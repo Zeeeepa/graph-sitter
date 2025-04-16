@@ -72,9 +72,10 @@ dependencies = [
   "datasets",
   "colorlog>=6.9.0",
   "codegen-sdk-pink>=0.1.0",
-  "dateutil",
+  "codegen-api-client",
 ]
 
+# renovate: datasource=python-version depName=python
 license = { text = "Apache-2.0" }
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -161,10 +162,14 @@ dev-dependencies = [
   "modal>=0.73.25",
   "pytest-lsp>=1.0.0b1",
   "cython>=3.0.11",
+  "codegen-api-client",
 ]
 
 [tool.uv.workspace]
 exclude = ["codegen-examples"]
+
+[tool.uv.sources]
+codegen-api-client = { git = "https://github.com/codegen-sh/codegen-api-client" }
 
 
 [tool.cython-lint]

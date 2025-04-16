@@ -1,11 +1,12 @@
 import os
 from typing import Any, Optional
 
-from codegen.agents.client.openapi_client.api.agents_api import AgentsApi
-from codegen.agents.client.openapi_client.api_client import ApiClient
-from codegen.agents.client.openapi_client.configuration import Configuration
-from codegen.agents.client.openapi_client.models.agent_run_response import AgentRunResponse
-from codegen.agents.client.openapi_client.models.create_agent_run_input import CreateAgentRunInput
+from codegen_api_client.api.agents_api import AgentsApi
+from codegen_api_client.api_client import ApiClient
+from codegen_api_client.configuration import Configuration
+from codegen_api_client.models.agent_run_response import AgentRunResponse
+from codegen_api_client.models.create_agent_run_input import CreateAgentRunInput
+
 from codegen.agents.constants import CODEGEN_BASE_API_URL
 
 
