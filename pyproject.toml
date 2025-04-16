@@ -259,6 +259,9 @@ manylinux-aarch64-image = "quay.io/pypa/manylinux_2_34_aarch64"
 [tool.cibuildwheel.linux]
 before-all = "curl -sSf https://sh.rustup.rs | sh -s -- -y"
 environment = { "PATH" = "$HOME/.cargo/bin:$PATH" }
+[tool.cibuildwheel.macos]
+before-all = "curl -sSf https://sh.rustup.rs | sh -s -- -y"
+environment = { "PATH" = "$HOME/.cargo/bin:$PATH" }
 
 [tool.semantic_release]
 assets = []
