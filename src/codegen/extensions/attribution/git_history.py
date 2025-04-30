@@ -7,9 +7,9 @@ from intervaltree import IntervalTree
 from pygit2 import Commit, Patch
 from pygit2.enums import CheckoutStrategy, DeltaStatus, SortMode
 
-from codegen.sdk.core.codebase import Codebase
-from codegen.sdk.core.file import SourceFile
-from codegen.sdk.core.symbol import Symbol
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.symbol import Symbol
 
 
 class GitAttributionTracker:

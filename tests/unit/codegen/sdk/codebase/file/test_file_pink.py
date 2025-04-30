@@ -3,11 +3,11 @@ import sys
 
 import pytest
 
-from codegen.configs.models.codebase import PinkMode
-from codegen.sdk.codebase.config import TestFlags
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
-from codegen.sdk.core.file import File, SourceFile
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.codebase.config import TestFlags
+from graph_sitter.codebase.factory.get_session import get_codebase_session
+from graph_sitter.configs.models.codebase import PinkMode
+from graph_sitter.core.file import File, SourceFile
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 Config = TestFlags.model_copy(update=dict(use_pink=PinkMode.ALL_FILES))
 

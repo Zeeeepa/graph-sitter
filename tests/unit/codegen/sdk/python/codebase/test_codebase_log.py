@@ -2,10 +2,10 @@ from unittest.mock import patch
 
 import pytest
 
-from codegen.sdk.codebase.config import SessionOptions
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
-from codegen.shared.enums.programming_language import ProgrammingLanguage
-from codegen.shared.exceptions.control_flow import MaxPreviewTimeExceeded
+from graph_sitter.codebase.config import SessionOptions
+from graph_sitter.codebase.factory.get_session import get_codebase_session
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.shared.exceptions.control_flow import MaxPreviewTimeExceeded
 
 
 def test_log_writes_to_console(tmpdir) -> None:
@@ -19,7 +19,7 @@ def test_log_writes_to_console(tmpdir) -> None:
     assert console == "This is a test log\nThis is another test log\n"
 
 
-@patch("codegen.sdk.core.codebase.MAX_LINES", 1)
+@patch("graph_sitter.core.codebase.MAX_LINES", 1)
 def test_log_truncate_at_max_lines(tmpdir) -> None:
     with get_codebase_session(
         tmpdir=tmpdir,
@@ -33,7 +33,7 @@ def test_log_truncate_at_max_lines(tmpdir) -> None:
     assert console == "1\n"
 
 
-@patch("codegen.sdk.core.codebase.MAX_LINES", 1)
+@patch("graph_sitter.core.codebase.MAX_LINES", 1)
 def test_log_max_lines_reached_continues_execution(tmpdir) -> None:
     with get_codebase_session(
         tmpdir=tmpdir,
@@ -64,7 +64,7 @@ def test_get_finalized_logs_returns_all_logs(tmpdir) -> None:
     assert console == "1\n2\n3\n4\n"
 
 
-@patch("codegen.sdk.core.codebase.MAX_LINES", 1)
+@patch("graph_sitter.core.codebase.MAX_LINES", 1)
 def test_get_finalized_logs_truncate_at_max_lines(tmpdir) -> None:
     with get_codebase_session(
         tmpdir=tmpdir,

@@ -1,10 +1,10 @@
-from codegen.sdk.core.codebase import Codebase
-from codegen.sdk.core.external_module import ExternalModule
-from codegen.sdk.core.import_resolution import Import
-from codegen.sdk.core.symbol import Symbol
-from codegen.sdk.writer_decorators import canonical
-from codegen.shared.enums.programming_language import ProgrammingLanguage
 from codemods.codemod import Codemod
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.symbol import Symbol
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.writer_decorators import canonical
 from tests.shared.skills.decorators import skill, skill_impl
 from tests.shared.skills.skill import Skill
 

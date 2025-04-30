@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
+from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 if TYPE_CHECKING:
-    from codegen.sdk.core.file import SourceFile
+    from graph_sitter.core.file import SourceFile
 
 
 def test_remove_unpacking_assignment(tmpdir) -> None:
@@ -163,7 +163,7 @@ def test_remove_unpacking_assignment_num(tmpdir) -> None:
         assert file2.source == """"""
 
 
-@patch("codegen.sdk.python.assignment.logger")
+@patch("graph_sitter.python.assignment.logger")
 def test_unpacking_function_with_underscore_removal(mock_logger, tmpdir: str) -> None:
     # language=python
     content1 = """

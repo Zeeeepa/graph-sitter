@@ -5,13 +5,13 @@ from pydantic import BaseModel
 from pydantic.fields import Field
 
 from codegen.git.models.pull_request_context import PullRequestContext
-from codegen.shared.logging.get_logger import get_logger
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
 
 class CodemodContext(BaseModel):
-    CODEGEN_VERSION: str = version("codegen")
+    GRAPH_SITTER_VERSION: str = version("graph-sitter")
     CODEMOD_ID: int | None = None
     CODEMOD_LINK: str | None = None
     CODEMOD_AUTHOR: str | None = None

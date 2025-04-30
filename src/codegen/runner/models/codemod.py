@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from codegen.git.models.codemod_context import CodemodContext
 from codegen.git.models.pr_options import PROptions
-from codegen.sdk.codebase.flagging.groupers.enums import GroupBy
+from graph_sitter.codebase.flagging.groupers.enums import GroupBy
 
 
 class Codemod(BaseModel):

@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from codegen.shared.compilation.function_construction import create_function_str_from_codeblock
+from graph_sitter.shared.compilation.function_construction import create_function_str_from_codeblock
 
 
 def test_no_execute_func_wraps():
@@ -46,6 +46,6 @@ def test_function_str_includes_imports():
     codeblock = """
 print(len(codebase.files))
 """
-    with patch("codegen.shared.compilation.function_construction.get_generated_imports", return_value="from foo import bar"):
+    with patch("graph_sitter.shared.compilation.function_construction.get_generated_imports", return_value="from foo import bar"):
         func = create_function_str_from_codeblock(codeblock, func_name="execute")
     assert "from foo import bar" in func

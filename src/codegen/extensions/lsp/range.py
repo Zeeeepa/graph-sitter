@@ -2,7 +2,7 @@ import tree_sitter
 from lsprotocol.types import Position, Range
 from pygls.workspace import TextDocument
 
-from codegen.sdk.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.editable import Editable
 
 
 def get_range(node: Editable) -> Range:

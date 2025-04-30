@@ -1,6 +1,6 @@
 import pytest
 
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
 
 
 @pytest.mark.parametrize(

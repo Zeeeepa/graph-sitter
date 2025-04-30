@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
-from codegen.sdk.core.codebase import Codebase
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.codebase.factory.get_session import get_codebase_session
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 
 def generate_files(num_files: int, extension: str = "py") -> dict[str, str]:

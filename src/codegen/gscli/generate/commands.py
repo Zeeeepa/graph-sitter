@@ -10,12 +10,12 @@ import codegen.sdk as sdk
 from codegen.gscli.generate.runner_imports import _generate_runner_imports
 from codegen.gscli.generate.system_prompt import get_system_prompt
 from codegen.gscli.generate.utils import LanguageType, generate_builtins_file
-from codegen.sdk.ai.client import get_openai_client
-from codegen.sdk.code_generation.changelog_generation import generate_changelog
-from codegen.sdk.code_generation.codegen_sdk_codebase import get_codegen_sdk_codebase
-from codegen.sdk.code_generation.doc_utils.generate_docs_json import generate_docs_json
-from codegen.sdk.code_generation.mdx_docs_generation import render_mdx_page_for_class
-from codegen.shared.logging.get_logger import get_logger
+from graph_sitter.ai.client import get_openai_client
+from graph_sitter.code_generation.changelog_generation import generate_changelog
+from graph_sitter.code_generation.codegen_sdk_codebase import get_codegen_sdk_codebase
+from graph_sitter.code_generation.doc_utils.generate_docs_json import generate_docs_json
+from graph_sitter.code_generation.mdx_docs_generation import render_mdx_page_for_class
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from codegen.extensions.index.file_index import FileIndex
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
+from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_file_index_lifecycle(tmpdir) -> None:

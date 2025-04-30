@@ -1,6 +1,6 @@
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
-from codegen.sdk.core.expressions.generic_type import GenericType
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.codebase.factory.get_session import get_codebase_session
+from graph_sitter.core.expressions.generic_type import GenericType
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 
 def test_return_type_annotation(tmpdir) -> None:

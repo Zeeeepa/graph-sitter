@@ -3,9 +3,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from codegen.git.models.pr_options import PROptions
-from codegen.shared.compilation.string_to_code import create_execute_function_from_codeblock
-from codegen.shared.exceptions.compilation import DangerousUserCodeException, InvalidUserCodeException
-from codegen.shared.exceptions.control_flow import StopCodemodException
+from graph_sitter.shared.compilation.string_to_code import create_execute_function_from_codeblock
+from graph_sitter.shared.exceptions.compilation import DangerousUserCodeException, InvalidUserCodeException
+from graph_sitter.shared.exceptions.control_flow import StopCodemodException
 
 
 def test_syntax_error_raises():
@@ -52,7 +52,7 @@ print(local_a)
     assert mock_log.call_args_list[0][0][0] == "this is local_a"
 
 
-@patch("codegen.shared.compilation.string_to_code.logger")
+@patch("graph_sitter.shared.compilation.string_to_code.logger")
 def test_stop_codemod_execution_logs_and_raises(mock_logger):
     codeblock = """
 local_a = "this is local_a"

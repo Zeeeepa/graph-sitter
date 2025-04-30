@@ -17,7 +17,7 @@ from lsprotocol.types import (
 )
 from pytest_lsp import LanguageClient
 
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
 from tests.unit.codegen.extensions.lsp.utils import apply_edit
 
 

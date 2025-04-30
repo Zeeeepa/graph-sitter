@@ -2,10 +2,10 @@ from unittest.mock import MagicMock, create_autospec, patch
 
 import pytest
 
-from codegen.configs.models.secrets import SecretsConfig
-from codegen.sdk.codebase.codebase_context import CodebaseContext
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.codebase.factory.get_session import get_codebase_session
+from graph_sitter.configs.models.secrets import SecretsConfig
+from graph_sitter.core.codebase import Codebase
 
 
 @pytest.fixture(autouse=True)
@@ -14,7 +14,7 @@ def context_mock():
     for attr in CodebaseContext.__annotations__:
         if not hasattr(mock_context, attr):
             setattr(mock_context, attr, MagicMock(name=attr))
-    with patch("codegen.sdk.core.codebase.CodebaseContext", return_value=mock_context):
+    with patch("graph_sitter.core.codebase.CodebaseContext", return_value=mock_context):
         yield mock_context
 
 

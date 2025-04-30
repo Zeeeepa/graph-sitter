@@ -10,7 +10,7 @@ from pytest_lsp import (
     client_capabilities,
 )
 
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
 
 
 @pytest_lsp.fixture(

@@ -2,14 +2,14 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from codegen.sdk.codebase.factory.get_session import get_codebase_session
-from codegen.sdk.core.dataclasses.usage import UsageType
-from codegen.sdk.enums import ImportType
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.codebase.factory.get_session import get_codebase_session
+from graph_sitter.core.dataclasses.usage import UsageType
+from graph_sitter.enums import ImportType
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 if TYPE_CHECKING:
-    from codegen.sdk.core.file import SourceFile
-    from codegen.sdk.core.import_resolution import Import, ImportResolution
+    from graph_sitter.core.file import SourceFile
+    from graph_sitter.core.import_resolution import Import, ImportResolution
 
 
 def test_dynamic_import_module_export_const(tmpdir) -> None:
