@@ -22,11 +22,6 @@ from openai import OpenAI
 from rich.console import Console
 from typing_extensions import TypeVar, deprecated
 
-from codegen.git.repo_operator.repo_operator import RepoOperator
-from codegen.git.schemas.enums import CheckoutResult
-from codegen.git.schemas.repo_config import RepoConfig
-from codegen.git.utils.pr_review import CodegenPR
-from codegen.visualizations.visualization_manager import VisualizationManager
 from graph_sitter._proxy import proxy_property
 from graph_sitter.ai.client import get_openai_client
 from graph_sitter.codebase.codebase_ai import generate_system_prompt, generate_tools
@@ -42,6 +37,8 @@ from graph_sitter.codebase.flagging.group import Group
 from graph_sitter.codebase.io.io import IO
 from graph_sitter.codebase.progress.progress import Progress
 from graph_sitter.codebase.span import Span
+from graph_sitter.compiled.sort import sort_editables
+from graph_sitter.compiled.utils import uncache_all
 from graph_sitter.configs.models.codebase import CodebaseConfig, PinkMode
 from graph_sitter.configs.models.secrets import SecretsConfig
 from graph_sitter.core.assignment import Assignment
@@ -61,8 +58,10 @@ from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.type_alias import TypeAlias
 from graph_sitter.enums import NodeType, SymbolType
-from graph_sitter.extensions.sort import sort_editables
-from graph_sitter.extensions.utils import uncache_all
+from graph_sitter.git.repo_operator.repo_operator import RepoOperator
+from graph_sitter.git.schemas.enums import CheckoutResult
+from graph_sitter.git.schemas.repo_config import RepoConfig
+from graph_sitter.git.utils.pr_review import CodegenPR
 from graph_sitter.output.constants import ANGULAR_STYLE
 from graph_sitter.python.assignment import PyAssignment
 from graph_sitter.python.class_definition import PyClass
@@ -90,6 +89,7 @@ from graph_sitter.typescript.interface import TSInterface
 from graph_sitter.typescript.statements.import_statement import TSImportStatement
 from graph_sitter.typescript.symbol import TSSymbol
 from graph_sitter.typescript.type_alias import TSTypeAlias
+from graph_sitter.visualizations.visualization_manager import VisualizationManager
 
 logger = get_logger(__name__)
 MAX_LINES = 10000  # Maximum number of lines of text allowed to be logged

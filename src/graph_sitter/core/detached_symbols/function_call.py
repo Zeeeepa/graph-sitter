@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
 
 from graph_sitter.codebase.resolution_stack import ResolutionStack
+from graph_sitter.compiled.sort import sort_editables
+from graph_sitter.compiled.utils import cached_property, is_descendant_of
 from graph_sitter.core.autocommit import reader, remover, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.detached_symbols.argument import Argument
@@ -14,8 +16,6 @@ from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.interfaces.resolvable import Resolvable
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.enums import NodeType
-from graph_sitter.extensions.sort import sort_editables
-from graph_sitter.extensions.utils import cached_property, is_descendant_of
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.typescript.detached_symbols.promise_chain import TSPromiseChain
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
 
     from tree_sitter import Node as TSNode
 
-    from codegen.visualizations.enums import VizNode
     from graph_sitter.codebase.codebase_context import CodebaseContext
     from graph_sitter.core.detached_symbols.parameter import Parameter
     from graph_sitter.core.function import Function
@@ -35,6 +34,7 @@ if TYPE_CHECKING:
     from graph_sitter.core.interfaces.editable import Editable
     from graph_sitter.core.interfaces.importable import Importable
     from graph_sitter.core.node_id_factory import NodeId
+    from graph_sitter.visualizations.enums import VizNode
 
 Parent = TypeVar("Parent", bound="Expression | None")
 
@@ -266,7 +266,7 @@ class FunctionCall(Expression[Parent], HasName, Resolvable, Generic[Parent]):
     @noapidoc
     @override
     def viz(self) -> VizNode:
-        from codegen.visualizations.enums import VizNode
+        from graph_sitter.visualizations.enums import VizNode
 
         func = self.function_definition
         from graph_sitter.core.function import Function

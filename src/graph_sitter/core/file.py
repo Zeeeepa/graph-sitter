@@ -12,11 +12,11 @@ from typing import TYPE_CHECKING, Generic, Literal, Self, TypeVar, override
 from tree_sitter import Node as TSNode
 from typing_extensions import deprecated
 
-from codegen.visualizations.enums import VizNode
 from graph_sitter._proxy import proxy_property
 from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.range_index import RangeIndex
 from graph_sitter.codebase.span import Range
+from graph_sitter.compiled.sort import sort_editables
 from graph_sitter.core.autocommit import commiter, mover, reader, remover, writer
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.dataclasses.usage import UsageType
@@ -30,13 +30,13 @@ from graph_sitter.core.interfaces.usable import Usable
 from graph_sitter.core.statements.import_statement import ImportStatement
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import EdgeType, ImportType, NodeType, SymbolType
-from graph_sitter.extensions.sort import sort_editables
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.topological_sort import pseudo_topological_sort
 from graph_sitter.tree_sitter_parser import get_parser_by_filepath_or_extension, parse_file
 from graph_sitter.typescript.function import TSFunction
 from graph_sitter.utils import is_minified_js
+from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
     from graph_sitter.core.assignment import Assignment

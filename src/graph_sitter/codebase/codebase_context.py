@@ -19,6 +19,8 @@ from graph_sitter.codebase.io.file_io import FileIO
 from graph_sitter.codebase.progress.stub_progress import StubProgress
 from graph_sitter.codebase.transaction_manager import TransactionManager
 from graph_sitter.codebase.validation import get_edges, post_reset_validation
+from graph_sitter.compiled.sort import sort_editables
+from graph_sitter.compiled.utils import uncache_all
 from graph_sitter.configs.models.codebase import CodebaseConfig, PinkMode
 from graph_sitter.configs.models.secrets import SecretsConfig
 from graph_sitter.core.autocommit import AutoCommit, commiter
@@ -26,8 +28,6 @@ from graph_sitter.core.directory import Directory
 from graph_sitter.core.external.dependency_manager import DependencyManager, get_dependency_manager
 from graph_sitter.core.external.language_engine import LanguageEngine, get_language_engine
 from graph_sitter.enums import Edge, EdgeType, NodeType
-from graph_sitter.extensions.sort import sort_editables
-from graph_sitter.extensions.utils import uncache_all
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.shared.exceptions.control_flow import StopCodemodException
 from graph_sitter.shared.logging.get_logger import get_logger
@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     from codeowners import CodeOwners as CodeOwnersParser
     from git import Commit as GitCommit
 
-    from codegen.git.repo_operator.repo_operator import RepoOperator
     from graph_sitter.codebase.io.io import IO
     from graph_sitter.codebase.node_classes.node_classes import NodeClasses
     from graph_sitter.codebase.progress.progress import Progress
@@ -51,6 +50,7 @@ if TYPE_CHECKING:
     from graph_sitter.core.interfaces.importable import Importable
     from graph_sitter.core.node_id_factory import NodeId
     from graph_sitter.core.parser import Parser
+    from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 
 logger = get_logger(__name__)
 

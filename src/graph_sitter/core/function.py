@@ -5,8 +5,9 @@ from typing import TYPE_CHECKING, Generic, Self, override
 
 from typing_extensions import TypeVar
 
-from codegen.visualizations.enums import VizNode
 from graph_sitter.codebase.resolution_stack import ResolutionStack
+from graph_sitter.compiled.sort import sort_editables
+from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.detached_symbols.code_block import CodeBlock
 from graph_sitter.core.detached_symbols.decorator import Decorator
@@ -18,9 +19,8 @@ from graph_sitter.core.interfaces.has_block import HasBlock
 from graph_sitter.core.interfaces.supports_generic import SupportsGenerics
 from graph_sitter.core.statements.statement import StatementType
 from graph_sitter.enums import SymbolType
-from graph_sitter.extensions.sort import sort_editables
-from graph_sitter.extensions.utils import cached_property
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
+from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Sequence

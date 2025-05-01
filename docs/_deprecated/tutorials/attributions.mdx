@@ -32,7 +32,7 @@ The attribution extension is included with Codegen. No additional installation i
 
 ### Running the Analysis
 
-You can run the AI impact analysis using the Codegen CLI:
+You can run the AI impact analysis using the graph_sitter.cli:
 
 ```bash
 codegen analyze-ai-impact
@@ -41,8 +41,8 @@ codegen analyze-ai-impact
 Or from Python code:
 
 ```python
-from codegen import Codebase
-from codegen.extensions.attribution.cli import run
+from graph_sitter import Codebase
+from graph_sitter.extensions.attribution.cli import run
 
 # Initialize codebase from current directory
 codebase = Codebase.from_repo("your-org/your-repo", language="python")
@@ -68,8 +68,8 @@ The analysis will print a summary of AI contributions to your console and save d
 After running the analysis, each symbol in your codebase will have attribution information attached to it:
 
 ```python
-from codegen import Codebase
-from codegen.extensions.attribution.main import add_attribution_to_symbols
+from graph_sitter import Codebase
+from graph_sitter.extensions.attribution.main import add_attribution_to_symbols
 
 # Initialize codebase
 codebase = Codebase.from_repo("your-org/your-repo", language="python")
@@ -92,8 +92,8 @@ By default, the analysis looks for common AI bot names in commit authors.
 You can customize this by providing your own list of AI authors:
 
 ```python
-from codegen import Codebase
-from codegen.extensions.attribution.main import analyze_ai_impact
+from graph_sitter import Codebase
+from graph_sitter.extensions.attribution.main import analyze_ai_impact
 
 # Initialize codebase
 codebase = Codebase.from_repo("your-org/your-repo", language="python")
@@ -119,8 +119,8 @@ Here's a complete example that analyzes contributors to your codebase and their 
 import os
 from collections import Counter
 
-from codegen import Codebase
-from codegen.extensions.attribution.main import add_attribution_to_symbols
+from graph_sitter import Codebase
+from graph_sitter.extensions.attribution.main import add_attribution_to_symbols
 from codegen.git.repo_operator.repo_operator import RepoOperator
 from codegen.git.schemas.repo_config import RepoConfig
 from codegen.sdk.codebase.config import ProjectConfig

@@ -2,10 +2,10 @@ import sys
 import traceback
 import os
 
-from codegen import Codebase
-from codegen.extensions.attribution.cli import run
-from codegen.git.repo_operator.repo_operator import RepoOperator
-from codegen.git.schemas.repo_config import RepoConfig
+from graph_sitter import Codebase
+from graph_sitter.extensions.attribution.cli import run
+from graph_sitter.git.repo_operator.repo_operator import RepoOperator
+from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.codebase.config import ProjectConfig
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 

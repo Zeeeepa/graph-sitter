@@ -71,7 +71,6 @@ dependencies = [
   "urllib3>=2.0.0",
   "datasets",
   "colorlog>=6.9.0",
-  "codegen-api-client",
 ]
 
 # renovate: datasource=python-version depName=python
@@ -111,7 +110,7 @@ keywords = [
   "code generation",
 ]
 [project.scripts]
-codegen = "codegen.cli.cli:main"
+gs = "graph_sitter.cli.cli:main"
 
 [project.optional-dependencies]
 pink = ["codegen-sdk-pink>=0.1.0"]
@@ -162,7 +161,6 @@ dev-dependencies = [
   "modal>=0.73.25",
   "pytest-lsp>=1.0.0b1",
   "cython>=3.0.11",
-  "codegen-api-client>=1.0.0",
 ]
 
 [tool.uv.workspace]
