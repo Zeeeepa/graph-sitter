@@ -41,6 +41,72 @@ fi
 echo -e "${BLUE}Creating necessary test directories...${NC}"
 mkdir -p tests/integration/verified_codemods/codemod_data
 
+# Function to prompt for user input with default value
+prompt_with_default() {
+    local prompt=$1
+    local default=$2
+    local response
+
+    echo -ne "${CYAN}${prompt} [${default}]: ${NC}"
+    read response
+    
+    if [ -z "$response" ]; then
+        echo "$default"
+    else
+        echo "$response"
+    fi
+}
+
+# Function to prompt for yes/no with default
+prompt_yes_no() {
+    local prompt=$1
+    local default=$2
+    local response
+    
+    if [ "$default" = "y" ]; then
+        default_display="Y/n"
+    else
+        default_display="y/N"
+    fi
+    
+    echo -ne "${CYAN}${prompt} [${default_display}]: ${NC}"
+    read response
+    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+    
+    if [ -z "$response" ]; then
+        response=$default
+    fi
+    
+    if [ "$response" = "y" ] || [ "$response" = "yes" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Function to prompt for GitHub token
+prompt_for_github_token() {
+    local token
+    
+    # Check if GITHUB_TOKEN is already set
+    if [ -n "$GITHUB_TOKEN" ]; then
+        echo -e "${GREEN}GitHub token is already set in the environment.${NC}"
+        return
+    fi
+    
+    echo -e "${YELLOW}Some integration tests require GitHub authentication.${NC}"
+    echo -ne "${CYAN}Enter GitHub token (leave empty to skip GitHub-dependent tests): ${NC}"
+    read -s token
+    echo ""
+    
+    if [ -n "$token" ]; then
+        export GITHUB_TOKEN="$token"
+        echo -e "${GREEN}GitHub token set. Tests requiring GitHub authentication will be run.${NC}"
+    else
+        echo -e "${YELLOW}No GitHub token provided. Tests requiring GitHub authentication may be skipped.${NC}"
+    fi
+}
+
 # Parse command line arguments
 RUN_UNIT=false
 RUN_INTEGRATION=false
@@ -48,7 +114,8 @@ RUN_ALL=false
 RUN_COVERAGE=false
 RUN_VERBOSE=false
 SPECIFIC_TEST=""
-NUM_CORES=20  # Default to 20 cores for parallel testing
+NUM_CORES=10  # Default to 10 cores for parallel testing
+INTERACTIVE=false
 
 for arg in "$@"; do
     case $arg in
@@ -73,6 +140,9 @@ for arg in "$@"; do
         --cores=*)
             NUM_CORES="${arg#*=}"
             ;;
+        --interactive)
+            INTERACTIVE=true
+            ;;
         --help)
             echo -e "${CYAN}Usage: ./scripts/full_test.sh [OPTIONS]${NC}"
             echo -e "${CYAN}Options:${NC}"
@@ -82,12 +152,65 @@ for arg in "$@"; do
             echo -e "  --coverage     Run with coverage"
             echo -e "  --verbose      Run with verbose output"
             echo -e "  --test=PATH    Run specific test file or directory"
-            echo -e "  --cores=N      Number of CPU cores to use (default: 20)"
+            echo -e "  --cores=N      Number of CPU cores to use (default: 10)"
+            echo -e "  --interactive  Run in interactive mode with prompts"
             echo -e "  --help         Show this help message"
             exit 0
             ;;
     esac
 done
+
+# If no arguments provided or interactive mode requested, prompt for options
+if [ $# -eq 0 ] || [ "$INTERACTIVE" = true ]; then
+    echo -e "${BOLD}${CYAN}Interactive Test Configuration${NC}"
+    echo -e "${YELLOW}Please provide the following information:${NC}"
+    
+    # Prompt for test type
+    echo -e "${CYAN}Select test type:${NC}"
+    echo -e "  1) Unit tests only"
+    echo -e "  2) Integration tests only"
+    echo -e "  3) All tests"
+    echo -e "  4) Specific test"
+    
+    TEST_TYPE=$(prompt_with_default "Enter your choice (1-4)" "1")
+    
+    case $TEST_TYPE in
+        1)
+            RUN_UNIT=true
+            ;;
+        2)
+            RUN_INTEGRATION=true
+            ;;
+        3)
+            RUN_ALL=true
+            ;;
+        4)
+            SPECIFIC_TEST=$(prompt_with_default "Enter the path to the specific test" "tests/unit")
+            ;;
+        *)
+            echo -e "${RED}Invalid choice. Defaulting to unit tests.${NC}"
+            RUN_UNIT=true
+            ;;
+    esac
+    
+    # Prompt for number of cores
+    NUM_CORES=$(prompt_with_default "Number of CPU cores to use for parallel testing" "10")
+    
+    # Prompt for coverage
+    if prompt_yes_no "Run with coverage" "n"; then
+        RUN_COVERAGE=true
+    fi
+    
+    # Prompt for verbose output
+    if prompt_yes_no "Run with verbose output" "n"; then
+        RUN_VERBOSE=true
+    fi
+    
+    # Prompt for GitHub token if running integration tests or all tests
+    if [ "$RUN_INTEGRATION" = true ] || [ "$RUN_ALL" = true ] || [[ "$SPECIFIC_TEST" == *"integration"* ]]; then
+        prompt_for_github_token
+    fi
+fi
 
 # Set default if no option provided
 if [ "$RUN_UNIT" = false ] && [ "$RUN_INTEGRATION" = false ] && [ "$RUN_ALL" = false ] && [ -z "$SPECIFIC_TEST" ]; then
@@ -134,6 +257,24 @@ monitor_memory() {
     
     return 0
 }
+
+# Display test configuration
+echo -e "${BLUE}${BOLD}=== Test Configuration ===${NC}"
+if [ -n "$SPECIFIC_TEST" ]; then
+    echo -e "${YELLOW}Test path:${NC} $SPECIFIC_TEST"
+elif [ "$RUN_ALL" = true ]; then
+    echo -e "${YELLOW}Test type:${NC} All tests"
+elif [ "$RUN_UNIT" = true ] && [ "$RUN_INTEGRATION" = true ]; then
+    echo -e "${YELLOW}Test type:${NC} Unit and integration tests"
+elif [ "$RUN_INTEGRATION" = true ]; then
+    echo -e "${YELLOW}Test type:${NC} Integration tests"
+else
+    echo -e "${YELLOW}Test type:${NC} Unit tests"
+fi
+echo -e "${YELLOW}Parallel processes:${NC} $NUM_CORES"
+echo -e "${YELLOW}Coverage:${NC} $([ "$RUN_COVERAGE" = true ] && echo "Enabled" || echo "Disabled")"
+echo -e "${YELLOW}Verbose output:${NC} $([ "$RUN_VERBOSE" = true ] && echo "Enabled" || echo "Disabled")"
+echo -e "${YELLOW}GitHub authentication:${NC} $([ -n "$GITHUB_TOKEN" ] && echo "Configured" || echo "Not configured")"
 
 # Determine which tests to run
 if [ -n "$SPECIFIC_TEST" ]; then
