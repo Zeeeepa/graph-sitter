@@ -7,6 +7,7 @@ set -e
 # Display colorful messages
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
@@ -91,28 +92,51 @@ if [ -f "./scripts/setup.sh" ]; then
     bash ./scripts/setup.sh
 fi
 
-# Step 8: Build Cython modules
-echo -e "${YELLOW}Building Cython modules...${NC}"
-bash ./scripts/build_and_test.sh
+# Step 8: Install Cython if not already installed
+echo -e "${YELLOW}Checking for Cython...${NC}"
+if ! python -c "import Cython" &> /dev/null; then
+    echo -e "${YELLOW}Installing Cython...${NC}"
+    uv pip install cython
+fi
 
-# Step 9: Run tests
+# Step 9: Compile Cython modules
+echo -e "${YELLOW}Compiling Cython modules...${NC}"
+python -m pip install -e .
+
+# Check if compilation was successful
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Cython modules compiled successfully!${NC}"
+else
+    echo -e "${RED}Failed to compile Cython modules. Please check the error messages above.${NC}"
+    exit 1
+fi
+
+# Step 10: Create necessary directories for tests
+echo -e "${YELLOW}Creating necessary directories for tests...${NC}"
+mkdir -p tests/integration/verified_codemods/codemod_data
+
+# Step 11: Run basic tests if requested
 if [ "$1" == "--test" ] || [ "$1" == "-t" ]; then
-    echo -e "${YELLOW}Running full test suite...${NC}"
-    python -m pytest tests -v -p no:xdist -p no:cov
+    echo -e "${YELLOW}Running basic test suite...${NC}"
+    python -m pytest tests/unit -v -p no:xdist -p no:cov
     
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}All tests passed!${NC}"
+        echo -e "${GREEN}All basic tests passed!${NC}"
     else
         echo -e "${RED}Some tests failed. Please check the error messages above.${NC}"
     fi
 fi
 
 echo -e "${GREEN}Full build completed successfully!${NC}"
-echo -e "${YELLOW}Your development environment is now set up.${NC}"
+echo -e "${BLUE}=== Environment Information ===${NC}"
+echo -e "${YELLOW}Python version:${NC} $(python --version)"
+echo -e "${YELLOW}UV version:${NC} $(uv --version)"
+
+echo -e "${BLUE}=== Next Steps ===${NC}"
 echo -e "${YELLOW}To activate the virtual environment in the future, run:${NC}"
 echo -e "  source .venv/bin/activate"
 echo -e "${YELLOW}To run tests:${NC}"
-echo -e "  python -m pytest tests/unit -v -p no:xdist -p no:cov"
-echo -e "${YELLOW}To run with coverage:${NC}"
-echo -e "  python -m pytest tests --cov=graph_sitter"
+echo -e "  ./scripts/full_test.sh --unit     # Run unit tests"
+echo -e "  ./scripts/full_test.sh --all      # Run all tests"
+echo -e "  ./scripts/full_test.sh --coverage # Run with coverage"
 
