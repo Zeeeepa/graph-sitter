@@ -37,6 +37,12 @@ if ! python -c "import graph_sitter.compiled.utils" &> /dev/null; then
     fi
 fi
 
+# Apply segmentation fault fixes
+if [ -f "./scripts/fix_segfault.sh" ]; then
+    echo -e "${BLUE}Applying segmentation fault fixes...${NC}"
+    bash ./scripts/fix_segfault.sh
+fi
+
 # Create necessary directories for tests
 echo -e "${BLUE}Creating necessary test directories...${NC}"
 mkdir -p tests/integration/verified_codemods/codemod_data
