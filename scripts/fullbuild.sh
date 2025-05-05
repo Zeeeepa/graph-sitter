@@ -9,6 +9,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 echo -e "${YELLOW}=== Graph-Sitter Full Build Script ===${NC}"
@@ -115,18 +116,29 @@ fi
 echo -e "${YELLOW}Creating necessary directories for tests...${NC}"
 mkdir -p tests/integration/verified_codemods/codemod_data
 
-# Step 11: Run basic tests if requested
+# Step 11: Ask if user wants to run tests
 if [ "$1" == "--test" ] || [ "$1" == "-t" ]; then
-    echo -e "${YELLOW}Running basic test suite...${NC}"
-    # Use full_test.sh instead of build_and_test.sh
+    RUN_TESTS=true
+else
+    echo -e "${CYAN}Do you want to run tests? (y/n) [default: n]:${NC}"
+    read -r run_tests_input
+    if [[ "$run_tests_input" =~ ^[Yy]$ ]]; then
+        RUN_TESTS=true
+    else
+        RUN_TESTS=false
+    fi
+fi
+
+if [ "$RUN_TESTS" = true ]; then
+    echo -e "${YELLOW}Running tests...${NC}"
     if [ -f "./scripts/full_test.sh" ]; then
-        bash ./scripts/full_test.sh --unit
+        bash ./scripts/full_test.sh
     else
         python -m pytest tests/unit -v -p no:xdist -p no:cov
     fi
     
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}All basic tests passed!${NC}"
+        echo -e "${GREEN}All tests passed!${NC}"
     else
         echo -e "${RED}Some tests failed. Please check the error messages above.${NC}"
     fi
@@ -141,7 +153,7 @@ echo -e "${BLUE}=== Next Steps ===${NC}"
 echo -e "${YELLOW}To activate the virtual environment in the future, run:${NC}"
 echo -e "  source .venv/bin/activate"
 echo -e "${YELLOW}To run tests:${NC}"
-echo -e "  ./scripts/full_test.sh --unit     # Run unit tests"
-echo -e "  ./scripts/full_test.sh --all      # Run all tests"
+echo -e "  ./scripts/full_test.sh           # Interactive test runner"
+echo -e "  ./scripts/full_test.sh --unit    # Run unit tests"
+echo -e "  ./scripts/full_test.sh --all     # Run all tests"
 echo -e "  ./scripts/full_test.sh --coverage # Run with coverage"
-echo -e "  ./scripts/interactive_test.sh     # Interactive test runner with prompts"
