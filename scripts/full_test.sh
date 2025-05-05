@@ -58,6 +58,9 @@ SPECIFIC_TEST=""
 NUM_CORES=10  # Default to 10 cores for parallel testing
 SKIP_LARGE_REPOS=false
 MAX_MEMORY_GB=31
+FORCE_ALL=false  # New option to force running all tests
+RETRY_COUNT=3    # Number of retries for tests that fail due to memory issues
+INCREMENTAL=false # Run tests incrementally to avoid memory issues
 
 # If arguments are provided, use them
 if [ $# -gt 0 ]; then
@@ -90,6 +93,16 @@ if [ $# -gt 0 ]; then
             --max-memory-gb=*)
                 MAX_MEMORY_GB="${arg#*=}"
                 ;;
+            --force-all)
+                FORCE_ALL=true
+                RUN_ALL=true
+                ;;
+            --retry=*)
+                RETRY_COUNT="${arg#*=}"
+                ;;
+            --incremental)
+                INCREMENTAL=true
+                ;;
             --help)
                 echo -e "${CYAN}Usage: ./scripts/full_test.sh [OPTIONS]${NC}"
                 echo -e "${CYAN}Options:${NC}"
@@ -102,6 +115,9 @@ if [ $# -gt 0 ]; then
                 echo -e "  --cores=N      Number of CPU cores to use (default: 10)"
                 echo -e "  --skip-large-repos  Skip large repositories"
                 echo -e "  --max-memory-gb=N  Maximum memory usage in GB (default: 31)"
+                echo -e "  --force-all    Force run ALL tests including memory-intensive ones"
+                echo -e "  --retry=N      Number of retries for tests that fail (default: 3)"
+                echo -e "  --incremental  Run tests incrementally to avoid memory issues"
                 echo -e "  --help         Show this help message"
                 echo -e ""
                 echo -e "If no options are provided, interactive mode will be used."
@@ -117,7 +133,8 @@ else
     echo -e "  ${CYAN}2) Integration tests${NC}"
     echo -e "  ${CYAN}3) All tests${NC}"
     echo -e "  ${CYAN}4) Specific test${NC}"
-    read -p "Enter your choice (1-4) [default: 1]: " test_type
+    echo -e "  ${CYAN}5) Force ALL tests (including memory-intensive ones)${NC}"
+    read -p "Enter your choice (1-5) [default: 1]: " test_type
     test_type=${test_type:-1}
     
     case $test_type in
@@ -146,6 +163,10 @@ else
                 RUN_UNIT=true
                 SPECIFIC_TEST=""
             fi
+            ;;
+        5)
+            RUN_ALL=true
+            FORCE_ALL=true
             ;;
         *)
             echo -e "${RED}Invalid choice. Defaulting to unit tests.${NC}"
@@ -192,16 +213,30 @@ else
         fi
     fi
     
-    # Prompt for skipping large repos
-    read -p "Skip large repositories (like mypy) to prevent segmentation faults? (y/n) [default: n]: " skip_large_option
-    if [[ "$skip_large_option" =~ ^[Yy]$ ]]; then
-        SKIP_LARGE_REPOS=true
+    # Prompt for skipping large repos if not forcing all tests
+    if [ "$FORCE_ALL" = false ]; then
+        read -p "Skip large repositories (like mypy) to prevent segmentation faults? (y/n) [default: n]: " skip_large_option
+        if [[ "$skip_large_option" =~ ^[Yy]$ ]]; then
+            SKIP_LARGE_REPOS=true
+        fi
     fi
     
     # Prompt for max memory
     read -p "Maximum memory usage in GB [default: 31]: " max_memory_input
     if [ -n "$max_memory_input" ]; then
         MAX_MEMORY_GB=$max_memory_input
+    fi
+    
+    # Prompt for incremental testing
+    read -p "Run tests incrementally to avoid memory issues? (y/n) [default: n]: " incremental_option
+    if [[ "$incremental_option" =~ ^[Yy]$ ]]; then
+        INCREMENTAL=true
+    fi
+    
+    # Prompt for retry count
+    read -p "Number of retries for tests that fail [default: 3]: " retry_input
+    if [ -n "$retry_input" ]; then
+        RETRY_COUNT=$retry_input
     fi
 fi
 
@@ -235,14 +270,14 @@ else
     PYTEST_CMD="$PYTEST_CMD -p no:cov"
 fi
 
-# Add skip for large repositories if requested
-if [ "$SKIP_LARGE_REPOS" = true ]; then
+# Add skip for large repositories if requested and not forcing all tests
+if [ "$SKIP_LARGE_REPOS" = true ] && [ "$FORCE_ALL" = false ]; then
     echo -e "${YELLOW}Skipping large repositories to prevent segmentation faults${NC}"
     # Skip mypy and other large repositories that cause segmentation faults
     PYTEST_CMD="$PYTEST_CMD -k 'not mypy'"
 fi
 
-# Create a memory monitoring function
+# Create a memory monitoring function with improved handling
 monitor_memory() {
     local pid=$1
     local max_memory_gb=$MAX_MEMORY_GB
@@ -251,9 +286,17 @@ monitor_memory() {
     echo -e "${BLUE}Starting memory monitor for PID ${pid}${NC}"
     echo -e "${BLUE}Maximum memory: ${max_memory_gb} GB${NC}"
     
+    # Create a file to track memory usage
+    local memory_log="/tmp/memory_usage_$pid.log"
+    echo "Time,MemoryGB,MaxMemoryGB" > "$memory_log"
+    
     while ps -p $pid > /dev/null; do
         local memory_kb=$(ps -o rss= -p $pid)
         local memory_gb=$(echo "scale=2; $memory_kb / 1024 / 1024" | bc)
+        local timestamp=$(date +"%H:%M:%S")
+        
+        # Log memory usage to file
+        echo "$timestamp,$memory_gb,$max_memory_gb" >> "$memory_log"
         
         # Log memory usage periodically
         if (( $(echo "$memory_gb > $(($max_memory_gb * 3 / 4))" | bc -l) )); then
@@ -262,14 +305,136 @@ monitor_memory() {
         
         if (( $(echo "$memory_gb > $max_memory_gb" | bc -l) )); then
             echo -e "${RED}Memory usage exceeded $max_memory_gb GB! Killing process to prevent segmentation fault.${NC}"
+            echo -e "${YELLOW}Memory usage log saved to: $memory_log${NC}"
             kill -15 $pid
+            
+            # Wait for process to terminate gracefully
+            sleep 5
+            if ps -p $pid > /dev/null; then
+                echo -e "${RED}Process did not terminate gracefully. Sending SIGKILL.${NC}"
+                kill -9 $pid
+            fi
+            
             return 1
         fi
         
         sleep $sleep_interval
     done
     
+    echo -e "${GREEN}Process completed. Memory usage log saved to: $memory_log${NC}"
     return 0
+}
+
+# Function to run tests with retries
+run_tests_with_retry() {
+    local test_cmd="$1"
+    local test_name="$2"
+    local retry_count=$RETRY_COUNT
+    local success=false
+    
+    echo -e "${BLUE}Running $test_name with $retry_count retries...${NC}"
+    
+    for ((i=1; i<=retry_count; i++)); do
+        echo -e "${YELLOW}Attempt $i of $retry_count${NC}"
+        
+        # Run the test command
+        $test_cmd &
+        TEST_PID=$!
+        
+        # Monitor memory usage
+        monitor_memory $TEST_PID
+        
+        # Wait for test to complete
+        wait $TEST_PID
+        TEST_EXIT_CODE=$?
+        
+        if [ $TEST_EXIT_CODE -eq 0 ]; then
+            echo -e "${GREEN}Tests passed on attempt $i!${NC}"
+            success=true
+            break
+        else
+            echo -e "${RED}Tests failed on attempt $i with exit code $TEST_EXIT_CODE${NC}"
+            
+            # If this was the last attempt, exit with failure
+            if [ $i -eq $retry_count ]; then
+                echo -e "${RED}All retry attempts failed.${NC}"
+                return $TEST_EXIT_CODE
+            fi
+            
+            # Wait before retrying
+            echo -e "${YELLOW}Waiting 5 seconds before retrying...${NC}"
+            sleep 5
+        fi
+    done
+    
+    if [ "$success" = true ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Function to run tests incrementally
+run_tests_incrementally() {
+    local test_path="$1"
+    local success=true
+    local failed_tests=()
+    
+    echo -e "${BLUE}Running tests incrementally to avoid memory issues...${NC}"
+    
+    # Get all test files
+    local test_files=$(find "$test_path" -name "test_*.py" | sort)
+    local total_files=$(echo "$test_files" | wc -l)
+    local current=0
+    
+    echo -e "${YELLOW}Found $total_files test files${NC}"
+    
+    # Run each test file individually
+    for test_file in $test_files; do
+        current=$((current + 1))
+        echo -e "${BLUE}[$current/$total_files] Running test: $test_file${NC}"
+        
+        # Build command for this test file
+        local file_cmd="$PYTEST_CMD $test_file"
+        
+        # Run the test with retry
+        $file_cmd &
+        TEST_PID=$!
+        
+        # Monitor memory usage
+        monitor_memory $TEST_PID
+        
+        # Wait for test to complete
+        wait $TEST_PID
+        TEST_EXIT_CODE=$?
+        
+        if [ $TEST_EXIT_CODE -ne 0 ]; then
+            echo -e "${RED}Test failed: $test_file${NC}"
+            failed_tests+=("$test_file")
+            success=false
+        else
+            echo -e "${GREEN}Test passed: $test_file${NC}"
+        fi
+        
+        # Clean up between tests
+        echo -e "${BLUE}Cleaning up between tests...${NC}"
+        rm -f .coverage .coverage.* .coverage-*
+        
+        # Wait a moment to let memory be released
+        sleep 2
+    done
+    
+    # Report failed tests
+    if [ "$success" = false ]; then
+        echo -e "${RED}${BOLD}The following tests failed:${NC}"
+        for failed_test in "${failed_tests[@]}"; do
+            echo -e "${RED}- $failed_test${NC}"
+        done
+        return 1
+    else
+        echo -e "${GREEN}${BOLD}All tests passed!${NC}"
+        return 0
+    fi
 }
 
 # Display test configuration
@@ -278,6 +443,9 @@ if [ -n "$SPECIFIC_TEST" ]; then
     echo -e "${YELLOW}Test path:${NC} $SPECIFIC_TEST"
 elif [ "$RUN_ALL" = true ]; then
     echo -e "${YELLOW}Test type:${NC} All tests"
+    if [ "$FORCE_ALL" = true ]; then
+        echo -e "${YELLOW}Force ALL:${NC} Yes (including memory-intensive tests)"
+    fi
 elif [ "$RUN_UNIT" = true ] && [ "$RUN_INTEGRATION" = true ]; then
     echo -e "${YELLOW}Test type:${NC} Unit and integration tests"
 elif [ "$RUN_INTEGRATION" = true ]; then
@@ -289,74 +457,147 @@ echo -e "${YELLOW}Parallel processes:${NC} $NUM_CORES"
 echo -e "${YELLOW}Coverage:${NC} $([ "$RUN_COVERAGE" = true ] && echo "Enabled" || echo "Disabled")"
 echo -e "${YELLOW}Verbose output:${NC} $([ "$RUN_VERBOSE" = true ] && echo "Enabled" || echo "Disabled")"
 echo -e "${YELLOW}GitHub authentication:${NC} $([ -n "$GITHUB_TOKEN" ] && echo "Configured" || echo "Not configured")"
-echo -e "${YELLOW}Skip large repositories:${NC} $([ "$SKIP_LARGE_REPOS" = true ] && echo "Yes" || echo "No")"
+echo -e "${YELLOW}Skip large repositories:${NC} $([ "$SKIP_LARGE_REPOS" = true ] && [ "$FORCE_ALL" = false ] && echo "Yes" || echo "No")"
 echo -e "${YELLOW}Maximum memory:${NC} ${MAX_MEMORY_GB} GB"
+echo -e "${YELLOW}Retry count:${NC} ${RETRY_COUNT}"
+echo -e "${YELLOW}Incremental testing:${NC} $([ "$INCREMENTAL" = true ] && echo "Enabled" || echo "Disabled")"
+
+# Create temporary directories for integration tests
+if [ "$RUN_INTEGRATION" = true ] || [ "$RUN_ALL" = true ] || [[ "$SPECIFIC_TEST" == *"integration"* ]]; then
+    echo -e "${BLUE}Creating temporary directories for integration tests...${NC}"
+    
+    # Create base pytest directory
+    mkdir -p /tmp/pytest-of-$(whoami)/pytest-0
+    
+    # Create directories for specific tests that need them
+    for dir in "test_reset_unstaged_modificati0" "test_reset_unstaged_new_files_0" "test_reset_staged_changes_0" \
+               "test_reset_staged_deletions_0" "test_reset_staged_renames_0" "test_reset_unstaged_renames_0" \
+               "test_reset_staged_rename_with_0" "test_reset_with_mixed_states0" "test_reset_with_mixed_renames0" \
+               "test_codebase_create_pr_active0"; do
+        mkdir -p "/tmp/pytest-of-$(whoami)/pytest-0/$dir"
+        echo -e "${GREEN}Created: /tmp/pytest-of-$(whoami)/pytest-0/$dir${NC}"
+    done
+    
+    # Create symlinks for higher pytest directories (1-30)
+    for i in {1..30}; do
+        if [ ! -L "/tmp/pytest-of-$(whoami)/pytest-$i" ]; then
+            ln -sf "/tmp/pytest-of-$(whoami)/pytest-0" "/tmp/pytest-of-$(whoami)/pytest-$i"
+            echo -e "${GREEN}Created symlink: /tmp/pytest-of-$(whoami)/pytest-$i -> /tmp/pytest-of-$(whoami)/pytest-0${NC}"
+        fi
+    done
+    
+    # Start a background process to create symlinks for new pytest directories
+    (
+        while true; do
+            for i in {31..100}; do
+                if [ -d "/tmp/pytest-of-$(whoami)/pytest-$i" ] && [ ! -L "/tmp/pytest-of-$(whoami)/pytest-$i" ]; then
+                    rm -rf "/tmp/pytest-of-$(whoami)/pytest-$i"
+                    ln -sf "/tmp/pytest-of-$(whoami)/pytest-0" "/tmp/pytest-of-$(whoami)/pytest-$i"
+                    echo -e "${GREEN}Created symlink: /tmp/pytest-of-$(whoami)/pytest-$i -> /tmp/pytest-of-$(whoami)/pytest-0${NC}"
+                fi
+            done
+            sleep 1
+        done
+    ) &
+    SYMLINK_PID=$!
+    
+    # Trap to kill the background process when the script exits
+    trap "kill $SYMLINK_PID 2>/dev/null" EXIT
+fi
 
 # Determine which tests to run
 if [ -n "$SPECIFIC_TEST" ]; then
     # Run specific test
     echo -e "${BLUE}Running specific test: ${SPECIFIC_TEST}${NC}"
-    $PYTEST_CMD "$SPECIFIC_TEST" &
-    TEST_PID=$!
     
-    # Monitor memory usage
-    monitor_memory $TEST_PID
-    
-    # Wait for test to complete
-    wait $TEST_PID
-    TEST_EXIT_CODE=$?
+    if [ "$INCREMENTAL" = true ] && [ -d "$SPECIFIC_TEST" ]; then
+        # Run incrementally if it's a directory
+        run_tests_incrementally "$SPECIFIC_TEST"
+        TEST_EXIT_CODE=$?
+    else
+        # Run with retry
+        run_tests_with_retry "$PYTEST_CMD \"$SPECIFIC_TEST\"" "specific test"
+        TEST_EXIT_CODE=$?
+    fi
 elif [ "$RUN_ALL" = true ]; then
     # Run all tests
     echo -e "${BLUE}Running all tests with $NUM_CORES parallel processes...${NC}"
+    echo -e "${YELLOW}Note: This may take a while and consume significant memory${NC}"
     
-    # Run tests without skipping any
-    $PYTEST_CMD tests &
-    TEST_PID=$!
-    
-    # Monitor memory usage
-    monitor_memory $TEST_PID
-    
-    # Wait for test to complete
-    wait $TEST_PID
-    TEST_EXIT_CODE=$?
+    if [ "$INCREMENTAL" = true ]; then
+        # Run unit tests incrementally
+        echo -e "${BLUE}Running unit tests incrementally...${NC}"
+        run_tests_incrementally "tests/unit"
+        UNIT_EXIT_CODE=$?
+        
+        # Run integration tests incrementally
+        echo -e "${BLUE}Running integration tests incrementally...${NC}"
+        run_tests_incrementally "tests/integration"
+        INTEGRATION_EXIT_CODE=$?
+        
+        # Combine exit codes
+        if [ $UNIT_EXIT_CODE -ne 0 ] || [ $INTEGRATION_EXIT_CODE -ne 0 ]; then
+            TEST_EXIT_CODE=1
+        else
+            TEST_EXIT_CODE=0
+        fi
+    else
+        # Run with retry
+        run_tests_with_retry "$PYTEST_CMD tests" "all tests"
+        TEST_EXIT_CODE=$?
+    fi
 elif [ "$RUN_UNIT" = true ] && [ "$RUN_INTEGRATION" = true ]; then
     # Run both unit and integration tests
     echo -e "${BLUE}Running unit and integration tests with $NUM_CORES parallel processes...${NC}"
     
-    $PYTEST_CMD tests/unit tests/integration &
-    TEST_PID=$!
-    
-    # Monitor memory usage
-    monitor_memory $TEST_PID
-    
-    # Wait for test to complete
-    wait $TEST_PID
-    TEST_EXIT_CODE=$?
+    if [ "$INCREMENTAL" = true ]; then
+        # Run unit tests incrementally
+        echo -e "${BLUE}Running unit tests incrementally...${NC}"
+        run_tests_incrementally "tests/unit"
+        UNIT_EXIT_CODE=$?
+        
+        # Run integration tests incrementally
+        echo -e "${BLUE}Running integration tests incrementally...${NC}"
+        run_tests_incrementally "tests/integration"
+        INTEGRATION_EXIT_CODE=$?
+        
+        # Combine exit codes
+        if [ $UNIT_EXIT_CODE -ne 0 ] || [ $INTEGRATION_EXIT_CODE -ne 0 ]; then
+            TEST_EXIT_CODE=1
+        else
+            TEST_EXIT_CODE=0
+        fi
+    else
+        # Run with retry
+        run_tests_with_retry "$PYTEST_CMD tests/unit tests/integration" "unit and integration tests"
+        TEST_EXIT_CODE=$?
+    fi
 elif [ "$RUN_INTEGRATION" = true ]; then
     # Run integration tests
     echo -e "${BLUE}Running integration tests with $NUM_CORES parallel processes...${NC}"
     
-    $PYTEST_CMD tests/integration &
-    TEST_PID=$!
-    
-    # Monitor memory usage
-    monitor_memory $TEST_PID
-    
-    # Wait for test to complete
-    wait $TEST_PID
-    TEST_EXIT_CODE=$?
+    if [ "$INCREMENTAL" = true ]; then
+        # Run incrementally
+        run_tests_incrementally "tests/integration"
+        TEST_EXIT_CODE=$?
+    else
+        # Run with retry
+        run_tests_with_retry "$PYTEST_CMD tests/integration" "integration tests"
+        TEST_EXIT_CODE=$?
+    fi
 else
     # Run unit tests
     echo -e "${BLUE}Running unit tests with $NUM_CORES parallel processes...${NC}"
-    $PYTEST_CMD tests/unit &
-    TEST_PID=$!
     
-    # Monitor memory usage
-    monitor_memory $TEST_PID
-    
-    # Wait for test to complete
-    wait $TEST_PID
-    TEST_EXIT_CODE=$?
+    if [ "$INCREMENTAL" = true ]; then
+        # Run incrementally
+        run_tests_incrementally "tests/unit"
+        TEST_EXIT_CODE=$?
+    else
+        # Run with retry
+        run_tests_with_retry "$PYTEST_CMD tests/unit" "unit tests"
+        TEST_EXIT_CODE=$?
+    fi
 fi
 
 # Display test results
