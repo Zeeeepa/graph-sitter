@@ -41,15 +41,29 @@ fi
 echo -e "${BLUE}Creating necessary test directories...${NC}"
 mkdir -p tests/integration/verified_codemods/codemod_data
 
+# Clean up any existing pytest temporary directories
+echo -e "${BLUE}Cleaning up existing pytest directories...${NC}"
+rm -rf /tmp/pytest-of-$(whoami)/pytest-*
+
+# Create a fresh pytest directory structure
+PYTEST_DIR="/tmp/pytest-of-$(whoami)/pytest-0"
+mkdir -p "$PYTEST_DIR"
+
 # Create temporary directories for test_reset tests
 echo -e "${BLUE}Creating temporary directories for integration tests...${NC}"
-mkdir -p /tmp/pytest-of-$(whoami)/pytest-0/
 for dir in test_reset_unstaged_modificati0 test_reset_unstaged_new_files_0 test_reset_staged_changes_0 \
            test_reset_staged_deletions_0 test_reset_staged_renames_0 test_reset_unstaged_renames_0 \
            test_reset_staged_rename_with_0 test_reset_with_mixed_states0 test_reset_with_mixed_renames0 \
            test_codebase_create_pr_active0; do
-    mkdir -p "/tmp/pytest-of-$(whoami)/pytest-0/$dir"
-    echo -e "${CYAN}Created: /tmp/pytest-of-$(whoami)/pytest-0/$dir${NC}"
+    mkdir -p "$PYTEST_DIR/$dir"
+    echo -e "${CYAN}Created: $PYTEST_DIR/$dir${NC}"
+done
+
+# Create symbolic links for pytest-1, pytest-2, etc. to point to pytest-0
+# This ensures tests will find the directories regardless of which pytest-N directory they look in
+for i in {1..5}; do
+    ln -sf "$PYTEST_DIR" "/tmp/pytest-of-$(whoami)/pytest-$i"
+    echo -e "${CYAN}Created symlink: /tmp/pytest-of-$(whoami)/pytest-$i -> $PYTEST_DIR${NC}"
 done
 
 # Parse command line arguments
