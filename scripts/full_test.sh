@@ -48,6 +48,7 @@ RUN_ALL=false
 RUN_COVERAGE=false
 RUN_VERBOSE=false
 SPECIFIC_TEST=""
+NUM_CORES=20  # Default to 20 cores for parallel testing
 
 for arg in "$@"; do
     case $arg in
@@ -69,6 +70,9 @@ for arg in "$@"; do
         --test=*)
             SPECIFIC_TEST="${arg#*=}"
             ;;
+        --cores=*)
+            NUM_CORES="${arg#*=}"
+            ;;
         --help)
             echo -e "${CYAN}Usage: ./scripts/full_test.sh [OPTIONS]${NC}"
             echo -e "${CYAN}Options:${NC}"
@@ -78,6 +82,7 @@ for arg in "$@"; do
             echo -e "  --coverage     Run with coverage"
             echo -e "  --verbose      Run with verbose output"
             echo -e "  --test=PATH    Run specific test file or directory"
+            echo -e "  --cores=N      Number of CPU cores to use (default: 20)"
             echo -e "  --help         Show this help message"
             exit 0
             ;;
@@ -100,56 +105,100 @@ else
     PYTEST_CMD="$PYTEST_CMD -v"
 fi
 
+# Add parallel processing
+PYTEST_CMD="$PYTEST_CMD -n $NUM_CORES"
+
 # Add coverage if requested
 if [ "$RUN_COVERAGE" = true ]; then
     PYTEST_CMD="$PYTEST_CMD --cov=graph_sitter --cov-report=term"
 fi
 
-# List of tests to skip
-SKIP_TESTS=(
-    "tests/integration/codemod/test_verified_codemods.py"
-    "tests/integration/codegen/cli/commands/test_reset.py"
-    "tests/integration/codegen/git/codebase/test_codebase_create_pr.py"
-)
-
-# Build the ignore string for pytest
-IGNORE_STRING=""
-for test in "${SKIP_TESTS[@]}"; do
-    IGNORE_STRING="$IGNORE_STRING --ignore=$test"
-done
+# Create a memory monitoring function
+monitor_memory() {
+    local pid=$1
+    local max_memory_gb=31
+    local sleep_interval=1
+    
+    while ps -p $pid > /dev/null; do
+        local memory_kb=$(ps -o rss= -p $pid)
+        local memory_gb=$(echo "scale=2; $memory_kb / 1024 / 1024" | bc)
+        
+        if (( $(echo "$memory_gb > $max_memory_gb" | bc -l) )); then
+            echo -e "${RED}Memory usage exceeded $max_memory_gb GB! Killing process to prevent segmentation fault.${NC}"
+            kill -15 $pid
+            return 1
+        fi
+        
+        sleep $sleep_interval
+    done
+    
+    return 0
+}
 
 # Determine which tests to run
 if [ -n "$SPECIFIC_TEST" ]; then
     # Run specific test
     echo -e "${BLUE}Running specific test: ${SPECIFIC_TEST}${NC}"
-    $PYTEST_CMD "$SPECIFIC_TEST"
+    $PYTEST_CMD "$SPECIFIC_TEST" &
+    TEST_PID=$!
+    
+    # Monitor memory usage
+    monitor_memory $TEST_PID
+    
+    # Wait for test to complete
+    wait $TEST_PID
     TEST_EXIT_CODE=$?
 elif [ "$RUN_ALL" = true ]; then
     # Run all tests
-    echo -e "${BLUE}Running all tests...${NC}"
-    echo -e "${YELLOW}Note: Some integration tests may be skipped if they require external resources${NC}"
+    echo -e "${BLUE}Running all tests with $NUM_CORES parallel processes...${NC}"
     
-    # Skip problematic tests
-    $PYTEST_CMD tests $IGNORE_STRING
+    # Run tests without skipping any
+    $PYTEST_CMD tests &
+    TEST_PID=$!
+    
+    # Monitor memory usage
+    monitor_memory $TEST_PID
+    
+    # Wait for test to complete
+    wait $TEST_PID
     TEST_EXIT_CODE=$?
 elif [ "$RUN_UNIT" = true ] && [ "$RUN_INTEGRATION" = true ]; then
     # Run both unit and integration tests
-    echo -e "${BLUE}Running unit and integration tests...${NC}"
+    echo -e "${BLUE}Running unit and integration tests with $NUM_CORES parallel processes...${NC}"
     
-    # Skip problematic tests
-    $PYTEST_CMD tests/unit tests/integration $IGNORE_STRING
+    $PYTEST_CMD tests/unit tests/integration &
+    TEST_PID=$!
+    
+    # Monitor memory usage
+    monitor_memory $TEST_PID
+    
+    # Wait for test to complete
+    wait $TEST_PID
     TEST_EXIT_CODE=$?
 elif [ "$RUN_INTEGRATION" = true ]; then
     # Run integration tests
-    echo -e "${BLUE}Running integration tests...${NC}"
+    echo -e "${BLUE}Running integration tests with $NUM_CORES parallel processes...${NC}"
     
-    # Skip problematic tests
-    $PYTEST_CMD tests/integration $IGNORE_STRING
+    $PYTEST_CMD tests/integration &
+    TEST_PID=$!
+    
+    # Monitor memory usage
+    monitor_memory $TEST_PID
+    
+    # Wait for test to complete
+    wait $TEST_PID
     TEST_EXIT_CODE=$?
 else
     # Run unit tests
-    echo -e "${BLUE}Running unit tests...${NC}"
-    $PYTEST_CMD tests/unit
+    echo -e "${BLUE}Running unit tests with $NUM_CORES parallel processes...${NC}"
+    $PYTEST_CMD tests/unit &
+    TEST_PID=$!
+    
+    # Monitor memory usage
+    monitor_memory $TEST_PID
+    
+    # Wait for test to complete
+    wait $TEST_PID
     TEST_EXIT_CODE=$?
 fi
 
@@ -164,10 +213,7 @@ fi
 echo -e "${BLUE}${BOLD}=== Test Summary ===${NC}"
 echo -e "${YELLOW}Test exit code:${NC} $TEST_EXIT_CODE"
 echo -e "${YELLOW}Python version:${NC} $(python --version)"
-echo -e "${YELLOW}Skipped tests:${NC}"
-for test in "${SKIP_TESTS[@]}"; do
-    echo -e "  - $test"
-done
+echo -e "${YELLOW}Parallel processes:${NC} $NUM_CORES"
 
 # Display coverage report if requested
 if [ "$RUN_COVERAGE" = true ]; then
