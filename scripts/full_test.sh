@@ -103,8 +103,7 @@ fi
 if [ "$RUN_COVERAGE" = true ]; then
     PYTEST_CMD="$PYTEST_CMD --cov=graph_sitter --cov-report=term"
 else
-    # Disable problematic plugins when not using coverage
-    PYTEST_CMD="$PYTEST_CMD -p no:xdist -p no:cov"
+    PYTEST_CMD="$PYTEST_CMD"
 fi
 
 # Determine which tests to run
@@ -161,4 +160,3 @@ if [ "$RUN_COVERAGE" = true ]; then
 fi
 
 exit $TEST_EXIT_CODE
-
