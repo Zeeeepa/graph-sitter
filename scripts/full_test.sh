@@ -41,6 +41,10 @@ fi
 echo -e "${BLUE}Creating necessary directories for tests...${NC}"
 mkdir -p tests/integration/verified_codemods/codemod_data
 
+# Clean up any existing coverage files
+echo -e "${BLUE}Cleaning up existing coverage files...${NC}"
+rm -f .coverage .coverage.* .coverage-*
+
 # Parse command line arguments
 RUN_UNIT=false
 RUN_INTEGRATION=false
@@ -197,7 +201,13 @@ PYTEST_CMD="$PYTEST_CMD -n $NUM_CORES"
 
 # Add coverage if requested
 if [ "$RUN_COVERAGE" = true ]; then
-    PYTEST_CMD="$PYTEST_CMD --cov=graph_sitter --cov-report=term"
+    # Use a simpler coverage configuration to avoid SQLite errors
+    PYTEST_CMD="$PYTEST_CMD --cov=graph_sitter --cov-report=term --no-cov-on-fail"
+    # Disable context for coverage to avoid SQLite errors
+    export COVERAGE_CONTEXT=off
+else
+    # Disable coverage plugins to avoid errors when not using coverage
+    PYTEST_CMD="$PYTEST_CMD -p no:cov"
 fi
 
 # Create a memory monitoring function
