@@ -100,7 +100,7 @@ if ! python -c "import Cython" &> /dev/null; then
 fi
 
 # Step 9: Compile Cython modules
-echo -e "${YELLOW}Compiling Cython modules...${NC}"
+echo -e "${YELLOW}Building Cython modules...${NC}"
 python -m pip install -e .
 
 # Check if compilation was successful
@@ -118,7 +118,12 @@ mkdir -p tests/integration/verified_codemods/codemod_data
 # Step 11: Run basic tests if requested
 if [ "$1" == "--test" ] || [ "$1" == "-t" ]; then
     echo -e "${YELLOW}Running basic test suite...${NC}"
-    python -m pytest tests/unit -v -p no:xdist -p no:cov
+    # Use full_test.sh instead of build_and_test.sh
+    if [ -f "./scripts/full_test.sh" ]; then
+        bash ./scripts/full_test.sh --unit
+    else
+        python -m pytest tests/unit -v -p no:xdist -p no:cov
+    fi
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}All basic tests passed!${NC}"
@@ -139,4 +144,3 @@ echo -e "${YELLOW}To run tests:${NC}"
 echo -e "  ./scripts/full_test.sh --unit     # Run unit tests"
 echo -e "  ./scripts/full_test.sh --all      # Run all tests"
 echo -e "  ./scripts/full_test.sh --coverage # Run with coverage"
-
