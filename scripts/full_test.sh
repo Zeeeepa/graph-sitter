@@ -38,7 +38,19 @@ if ! python -c "import graph_sitter.compiled.utils" &> /dev/null; then
 fi
 
 # Create necessary directories for tests
+echo -e "${BLUE}Creating necessary test directories...${NC}"
 mkdir -p tests/integration/verified_codemods/codemod_data
+
+# Create temporary directories for test_reset tests
+echo -e "${BLUE}Creating temporary directories for integration tests...${NC}"
+mkdir -p /tmp/pytest-of-$(whoami)/pytest-0/
+for dir in test_reset_unstaged_modificati0 test_reset_unstaged_new_files_0 test_reset_staged_changes_0 \
+           test_reset_staged_deletions_0 test_reset_staged_renames_0 test_reset_unstaged_renames_0 \
+           test_reset_staged_rename_with_0 test_reset_with_mixed_states0 test_reset_with_mixed_renames0 \
+           test_codebase_create_pr_active0; do
+    mkdir -p "/tmp/pytest-of-$(whoami)/pytest-0/$dir"
+    echo -e "${CYAN}Created: /tmp/pytest-of-$(whoami)/pytest-0/$dir${NC}"
+done
 
 # Parse command line arguments
 RUN_UNIT=false
