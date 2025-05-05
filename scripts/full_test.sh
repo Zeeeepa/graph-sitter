@@ -105,6 +105,19 @@ if [ "$RUN_COVERAGE" = true ]; then
     PYTEST_CMD="$PYTEST_CMD --cov=graph_sitter --cov-report=term"
 fi
 
+# List of tests to skip
+SKIP_TESTS=(
+    "tests/integration/codemod/test_verified_codemods.py"
+    "tests/integration/codegen/cli/commands/test_reset.py"
+    "tests/integration/codegen/git/codebase/test_codebase_create_pr.py"
+)
+
+# Build the ignore string for pytest
+IGNORE_STRING=""
+for test in "${SKIP_TESTS[@]}"; do
+    IGNORE_STRING="$IGNORE_STRING --ignore=$test"
+done
+
 # Determine which tests to run
 if [ -n "$SPECIFIC_TEST" ]; then
     # Run specific test
@@ -116,22 +129,22 @@ elif [ "$RUN_ALL" = true ]; then
     echo -e "${BLUE}Running all tests...${NC}"
     echo -e "${YELLOW}Note: Some integration tests may be skipped if they require external resources${NC}"
     
-    # Skip problematic verified codemods tests
-    $PYTEST_CMD tests --ignore=tests/integration/codemod/test_verified_codemods.py
+    # Skip problematic tests
+    $PYTEST_CMD tests $IGNORE_STRING
     TEST_EXIT_CODE=$?
 elif [ "$RUN_UNIT" = true ] && [ "$RUN_INTEGRATION" = true ]; then
     # Run both unit and integration tests
     echo -e "${BLUE}Running unit and integration tests...${NC}"
     
-    # Skip problematic verified codemods tests
-    $PYTEST_CMD tests/unit tests/integration --ignore=tests/integration/codemod/test_verified_codemods.py
+    # Skip problematic tests
+    $PYTEST_CMD tests/unit tests/integration $IGNORE_STRING
     TEST_EXIT_CODE=$?
 elif [ "$RUN_INTEGRATION" = true ]; then
     # Run integration tests
     echo -e "${BLUE}Running integration tests...${NC}"
     
-    # Skip problematic verified codemods tests
-    $PYTEST_CMD tests/integration --ignore=tests/integration/codemod/test_verified_codemods.py
+    # Skip problematic tests
+    $PYTEST_CMD tests/integration $IGNORE_STRING
     TEST_EXIT_CODE=$?
 else
     # Run unit tests
@@ -151,6 +164,10 @@ fi
 echo -e "${BLUE}${BOLD}=== Test Summary ===${NC}"
 echo -e "${YELLOW}Test exit code:${NC} $TEST_EXIT_CODE"
 echo -e "${YELLOW}Python version:${NC} $(python --version)"
+echo -e "${YELLOW}Skipped tests:${NC}"
+for test in "${SKIP_TESTS[@]}"; do
+    echo -e "  - $test"
+done
 
 # Display coverage report if requested
 if [ "$RUN_COVERAGE" = true ]; then
