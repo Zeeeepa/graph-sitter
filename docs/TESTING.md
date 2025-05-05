@@ -1,10 +1,10 @@
-# Testing in Graph-Sitter
+# Testing Guide for Graph-Sitter
 
-This document explains how to run tests in the Graph-Sitter project and addresses common issues.
+This document provides guidance on running tests for the Graph-Sitter project, including how to handle memory-intensive tests that might cause segmentation faults.
 
-## Running Tests
+## Quick Start
 
-The project includes a comprehensive test script that can run unit tests, integration tests, or both:
+To run tests, use the `full_test.sh` script:
 
 ```bash
 # Run unit tests (default)
@@ -20,59 +20,89 @@ The project includes a comprehensive test script that can run unit tests, integr
 ./scripts/full_test.sh --test=tests/unit/path/to/test.py
 ```
 
-## Coverage Issues
+## Handling Memory Issues and Segmentation Faults
 
-When running tests with coverage, you might encounter SQLite errors like:
+Some integration tests, particularly those involving large repositories like `mypy`, can consume significant memory and potentially cause segmentation faults. The `full_test.sh` script includes several fixes for these issues:
 
-```
-DataError: Couldn't use data file '/path/to/.coverage.file': no such table: context
-```
+1. **Memory Monitoring**: The script monitors memory usage and gracefully terminates tests before they consume too much memory and cause a segmentation fault.
 
-These errors occur because:
+2. **Skip Large Repositories**: You can skip large repositories that are known to cause memory issues:
 
-1. The pytest-cov plugin uses SQLite databases to store coverage data
-2. When running tests in parallel with xdist, multiple processes try to access these databases simultaneously
-3. The coverage context feature requires additional SQLite tables that may not be properly initialized in parallel mode
+   ```bash
+   ./scripts/full_test.sh --all --skip-large-repos
+   ```
 
-### Solutions
+3. **Memory Limit**: You can set a custom memory limit (in GB):
 
-The `full_test.sh` script includes several fixes for these issues:
+   ```bash
+   ./scripts/full_test.sh --all --max-memory-gb=24
+   ```
 
-1. **Cleaning up existing coverage files** before running tests
-2. **Disabling coverage context** by setting `COVERAGE_CONTEXT=off` when running with coverage
-3. **Adding the `--no-cov-on-fail` flag** to prevent coverage errors from failing tests
-4. **Disabling coverage plugins** when not explicitly running with coverage
+4. **Reduce Parallel Workers**: You can reduce the number of parallel test workers to decrease memory usage:
 
-## Memory Issues
-
-Some tests, particularly those processing large repositories like `mypy`, may consume significant memory and cause segmentation faults. The test script includes memory monitoring to prevent these crashes by:
-
-1. Monitoring memory usage of test processes
-2. Gracefully terminating tests that exceed memory limits
-3. Providing clear error messages when memory limits are reached
-
-## GitHub Authentication
-
-Some integration tests require GitHub authentication. You can provide a GitHub token:
-
-1. Set the `GITHUB_TOKEN` environment variable before running tests
-2. Or use the interactive mode of the test script, which will prompt for a token
+   ```bash
+   ./scripts/full_test.sh --all --cores=4
+   ```
 
 ## Interactive Mode
 
 Running `./scripts/full_test.sh` without arguments enters interactive mode, which guides you through:
 
-1. Selecting which tests to run
-2. Setting the number of CPU cores for parallel testing
+1. Selecting which tests to run (unit, integration, all, or specific)
+2. Setting the number of parallel processes
 3. Enabling/disabling coverage
-4. Providing GitHub authentication if needed
+4. Enabling/disabling verbose output
+5. Providing a GitHub token for tests that require authentication
+6. Skipping large repositories to prevent segmentation faults
+7. Setting a maximum memory limit
 
-## Troubleshooting
+## Common Issues and Solutions
 
-If you encounter test failures:
+### Segmentation Faults
 
-1. **Coverage errors**: Run without coverage (`./scripts/full_test.sh` without `--coverage`)
-2. **Segmentation faults**: Reduce the number of parallel processes (`--cores=4`)
-3. **GitHub authentication errors**: Provide a valid GitHub token or skip GitHub-dependent tests
-4. **SQLite errors**: Delete all `.coverage*` files and try again
+If you encounter segmentation faults during testing:
+
+1. Try running with `--skip-large-repos` to skip memory-intensive repositories
+2. Reduce the number of parallel workers with `--cores=4` or lower
+3. Increase the memory limit if your system has enough RAM: `--max-memory-gb=40`
+4. Run only unit tests: `./scripts/full_test.sh --unit`
+
+### Coverage Errors
+
+If you encounter SQLite errors when running with coverage:
+
+1. Run without coverage (`./scripts/full_test.sh` without `--coverage`)
+2. The script already includes fixes for common coverage issues, but some edge cases might still occur
+
+### GitHub Authentication
+
+Some integration tests require GitHub authentication. You can provide a GitHub token:
+
+```bash
+export GITHUB_TOKEN=your_github_token
+./scripts/full_test.sh --all
+```
+
+Or use interactive mode and enter the token when prompted.
+
+## Advanced Usage
+
+### Running Specific Test Categories
+
+```bash
+# Run only integration tests
+./scripts/full_test.sh --integration
+
+# Run both unit and integration tests
+./scripts/full_test.sh --unit --integration
+
+# Run with verbose output
+./scripts/full_test.sh --verbose
+```
+
+### Memory Monitoring
+
+The script includes a memory monitor that tracks memory usage during test execution. If memory usage exceeds the specified limit, the tests will be gracefully terminated to prevent segmentation faults.
+
+You can adjust the memory limit with the `--max-memory-gb` option or in interactive mode.
 

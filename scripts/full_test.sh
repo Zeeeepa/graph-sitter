@@ -45,6 +45,9 @@ mkdir -p tests/integration/verified_codemods/codemod_data
 echo -e "${BLUE}Cleaning up existing coverage files...${NC}"
 rm -f .coverage .coverage.* .coverage-*
 
+# Make memory monitor executable
+chmod +x scripts/memory_monitor.sh
+
 # Parse command line arguments
 RUN_UNIT=false
 RUN_INTEGRATION=false
@@ -53,6 +56,8 @@ RUN_COVERAGE=false
 RUN_VERBOSE=false
 SPECIFIC_TEST=""
 NUM_CORES=10  # Default to 10 cores for parallel testing
+SKIP_LARGE_REPOS=false
+MAX_MEMORY_GB=31
 
 # If arguments are provided, use them
 if [ $# -gt 0 ]; then
@@ -79,6 +84,12 @@ if [ $# -gt 0 ]; then
             --cores=*)
                 NUM_CORES="${arg#*=}"
                 ;;
+            --skip-large-repos)
+                SKIP_LARGE_REPOS=true
+                ;;
+            --max-memory-gb=*)
+                MAX_MEMORY_GB="${arg#*=}"
+                ;;
             --help)
                 echo -e "${CYAN}Usage: ./scripts/full_test.sh [OPTIONS]${NC}"
                 echo -e "${CYAN}Options:${NC}"
@@ -89,6 +100,8 @@ if [ $# -gt 0 ]; then
                 echo -e "  --verbose      Run with verbose output"
                 echo -e "  --test=PATH    Run specific test file or directory"
                 echo -e "  --cores=N      Number of CPU cores to use (default: 10)"
+                echo -e "  --skip-large-repos  Skip large repositories"
+                echo -e "  --max-memory-gb=N  Maximum memory usage in GB (default: 31)"
                 echo -e "  --help         Show this help message"
                 echo -e ""
                 echo -e "If no options are provided, interactive mode will be used."
@@ -178,6 +191,18 @@ else
             echo -e "${GREEN}GitHub token is already set in the environment.${NC}"
         fi
     fi
+    
+    # Prompt for skipping large repos
+    read -p "Skip large repositories (like mypy) to prevent segmentation faults? (y/n) [default: n]: " skip_large_option
+    if [[ "$skip_large_option" =~ ^[Yy]$ ]]; then
+        SKIP_LARGE_REPOS=true
+    fi
+    
+    # Prompt for max memory
+    read -p "Maximum memory usage in GB [default: 31]: " max_memory_input
+    if [ -n "$max_memory_input" ]; then
+        MAX_MEMORY_GB=$max_memory_input
+    fi
 fi
 
 # Set default if no option provided
@@ -210,15 +235,30 @@ else
     PYTEST_CMD="$PYTEST_CMD -p no:cov"
 fi
 
+# Add skip for large repositories if requested
+if [ "$SKIP_LARGE_REPOS" = true ]; then
+    echo -e "${YELLOW}Skipping large repositories to prevent segmentation faults${NC}"
+    # Skip mypy and other large repositories that cause segmentation faults
+    PYTEST_CMD="$PYTEST_CMD -k 'not mypy'"
+fi
+
 # Create a memory monitoring function
 monitor_memory() {
     local pid=$1
-    local max_memory_gb=31
+    local max_memory_gb=$MAX_MEMORY_GB
     local sleep_interval=1
+    
+    echo -e "${BLUE}Starting memory monitor for PID ${pid}${NC}"
+    echo -e "${BLUE}Maximum memory: ${max_memory_gb} GB${NC}"
     
     while ps -p $pid > /dev/null; do
         local memory_kb=$(ps -o rss= -p $pid)
         local memory_gb=$(echo "scale=2; $memory_kb / 1024 / 1024" | bc)
+        
+        # Log memory usage periodically
+        if (( $(echo "$memory_gb > $(($max_memory_gb * 3 / 4))" | bc -l) )); then
+            echo -e "${YELLOW}Memory usage: ${memory_gb} GB / ${max_memory_gb} GB${NC}"
+        fi
         
         if (( $(echo "$memory_gb > $max_memory_gb" | bc -l) )); then
             echo -e "${RED}Memory usage exceeded $max_memory_gb GB! Killing process to prevent segmentation fault.${NC}"
@@ -249,6 +289,8 @@ echo -e "${YELLOW}Parallel processes:${NC} $NUM_CORES"
 echo -e "${YELLOW}Coverage:${NC} $([ "$RUN_COVERAGE" = true ] && echo "Enabled" || echo "Disabled")"
 echo -e "${YELLOW}Verbose output:${NC} $([ "$RUN_VERBOSE" = true ] && echo "Enabled" || echo "Disabled")"
 echo -e "${YELLOW}GitHub authentication:${NC} $([ -n "$GITHUB_TOKEN" ] && echo "Configured" || echo "Not configured")"
+echo -e "${YELLOW}Skip large repositories:${NC} $([ "$SKIP_LARGE_REPOS" = true ] && echo "Yes" || echo "No")"
+echo -e "${YELLOW}Maximum memory:${NC} ${MAX_MEMORY_GB} GB"
 
 # Determine which tests to run
 if [ -n "$SPECIFIC_TEST" ]; then
