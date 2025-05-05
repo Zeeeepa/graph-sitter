@@ -61,10 +61,46 @@ done
 
 # Create symbolic links for pytest-1, pytest-2, etc. to point to pytest-0
 # This ensures tests will find the directories regardless of which pytest-N directory they look in
-for i in {1..5}; do
+for i in {1..20}; do
     ln -sf "$PYTEST_DIR" "/tmp/pytest-of-$(whoami)/pytest-$i"
     echo -e "${CYAN}Created symlink: /tmp/pytest-of-$(whoami)/pytest-$i -> $PYTEST_DIR${NC}"
 done
+
+# Add a function to dynamically create symlinks if needed during test execution
+cat > /tmp/pytest-symlink-creator.sh << 'EOF'
+#!/bin/bash
+# This script monitors for new pytest directories and creates symlinks to pytest-0
+PYTEST_BASE="/tmp/pytest-of-$(whoami)"
+PYTEST_SRC="$PYTEST_BASE/pytest-0"
+
+# Run in background
+(
+    while true; do
+        # Find all pytest directories
+        for dir in "$PYTEST_BASE"/pytest-*; do
+            if [[ "$dir" != "$PYTEST_SRC" && ! -L "$dir" ]]; then
+                # If it's not a symlink, create one
+                ln -sf "$PYTEST_SRC" "$dir"
+                echo "Created dynamic symlink: $dir -> $PYTEST_SRC"
+            fi
+        done
+        sleep 1
+    done
+) &
+
+# Store the background process ID
+echo $! > /tmp/pytest-symlink-creator.pid
+EOF
+
+# Make the script executable
+chmod +x /tmp/pytest-symlink-creator.sh
+
+# Start the dynamic symlink creator in the background
+echo -e "${BLUE}Starting dynamic pytest directory monitor...${NC}"
+/tmp/pytest-symlink-creator.sh
+
+# Trap to kill the background process when this script exits
+trap 'if [ -f /tmp/pytest-symlink-creator.pid ]; then kill $(cat /tmp/pytest-symlink-creator.pid) 2>/dev/null; rm /tmp/pytest-symlink-creator.pid; fi' EXIT
 
 # Parse command line arguments
 RUN_UNIT=false
