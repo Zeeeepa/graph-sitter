@@ -98,7 +98,7 @@ bash ./scripts/build_and_test.sh
 # Step 9: Run tests
 if [ "$1" == "--test" ] || [ "$1" == "-t" ]; then
     echo -e "${YELLOW}Running full test suite...${NC}"
-    python -m pytest tests -v -p no:xdist -p no:cov
+    ./scripts/run_tests.sh --unit
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}All tests passed!${NC}"
@@ -112,7 +112,7 @@ echo -e "${YELLOW}Your development environment is now set up.${NC}"
 echo -e "${YELLOW}To activate the virtual environment in the future, run:${NC}"
 echo -e "  source .venv/bin/activate"
 echo -e "${YELLOW}To run tests:${NC}"
-echo -e "  python -m pytest tests/unit -v -p no:xdist -p no:cov"
-echo -e "${YELLOW}To run with coverage:${NC}"
-echo -e "  python -m pytest tests --cov=graph_sitter"
-
+echo -e "  ./scripts/run_tests.sh --unit         # Run unit tests"
+echo -e "  ./scripts/run_tests.sh --integration  # Run integration tests"
+echo -e "  ./scripts/run_tests.sh --all          # Run all tests"
+echo -e "  ./scripts/run_tests.sh --coverage     # Run with coverage"

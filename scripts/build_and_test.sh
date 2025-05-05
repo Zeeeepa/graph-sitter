@@ -46,8 +46,8 @@ fi
 if [ "$1" == "--test" ] || [ "$1" == "-t" ]; then
     echo -e "${YELLOW}Running tests...${NC}"
     
-    # Disable problematic plugins to avoid issues
-    python -m pytest tests/unit -v -p no:xdist -p no:cov
+    # Use the new run_tests.sh script
+    ./scripts/run_tests.sh --unit
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}All tests passed!${NC}"
@@ -59,8 +59,7 @@ fi
 
 echo -e "${GREEN}Build completed successfully!${NC}"
 echo -e "${YELLOW}You can now run tests with:${NC}"
-echo -e "  python -m pytest tests/unit -v -p no:xdist -p no:cov"
-echo -e "  python -m pytest tests/unit/specific/path/to/test_file.py -v -p no:xdist -p no:cov"
-echo -e "${YELLOW}Or run with coverage:${NC}"
-echo -e "  python -m pytest tests --cov=graph_sitter"
-
+echo -e "  ./scripts/run_tests.sh --unit         # Run unit tests"
+echo -e "  ./scripts/run_tests.sh --integration  # Run integration tests"
+echo -e "  ./scripts/run_tests.sh --all          # Run all tests"
+echo -e "  ./scripts/run_tests.sh --coverage     # Run with coverage"
