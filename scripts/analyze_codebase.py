@@ -105,8 +105,8 @@ class EnhancedCodebaseAnalyzer:
         return {
             "codebase_summary": get_codebase_summary(self.codebase),
             "total_files": len(list(self.codebase.files)),
-            "total_code_files": len([f for f in self.codebase.files if hasattr(f, 'extension') and f.extension.lower() in ['.py', '.js', '.ts', '.tsx', '.jsx']]),
-            "total_doc_files": len([f for f in self.codebase.files if hasattr(f, 'extension') and f.extension.lower() in ['.md', '.rst', '.txt']]),
+            "total_code_files": len([f for f in self.codebase.files if hasattr(f, 'extension') and str(f.extension).lower() in ['.py', '.js', '.ts', '.tsx', '.jsx']]),
+            "total_doc_files": len([f for f in self.codebase.files if hasattr(f, 'extension') and str(f.extension).lower() in ['.md', '.rst', '.txt']]),
             "total_classes": len(list(self.codebase.classes)),
             "total_functions": len(list(self.codebase.functions)),
             "total_global_vars": len(list(self.codebase.global_vars)),
@@ -278,7 +278,7 @@ class EnhancedCodebaseAnalyzer:
         top_level_files = []
         
         for file in self.codebase.files:
-            if not hasattr(file, 'path') or not hasattr(file, 'extension') or file.extension.lower() not in ['.py', '.js', '.ts', '.tsx', '.jsx']:
+            if not hasattr(file, 'path') or not hasattr(file, 'extension') or str(file.extension).lower() not in ['.py', '.js', '.ts', '.tsx', '.jsx']:
                 continue
             
             importers = []
