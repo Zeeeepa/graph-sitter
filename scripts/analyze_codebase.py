@@ -67,7 +67,20 @@ class EnhancedCodebaseAnalyzer:
             # Extract org/repo from URL
             parts = self.repo_path.split("/")
             org_repo = f"{parts[-2]}/{parts[-1]}"
-            return Codebase(org_repo)
+            
+            # Create a temporary directory for cloning if needed
+            temp_dir = Path(os.path.expanduser("~")) / ".graph-sitter" / "repos"
+            temp_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Clone the repository to a temporary directory
+            repo_dir = temp_dir / parts[-2] / parts[-1]
+            if not repo_dir.exists():
+                print(f"Cloning repository to {repo_dir}...")
+                repo_dir.parent.mkdir(parents=True, exist_ok=True)
+                os.system(f"git clone {self.repo_path} {repo_dir}")
+            
+            print(f"Using local repository at {repo_dir}")
+            return Codebase(str(repo_dir))
         else:
             # Local path
             return Codebase(self.repo_path)
@@ -391,11 +404,20 @@ def main():
     parser.add_argument("--github-repo", help="GitHub repository URL to analyze", default=None)
     args = parser.parse_args()
     
-    analyzer = EnhancedCodebaseAnalyzer(args.github_repo)
-    results = analyzer.analyze()
-    analyzer.print_analysis(results)
+    try:
+        analyzer = EnhancedCodebaseAnalyzer(args.github_repo)
+        results = analyzer.analyze()
+        analyzer.print_analysis(results)
+    except Exception as e:
+        print(f"Error analyzing codebase: {str(e)}")
+        print("\nUsage examples:")
+        print("  # Analyze local codebase")
+        print("  python scripts/analyze_codebase.py")
+        print("\n  # Analyze GitHub repository")
+        print("  python scripts/analyze_codebase.py --github-repo https://github.com/Zeeeepa/graph-sitter")
+        print("\nNote: When analyzing GitHub repositories, the script will clone the repository to")
+        print("      ~/.graph-sitter/repos/<org>/<repo> directory for analysis.")
 
 
 if __name__ == "__main__":
     main()
-
