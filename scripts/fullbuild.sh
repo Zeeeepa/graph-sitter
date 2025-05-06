@@ -131,20 +131,20 @@ fi
 
 if [ "$RUN_TESTS" = true ]; then
     echo -e "${YELLOW}Running tests...${NC}"
-    if [ -f "./scripts/improved_test.sh" ]; then
-        bash ./scripts/improved_test.sh
-    elif [ -f "./scripts/full_test.sh" ]; then
+    if [ -f "./scripts/full_test.sh" ]; then
         bash ./scripts/full_test.sh
     else
         python -m pytest tests/unit -v -p no:xdist -p no:cov
     fi
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}All tests passed!${NC}"
-    else
-        echo -e "${RED}Some tests failed. Please check the error messages above.${NC}"
-    fi
 fi
+
+echo -e "${YELLOW}To activate the virtual environment in the future, run:${NC}"
+echo -e "  source .venv/bin/activate"
+echo -e "${YELLOW}To run tests:${NC}"
+echo -e "  ./scripts/full_test.sh           # Interactive test runner"
+echo -e "  ./scripts/full_test.sh --unit    # Run unit tests"
+echo -e "  ./scripts/full_test.sh --all     # Run all tests"
+echo -e "  ./scripts/full_test.sh --coverage # Run with coverage"
 
 echo -e "${GREEN}Full build completed successfully!${NC}"
 echo -e "${BLUE}=== Environment Information ===${NC}"
@@ -155,7 +155,7 @@ echo -e "${BLUE}=== Next Steps ===${NC}"
 echo -e "${YELLOW}To activate the virtual environment in the future, run:${NC}"
 echo -e "  source .venv/bin/activate"
 echo -e "${YELLOW}To run tests:${NC}"
-echo -e "  ./scripts/improved_test.sh        # Recommended test runner"
-echo -e "  ./scripts/improved_test.sh --unit # Run unit tests"
-echo -e "  ./scripts/improved_test.sh --all  # Run all tests"
-echo -e "  ./scripts/improved_test.sh --coverage # Run with coverage"
+echo -e "  ./scripts/full_test.sh           # Interactive test runner"
+echo -e "  ./scripts/full_test.sh --unit    # Run unit tests"
+echo -e "  ./scripts/full_test.sh --all     # Run all tests"
+echo -e "  ./scripts/full_test.sh --coverage # Run with coverage"

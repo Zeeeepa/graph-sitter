@@ -6,26 +6,25 @@ This document provides guidance on how to effectively test the Graph-Sitter code
 
 Graph-Sitter provides several scripts to help with testing:
 
-- `scripts/improved_test.sh`: The recommended script for running tests with improved coverage handling and reliability
-- `scripts/full_test.sh`: The original test script (maintained for backward compatibility)
+- `scripts/full_test.sh`: The main test script with comprehensive options
 - `scripts/fullbuild.sh`: Script to set up the development environment and optionally run tests
 
 ## Quick Start
 
-To run tests with the improved test script:
+To run tests with the test script:
 
 ```bash
 # Run unit tests (default)
-./scripts/improved_test.sh
+./scripts/full_test.sh
 
 # Run all tests
-./scripts/improved_test.sh --all
+./scripts/full_test.sh --all
 
 # Run with coverage
-./scripts/improved_test.sh --coverage
+./scripts/full_test.sh --coverage
 
 # Run specific test file or directory
-./scripts/improved_test.sh --test=tests/unit/sdk/core/test_file.py
+./scripts/full_test.sh --test=tests/unit/sdk/core/test_file.py
 ```
 
 ## Interactive Mode
@@ -33,7 +32,7 @@ To run tests with the improved test script:
 If you run the test script without arguments, it will enter interactive mode:
 
 ```bash
-./scripts/improved_test.sh
+./scripts/full_test.sh
 ```
 
 This will prompt you for:
@@ -46,29 +45,29 @@ This will prompt you for:
 
 ## Advanced Options
 
-The improved test script supports several advanced options:
+The test script supports several advanced options:
 
 ```bash
 # Run tests sequentially (no parallelism)
-./scripts/improved_test.sh --sequential
+./scripts/full_test.sh --sequential
 
 # Stop on first test failure
-./scripts/improved_test.sh --fail-fast
+./scripts/full_test.sh --fail-fast
 
 # Generate HTML coverage report
-./scripts/improved_test.sh --coverage --html-report
+./scripts/full_test.sh --coverage --html-report
 
 # Run tests incrementally (one file at a time)
-./scripts/improved_test.sh --incremental
+./scripts/full_test.sh --incremental
 
 # Set maximum memory usage (in GB)
-./scripts/improved_test.sh --max-memory-gb=16
+./scripts/full_test.sh --max-memory-gb=16
 
 # Skip large repositories that cause memory issues
-./scripts/improved_test.sh --skip-large-repos
+./scripts/full_test.sh --skip-large-repos
 
 # Force run ALL tests including memory-intensive ones
-./scripts/improved_test.sh --force-all
+./scripts/full_test.sh --force-all
 ```
 
 ## Handling Memory Issues
@@ -89,10 +88,10 @@ The test script supports generating coverage reports:
 
 ```bash
 # Run with coverage and generate terminal report
-./scripts/improved_test.sh --coverage
+./scripts/full_test.sh --coverage
 
 # Run with coverage and generate HTML report
-./scripts/improved_test.sh --coverage --html-report
+./scripts/full_test.sh --coverage --html-report
 ```
 
 The HTML report will be available at `htmlcov/index.html`.
@@ -108,7 +107,7 @@ CoverageWarning: Module graph_sitter was previously imported, but not measured (
 CoverageWarning: No data was collected. (no-data-collected)
 ```
 
-These are normal when running with coverage and can be safely ignored. The improved test script configures coverage to minimize these warnings.
+These are normal when running with coverage and can be safely ignored. The test script configures coverage to minimize these warnings.
 
 ### SQLite Errors
 
@@ -118,7 +117,7 @@ If you encounter SQLite errors like:
 DataError: Couldn't use data file '/path/to/.coverage.file': no such table: context
 ```
 
-The improved test script configures coverage to avoid these errors by:
+The test script configures coverage to avoid these errors by:
 - Setting `COVERAGE_CONTEXT=off`
 - Setting `COVERAGE_CORE=singleprocess`
 - Cleaning up coverage files between test runs
@@ -138,7 +137,7 @@ Some integration tests require GitHub authentication. You can provide a GitHub t
 
 ```bash
 export GITHUB_TOKEN=your_github_token
-./scripts/improved_test.sh --all
+./scripts/full_test.sh --all
 ```
 
 Or use interactive mode, which will prompt you for a token.
@@ -148,7 +147,7 @@ Or use interactive mode, which will prompt you for a token.
 For CI environments, it's recommended to use:
 
 ```bash
-./scripts/improved_test.sh --all --coverage --cores=$(nproc) --skip-large-repos
+./scripts/full_test.sh --all --coverage --cores=$(nproc) --skip-large-repos
 ```
 
 This will run all tests with coverage, using all available CPU cores, while skipping repositories that might cause memory issues.
