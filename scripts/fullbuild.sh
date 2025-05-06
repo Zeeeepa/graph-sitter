@@ -83,7 +83,7 @@ uv tool install pre-commit --with pre-commit-uv
 pre-commit install
 pre-commit install-hooks
 
-# Step 7: Run existing setup scripts
+# Step 7: Run additional setup scripts
 echo -e "${YELLOW}Running additional setup scripts...${NC}"
 if [ -f "./scripts/install-deps.sh" ]; then
     bash ./scripts/install-deps.sh
@@ -131,7 +131,9 @@ fi
 
 if [ "$RUN_TESTS" = true ]; then
     echo -e "${YELLOW}Running tests...${NC}"
-    if [ -f "./scripts/full_test.sh" ]; then
+    if [ -f "./scripts/improved_test.sh" ]; then
+        bash ./scripts/improved_test.sh
+    elif [ -f "./scripts/full_test.sh" ]; then
         bash ./scripts/full_test.sh
     else
         python -m pytest tests/unit -v -p no:xdist -p no:cov
@@ -153,7 +155,7 @@ echo -e "${BLUE}=== Next Steps ===${NC}"
 echo -e "${YELLOW}To activate the virtual environment in the future, run:${NC}"
 echo -e "  source .venv/bin/activate"
 echo -e "${YELLOW}To run tests:${NC}"
-echo -e "  ./scripts/full_test.sh           # Interactive test runner"
-echo -e "  ./scripts/full_test.sh --unit    # Run unit tests"
-echo -e "  ./scripts/full_test.sh --all     # Run all tests"
-echo -e "  ./scripts/full_test.sh --coverage # Run with coverage"
+echo -e "  ./scripts/improved_test.sh        # Recommended test runner"
+echo -e "  ./scripts/improved_test.sh --unit # Run unit tests"
+echo -e "  ./scripts/improved_test.sh --all  # Run all tests"
+echo -e "  ./scripts/improved_test.sh --coverage # Run with coverage"
