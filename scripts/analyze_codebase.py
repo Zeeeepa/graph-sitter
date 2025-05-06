@@ -108,7 +108,10 @@ class EnhancedCodebaseAnalyzer:
                 ext = file.extension
                 if ext is None:
                     return ""
-                return str(ext).lower()
+                # Convert PosixPath to string before calling lower()
+                if hasattr(ext, 'parts'):  # Check if it's a Path object
+                    return str(ext).lower()
+                return ext.lower() if isinstance(ext, str) else str(ext).lower()
             return ""
         
         # Count files by type
@@ -302,7 +305,10 @@ class EnhancedCodebaseAnalyzer:
                 ext = file.extension
                 if ext is None:
                     return ""
-                return str(ext).lower()
+                # Convert PosixPath to string before calling lower()
+                if hasattr(ext, 'parts'):  # Check if it's a Path object
+                    return str(ext).lower()
+                return ext.lower() if isinstance(ext, str) else str(ext).lower()
             return ""
         
         for file in self.codebase.files:
@@ -453,4 +459,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
