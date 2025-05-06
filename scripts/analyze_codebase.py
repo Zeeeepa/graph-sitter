@@ -92,13 +92,19 @@ class EnhancedCodebaseAnalyzer:
         Returns:
             Dict containing analysis results
         """
-        results = {
-            "summary": self._get_summary(),
-            "entry_points": self._find_entry_points(),
-            "errors": self._find_errors(),
-            "top_level_files": self._find_top_level_files(),
-        }
-        return results
+        try:
+            results = {
+                "summary": self._get_summary(),
+                "entry_points": self._find_entry_points(),
+                "errors": self._find_errors(),
+                "top_level_files": self._find_top_level_files(),
+            }
+            return results
+        except Exception as e:
+            import traceback
+            print(f"Error in analyze method: {str(e)}")
+            print(traceback.format_exc())
+            raise
     
     def _get_summary(self) -> Dict:
         """Get a summary of the codebase."""
@@ -155,6 +161,9 @@ class EnhancedCodebaseAnalyzer:
                 continue
                 
             file_path = func.file.path if hasattr(func.file, 'path') else "unknown"
+            # Convert PosixPath to string if needed
+            if hasattr(file_path, 'parts'):  # Check if it's a Path object
+                file_path = str(file_path)
             
             # Check for empty exception handlers
             if hasattr(func, 'content') and func.content:
@@ -241,6 +250,9 @@ class EnhancedCodebaseAnalyzer:
                 continue
                 
             file_path = file.path
+            # Convert PosixPath to string if needed
+            if hasattr(file_path, 'parts'):  # Check if it's a Path object
+                file_path = str(file_path)
             
             # Check for common entry point patterns
             if (
@@ -291,6 +303,10 @@ class EnhancedCodebaseAnalyzer:
             if hasattr(other_file, 'imports'):
                 for imp in other_file.imports:
                     if hasattr(imp, 'imported_symbol') and imp.imported_symbol == file:
+                        other_file_path = other_file.path if hasattr(other_file, 'path') else "unknown"
+                        # Convert PosixPath to string if needed
+                        if hasattr(other_file_path, 'parts'):  # Check if it's a Path object
+                            other_file_path = str(other_file_path)
                         importers += 1
         
         return importers
@@ -324,12 +340,21 @@ class EnhancedCodebaseAnalyzer:
                 if hasattr(other_file, 'imports'):
                     for imp in other_file.imports:
                         if hasattr(imp, 'imported_symbol') and imp.imported_symbol == file:
-                            importers.append(other_file.path if hasattr(other_file, 'path') else "unknown")
+                            other_file_path = other_file.path if hasattr(other_file, 'path') else "unknown"
+                            # Convert PosixPath to string if needed
+                            if hasattr(other_file_path, 'parts'):  # Check if it's a Path object
+                                other_file_path = str(other_file_path)
+                            importers.append(other_file_path)
             
             # If no other file imports this file, it's a top-level file
             if not importers:
+                # Convert PosixPath to string if needed
+                file_path = file.path
+                if hasattr(file_path, 'parts'):  # Check if it's a Path object
+                    file_path = str(file_path)
+                    
                 file_info = {
-                    "file": file.path,
+                    "file": file_path,
                     "functions": [],
                     "operators": self._get_operators_and_operands(file)
                 }
@@ -459,4 +484,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
