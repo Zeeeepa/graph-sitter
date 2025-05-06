@@ -1,81 +1,98 @@
-<br />
+# PR Static Analysis System
 
-<p align="center">
-  <a href="https://docs.codegen.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+A system for analyzing GitHub pull requests and providing feedback.
 
-<h2 align="center">
-  The SWE that Never Sleeps
-</h2>
+## Overview
 
-<div align="center">
+This system integrates with GitHub to analyze pull requests and provide feedback through comments and status checks. It consists of several components:
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-docs.codegen.com-purple?style=flat-square)](https://docs.codegen.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/codegen-sdk/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+- **RepoOperator**: Manages Git repository operations
+- **GitHubClient**: Interacts with the GitHub API
+- **PR Models**: Represents GitHub pull request data
+- **Webhook Handler**: Processes GitHub webhook events
 
-</div>
-
-<br />
-
-The Codegen SDK provides a programmatic interface to code agents provided by [Codegen](https://codegen.com).
-
-```python
-from codegen.agents.agent import Agent
-
-# Initialize the Agent with your organization ID and API token
-agent = Agent(
-    org_id="YOUR_ORG_ID",  # Find this at codegen.com/developer
-    token="YOUR_API_TOKEN",  # Get this from codegen.com/developer
-    # base_url="https://codegen-sh-rest-api.modal.run",  # Optional - defaults to production
-)
-
-# Run an agent with a prompt
-task = agent.run(prompt="Implement a new feature to sort users by last login.")
-
-# Check the initial status
-print(task.status)
-
-# Refresh the task to get updated status (tasks can take time)
-task.refresh()
-
-# Check the updated status
-print(task.status)
-
-# Once task is complete, you can access the result
-if task.status == "completed":
-    print(task.result)  # Result often contains code, summaries, or links
-```
-
-## Installation and Usage
-
-Install the SDK using pip or uv:
+## Installation
 
 ```bash
-pip install codegen
-# or
-uv pip install codegen
+pip install -e .
 ```
 
-Get started at [codegen.com](https://codegen.com) and get your API token at [codegen.com/developer](https://codegen.com/developer).
+## Usage
 
-You can interact with your AI engineer via API, or chat with it in Slack, Linear, Github, or on our website.
+### Setting up the webhook server
 
-## Resources
+```python
+from fastapi import FastAPI, Request
+from pr_static_analysis.webhook import WebhookHandler
 
-- [Docs](https://docs.codegen.com)
-- [Getting Started](https://docs.codegen.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+app = FastAPI()
+webhook_handler = WebhookHandler(secret="your-webhook-secret")
 
-## Contributing
+@app.post("/webhook/github")
+async def github_webhook(request: Request):
+    return await webhook_handler.handle_webhook(request)
+```
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+### Analyzing a pull request
 
-## Enterprise
+```python
+from pr_static_analysis.git import RepoOperator, GitHubClient, PullRequestContext
 
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
+# Initialize clients
+github_client = GitHubClient(access_token="your-github-token")
+repo_operator = RepoOperator(repo_path="/path/to/repo", access_token="your-github-token")
+
+# Get PR data
+pr = github_client.get_pr("owner/repo", 123)
+pr_context = PullRequestContext.from_github_pr(pr._rawData)
+
+# Get changed files
+changed_files = github_client.get_pr_files("owner/repo", 123)
+
+# Analyze files
+# ...
+
+# Post results
+github_client.create_pr_comment("owner/repo", 123, "Analysis results...")
+```
+
+## Components
+
+### RepoOperator
+
+The `RepoOperator` class provides methods for interacting with Git repositories:
+
+- `clone_repo(repo_url)`: Clone a repository
+- `checkout_branch(branch_name)`: Checkout a branch
+- `checkout_commit(commit_sha)`: Checkout a specific commit
+- `get_file_content(file_path, ref)`: Get content of a file at a specific ref
+- `get_changed_files(base_ref, head_ref)`: Get files changed between two refs
+- `get_diff(file_path, base_ref, head_ref)`: Get diff for a specific file
+
+### GitHubClient
+
+The `GitHubClient` class provides methods for interacting with the GitHub API:
+
+- `get_pr(repo, pr_number)`: Get a specific PR
+- `get_pr_files(repo, pr_number)`: Get files changed in a PR
+- `get_pr_commits(repo, pr_number)`: Get commits in a PR
+- `get_pr_reviews(repo, pr_number)`: Get reviews for a PR
+- `create_pr_comment(repo, pr_number, body)`: Create a general comment on a PR
+- `create_pr_review_comment(repo, pr_number, body, commit_sha, path, line)`: Create an inline comment on a PR
+- `create_status(repo, commit_sha, state, description, context)`: Create a status for a commit
+
+### WebhookHandler
+
+The `WebhookHandler` class processes GitHub webhook events:
+
+- `register_handler(event_type, handler)`: Register a handler for a specific event type
+- `handle_webhook(request)`: Handle a webhook request
+- `route_event(event_type, action, payload)`: Route an event to the appropriate handlers
+- `handle_pr_event(payload)`: Handle a pull request event
+- `handle_push_event(payload)`: Handle a push event
+- `handle_review_event(payload)`: Handle a pull request review event
+
+## License
+
+MIT
+
