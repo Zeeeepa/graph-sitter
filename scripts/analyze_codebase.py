@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 """
-Codebase Analysis Tool for Graph-Sitter
+Enhanced Codebase Analysis Tool for Graph-Sitter
 
-This script analyzes the graph-sitter codebase using its own analysis tools.
-It provides a comprehensive overview of the codebase structure, including:
-- Total number of files, code files, and documents
+This script provides a comprehensive analysis of the graph-sitter codebase,
+focusing on error detection, entry points, and inheritance relationships.
+
+It uses graph-sitter's own analysis capabilities to analyze itself, providing:
+- Total number of files, code files, and documentation files
 - Class hierarchy and inheritance depth
-- Function statistics and error detection
-- Main entry points and core functionality
+- Function statistics and detailed error detection
+- Main entry points and core functionality with parameter flow analysis
 - Symbol usage and dependencies
 
 Usage:
@@ -19,9 +21,10 @@ Options:
 
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -38,12 +41,12 @@ from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.function import Function
 from graph_sitter.core.file import SourceFile
-from graph_sitter.enums import SymbolType
+from graph_sitter.enums import SymbolType, EdgeType
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 
-class CodebaseAnalyzer:
-    """Analyzes a codebase using graph-sitter's own analysis tools."""
+class EnhancedCodebaseAnalyzer:
+    """Enhanced analyzer for the graph-sitter codebase."""
 
     def __init__(self, repo_path: Optional[str] = None):
         """
@@ -54,7 +57,7 @@ class CodebaseAnalyzer:
         """
         self.repo_path = repo_path or os.getcwd()
         self.codebase = self._load_codebase()
-        self.errors: List[Tuple[str, str, str]] = []  # (file_path, function_name, error_message)
+        self.errors: List[Dict[str, Any]] = []
         
     def _load_codebase(self) -> Codebase:
         """Load the codebase from the repository path."""
@@ -78,11 +81,9 @@ class CodebaseAnalyzer:
         """
         results = {
             "summary": self._get_summary(),
-            "file_stats": self._get_file_stats(),
-            "class_stats": self._get_class_stats(),
-            "function_stats": self._get_function_stats(),
             "entry_points": self._find_entry_points(),
-            "errors": self.errors
+            "errors": self._find_errors(),
+            "top_level_files": self._find_top_level_files(),
         }
         return results
     
@@ -108,111 +109,95 @@ class CodebaseAnalyzer:
                 language_counts[lang] = language_counts.get(lang, 0) + 1
         return language_counts
     
-    def _get_file_stats(self) -> Dict:
-        """Get statistics about files in the codebase."""
-        source_files = [f for f in self.codebase.files if f.is_source_file]
+    def _find_errors(self) -> List[Dict[str, Any]]:
+        """Find errors in the codebase."""
+        errors = []
         
-        # Find largest files by line count
-        largest_files = sorted(
-            [(f, len(f.content.splitlines())) for f in source_files if hasattr(f, 'content')],
-            key=lambda x: x[1],
-            reverse=True
-        )[:10]
+        # Check for functions with potential issues
+        for func in self.codebase.functions:
+            # Skip functions without a file
+            if not hasattr(func, 'file') or not func.file:
+                continue
+                
+            file_path = func.file.path if hasattr(func.file, 'path') else "unknown"
+            
+            # Check for empty exception handlers
+            if hasattr(func, 'content') and func.content:
+                if "except:" in func.content and "pass" in func.content:
+                    errors.append({
+                        "file": file_path,
+                        "function": func.name,
+                        "error": "Empty exception handler",
+                        "context": self._get_error_context(func.content, "except:", "pass")
+                    })
+            
+            # Check for very long functions (over 100 lines)
+            if hasattr(func, 'content') and func.content:
+                lines = func.content.splitlines()
+                if len(lines) > 100:
+                    errors.append({
+                        "file": file_path,
+                        "function": func.name,
+                        "error": f"Very long function ({len(lines)} lines)",
+                        "context": f"Function spans from line {func.line_range[0]} to {func.line_range[1]}"
+                    })
+            
+            # Check for unused parameters
+            if hasattr(func, 'parameters') and func.parameters:
+                used_params = set()
+                for call in func.function_calls:
+                    if hasattr(call, 'args'):
+                        for arg in call.args:
+                            if hasattr(arg, 'name'):
+                                used_params.add(arg.name)
+                
+                for param in func.parameters:
+                    if param.name not in used_params and param.name not in ['self', 'cls', 'kwargs', 'args']:
+                        errors.append({
+                            "file": file_path,
+                            "function": func.name,
+                            "error": f"Unused parameter '{param.name}'",
+                            "context": f"Parameter '{param.name}' is defined but not used in the function body"
+                        })
+            
+            # Check for too many parameters
+            if hasattr(func, 'parameters') and len(func.parameters) > 7:  # Arbitrary threshold
+                errors.append({
+                    "file": file_path,
+                    "function": func.name,
+                    "error": f"Too many parameters ({len(func.parameters)})",
+                    "context": f"Function has {len(func.parameters)} parameters, which may indicate a design issue"
+                })
+            
+            # Check for missing docstring
+            if not hasattr(func, 'docstring') or not func.docstring:
+                errors.append({
+                    "file": file_path,
+                    "function": func.name,
+                    "error": "Missing docstring",
+                    "context": "Function lacks documentation"
+                })
         
-        # Find most complex files by symbol count
-        most_complex_files = sorted(
-            [(f, len(list(f.symbols))) for f in source_files],
-            key=lambda x: x[1],
-            reverse=True
-        )[:10]
-        
-        return {
-            "largest_files": [(f.path, lines) for f, lines in largest_files],
-            "most_complex_files": [(f.path, symbols) for f, symbols in most_complex_files],
-        }
+        return errors
     
-    def _get_class_stats(self) -> Dict:
-        """Get statistics about classes in the codebase."""
-        classes = list(self.codebase.classes)
+    def _get_error_context(self, content: str, *patterns: str) -> str:
+        """Get context around an error in the code."""
+        lines = content.splitlines()
+        context_lines = []
         
-        # Calculate depth of inheritance for each class
-        class_doi = {}
-        for cls in classes:
-            class_doi[cls.name] = self._calculate_doi(cls)
+        for i, line in enumerate(lines):
+            for pattern in patterns:
+                if pattern in line:
+                    start = max(0, i - 2)
+                    end = min(len(lines), i + 3)
+                    context_lines.extend(lines[start:end])
+                    context_lines.append("...")
+                    break
         
-        # Find classes with deepest inheritance
-        deepest_inheritance = sorted(
-            [(name, depth) for name, depth in class_doi.items()],
-            key=lambda x: x[1],
-            reverse=True
-        )[:10]
-        
-        # Find classes with most methods
-        most_methods = sorted(
-            [(cls.name, len(cls.methods)) for cls in classes],
-            key=lambda x: x[1],
-            reverse=True
-        )[:10]
-        
-        return {
-            "deepest_inheritance": deepest_inheritance,
-            "most_methods": most_methods,
-        }
-    
-    def _calculate_doi(self, cls: Class) -> int:
-        """Calculate the depth of inheritance for a given class."""
-        return len(cls.superclasses)
-    
-    def _get_function_stats(self) -> Dict:
-        """Get statistics about functions in the codebase."""
-        functions = list(self.codebase.functions)
-        
-        # Find functions with most parameters
-        most_parameters = sorted(
-            [(func.name, len(func.parameters)) for func in functions],
-            key=lambda x: x[1],
-            reverse=True
-        )[:10]
-        
-        # Find functions with most dependencies
-        most_dependencies = sorted(
-            [(func.name, len(func.dependencies)) for func in functions],
-            key=lambda x: x[1],
-            reverse=True
-        )[:10]
-        
-        # Find functions with potential errors (heuristic-based)
-        for func in functions:
-            self._check_function_for_errors(func)
-        
-        return {
-            "most_parameters": most_parameters,
-            "most_dependencies": most_dependencies,
-            "total_functions": len(functions),
-            "functions_with_errors": len(self.errors)
-        }
-    
-    def _check_function_for_errors(self, func: Function) -> None:
-        """
-        Check a function for potential errors using heuristics.
-        
-        This is a simple demonstration and would need to be expanded for real error detection.
-        """
-        # Check for empty exception handlers
-        if hasattr(func, 'content') and func.content:
-            if "except:" in func.content and "pass" in func.content:
-                file_path = func.file.path if hasattr(func, 'file') else "unknown"
-                self.errors.append((file_path, func.name, "Empty exception handler"))
-        
-        # Check for very long functions (over 100 lines)
-        if hasattr(func, 'content') and func.content:
-            lines = func.content.splitlines()
-            if len(lines) > 100:
-                file_path = func.file.path if hasattr(func, 'file') else "unknown"
-                self.errors.append((file_path, func.name, f"Very long function ({len(lines)} lines)"))
+        return "\n".join(context_lines) if context_lines else "Context not available"
     
     def _find_entry_points(self) -> List[Dict]:
-        """Find potential entry points to the codebase."""
+        """Find potential entry points to the codebase with parameter flow analysis."""
         entry_points = []
         
         # Look for files with main functions or CLI entry points
@@ -232,17 +217,121 @@ class CodebaseAnalyzer:
                 entry_point = {
                     "file": file_path,
                     "type": "potential_entry_point",
+                    "functions": [],
+                    "inheritance_level": self._calculate_file_inheritance_level(file)
                 }
                 
-                # Check if the file has a main function
+                # Check if the file has functions
                 if hasattr(file, 'functions'):
-                    main_funcs = [f for f in file.functions if f.name == "main"]
-                    if main_funcs:
-                        entry_point["main_function"] = main_funcs[0].name
+                    for func in file.functions:
+                        function_info = {
+                            "name": func.name,
+                            "parameters": [p.name for p in func.parameters] if hasattr(func, 'parameters') else [],
+                            "calls": []
+                        }
+                        
+                        # Get function calls
+                        if hasattr(func, 'function_calls'):
+                            for call in func.function_calls:
+                                if hasattr(call, 'name'):
+                                    call_info = {
+                                        "name": call.name,
+                                        "args": [arg.source if hasattr(arg, 'source') else str(arg) for arg in call.args] if hasattr(call, 'args') else []
+                                    }
+                                    function_info["calls"].append(call_info)
+                        
+                        entry_point["functions"].append(function_info)
                 
                 entry_points.append(entry_point)
         
+        # Sort by inheritance level
+        entry_points.sort(key=lambda x: x["inheritance_level"])
+        
         return entry_points
+    
+    def _calculate_file_inheritance_level(self, file: SourceFile) -> int:
+        """Calculate the inheritance level of a file (how many other files import it)."""
+        importers = 0
+        for other_file in self.codebase.files:
+            if hasattr(other_file, 'imports'):
+                for imp in other_file.imports:
+                    if hasattr(imp, 'imported_symbol') and imp.imported_symbol == file:
+                        importers += 1
+        
+        return importers
+    
+    def _find_top_level_files(self) -> List[Dict]:
+        """Find top-level files that are not imported by other files."""
+        top_level_files = []
+        
+        for file in self.codebase.files:
+            if not hasattr(file, 'path') or not file.is_source_file:
+                continue
+            
+            importers = []
+            for other_file in self.codebase.files:
+                if hasattr(other_file, 'imports'):
+                    for imp in other_file.imports:
+                        if hasattr(imp, 'imported_symbol') and imp.imported_symbol == file:
+                            importers.append(other_file.path if hasattr(other_file, 'path') else "unknown")
+            
+            # If no other file imports this file, it's a top-level file
+            if not importers:
+                file_info = {
+                    "file": file.path,
+                    "functions": [],
+                    "operators": self._get_operators_and_operands(file)
+                }
+                
+                # Get functions in the file
+                if hasattr(file, 'functions'):
+                    for func in file.functions:
+                        function_info = {
+                            "name": func.name,
+                            "parameters": [p.name for p in func.parameters] if hasattr(func, 'parameters') else [],
+                            "calls": []
+                        }
+                        
+                        # Get function calls
+                        if hasattr(func, 'function_calls'):
+                            for call in func.function_calls:
+                                if hasattr(call, 'name'):
+                                    call_info = {
+                                        "name": call.name,
+                                        "args": [arg.source if hasattr(arg, 'source') else str(arg) for arg in call.args] if hasattr(call, 'args') else []
+                                    }
+                                    function_info["calls"].append(call_info)
+                        
+                        file_info["functions"].append(function_info)
+                
+                top_level_files.append(file_info)
+        
+        return top_level_files
+    
+    def _get_operators_and_operands(self, file: SourceFile) -> Dict[str, List[str]]:
+        """Extract operators and operands from a file."""
+        operators = []
+        operands = []
+        
+        if hasattr(file, 'functions'):
+            for func in file.functions:
+                if hasattr(func, 'function_calls'):
+                    for call in func.function_calls:
+                        if hasattr(call, 'name'):
+                            operators.append(call.name)
+                        if hasattr(call, 'args'):
+                            for arg in call.args:
+                                if hasattr(arg, 'source'):
+                                    operands.append(arg.source)
+        
+        return {
+            "operators": operators[:10],  # Limit to 10 for brevity
+            "operands": operands[:10]     # Limit to 10 for brevity
+        }
+    
+    def _calculate_doi(self, cls: Class) -> int:
+        """Calculate the depth of inheritance for a given class."""
+        return len(cls.superclasses) if hasattr(cls, 'superclasses') else 0
     
     def print_analysis(self, results: Dict) -> None:
         """Print the analysis results in a readable format."""
@@ -253,60 +342,56 @@ class CodebaseAnalyzer:
         # Print summary
         summary = results["summary"]
         print(f"\n## CODEBASE SUMMARY")
+        print("--------------------------------------")
         print(f"Total files: {summary['total_files']}")
-        print(f"  - Code files: {summary['total_code_files']}")
-        print(f"  - Documentation files: {summary['total_doc_files']}")
+        print(f"  - Code files: {summary['total_code_files']}     - Documentation files: {summary['total_doc_files']}")
+        print("--------------------------------------")
         print(f"Total classes: {summary['total_classes']}")
-        print(f"Total functions: {summary['total_functions']}")
-        print(f"Total global variables: {summary['total_global_vars']}")
+        print("--------------------------------------")
+        print(f"Total functions: {summary['total_functions']} / Functions with errors: {len(results['errors'])}")
+        print("--------------------------------------")
         
-        print("\nProgramming Languages:")
+        # Print errors
+        if results['errors']:
+            for i, error in enumerate(results['errors'], 1):
+                print(f"error {i},")
+                print(f"{error['file']}[{error['function']}]= Error specifics [{error['error']}] {error['context']}")
+            print("--------------------------------------")
+        
+        print(f"Total global variables: {summary['total_global_vars']}")
+        print("Programming Languages:")
         for lang, count in summary['programming_languages'].items():
             print(f"  - {lang}: {count} files")
+        print("--------------------------------------")
         
         # Print entry points
         print(f"\n## MAIN ENTRY POINTS")
+        print("(Top Level Inheritance Codefile Name List + Their Flow Function lists with parameters used in these flows and codefile locations)- this should create callable tree flows.")
         for entry in results["entry_points"]:
             print(f"  - {entry['file']}")
-            if "main_function" in entry:
-                print(f"    Main function: {entry['main_function']}")
+            for func in entry["functions"]:
+                params_str = ", ".join(func["parameters"])
+                calls_str = ", ".join([call["name"] for call in func["calls"]])
+                print(f"    Main functions: {func['name']} [Parameters callable in/ callable out] [Inheritance {entry['inheritance_level']}/4] - [1.{entry['file']}/method='{func['name']}'{{{params_str}}} - {calls_str}]")
         
-        # Print class stats
-        print(f"\n## CLASS HIERARCHY")
-        print("\nClasses with deepest inheritance:")
-        for name, depth in results["class_stats"]["deepest_inheritance"]:
-            print(f"  - {name}: {depth} levels")
-        
-        print("\nClasses with most methods:")
-        for name, methods in results["class_stats"]["most_methods"]:
-            print(f"  - {name}: {methods} methods")
-        
-        # Print function stats
-        print(f"\n## FUNCTION STATISTICS")
-        print("\nFunctions with most parameters:")
-        for name, params in results["function_stats"]["most_parameters"]:
-            print(f"  - {name}: {params} parameters")
-        
-        print("\nFunctions with most dependencies:")
-        for name, deps in results["function_stats"]["most_dependencies"]:
-            print(f"  - {name}: {deps} dependencies")
-        
-        # Print errors
-        print(f"\n## POTENTIAL ISSUES")
-        print(f"Found {len(results['errors'])} potential issues:")
-        for file_path, func_name, error in results["errors"]:
-            print(f"  - {file_path}: {func_name} - {error}")
+        # Print top-level files
+        print("\n[ To list ALL top level [Highest inheritance level where noone imports them] = And list all project's codefiles like this. even if there are 50 such codefiles.")
+        for file_info in results["top_level_files"]:
+            print(f"  - {file_info['file']}")
+            for func in file_info["functions"]:
+                params_str = ", ".join(func["parameters"])
+                print(f"    Main function: {func['name']}[Parameters callable in/ callable out]")
         
         print("\n" + "="*80)
 
 
 def main():
     """Main entry point for the script."""
-    parser = argparse.ArgumentParser(description="Analyze a codebase using graph-sitter")
+    parser = argparse.ArgumentParser(description="Enhanced analysis of a codebase using graph-sitter")
     parser.add_argument("--github-repo", help="GitHub repository URL to analyze", default=None)
     args = parser.parse_args()
     
-    analyzer = CodebaseAnalyzer(args.github_repo)
+    analyzer = EnhancedCodebaseAnalyzer(args.github_repo)
     results = analyzer.analyze()
     analyzer.print_analysis(results)
 

@@ -1,16 +1,16 @@
-# Graph-Sitter Codebase Analysis Tool
+# Enhanced Graph-Sitter Codebase Analysis Tool
 
-This directory contains a tool for analyzing the Graph-Sitter codebase using its own analysis capabilities.
+This directory contains an enhanced tool for analyzing the Graph-Sitter codebase using its own analysis capabilities.
 
 ## Overview
 
-The `analyze_codebase.py` script provides a comprehensive analysis of the Graph-Sitter codebase, including:
+The `analyze_codebase.py` script provides a comprehensive analysis of the Graph-Sitter codebase, focusing on:
 
-- Total number of files, code files, and documentation files
-- Class hierarchy and inheritance depth
-- Function statistics and error detection
-- Main entry points and core functionality
-- Symbol usage and dependencies
+- **Statistical Information**: Total files, code files, documentation files, classes, functions, and global variables
+- **Error Detection**: Detailed analysis of functions with potential issues, including context and specific error information
+- **Entry Point Analysis**: Identification of main entry points with parameter flow and inheritance level analysis
+- **Top-Level Files**: Files that aren't imported by other files, representing potential starting points for understanding the codebase
+- **Operator Analysis**: Extraction of operators and operands from functions to understand code complexity
 
 ## Usage
 
@@ -31,43 +31,42 @@ The script outputs a detailed analysis report that includes:
 - Total number of classes, functions, and global variables
 - Programming languages used in the codebase
 
+### Error Analysis
+- Detailed list of functions with potential issues
+- Error context showing the problematic code
+- Error categorization (empty exception handlers, unused parameters, etc.)
+
 ### Main Entry Points
 - Files that likely serve as entry points to the application
-- Main functions and CLI interfaces
+- Function parameter flow analysis
+- Inheritance level analysis showing how deeply integrated each entry point is
 
-### Class Hierarchy
-- Classes with the deepest inheritance chains
-- Classes with the most methods
-
-### Function Statistics
-- Functions with the most parameters
-- Functions with the most dependencies
-- Total number of functions and those with potential issues
-
-### Potential Issues
-- List of functions with potential code quality issues
-- File paths and error descriptions
+### Top-Level Files
+- Files that aren't imported by other files
+- Function listings with parameter information
+- Operator and operand analysis
 
 ## How It Works
 
 The script leverages Graph-Sitter's own codebase analysis tools to analyze itself:
 
-1. It loads the codebase using `Codebase` class
+1. It loads the codebase using the `Codebase` class
 2. Analyzes the structure using functions from `codebase_analysis.py`
-3. Calculates additional metrics like depth of inheritance
-4. Identifies potential code quality issues using heuristics
-5. Formats and prints the results in a readable format
+3. Performs error detection using heuristics and pattern matching
+4. Analyzes parameter flow and inheritance relationships
+5. Identifies top-level files and entry points
+6. Formats and prints the results in a readable format
 
 ## Integration
 
-This tool can be integrated into your development workflow to:
+This enhanced analysis tool can be integrated into your development workflow to:
 
-- Monitor code quality over time
-- Identify complex areas of the codebase
-- Find potential entry points for new developers
-- Detect potential issues before they cause problems
+- Identify and fix potential code issues before they cause problems
+- Understand the codebase structure and entry points
+- Track code quality metrics over time
+- Onboard new developers by providing a clear map of the codebase
 
-## Example
+## Example Output
 
 ```
 ================================================================================
@@ -75,47 +74,41 @@ GRAPH-SITTER CODEBASE ANALYSIS
 ================================================================================
 
 ## CODEBASE SUMMARY
+--------------------------------------
 Total files: 245
-  - Code files: 230
-  - Documentation files: 15
+  - Code files: 230     - Documentation files: 15
+--------------------------------------
 Total classes: 87
-Total functions: 1253
+--------------------------------------
+Total functions: 1253 / Functions with errors: 12
+--------------------------------------
+error 1,
+src/graph_sitter/core/function.py[parse_parameters]= Error specifics [Empty exception handler] try:
+    # Parse parameter
+    pass
+except:
+    pass
+...
+error 2,
+src/graph_sitter/codebase/codebase_context.py[build_graph]= Error specifics [Very long function (142 lines)] Function spans from line 243 to 385
+--------------------------------------
 Total global variables: 342
-
 Programming Languages:
   - PYTHON: 230 files
+--------------------------------------
 
 ## MAIN ENTRY POINTS
+(Top Level Inheritance Codefile Name List + Their Flow Function lists with parameters used in these flows and codefile locations)- this should create callable tree flows.
   - src/graph_sitter/cli/cli.py
+    Main functions: cli [Parameters callable in/ callable out] [Inheritance 1/4] - [1.src/graph_sitter/cli/cli.py/method='cli'{} - features, scope, analyze]
   - src/graph_sitter/cli/main.py
-    Main function: main
+    Main function: main[Parameters callable in/ callable out] [Inheritance 1/4] - [1.src/graph_sitter/cli/main.py/method='main'{} - parse_args, setup_logging, run_command]
 
-## CLASS HIERARCHY
-Classes with deepest inheritance:
-  - CodebaseContext: 3 levels
-  - Codebase: 2 levels
-  - Function: 2 levels
-
-Classes with most methods:
-  - Codebase: 45 methods
-  - CodebaseContext: 32 methods
-  - Function: 28 methods
-
-## FUNCTION STATISTICS
-Functions with most parameters:
-  - create_pr: 8 parameters
-  - analyze_code: 7 parameters
-  - process_file: 6 parameters
-
-Functions with most dependencies:
-  - build_graph: 15 dependencies
-  - process_symbols: 12 dependencies
-  - analyze_imports: 10 dependencies
-
-## POTENTIAL ISSUES
-Found 12 potential issues:
-  - src/graph_sitter/core/function.py: parse_parameters - Empty exception handler
-  - src/graph_sitter/codebase/codebase_context.py: build_graph - Very long function (142 lines)
+[ To list ALL top level [Highest inheritance level where noone imports them] = And list all project's codefiles like this. even if there are 50 such codefiles.
+  - src/graph_sitter/cli/commands/analyze/main.py
+    Main function: analyze[Parameters callable in/ callable out]
+  - src/graph_sitter/cli/commands/features/main.py
+    Main function: features[Parameters callable in/ callable out]
 ================================================================================
 ```
 
