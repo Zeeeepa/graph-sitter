@@ -102,11 +102,30 @@ class EnhancedCodebaseAnalyzer:
     
     def _get_summary(self) -> Dict:
         """Get a summary of the codebase."""
+        # Helper function to safely get file extension
+        def get_file_extension(file):
+            if hasattr(file, 'extension'):
+                ext = file.extension
+                if ext is None:
+                    return ""
+                return str(ext).lower()
+            return ""
+        
+        # Count files by type
+        code_files = []
+        doc_files = []
+        for f in self.codebase.files:
+            ext = get_file_extension(f)
+            if ext in ['.py', '.js', '.ts', '.tsx', '.jsx']:
+                code_files.append(f)
+            elif ext in ['.md', '.rst', '.txt']:
+                doc_files.append(f)
+        
         return {
             "codebase_summary": get_codebase_summary(self.codebase),
             "total_files": len(list(self.codebase.files)),
-            "total_code_files": len([f for f in self.codebase.files if hasattr(f, 'extension') and str(f.extension).lower() in ['.py', '.js', '.ts', '.tsx', '.jsx']]),
-            "total_doc_files": len([f for f in self.codebase.files if hasattr(f, 'extension') and str(f.extension).lower() in ['.md', '.rst', '.txt']]),
+            "total_code_files": len(code_files),
+            "total_doc_files": len(doc_files),
             "total_classes": len(list(self.codebase.classes)),
             "total_functions": len(list(self.codebase.functions)),
             "total_global_vars": len(list(self.codebase.global_vars)),
@@ -277,8 +296,21 @@ class EnhancedCodebaseAnalyzer:
         """Find top-level files that are not imported by other files."""
         top_level_files = []
         
+        # Helper function to safely get file extension
+        def get_file_extension(file):
+            if hasattr(file, 'extension'):
+                ext = file.extension
+                if ext is None:
+                    return ""
+                return str(ext).lower()
+            return ""
+        
         for file in self.codebase.files:
-            if not hasattr(file, 'path') or not hasattr(file, 'extension') or str(file.extension).lower() not in ['.py', '.js', '.ts', '.tsx', '.jsx']:
+            if not hasattr(file, 'path'):
+                continue
+                
+            ext = get_file_extension(file)
+            if ext not in ['.py', '.js', '.ts', '.tsx', '.jsx']:
                 continue
             
             importers = []
@@ -421,3 +453,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
