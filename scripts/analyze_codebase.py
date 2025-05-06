@@ -363,7 +363,7 @@ class EnhancedCodebaseAnalyzer:
             results = {
                 "summary": self._get_summary(),
                 "entry_points": self._find_entry_points(),
-                "errors": self._find_errors(),
+                "errors": self._detect_errors(),
                 "top_level_files": self._find_top_level_files(),
             }
             return results
@@ -415,53 +415,97 @@ class EnhancedCodebaseAnalyzer:
                 language_counts[lang] = language_counts.get(lang, 0) + 1
         return language_counts
     
-    def _find_errors(self) -> List[Dict[str, Any]]:
-        """Find actual errors in the codebase (excluding style issues)."""
+    def _detect_errors(self) -> List[Dict]:
+        """Detect actual errors in the codebase that would cause runtime issues."""
         errors = []
         
-        # Check for functions with potential issues
-        for func in self.codebase.functions:
-            # Skip functions without a file
-            if not hasattr(func, 'file') or not func.file:
+        for file in self.codebase.files:
+            if not hasattr(file, 'path'):
                 continue
                 
-            file_path = func.file.path if hasattr(func.file, 'path') else "unknown"
-            # Convert PosixPath to string if needed
-            if hasattr(file_path, 'parts'):  # Check if it's a Path object
-                file_path = str(file_path)
+            # Helper function to safely get file extension
+            def get_file_extension(file_path):
+                if hasattr(file_path, 'suffix'):  # Path object
+                    return str(file_path.suffix).lower()
+                elif isinstance(file_path, str):
+                    return os.path.splitext(file_path)[1].lower()
+                return ""
+                
+            ext = get_file_extension(file.path)
+            if ext not in ['.py', '.js', '.ts', '.tsx', '.jsx']:
+                continue
             
-            # Check for empty exception handlers
-            if hasattr(func, 'content') and func.content:
-                if "except:" in func.content and "pass" in func.content:
-                    errors.append({
-                        "file": file_path,
-                        "function": func.name,
-                        "error": "Empty exception handler",
-                        "context": self._get_error_context(func.content, "except:", "pass")
-                    })
-            
-            # Check for very long functions (over 100 lines)
-            if hasattr(func, 'content') and func.content:
-                lines = func.content.splitlines()
-                if len(lines) > 100:
-                    errors.append({
-                        "file": file_path,
-                        "function": func.name,
-                        "error": f"Very long function ({len(lines)} lines)",
-                        "context": f"Function spans from line {func.line_range[0]} to {func.line_range[1]}"
-                    })
-            
-            # Check for too many parameters
-            if hasattr(func, 'parameters') and len(func.parameters) > 7:  # Arbitrary threshold
-                errors.append({
-                    "file": file_path,
-                    "function": func.name,
-                    "error": f"Too many parameters ({len(func.parameters)})",
-                    "context": f"Function has {len(func.parameters)} parameters, which may indicate a design issue"
-                })
-            
-            # Note: We're intentionally NOT checking for missing docstrings or unused parameters
-            # as per the user's request
+            # Check for functions with errors
+            if hasattr(file, 'functions'):
+                for func in file.functions:
+                    # Check for functions that are never called (dead code)
+                    if hasattr(func, 'callers') and not func.callers and not func.name.startswith('test_') and not func.name == 'main':
+                        # Skip __init__ methods and special methods
+                        if func.name not in ['__init__', '__str__', '__repr__', '__eq__', '__hash__', '__call__']:
+                            errors.append({
+                                "file": str(file.path) if hasattr(file.path, 'parts') else file.path,
+                                "function": func.name,
+                                "error": "Function is never called (dead code)",
+                                "context": f"Function '{func.name}' is defined but never called in the codebase."
+                            })
+                    
+                    # Check for incorrect parameter usage
+                    if hasattr(func, 'function_calls'):
+                        for call in func.function_calls:
+                            if hasattr(call, 'target') and hasattr(call.target, 'parameters'):
+                                # Check if the number of arguments matches the number of parameters
+                                if hasattr(call, 'args') and len(call.args) != len(call.target.parameters):
+                                    # Skip if the function has *args or **kwargs
+                                    has_varargs = any(p.name.startswith('*') for p in call.target.parameters)
+                                    if not has_varargs:
+                                        errors.append({
+                                            "file": str(file.path) if hasattr(file.path, 'parts') else file.path,
+                                            "function": func.name,
+                                            "error": "Incorrect number of arguments",
+                                            "context": f"Call to '{call.name}' has {len(call.args)} arguments but the function expects {len(call.target.parameters)} parameters."
+                                        })
+                    
+                    # Check for empty exception handlers (swallowing exceptions)
+                    if hasattr(func, 'code_block') and hasattr(func.code_block, 'statements'):
+                        for stmt in func.code_block.statements:
+                            if hasattr(stmt, 'type') and stmt.type == 'try_statement':
+                                if hasattr(stmt, 'except_clauses'):
+                                    for except_clause in stmt.except_clauses:
+                                        if hasattr(except_clause, 'body') and not except_clause.body.statements:
+                                            errors.append({
+                                                "file": str(file.path) if hasattr(file.path, 'parts') else file.path,
+                                                "function": func.name,
+                                                "error": "Empty exception handler",
+                                                "context": f"Function '{func.name}' has an empty exception handler which may hide errors."
+                                            })
+                    
+                    # Check for undefined variables
+                    if hasattr(func, 'code_block') and hasattr(func.code_block, 'statements'):
+                        defined_vars = set()
+                        for param in func.parameters if hasattr(func, 'parameters') else []:
+                            defined_vars.add(param.name)
+                        
+                        for stmt in func.code_block.statements:
+                            # Add variables defined in assignments
+                            if hasattr(stmt, 'type') and stmt.type == 'assignment':
+                                if hasattr(stmt, 'targets'):
+                                    for target in stmt.targets:
+                                        if hasattr(target, 'name'):
+                                            defined_vars.add(target.name)
+                            
+                            # Check variables used in expressions
+                            if hasattr(stmt, 'expressions'):
+                                for expr in stmt.expressions:
+                                    if hasattr(expr, 'type') and expr.type == 'identifier':
+                                        if hasattr(expr, 'name') and expr.name not in defined_vars:
+                                            # Skip built-in functions and common imports
+                                            if expr.name not in ['print', 'len', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple']:
+                                                errors.append({
+                                                    "file": str(file.path) if hasattr(file.path, 'parts') else file.path,
+                                                    "function": func.name,
+                                                    "error": "Potentially undefined variable",
+                                                    "context": f"Variable '{expr.name}' is used but may not be defined in the function scope."
+                                                })
         
         return errors
     
@@ -747,4 +791,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
