@@ -23,11 +23,19 @@ import argparse
 import os
 import re
 import sys
+import json
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+try:
+    import jinja2
+except ImportError:
+    print("Installing jinja2...")
+    os.system("pip install jinja2")
+    import jinja2
 
 from graph_sitter.codebase.codebase_analysis import (
     get_class_summary,
@@ -43,6 +51,265 @@ from graph_sitter.core.function import Function
 from graph_sitter.core.file import SourceFile
 from graph_sitter.enums import SymbolType, EdgeType
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+
+
+# HTML template for the analysis report
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph-Sitter Codebase Analysis</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .stat-card {
+            background-color: #f1f8ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .stat-card h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .error-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .error-item {
+            background-color: #fff8f8;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .error-title {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .error-context {
+            font-family: monospace;
+            background-color: #f9f2f4;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        .collapsible {
+            background-color: #f1f8ff;
+            color: #2980b9;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .active, .collapsible:hover {
+            background-color: #e1f0ff;
+        }
+        .content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: white;
+            border-radius: 0 0 4px 4px;
+        }
+        .entry-point {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #2ecc71;
+        }
+        .function-flow {
+            margin-left: 20px;
+            font-family: monospace;
+        }
+        .badge {
+            background-color: #3498db;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .language-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .language-badge {
+            background-color: #34495e;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .visualization {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Graph-Sitter Codebase Analysis</h1>
+    
+    <div class="section">
+        <h2>Codebase Summary</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Files</h3>
+                <p>Total: {{ summary.total_files }}</p>
+                <p>Code: {{ summary.total_code_files }}</p>
+                <p>Documentation: {{ summary.total_doc_files }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Components</h3>
+                <p>Classes: {{ summary.total_classes }}</p>
+                <p>Functions: {{ summary.total_functions }}</p>
+                <p>Global Variables: {{ summary.total_global_vars }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Languages</h3>
+                <div class="language-stats">
+                    {% for lang, count in summary.programming_languages.items() %}
+                    <div class="language-badge">{{ lang }}: {{ count }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if errors %}
+    <div class="section">
+        <h2>Errors Found ({{ errors|length }})</h2>
+        <ul class="error-list">
+            {% for error in errors %}
+            <li class="error-item">
+                <div class="error-title">{{ error.file }}[{{ error.function }}] - {{ error.error }}</div>
+                <div class="error-context">{{ error.context }}</div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <h2>Top Level Operator Codefiles/Functions ({{ entry_points|length }})</h2>
+        {% for entry in entry_points %}
+        <button class="collapsible">{{ entry.file }} <span class="badge">Inheritance {{ entry.inheritance_level }}</span></button>
+        <div class="content">
+            {% for func in entry.functions %}
+            <div class="entry-point">
+                <strong>{{ func.name }}</strong>
+                <p>Parameters: {{ func.parameters|join(", ") }}</p>
+                <div class="function-flow">
+                    <p>Call Flow:</p>
+                    <ul>
+                        {% for call in func.calls %}
+                        <li>{{ call.name }}({{ call.args|join(", ") }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="section">
+        <h2>Top Level Files ({{ top_level_files|length }})</h2>
+        {% for file in top_level_files %}
+        <button class="collapsible">{{ file.file }}</button>
+        <div class="content">
+            {% for func in file.functions %}
+            <div class="entry-point">
+                <strong>{{ func.name }}</strong>
+                <p>Parameters: {{ func.parameters|join(", ") }}</p>
+                <div class="function-flow">
+                    <p>Call Flow:</p>
+                    <ul>
+                        {% for call in func.calls %}
+                        <li>{{ call.name }}({{ call.args|join(", ") }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var coll = document.getElementsByClassName("collapsible");
+            for (var i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    var content = this.nextElementSibling;
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+"""
 
 
 class EnhancedCodebaseAnalyzer:
@@ -110,14 +377,12 @@ class EnhancedCodebaseAnalyzer:
         """Get a summary of the codebase."""
         # Helper function to safely get file extension
         def get_file_extension(file):
-            if hasattr(file, 'extension'):
-                ext = file.extension
-                if ext is None:
-                    return ""
-                # Convert PosixPath to string before calling lower()
-                if hasattr(ext, 'parts'):  # Check if it's a Path object
-                    return str(ext).lower()
-                return ext.lower() if isinstance(ext, str) else str(ext).lower()
+            if hasattr(file, 'path'):
+                path = file.path
+                if hasattr(path, 'suffix'):  # Path object
+                    return str(path.suffix).lower()
+                elif isinstance(path, str):
+                    return os.path.splitext(path)[1].lower()
             return ""
         
         # Count files by type
@@ -151,7 +416,7 @@ class EnhancedCodebaseAnalyzer:
         return language_counts
     
     def _find_errors(self) -> List[Dict[str, Any]]:
-        """Find errors in the codebase."""
+        """Find actual errors in the codebase (excluding style issues)."""
         errors = []
         
         # Check for functions with potential issues
@@ -186,24 +451,6 @@ class EnhancedCodebaseAnalyzer:
                         "context": f"Function spans from line {func.line_range[0]} to {func.line_range[1]}"
                     })
             
-            # Check for unused parameters
-            if hasattr(func, 'parameters') and func.parameters:
-                used_params = set()
-                for call in func.function_calls:
-                    if hasattr(call, 'args'):
-                        for arg in call.args:
-                            if hasattr(arg, 'name'):
-                                used_params.add(arg.name)
-                
-                for param in func.parameters:
-                    if param.name not in used_params and param.name not in ['self', 'cls', 'kwargs', 'args']:
-                        errors.append({
-                            "file": file_path,
-                            "function": func.name,
-                            "error": f"Unused parameter '{param.name}'",
-                            "context": f"Parameter '{param.name}' is defined but not used in the function body"
-                        })
-            
             # Check for too many parameters
             if hasattr(func, 'parameters') and len(func.parameters) > 7:  # Arbitrary threshold
                 errors.append({
@@ -213,14 +460,8 @@ class EnhancedCodebaseAnalyzer:
                     "context": f"Function has {len(func.parameters)} parameters, which may indicate a design issue"
                 })
             
-            # Check for missing docstring
-            if not hasattr(func, 'docstring') or not func.docstring:
-                errors.append({
-                    "file": file_path,
-                    "function": func.name,
-                    "error": "Missing docstring",
-                    "context": "Function lacks documentation"
-                })
+            # Note: We're intentionally NOT checking for missing docstrings or unused parameters
+            # as per the user's request
         
         return errors
     
@@ -241,58 +482,66 @@ class EnhancedCodebaseAnalyzer:
         return "\n".join(context_lines) if context_lines else "Context not available"
     
     def _find_entry_points(self) -> List[Dict]:
-        """Find potential entry points to the codebase with parameter flow analysis."""
+        """Find potential entry points to the codebase."""
         entry_points = []
         
-        # Look for files with main functions or CLI entry points
+        # Find files that are imported by many other files
+        file_importers = {}
         for file in self.codebase.files:
-            if not hasattr(file, 'path'):
-                continue
-                
-            file_path = file.path
+            file_path = file.path if hasattr(file, 'path') else "unknown"
             # Convert PosixPath to string if needed
             if hasattr(file_path, 'parts'):  # Check if it's a Path object
                 file_path = str(file_path)
+                
+            importers = self._calculate_file_inheritance_level(file)
+            file_importers[file_path] = importers
+        
+        # Sort files by number of importers (descending)
+        sorted_files = sorted(file_importers.items(), key=lambda x: x[1], reverse=True)
+        
+        # Take the top 20 files as entry points
+        for file_path, importers in sorted_files[:20]:
+            entry_point = {
+                "file": file_path,
+                "inheritance_level": importers,
+                "functions": []
+            }
             
-            # Check for common entry point patterns
-            if (
-                "cli" in file_path or 
-                "main.py" in file_path or 
-                "app.py" in file_path or
-                "__main__.py" in file_path
-            ):
-                entry_point = {
-                    "file": file_path,
-                    "type": "potential_entry_point",
-                    "functions": [],
-                    "inheritance_level": self._calculate_file_inheritance_level(file)
-                }
-                
-                # Check if the file has functions
-                if hasattr(file, 'functions'):
-                    for func in file.functions:
-                        function_info = {
-                            "name": func.name,
-                            "parameters": [p.name for p in func.parameters] if hasattr(func, 'parameters') else [],
-                            "calls": []
-                        }
-                        
-                        # Get function calls
-                        if hasattr(func, 'function_calls'):
-                            for call in func.function_calls:
-                                if hasattr(call, 'name'):
-                                    call_info = {
-                                        "name": call.name,
-                                        "args": [arg.source if hasattr(arg, 'source') else str(arg) for arg in call.args] if hasattr(call, 'args') else []
-                                    }
-                                    function_info["calls"].append(call_info)
-                        
-                        entry_point["functions"].append(function_info)
-                
-                entry_points.append(entry_point)
+            # Find the file object
+            file_obj = None
+            for file in self.codebase.files:
+                if hasattr(file, 'path'):
+                    path = file.path
+                    if hasattr(path, 'parts'):  # Path object
+                        path = str(path)
+                    if path == file_path:
+                        file_obj = file
+                        break
+            
+            if file_obj and hasattr(file_obj, 'functions'):
+                for func in file_obj.functions:
+                    function_info = {
+                        "name": func.name,
+                        "parameters": [p.name for p in func.parameters] if hasattr(func, 'parameters') else [],
+                        "calls": []
+                    }
+                    
+                    # Get function calls
+                    if hasattr(func, 'function_calls'):
+                        for call in func.function_calls:
+                            if hasattr(call, 'name'):
+                                call_info = {
+                                    "name": call.name,
+                                    "args": [arg.source if hasattr(arg, 'source') else str(arg) for arg in call.args] if hasattr(call, 'args') else []
+                                }
+                                function_info["calls"].append(call_info)
+                    
+                    entry_point["functions"].append(function_info)
+            
+            entry_points.append(entry_point)
         
         # Sort by inheritance level
-        entry_points.sort(key=lambda x: x["inheritance_level"])
+        entry_points.sort(key=lambda x: x["inheritance_level"], reverse=True)
         
         return entry_points
     
@@ -303,10 +552,6 @@ class EnhancedCodebaseAnalyzer:
             if hasattr(other_file, 'imports'):
                 for imp in other_file.imports:
                     if hasattr(imp, 'imported_symbol') and imp.imported_symbol == file:
-                        other_file_path = other_file.path if hasattr(other_file, 'path') else "unknown"
-                        # Convert PosixPath to string if needed
-                        if hasattr(other_file_path, 'parts'):  # Check if it's a Path object
-                            other_file_path = str(other_file_path)
                         importers += 1
         
         return importers
@@ -317,14 +562,12 @@ class EnhancedCodebaseAnalyzer:
         
         # Helper function to safely get file extension
         def get_file_extension(file):
-            if hasattr(file, 'extension'):
-                ext = file.extension
-                if ext is None:
-                    return ""
-                # Convert PosixPath to string before calling lower()
-                if hasattr(ext, 'parts'):  # Check if it's a Path object
-                    return str(ext).lower()
-                return ext.lower() if isinstance(ext, str) else str(ext).lower()
+            if hasattr(file, 'path'):
+                path = file.path
+                if hasattr(path, 'suffix'):  # Path object
+                    return str(path.suffix).lower()
+                elif isinstance(path, str):
+                    return os.path.splitext(path)[1].lower()
             return ""
         
         for file in self.codebase.files:
@@ -409,6 +652,16 @@ class EnhancedCodebaseAnalyzer:
         """Calculate the depth of inheritance for a given class."""
         return len(cls.superclasses) if hasattr(cls, 'superclasses') else 0
     
+    def generate_html_report(self, results: Dict) -> str:
+        """Generate an HTML report from the analysis results."""
+        template = jinja2.Template(HTML_TEMPLATE)
+        return template.render(
+            summary=results["summary"],
+            errors=results["errors"],
+            entry_points=results["entry_points"],
+            top_level_files=results["top_level_files"]
+        )
+    
     def print_analysis(self, results: Dict) -> None:
         """Print the analysis results in a readable format."""
         print("\n" + "="*80)
@@ -465,12 +718,22 @@ def main():
     """Main entry point for the script."""
     parser = argparse.ArgumentParser(description="Enhanced analysis of a codebase using graph-sitter")
     parser.add_argument("--github-repo", help="GitHub repository URL to analyze", default=None)
+    parser.add_argument("--output", help="Output HTML file path", default="codebase_analysis.html")
     args = parser.parse_args()
     
     try:
         analyzer = EnhancedCodebaseAnalyzer(args.github_repo)
         results = analyzer.analyze()
+        
+        # Generate HTML report
+        html_report = analyzer.generate_html_report(results)
+        with open(args.output, "w") as f:
+            f.write(html_report)
+        
+        # Print text report
         analyzer.print_analysis(results)
+        
+        print(f"\nHTML report generated at: {os.path.abspath(args.output)}")
     except Exception as e:
         print(f"Error analyzing codebase: {str(e)}")
         print("\nUsage examples:")
@@ -484,3 +747,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
