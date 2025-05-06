@@ -83,7 +83,7 @@ uv tool install pre-commit --with pre-commit-uv
 pre-commit install
 pre-commit install-hooks
 
-# Step 7: Run existing setup scripts
+# Step 7: Run additional setup scripts
 echo -e "${YELLOW}Running additional setup scripts...${NC}"
 if [ -f "./scripts/install-deps.sh" ]; then
     bash ./scripts/install-deps.sh
@@ -136,13 +136,15 @@ if [ "$RUN_TESTS" = true ]; then
     else
         python -m pytest tests/unit -v -p no:xdist -p no:cov
     fi
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}All tests passed!${NC}"
-    else
-        echo -e "${RED}Some tests failed. Please check the error messages above.${NC}"
-    fi
 fi
+
+echo -e "${YELLOW}To activate the virtual environment in the future, run:${NC}"
+echo -e "  source .venv/bin/activate"
+echo -e "${YELLOW}To run tests:${NC}"
+echo -e "  ./scripts/full_test.sh           # Interactive test runner"
+echo -e "  ./scripts/full_test.sh --unit    # Run unit tests"
+echo -e "  ./scripts/full_test.sh --all     # Run all tests"
+echo -e "  ./scripts/full_test.sh --coverage # Run with coverage"
 
 echo -e "${GREEN}Full build completed successfully!${NC}"
 echo -e "${BLUE}=== Environment Information ===${NC}"
