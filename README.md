@@ -1,81 +1,94 @@
-<br />
+# Codebase Analyzer
 
-<p align="center">
-  <a href="https://docs.codegen.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+A collection of utility functions for analyzing and manipulating codebases, focusing on call graphs, modularity, and type coverage.
 
-<h2 align="center">
-  The SWE that Never Sleeps
-</h2>
+## Utility Functions
 
-<div align="center">
+### Call Graph Analysis
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-docs.codegen.com-purple?style=flat-square)](https://docs.codegen.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/codegen-sdk/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+1. **find_all_paths_between_functions**
+   * Find all possible paths between two functions in the call graph
+   * Useful for understanding how functions are connected and tracing execution paths
 
-</div>
+2. **get_max_call_chain**
+   * Find the longest call chain in the codebase starting from a given function
+   * Helps identify complex execution flows and potential refactoring opportunities
 
-<br />
+### Code Modularity
 
-The Codegen SDK provides a programmatic interface to code agents provided by [Codegen](https://codegen.com).
+3. **organize_imports**
+   * Organize imports in a file by type (standard library, third-party, local) and name
+   * Improves code readability and maintainability
+
+4. **extract_shared_code**
+   * Extract shared code into common modules
+   * Reduces duplication and improves code organization
+
+5. **determine_appropriate_shared_module**
+   * Determine the appropriate module for shared code based on symbol characteristics
+   * Ensures consistent organization of shared code
+
+6. **break_circular_dependencies**
+   * Break circular dependencies by extracting shared code into separate modules
+   * Improves code architecture and prevents import-related issues
+
+7. **analyze_module_coupling**
+   * Analyze coupling between modules to identify highly connected components
+   * Helps identify areas for refactoring to improve modularity
+
+### Type Coverage
+
+8. **calculate_type_coverage_percentages**
+   * Calculate type coverage percentages across the codebase
+   * Provides insights into type annotation completeness for parameters, return types, and attributes
+
+## Usage Examples
 
 ```python
-from codegen.agents.agent import Agent
+# Find all paths between two functions
+start_func = codebase.get_function("create_skill")
+end_func = codebase.get_function("auto_define_skill_description")
+paths = find_all_paths_between_functions(start_func, end_func)
+for path in paths:
+    print(" -> ".join([func.name for func in path]))
 
-# Initialize the Agent with your organization ID and API token
-agent = Agent(
-    org_id="YOUR_ORG_ID",  # Find this at codegen.com/developer
-    token="YOUR_API_TOKEN",  # Get this from codegen.com/developer
-    # base_url="https://codegen-sh-rest-api.modal.run",  # Optional - defaults to production
-)
+# Get the longest call chain
+main_func = codebase.get_function("main")
+longest_chain = get_max_call_chain(main_func)
+print("Longest call chain:")
+print(" -> ".join([func.name for func in longest_chain]))
 
-# Run an agent with a prompt
-task = agent.run(prompt="Implement a new feature to sort users by last login.")
+# Organize imports in a file
+file = codebase.get_file("app/main.py")
+organize_imports(file)
 
-# Check the initial status
-print(task.status)
+# Extract shared code
+extracted = extract_shared_code(codebase, min_usages=4)
+for module, symbols in extracted.items():
+    print(f"Extracted {len(symbols)} symbols to {module}")
 
-# Refresh the task to get updated status (tasks can take time)
-task.refresh()
+# Break circular dependencies
+broken_cycles = break_circular_dependencies(codebase)
+print(f"Broke {len(broken_cycles)} circular dependencies")
 
-# Check the updated status
-print(task.status)
+# Analyze module coupling
+coupling = analyze_module_coupling(codebase)
+for file_path, metrics in sorted(coupling.items(), key=lambda x: x[1]['score'], reverse=True)[:5]:
+    print(f"{file_path}: {metrics['score']} connections")
 
-# Once task is complete, you can access the result
-if task.status == "completed":
-    print(task.result)  # Result often contains code, summaries, or links
+# Calculate type coverage
+coverage = calculate_type_coverage_percentages(codebase)
+print(f"Parameter type coverage: {coverage['parameters']['percentage']:.1f}%")
+print(f"Return type coverage: {coverage['returns']['percentage']:.1f}%")
+print(f"Attribute type coverage: {coverage['attributes']['percentage']:.1f}%")
 ```
 
-## Installation and Usage
+## Requirements
 
-Install the SDK using pip or uv:
+- NetworkX for graph operations
+- A codebase object with appropriate attributes and methods
 
-```bash
-pip install codegen
-# or
-uv pip install codegen
-```
+## Notes
 
-Get started at [codegen.com](https://codegen.com) and get your API token at [codegen.com/developer](https://codegen.com/developer).
+These utility functions are designed to work with a codebase analysis framework that provides access to code structure through objects representing files, functions, classes, and symbols. The functions include error handling and fallbacks for cases where expected attributes or methods might not be available.
 
-You can interact with your AI engineer via API, or chat with it in Slack, Linear, Github, or on our website.
-
-## Resources
-
-- [Docs](https://docs.codegen.com)
-- [Getting Started](https://docs.codegen.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
-
-## Contributing
-
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
-
-## Enterprise
-
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
