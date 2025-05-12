@@ -6,7 +6,7 @@ icon: "code"
 iconType: "solid"
 ---
 
-[Codegen](https://github.com/codegen-sh/codegen-sdk) is a python library for manipulating codebases.
+[Codegen](https://github.com/codegen-sh/graph-sitter) is a python library for manipulating codebases.
 
 It provides a scriptable interface to a powerful, multi-lingual language server built on top of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/).
 
@@ -187,11 +187,11 @@ uv tool install codegen
 
 ## Quick Start with Jupyter
 
-The [codegen notebook](/cli/notebook) command creates a virtual environment and opens a Jupyter notebook for quick prototyping. This is often the fastest way to get up and running.
+The [gs notebook](/cli/notebook) command creates a virtual environment and opens a Jupyter notebook for quick prototyping. This is often the fastest way to get up and running.
 
 ```bash
 # Launch Jupyter with a demo notebook
-codegen notebook --demo
+gs notebook --demo
 ```
 
 
@@ -515,9 +515,9 @@ Let's walk through a minimal example of using Codegen in a project:
    cd path/to/your/project
    ```
 
-2. Initialize Codegen in your project with [codegen init](/cli/init):
+2. Initialize Codegen in your project with [gs init](/cli/init):
    ```bash
-   codegen init
+   gs init
    ```
 
    This creates a `.codegen/` directory with:
@@ -529,25 +529,25 @@ Let's walk through a minimal example of using Codegen in a project:
    └── codegen-system-prompt.txt  # AI system prompt
    ```
 
-3. Create your first codemod with [codegen create](/cli/create):
+3. Create your first codemod with [gs create](/cli/create):
    ```bash
-   codegen create organize-imports \
+   gs create organize-imports \
      -d "Sort and organize imports according to PEP8"
    ```
     <Note>
-        The `-d` flag in `codegen create` generates an AI-powered implementation. This requires a Github account registered on [codegen.sh](https://codegen.sh)
+        The `-d` flag in `gs create` generates an AI-powered implementation. This requires a Github account registered on [codegen.sh](https://codegen.sh)
     </Note>
 
 
 
-4. Run your codemod with [codegen run](/cli/run):
+4. Run your codemod with [gs run](/cli/run):
    ```bash
-   codegen run organize-imports
+   gs run organize-imports
    ```
 
-5. Reset any filesystem changes (excluding `.codegen/*`) with [codegen reset](/cli/reset):
+5. Reset any filesystem changes (excluding `.codegen/*`) with [gs reset](/cli/reset):
    ```bash
-   codegen reset
+   gs reset
    ```
 
 ## Next Steps
@@ -597,11 +597,11 @@ iconType: "solid"
 
 Get up and running with Codegen programs in IDEs like VSCode, Cursor and PyCharm.
 
-<Tip>Make sure to [install and initialize](/introduction/installation) Codegen with `codegen init`</Tip>
+<Tip>Make sure to [install and initialize](/introduction/installation) Codegen with `gs init`</Tip>
 
 ## Configuring your IDE Interpreter
 
-Codegen creates a custom Python environment in `.codegen/.venv`. Configure your IDE to use this environment for the best development experience.
+gs creates a custom Python environment in `.codegen/.venv`. Configure your IDE to use this environment for the best development experience.
 
 <AccordionGroup>
   <Accordion title="VSCode, Cursor and Windsurf" icon="window-maximize">
@@ -643,10 +643,10 @@ Codegen creates a custom Python environment in `.codegen/.venv`. Configure your 
 
 ## Create a New Codemod
 
-Generate the boilerplate for a new code manipulation program using [codegen create](/cli/create):
+Generate the boilerplate for a new code manipulation program using [gs create](/cli/create):
 
 ```bash
-codegen create organize-types \
+gs create organize-types \
   -d "Move all TypeScript types to \
       into a centralized types.ts file"
 ```
@@ -666,7 +666,7 @@ The generated codemod includes type hints and docstrings, making it easy to get 
 
 ## Iterating with Chat Assistants
 
-When you do `codegen init`, you will receive a [system prompt optimized for AI consumption](/introduction/work-with-ai) at `.codegen/codegen-system-prompt.txt`.
+When you do `gs init`, you will receive a [system prompt optimized for AI consumption](/introduction/work-with-ai) at `.codegen/codegen-system-prompt.txt`.
 
 If you reference this file in "chat" sessions with Copilot, Cursor, Cody, etc., the assistant will become fluent in Codegen.
 
@@ -688,10 +688,10 @@ You can also drag and drop the system prompt ([available here](/introduction/wor
 
 ```bash
 # Run => write changes to disk
-codegen run organize-types
+gs run organize-types
 
 # Reset changes on disk
-codegen reset
+gs reset
 ```
 
 <Tip>You can also run the program directly via `.codegen/.venv/bin/python path/to/codemod.py` or via your editor's debugger</Tip>
@@ -748,10 +748,10 @@ import {
 
 The [graph_sitter.cli](/cli/about) provides commands to generate `.md` files that can be fed to any AI assistant for more accurate and contextual help.
 
-When you create a new codemod via [`codegen create`](/cli/create):
+When you create a new codemod via [`gs create`](/cli/create):
 
 ```bash
-codegen create delete-dead-imports --description "Delete unused imports"
+gs create delete-dead-imports --description "Delete unused imports"
 ```
 
 Codegen automatically generates an optimized ["system prompt"](https://news.ycombinator.com/item?id=37880023) that includes:
@@ -764,7 +764,7 @@ You can find this generated prompt in the `.codegen/prompts/<codemod-name>-syste
 
 <Note>
   All contents of the `.codegen/prompts` directory are by default ignored the
-  `.gitignore` file. after running [`codegen init`](/cli/init)
+  `.gitignore` file. after running [`gs init`](/cli/init)
 </Note>
 
 This `.md` file can be used with any AI assistant (Claude, GPT-4, etc.) to get more accurate and contextual help.
@@ -775,7 +775,7 @@ This `.md` file can be used with any AI assistant (Claude, GPT-4, etc.) to get m
   <Step title="Create a codemod with description">
     Use the [`create` command](/cli/create) with a detailed description of what you want to accomplish:
     ```bash
-    codegen create modernize-components --description "Convert class components to functional components with hooks"
+    gs create modernize-components --description "Convert class components to functional components with hooks"
     ```
   </Step>
   <Step title="Review the generated system prompt">
@@ -827,7 +827,7 @@ Codegen performs advanced static analysis to build a rich graph representation o
 </Note>
 <Info>
   Codegen is open source. Check out the [source
-  code](https://github.com/codegen-sh/codegen-sdk) to learn more!
+  code](https://github.com/codegen-sh/graph-sitter) to learn more!
 </Info>
 
 ## The Codebase Graph
@@ -1019,7 +1019,7 @@ Join the growing Codegen community! We're excited to have you be part of our jou
 
 We welcome contributions of all kinds! Whether you're fixing a typo in documentation, reporting a bug, or implementing a new feature, we appreciate your help in making Codegen better.
 
-Check out our [Contributing Guide](https://github.com/codegen-sh/codegen-sdk/blob/develop/CONTRIBUTING.md) on GitHub to learn how to:
+Check out our [Contributing Guide](https://github.com/codegen-sh/graph-sitter/blob/develop/CONTRIBUTING.md) on GitHub to learn how to:
 
 - Set up your development environment
 - Submit pull requests
@@ -1066,7 +1066,7 @@ Based in San Francisco, we're a team of engineers and researchers passionate abo
 
 ## Open Source
 
-We believe in the power of open source software. Our core library, [codegen](https://github.com/codegen-sh/codegen-sdk), is freely available and open to contributions from the community.
+We believe in the power of open source software. Our core library, [codegen](https://github.com/codegen-sh/graph-sitter), is freely available and open to contributions from the community.
 
 ## Join Us
 
@@ -1144,18 +1144,18 @@ iconType: "solid"
     icon="hand-holding-heart"
   >
     Start by trying out Codegen, joining our [Slack community](https://community.codegen.com), and looking for
-    issues labeled "good first issue" on [GitHub](https://github.com/codegen-sh/codegen-sdk). We welcome contributions to
+    issues labeled "good first issue" on [GitHub](https://github.com/codegen-sh/graph-sitter). We welcome contributions to
     documentation, examples, and code improvements.
   </Accordion>
   <Accordion title="Is Codegen free to use?" icon="scale-balanced">
-    Yes, Codegen is [open source](https://github.com/codegen-sh/codegen-sdk) and free to use under the [Apache 2.0
-    license](https://github.com/codegen-sh/codegen-sdk?tab=Apache-2.0-1-ov-file).
+    Yes, Codegen is [open source](https://github.com/codegen-sh/graph-sitter) and free to use under the [Apache 2.0
+    license](https://github.com/codegen-sh/graph-sitter?tab=Apache-2.0-1-ov-file).
     You can use it for both personal and commercial projects.
   </Accordion>
   <Accordion title="Where can I get help if I'm stuck?" icon="life-ring">
     The best places to get help are:
     1. Our community [Slack channel](https://community.codegen.com)
-    2. [GitHub issues](https://github.com/codegen-sh/codegen-sdk) for bug reports
+    2. [GitHub issues](https://github.com/codegen-sh/graph-sitter) for bug reports
     3. Reach out to us on [Twitter](https://x.com/codegen)
   </Accordion>
 </AccordionGroup>
@@ -1402,7 +1402,7 @@ codebase = Codebase(
   - `config`: Toggle specific features like language engines, dependency management, and graph synchronization
   - `secrets`: API keys and other sensitive information needed by the codebase
 
-For a complete list of available feature flags and configuration options, see the [source code on GitHub](https://github.com/codegen-sh/codegen-sdk/blob/develop/src/codegen/sdk/codebase/config.py).
+For a complete list of available feature flags and configuration options, see the [source code on GitHub](https://github.com/codegen-sh/graph-sitter/blob/develop/src/codegen/sdk/codebase/config.py).
 
 ## Advanced Initialization
 
@@ -1436,7 +1436,7 @@ codebase = Codebase(
 )
 ```
 
-For more details on advanced configuration options, see the [source code on GitHub](https://github.com/codegen-sh/codegen-sdk/blob/develop/src/codegen/sdk/core/codebase.py).
+For more details on advanced configuration options, see the [source code on GitHub](https://github.com/codegen-sh/graph-sitter/blob/develop/src/codegen/sdk/core/codebase.py).
 
 ## Supported Languages
 
@@ -1461,7 +1461,7 @@ Codegen enables you to create reusable code transformations using Python functio
 The easiest way to create a new codemod is using the CLI [create](/cli/create) command:
 
 ```bash
-codegen create rename-function
+gs create rename-function
 ```
 
 This creates a new codemod in your `.codegen/codemods` directory:
@@ -1486,7 +1486,7 @@ def run(codebase: Codebase):
 You can use AI to generate an initial implementation by providing a description:
 
 ```bash
-codegen create rename-function -d "Rename the getUserData function to fetchUserProfile"
+gs create rename-function -d "Rename the getUserData function to fetchUserProfile"
 ```
 
 This will:
@@ -1499,7 +1499,7 @@ This will:
 Once created, run your codemod using:
 
 ```bash
-codegen run rename-function
+gs run rename-function
 ```
 
 The execution flow:
@@ -1553,7 +1553,7 @@ def run(codebase: Codebase, arguments: RenameArgs):
 
 Run it with:
 ```bash
-codegen run rename-function --arguments '{"old_name": "getUserData", "new_name": "fetchUserProfile"}'
+gs run rename-function --arguments '{"old_name": "getUserData", "new_name": "fetchUserProfile"}'
 ```
 
 ## Directory Structure
@@ -1575,7 +1575,7 @@ icon: "folder"
 iconType: "solid"
 ---
 
-The `.codegen` directory contains your project's Codegen configuration, codemods, and supporting files. It's automatically created when you run `codegen init`.
+The `.codegen` directory contains your project's Codegen configuration, codemods, and supporting files. It's automatically created when you run `gs init`.
 
 ## Directory Structure
 
@@ -1590,10 +1590,10 @@ The `.codegen` directory contains your project's Codegen configuration, codemods
 
 ## Initialization
 
-The directory is created and managed using the `codegen init` command:
+The directory is created and managed using the `gs init` command:
 
 ```bash
-codegen init [--fetch-docs] [--repo-name NAME] [--organization-name ORG]
+gs init [--fetch-docs] [--repo-name NAME] [--organization-name ORG]
 ```
 
 <Note>
@@ -1610,7 +1610,7 @@ Codegen maintains its own virtual environment in `.codegen/.venv/` to ensure con
 - Used for running codemods and Jupyter notebooks
 - Gitignored to avoid committing environment-specific files
 
-The environment is created during `codegen init` and used by commands like `codegen run` and `codegen notebook`.
+The environment is created during `gs init` and used by commands like `gs run` and `gs notebook`.
 
 <Note>To debug codemods, you will need to set the python virtual environment in your IDE to `.codegen/.venv`</Note>
 
@@ -1648,7 +1648,7 @@ Codegen automatically adds appropriate entries to your `.gitignore`:
 The `codemods/` directory is where your transformation functions live. You can create new codemods using:
 
 ```bash
-codegen create my-codemod [--description "what it does"]
+gs create my-codemod [--description "what it does"]
 ```
 
 This will:
@@ -1657,7 +1657,7 @@ This will:
 3. Set up the necessary imports and decorators
 
 <Tip>
-Use `codegen list` to see all codemods in your project.
+Use `gs list` to see all codemods in your project.
 </Tip>
 
 ## Jupyter Integration
@@ -1685,12 +1685,12 @@ After initializing your `.codegen` directory:
 
 1. Create your first codemod:
 ```bash
-codegen create my-codemod -d "describe what you want to do"
+gs create my-codemod -d "describe what you want to do"
 ```
 
 2. Run it:
 ```bash
-codegen run my-codemod --apply-local
+gs run my-codemod --apply-local
 ```
 
 3. Deploy it for team use:
@@ -1740,7 +1740,7 @@ The `function` decorator is part of the codegen SDK CLI and is used to mark func
 To run a deployed function using the CLI, use the following command:
 
 ```bash
-codegen run my-function
+gs run my-function
 ```
 
 This command runs the function named `my-function`.
@@ -6745,7 +6745,7 @@ iconType: "solid"
 
 This guide demonstrates how to use Codegen to generate high-quality training data for large language models (LLMs) by extracting function implementations along with their dependencies and usages. This approach is similar to [word2vec](https://www.tensorflow.org/text/tutorials/word2vec) or [node2vec](https://snap.stanford.edu/node2vec/) - given the context of a function, learn to predict the function's implementation.
 
-<Info>View the full code in our [examples repository](https://github.com/codegen-sh/codegen-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/generate_training_data)</Info>
+<Info>View the full code in our [examples repository](https://github.com/codegen-sh/graph-sitter-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/generate_training_data)</Info>
 
 <Tip>This example works with both Python and Typescript repositories without modification</Tip>
 
@@ -8844,7 +8844,7 @@ iconType: "solid"
 Migrating from [unittest](https://docs.python.org/3/library/unittest.html) to [pytest](https://docs.pytest.org/) involves converting test classes and assertions to pytest's more modern and concise style. This guide will walk you through using Codegen to automate this migration.
 
 <Info>
-You can find the complete example code in our [examples repository](https://github.com/codegen-sh/codegen-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/unittest_to_pytest).
+You can find the complete example code in our [examples repository](https://github.com/codegen-sh/graph-sitter-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/unittest_to_pytest).
 </Info>
 
 ## Overview
@@ -9056,7 +9056,7 @@ iconType: "solid"
 Migrating from [SQLAlchemy](https://www.sqlalchemy.org/) 1.4 to 2.0 involves several API changes to support the new 2.0-style query interface. This guide will walk you through using Codegen to automate this migration, handling query syntax, session usage, and ORM patterns.
 
 <Info>
-You can find the complete example code in our [examples repository](https://github.com/codegen-sh/codegen-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/sqlalchemy_1.4_to_2.0).
+You can find the complete example code in our [examples repository](https://github.com/codegen-sh/graph-sitter-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/sqlalchemy_1.4_to_2.0).
 </Info>
 
 ## Overview
@@ -9198,7 +9198,7 @@ Import loops occur when two or more Python modules depend on each other, creatin
 In this tutorial, we'll explore how to identify and fix problematic import cycles using Codegen.
 
 <Info>
-You can find the complete example code in our [examples repository](https://github.com/codegen-sh/codegen-examples/tree/main/examples/removing_import_loops_in_pytorch).
+You can find the complete example code in our [examples repository](https://github.com/codegen-sh/graph-sitter-examples/tree/main/examples/removing_import_loops_in_pytorch).
 </Info>
 
 ## Overview
@@ -9445,7 +9445,7 @@ iconType: "solid"
 Migrating from Python 2 to Python 3 involves several syntax and API changes. This guide will walk you through using Codegen to automate this migration, handling print statements, string handling, iterators, and more.
 
 <Info>
-You can find the complete example code in our [examples repository](https://github.com/codegen-sh/codegen-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/python2_to_python3).
+You can find the complete example code in our [examples repository](https://github.com/codegen-sh/graph-sitter-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/python2_to_python3).
 </Info>
 
 ## Overview
@@ -9658,7 +9658,7 @@ class MyIterator:
 You can run the complete migration using our example script:
 
 ```bash
-git clone https://github.com/codegen-sh/codegen-examples.git
+git clone https://github.com/codegen-sh/graph-sitter-examples.git
 cd codegen-examples/python2_to_python3
 python run.py
 ```
@@ -9701,7 +9701,7 @@ iconType: "solid"
 
 Migrating from [Flask](https://flask.palletsprojects.com/) to [FastAPI](https://fastapi.tiangolo.com/) involves several key changes to your codebase. This guide will walk you through using Codegen to automate this migration, handling imports, route decorators, static files, and template rendering.
 
-You can find the complete example code in our [examples repository](https://github.com/codegen-sh/codegen-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/flask_to_fastapi_migration)
+You can find the complete example code in our [examples repository](https://github.com/codegen-sh/graph-sitter-examples/tree/7b978091c3153b687c32928fe10f05425e22f6a5/examples/flask_to_fastapi_migration)
 
 ## Overview
 
@@ -9877,7 +9877,7 @@ def list_users(request: Request):
 You can run the complete migration using our example script:
 
 ```bash
-git clone https://github.com/codegen-sh/codegen-examples.git
+git clone https://github.com/codegen-sh/graph-sitter-examples.git
 cd codegen-examples/flask_to_fastapi_migration
 python run.py
 ```
