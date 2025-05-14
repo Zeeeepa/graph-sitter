@@ -6,7 +6,7 @@ icon: "network-wired"
 iconType: "solid"
 ---
 
-This guide demonstrates how to use Codegen to generate high-quality training data for large language models (LLMs) by extracting function implementations along with their dependencies and usages. This approach is similar to [word2vec](https://www.tensorflow.org/text/tutorials/word2vec) or [node2vec](https://snap.stanford.edu/node2vec/) - given the context of a function, learn to predict the function's implementation.
+This guide demonstrates how to use Graph-sitter to generate high-quality training data for large language models (LLMs) by extracting function implementations along with their dependencies and usages. This approach is similar to [word2vec](https://www.tensorflow.org/text/tutorials/word2vec) or [node2vec](https://snap.stanford.edu/node2vec/) - given the context of a function, learn to predict the function's implementation.
 
 <Info>View the full code in our [examples repository](https://github.com/codegen-sh/graph-sitter/tree/develop/examples/examples/generate_training_data)</Info>
 
@@ -26,7 +26,7 @@ Let's walk through each step using Codegen.
 
 First, we will do a "graph expansion" for each function - grab the function's source, as well as the full source of all usages of the function and all dependencies.
 
-<Info>See [dependencies and usages](/building-with-codegen/dependencies-and-usages) to learn more about navigating the code graph</Info>
+<Info>See [dependencies and usages](/building-with-graph-sitter/dependencies-and-usages) to learn more about navigating the code graph</Info>
 
 First, let's import the types we need from Codegen:
 
@@ -148,7 +148,7 @@ def run(codebase: Codebase):
 
 Finally, we can run our training data generator on any codebase.
 
-<Note>See [parsing codebases](/building-with-codegen/parsing-codebases) to learn more</Note>
+<Note>See [parsing codebases](/building-with-graph-sitter/parsing-codebases) to learn more</Note>
 
 ```python
 if __name__ == "__main__":

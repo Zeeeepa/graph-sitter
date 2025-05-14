@@ -1,10 +1,10 @@
-# Contributing to Codegen
+# Contributing to Graph-sitter
 
-Thank you for your interest in contributing to Codegen! This document outlines the process and guidelines for contributing. If you have any questions, please join our [Slack Community](https://community.codegen.com) 😀.
+Thank you for your interest in contributing to Graph-sitter! This document outlines the process and guidelines for contributing. If you have any questions, please join our [Slack Community](https://community.codegen.com) 😀.
 
 ## Contributor License Agreement
 
-By contributing to Codegen, you agree that:
+By contributing to Graph-sitter, you agree that:
 
 1. Your contributions will be licensed under the project's license.
 1. You have the right to license your contribution under the project's license.

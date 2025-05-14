@@ -369,7 +369,7 @@ def my_db_query(
 ) -> None:
     from_record = (
         parent.proxy
-    )  # added by Codegen
+    )  # added by Graph-sitter
     from_logs: list[Log] = (
         db.session.execute(
             select(Log).where(
@@ -382,7 +382,7 @@ def my_db_query(
     for log in from_logs:
         log.proxy_id = to_record.id
     """
-    WRAP_REDUCE_MIGRATION_STRING_IDENTIFIER = "# added by Codegen"
+    WRAP_REDUCE_MIGRATION_STRING_IDENTIFIER = "# added by Graph-sitter"
     with get_codebase_session(tmpdir=tmpdir, files={"test.py": content}) as codebase:
         file = codebase.get_file("test.py")
         func = file.get_function("my_db_query")

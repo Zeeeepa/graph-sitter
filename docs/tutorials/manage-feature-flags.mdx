@@ -5,7 +5,7 @@ icon: "flag"
 iconType: "solid"
 ---
 
-Codegen has been used in production for multi-million line codebases to automatically delete "dead" (rolled-out) feature flags. This guide will walk you through analyzing feature flag usage and safely removing rolled out flags.
+Graph-sitter has been used in production for multi-million line codebases to automatically delete "dead" (rolled-out) feature flags. This guide will walk you through analyzing feature flag usage and safely removing rolled out flags.
 
 <Warning>
     Every codebase does feature flags differently. This guide shows common techniques and syntax but likely requires adaptation to codebase-specific circumstances.
@@ -13,7 +13,7 @@ Codegen has been used in production for multi-million line codebases to automati
 
 ## Analyzing Feature Flag Usage
 
-Before removing a feature flag, it's important to analyze its usage across the codebase. Codegen provides tools to help identify where and how feature flags are used.
+Before removing a feature flag, it's important to analyze its usage across the codebase. Graph-sitter provides tools to help identify where and how feature flags are used.
 
 ### For Python Codebases
 
@@ -61,16 +61,16 @@ else:
 This will output a table showing all feature flags and their usage counts, helping identify which flags are candidates for removal.
 
 <Tip>
-    Learn more about [Attributes](/building-with-codegen/class-api#class-attributes) and [tracking usages](/building-with-codegen/dependencies-and-usages) here
+    Learn more about [Attributes](/building-with-graph-sitter/class-api#class-attributes) and [tracking usages](/building-with-graph-sitter/dependencies-and-usages) here
 </Tip>
 
 
 ## Removing Rolled Out Flags
 
-Once you've identified a flag that's ready to be removed, Codegen can help safely delete it and its associated code paths.
+Once you've identified a flag that's ready to be removed, Graph-sitter can help safely delete it and its associated code paths.
 
 <Tip>
-    This primarily leverages Codegen's API for [reduction conditions](/building-with-codegen/reducing-conditions)
+    This primarily leverages Codegen's API for [reduction conditions](/building-with-graph-sitter/reducing-conditions)
 </Tip>
 
 ### Python Example
@@ -153,5 +153,5 @@ This will:
 
 
 ## Related Resources
-- [Reducing Conditions](/building-with-codegen/reducing-conditions) - Details on condition reduction APIs
+- [Reducing Conditions](/building-with-graph-sitter/reducing-conditions) - Details on condition reduction APIs
 - [Dead Code Removal](/tutorials/deleting-dead-code) - Remove unused code after flag deletion

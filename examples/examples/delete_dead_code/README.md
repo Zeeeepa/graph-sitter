@@ -50,8 +50,8 @@ The script (`run.py`) performs the dead code removal in several key steps:
 ## Running the Script
 
 ```bash
-# Install Codegen
-pip install codegen
+# Install Graph-sitter
+pip install graph-sitter
 
 # Run the script
 python run.py
@@ -75,7 +75,7 @@ python run.py
 ## Learn More
 
 - [Deleting Dead Code](https://graph-sitter.com/tutorials/deleting-dead-code)
-- [Codegen Documentation](https://graph-sitter.com)
+- [Graph-sitter Documentation](https://graph-sitter.com)
 
 ## Contributing
 

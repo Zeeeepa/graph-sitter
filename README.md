@@ -27,7 +27,7 @@
 ```python
 from codegen import Codebase
 
-# Codegen builds a complete graph connecting
+# Graph-sitter builds a complete graph connecting
 # functions, classes, imports and their relationships
 codebase = Codebase("./")
 
@@ -39,25 +39,25 @@ for function in codebase.functions:
         function.move_to_file("deprecated.py")
 ```
 
-Write code that transforms code. Codegen combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
 
 ## Installation and Usage
 
 We support
 
-- Running Codegen in Python 3.12 - 3.13 (recommended: Python 3.13+)
+- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
 - macOS and Linux
   - macOS is supported
   - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-codegen/codegen-with-wsl) for more details.
+  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
 - Python, Typescript, Javascript and React codebases
 
 ```
 # Install inside existing project
-uv pip install codegen
+uv pip install graph-sitter
 
 # Install global CLI
-uv tool install codegen --python 3.13
+uv tool install graph-sitter --python 3.13
 
 # Create a codemod for a given repo
 cd path/to/repo
@@ -100,13 +100,13 @@ If you run into additional issues not listed here, please [join our slack commun
 
 Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
 
-We built Codegen backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
 
 - **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
 
 - **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
 
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Codegen provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
 
 ## Contributing
 

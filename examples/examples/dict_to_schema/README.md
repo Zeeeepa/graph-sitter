@@ -92,8 +92,8 @@ class Service:
 ## Running the Conversion
 
 ```bash
-# Install Codegen
-pip install codegen
+# Install Graph-sitter
+pip install graph-sitter
 
 # Run the conversion
 python run.py
@@ -102,7 +102,7 @@ python run.py
 ## Learn More
 
 - [Pydantic Documentation](https://docs.pydantic.dev/)
-- [Codegen Documentation](https://graph-sitter.com)
+- [Graph-sitter Documentation](https://graph-sitter.com)
 
 ## Contributing
 
