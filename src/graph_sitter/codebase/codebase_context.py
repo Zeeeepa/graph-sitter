@@ -4,7 +4,7 @@ import os
 from collections import Counter, defaultdict
 from contextlib import contextmanager
 from enum import IntEnum, auto, unique
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from os import PathLike
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -215,23 +215,19 @@ class CodebaseContext:
     def __repr__(self):
         return self.__class__.__name__
 
-    @property
+    @cached_property
     def _graph(self) -> PyDiGraph[Importable, Edge]:
         if not self.__graph_ready:
             logger.info("Lazily Computing Graph")
             self.build_graph(self.projects[0].repo_operator)
         return self.__graph
 
-    @_graph.setter
-    def _graph(self, value: PyDiGraph[Importable, Edge]) -> None:
-        self.__graph = value
-
     @stopwatch
     @commiter
     def build_graph(self, repo_operator: RepoOperator) -> None:
         """Builds a codebase graph based on the current file state of the given repo operator"""
         self.__graph_ready = True
-        self._graph.clear()
+        self.__graph.clear()
 
         # =====[ Add all files to the graph in parallel ]=====
         syncs = defaultdict(lambda: [])
@@ -492,22 +488,22 @@ class CodebaseContext:
         for file_path in files_to_sync[SyncType.REPARSE]:
             file = self.get_file(file_path)
             file.remove_internal_edges()
-
-        task = self.progress.begin("Reparsing updated files", count=len(files_to_sync[SyncType.REPARSE]))
         files_to_resolve = []
-        # Step 4: Reparse updated files
-        for idx, file_path in enumerate(files_to_sync[SyncType.REPARSE]):
-            task.update(f"Reparsing {self.to_relative(file_path)}", count=idx)
-            file = self.get_file(file_path)
-            to_resolve.extend(file.unparse(reparse=True))
-            to_resolve = list(filter(lambda node: self.has_node(node.node_id) and node is not None, to_resolve))
-            file.sync_with_file_content()
-            files_to_resolve.append(file)
-        task.end()
+        if len(files_to_sync[SyncType.REPARSE]) > 0:
+            task = self.progress.begin("Reparsing updated files", count=len(files_to_sync[SyncType.REPARSE]))
+            # Step 4: Reparse updated files
+            for idx, file_path in enumerate(files_to_sync[SyncType.REPARSE]):
+                task.update(f"Reparsing {self.to_relative(file_path)}", count=idx)
+                file = self.get_file(file_path)
+                to_resolve.extend(file.unparse(reparse=True))
+                to_resolve = list(filter(lambda node: self.has_node(node.node_id) and node is not None, to_resolve))
+                file.sync_with_file_content()
+                files_to_resolve.append(file)
+            task.end()
         # Step 5: Add new files as nodes to graph (does not yet add edges)
-        task = self.progress.begin("Adding new files", count=len(files_to_sync[SyncType.ADD]))
+        task = self.progress.begin("Parsing new files", count=len(files_to_sync[SyncType.ADD]))
         for idx, filepath in enumerate(files_to_sync[SyncType.ADD]):
-            task.update(f"Adding {self.to_relative(filepath)}", count=idx)
+            task.update(f"Parsing {self.to_relative(filepath)}", count=idx)
             try:
                 content = self.io.read_text(filepath)
             except UnicodeDecodeError as e:
@@ -624,6 +620,10 @@ class CodebaseContext:
         return [(x[0], x[1], x[2].type, x[2].usage) for x in self._graph.weighted_edge_list()]
 
     def get_file(self, file_path: os.PathLike, ignore_case: bool = False) -> SourceFile | None:
+        # Performance hack: just use the relative path
+        node_id = self.filepath_idx.get(str(file_path), None)
+        if node_id is not None:
+            return self.get_node(node_id)
         # If not part of repo path, return None
         absolute_path = self.to_absolute(file_path)
         if not self.is_subdir(absolute_path) and not self.config.allow_external:
@@ -752,6 +752,7 @@ class CodebaseContext:
             return path.relative_to(self.repo_path)
         return path
 
+    @lru_cache(maxsize=10000)
     def is_subdir(self, path: PathLike | str) -> bool:
         path = self.to_absolute(path)
         return path == Path(self.repo_path) or path.is_relative_to(self.repo_path) or Path(self.repo_path) in path.parents

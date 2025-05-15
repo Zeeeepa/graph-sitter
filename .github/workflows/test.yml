@@ -38,6 +38,7 @@ jobs:
           uv run pytest \
             -n auto \
             --cov src \
+            --cov-report=json \
             --timeout 15 \
             -o junit_suite_name="${{github.job}}" \
             tests/unit
@@ -92,7 +93,7 @@ jobs:
   parse-tests:
     needs: access-check
     if: contains(github.event.pull_request.labels.*.name, 'parse-tests') || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest-32
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
