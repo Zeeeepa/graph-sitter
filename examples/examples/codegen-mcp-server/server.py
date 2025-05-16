@@ -167,7 +167,7 @@ They live in the `.codegen/codemods/{name}/{name.py}` directory, and take the fo
 ```python
 from graph_sitter import Codebase
 
-@codegen.function('{name}')
+@graph_sitter.function('{name}')
 def codemod(codebase: Codebase):
     for function in codebase.functions:
         if not function.usages:
@@ -355,9 +355,9 @@ async def run_codemod(
                 return {"error": "Invalid JSON in arguments parameter"}
 
         # Create a session for the codemod
-        from graph_sitter.cli.auth.session import CodegenSession
+        from graph_sitter.cli.auth.session import CliSession
 
-        session = CodegenSession(state.parsed_codebase.repo_path)
+        session = CliSession(state.parsed_codebase.repo_path)
         session.codebase = state.parsed_codebase
 
         # Capture output

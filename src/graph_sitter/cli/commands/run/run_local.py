@@ -5,7 +5,7 @@ import rich.progress
 from rich.panel import Panel
 from rich.status import Status
 
-from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.utils.function_finder import DecoratedFunction
 from graph_sitter.codebase.config import ProjectConfig
 from graph_sitter.codebase.progress.progress import Progress
@@ -80,7 +80,7 @@ def parse_codebase(
 
 
 def run_local(
-    session: CodegenSession,
+    session: CliSession,
     function: DecoratedFunction,
     diff_preview: int | None = None,
 ) -> None:
@@ -91,7 +91,7 @@ def run_local(
         function: The function to run
         diff_preview: Number of lines of diff to preview (None for all)
     """
-    rich.print("Parsing codebase at {session.repo_path} with subdirectories {function.subdirectories or 'ALL'} and language {function.language or 'AUTO'} ...")
+    rich.print(f"Parsing codebase at {session.repo_path} with subdirectories {function.subdirectories or 'ALL'} and language {function.language or 'AUTO'} ...")
     # Parse codebase and run
     codebase = parse_codebase(repo_path=session.repo_path, subdirectories=function.subdirectories, language=function.language)
     with Status("[bold]Running codemod...", spinner="dots") as status:
