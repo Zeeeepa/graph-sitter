@@ -83,7 +83,7 @@ import {Attribute} from '/snippets/Attribute.mdx';
 <HorizontalDivider />
 ### <span className="text-primary">ancestors</span>
 Find all ancestors of the node of the given type. Does not return itself
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1119-L1127" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1116-L1124" />
 
 
 <Return return_type={ <><span>list[</span> <a href="/api-reference/core/Editable" style={ {fontWeight: "inherit", fontSize: "inherit"} }>Editable</a> <span>]</span></> } description=""/>
@@ -145,7 +145,7 @@ Search for string literals matching given strings in the SymbolGroup.
 
 ### <span className="text-primary">flag</span>
 Adds a visual flag comment to the end of this Editable's source text.
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L939-L950" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L936-L947" />
 
 
 <Return return_type={ <><span>CodeFlag[</span> <a href="/api-reference/python/PyUnionType" style={ {fontWeight: "inherit", fontSize: "inherit"} }>PyUnionType</a> <span>]</span></> } description=""/>
@@ -153,7 +153,7 @@ Adds a visual flag comment to the end of this Editable's source text.
 
 ### <span className="text-primary">get_variable_usages</span>
 Returns Editables for all TreeSitter nodes corresponding to instances of variable usage
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L909-L925" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L906-L922" />
 
 <ParameterWrapper>
 <Parameter
@@ -274,7 +274,7 @@ Inserts source code before this symbol group.
 
 ### <span className="text-primary">is_child_of</span>
 Checks if this node is a descendant of the given editable instance in the AST.
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1109-L1116" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1106-L1113" />
 
 
 <Return return_type={ <code className="text-sm bg-gray-100 px-2 py-0.5 rounded">bool</code> } description=""/>
@@ -282,7 +282,7 @@ Checks if this node is a descendant of the given editable instance in the AST.
 
 ### <span className="text-primary">is_wrapped_in</span>
 Check if this node is contained another node of the given class
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1088-L1090" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1085-L1087" />
 
 
 <Return return_type={ <code className="text-sm bg-gray-100 px-2 py-0.5 rounded">bool</code> } description=""/>
@@ -290,7 +290,7 @@ Check if this node is contained another node of the given class
 
 ### <span className="text-primary">parent_of_type</span>
 Find the first ancestor of the node of the given type. Does not return itself
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1093-L1099" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1090-L1096" />
 
 
 <Return return_type={ <><a href="/api-reference/core/Editable" style={ {fontWeight: "inherit", fontSize: "inherit"} }>Editable</a> <span>| None</span></> } description=""/>
@@ -298,7 +298,7 @@ Find the first ancestor of the node of the given type. Does not return itself
 
 ### <span className="text-primary">parent_of_types</span>
 Find the first ancestor of the node of the given type. Does not return itself
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1101-L1107" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1098-L1104" />
 
 
 <Return return_type={ <><a href="/api-reference/core/Editable" style={ {fontWeight: "inherit", fontSize: "inherit"} }>Editable</a> <span>| None</span></> } description=""/>
@@ -306,7 +306,7 @@ Find the first ancestor of the node of the given type. Does not return itself
 
 ### <span className="text-primary">reduce_condition</span>
 Reduces an editable to the following condition
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1044-L1049" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1041-L1046" />
 
 
 <Return return_type={ <code className="text-sm bg-gray-100 px-2 py-0.5 rounded">None</code> } description=""/>

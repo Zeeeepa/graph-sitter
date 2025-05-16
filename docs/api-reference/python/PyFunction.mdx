@@ -279,7 +279,7 @@ Adds statements to the end of a function body.
 
 ### <span className="text-primary">ancestors</span>
 Find all ancestors of the node of the given type. Does not return itself
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1119-L1127" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1116-L1124" />
 
 
 <Return return_type={ <><span>list[</span> <a href="/api-reference/core/Editable" style={ {fontWeight: "inherit", fontSize: "inherit"} }>Editable</a> <span>]</span></> } description=""/>
@@ -353,7 +353,7 @@ Replace the source of this node with new_src.
 
 ### <span className="text-primary">find</span>
 Find and return matching nodes or substrings within an Editable instance.
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L487-L504" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L484-L501" />
 
 <ParameterWrapper>
 <Parameter
@@ -376,7 +376,7 @@ Find and return matching nodes or substrings within an Editable instance.
 
 ### <span className="text-primary">find_string_literals</span>
 Returns a list of string literals within this node's source that match any of the given
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L398-L412" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L395-L409" />
 
 <ParameterWrapper>
 <Parameter
@@ -501,7 +501,7 @@ Retrieves a parameter from the callable by its type.
 
 ### <span className="text-primary">get_variable_usages</span>
 Returns Editables for all TreeSitter nodes corresponding to instances of variable usage
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L909-L925" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L906-L922" />
 
 <ParameterWrapper>
 <Parameter
@@ -524,7 +524,7 @@ Returns Editables for all TreeSitter nodes corresponding to instances of variabl
 
 ### <span className="text-primary">insert_after</span>
 Inserts code after this node.
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L608-L634" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L605-L631" />
 
 <ParameterWrapper>
 <Parameter
@@ -635,7 +635,7 @@ Inserts lines of code into the function body at the specified index.
 
 ### <span className="text-primary">is_child_of</span>
 Checks if this node is a descendant of the given editable instance in the AST.
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1109-L1116" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1106-L1113" />
 
 
 <Return return_type={ <code className="text-sm bg-gray-100 px-2 py-0.5 rounded">bool</code> } description=""/>
@@ -643,7 +643,7 @@ Checks if this node is a descendant of the given editable instance in the AST.
 
 ### <span className="text-primary">is_wrapped_in</span>
 Check if this node is contained another node of the given class
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1088-L1090" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1085-L1087" />
 
 
 <Return return_type={ <code className="text-sm bg-gray-100 px-2 py-0.5 rounded">bool</code> } description=""/>
@@ -680,7 +680,7 @@ Moves the given symbol to a new file and updates its imports and references.
 
 ### <span className="text-primary">parent_of_type</span>
 Find the first ancestor of the node of the given type. Does not return itself
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1093-L1099" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1090-L1096" />
 
 
 <Return return_type={ <><a href="/api-reference/core/Editable" style={ {fontWeight: "inherit", fontSize: "inherit"} }>Editable</a> <span>| None</span></> } description=""/>
@@ -688,7 +688,7 @@ Find the first ancestor of the node of the given type. Does not return itself
 
 ### <span className="text-primary">parent_of_types</span>
 Find the first ancestor of the node of the given type. Does not return itself
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1101-L1107" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1098-L1104" />
 
 
 <Return return_type={ <><a href="/api-reference/core/Editable" style={ {fontWeight: "inherit", fontSize: "inherit"} }>Editable</a> <span>| None</span></> } description=""/>
@@ -713,7 +713,7 @@ Prepends statements to the start of the function body.
 
 ### <span className="text-primary">reduce_condition</span>
 Reduces an editable to the following condition
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1044-L1049" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L1041-L1046" />
 
 
 <Return return_type={ <code className="text-sm bg-gray-100 px-2 py-0.5 rounded">None</code> } description=""/>
@@ -721,7 +721,7 @@ Reduces an editable to the following condition
 
 ### <span className="text-primary">remove</span>
 Deletes this Node and its related extended nodes (e.g. decorators, comments).
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L687-L702" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L684-L699" />
 
 <ParameterWrapper>
 <Parameter
@@ -802,7 +802,7 @@ Renames a local variable and all its usages within a function body.
 
 ### <span className="text-primary">replace</span>
 Search and replace occurrences of text within this node's source and its extended nodes.
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L432-L456" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L429-L453" />
 
 <ParameterWrapper>
 <Parameter
@@ -843,7 +843,7 @@ Search and replace occurrences of text within this node's source and its extende
 
 ### <span className="text-primary">search</span>
 Returns a list of all regex match of `regex_pattern`, similar to python's re.search().
-<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L520-L536" />
+<GithubLinkNote link="https://github.com/codegen-sh/graph-sitter/blob/develop/src/graph_sitter/core/interfaces/editable.py#L517-L533" />
 
 <ParameterWrapper>
 <Parameter
