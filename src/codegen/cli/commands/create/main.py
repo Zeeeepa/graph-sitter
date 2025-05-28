@@ -3,17 +3,17 @@ from pathlib import Path
 import rich
 import rich_click as click
 
-from codegen.cli.api.client import RestAPI
-from codegen.cli.auth.constants import PROMPTS_DIR
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.auth.token_manager import get_current_token
-from codegen.cli.codemod.convert import convert_to_cli
-from codegen.cli.errors import ServerError
-from codegen.cli.rich.codeblocks import format_command, format_path
-from codegen.cli.rich.pretty_print import pretty_print_error
-from codegen.cli.rich.spinners import create_spinner
-from codegen.cli.utils.default_code import DEFAULT_CODEMOD
-from codegen.cli.workspace.decorators import requires_init
+from graph_sitter.cli.api.client import RestAPI
+from graph_sitter.cli.auth.constants import PROMPTS_DIR
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.token_manager import get_current_token
+from graph_sitter.cli.codemod.convert import convert_to_cli
+from graph_sitter.cli.errors import ServerError
+from graph_sitter.cli.rich.codeblocks import format_command, format_path
+from graph_sitter.cli.rich.pretty_print import pretty_print_error
+from graph_sitter.cli.rich.spinners import create_spinner
+from graph_sitter.cli.utils.default_code import DEFAULT_CODEMOD
+from graph_sitter.cli.workspace.decorators import requires_init
 
 
 def get_prompts_dir() -> Path:

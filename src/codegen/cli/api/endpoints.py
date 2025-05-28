@@ -1,4 +1,4 @@
-from codegen.cli.api.modal import MODAL_PREFIX
+from graph_sitter.cli.api.modal import MODAL_PREFIX
 
 RUN_ENDPOINT = f"https://{MODAL_PREFIX}--cli-run.modal.run"
 DOCS_ENDPOINT = f"https://{MODAL_PREFIX}--cli-docs.modal.run"

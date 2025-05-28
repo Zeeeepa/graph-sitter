@@ -8,8 +8,8 @@ import rich
 from rich.box import ROUNDED
 from rich.panel import Panel
 
-from codegen.cli.commands.start.docker_container import DockerContainer
-from codegen.cli.commands.start.docker_fleet import CODEGEN_RUNNER_IMAGE
+from graph_sitter.cli.commands.start.docker_container import DockerContainer
+from graph_sitter.cli.commands.start.docker_fleet import CODEGEN_RUNNER_IMAGE
 from codegen.configs.models.secrets import SecretsConfig
 from codegen.git.repo_operator.local_git_repo import LocalGitRepo
 from codegen.git.schemas.repo_config import RepoConfig

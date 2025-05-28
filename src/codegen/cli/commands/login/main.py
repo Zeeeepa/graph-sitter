@@ -1,7 +1,7 @@
 import rich_click as click
 
-from codegen.cli.auth.login import login_routine
-from codegen.cli.auth.token_manager import get_current_token
+from graph_sitter.cli.auth.login import login_routine
+from graph_sitter.cli.auth.token_manager import get_current_token
 
 
 @click.command(name="login")

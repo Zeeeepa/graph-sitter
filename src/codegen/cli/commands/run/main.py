@@ -3,11 +3,11 @@ import os
 
 import rich_click as click
 
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.utils.codemod_manager import CodemodManager
-from codegen.cli.utils.json_schema import validate_json
-from codegen.cli.workspace.decorators import requires_init
-from codegen.cli.workspace.venv_manager import VenvManager
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.utils.codemod_manager import CodemodManager
+from graph_sitter.cli.utils.json_schema import validate_json
+from graph_sitter.cli.workspace.decorators import requires_init
+from graph_sitter.cli.workspace.venv_manager import VenvManager
 
 
 @click.command(name="run")
@@ -57,14 +57,14 @@ def run_command(
 
     # Run the codemod
     if web:
-        from codegen.cli.commands.run.run_cloud import run_cloud
+        from graph_sitter.cli.commands.run.run_cloud import run_cloud
 
         run_cloud(session, codemod, diff_preview=diff_preview)
     elif daemon:
-        from codegen.cli.commands.run.run_daemon import run_daemon
+        from graph_sitter.cli.commands.run.run_daemon import run_daemon
 
         run_daemon(session, codemod, diff_preview=diff_preview)
     else:
-        from codegen.cli.commands.run.run_local import run_local
+        from graph_sitter.cli.commands.run.run_local import run_local
 
         run_local(session, codemod, diff_preview=diff_preview)

@@ -6,16 +6,16 @@ import requests
 import rich
 from rich.status import Status
 
-from codegen.cli.api.client import RestAPI
-from codegen.cli.api.endpoints import CODEGEN_SYSTEM_PROMPT_URL
-from codegen.cli.auth.constants import CODEGEN_DIR, DOCS_DIR, EXAMPLES_DIR, PROMPTS_DIR
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.auth.token_manager import get_current_token
-from codegen.cli.rich.spinners import create_spinner
-from codegen.cli.utils.notebooks import create_notebook
-from codegen.cli.workspace.docs_workspace import populate_api_docs
-from codegen.cli.workspace.examples_workspace import populate_examples
-from codegen.cli.workspace.venv_manager import VenvManager
+from graph_sitter.cli.api.client import RestAPI
+from graph_sitter.cli.api.endpoints import CODEGEN_SYSTEM_PROMPT_URL
+from graph_sitter.cli.auth.constants import CODEGEN_DIR, DOCS_DIR, EXAMPLES_DIR, PROMPTS_DIR
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.token_manager import get_current_token
+from graph_sitter.cli.rich.spinners import create_spinner
+from graph_sitter.cli.utils.notebooks import create_notebook
+from graph_sitter.cli.workspace.docs_workspace import populate_api_docs
+from graph_sitter.cli.workspace.examples_workspace import populate_examples
+from graph_sitter.cli.workspace.venv_manager import VenvManager
 
 
 def initialize_codegen(session: CodegenSession, status: Status | str = "Initializing", fetch_docs: bool = False) -> CodegenSession:

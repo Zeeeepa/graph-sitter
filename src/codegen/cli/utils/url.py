@@ -1,7 +1,7 @@
 from enum import Enum
 
-from codegen.cli.env.enums import Environment
-from codegen.cli.env.global_env import global_env
+from graph_sitter.cli.env.enums import Environment
+from graph_sitter.cli.env.global_env import global_env
 
 
 class DomainRegistry(Enum):

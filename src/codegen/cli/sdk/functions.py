@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from codegen.cli.api.client import RestAPI
-from codegen.cli.api.schemas import CodemodRunType, RunCodemodOutput
-from codegen.cli.auth.token_manager import get_current_token
-from codegen.cli.utils.codemods import Codemod
-from codegen.cli.utils.schema import CodemodConfig
+from graph_sitter.cli.api.client import RestAPI
+from graph_sitter.cli.api.schemas import CodemodRunType, RunCodemodOutput
+from graph_sitter.cli.auth.token_manager import get_current_token
+from graph_sitter.cli.utils.codemods import Codemod
+from graph_sitter.cli.utils.schema import CodemodConfig
 
 
 @dataclass

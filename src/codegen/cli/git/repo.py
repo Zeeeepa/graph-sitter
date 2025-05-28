@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pygit2.repository import Repository
 
-from codegen.cli.git.folder import get_git_folder
+from graph_sitter.cli.git.folder import get_git_folder
 
 
 # TODO: move to codegen.git module

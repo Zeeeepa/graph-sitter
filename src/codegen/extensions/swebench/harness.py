@@ -13,7 +13,7 @@ import lox
 from codegen import Codebase
 from codegen.agents.code_agent import CodeAgent
 from codegen.configs.models.codebase import CodebaseConfig
-from codegen.extensions.swebench.utils import (
+from graph_sitter.extensions.swebench.utils import (
     SweBenchExample,
     get_swe_bench_examples,
     load_predictions,

@@ -2,8 +2,8 @@ import os
 
 from dotenv import find_dotenv, load_dotenv
 
-from codegen.cli.env.constants import DEFAULT_ENV
-from codegen.cli.env.enums import Environment
+from graph_sitter.cli.env.constants import DEFAULT_ENV
+from graph_sitter.cli.env.enums import Environment
 
 
 class GlobalEnv:

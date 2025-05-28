@@ -5,8 +5,8 @@ import rich
 from github import BadCredentialsException
 from github.MainClass import Github
 
-from codegen.cli.git.repo import get_git_repo
-from codegen.cli.rich.codeblocks import format_command
+from graph_sitter.cli.git.repo import get_git_repo
+from graph_sitter.cli.rich.codeblocks import format_command
 from codegen.configs.constants import CODEGEN_DIR_NAME, ENV_FILENAME
 from codegen.configs.session_manager import session_manager
 from codegen.configs.user_config import UserConfig

@@ -1,7 +1,7 @@
 import rich
 import rich_click as click
 
-from codegen.cli.auth.token_manager import TokenManager
+from graph_sitter.cli.auth.token_manager import TokenManager
 
 
 @click.command(name="logout")
