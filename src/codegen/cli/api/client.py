@@ -5,7 +5,7 @@ import requests
 from pydantic import BaseModel
 from rich import print as rprint
 
-from graph_sitter.cli.api.endpoints import (
+from codegen.cli.api.endpoints import (
     CREATE_ENDPOINT,
     DEPLOY_ENDPOINT,
     DOCS_ENDPOINT,
@@ -17,7 +17,7 @@ from graph_sitter.cli.api.endpoints import (
     RUN_ENDPOINT,
     RUN_ON_PR_ENDPOINT,
 )
-from graph_sitter.cli.api.schemas import (
+from codegen.cli.api.schemas import (
     AskExpertInput,
     AskExpertResponse,
     CodemodRunType,
@@ -41,8 +41,8 @@ from graph_sitter.cli.api.schemas import (
 )
 from graph_sitter.cli.auth.session import CodegenSession
 from graph_sitter.cli.codemod.convert import convert_to_ui
-from graph_sitter.cli.env.global_env import global_env
-from graph_sitter.cli.errors import InvalidTokenError, ServerError
+from codegen.cli.env.global_env import global_env
+from codegen.cli.errors import InvalidTokenError, ServerError
 from graph_sitter.cli.utils.codemods import Codemod
 from graph_sitter.cli.utils.function_finder import DecoratedFunction
 from codegen.shared.enums.programming_language import ProgrammingLanguage

@@ -1,10 +1,10 @@
 import rich
 import rich_click as click
 
-from graph_sitter.cli.api.client import RestAPI
-from graph_sitter.cli.auth.decorators import requires_auth
+from codegen.cli.api.client import RestAPI
+from codegen.cli.auth.decorators import requires_auth
 from graph_sitter.cli.auth.session import CodegenSession
-from graph_sitter.cli.auth.token_manager import get_current_token
+from codegen.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.rich.spinners import create_spinner
 from graph_sitter.cli.utils.codemod_manager import CodemodManager
 

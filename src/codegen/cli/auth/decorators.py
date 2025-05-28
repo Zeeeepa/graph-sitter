@@ -4,10 +4,10 @@ from collections.abc import Callable
 import click
 import rich
 
-from graph_sitter.cli.auth.login import login_routine
+from codegen.cli.auth.login import login_routine
 from graph_sitter.cli.auth.session import CodegenSession
-from graph_sitter.cli.auth.token_manager import TokenManager, get_current_token
-from graph_sitter.cli.errors import AuthError
+from codegen.cli.auth.token_manager import TokenManager, get_current_token
+from codegen.cli.errors import AuthError
 from graph_sitter.cli.rich.pretty_print import pretty_print_error
 
 

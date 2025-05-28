@@ -1,5 +1,5 @@
-from graph_sitter.cli.env.enums import Environment
-from graph_sitter.cli.env.global_env import global_env
+from codegen.cli.env.enums import Environment
+from codegen.cli.env.global_env import global_env
 
 
 def get_modal_workspace():

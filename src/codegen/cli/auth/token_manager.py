@@ -2,9 +2,9 @@ import json
 import os
 from pathlib import Path
 
-from graph_sitter.cli.api.client import RestAPI
+from codegen.cli.api.client import RestAPI
 from graph_sitter.cli.auth.constants import AUTH_FILE, CONFIG_DIR
-from graph_sitter.cli.errors import AuthError
+from codegen.cli.errors import AuthError
 
 
 class TokenManager:
