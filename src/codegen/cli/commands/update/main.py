@@ -7,7 +7,7 @@ import rich
 import rich_click as click
 from packaging.version import Version
 
-import codegen
+import graph_sitter
 
 
 def fetch_pypi_releases(package: str) -> list[str]:

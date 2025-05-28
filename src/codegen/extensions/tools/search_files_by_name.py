@@ -7,7 +7,7 @@ from pydantic import Field
 
 from codegen.extensions.tools.observation import Observation
 from codegen.sdk.core.codebase import Codebase
-from codegen.shared.logging.get_logger import get_logger
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 

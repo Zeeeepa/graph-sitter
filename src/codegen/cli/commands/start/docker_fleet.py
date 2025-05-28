@@ -1,7 +1,7 @@
 import docker
 from docker.errors import NotFound
 
-from codegen.cli.commands.start.docker_container import DockerContainer
+from graph_sitter.cli.commands.start.docker_container import DockerContainer
 
 CODEGEN_RUNNER_IMAGE = "codegen-runner"
 

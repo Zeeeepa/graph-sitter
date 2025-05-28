@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage
 from codegen.extensions.langchain.agent import create_chat_agent
 
 if TYPE_CHECKING:
-    from codegen import Codebase
+    from graph_sitter import Codebase
 
 
 class ChatAgent:

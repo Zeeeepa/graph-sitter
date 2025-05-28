@@ -3,7 +3,7 @@ from pathlib import Path
 
 import rich_click as click
 
-from codegen.cli.utils.function_finder import DecoratedFunction, find_codegen_functions
+from graph_sitter.cli.utils.function_finder import DecoratedFunction, find_codegen_functions
 
 
 def _might_have_decorators(file_path: Path) -> bool:

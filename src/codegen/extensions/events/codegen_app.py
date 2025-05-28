@@ -4,10 +4,10 @@ from typing import Any, Optional
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 
-from codegen.configs.models.codebase import CodebaseConfig
-from codegen.configs.models.secrets import SecretsConfig
+from graph_sitter.configs.models.codebase import CodebaseConfig
+from graph_sitter.configs.models.secrets import SecretsConfig
 from codegen.sdk.core.codebase import Codebase
-from codegen.shared.logging.get_logger import get_logger
+from graph_sitter.shared.logging.get_logger import get_logger
 
 from .github import GitHub
 from .linear import Linear

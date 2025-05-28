@@ -1,4 +1,4 @@
-from codegen.extensions.swebench.enums import SWEBenchLiteSubset
+from graph_sitter.extensions.swebench.enums import SWEBenchLiteSubset
 
 SMALL_LITE_SUBSET = [
     "mwaskom__seaborn-2848",

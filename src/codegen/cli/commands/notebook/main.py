@@ -4,11 +4,11 @@ from pathlib import Path
 
 import rich_click as click
 
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.rich.spinners import create_spinner
-from codegen.cli.utils.notebooks import create_notebook
-from codegen.cli.workspace.decorators import requires_init
-from codegen.cli.workspace.venv_manager import VenvManager
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.rich.spinners import create_spinner
+from graph_sitter.cli.utils.notebooks import create_notebook
+from graph_sitter.cli.workspace.decorators import requires_init
+from graph_sitter.cli.workspace.venv_manager import VenvManager
 
 
 def create_jupyter_dir(codegen_dir: Path) -> Path:

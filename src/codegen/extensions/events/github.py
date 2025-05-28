@@ -7,8 +7,8 @@ from github import Github
 from pydantic import BaseModel
 
 from codegen.extensions.events.interface import EventHandlerManagerProtocol
-from codegen.extensions.github.types.base import GitHubInstallation, GitHubWebhookPayload
-from codegen.shared.logging.get_logger import get_logger
+from graph_sitter.extensions.github.types.base import GitHubInstallation, GitHubWebhookPayload
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
