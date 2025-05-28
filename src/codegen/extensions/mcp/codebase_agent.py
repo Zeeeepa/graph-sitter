@@ -5,7 +5,7 @@ from mcp.server.fastmcp import FastMCP
 
 from codegen.extensions.langchain.agent import create_codebase_inspector_agent
 from codegen.sdk.core.codebase import Codebase
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 # Initialize FastMCP server
 

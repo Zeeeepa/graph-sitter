@@ -10,7 +10,7 @@ from langchain_core.tools.base import BaseTool
 from langgraph.prebuilt import InjectedStore
 from pydantic import BaseModel, Field
 
-from codegen.extensions.linear.linear_client import LinearClient
+from graph_sitter.extensions.linear.linear_client import LinearClient
 from codegen.extensions.tools.bash import run_bash_command
 from codegen.extensions.tools.github.checkout_pr import checkout_pr
 from codegen.extensions.tools.github.view_pr_checks import view_pr_checks

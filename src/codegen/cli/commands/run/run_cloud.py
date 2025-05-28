@@ -8,7 +8,7 @@ from rich.panel import Panel
 from codegen.cli.api.client import RestAPI
 from graph_sitter.cli.auth.session import CodegenSession
 from codegen.cli.auth.token_manager import get_current_token
-from codegen.cli.errors import ServerError
+from graph_sitter.cli.errors import ServerError
 from graph_sitter.cli.git.patch import apply_patch
 from graph_sitter.cli.rich.codeblocks import format_command
 from graph_sitter.cli.rich.spinners import create_spinner

@@ -6,7 +6,7 @@ import rich_click as click
 from codegen.cli.api.webapp_routes import USER_SECRETS_ROUTE
 from codegen.cli.auth.token_manager import TokenManager
 from codegen.cli.env.global_env import global_env
-from codegen.cli.errors import AuthError
+from graph_sitter.cli.errors import AuthError
 
 
 def login_routine(token: str | None = None) -> str:
