@@ -2,8 +2,8 @@ import functools
 import sys
 from collections.abc import Callable
 
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.rich.pretty_print import pretty_print_error
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.rich.pretty_print import pretty_print_error
 
 
 def requires_init(f: Callable) -> Callable:

@@ -4,8 +4,8 @@ import rich
 import rich_click as click
 from rich.table import Table
 
-from codegen.cli.rich.codeblocks import format_codeblock, format_command
-from codegen.cli.utils.codemod_manager import CodemodManager
+from graph_sitter.cli.rich.codeblocks import format_codeblock, format_command
+from graph_sitter.cli.utils.codemod_manager import CodemodManager
 
 
 @click.command(name="list")

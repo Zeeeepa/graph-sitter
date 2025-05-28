@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from pydantic.fields import Field
 
-import codegen.cli.sdk.decorator
-from codegen.cli.utils.count_functions_2 import NumberType
+import graph_sitter.cli.sdk.decorator
+from graph_sitter.cli.utils.count_functions_2 import NumberType
 
 # from app.codemod.compilation.models.context import CodemodContext
 # from app.codemod.compilation.models.pr_options import PROptions

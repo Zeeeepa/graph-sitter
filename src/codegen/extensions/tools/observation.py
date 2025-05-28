@@ -6,7 +6,7 @@ from typing import Any, ClassVar, Optional
 from langchain_core.messages import ToolMessage
 from pydantic import BaseModel, Field
 
-from codegen.shared.logging.get_logger import get_logger
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 

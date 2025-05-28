@@ -6,9 +6,9 @@ from typing import Literal, Optional
 
 from datasets import load_dataset
 
-from codegen.extensions.swebench.enums import SWEBenchDataset, SWEBenchLiteSubset
-from codegen.extensions.swebench.subsets import LITE_SUBSETS
-from codegen.extensions.swebench.success_rates import LITE_SUCCESS_RATES
+from graph_sitter.extensions.swebench.enums import SWEBenchDataset, SWEBenchLiteSubset
+from graph_sitter.extensions.swebench.subsets import LITE_SUBSETS
+from graph_sitter.extensions.swebench.success_rates import LITE_SUCCESS_RATES
 
 
 @dataclass

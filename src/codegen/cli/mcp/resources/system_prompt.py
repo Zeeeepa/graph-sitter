@@ -10,7 +10,7 @@ iconType: "solid"
 
 It provides a scriptable interface to a powerful, multi-lingual language server built on top of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/).
 
-export const metaCode = `from codegen import Codebase
+export const metaCode = `from graph_sitter import Codebase
 
 # Codegen builds a complete graph connecting
 # functions, classes, imports and their relationships
@@ -209,7 +209,7 @@ codegen notebook --demo
 Instantiating a [Codebase](/api-reference/core/Codebase) will automatically parse a codebase and make it available for manipulation.
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Clone + parse fastapi/fastapi
 codebase = Codebase.from_repo('fastapi/fastapi')
@@ -836,7 +836,7 @@ At the heart of Codegen is a comprehensive graph representation of your code. Wh
 
 ```python
 # Initialize and analyze the codebase
-from codegen import Codebase
+from graph_sitter import Codebase
 codebase = Codebase("./")
 
 # Access pre-computed relationships
@@ -1325,8 +1325,8 @@ The primary entrypoint to programs leveraging Codegen is the [Codebase](/api-ref
 Construct a Codebase by passing in a path to a local `git` repository or any subfolder within it. The path must be within a git repository (i.e., somewhere in the parent directory tree must contain a `.git` folder).
 
 ```python
-from codegen import Codebase
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter import Codebase
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 # Parse from a git repository root
 codebase = Codebase("path/to/repository")
@@ -1358,8 +1358,8 @@ codebase = Codebase("./", programming_language=ProgrammingLanguage.TYPESCRIPT)
 To fetch and parse a repository directly from GitHub, use the `from_repo` function.
 
 ```python
-import codegen
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+import graph_sitter
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 # Fetch and parse a repository (defaults to /tmp/codegen/{repo_name})
 codebase = codegen.from_repo('fastapi/fastapi')
@@ -1384,9 +1384,9 @@ codebase = codegen.from_repo(
 You can customize the behavior of your Codebase instance by passing a `CodebaseConfig` object. This allows you to configure secrets (like API keys) and toggle specific features:
 
 ```python
-from codegen import Codebase
-from codegen.configs.models.codebase import CodebaseConfig
-from codegen.configs.models.secrets import SecretsConfig
+from graph_sitter import Codebase
+from graph_sitter.configs.models.codebase import CodebaseConfig
+from graph_sitter.configs.models.secrets import SecretsConfig
 
 codebase = Codebase(
     "path/to/repository",
@@ -1415,11 +1415,11 @@ For more complex scenarios, Codegen supports an advanced initialization mode usi
 Here's an example:
 
 ```python
-from codegen import Codebase
-from codegen.git.repo_operator.repo_operator import RepoOperator
-from codegen.git.schemas.repo_config import RepoConfig
+from graph_sitter import Codebase
+from graph_sitter.git.repo_operator.repo_operator import RepoOperator
+from graph_sitter.git.schemas.repo_config import RepoConfig
 from codegen.sdk.codebase.config import ProjectConfig
-from codegen.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 codebase = Codebase(
     projects = [
@@ -1467,8 +1467,8 @@ codegen create rename-function
 This creates a new codemod in your `.codegen/codemods` directory:
 
 ```python
-import codegen
-from codegen import Codebase
+import graph_sitter
+from graph_sitter import Codebase
 
 @codegen.function("rename-function")
 def run(codebase: Codebase):
@@ -1518,8 +1518,8 @@ A codemod consists of three main parts:
 3. Your transformation logic using the Codebase API
 
 ```python
-import codegen
-from codegen import Codebase
+import graph_sitter
+from graph_sitter import Codebase
 
 @codegen.function("update-imports")
 def run(codebase: Codebase):
@@ -1665,7 +1665,7 @@ Use `codegen list` to see all codemods in your project.
 The `jupyter/` directory contains notebooks for interactive development:
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Initialize codebase
 codebase = Codebase('../../')
@@ -1768,7 +1768,7 @@ Codegen provides first-class support for both Python and TypeScript codebases. T
 When you create a new `Codebase` instance, Codegen automatically detects the programming language:
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Automatically detects Python or TypeScript
 codebase = Codebase("./")
@@ -1891,7 +1891,7 @@ You can manage your codebase's state with two core APIs:
 When you make changes to your codebase through Codegen's APIs, they aren't immediately written to disk. You need to explicitly commit them with [codebase.commit()](/api-reference/core/Codebase#commit):
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 codebase = Codebase("./")
 
@@ -4551,7 +4551,7 @@ This guide covers the core APIs and patterns for working with type annotations i
 Codegen builds a complete dependency graph of your codebase, connecting functions, classes, imports, and their relationships. This enables powerful type resolution capabilities:
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Initialize codebase with dependency graph
 codebase = Codebase("./")
@@ -6376,7 +6376,7 @@ First, we'll set up our codebase, graph and configure some basic parameters:
 
 ```python
 import networkx as nx
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Initialize codebase
 codebase = Codebase("path/to/posthog/")
@@ -6768,8 +6768,8 @@ First, we will do a "graph expansion" for each function - grab the function's so
 First, let's import the types we need from Codegen:
 
 ```python
-import codegen
-from codegen import Codebase
+import graph_sitter
+from graph_sitter import Codebase
 from codegen.sdk.core.external_module import ExternalModule
 from codegen.sdk.core.import_resolution import Import
 from codegen.sdk.core.symbol import Symbol
@@ -9723,7 +9723,7 @@ First, we need to update Flask imports to their FastAPI equivalents and modify t
 </Tip>
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Parse the codebase
 codebase = Codebase("./")

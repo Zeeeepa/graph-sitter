@@ -4,7 +4,7 @@ import time
 
 import rich_click as click
 
-from codegen.cli.rich.spinners import create_spinner
+from graph_sitter.cli.rich.spinners import create_spinner
 
 
 @click.command(name="style-debug")

@@ -2,13 +2,13 @@ import rich
 import rich_click as click
 from rich.panel import Panel
 
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.commands.start.docker_container import DockerContainer
-from codegen.cli.errors import ServerError
-from codegen.cli.rich.codeblocks import format_command
-from codegen.cli.rich.spinners import create_spinner
-from codegen.runner.clients.docker_client import DockerClient
-from codegen.runner.enums.warmup_state import WarmupState
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.commands.start.docker_container import DockerContainer
+from graph_sitter.cli.errors import ServerError
+from graph_sitter.cli.rich.codeblocks import format_command
+from graph_sitter.cli.rich.spinners import create_spinner
+from graph_sitter.runner.clients.docker_client import DockerClient
+from graph_sitter.runner.enums.warmup_state import WarmupState
 
 
 def run_daemon(session: CodegenSession, function, diff_preview: int | None = None):

@@ -4,8 +4,8 @@ import click
 from pygit2.enums import FileStatus, ResetMode
 from pygit2.repository import Repository
 
-from codegen.cli.auth.constants import CODEGEN_DIR
-from codegen.cli.git.repo import get_git_repo
+from graph_sitter.cli.auth.constants import CODEGEN_DIR
+from graph_sitter.cli.git.repo import get_git_repo
 
 
 def is_codegen_file(filepath: Path) -> bool:

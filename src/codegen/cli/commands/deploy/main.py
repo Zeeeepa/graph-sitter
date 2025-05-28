@@ -7,10 +7,10 @@ import rich_click as click
 from codegen.cli.api.client import RestAPI
 from codegen.cli.auth.decorators import requires_auth
 from codegen.cli.auth.token_manager import get_current_token
-from codegen.cli.rich.codeblocks import format_command
-from codegen.cli.rich.spinners import create_spinner
-from codegen.cli.utils.codemod_manager import CodemodManager
-from codegen.cli.utils.function_finder import DecoratedFunction
+from graph_sitter.cli.rich.codeblocks import format_command
+from graph_sitter.cli.rich.spinners import create_spinner
+from graph_sitter.cli.utils.codemod_manager import CodemodManager
+from graph_sitter.cli.utils.function_finder import DecoratedFunction
 
 
 def deploy_functions(functions: list[DecoratedFunction], message: str | None = None) -> None:

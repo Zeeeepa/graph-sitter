@@ -4,11 +4,11 @@ from pathlib import Path
 import rich
 import rich_click as click
 
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.commands.init.render import get_success_message
-from codegen.cli.rich.codeblocks import format_command
-from codegen.cli.workspace.initialize_workspace import initialize_codegen
-from codegen.shared.path import get_git_root_path
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.commands.init.render import get_success_message
+from graph_sitter.cli.rich.codeblocks import format_command
+from graph_sitter.cli.workspace.initialize_workspace import initialize_codegen
+from graph_sitter.shared.path import get_git_root_path
 
 
 @click.command(name="init")

@@ -4,8 +4,8 @@ import os
 from slack_sdk import WebClient
 
 from codegen.extensions.events.interface import EventHandlerManagerProtocol
-from codegen.extensions.slack.types import SlackWebhookPayload
-from codegen.shared.logging.get_logger import get_logger
+from graph_sitter.extensions.slack.types import SlackWebhookPayload
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)

@@ -3,10 +3,10 @@ import rich_click as click
 
 from codegen.cli.api.client import RestAPI
 from codegen.cli.auth.decorators import requires_auth
-from codegen.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.session import CodegenSession
 from codegen.cli.auth.token_manager import get_current_token
-from codegen.cli.rich.spinners import create_spinner
-from codegen.cli.utils.codemod_manager import CodemodManager
+from graph_sitter.cli.rich.spinners import create_spinner
+from graph_sitter.cli.utils.codemod_manager import CodemodManager
 
 
 def run_on_pr(session: CodegenSession, codemod_name: str, pr_number: int) -> None:

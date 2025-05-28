@@ -4,8 +4,8 @@ from pathlib import Path
 from rich.status import Status
 
 from codegen.cli.api.schemas import SerializedExample
-from codegen.cli.auth.session import CodegenSession
-from codegen.cli.codemod.convert import convert_to_cli
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.codemod.convert import convert_to_cli
 
 
 def populate_examples(session: CodegenSession, dest: Path, examples: list[SerializedExample], status: Status):

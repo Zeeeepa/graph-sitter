@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codegen.cli.api.webapp_routes import generate_webapp_url
-from codegen.cli.utils.schema import CodemodConfig
+from graph_sitter.cli.utils.schema import CodemodConfig
 
 
 @dataclass

@@ -1,4 +1,4 @@
-DEFAULT_CODEMOD = '''import codegen
+DEFAULT_CODEMOD = '''import graph_sitter
 from codegen.sdk.core.codebase import Codebase
 
 

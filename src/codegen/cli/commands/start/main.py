@@ -8,12 +8,12 @@ import rich
 from rich.box import ROUNDED
 from rich.panel import Panel
 
-from codegen.cli.commands.start.docker_container import DockerContainer
-from codegen.cli.commands.start.docker_fleet import CODEGEN_RUNNER_IMAGE
-from codegen.configs.models.secrets import SecretsConfig
-from codegen.git.repo_operator.local_git_repo import LocalGitRepo
-from codegen.git.schemas.repo_config import RepoConfig
-from codegen.shared.network.port import get_free_port
+from graph_sitter.cli.commands.start.docker_container import DockerContainer
+from graph_sitter.cli.commands.start.docker_fleet import CODEGEN_RUNNER_IMAGE
+from graph_sitter.configs.models.secrets import SecretsConfig
+from graph_sitter.git.repo_operator.local_git_repo import LocalGitRepo
+from graph_sitter.git.schemas.repo_config import RepoConfig
+from graph_sitter.shared.network.port import get_free_port
 
 _default_host = "0.0.0.0"
 
