@@ -1,6 +1,6 @@
 from neo4j import GraphDatabase
 
-from graph_sitter.extensions.graph.utils import SimpleGraph
+from contexten.extensions.graph.utils import SimpleGraph
 
 
 class Neo4jExporter:

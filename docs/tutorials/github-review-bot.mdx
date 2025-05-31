@@ -27,7 +27,7 @@ First, we set up a Modal application to handle GitHub webhooks:
 
 ```python
 import modal
-from codegen.extensions.events.app import CodegenApp
+from contexten.extensions.events.app import CodegenApp
 from fastapi import Request
 
 # Set up the base image with required dependencies
@@ -61,7 +61,7 @@ Make sure to configure your GitHub repository's webhook settings to point to you
 Next, we set up event handlers for PR label events:
 
 ```python
-from codegen.extensions.github.types.events.pull_request import (
+from contexten.extensions.github.types.events.pull_request import (
     PullRequestLabeledEvent,
     PullRequestUnlabeledEvent
 )
@@ -95,8 +95,8 @@ The bot only triggers on PRs labeled with "Codegen", giving you control over whi
 Finally, we implement the AI-powered review agent:
 
 ```python
-from codegen import Codebase, CodeAgent
-from codegen.extensions.langchain.tools import (
+from graph_sitter import Codebase, CodeAgent
+from contexten.extensions.langchain.tools import (
     GithubViewPRTool,
     GithubCreatePRCommentTool,
     GithubCreatePRReviewCommentTool,

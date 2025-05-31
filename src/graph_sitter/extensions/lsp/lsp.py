@@ -5,12 +5,12 @@ from lsprotocol import types
 import graph_sitter
 from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
 from graph_sitter.core.file import SourceFile
-from graph_sitter.extensions.lsp.definition import go_to_definition
-from graph_sitter.extensions.lsp.document_symbol import get_document_symbol
-from graph_sitter.extensions.lsp.protocol import GraphSitterLanguageServerProtocol
-from graph_sitter.extensions.lsp.range import get_range
-from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
-from graph_sitter.extensions.lsp.utils import get_path
+from contexten.extensions.lsp.definition import go_to_definition
+from contexten.extensions.lsp.document_symbol import get_document_symbol
+from contexten.extensions.lsp.protocol import GraphSitterLanguageServerProtocol
+from contexten.extensions.lsp.range import get_range
+from contexten.extensions.lsp.server import GraphSitterLanguageServer
+from contexten.extensions.lsp.utils import get_path
 from graph_sitter.shared.logging.get_logger import get_logger
 
 version = getattr(graph_sitter, "__version__", "v0.1")

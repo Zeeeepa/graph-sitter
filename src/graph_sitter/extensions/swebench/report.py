@@ -5,8 +5,8 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 
-from graph_sitter.extensions.swebench.enums import SWEBenchDataset
-from graph_sitter.extensions.swebench.tests import remove_patches_to_tests
+from contexten.extensions.swebench.enums import SWEBenchDataset
+from contexten.extensions.swebench.tests import remove_patches_to_tests
 
 NUM_EVAL_PROCS = 5
 

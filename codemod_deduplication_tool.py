@@ -254,7 +254,7 @@ class DeduplicationEngine:
                     except Exception as e:
                         print(f"  {Colors.FAIL}❌ Error removing {file_path}: {e}{Colors.ENDC}")
         
-        # Remove from codegen where graph_sitter has equivalent/better versions
+        # Remove from contexten where graph_sitter has equivalent/better versions
         overlapping_relative = set()
         codegen_relative = {m.replace('codegen.', '') for m in self.analyzer.codegen_modules.keys()}
         graph_sitter_relative = {m.replace('graph_sitter.', '') for m in self.analyzer.graph_sitter_modules.keys()}
@@ -267,11 +267,11 @@ class DeduplicationEngine:
                     file_path = self.analyzer.codegen_modules[codegen_module]
                     
                     if self.dry_run:
-                        print(f"  {Colors.WARNING}[DRY RUN] Would remove from codegen: {rel_module}{Colors.ENDC}")
+                        print(f"  {Colors.WARNING}[DRY RUN] Would remove from contexten: {rel_module}{Colors.ENDC}")
                     else:
                         try:
                             os.remove(file_path)
-                            print(f"  {Colors.OKGREEN}✅ Removed from codegen: {rel_module}{Colors.ENDC}")
+                            print(f"  {Colors.OKGREEN}✅ Removed from contexten: {rel_module}{Colors.ENDC}")
                             removed_from_codegen += 1
                             
                             # Remove empty directories
@@ -282,7 +282,7 @@ class DeduplicationEngine:
         
         if not self.dry_run:
             print(f"\n📊 Removal summary:")
-            print(f"  🗑️ Removed from codegen: {Colors.OKGREEN}{removed_from_codegen}{Colors.ENDC} files")
+            print(f"  🗑️ Removed from contexten: {Colors.OKGREEN}{removed_from_codegen}{Colors.ENDC} files")
             print(f"  🗑️ Removed from graph_sitter: {Colors.OKGREEN}{removed_from_graph_sitter}{Colors.ENDC} files")
     
     def _remove_empty_dirs(self, dir_path: Path, base_path: Path):
@@ -354,7 +354,7 @@ class DeduplicationEngine:
         for line in lines:
             updated_line = line
             
-            # Handle 'from codegen.X import Y' patterns
+            # Handle 'from contexten.X import Y' patterns
             from_match = re.match(r'^(\s*from\s+)codegen\.([a-zA-Z_][a-zA-Z0-9_.]*)\s+(import\s+.+)$', line)
             if from_match:
                 prefix, module_path, import_part = from_match.groups()
@@ -363,7 +363,7 @@ class DeduplicationEngine:
                 if self._should_import_from_graph_sitter(module_path):
                     updated_line = f"{prefix}graph_sitter.{module_path} {import_part}"
             
-            # Handle 'import codegen.X' patterns
+            # Handle 'import contexten.X' patterns
             import_match = re.match(r'^(\s*import\s+)codegen\.([a-zA-Z_][a-zA-Z0-9_.]*)', line)
             if import_match:
                 prefix, module_path = import_match.groups()
@@ -378,11 +378,11 @@ class DeduplicationEngine:
     
     def _should_import_from_graph_sitter(self, module_path: str) -> bool:
         """Determine if a module should be imported from graph_sitter."""
-        # If the module is kept in codegen, import from codegen
+        # If the module is kept in codegen, import from contexten
         if module_path in self.keep_in_codegen:
             return False
         
-        # If the module is unique to codegen, import from codegen
+        # If the module is unique to codegen, import from contexten
         if module_path in self.codegen_only:
             return False
         
