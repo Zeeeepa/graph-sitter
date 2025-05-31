@@ -1,7 +1,7 @@
 import logging
 from logging import getLogger
 import modal
-from contexten.extensions.events.app import CodegenApp
+from contexten import CodegenApp
 from fastapi import Request
 from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent, PullRequestUnlabeledEvent
 from helpers import remove_bot_comments, pr_review_agent

@@ -7,7 +7,7 @@ import os
 from graph_sitter import Codebase
 
 from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
-from contexten.configs.models.secrets import SecretsConfig
+from graph_sitter.configs.models.secrets import SecretsConfig
 from contexten import CodeAgent
 
 from contexten.extensions.langchain.tools import (

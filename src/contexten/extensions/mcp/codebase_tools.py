@@ -4,8 +4,8 @@ from typing import Annotated
 from mcp.server.fastmcp import FastMCP
 
 from graph_sitter.core.codebase import Codebase
-from graph_sitter.extensions.tools import reveal_symbol
-from graph_sitter.extensions.tools.search import search
+from contexten.extensions.tools import reveal_symbol
+from contexten.extensions.tools.search import search
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 mcp = FastMCP(

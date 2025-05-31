@@ -1,5 +1,5 @@
 from graph_sitter import Codebase
-from graph_sitter.extensions.attribution.main import (
+from contexten.extensions.attribution.main import (
     add_attribution_to_symbols,
     analyze_ai_impact,
 )

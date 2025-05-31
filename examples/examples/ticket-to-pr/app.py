@@ -1,6 +1,6 @@
 from graph_sitter import Codebase, CodeAgent
 from contexten.extensions.clients.linear import LinearClient
-from contexten.extensions.events.app import CodegenApp
+from contexten import CodegenApp
 from contexten.extensions.tools.github.create_pr import create_pr
 from contexten.shared.enums.programming_language import ProgrammingLanguage
 from helpers import create_codebase, format_linear_message, has_codegen_label, process_update_event

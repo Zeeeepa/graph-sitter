@@ -4,7 +4,7 @@ from typing import ClassVar, Optional
 
 from pydantic import Field
 
-from graph_sitter.extensions.index.file_index import FileIndex
+from contexten.extensions.index.file_index import FileIndex
 from graph_sitter import Codebase
 
 from .observation import Observation

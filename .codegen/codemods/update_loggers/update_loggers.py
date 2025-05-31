@@ -1,5 +1,5 @@
 import contexten
-from contexten.sdk.core.codebase import PyCodebaseType
+from graph_sitter.core.codebase import PyCodebaseType
 
 
 @codegen.function("update-loggers")
