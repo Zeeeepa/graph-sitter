@@ -1,4 +1,4 @@
-# Codegen MCP Servers
+# Graph-sitter MCP Servers
 
 This directory contains reference implementations of MCP (Machine Control Protocol) servers that extend AI Agent capabilities using the Codegen SDK. These servers enable AI Agents to:
 
@@ -19,11 +19,11 @@ Add this to your `cline_mcp_settings.json` file to get started:
 ```
 {
   "mcpServers": {
-    "codegen-cli": {
+    "graph_sitter.cli": {
         "command": "uv",
         "args": [
             "--directory",
-            "<path to codegen installation>/codegen-sdk/src/codegen/extensions/mcp",
+            "<path to codegen installation>/codegen-sdk/src/graph_sitter.extensions/mcp",
             "run",
             "codebase_agent.py | codebase_mods | codebase_tools"
         ]
@@ -39,5 +39,5 @@ Under the `Settings` > `Feature` > `MCP Servers` section, click "Add New MCP Ser
 ```
 Name: codegen-mcp
 Type: Command
-Command: uv --directory <path to codegen installation>/codegen-sdk/src/codegen/cli/mcp run <codebase_agent.py | codebase_mods | codebase_tools>
+Command: uv --directory <path to codegen installation>/codegen-sdk/src/graph_sitter.cli/mcp run <codebase_agent.py | codebase_mods | codebase_tools>
 ```
