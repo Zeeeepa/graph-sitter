@@ -1,0 +1,89 @@
+# Graph-Sitter System Requirements
+
+# Core dependencies
+networkx>=2.8.0
+psycopg2-binary>=2.9.0
+sqlalchemy>=1.4.0
+pydantic>=1.10.0
+pyyaml>=6.0
+requests>=2.28.0
+chardet>=5.0.0
+
+# Optional: Tree-sitter support (requires compilation)
+# tree-sitter>=0.20.0
+
+# Database and caching
+redis>=4.3.0
+alembic>=1.8.0
+
+# Async support
+aiohttp>=3.8.0
+asyncio-mqtt>=0.11.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+black>=22.0.0
+isort>=5.10.0
+flake8>=5.0.0
+mypy>=0.991
+
+# Documentation
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.0.0
+
+# Monitoring and logging
+structlog>=22.0.0
+prometheus-client>=0.14.0
+
+# Security
+cryptography>=37.0.0
+python-dotenv>=0.20.0
+
+# Code analysis tools
+radon>=5.1.0  # Complexity metrics
+bandit>=1.7.0  # Security analysis
+vulture>=2.5  # Dead code detection
+
+# Optional: Language-specific tools
+# For JavaScript/TypeScript validation (requires Node.js)
+# For Java validation (requires JDK)
+
+# Utility libraries
+click>=8.0.0  # CLI interface
+rich>=12.0.0  # Rich terminal output
+tqdm>=4.64.0  # Progress bars
+pathlib2>=2.3.0  # Enhanced path handling
+
+# Data processing
+pandas>=1.5.0  # Data analysis
+numpy>=1.23.0  # Numerical computing
+
+# Graph visualization (optional)
+matplotlib>=3.5.0
+plotly>=5.10.0
+graphviz>=0.20.0
+
+# API and web framework support
+fastapi>=0.85.0
+uvicorn>=0.18.0
+starlette>=0.20.0
+
+# Configuration management
+dynaconf>=3.1.0
+python-decouple>=3.6
+
+# File processing
+magic>=0.4.0  # File type detection
+pygments>=2.13.0  # Syntax highlighting
+
+# Concurrency and parallelism
+concurrent-futures>=3.1.0
+multiprocessing-logging>=0.3.0
+
+# Version constraints for compatibility
+python-dateutil>=2.8.0
+urllib3>=1.26.0
+certifi>=2022.0.0
+
