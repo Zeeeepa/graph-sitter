@@ -70,6 +70,21 @@ dependencies = [
   "datasets",
   "colorlog>=6.9.0",
   "codegen-sdk-pink>=0.1.0",
+  # Contexten Enhanced Orchestrator dependencies
+  "sqlalchemy>=2.0.0",
+  "aiosqlite>=0.19.0",
+  "numpy>=1.24.0",
+  "pyyaml>=6.0",
+  "asyncio-mqtt>=0.16.0",
+  "httpx>=0.25.0",
+  "uvloop>=0.19.0; sys_platform != 'win32'",
+  # Optional dependencies for enhanced features
+  "boto3>=1.34.0",  # For AWS integration
+  "anthropic>=0.25.0",  # For Anthropic model provider
+  "openai>=1.0.0",  # For OpenAI model provider
+  "mem0ai>=0.1.0",  # For advanced memory features
+  "strands-agents>=0.1.0",  # For Strands-Agents integration
+  "strands-agents-tools>=0.1.0",  # For Strands-Agents tools
 ]
 
 # renovate: datasource=python-version depName=python
