@@ -8,7 +8,7 @@ from pydantic import Field
 from contexten.extensions.tools.observation import Observation
 from contexten.extensions.tools.tool_output_types import ListDirectoryArtifacts
 from graph_sitter import Codebase
-from contexten.sdk.core.directory import Directory
+from graph_sitter.core.directory import Directory
 
 
 class DirectoryInfo(Observation):

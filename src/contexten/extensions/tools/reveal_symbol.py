@@ -5,11 +5,11 @@ from typing import Any, ClassVar, Optional
 import tiktoken
 from pydantic import Field
 
-from contexten.sdk.ai.utils import count_tokens
+from graph_sitter.ai.utils import count_tokens
 from graph_sitter import Codebase
-from contexten.sdk.core.external_module import ExternalModule
-from contexten.sdk.core.import_resolution import Import
-from contexten.sdk.core.symbol import Symbol
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.symbol import Symbol
 
 from .observation import Observation
 
