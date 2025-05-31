@@ -1,0 +1,39 @@
+# Linear & GitHub Dashboard Requirements
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# HTTP Client
+aiohttp>=3.9.0
+requests>=2.31.0
+
+# GitHub Integration
+PyGithub>=1.59.0
+
+# Data Models and Validation
+pydantic>=2.5.0
+
+# Environment and Configuration
+python-dotenv>=1.0.0
+
+# Async Support
+asyncio-mqtt>=0.13.0
+
+# Optional: Database support (uncomment if needed)
+# sqlalchemy>=2.0.0
+# alembic>=1.13.0
+# asyncpg>=0.29.0  # for PostgreSQL
+# aiosqlite>=0.19.0  # for SQLite
+
+# Optional: Redis for caching (uncomment if needed)
+# redis>=5.0.0
+# aioredis>=2.0.0
+
+# Development dependencies (uncomment for development)
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# isort>=5.12.0
+# mypy>=1.7.0
+
