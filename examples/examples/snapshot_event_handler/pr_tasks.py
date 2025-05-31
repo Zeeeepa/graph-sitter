@@ -1,5 +1,5 @@
 import logging
-from codegen.extensions.github.types.pull_request import PullRequestLabeledEvent
+from contexten.extensions.github.types.pull_request import PullRequestLabeledEvent
 
 from graph_sitter import Codebase
 
@@ -12,7 +12,7 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
 
     patch, commit_shas, modified_symbols = codebase.get_modified_symbols_in_pr(event.pull_request.number)
     modified_files = set(commit_shas.keys())
-    from codegen.sdk.core.statements.if_block_statement import IfBlockStatement
+    from contexten.sdk.core.statements.if_block_statement import IfBlockStatement
 
     DIR_NAME = "packages/next/src/client/components/react-dev-overlay"
     directory = codebase.get_directory(DIR_NAME)

@@ -8,8 +8,8 @@ from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
 import click
 import modal
-from codegen.extensions.swebench.harness import run_agent_on_entry
-from codegen.extensions.swebench.utils import (
+from contexten.extensions.swebench.harness import run_agent_on_entry
+from contexten.extensions.swebench.utils import (
     SWEBenchDataset,
     SweBenchExample,
     get_swe_bench_examples,

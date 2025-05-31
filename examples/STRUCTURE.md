@@ -27,7 +27,7 @@ Your `run.py` should follow this structure, demonstrated well in the `generate_t
    ```python
    import graph_sitter
    from graph_sitter import Codebase
-   from codegen.sdk.core import Function
+   from contexten.sdk.core import Function
    # ... other imports
    ```
 

@@ -1,11 +1,11 @@
 import logging
 
 import modal
-from codegen import CodeAgent, CodegenApp
-from codegen.extensions.github.types.events.pull_request import PullRequestLabeledEvent
-from codegen.extensions.linear.types import LinearEvent
-from codegen.extensions.slack.types import SlackEvent
-from codegen.extensions.tools.github.create_pr_comment import create_pr_comment
+from contexten import CodeAgent, CodegenApp
+from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
+from contexten.extensions.linear.types import LinearEvent
+from contexten.extensions.slack.types import SlackEvent
+from contexten.extensions.tools.github.create_pr_comment import create_pr_comment
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

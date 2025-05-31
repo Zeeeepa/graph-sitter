@@ -1,6 +1,6 @@
 from graph_sitter import Codebase, ProgrammingLanguage
 from typing import List, Dict, Any
-from codegen.configs.models.codebase import CodebaseConfig
+from contexten.configs.models.codebase import CodebaseConfig
 from data import LinearLabels, LinearIssueUpdateEvent
 import os
 import logging

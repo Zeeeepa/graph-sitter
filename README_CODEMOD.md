@@ -50,7 +50,7 @@ For modules that exist in both directories, the tool:
 ### 3. Deduplication
 The tool removes duplicate files by:
 - Removing files from graph_sitter where codegen has better versions
-- Removing files from codegen where graph_sitter has equivalent/better versions
+- Removing files from contexten where graph_sitter has equivalent/better versions
 - Cleaning up empty directories after file removal
 
 ### 4. Import Updates
@@ -78,7 +78,7 @@ Updates imports in codegen files to:
 
 🗑️ Removing duplicate files...
   ✅ Removed from graph_sitter: cli.commands.create.main
-  ✅ Removed from codegen: cli.mcp.resources.system_setup_instructions
+  ✅ Removed from contexten: cli.mcp.resources.system_setup_instructions
 
 🔧 Updating imports in codegen files...
   ✅ Updated: agents/code_agent.py

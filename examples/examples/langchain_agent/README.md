@@ -22,8 +22,8 @@ This example demonstrates how to build an intelligent code agent using Codegen's
 ## Quick Start
 
 ```python
-from codegen import Codebase
-from codegen.extensions.langchain import create_codebase_agent
+from contexten import Codebase
+from contexten.extensions.langchain import create_codebase_agent
 
 # Initialize codebase
 codebase = Codebase.from_repo("fastapi/fastapi")
