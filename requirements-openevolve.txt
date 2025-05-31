@@ -1,0 +1,20 @@
+# OpenEvolve Integration & Evaluation System Requirements
+
+# Core dependencies
+aiosqlite>=0.17.0  # Async SQLite database support
+asyncio  # Built-in async support
+
+# Optional dependencies for enhanced functionality
+psycopg2-binary>=2.9.0  # PostgreSQL support (optional)
+numpy>=1.21.0  # Numerical computations for correlation analysis (optional)
+scipy>=1.7.0  # Statistical analysis (optional)
+
+# Development and testing dependencies
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+
+# Documentation dependencies
+markdown>=3.4.0
+jinja2>=3.1.0  # For HTML report templates
+
