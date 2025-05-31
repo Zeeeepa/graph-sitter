@@ -1,0 +1,29 @@
+# Enhanced Event System Dependencies
+# Core-7: Event System & Multi-Platform Integration
+
+# Database connectivity
+psycopg2-binary>=2.9.0
+
+# Async HTTP client for webhooks
+aiohttp>=3.8.0
+
+# FastAPI for web endpoints (if not already included)
+fastapi>=0.100.0
+uvicorn>=0.20.0
+
+# WebSocket support
+websockets>=11.0
+
+# JSON handling and validation
+pydantic>=2.0.0
+
+# Testing dependencies
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# Optional: Redis for caching and message queuing
+redis>=4.5.0
+
+# Optional: Monitoring and metrics
+prometheus-client>=0.16.0
+
