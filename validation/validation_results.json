@@ -1,0 +1,211 @@
+{
+  "validation_id": "testing-12-1748690495",
+  "start_time": "2025-05-31T11:21:35.937426",
+  "phases": {
+    "health_check": {
+      "status": "FAILED",
+      "checks": {
+        "python_version": {
+          "required": "3.12+",
+          "actual": "3.13.3",
+          "status": "PASSED"
+        },
+        "src_directory": {
+          "path": "/tmp/Zeeeepa/graph-sitter/src",
+          "exists": true,
+          "status": "PASSED"
+        },
+        "tests_directory": {
+          "path": "/tmp/Zeeeepa/graph-sitter/tests",
+          "exists": true,
+          "status": "PASSED"
+        },
+        "docs_directory": {
+          "path": "/tmp/Zeeeepa/graph-sitter/docs",
+          "exists": true,
+          "status": "PASSED"
+        },
+        ".github_directory": {
+          "path": "/tmp/Zeeeepa/graph-sitter/.github",
+          "exists": true,
+          "status": "PASSED"
+        },
+        "pyproject.toml_file": {
+          "path": "/tmp/Zeeeepa/graph-sitter/pyproject.toml",
+          "exists": true,
+          "status": "PASSED"
+        },
+        "README.md_file": {
+          "path": "/tmp/Zeeeepa/graph-sitter/README.md",
+          "exists": true,
+          "status": "PASSED"
+        },
+        ".gitignore_file": {
+          "path": "/tmp/Zeeeepa/graph-sitter/.gitignore",
+          "exists": true,
+          "status": "PASSED"
+        },
+        "tree_sitter_import": {
+          "status": "FAILED"
+        },
+        "rustworkx_import": {
+          "status": "FAILED"
+        }
+      },
+      "issues": [
+        "tree-sitter not available",
+        "rustworkx not available",
+        "Failed check: tree_sitter_import",
+        "Failed check: rustworkx_import"
+      ]
+    },
+    "dependency_validation": {
+      "status": "PASSED",
+      "dependency_analysis": {
+        "total_dependencies": 64,
+        "dependencies": [
+          "openai==1.78.1",
+          "tiktoken<1.0.0,>=0.5.1",
+          "tabulate>=0.9.0,<1.0.0",
+          "codeowners<1.0.0,>=0.6.0",
+          "dataclasses-json<1.0.0,>=0.6.4",
+          "dicttoxml<2.0.0,>=1.7.16",
+          "xmltodict<1.0.0,>=0.13.0",
+          "astor<1.0.0,>=0.8.1",
+          "tree-sitter>=0.23.1",
+          "tree-sitter-python>=0.23.4"
+        ],
+        "lock_file_exists": true
+      },
+      "issues": []
+    },
+    "component_testing": {
+      "status": "FAILED",
+      "test_results": {
+        "pytest": {
+          "return_code": 1,
+          "stdout": "",
+          "stderr": "/usr/local/bin/python: No module named pytest\n",
+          "status": "FAILED"
+        }
+      },
+      "issues": [
+        "Test suite execution failed"
+      ]
+    },
+    "integration_testing": {
+      "status": "FAILED",
+      "integration_scenarios": {
+        "core_imports": {
+          "status": "FAILED",
+          "error": "No module named 'dicttoxml'"
+        },
+        "config_loading": {
+          "status": "PASSED",
+          "config_files_found": 3
+        },
+        "cli_availability": {
+          "status": "PASSED",
+          "cli_files_found": 3
+        }
+      },
+      "issues": [
+        "Core import failed: No module named 'dicttoxml'"
+      ]
+    },
+    "performance_benchmarking": {
+      "status": "FAILED",
+      "benchmarks": {},
+      "issues": [
+        "Performance benchmarking failed: No module named 'dicttoxml'"
+      ]
+    },
+    "security_assessment": {
+      "status": "PASSED",
+      "security_checks": {
+        ".github/dependabot.yml_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        ".pre-commit-config.yaml_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        "pyproject.toml_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        "code_security_scan": {
+          "files_scanned": 10,
+          "issues_found": 0,
+          "issues": [],
+          "status": "PASSED"
+        }
+      },
+      "issues": []
+    },
+    "production_readiness": {
+      "status": "PASSED",
+      "readiness_criteria": {
+        "README.md_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        "CONTRIBUTING.md_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        "LICENSE_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        ".github/workflows/test.yml_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        ".github/workflows/release.yml_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        "pyproject.toml_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        "uv.lock_exists": {
+          "exists": true,
+          "status": "PASSED"
+        },
+        "production_configs": {
+          "configs_found": 1,
+          "total_configs": 3,
+          "status": "PASSED"
+        }
+      },
+      "issues": []
+    }
+  },
+  "overall_status": "FAILED",
+  "critical_issues": [
+    "tree-sitter not available",
+    "rustworkx not available",
+    "Failed check: tree_sitter_import",
+    "Failed check: rustworkx_import",
+    "Test suite execution failed",
+    "Core import failed: No module named 'dicttoxml'",
+    "Performance benchmarking failed: No module named 'dicttoxml'"
+  ],
+  "recommendations": [
+    "\u274c CRITICAL: Address failures in phases: health_check, component_testing, integration_testing, performance_benchmarking",
+    "\ud83d\udd04 NOT READY: Address critical issues before production deployment"
+  ],
+  "production_ready": false,
+  "next_steps": [
+    "1. Address all critical issues identified in validation",
+    "2. Re-run validation tests to verify fixes",
+    "3. Complete missing documentation and configurations",
+    "4. Setup comprehensive monitoring and alerting",
+    "5. Conduct security audit and penetration testing"
+  ],
+  "end_time": "2025-05-31T11:21:36.024435",
+  "total_duration_minutes": 0.0014503833333333333
+}
