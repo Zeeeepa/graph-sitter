@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""
+Unified Graph-Sitter CLI
+Routes commands to appropriate modules based on functionality
+"""
+
+import sys
+import argparse
+from typing import List, Optional
+
+# AI-focused commands route to codegen
+AI_COMMANDS = {
+    'agent', 'deploy', 'expert', 'serve', 
+    'run-agent', 'create-app', 'login', 'logout',
+    'profile', 'run-on-pr'
+}
+
+# Core development commands route to graph_sitter
+CORE_COMMANDS = {
+    'init', 'config', 'run', 'list', 'lsp', 
+    'notebook', 'reset', 'start', 'update', 'style-debug'
+}
+
+def route_command(args: List[str]) -> None:
+    """Route command to appropriate module."""
+    if not args or args[0] in ['-h', '--help', 'help']:
+        show_help()
+        return
+    
+    command = args[0]
+    
+    if command in AI_COMMANDS:
+        route_to_codegen(args)
+    elif command in CORE_COMMANDS:
+        route_to_graph_sitter(args)
+    elif command == 'ai':
+        # Special namespace for AI commands
+        if len(args) > 1:
+            route_to_codegen(args[1:])
+        else:
+            show_ai_help()
+    elif command == 'core':
+        # Special namespace for core commands
+        if len(args) > 1:
+            route_to_graph_sitter(args[1:])
+        else:
+            show_core_help()
+    else:
+        print(f"❌ Unknown command: {command}")
+        print("💡 Use 'graph-sitter help' to see available commands")
+        sys.exit(1)
+
+def route_to_codegen(args: List[str]) -> None:
+    """Route to codegen CLI."""
+    try:
+        # Import and run codegen CLI
+        import os
+        import subprocess
+        
+        # Find codegen CLI script
+        codegen_cli = find_cli_script('codegen')
+        if codegen_cli:
+            subprocess.run([sys.executable, codegen_cli] + args, check=True)
+        else:
+            print("❌ Codegen CLI not found. Please ensure codegen is properly installed.")
+            sys.exit(1)
+    except ImportError:
+        print("❌ Codegen module not available. Please install codegen dependencies.")
+        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        sys.exit(e.returncode)
+
+def route_to_graph_sitter(args: List[str]) -> None:
+    """Route to graph_sitter CLI."""
+    try:
+        # Import and run graph_sitter CLI
+        import os
+        import subprocess
+        
+        # Find graph_sitter CLI script
+        gs_cli = find_cli_script('graph_sitter')
+        if gs_cli:
+            subprocess.run([sys.executable, gs_cli] + args, check=True)
+        else:
+            print("❌ Graph-sitter CLI not found. Please ensure graph_sitter is properly installed.")
+            sys.exit(1)
+    except ImportError:
+        print("❌ Graph_sitter module not available. Please install graph_sitter dependencies.")
+        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        sys.exit(e.returncode)
+
+def find_cli_script(module_name: str) -> Optional[str]:
+    """Find the CLI script for a module."""
+    import os
+    from pathlib import Path
+    
+    # Look for CLI in common locations
+    possible_paths = [
+        f"src/{module_name}/cli/cli.py",
+        f"{module_name}/cli/cli.py",
+        f"src/{module_name}/cli/__main__.py",
+        f"{module_name}/cli/__main__.py"
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    
+    return None
+
+def show_help():
+    """Show unified help."""
+    print("""
+🚀 Graph-Sitter Unified CLI
+
+CORE DEVELOPMENT COMMANDS:
+  init          Initialize a new project
+  config        Manage configuration  
+  run           Execute codemods
+  list          List codebase elements
+  lsp           Language server operations
+  notebook      Jupyter integration
+  reset         Reset workspace
+  start         Start development server
+  update        Update dependencies
+  style-debug   Debug style issues
+
+AI-POWERED COMMANDS:
+  agent         Run AI development agents
+  deploy        Deploy applications
+  expert        Get expert AI assistance
+  serve         Start AI services
+  login         Authenticate with external services
+  logout        Sign out
+  profile       Manage user profile
+  run-on-pr     Run AI on pull requests
+
+NAMESPACED COMMANDS:
+  ai <command>    Access AI commands with explicit namespace
+  core <command>  Access core commands with explicit namespace
+
+EXAMPLES:
+  graph-sitter init my-project     # Initialize new project
+  graph-sitter agent "fix bugs"    # Run AI agent
+  graph-sitter ai deploy           # Deploy with AI namespace
+  graph-sitter core run codemod    # Run codemod with core namespace
+
+For detailed help on any command:
+  graph-sitter <command> --help
+
+For module-specific help:
+  graph-sitter ai --help           # AI commands help
+  graph-sitter core --help         # Core commands help
+""")
+
+def show_ai_help():
+    """Show AI commands help."""
+    print("""
+🤖 AI-Powered Commands
+
+Available AI commands:
+  agent         Run AI development agents
+  deploy        Deploy applications  
+  expert        Get expert AI assistance
+  serve         Start AI services
+  login         Authenticate with external services
+  logout        Sign out
+  profile       Manage user profile
+  run-on-pr     Run AI on pull requests
+
+Usage:
+  graph-sitter ai <command> [options]
+  graph-sitter <command> [options]    # Direct usage
+
+Examples:
+  graph-sitter ai agent "implement feature X"
+  graph-sitter agent "fix all bugs"
+  graph-sitter ai deploy --production
+
+For detailed help:
+  graph-sitter ai <command> --help
+""")
+
+def show_core_help():
+    """Show core commands help."""
+    print("""
+⚙️ Core Development Commands
+
+Available core commands:
+  init          Initialize a new project
+  config        Manage configuration
+  run           Execute codemods
+  list          List codebase elements
+  lsp           Language server operations
+  notebook      Jupyter integration
+  reset         Reset workspace
+  start         Start development server
+  update        Update dependencies
+  style-debug   Debug style issues
+
+Usage:
+  graph-sitter core <command> [options]
+  graph-sitter <command> [options]    # Direct usage
+
+Examples:
+  graph-sitter core init my-project
+  graph-sitter init my-project
+  graph-sitter core run my-codemod
+
+For detailed help:
+  graph-sitter core <command> --help
+""")
+
+if __name__ == '__main__':
+    route_command(sys.argv[1:])
+
