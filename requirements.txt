@@ -1,0 +1,60 @@
+# Core dependencies for Comprehensive Graph-Sitter Enhancement System
+
+# Codegen SDK - Core requirement
+codegen>=0.26.3
+
+# Database
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0
+
+# Async support
+asyncio-mqtt>=0.11.0
+aiofiles>=23.0.0
+
+# Platform integrations
+PyGithub>=1.59.0
+slack-sdk>=3.21.0
+requests>=2.31.0
+
+# Data processing
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Utilities
+click>=8.1.0
+rich>=13.0.0
+typer>=0.9.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0
+
+# Optional dependencies for enhanced functionality
+# Uncomment as needed:
+
+# Machine learning and AI
+# openai>=1.0.0
+# anthropic>=0.3.0
+# langchain>=0.1.0
+# transformers>=4.30.0
+
+# Monitoring and observability
+# prometheus-client>=0.17.0
+# structlog>=23.1.0
+
+# Additional database support
+# redis>=4.6.0
+# elasticsearch>=8.8.0
+
+# Web framework (if building web interface)
+# fastapi>=0.100.0
+# uvicorn>=0.23.0
+
+# Task queue (if using external task queue)
+# celery>=5.3.0
+# rq>=1.15.0
+
