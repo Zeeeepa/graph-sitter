@@ -4,7 +4,7 @@ from typing import Any, Callable, TypeVar
 from pydantic import BaseModel
 
 from codegen.extensions.events.interface import EventHandlerManagerProtocol
-from graph_sitter.extensions.linear.types import LinearEvent
+from codegen.extensions.linear.types import LinearEvent
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)

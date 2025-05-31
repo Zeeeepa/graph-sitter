@@ -4,7 +4,7 @@ from logging import getLogger
 
 import os
 
-from codegen import Codebase
+from graph_sitter import Codebase
 
 from codegen.extensions.github.types.events.pull_request import PullRequestLabeledEvent
 from codegen.configs.models.secrets import SecretsConfig

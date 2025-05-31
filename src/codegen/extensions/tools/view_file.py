@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional
 from langchain_core.messages import ToolMessage
 from pydantic import Field
 
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 from .observation import Observation
 

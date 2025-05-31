@@ -1,4 +1,4 @@
-from codegen import Codebase, CodeAgent
+from graph_sitter import Codebase, CodeAgent
 from codegen.extensions.clients.linear import LinearClient
 from codegen.extensions.events.app import CodegenApp
 from codegen.extensions.tools.github.create_pr import create_pr

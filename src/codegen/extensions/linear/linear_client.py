@@ -4,7 +4,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from graph_sitter.extensions.linear.types import LinearComment, LinearIssue, LinearTeam, LinearUser
+from codegen.extensions.linear.types import LinearComment, LinearIssue, LinearTeam, LinearUser
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)

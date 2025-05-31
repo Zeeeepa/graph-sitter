@@ -1,7 +1,7 @@
 import logging
 from codegen.extensions.github.types.pull_request import PullRequestLabeledEvent
 
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger(__name__)

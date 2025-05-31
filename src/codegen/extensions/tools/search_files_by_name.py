@@ -6,7 +6,7 @@ from typing import ClassVar, Optional
 from pydantic import Field
 
 from codegen.extensions.tools.observation import Observation
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)

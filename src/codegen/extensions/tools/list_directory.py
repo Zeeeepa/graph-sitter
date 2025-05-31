@@ -7,7 +7,7 @@ from pydantic import Field
 
 from codegen.extensions.tools.observation import Observation
 from codegen.extensions.tools.tool_output_types import ListDirectoryArtifacts
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 from codegen.sdk.core.directory import Directory
 
 

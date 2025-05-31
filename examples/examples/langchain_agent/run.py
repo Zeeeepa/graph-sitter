@@ -1,6 +1,6 @@
 """Demo implementation of an agent with Codegen tools."""
 
-from codegen import Codebase
+from graph_sitter import Codebase
 from codegen.extensions.langchain.graph import create_react_agent
 from codegen.extensions.langchain.llm import LLM
 from codegen.extensions.langchain.prompts import REASONER_SYSTEM_MESSAGE

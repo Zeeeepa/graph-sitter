@@ -5,7 +5,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langgraph.checkpoint.memory import MemorySaver
 
 from codegen.extensions.langchain.agent import create_codebase_agent
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 AGENT_INSTRUCTIONS = """
 Instruction Set for Codegen SDK Expert Agent

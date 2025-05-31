@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import Field
 
 from codegen.extensions.langchain.llm import LLM
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 from .observation import Observation
 

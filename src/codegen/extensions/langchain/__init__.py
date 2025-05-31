@@ -2,7 +2,7 @@
 
 from langchain_core.tools.base import BaseTool
 
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 from .tools import (
     CommitTool,

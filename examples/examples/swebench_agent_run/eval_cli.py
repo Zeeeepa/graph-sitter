@@ -14,7 +14,7 @@ from codegen.extensions.swebench.utils import (
     SweBenchExample,
     get_swe_bench_examples,
 )
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 from swebench_agent_run.constants import DATASET_DICT
 from swebench_agent_run.report import generate_report

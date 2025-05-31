@@ -19,7 +19,7 @@ from codegen.extensions.langchain.tools import (
     RipGrepTool,
     ViewFileTool,
 )
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", message=".*Helicone.*")

@@ -16,7 +16,7 @@ from pydantic import Field
 
 from codegen.extensions.tools.tool_output_types import SearchArtifacts
 from codegen.extensions.tools.tool_output_types import SearchMatch as SearchMatchDict
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 from .observation import Observation
 

@@ -5,7 +5,7 @@ from typing import ClassVar, Optional
 from pydantic import Field
 
 from graph_sitter.extensions.index.file_index import FileIndex
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 from .observation import Observation
 

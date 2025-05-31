@@ -6,7 +6,7 @@ import tiktoken
 from pydantic import Field
 
 from codegen.sdk.ai.utils import count_tokens
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 from codegen.sdk.core.external_module import ExternalModule
 from codegen.sdk.core.import_resolution import Import
 from codegen.sdk.core.symbol import Symbol
