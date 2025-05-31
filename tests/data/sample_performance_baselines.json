@@ -1,0 +1,33 @@
+{
+  "graph_sitter.codebase_parsing": {
+    "execution_time_ms": 250.5,
+    "memory_usage_mb": 45.2,
+    "cpu_usage_percent": 12.8,
+    "peak_memory_mb": 52.1,
+    "gc_collections": 3,
+    "io_operations": 0,
+    "cache_hits": 0,
+    "cache_misses": 0
+  },
+  "graph_sitter.symbol_resolution": {
+    "execution_time_ms": 180.3,
+    "memory_usage_mb": 32.7,
+    "cpu_usage_percent": 15.2,
+    "peak_memory_mb": 38.9,
+    "gc_collections": 2,
+    "io_operations": 0,
+    "cache_hits": 0,
+    "cache_misses": 0
+  },
+  "codegen_sdk.agent_creation": {
+    "execution_time_ms": 95.1,
+    "memory_usage_mb": 18.4,
+    "cpu_usage_percent": 8.7,
+    "peak_memory_mb": 22.3,
+    "gc_collections": 1,
+    "io_operations": 0,
+    "cache_hits": 0,
+    "cache_misses": 0
+  }
+}
+

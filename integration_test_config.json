@@ -1,0 +1,63 @@
+{
+  "_comment": "Comprehensive Integration Testing Framework Configuration",
+  "_description": "This file configures all aspects of the integration testing framework",
+  
+  "run_integration_tests": true,
+  "run_performance_tests": true,
+  "run_validation_tests": true,
+  "run_workflow_tests": true,
+  "performance": {
+    "max_execution_time_regression_percent": 20.0,
+    "max_memory_regression_percent": 25.0,
+    "max_cpu_regression_percent": 30.0,
+    "baseline_update_threshold_percent": 5.0,
+    "max_execution_time_ms": 10000.0,
+    "max_memory_usage_mb": 1000.0,
+    "max_peak_memory_mb": 1500.0
+  },
+  "validation": {
+    "fail_on_critical_issues": true,
+    "fail_on_error_issues": false,
+    "max_allowed_critical_issues": 0,
+    "max_allowed_error_issues": 5,
+    "max_allowed_warning_issues": 20,
+    "required_components": [
+      "graph_sitter_core",
+      "graph_sitter_python",
+      "graph_sitter_typescript",
+      "codegen_sdk"
+    ],
+    "check_method_conflicts": true,
+    "check_class_conflicts": true,
+    "check_version_compatibility": true
+  },
+  "workflow": {
+    "default_timeout_seconds": 300.0,
+    "step_timeout_seconds": 60.0,
+    "max_retry_attempts": 2,
+    "continue_on_failure": true,
+    "parallel_execution": false,
+    "max_concurrent_workflows": 3,
+    "min_workflow_success_rate": 0.7,
+    "min_step_success_rate": 0.8
+  },
+  "reporting": {
+    "output_directory": "test_reports",
+    "generate_html": true,
+    "generate_json": true,
+    "generate_markdown": true,
+    "include_detailed_logs": true,
+    "include_performance_charts": false,
+    "include_trend_analysis": false,
+    "timestamp_format": "%Y%m%d_%H%M%S",
+    "report_prefix": "integration_test"
+  },
+  "test_data_directory": "tests/data",
+  "baseline_data_file": "performance_baselines.json",
+  "log_level": "INFO",
+  "debug_mode": false,
+  "fail_on_regression": true,
+  "fail_on_critical_validation": true,
+  "fail_on_workflow_failure": false
+}
+
