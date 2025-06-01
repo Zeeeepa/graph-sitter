@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from dataclasses import dataclass
 
 
 class LinearUser(BaseModel):
@@ -196,12 +197,31 @@ class LinearIntegrationMetrics(BaseModel):
 
 class LinearEvent(BaseModel):
     """Represents a Linear webhook event."""
+    type: str
+    action: str
+    data: Dict[str, Any]
+    timestamp: datetime
+    webhook_id: Optional[str] = None
+    organization_id: Optional[str] = None
 
-    action: str  # e.g. "create", "update", "remove"
-    type: str  # e.g. "Issue", "Comment", "Project"
-    data: LinearIssue | LinearComment  # The actual event data
-    url: str  # URL to the resource in Linear
-    created_at: str | None = None  # ISO timestamp
-    organization_id: str | None = None
-    team_id: str | None = None
 
+@dataclass
+class LinearComment:
+    """Linear comment"""
+    id: str
+    body: str
+    created_at: datetime
+    updated_at: datetime
+    user_id: str
+    issue_id: str
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'LinearComment':
+        return cls(
+            id=data['id'],
+            body=data['body'],
+            created_at=datetime.fromisoformat(data['createdAt'].replace('Z', '+00:00')),
+            updated_at=datetime.fromisoformat(data['updatedAt'].replace('Z', '+00:00')),
+            user_id=data['user']['id'],
+            issue_id=data['issue']['id']
+        )

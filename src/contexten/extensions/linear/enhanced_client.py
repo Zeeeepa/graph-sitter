@@ -1,228 +1,188 @@
 """
 Enhanced Linear GraphQL Client
 
-Comprehensive Linear API client with advanced features including:
-- Rate limiting and request throttling
-- Response caching with TTL
-- Retry logic with exponential backoff
-- Comprehensive error handling
-- Request/response logging
-- Performance metrics
+This module provides a comprehensive GraphQL client for Linear API with
+advanced features like connection pooling, retry logic, and caching.
 """
 
 import asyncio
-import hashlib
-import json
-import time
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Union
-from dataclasses import dataclass, field
-
 import aiohttp
-from aiohttp import ClientSession, ClientTimeout, ClientError
+import json
+import logging
+from typing import Dict, List, Optional, Any, Union
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+import hashlib
+import time
 
-from .config import LinearIntegrationConfig
-from .types import (
-    LinearIssue, LinearComment, LinearUser, LinearTeam, LinearLabel,
-    LinearProject, LinearState, ComponentStats
-)
-from graph_sitter.shared.logging.get_logger import get_logger
+from .types import LinearIssue, LinearProject, LinearTeam, LinearUser, LinearComment
+from .queries import LINEAR_QUERIES
+from .mutations import LINEAR_MUTATIONS
+from ...shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
-
 @dataclass
 class CacheEntry:
-    """Cache entry with TTL"""
+    """Cache entry for GraphQL responses"""
     data: Any
-    expires_at: datetime
+    timestamp: datetime
+    ttl: int  # Time to live in seconds
     
     def is_expired(self) -> bool:
-        return datetime.now() > self.expires_at
-
-
-@dataclass
-class RateLimiter:
-    """Rate limiter for API requests"""
-    requests: int = 0
-    window_start: datetime = field(default_factory=datetime.now)
-    max_requests: int = 100
-    window_seconds: int = 60
-    
-    def can_make_request(self) -> bool:
-        now = datetime.now()
-        if now - self.window_start > timedelta(seconds=self.window_seconds):
-            # Reset window
-            self.requests = 0
-            self.window_start = now
-        
-        return self.requests < self.max_requests
-    
-    def record_request(self) -> None:
-        self.requests += 1
-    
-    def time_until_reset(self) -> float:
-        """Time in seconds until rate limit resets"""
-        reset_time = self.window_start + timedelta(seconds=self.window_seconds)
-        return max(0, (reset_time - datetime.now()).total_seconds())
-
+        return datetime.utcnow() > self.timestamp + timedelta(seconds=self.ttl)
 
 class EnhancedLinearClient:
-    """Enhanced Linear GraphQL client with comprehensive features"""
+    """
+    Enhanced Linear GraphQL Client with advanced features:
+    - Connection pooling
+    - Automatic retries with exponential backoff
+    - Response caching
+    - Rate limiting
+    - Error handling and recovery
+    """
     
-    def __init__(self, config: LinearIntegrationConfig):
-        self.config = config
-        self.api_config = config.api
-        
-        # Initialize session
-        timeout = ClientTimeout(total=self.api_config.timeout)
-        self.session: Optional[ClientSession] = None
+    BASE_URL = "https://api.linear.app/graphql"
+    
+    def __init__(
+        self,
+        api_key: str,
+        max_retries: int = 3,
+        timeout: int = 30,
+        cache_ttl: int = 300,  # 5 minutes
+        rate_limit_per_minute: int = 1000
+    ):
+        self.api_key = api_key
+        self.max_retries = max_retries
         self.timeout = timeout
+        self.cache_ttl = cache_ttl
+        self.rate_limit_per_minute = rate_limit_per_minute
         
-        # Rate limiting
-        self.rate_limiter = RateLimiter(
-            max_requests=self.api_config.rate_limit_requests,
-            window_seconds=self.api_config.rate_limit_window
-        )
+        self._session: Optional[aiohttp.ClientSession] = None
+        self._cache: Dict[str, CacheEntry] = {}
+        self._rate_limiter = asyncio.Semaphore(rate_limit_per_minute)
+        self._last_request_time = 0
         
-        # Response cache
-        self.cache: Dict[str, CacheEntry] = {}
-        self.cache_ttl = timedelta(seconds=self.api_config.cache_ttl)
-        
-        # Statistics
-        self.stats = ComponentStats()
-        self.start_time = datetime.now()
-        
-        # User info cache
-        self.user_info: Optional[Dict[str, Any]] = None
-        
-        logger.info("Enhanced Linear client initialized")
-    
-    async def __aenter__(self):
-        """Async context manager entry"""
-        await self.initialize()
-        return self
-    
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Async context manager exit"""
-        await self.close()
-    
-    async def initialize(self) -> None:
-        """Initialize the client session"""
-        if self.session is None:
-            self.session = ClientSession(timeout=self.timeout)
-            logger.info("Linear client session initialized")
-    
-    async def close(self) -> None:
-        """Close the client session"""
-        if self.session:
-            await self.session.close()
-            self.session = None
-            logger.info("Linear client session closed")
-    
-    def _get_headers(self) -> Dict[str, str]:
-        """Get request headers"""
-        return {
+        # Headers for GraphQL requests
+        self._headers = {
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "Authorization": self.api_config.api_key,
-            "User-Agent": "graph-sitter-linear-client/1.0"
+            "User-Agent": "Contexten-Linear-Client/1.0"
         }
     
+    async def initialize(self) -> None:
+        """Initialize the HTTP session"""
+        if not self._session:
+            connector = aiohttp.TCPConnector(
+                limit=100,  # Connection pool size
+                limit_per_host=20,
+                ttl_dns_cache=300,
+                use_dns_cache=True
+            )
+            
+            timeout = aiohttp.ClientTimeout(total=self.timeout)
+            
+            self._session = aiohttp.ClientSession(
+                connector=connector,
+                timeout=timeout,
+                headers=self._headers
+            )
+            
+            logger.info("Linear GraphQL client initialized")
+    
+    async def close(self) -> None:
+        """Close the HTTP session"""
+        if self._session:
+            await self._session.close()
+            self._session = None
+            logger.info("Linear GraphQL client closed")
+    
     def _get_cache_key(self, query: str, variables: Optional[Dict] = None) -> str:
-        """Generate cache key for query"""
-        cache_data = {"query": query, "variables": variables or {}}
-        cache_str = json.dumps(cache_data, sort_keys=True)
-        return hashlib.md5(cache_str.encode()).hexdigest()
+        """Generate cache key for query and variables"""
+        content = f"{query}:{json.dumps(variables or {}, sort_keys=True)}"
+        return hashlib.md5(content.encode()).hexdigest()
     
     def _get_cached_response(self, cache_key: str) -> Optional[Any]:
         """Get cached response if available and not expired"""
-        if cache_key in self.cache:
-            entry = self.cache[cache_key]
+        if cache_key in self._cache:
+            entry = self._cache[cache_key]
             if not entry.is_expired():
-                self.stats.cache_hits += 1
+                logger.debug(f"Cache hit for key: {cache_key}")
                 return entry.data
             else:
                 # Remove expired entry
-                del self.cache[cache_key]
-        
-        self.stats.cache_misses += 1
+                del self._cache[cache_key]
         return None
     
-    def _cache_response(self, cache_key: str, data: Any) -> None:
-        """Cache response with TTL"""
-        expires_at = datetime.now() + self.cache_ttl
-        self.cache[cache_key] = CacheEntry(data=data, expires_at=expires_at)
+    def _cache_response(self, cache_key: str, data: Any, ttl: Optional[int] = None) -> None:
+        """Cache response data"""
+        ttl = ttl or self.cache_ttl
+        self._cache[cache_key] = CacheEntry(
+            data=data,
+            timestamp=datetime.utcnow(),
+            ttl=ttl
+        )
+        logger.debug(f"Cached response for key: {cache_key}")
     
-    async def _wait_for_rate_limit(self) -> None:
-        """Wait if rate limit is exceeded"""
-        if not self.rate_limiter.can_make_request():
-            wait_time = self.rate_limiter.time_until_reset()
-            logger.warning(f"Rate limit exceeded, waiting {wait_time:.2f} seconds")
-            await asyncio.sleep(wait_time)
+    async def _rate_limit(self) -> None:
+        """Apply rate limiting"""
+        async with self._rate_limiter:
+            current_time = time.time()
+            time_since_last = current_time - self._last_request_time
+            min_interval = 60.0 / self.rate_limit_per_minute
+            
+            if time_since_last < min_interval:
+                await asyncio.sleep(min_interval - time_since_last)
+            
+            self._last_request_time = time.time()
     
     async def _execute_query(
-        self, 
-        query: str, 
+        self,
+        query: str,
         variables: Optional[Dict] = None,
         use_cache: bool = True,
-        retries: Optional[int] = None
+        cache_ttl: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Execute GraphQL query with comprehensive error handling"""
-        
-        if not self.session:
+        """Execute GraphQL query with retries and caching"""
+        if not self._session:
             await self.initialize()
         
         # Check cache first
         cache_key = self._get_cache_key(query, variables) if use_cache else None
-        if cache_key and use_cache:
+        if cache_key:
             cached_response = self._get_cached_response(cache_key)
             if cached_response:
                 return cached_response
         
-        # Rate limiting
-        await self._wait_for_rate_limit()
-        self.rate_limiter.record_request()
+        # Apply rate limiting
+        await self._rate_limit()
         
-        # Prepare request
-        payload = {"query": query}
-        if variables:
-            payload["variables"] = variables
+        payload = {
+            "query": query,
+            "variables": variables or {}
+        }
         
-        headers = self._get_headers()
-        max_retries = retries if retries is not None else self.api_config.max_retries
-        
-        # Execute with retries
         last_exception = None
-        for attempt in range(max_retries + 1):
+        
+        for attempt in range(self.max_retries + 1):
             try:
-                self.stats.requests_made += 1
-                self.stats.last_request = datetime.now()
-                
-                async with self.session.post(
-                    self.api_config.base_url,
-                    json=payload,
-                    headers=headers
-                ) as response:
-                    
+                async with self._session.post(self.BASE_URL, json=payload) as response:
                     if response.status == 200:
                         data = await response.json()
                         
-                        # Check for GraphQL errors
                         if "errors" in data:
                             error_msg = "; ".join([err.get("message", "Unknown error") for err in data["errors"]])
                             raise Exception(f"GraphQL errors: {error_msg}")
                         
                         # Cache successful response
-                        if cache_key and use_cache:
-                            self._cache_response(cache_key, data)
+                        if cache_key and "data" in data:
+                            self._cache_response(cache_key, data, cache_ttl)
                         
-                        self.stats.requests_successful += 1
                         return data
                     
-                    elif response.status == 429:
-                        # Rate limited by server
-                        retry_after = int(response.headers.get("Retry-After", "60"))
-                        logger.warning(f"Server rate limit hit, waiting {retry_after} seconds")
+                    elif response.status == 429:  # Rate limited
+                        retry_after = int(response.headers.get("Retry-After", 60))
+                        logger.warning(f"Rate limited, waiting {retry_after} seconds")
                         await asyncio.sleep(retry_after)
                         continue
                     
@@ -230,370 +190,309 @@ class EnhancedLinearClient:
                         error_text = await response.text()
                         raise Exception(f"HTTP {response.status}: {error_text}")
             
-            except (ClientError, asyncio.TimeoutError) as e:
-                last_exception = e
-                if attempt < max_retries:
-                    wait_time = 2 ** attempt  # Exponential backoff
-                    logger.warning(f"Request failed (attempt {attempt + 1}/{max_retries + 1}), retrying in {wait_time}s: {e}")
-                    await asyncio.sleep(wait_time)
-                else:
-                    logger.error(f"Request failed after {max_retries + 1} attempts: {e}")
-            
             except Exception as e:
                 last_exception = e
-                logger.error(f"Unexpected error in request: {e}")
-                break
+                if attempt < self.max_retries:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    logger.warning(f"Request failed (attempt {attempt + 1}), retrying in {wait_time}s: {e}")
+                    await asyncio.sleep(wait_time)
+                else:
+                    logger.error(f"Request failed after {self.max_retries + 1} attempts: {e}")
         
-        # All retries failed
-        self.stats.requests_failed += 1
-        self.stats.last_error = str(last_exception)
-        raise Exception(f"Request failed after {max_retries + 1} attempts: {last_exception}")
+        raise last_exception
     
-    async def authenticate(self, api_key: str) -> bool:
-        """Authenticate with Linear API and get user info"""
-        try:
-            query = """
-                query {
-                    viewer {
-                        id
-                        name
-                        email
-                        avatarUrl
-                        active
-                    }
-                }
-            """
-            
-            response = await self._execute_query(query, use_cache=False)
-            self.user_info = response["data"]["viewer"]
-            
-            logger.info(f"Authenticated as Linear user: {self.user_info.get('name')} ({self.user_info.get('email')})")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Authentication failed: {e}")
-            return False
-    
+    # Issue Operations
     async def get_issue(self, issue_id: str) -> Optional[LinearIssue]:
-        """Get issue by ID with comprehensive data"""
+        """Get a Linear issue by ID"""
         try:
-            query = """
-                query getIssue($issueId: String!) {
-                    issue(id: $issueId) {
-                        id
-                        title
-                        description
-                        number
-                        url
-                        priority
-                        estimate
-                        createdAt
-                        updatedAt
-                        completedAt
-                        dueDate
-                        assignee {
-                            id
-                            name
-                            email
-                            avatarUrl
-                            active
-                        }
-                        creator {
-                            id
-                            name
-                            email
-                            avatarUrl
-                            active
-                        }
-                        team {
-                            id
-                            name
-                            key
-                            description
-                            private
-                        }
-                        state {
-                            id
-                            name
-                            type
-                            color
-                            position
-                        }
-                        labels {
-                            nodes {
-                                id
-                                name
-                                color
-                                description
-                            }
-                        }
-                        project {
-                            id
-                            name
-                            description
-                            url
-                        }
-                    }
-                }
-            """
-            
-            variables = {"issueId": issue_id}
-            response = await self._execute_query(query, variables)
-            
-            issue_data = response["data"]["issue"]
-            if not issue_data:
-                return None
-            
-            # Parse labels
-            labels = []
-            if issue_data.get("labels", {}).get("nodes"):
-                labels = [
-                    LinearLabel(**label) 
-                    for label in issue_data["labels"]["nodes"]
-                ]
-            
-            # Parse other nested objects
-            assignee = LinearUser(**issue_data["assignee"]) if issue_data.get("assignee") else None
-            creator = LinearUser(**issue_data["creator"]) if issue_data.get("creator") else None
-            team = LinearTeam(**issue_data["team"]) if issue_data.get("team") else None
-            state = LinearState(**issue_data["state"]) if issue_data.get("state") else None
-            project = LinearProject(**issue_data["project"]) if issue_data.get("project") else None
-            
-            return LinearIssue(
-                id=issue_data["id"],
-                title=issue_data["title"],
-                description=issue_data.get("description"),
-                number=issue_data.get("number"),
-                url=issue_data.get("url"),
-                assignee=assignee,
-                assignee_id=issue_data.get("assignee", {}).get("id") if issue_data.get("assignee") else None,
-                creator=creator,
-                team=team,
-                state=state,
-                labels=labels,
-                project=project,
-                priority=issue_data.get("priority"),
-                estimate=issue_data.get("estimate"),
-                created_at=datetime.fromisoformat(issue_data["createdAt"].replace("Z", "+00:00")) if issue_data.get("createdAt") else None,
-                updated_at=datetime.fromisoformat(issue_data["updatedAt"].replace("Z", "+00:00")) if issue_data.get("updatedAt") else None,
-                completed_at=datetime.fromisoformat(issue_data["completedAt"].replace("Z", "+00:00")) if issue_data.get("completedAt") else None,
-                due_date=datetime.fromisoformat(issue_data["dueDate"].replace("Z", "+00:00")) if issue_data.get("dueDate") else None
+            response = await self._execute_query(
+                LINEAR_QUERIES["GET_ISSUE"],
+                {"id": issue_id}
             )
+            
+            issue_data = response.get("data", {}).get("issue")
+            if issue_data:
+                return LinearIssue.from_dict(issue_data)
+            return None
             
         except Exception as e:
             logger.error(f"Error getting issue {issue_id}: {e}")
             return None
     
-    async def get_user_assigned_issues(
-        self, 
-        user_id: str, 
-        limit: int = 50,
-        include_completed: bool = False
+    async def search_issues(
+        self,
+        query: Optional[str] = None,
+        team_id: Optional[str] = None,
+        project_id: Optional[str] = None,
+        assignee_id: Optional[str] = None,
+        state: Optional[str] = None,
+        limit: int = 50
     ) -> List[LinearIssue]:
-        """Get issues assigned to a specific user"""
+        """Search for Linear issues"""
         try:
-            state_filter = "" if include_completed else 'filter: { state: { type: { neq: "completed" } } }'
+            variables = {
+                "first": limit,
+                "filter": {}
+            }
             
-            query = f"""
-                query getUserAssignedIssues($userId: String!, $limit: Int!) {{
-                    user(id: $userId) {{
-                        assignedIssues(first: $limit, {state_filter}) {{
-                            nodes {{
-                                id
-                                title
-                                description
-                                number
-                                url
-                                priority
-                                estimate
-                                createdAt
-                                updatedAt
-                                assignee {{
-                                    id
-                                    name
-                                }}
-                                team {{
-                                    id
-                                    name
-                                    key
-                                }}
-                                state {{
-                                    id
-                                    name
-                                    type
-                                }}
-                            }}
-                        }}
-                    }}
-                }}
-            """
+            # Build filter
+            if team_id:
+                variables["filter"]["team"] = {"id": {"eq": team_id}}
+            if project_id:
+                variables["filter"]["project"] = {"id": {"eq": project_id}}
+            if assignee_id:
+                variables["filter"]["assignee"] = {"id": {"eq": assignee_id}}
+            if state:
+                variables["filter"]["state"] = {"name": {"eq": state}}
+            if query:
+                variables["filter"]["title"] = {"containsIgnoreCase": query}
             
-            variables = {"userId": user_id, "limit": limit}
-            response = await self._execute_query(query, variables)
+            response = await self._execute_query(
+                LINEAR_QUERIES["SEARCH_ISSUES"],
+                variables
+            )
             
-            user_data = response["data"]["user"]
-            if not user_data or not user_data.get("assignedIssues", {}).get("nodes"):
-                return []
-            
-            issues = []
-            for issue_data in user_data["assignedIssues"]["nodes"]:
-                # Create simplified issue objects for listing
-                assignee = LinearUser(id=issue_data["assignee"]["id"], name=issue_data["assignee"]["name"]) if issue_data.get("assignee") else None
-                team = LinearTeam(id=issue_data["team"]["id"], name=issue_data["team"]["name"], key=issue_data["team"]["key"]) if issue_data.get("team") else None
-                state = LinearState(
-                    id=issue_data["state"]["id"], 
-                    name=issue_data["state"]["name"], 
-                    type=issue_data["state"]["type"],
-                    color="",  # Not included in this query
-                    position=0.0  # Not included in this query
-                ) if issue_data.get("state") else None
-                
-                issue = LinearIssue(
-                    id=issue_data["id"],
-                    title=issue_data["title"],
-                    description=issue_data.get("description"),
-                    number=issue_data.get("number"),
-                    url=issue_data.get("url"),
-                    assignee=assignee,
-                    assignee_id=issue_data.get("assignee", {}).get("id") if issue_data.get("assignee") else None,
-                    team=team,
-                    state=state,
-                    priority=issue_data.get("priority"),
-                    estimate=issue_data.get("estimate"),
-                    created_at=datetime.fromisoformat(issue_data["createdAt"].replace("Z", "+00:00")) if issue_data.get("createdAt") else None,
-                    updated_at=datetime.fromisoformat(issue_data["updatedAt"].replace("Z", "+00:00")) if issue_data.get("updatedAt") else None
-                )
-                issues.append(issue)
-            
-            return issues
+            issues_data = response.get("data", {}).get("issues", {}).get("nodes", [])
+            return [LinearIssue.from_dict(issue) for issue in issues_data]
             
         except Exception as e:
-            logger.error(f"Error getting assigned issues for user {user_id}: {e}")
+            logger.error(f"Error searching issues: {e}")
             return []
     
-    async def update_issue(
-        self, 
-        issue_id: str, 
-        updates: Dict[str, Any]
-    ) -> bool:
-        """Update an issue with the provided changes"""
+    async def create_issue(
+        self,
+        title: str,
+        description: Optional[str] = None,
+        team_id: Optional[str] = None,
+        project_id: Optional[str] = None,
+        assignee_id: Optional[str] = None,
+        priority: Optional[int] = None,
+        labels: Optional[List[str]] = None,
+        parent_id: Optional[str] = None
+    ) -> LinearIssue:
+        """Create a new Linear issue"""
         try:
-            # Build the mutation dynamically based on updates
-            update_fields = []
-            variables = {"issueId": issue_id}
+            variables = {
+                "input": {
+                    "title": title
+                }
+            }
             
-            if "title" in updates:
-                update_fields.append("title: $title")
-                variables["title"] = updates["title"]
+            if description:
+                variables["input"]["description"] = description
+            if team_id:
+                variables["input"]["teamId"] = team_id
+            if project_id:
+                variables["input"]["projectId"] = project_id
+            if assignee_id:
+                variables["input"]["assigneeId"] = assignee_id
+            if priority is not None:
+                variables["input"]["priority"] = priority
+            if labels:
+                variables["input"]["labelIds"] = labels
+            if parent_id:
+                variables["input"]["parentId"] = parent_id
             
-            if "description" in updates:
-                update_fields.append("description: $description")
-                variables["description"] = updates["description"]
+            response = await self._execute_query(
+                LINEAR_MUTATIONS["CREATE_ISSUE"],
+                variables,
+                use_cache=False
+            )
             
-            if "assignee_id" in updates:
-                update_fields.append("assigneeId: $assigneeId")
-                variables["assigneeId"] = updates["assignee_id"]
-            
-            if "state_id" in updates:
-                update_fields.append("stateId: $stateId")
-                variables["stateId"] = updates["state_id"]
-            
-            if "priority" in updates:
-                update_fields.append("priority: $priority")
-                variables["priority"] = updates["priority"]
-            
-            if not update_fields:
-                logger.warning("No valid update fields provided")
-                return False
-            
-            mutation = f"""
-                mutation updateIssue($issueId: String!, {', '.join(f'${k}: {self._get_graphql_type(k, v)}' for k, v in variables.items() if k != 'issueId')}) {{
-                    issueUpdate(id: $issueId, input: {{ {', '.join(update_fields)} }}) {{
-                        success
-                        issue {{
-                            id
-                            title
-                        }}
-                    }}
-                }}
-            """
-            
-            response = await self._execute_query(mutation, variables, use_cache=False)
-            
-            result = response["data"]["issueUpdate"]
-            if result["success"]:
-                logger.info(f"Successfully updated issue {issue_id}")
-                return True
+            issue_data = response.get("data", {}).get("issueCreate", {}).get("issue")
+            if issue_data:
+                return LinearIssue.from_dict(issue_data)
             else:
-                logger.error(f"Failed to update issue {issue_id}")
-                return False
+                raise Exception("Failed to create issue")
+                
+        except Exception as e:
+            logger.error(f"Error creating issue: {e}")
+            raise
+    
+    async def update_issue(self, issue_id: str, **updates) -> LinearIssue:
+        """Update an existing Linear issue"""
+        try:
+            variables = {
+                "id": issue_id,
+                "input": updates
+            }
             
+            response = await self._execute_query(
+                LINEAR_MUTATIONS["UPDATE_ISSUE"],
+                variables,
+                use_cache=False
+            )
+            
+            issue_data = response.get("data", {}).get("issueUpdate", {}).get("issue")
+            if issue_data:
+                return LinearIssue.from_dict(issue_data)
+            else:
+                raise Exception("Failed to update issue")
+                
         except Exception as e:
             logger.error(f"Error updating issue {issue_id}: {e}")
-            return False
+            raise
     
-    def _get_graphql_type(self, field: str, value: Any) -> str:
-        """Get GraphQL type for a field"""
-        type_mapping = {
-            "title": "String",
-            "description": "String", 
-            "assigneeId": "String",
-            "stateId": "String",
-            "priority": "Int"
-        }
-        return type_mapping.get(field, "String")
-    
-    async def create_comment(self, issue_id: str, body: str) -> Optional[str]:
-        """Create a comment on an issue"""
+    async def add_comment(self, issue_id: str, body: str) -> LinearComment:
+        """Add a comment to an issue"""
         try:
-            mutation = """
-                mutation createComment($issueId: String!, $body: String!) {
-                    commentCreate(input: {issueId: $issueId, body: $body}) {
-                        success
-                        comment {
-                            id
-                            body
-                            url
-                        }
-                    }
+            variables = {
+                "input": {
+                    "issueId": issue_id,
+                    "body": body
                 }
-            """
+            }
             
-            variables = {"issueId": issue_id, "body": body}
-            response = await self._execute_query(mutation, variables, use_cache=False)
+            response = await self._execute_query(
+                LINEAR_MUTATIONS["CREATE_COMMENT"],
+                variables,
+                use_cache=False
+            )
             
-            result = response["data"]["commentCreate"]
-            if result["success"]:
-                comment_id = result["comment"]["id"]
-                logger.info(f"Created comment {comment_id} on issue {issue_id}")
-                return comment_id
+            comment_data = response.get("data", {}).get("commentCreate", {}).get("comment")
+            if comment_data:
+                return LinearComment.from_dict(comment_data)
             else:
-                logger.error(f"Failed to create comment on issue {issue_id}")
-                return None
+                raise Exception("Failed to create comment")
+                
+        except Exception as e:
+            logger.error(f"Error adding comment to issue {issue_id}: {e}")
+            raise
+    
+    # Project Operations
+    async def get_projects(self, team_id: Optional[str] = None) -> List[LinearProject]:
+        """Get Linear projects"""
+        try:
+            variables = {"first": 100}
+            if team_id:
+                variables["filter"] = {"team": {"id": {"eq": team_id}}}
+            
+            response = await self._execute_query(
+                LINEAR_QUERIES["GET_PROJECTS"],
+                variables
+            )
+            
+            projects_data = response.get("data", {}).get("projects", {}).get("nodes", [])
+            return [LinearProject.from_dict(project) for project in projects_data]
             
         except Exception as e:
-            logger.error(f"Error creating comment on issue {issue_id}: {e}")
+            logger.error(f"Error getting projects: {e}")
+            return []
+    
+    async def create_project(
+        self,
+        name: str,
+        description: Optional[str] = None,
+        team_id: Optional[str] = None,
+        lead_id: Optional[str] = None,
+        target_date: Optional[datetime] = None
+    ) -> LinearProject:
+        """Create a new Linear project"""
+        try:
+            variables = {
+                "input": {
+                    "name": name
+                }
+            }
+            
+            if description:
+                variables["input"]["description"] = description
+            if team_id:
+                variables["input"]["teamId"] = team_id
+            if lead_id:
+                variables["input"]["leadId"] = lead_id
+            if target_date:
+                variables["input"]["targetDate"] = target_date.isoformat()
+            
+            response = await self._execute_query(
+                LINEAR_MUTATIONS["CREATE_PROJECT"],
+                variables,
+                use_cache=False
+            )
+            
+            project_data = response.get("data", {}).get("projectCreate", {}).get("project")
+            if project_data:
+                return LinearProject.from_dict(project_data)
+            else:
+                raise Exception("Failed to create project")
+                
+        except Exception as e:
+            logger.error(f"Error creating project: {e}")
+            raise
+    
+    # Team Operations
+    async def get_teams(self) -> List[LinearTeam]:
+        """Get Linear teams"""
+        try:
+            response = await self._execute_query(
+                LINEAR_QUERIES["GET_TEAMS"],
+                {"first": 100}
+            )
+            
+            teams_data = response.get("data", {}).get("teams", {}).get("nodes", [])
+            return [LinearTeam.from_dict(team) for team in teams_data]
+            
+        except Exception as e:
+            logger.error(f"Error getting teams: {e}")
+            return []
+    
+    async def get_team_members(self, team_id: str) -> List[LinearUser]:
+        """Get members of a Linear team"""
+        try:
+            response = await self._execute_query(
+                LINEAR_QUERIES["GET_TEAM_MEMBERS"],
+                {"teamId": team_id, "first": 100}
+            )
+            
+            members_data = response.get("data", {}).get("team", {}).get("members", {}).get("nodes", [])
+            return [LinearUser.from_dict(member) for member in members_data]
+            
+        except Exception as e:
+            logger.error(f"Error getting team members for {team_id}: {e}")
+            return []
+    
+    # User Operations
+    async def get_current_user(self) -> Optional[LinearUser]:
+        """Get current authenticated user"""
+        try:
+            response = await self._execute_query(
+                LINEAR_QUERIES["GET_CURRENT_USER"]
+            )
+            
+            user_data = response.get("data", {}).get("viewer")
+            if user_data:
+                return LinearUser.from_dict(user_data)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error getting current user: {e}")
             return None
     
-    def get_stats(self) -> ComponentStats:
-        """Get client statistics"""
-        self.stats.uptime_seconds = (datetime.now() - self.start_time).total_seconds()
-        return self.stats
+    # Health Check
+    async def health_check(self) -> bool:
+        """Perform health check"""
+        try:
+            await self.get_current_user()
+            return True
+        except Exception as e:
+            logger.error(f"Health check failed: {e}")
+            return False
     
+    # Cache Management
     def clear_cache(self) -> None:
-        """Clear the response cache"""
-        self.cache.clear()
-        logger.info("Response cache cleared")
+        """Clear all cached responses"""
+        self._cache.clear()
+        logger.info("Cache cleared")
     
-    def get_cache_info(self) -> Dict[str, Any]:
-        """Get cache information"""
-        total_entries = len(self.cache)
-        expired_entries = sum(1 for entry in self.cache.values() if entry.is_expired())
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics"""
+        total_entries = len(self._cache)
+        expired_entries = sum(1 for entry in self._cache.values() if entry.is_expired())
         
         return {
             "total_entries": total_entries,
-            "expired_entries": expired_entries,
             "active_entries": total_entries - expired_entries,
-            "cache_hit_rate": self.stats.cache_hits / (self.stats.cache_hits + self.stats.cache_misses) if (self.stats.cache_hits + self.stats.cache_misses) > 0 else 0.0
+            "expired_entries": expired_entries,
+            "cache_hit_ratio": getattr(self, "_cache_hits", 0) / max(getattr(self, "_cache_requests", 1), 1)
         }
 
