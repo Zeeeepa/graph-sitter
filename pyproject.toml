@@ -70,6 +70,7 @@ dependencies = [
   "datasets",
   "colorlog>=6.9.0",
   "codegen-sdk-pink>=0.1.0",
+  "contexten>=0.1.0",
 ]
 
 # renovate: datasource=python-version depName=python
@@ -148,9 +149,9 @@ dev-dependencies = [
   "sybil[pytest]>=9.0.0",
   "jsbeautifier<2.0.0,>=1.15.1",
   "inflection<1.0.0,>=0.5.1",
-  "autoflake>=2.3.1",
-  "black>=24.8.0",
-  "isort>=5.13.2",
+  # Remove redundant tools since ruff handles formatting and import sorting
+  # "black>=24.8.0",  # Replaced by ruff format
+  # "isort>=5.13.2",  # Replaced by ruff isort
   "emoji>=2.14.0",
   "pytest-benchmark[histogram]>=5.1.0",
   "pytest-asyncio>=0.21.1,<1.0.0",

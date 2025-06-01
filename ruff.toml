@@ -4,58 +4,48 @@ exclude = [
   'docs/**',
   "src/graph_sitter/__init__.py",
 ]
+# Enable unsafe fixes for better performance during development
 unsafe-fixes = true
+
 [lint]
+# Optimized rule selection for better performance and code quality
 select = [
-  "F",
-  "E",
-  "W",
-  "I",
-  "UP",
-  "D",
-  "YTT",
-  "RUF",
-  "DTZ",
-  "TC",
-  "EM",
-  "TRY400",
+  "F",    # Pyflakes
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "I",    # isort
+  "UP",   # pyupgrade
+  "D",    # pydocstyle
+  "YTT",  # flake8-2020
+  "RUF",  # Ruff-specific rules
+  "DTZ",  # flake8-datetimez
+  "TC",   # flake8-type-checking
+  "EM",   # flake8-errmsg
+  "TRY400", # flake8-try
+  "PERF", # Performance optimizations
+  "FURB", # refurb
 ]
 ignore = [
-  "D100",
-  "D101",
-  "D102",
-  "D103",
-  "D104",
-  "D105",
-  "D106",
-  "D107",
-  "D203",
-  "D205",
-  "D213",
-  "D400",
-  "D401",
-  "D402",
-  "D404",
-  "D415",
-  "D417",
+  "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", # Docstring requirements
+  "D203", "D205", "D213", "D400", "D401", "D402", "D404", "D415", "D417", # Docstring formatting
   "E712",   # https://github.com/astral-sh/ruff/issues/4560
-  "F841",
-  "F842",
-  "RUF012",
-  "RUF007",
+  "F841", "F842", # Unused variables (common in development)
+  "RUF012", "RUF007", # Mutable class attributes
 ]
 exclude = [
-  "*.ipynb",
-] # disable just linting for notebooks (allow for formatting)
+  "*.ipynb", # disable just linting for notebooks (allow for formatting)
+]
+
 [lint.per-file-ignores]
 "src/graph_sitter/cli/mcp/resources/system_prompt.py" = ["E501"]
+
 [lint.pydocstyle]
 convention = "google"
+
 [lint.pyflakes]
 extend-generics = [
   "graph_sitter.codebase.flagging.enums.MessageType",
   "graph_sitter.codebase.flagging.enums.FlagKwargs",
-  "graph_sitter.codebase.span.Span",
   "graph_sitter.core.assignment.Assignment",
   "graph_sitter.core.class_definition.Class",
   "graph_sitter.core.codebase.Codebase",
@@ -233,7 +223,9 @@ extend-generics = [
   "graph_sitter.typescript.ts_config.TSConfig",
   "graph_sitter.typescript.type_alias.TSTypeAlias",
 ]
+
 [lint.isort]
 known-first-party = ["codegen", "graph-sitter"]
+
 [format]
 docstring-code-format = true

@@ -1,5 +1,5 @@
 default_language_version:
-  python: python3.13
+  python: python3.12
 repos:
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
@@ -16,6 +16,16 @@ repos:
       # Run the formatter.
       - id: ruff-format
         types_or: [python, jupyter, pyi]
+
+  # Remove redundant black and isort since ruff handles both
+  # - repo: https://github.com/psf/black
+  #   rev: 24.8.0
+  #   hooks:
+  #     - id: black
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 5.13.2
+  #   hooks:
+  #     - id: isort
 
   - repo: https://github.com/biomejs/pre-commit
     rev: "v2.0.0-beta.1"
