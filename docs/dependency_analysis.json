@@ -1,0 +1,1131 @@
+{
+  "summary": {
+    "total_files_with_references": 20,
+    "total_references": 99,
+    "references_by_file_type": {
+      "python": 54,
+      "markdown": 45
+    },
+    "references_by_import_type": {
+      "from_import": 13,
+      "from_import_new": 10
+    },
+    "most_referenced_files": [
+      {
+        "file": "docs/migration-strategy.md",
+        "references": 26
+      },
+      {
+        "file": "src/contexten/cli/commands/serve/main.py",
+        "references": 14
+      },
+      {
+        "file": "docs/implementation-roadmap.md",
+        "references": 13
+      },
+      {
+        "file": "scripts/analyze_dependencies.py",
+        "references": 9
+      },
+      {
+        "file": "src/contexten/extensions/events/modal/base.py",
+        "references": 6
+      },
+      {
+        "file": "examples/examples/webhooks_README.md",
+        "references": 4
+      },
+      {
+        "file": "examples/examples/linear_webhooks/webhooks.py",
+        "references": 4
+      },
+      {
+        "file": "examples/examples/github_webhooks/webhooks.py",
+        "references": 4
+      },
+      {
+        "file": "examples/examples/unified_webhooks/webhooks.py",
+        "references": 4
+      },
+      {
+        "file": "fix_imports_codemod.py",
+        "references": 2
+      }
+    ]
+  },
+  "migration_plan": {
+    "phase_1_internal_updates": [
+      {
+        "file": "src/contexten/__init__.py",
+        "references": 2,
+        "priority": "high"
+      },
+      {
+        "file": "src/contexten/cli/commands/serve/main.py",
+        "references": 14,
+        "priority": "high"
+      },
+      {
+        "file": "src/contexten/extensions/events/client.py",
+        "references": 1,
+        "priority": "high"
+      },
+      {
+        "file": "src/contexten/extensions/events/codegen_app.py",
+        "references": 1,
+        "priority": "high"
+      },
+      {
+        "file": "src/contexten/extensions/events/modal/base.py",
+        "references": 6,
+        "priority": "high"
+      }
+    ],
+    "phase_2_example_updates": [
+      {
+        "file": "examples/examples/webhooks_README.md",
+        "references": 4,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/linear_webhooks/webhooks.py",
+        "references": 4,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/snapshot_event_handler/event_handlers.py",
+        "references": 2,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/github_checks/app.py",
+        "references": 1,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/pr_review_bot/app.py",
+        "references": 1,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/github_webhooks/webhooks.py",
+        "references": 4,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/codegen_app/app.py",
+        "references": 1,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/unified_webhooks/webhooks.py",
+        "references": 4,
+        "priority": "medium"
+      },
+      {
+        "file": "examples/examples/ticket-to-pr/app.py",
+        "references": 1,
+        "priority": "medium"
+      }
+    ],
+    "phase_3_documentation_updates": [
+      {
+        "file": "docs/migration-strategy.md",
+        "references": 26,
+        "priority": "low"
+      },
+      {
+        "file": "docs/integration-architecture.md",
+        "references": 2,
+        "priority": "low"
+      },
+      {
+        "file": "docs/implementation-roadmap.md",
+        "references": 13,
+        "priority": "low"
+      }
+    ],
+    "phase_4_external_notifications": [
+      {
+        "file": "fix_imports_codemod.py",
+        "references": 2,
+        "priority": "medium"
+      },
+      {
+        "file": "fix_documentation_imports.py",
+        "references": 1,
+        "priority": "medium"
+      },
+      {
+        "file": "scripts/analyze_dependencies.py",
+        "references": 9,
+        "priority": "medium"
+      }
+    ]
+  },
+  "detailed_results": {
+    "fix_imports_codemod.py": {
+      "file_path": "fix_imports_codemod.py",
+      "total_references": 2,
+      "import_references": [
+        {
+          "file_path": "fix_imports_codemod.py",
+          "line_number": 158,
+          "line_content": "f.write('from .extensions.events.codegen_app import CodegenApp\\n')",
+          "import_type": "from_import",
+          "module_path": ".extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "fix_imports_codemod.py",
+          "line_number": 159,
+          "line_content": "f.write('\\n__all__ = [\"CodegenApp\"]\\n')",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "fix_documentation_imports.py": {
+      "file_path": "fix_documentation_imports.py",
+      "total_references": 1,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "fix_documentation_imports.py",
+          "line_number": 34,
+          "line_content": "# Agent should be CodegenApp from contexten",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "scripts/analyze_dependencies.py": {
+      "file_path": "scripts/analyze_dependencies.py",
+      "total_references": 9,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 5,
+          "line_content": "This script analyzes all dependencies and references to codegen_app and CodegenApp",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 5,
+          "line_content": "This script analyzes all dependencies and references to codegen_app and CodegenApp",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 43,
+          "line_content": "'codegen_app_usage': re.compile(r'codegen_app'),",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 44,
+          "line_content": "'CodegenApp_usage': re.compile(r'CodegenApp'),",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 95,
+          "line_content": "symbol_name='CodegenApp'",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 98,
+          "line_content": "elif self.patterns['codegen_app_direct'].search(line):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 105,
+          "line_content": "symbol_name='codegen_app'",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 126,
+          "line_content": "symbol_name='CodegenApp'",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "scripts/analyze_dependencies.py",
+          "line_number": 136,
+          "line_content": "symbol_name='codegen_app'",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        }
+      ],
+      "file_type": "python"
+    },
+    "docs/migration-strategy.md": {
+      "file_path": "docs/migration-strategy.md",
+      "total_references": 26,
+      "import_references": [
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 24,
+          "line_content": "from codegen.extensions.events.codegen_app import CodegenApp          # Legacy",
+          "import_type": "from_import",
+          "module_path": "codegen.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 25,
+          "line_content": "from contexten.extensions.events.codegen_app import CodegenApp        # Current",
+          "import_type": "from_import",
+          "module_path": "contexten.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 58,
+          "line_content": "from .extensions.events.contexten_app import ContextenApp",
+          "import_type": "from_import_new",
+          "module_path": ".extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 59,
+          "line_content": "from .extensions.events.contexten_app import ContextenApp as CodegenApp  # Backward compatibility",
+          "import_type": "from_import_new",
+          "module_path": ".extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 79,
+          "line_content": "from contexten.extensions.events.contexten_app import ContextenApp",
+          "import_type": "from_import_new",
+          "module_path": "contexten.extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 82,
+          "line_content": "from .contexten_app import ContextenApp as CodegenApp",
+          "import_type": "from_import_new",
+          "module_path": ".contexten_app",
+          "symbol_name": "ContextenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 203,
+          "line_content": "from contexten.extensions.events.codegen_app import CodegenApp  # Legacy import",
+          "import_type": "from_import",
+          "module_path": "contexten.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 204,
+          "line_content": "from contexten.extensions.events.contexten_app import ContextenApp  # New import",
+          "import_type": "from_import_new",
+          "module_path": "contexten.extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 16,
+          "line_content": "- **Target File**: `src/contexten/extensions/events/codegen_app.py` (182 lines) \u2192 `contexten_app.py`",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 17,
+          "line_content": "- **Impact**: 52 references to \"CodegenApp\" across codebase",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 35,
+          "line_content": "find . -name \"*.py\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 35,
+          "line_content": "find . -name \"*.py\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 36,
+          "line_content": "find . -name \"*.md\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 36,
+          "line_content": "find . -name \"*.md\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 37,
+          "line_content": "find . -name \"*.yml\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 37,
+          "line_content": "find . -name \"*.yml\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 38,
+          "line_content": "find . -name \"*.json\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 38,
+          "line_content": "find . -name \"*.json\" -exec grep -l \"codegen_app\\|CodegenApp\" {} \\;",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 42,
+          "line_content": "- Environment variables referencing codegen_app",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 64,
+          "line_content": "\"CodegenApp is deprecated, use ContextenApp instead\",",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 71,
+          "line_content": "1. **Copy** `codegen_app.py` to `contexten_app.py`",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 72,
+          "line_content": "2. **Update** class name: `CodegenApp` \u2192 `ContextenApp`",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 81,
+          "line_content": "# Backward compatibility proxy in codegen_app.py",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 208,
+          "line_content": "legacy_app = CodegenApp(\"test-app\")",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 259,
+          "line_content": "git checkout HEAD~1 -- src/contexten/extensions/events/codegen_app.py",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/migration-strategy.md",
+          "line_number": 306,
+          "line_content": "- Remove `codegen_app.py` file",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        }
+      ],
+      "file_type": "markdown"
+    },
+    "docs/integration-architecture.md": {
+      "file_path": "docs/integration-architecture.md",
+      "total_references": 2,
+      "import_references": [
+        {
+          "file_path": "docs/integration-architecture.md",
+          "line_number": 561,
+          "line_content": "from contexten.extensions.events.contexten_app import ContextenApp",
+          "import_type": "from_import_new",
+          "module_path": "contexten.extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "docs/integration-architecture.md",
+          "line_number": 260,
+          "line_content": "\"\"\"Adapter to maintain compatibility with legacy CodegenApp usage.\"\"\"",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "markdown"
+    },
+    "docs/implementation-roadmap.md": {
+      "file_path": "docs/implementation-roadmap.md",
+      "total_references": 13,
+      "import_references": [
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 111,
+          "line_content": "from .contexten_app import ContextenApp as CodegenApp",
+          "import_type": "from_import_new",
+          "module_path": ".contexten_app",
+          "symbol_name": "ContextenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 119,
+          "line_content": "from .extensions.events.contexten_app import ContextenApp",
+          "import_type": "from_import_new",
+          "module_path": ".extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 120,
+          "line_content": "from .extensions.events.contexten_app import ContextenApp as CodegenApp  # Backward compatibility",
+          "import_type": "from_import_new",
+          "module_path": ".extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 129,
+          "line_content": "- \u2705 Both import paths working: `from contexten...codegen_app import CodegenApp` and `from contexten...contexten_app import ContextenApp`",
+          "import_type": "from_import",
+          "module_path": "contexten...codegen_app",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 146,
+          "line_content": "from contexten.extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": "contexten.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 150,
+          "line_content": "from contexten.extensions.events.contexten_app import ContextenApp",
+          "import_type": "from_import_new",
+          "module_path": "contexten.extensions.events.contexten_app",
+          "symbol_name": "ContextenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 20,
+          "line_content": "- Scan all Python files for `codegen_app` and `CodegenApp` references",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 20,
+          "line_content": "- Scan all Python files for `codegen_app` and `CodegenApp` references",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 36,
+          "line_content": "- \u2705 Complete inventory of 52+ CodegenApp references",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 105,
+          "line_content": "# Copy and rename CodegenApp -> ContextenApp",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 110,
+          "line_content": "# src/contexten/extensions/events/codegen_app.py",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 113,
+          "line_content": "warnings.warn(\"CodegenApp is deprecated, use ContextenApp\", DeprecationWarning)",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "docs/implementation-roadmap.md",
+          "line_number": 147,
+          "line_content": "assert CodegenApp is not None",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "markdown"
+    },
+    "examples/examples/webhooks_README.md": {
+      "file_path": "examples/examples/webhooks_README.md",
+      "total_references": 4,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/webhooks_README.md",
+          "line_number": 3,
+          "line_content": "This directory contains updated Modal webhook deployments using the latest CodegenApp patterns and best practices.",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/webhooks_README.md",
+          "line_number": 8,
+          "line_content": "- **Latest CodegenApp Architecture**: Uses the new `CodebaseEventsApp` and `EventRouterMixin` base classes",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/webhooks_README.md",
+          "line_number": 207,
+          "line_content": "def setup_handlers(self, cg: CodegenApp):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/webhooks_README.md",
+          "line_number": 222,
+          "line_content": "- [CodegenApp API Reference](https://docs.codegen.com)",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "markdown"
+    },
+    "examples/examples/linear_webhooks/webhooks.py": {
+      "file_path": "examples/examples/linear_webhooks/webhooks.py",
+      "total_references": 4,
+      "import_references": [
+        {
+          "file_path": "examples/examples/linear_webhooks/webhooks.py",
+          "line_number": 7,
+          "line_content": "from codegen.extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": "codegen.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/linear_webhooks/webhooks.py",
+          "line_number": 2,
+          "line_content": "Modern Modal deployment for Linear webhook handling using the latest CodegenApp patterns.",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/linear_webhooks/webhooks.py",
+          "line_number": 39,
+          "line_content": "def setup_handlers(self, cg: CodegenApp):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/linear_webhooks/webhooks.py",
+          "line_number": 109,
+          "line_content": "cg = CodegenApp(name=\"linear-local\", repo=\"your-org/your-repo\")",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "examples/examples/snapshot_event_handler/event_handlers.py": {
+      "file_path": "examples/examples/snapshot_event_handler/event_handlers.py",
+      "total_references": 2,
+      "import_references": [
+        {
+          "file_path": "examples/examples/snapshot_event_handler/event_handlers.py",
+          "line_number": 2,
+          "line_content": "from contexten.extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": "contexten.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/snapshot_event_handler/event_handlers.py",
+          "line_number": 51,
+          "line_content": "def setup_handlers(self, cg: CodegenApp):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "examples/examples/github_checks/app.py": {
+      "file_path": "examples/examples/github_checks/app.py",
+      "total_references": 1,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/github_checks/app.py",
+          "line_number": 16,
+          "line_content": "cg = CodegenApp(name=\"codegen-github-checks\")",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "examples/examples/pr_review_bot/app.py": {
+      "file_path": "examples/examples/pr_review_bot/app.py",
+      "total_references": 1,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/pr_review_bot/app.py",
+          "line_number": 29,
+          "line_content": "app = CodegenApp(name=\"github\", image=base_image, modal_api_key=\"\")",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "examples/examples/github_webhooks/webhooks.py": {
+      "file_path": "examples/examples/github_webhooks/webhooks.py",
+      "total_references": 4,
+      "import_references": [
+        {
+          "file_path": "examples/examples/github_webhooks/webhooks.py",
+          "line_number": 8,
+          "line_content": "from codegen.extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": "codegen.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/github_webhooks/webhooks.py",
+          "line_number": 2,
+          "line_content": "Modern Modal deployment for GitHub webhook handling using the latest CodegenApp patterns.",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/github_webhooks/webhooks.py",
+          "line_number": 42,
+          "line_content": "def setup_handlers(self, cg: CodegenApp):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/github_webhooks/webhooks.py",
+          "line_number": 141,
+          "line_content": "cg = CodegenApp(name=\"github-local\", repo=\"your-org/your-repo\")",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "examples/examples/codegen_app/app.py": {
+      "file_path": "examples/examples/codegen_app/app.py",
+      "total_references": 1,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/codegen_app/app.py",
+          "line_number": 19,
+          "line_content": "cg = CodegenApp(name=\"codegen-test\", repo=\"codegen-sh/Kevin-s-Adventure-Game\")",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "examples/examples/unified_webhooks/webhooks.py": {
+      "file_path": "examples/examples/unified_webhooks/webhooks.py",
+      "total_references": 4,
+      "import_references": [
+        {
+          "file_path": "examples/examples/unified_webhooks/webhooks.py",
+          "line_number": 8,
+          "line_content": "from codegen.extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": "codegen.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/unified_webhooks/webhooks.py",
+          "line_number": 3,
+          "line_content": "This deployment demonstrates the latest CodegenApp patterns with automatic webhook detection.",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/unified_webhooks/webhooks.py",
+          "line_number": 42,
+          "line_content": "def setup_handlers(self, cg: CodegenApp):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "examples/examples/unified_webhooks/webhooks.py",
+          "line_number": 245,
+          "line_content": "cg = CodegenApp(name=\"unified-local\", repo=repo_name)",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "examples/examples/ticket-to-pr/app.py": {
+      "file_path": "examples/examples/ticket-to-pr/app.py",
+      "total_references": 1,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "examples/examples/ticket-to-pr/app.py",
+          "line_number": 20,
+          "line_content": "app = CodegenApp(\"linear-bot\", image=image, modal_api_key=\"\")",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "src/contexten/__init__.py": {
+      "file_path": "src/contexten/__init__.py",
+      "total_references": 2,
+      "import_references": [
+        {
+          "file_path": "src/contexten/__init__.py",
+          "line_number": 2,
+          "line_content": "from .extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": ".extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "src/contexten/__init__.py",
+          "line_number": 4,
+          "line_content": "__all__ = [\"CodegenApp\"]",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "src/contexten/cli/commands/serve/main.py": {
+      "file_path": "src/contexten/cli/commands/serve/main.py",
+      "total_references": 14,
+      "import_references": [
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 15,
+          "line_content": "from contexten.extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": "contexten.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 37,
+          "line_content": "def load_app_from_file(file_path: Path) -> CodegenApp:",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 38,
+          "line_content": "\"\"\"Load a CodegenApp instance from a Python file.",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 41,
+          "line_content": "file_path: Path to the Python file containing the CodegenApp",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 44,
+          "line_content": "The CodegenApp instance from the file",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 47,
+          "line_content": "click.ClickException: If no CodegenApp instance is found",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 59,
+          "line_content": "# Find CodegenApp instance",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 62,
+          "line_content": "if isinstance(attr, CodegenApp):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 65,
+          "line_content": "msg = f\"No CodegenApp instance found in {file_path}\"",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 81,
+          "line_content": "module_name = f\"codegen_app_{file_path.stem}\"",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 84,
+          "line_content": "app = app.app  # Get the FastAPI instance from the CodegenApp",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 150,
+          "line_content": "\"\"\"Run a CodegenApp server from a Python file.",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 152,
+          "line_content": "FILE is the path to a Python file containing a CodegenApp instance",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/cli/commands/serve/main.py",
+          "line_number": 176,
+          "line_content": "f\"[green]Starting CodegenApp server[/green]\\n\"",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "src/contexten/extensions/events/client.py": {
+      "file_path": "src/contexten/extensions/events/client.py",
+      "total_references": 1,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "src/contexten/extensions/events/client.py",
+          "line_number": 22,
+          "line_content": "\"\"\"Client for testing CodegenApp endpoints\"\"\"",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "src/contexten/extensions/events/codegen_app.py": {
+      "file_path": "src/contexten/extensions/events/codegen_app.py",
+      "total_references": 1,
+      "import_references": [],
+      "usage_references": [
+        {
+          "file_path": "src/contexten/extensions/events/codegen_app.py",
+          "line_number": 19,
+          "line_content": "class CodegenApp:",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    },
+    "src/contexten/extensions/events/modal/base.py": {
+      "file_path": "src/contexten/extensions/events/modal/base.py",
+      "total_references": 6,
+      "import_references": [
+        {
+          "file_path": "src/contexten/extensions/events/modal/base.py",
+          "line_number": 8,
+          "line_content": "from contexten.extensions.events.codegen_app import CodegenApp",
+          "import_type": "from_import",
+          "module_path": "contexten.extensions.events.codegen_app",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "usage_references": [
+        {
+          "file_path": "src/contexten/extensions/events/modal/base.py",
+          "line_number": 126,
+          "line_content": "def get_codegen_app(self) -> CodegenApp:",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/extensions/events/modal/base.py",
+          "line_number": 126,
+          "line_content": "def get_codegen_app(self) -> CodegenApp:",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "src/contexten/extensions/events/modal/base.py",
+          "line_number": 128,
+          "line_content": "return CodegenApp(name=f\"{full_repo_name}-events\", repo=full_repo_name, commit=self.commit)",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        },
+        {
+          "file_path": "src/contexten/extensions/events/modal/base.py",
+          "line_number": 132,
+          "line_content": "self.cg = self.get_codegen_app()",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "codegen_app"
+        },
+        {
+          "file_path": "src/contexten/extensions/events/modal/base.py",
+          "line_number": 140,
+          "line_content": "def setup_handlers(self, cg: CodegenApp):",
+          "import_type": "usage",
+          "module_path": "",
+          "symbol_name": "CodegenApp"
+        }
+      ],
+      "file_type": "python"
+    }
+  }
+}
