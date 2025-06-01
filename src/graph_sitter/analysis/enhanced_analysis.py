@@ -1,541 +1,663 @@
-"""
-Enhanced codebase analysis integrating all analysis capabilities.
+"""Enhanced codebase analysis integrating all graph-sitter.com capabilities."""
 
-This module provides the main interface for comprehensive codebase analysis,
-integrating metrics, call graph analysis, dead code detection, and dependency analysis
-with database storage capabilities.
-"""
-
+import asyncio
 import json
+import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, List, Any, Optional
-from dataclasses import asdict
+from typing import Any, Dict, List, Optional
 
 from graph_sitter.core.codebase import Codebase
-from .database import (
-    AnalysisDatabase, CodebaseRecord, FileRecord, FunctionRecord, 
-    ClassRecord, FunctionCallRecord, DependencyRecord, ImportRecord
-)
-from .metrics import CodeMetrics, FunctionMetrics, ClassMetrics, FileMetrics
-from .call_graph import CallGraphAnalyzer, CallGraphMetrics
-from .dead_code import DeadCodeDetector, DeadCodeReport
-from .dependency_analyzer import DependencyAnalyzer, DependencyMetrics, ImportAnalysis
+from graph_sitter.core.function import Function
+from graph_sitter.core.symbol import Symbol
+
+from .call_graph import CallGraphAnalyzer
+from .dead_code import DeadCodeDetector
+from .dependency_analyzer import DependencyAnalyzer
+from .metrics import MetricsCalculator
+
+logger = logging.getLogger(__name__)
 
 
-class EnhancedCodebaseAnalysis:
-    """
-    Enhanced codebase analysis following graph-sitter.com patterns.
+@dataclass
+class AnalysisReport:
+    """Comprehensive analysis report."""
+    codebase_id: str
+    timestamp: str
+    summary: Dict[str, Any]
+    metrics: Dict[str, Any]
+    call_graph_analysis: Dict[str, Any]
+    dependency_analysis: Dict[str, Any]
+    dead_code_analysis: Dict[str, Any]
+    function_analysis: List[Dict[str, Any]]
+    class_analysis: List[Dict[str, Any]]
+    file_analysis: List[Dict[str, Any]]
+    issues: List[Dict[str, Any]]
+    recommendations: List[str]
+    health_score: float
+
+
+class EnhancedCodebaseAnalyzer:
+    """Comprehensive codebase analyzer integrating all capabilities."""
     
-    Provides comprehensive analysis capabilities including:
-    - Advanced code metrics
-    - Call graph analysis
-    - Dead code detection
-    - Dependency analysis
-    - Database storage and retrieval
-    """
-    
-    def __init__(self, codebase: Codebase, db_path: str = ":memory:"):
-        """Initialize enhanced analysis with codebase and database."""
+    def __init__(self, codebase: Codebase, codebase_id: str = "default"):
         self.codebase = codebase
-        self.db = AnalysisDatabase(db_path)
+        self.codebase_id = codebase_id
         
         # Initialize analyzers
-        self.metrics_analyzer = CodeMetrics(codebase)
+        self.metrics_calculator = MetricsCalculator(codebase)
         self.call_graph_analyzer = CallGraphAnalyzer(codebase)
-        self.dead_code_detector = DeadCodeDetector(codebase)
         self.dependency_analyzer = DependencyAnalyzer(codebase)
-        
-        self.codebase_id: Optional[int] = None
+        self.dead_code_detector = DeadCodeDetector(codebase)
     
-    def run_full_analysis(self, store_in_db: bool = True) -> Dict[str, Any]:
-        """
-        Run comprehensive analysis of the entire codebase.
-        
-        Args:
-            store_in_db: Whether to store results in database
+    def run_full_analysis(self) -> AnalysisReport:
+        """Run comprehensive analysis of the codebase."""
+        try:
+            logger.info(f"Starting full analysis for codebase: {self.codebase_id}")
             
-        Returns:
-            Dictionary containing all analysis results
-        """
-        print("🔍 Starting comprehensive codebase analysis...")
-        
-        # 1. Basic codebase metrics
-        print("📊 Analyzing codebase metrics...")
-        codebase_summary = self.metrics_analyzer.get_codebase_summary()
-        
-        # 2. File-level analysis
-        print("📁 Analyzing files...")
-        file_analyses = {}
-        for file in self.codebase.files:
-            file_analyses[file.filepath] = self.metrics_analyzer.analyze_file(file)
-        
-        # 3. Function-level analysis
-        print("🔧 Analyzing functions...")
-        function_analyses = {}
-        for function in self.codebase.functions:
-            function_analyses[function.qualified_name] = self.metrics_analyzer.analyze_function(function)
-        
-        # 4. Class-level analysis
-        print("🏗️ Analyzing classes...")
-        class_analyses = {}
-        for class_def in self.codebase.classes:
-            class_analyses[class_def.qualified_name] = self.metrics_analyzer.analyze_class(class_def)
-        
-        # 5. Call graph analysis
-        print("📞 Analyzing call graph...")
-        call_graph_metrics = self.call_graph_analyzer.get_call_graph_metrics()
-        
-        # 6. Dead code detection
-        print("💀 Detecting dead code...")
-        dead_code_report = self.dead_code_detector.analyze()
-        
-        # 7. Dependency analysis
-        print("🔗 Analyzing dependencies...")
-        dependency_metrics = self.dependency_analyzer.get_dependency_metrics()
-        import_analysis = self.dependency_analyzer.analyze_imports()
-        
-        # 8. Circular dependency detection
-        print("🔄 Detecting circular dependencies...")
-        circular_dependencies = self.dependency_analyzer.find_circular_dependencies()
-        
-        # Compile comprehensive results
-        analysis_results = {
-            'timestamp': datetime.now().isoformat(),
-            'codebase_summary': codebase_summary,
-            'file_analyses': {path: asdict(analysis) for path, analysis in file_analyses.items()},
-            'function_analyses': {name: asdict(analysis) for name, analysis in function_analyses.items()},
-            'class_analyses': {name: asdict(analysis) for name, analysis in class_analyses.items()},
-            'call_graph_metrics': asdict(call_graph_metrics),
-            'dead_code_report': asdict(dead_code_report),
-            'dependency_metrics': asdict(dependency_metrics),
-            'import_analysis': asdict(import_analysis),
-            'circular_dependencies': [asdict(cd) for cd in circular_dependencies],
-            'analysis_insights': self._generate_insights(
-                codebase_summary, call_graph_metrics, dead_code_report, 
-                dependency_metrics, circular_dependencies
+            # Get basic metrics
+            codebase_metrics = self.metrics_calculator.get_codebase_summary()
+            
+            # Analyze call graph
+            call_graph_analysis = self._analyze_call_graph()
+            
+            # Analyze dependencies
+            dependency_analysis = self._analyze_dependencies()
+            
+            # Detect dead code
+            dead_code_analysis = self._analyze_dead_code()
+            
+            # Analyze functions
+            function_analysis = self._analyze_functions()
+            
+            # Analyze classes
+            class_analysis = self._analyze_classes()
+            
+            # Analyze files
+            file_analysis = self._analyze_files()
+            
+            # Detect issues
+            issues = self._detect_issues()
+            
+            # Generate recommendations
+            recommendations = self._generate_recommendations(
+                codebase_metrics, call_graph_analysis, dependency_analysis, dead_code_analysis
             )
-        }
-        
-        # Store in database if requested
-        if store_in_db:
-            print("💾 Storing analysis results in database...")
-            self.codebase_id = self._store_analysis_in_db(
-                analysis_results, file_analyses, function_analyses, class_analyses
+            
+            # Calculate health score
+            health_score = self._calculate_health_score(
+                codebase_metrics, call_graph_analysis, dependency_analysis, dead_code_analysis
             )
-            analysis_results['codebase_id'] = self.codebase_id
-        
-        print("✅ Analysis complete!")
-        return analysis_results
+            
+            report = AnalysisReport(
+                codebase_id=self.codebase_id,
+                timestamp=datetime.now().isoformat(),
+                summary=asdict(codebase_metrics),
+                metrics={
+                    'codebase': asdict(codebase_metrics),
+                    'call_graph': call_graph_analysis,
+                    'dependencies': dependency_analysis,
+                    'dead_code': dead_code_analysis
+                },
+                call_graph_analysis=call_graph_analysis,
+                dependency_analysis=dependency_analysis,
+                dead_code_analysis=dead_code_analysis,
+                function_analysis=function_analysis,
+                class_analysis=class_analysis,
+                file_analysis=file_analysis,
+                issues=issues,
+                recommendations=recommendations,
+                health_score=health_score
+            )
+            
+            logger.info(f"Analysis completed. Health score: {health_score:.2f}")
+            return report
+            
+        except Exception as e:
+            logger.error(f"Error during full analysis: {e}")
+            raise
     
     def get_function_context_analysis(self, function_name: str) -> Dict[str, Any]:
-        """
-        Get comprehensive context analysis for a function.
-        
-        Based on graph-sitter.com function context analysis patterns.
-        """
-        function = self._get_function_by_name(function_name)
-        if not function:
-            return {}
-        
-        # Get function metrics
-        metrics = self.metrics_analyzer.analyze_function(function)
-        
-        # Get call graph context
-        call_paths = self.call_graph_analyzer.find_call_paths(
-            function.qualified_name, function.qualified_name, max_depth=5
-        )
-        
-        # Get dependency context
-        dependencies = self.dependency_analyzer.analyze_symbol_dependencies(
-            function.qualified_name
-        )
-        
-        # Get usage patterns
-        usage_patterns = self._analyze_function_usage_patterns(function)
-        
-        return {
-            'function': function.qualified_name,
-            'metrics': asdict(metrics),
-            'call_context': {
-                'incoming_calls': len(function.call_sites) if hasattr(function, 'call_sites') else 0,
-                'outgoing_calls': len(function.function_calls) if hasattr(function, 'function_calls') else 0,
-                'call_paths': [asdict(path) for path in call_paths[:10]]  # Limit to top 10
-            },
-            'dependencies': dependencies,
-            'usage_patterns': usage_patterns,
-            'recommendations': self._generate_function_recommendations(function, metrics)
-        }
+        """Get comprehensive context analysis for a function."""
+        try:
+            # Find the function
+            function = None
+            for func in self.codebase.functions:
+                if func.name == function_name:
+                    function = func
+                    break
+            
+            if not function:
+                return {'error': f'Function {function_name} not found'}
+            
+            # Get function metrics
+            function_metrics = self.metrics_calculator.analyze_function_metrics(function)
+            
+            # Get call graph context
+            call_depth = self.call_graph_analyzer.get_function_call_depth(function_name)
+            
+            # Get dependency context
+            dependency_context = self.dependency_analyzer.analyze_symbol_dependencies(function)
+            
+            # Check if function is dead code
+            dead_code_items = self.dead_code_detector.find_dead_code()
+            is_dead_code = any(
+                item.symbol.name == function_name and item.type == 'function'
+                for item in dead_code_items
+            )
+            
+            return {
+                'function_name': function_name,
+                'metrics': asdict(function_metrics),
+                'call_graph': {
+                    'depth': call_depth,
+                    'incoming_calls': len(getattr(function, 'call_sites', [])),
+                    'outgoing_calls': len(getattr(function, 'function_calls', []))
+                },
+                'dependencies': dependency_context,
+                'is_dead_code': is_dead_code,
+                'implementation': {
+                    'source': getattr(function, 'source', ''),
+                    'filepath': getattr(function, 'filepath', 'unknown'),
+                    'line_start': getattr(function, 'line_start', None),
+                    'line_end': getattr(function, 'line_end', None)
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error analyzing function context: {e}")
+            return {'error': str(e)}
     
     def get_codebase_health_score(self) -> Dict[str, Any]:
-        """Calculate overall codebase health score."""
-        if not self.codebase_id:
-            # Run analysis if not done yet
-            self.run_full_analysis()
-        
-        # Get metrics from database
-        codebase_metrics = self.db.get_codebase_metrics(self.codebase_id)
-        dead_code_candidates = self.db.get_dead_code_candidates(self.codebase_id)
-        complex_functions = self.db.get_complex_functions(self.codebase_id)
-        
-        # Calculate health scores (0-100)
-        maintainability_score = codebase_metrics.get('avg_maintainability', 50)
-        complexity_score = max(0, 100 - codebase_metrics.get('avg_function_complexity', 5) * 10)
-        dead_code_score = max(0, 100 - len(dead_code_candidates) * 2)
-        
-        overall_score = (maintainability_score * 0.4 + 
-                        complexity_score * 0.3 + 
-                        dead_code_score * 0.3)
-        
-        return {
-            'overall_health_score': round(overall_score, 1),
-            'maintainability_score': round(maintainability_score, 1),
-            'complexity_score': round(complexity_score, 1),
-            'dead_code_score': round(dead_code_score, 1),
-            'health_rating': self._get_health_rating(overall_score),
-            'recommendations': self._generate_health_recommendations(
-                maintainability_score, complexity_score, dead_code_score
-            )
-        }
-    
-    def query_analysis_data(self, query_type: str, **kwargs) -> List[Dict[str, Any]]:
-        """
-        Query stored analysis data with various filters.
-        
-        Args:
-            query_type: Type of query ('dead_code', 'complex_functions', 'recursive_functions', etc.)
-            **kwargs: Additional query parameters
+        """Calculate comprehensive codebase health assessment."""
+        try:
+            # Get metrics
+            metrics = self.metrics_calculator.get_codebase_summary()
             
-        Returns:
-            List of matching analysis results
-        """
-        if not self.codebase_id:
-            return []
-        
-        if query_type == 'dead_code':
-            return self.db.get_dead_code_candidates(self.codebase_id)
-        elif query_type == 'complex_functions':
-            min_complexity = kwargs.get('min_complexity', 10)
-            return self.db.get_complex_functions(self.codebase_id, min_complexity)
-        elif query_type == 'recursive_functions':
-            return self.db.get_recursive_functions(self.codebase_id)
-        elif query_type == 'call_graph':
-            return self.db.get_call_graph_data(self.codebase_id)
-        else:
-            return []
-    
-    def generate_analysis_report(self, output_format: str = 'markdown') -> str:
-        """Generate a comprehensive analysis report."""
-        if not self.codebase_id:
-            analysis_results = self.run_full_analysis()
-        else:
-            # Get stored results
-            analysis_results = self._get_stored_analysis_results()
-        
-        if output_format == 'markdown':
-            return self._generate_markdown_report(analysis_results)
-        elif output_format == 'json':
-            return json.dumps(analysis_results, indent=2)
-        else:
-            return str(analysis_results)
-    
-    def close(self):
-        """Close database connection."""
-        self.db.close()
-    
-    # Private helper methods
-    
-    def _store_analysis_in_db(self, analysis_results: Dict[str, Any],
-                             file_analyses: Dict[str, FileMetrics],
-                             function_analyses: Dict[str, FunctionMetrics],
-                             class_analyses: Dict[str, ClassMetrics]) -> int:
-        """Store analysis results in database."""
-        
-        # Store codebase record
-        codebase_summary = analysis_results['codebase_summary']
-        codebase_record = CodebaseRecord(
-            path=getattr(self.codebase, 'path', '.'),
-            name=getattr(self.codebase, 'name', 'Unknown'),
-            total_files=codebase_summary['total_files'],
-            total_functions=codebase_summary['total_functions'],
-            total_classes=codebase_summary['total_classes'],
-            total_imports=0,  # Would need to calculate
-            total_symbols=codebase_summary['total_files'] + codebase_summary['total_functions'] + codebase_summary['total_classes'],
-            analysis_timestamp=analysis_results['timestamp'],
-            metadata=json.dumps({
-                'maintainability_score': codebase_summary.get('maintainability_score', 0),
-                'technical_debt_ratio': codebase_summary.get('technical_debt_ratio', 0)
-            })
-        )
-        codebase_id = self.db.store_codebase(codebase_record)
-        
-        # Store file records
-        file_id_map = {}
-        for filepath, file_metrics in file_analyses.items():
-            file_record = FileRecord(
-                codebase_id=codebase_id,
-                filepath=filepath,
-                filename=file_metrics.filename,
-                file_type='python',  # Default, could be detected
-                lines_of_code=file_metrics.lines_of_code,
-                functions_count=file_metrics.functions_count,
-                classes_count=file_metrics.classes_count,
-                imports_count=file_metrics.imports_count,
-                complexity_score=file_metrics.complexity_score,
-                maintainability_index=file_metrics.maintainability_index,
-                metadata=json.dumps({
-                    'test_coverage_estimate': file_metrics.test_coverage_estimate,
-                    'documentation_coverage': file_metrics.documentation_coverage
-                })
+            # Calculate component scores
+            maintainability_score = metrics.average_maintainability / 100.0
+            documentation_score = metrics.documentation_coverage
+            test_coverage_score = metrics.test_coverage_estimate
+            dead_code_score = 1.0 - metrics.dead_code_percentage
+            complexity_score = max(0.0, 1.0 - (metrics.average_complexity - 1.0) / 10.0)
+            
+            # Get additional scores
+            call_graph_score = self._calculate_call_graph_health()
+            dependency_score = self._calculate_dependency_health()
+            
+            # Weighted health score
+            health_score = (
+                maintainability_score * 0.25 +
+                documentation_score * 0.15 +
+                test_coverage_score * 0.15 +
+                dead_code_score * 0.15 +
+                complexity_score * 0.15 +
+                call_graph_score * 0.10 +
+                dependency_score * 0.05
             )
-            file_id = self.db.store_file(file_record)
-            file_id_map[filepath] = file_id
-        
-        # Store function records
-        for qualified_name, func_metrics in function_analyses.items():
-            function = self._get_function_by_name(qualified_name)
-            if function and hasattr(function, 'filepath'):
-                file_id = file_id_map.get(function.filepath)
-                if file_id:
-                    function_record = FunctionRecord(
-                        file_id=file_id,
-                        name=func_metrics.name,
-                        qualified_name=func_metrics.qualified_name,
-                        start_line=0,  # Would need to extract from function
-                        end_line=0,
-                        lines_of_code=func_metrics.lines_of_code,
-                        cyclomatic_complexity=func_metrics.cyclomatic_complexity,
-                        parameters_count=func_metrics.parameters_count,
-                        return_statements_count=func_metrics.return_statements_count,
-                        call_sites_count=func_metrics.call_sites_count,
-                        function_calls_count=func_metrics.function_calls_count,
-                        is_recursive=func_metrics.is_recursive,
-                        is_async=func_metrics.is_async,
-                        is_generator=func_metrics.is_generator,
-                        docstring="",  # Would need to extract
-                        metadata=json.dumps({
-                            'nesting_depth': func_metrics.nesting_depth,
-                            'cognitive_complexity': func_metrics.cognitive_complexity,
-                            'maintainability_index': func_metrics.maintainability_index
-                        })
-                    )
-                    self.db.store_function(function_record)
-        
-        # Store class records
-        for qualified_name, class_metrics in class_analyses.items():
-            class_def = self._get_class_by_name(qualified_name)
-            if class_def and hasattr(class_def, 'filepath'):
-                file_id = file_id_map.get(class_def.filepath)
-                if file_id:
-                    class_record = ClassRecord(
-                        file_id=file_id,
-                        name=class_metrics.name,
-                        qualified_name=class_metrics.qualified_name,
-                        start_line=0,  # Would need to extract
-                        end_line=0,
-                        methods_count=class_metrics.methods_count,
-                        attributes_count=class_metrics.attributes_count,
-                        inheritance_depth=class_metrics.inheritance_depth,
-                        parent_classes=json.dumps(class_metrics.parent_classes),
-                        child_classes=json.dumps(class_metrics.child_classes),
-                        is_abstract=class_metrics.is_abstract,
-                        docstring="",  # Would need to extract
-                        metadata=json.dumps({
-                            'complexity_score': class_metrics.complexity_score,
-                            'cohesion_score': class_metrics.cohesion_score,
-                            'coupling_score': class_metrics.coupling_score
-                        })
-                    )
-                    self.db.store_class(class_record)
-        
-        return codebase_id
+            
+            return {
+                'overall_health_score': health_score,
+                'component_scores': {
+                    'maintainability': maintainability_score,
+                    'documentation': documentation_score,
+                    'test_coverage': test_coverage_score,
+                    'dead_code': dead_code_score,
+                    'complexity': complexity_score,
+                    'call_graph': call_graph_score,
+                    'dependencies': dependency_score
+                },
+                'grade': self._score_to_grade(health_score),
+                'recommendations': self._health_recommendations(health_score)
+            }
+        except Exception as e:
+            logger.error(f"Error calculating health score: {e}")
+            return {'error': str(e)}
     
-    def _get_function_by_name(self, name: str):
-        """Get function object by name."""
-        for function in self.codebase.functions:
-            if function.qualified_name == name or function.name == name:
-                return function
-        return None
-    
-    def _get_class_by_name(self, name: str):
-        """Get class object by name."""
-        for class_def in self.codebase.classes:
-            if class_def.qualified_name == name or class_def.name == name:
-                return class_def
-        return None
-    
-    def _analyze_function_usage_patterns(self, function) -> Dict[str, Any]:
-        """Analyze usage patterns for a function."""
-        patterns = {
-            'is_entry_point': function.name in ['main', '__main__', 'run'],
-            'is_test_function': 'test' in function.name.lower(),
-            'is_private': function.name.startswith('_'),
-            'has_decorators': hasattr(function, 'decorators') and len(function.decorators) > 0,
-            'usage_frequency': 'low'  # Would need call site analysis
-        }
-        
-        # Determine usage frequency
-        if hasattr(function, 'call_sites'):
-            call_count = len(function.call_sites)
-            if call_count == 0:
-                patterns['usage_frequency'] = 'unused'
-            elif call_count <= 2:
-                patterns['usage_frequency'] = 'low'
-            elif call_count <= 10:
-                patterns['usage_frequency'] = 'medium'
+    async def query_analysis_data(self, query: str) -> Dict[str, Any]:
+        """Query analysis data using natural language."""
+        try:
+            # This would integrate with the enhanced AI system
+            if hasattr(self.codebase, 'ai'):
+                # Prepare context about the codebase
+                context = {
+                    'codebase_summary': asdict(self.metrics_calculator.get_codebase_summary()),
+                    'call_graph_patterns': self.call_graph_analyzer.analyze_call_patterns(),
+                    'dependency_analysis': self.dependency_analyzer.analyze_imports(),
+                    'dead_code_count': len(self.dead_code_detector.find_dead_code())
+                }
+                
+                prompt = f"""
+                Analyze this codebase query: "{query}"
+                
+                Codebase Context:
+                {json.dumps(context, indent=2, default=str)}
+                
+                Please provide a detailed analysis addressing the query.
+                """
+                
+                result = await self.codebase.ai(prompt)
+                return {
+                    'query': query,
+                    'analysis': result.content if hasattr(result, 'content') else str(result),
+                    'context': context
+                }
             else:
-                patterns['usage_frequency'] = 'high'
-        
-        return patterns
+                return {'error': 'AI analysis not available'}
+        except Exception as e:
+            logger.error(f"Error querying analysis data: {e}")
+            return {'error': str(e)}
     
-    def _generate_function_recommendations(self, function, metrics: FunctionMetrics) -> List[str]:
-        """Generate recommendations for a function."""
-        recommendations = []
-        
-        if metrics.cyclomatic_complexity > 10:
-            recommendations.append("Consider breaking down this function to reduce complexity")
-        
-        if metrics.lines_of_code > 50:
-            recommendations.append("Function is quite long, consider splitting into smaller functions")
-        
-        if metrics.parameters_count > 5:
-            recommendations.append("Consider using a configuration object to reduce parameter count")
-        
-        if metrics.is_recursive and metrics.cyclomatic_complexity > 5:
-            recommendations.append("Recursive function with high complexity - consider iterative approach")
-        
-        if metrics.maintainability_index < 20:
-            recommendations.append("Low maintainability - consider refactoring")
-        
-        return recommendations
+    def generate_analysis_report(self, format: str = 'json') -> str:
+        """Generate comprehensive analysis report."""
+        try:
+            report = self.run_full_analysis()
+            
+            if format == 'json':
+                return json.dumps(asdict(report), indent=2, default=str)
+            elif format == 'markdown':
+                return self._generate_markdown_report(report)
+            else:
+                raise ValueError(f"Unsupported format: {format}")
+        except Exception as e:
+            logger.error(f"Error generating report: {e}")
+            return f"Error generating report: {e}"
     
-    def _generate_insights(self, codebase_summary: Dict[str, Any],
-                          call_graph_metrics: CallGraphMetrics,
-                          dead_code_report: DeadCodeReport,
-                          dependency_metrics: DependencyMetrics,
-                          circular_dependencies: List) -> Dict[str, Any]:
-        """Generate high-level insights from analysis results."""
-        insights = {
-            'code_quality': 'good',  # Default
-            'main_issues': [],
-            'strengths': [],
-            'improvement_areas': []
-        }
-        
-        # Analyze code quality indicators
-        if dead_code_report.total_dead_items > codebase_summary['total_functions'] * 0.1:
-            insights['main_issues'].append(f"High amount of dead code: {dead_code_report.total_dead_items} items")
-            insights['code_quality'] = 'needs_improvement'
-        
-        if len(circular_dependencies) > 0:
-            insights['main_issues'].append(f"Circular dependencies detected: {len(circular_dependencies)}")
-            insights['code_quality'] = 'needs_improvement'
-        
-        if codebase_summary.get('average_function_complexity', 0) > 8:
-            insights['main_issues'].append("High average function complexity")
-            insights['code_quality'] = 'needs_improvement'
-        
-        # Identify strengths
-        if dead_code_report.total_dead_items < codebase_summary['total_functions'] * 0.05:
-            insights['strengths'].append("Low amount of dead code")
-        
-        if len(circular_dependencies) == 0:
-            insights['strengths'].append("No circular dependencies")
-        
-        # Suggest improvement areas
-        if call_graph_metrics.max_call_depth > 10:
-            insights['improvement_areas'].append("Reduce call depth complexity")
-        
-        if dependency_metrics.circular_dependencies > 0:
-            insights['improvement_areas'].append("Resolve circular dependencies")
-        
-        return insights
+    def _analyze_call_graph(self) -> Dict[str, Any]:
+        """Analyze call graph patterns."""
+        try:
+            patterns = self.call_graph_analyzer.analyze_call_patterns()
+            
+            # Find specific patterns
+            most_called = self.call_graph_analyzer.find_most_called_function()
+            most_calling = self.call_graph_analyzer.find_most_calling_function()
+            unused_functions = self.call_graph_analyzer.find_unused_functions()
+            recursive_functions = self.call_graph_analyzer.find_recursive_functions()
+            
+            return {
+                'patterns': patterns,
+                'most_called_function': most_called.name if most_called else None,
+                'most_calling_function': most_calling.name if most_calling else None,
+                'unused_functions': [f.name for f in unused_functions],
+                'recursive_functions': [f.name for f in recursive_functions],
+                'call_chains': self.call_graph_analyzer.analyze_call_chains()
+            }
+        except Exception as e:
+            logger.error(f"Error analyzing call graph: {e}")
+            return {}
     
-    def _get_health_rating(self, score: float) -> str:
-        """Get health rating based on score."""
-        if score >= 80:
-            return "Excellent"
-        elif score >= 60:
-            return "Good"
-        elif score >= 40:
-            return "Fair"
+    def _analyze_dependencies(self) -> Dict[str, Any]:
+        """Analyze dependency patterns."""
+        try:
+            import_analysis = self.dependency_analyzer.analyze_imports()
+            circular_deps = self.dependency_analyzer.find_circular_dependencies()
+            
+            return {
+                'import_analysis': asdict(import_analysis),
+                'circular_dependencies': [
+                    {
+                        'symbols': [s.name for s in cd.symbols],
+                        'severity': cd.severity,
+                        'description': cd.description
+                    }
+                    for cd in circular_deps
+                ],
+                'optimization_suggestions': self.dependency_analyzer.optimize_import_structure()
+            }
+        except Exception as e:
+            logger.error(f"Error analyzing dependencies: {e}")
+            return {}
+    
+    def _analyze_dead_code(self) -> Dict[str, Any]:
+        """Analyze dead code."""
+        try:
+            dead_code_items = self.dead_code_detector.find_dead_code()
+            cleanup_impact = self.dead_code_detector.estimate_cleanup_impact(dead_code_items)
+            removal_plan = self.dead_code_detector.get_removal_plan(dead_code_items)
+            
+            return {
+                'dead_code_items': [
+                    {
+                        'name': item.symbol.name,
+                        'type': item.type,
+                        'filepath': item.filepath,
+                        'reason': item.reason,
+                        'confidence': item.confidence,
+                        'safe_to_remove': item.safe_to_remove
+                    }
+                    for item in dead_code_items
+                ],
+                'cleanup_impact': cleanup_impact,
+                'removal_plan': {
+                    'items_count': len(removal_plan.items),
+                    'estimated_lines_saved': removal_plan.estimated_lines_saved,
+                    'risk_assessment': removal_plan.risk_assessment,
+                    'warnings': removal_plan.warnings
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error analyzing dead code: {e}")
+            return {}
+    
+    def _analyze_functions(self) -> List[Dict[str, Any]]:
+        """Analyze all functions."""
+        try:
+            function_analyses = []
+            for function in list(self.codebase.functions)[:50]:  # Limit for performance
+                try:
+                    metrics = self.metrics_calculator.analyze_function_metrics(function)
+                    function_analyses.append(asdict(metrics))
+                except Exception as e:
+                    logger.warning(f"Error analyzing function {function.name}: {e}")
+            
+            return function_analyses
+        except Exception as e:
+            logger.error(f"Error analyzing functions: {e}")
+            return []
+    
+    def _analyze_classes(self) -> List[Dict[str, Any]]:
+        """Analyze all classes."""
+        try:
+            class_analyses = []
+            for class_def in list(self.codebase.classes)[:50]:  # Limit for performance
+                try:
+                    metrics = self.metrics_calculator.analyze_class_metrics(class_def)
+                    class_analyses.append(asdict(metrics))
+                except Exception as e:
+                    logger.warning(f"Error analyzing class {class_def.name}: {e}")
+            
+            return class_analyses
+        except Exception as e:
+            logger.error(f"Error analyzing classes: {e}")
+            return []
+    
+    def _analyze_files(self) -> List[Dict[str, Any]]:
+        """Analyze all files."""
+        try:
+            file_analyses = []
+            for file in list(self.codebase.files)[:50]:  # Limit for performance
+                try:
+                    metrics = self.metrics_calculator.analyze_file_metrics(file)
+                    file_analyses.append(asdict(metrics))
+                except Exception as e:
+                    logger.warning(f"Error analyzing file {file.filepath}: {e}")
+            
+            return file_analyses
+        except Exception as e:
+            logger.error(f"Error analyzing files: {e}")
+            return []
+    
+    def _detect_issues(self) -> List[Dict[str, Any]]:
+        """Detect various code issues."""
+        try:
+            issues = []
+            
+            # Get metrics for issue detection
+            codebase_metrics = self.metrics_calculator.get_codebase_summary()
+            
+            # High complexity functions
+            for function in self.codebase.functions:
+                try:
+                    complexity = self.metrics_calculator.calculate_cyclomatic_complexity(function)
+                    if complexity > 10:
+                        issues.append({
+                            'type': 'high_complexity',
+                            'severity': 'medium',
+                            'symbol': function.name,
+                            'description': f'Function has high cyclomatic complexity: {complexity}',
+                            'suggestion': 'Consider breaking this function into smaller functions'
+                        })
+                except Exception:
+                    continue
+            
+            # Poor documentation
+            if codebase_metrics.documentation_coverage < 0.5:
+                issues.append({
+                    'type': 'poor_documentation',
+                    'severity': 'medium',
+                    'symbol': 'codebase',
+                    'description': f'Low documentation coverage: {codebase_metrics.documentation_coverage:.1%}',
+                    'suggestion': 'Add docstrings to functions and classes'
+                })
+            
+            # High dead code percentage
+            if codebase_metrics.dead_code_percentage > 0.2:
+                issues.append({
+                    'type': 'dead_code',
+                    'severity': 'low',
+                    'symbol': 'codebase',
+                    'description': f'High dead code percentage: {codebase_metrics.dead_code_percentage:.1%}',
+                    'suggestion': 'Remove unused functions and classes'
+                })
+            
+            # Circular dependencies
+            circular_deps = self.dependency_analyzer.find_circular_dependencies()
+            for cd in circular_deps:
+                if cd.severity in ['medium', 'high']:
+                    issues.append({
+                        'type': 'circular_dependency',
+                        'severity': cd.severity,
+                        'symbol': ', '.join([s.name for s in cd.symbols]),
+                        'description': cd.description,
+                        'suggestion': 'Refactor to break circular dependencies'
+                    })
+            
+            return issues
+        except Exception as e:
+            logger.error(f"Error detecting issues: {e}")
+            return []
+    
+    def _generate_recommendations(self, codebase_metrics, call_graph_analysis, 
+                                dependency_analysis, dead_code_analysis) -> List[str]:
+        """Generate improvement recommendations."""
+        try:
+            recommendations = []
+            
+            # Maintainability recommendations
+            if codebase_metrics.average_maintainability < 60:
+                recommendations.append(
+                    "Improve code maintainability by reducing complexity and adding documentation"
+                )
+            
+            # Documentation recommendations
+            if codebase_metrics.documentation_coverage < 0.7:
+                recommendations.append(
+                    "Increase documentation coverage by adding docstrings to functions and classes"
+                )
+            
+            # Test coverage recommendations
+            if codebase_metrics.test_coverage_estimate < 0.6:
+                recommendations.append(
+                    "Improve test coverage by adding unit tests for critical functions"
+                )
+            
+            # Dead code recommendations
+            dead_code_count = len(dead_code_analysis.get('dead_code_items', []))
+            if dead_code_count > 0:
+                recommendations.append(
+                    f"Remove {dead_code_count} dead code items to improve codebase cleanliness"
+                )
+            
+            # Call graph recommendations
+            unused_functions = call_graph_analysis.get('unused_functions', [])
+            if len(unused_functions) > 5:
+                recommendations.append(
+                    f"Review {len(unused_functions)} unused functions for potential removal"
+                )
+            
+            # Dependency recommendations
+            circular_deps = dependency_analysis.get('circular_dependencies', [])
+            if circular_deps:
+                recommendations.append(
+                    f"Resolve {len(circular_deps)} circular dependencies to improve architecture"
+                )
+            
+            return recommendations
+        except Exception as e:
+            logger.error(f"Error generating recommendations: {e}")
+            return []
+    
+    def _calculate_health_score(self, codebase_metrics, call_graph_analysis,
+                              dependency_analysis, dead_code_analysis) -> float:
+        """Calculate overall codebase health score."""
+        try:
+            # Component scores
+            maintainability = codebase_metrics.average_maintainability / 100.0
+            documentation = codebase_metrics.documentation_coverage
+            test_coverage = codebase_metrics.test_coverage_estimate
+            dead_code_penalty = codebase_metrics.dead_code_percentage
+            
+            # Call graph health
+            patterns = call_graph_analysis.get('patterns', {})
+            call_graph_health = min(1.0, patterns.get('average_calls_per_function', 0) / 5.0)
+            
+            # Dependency health
+            import_analysis = dependency_analysis.get('import_analysis', {})
+            dependency_health = 1.0 - import_analysis.get('import_complexity_score', 0)
+            
+            # Weighted score
+            health_score = (
+                maintainability * 0.3 +
+                documentation * 0.2 +
+                test_coverage * 0.2 +
+                (1.0 - dead_code_penalty) * 0.15 +
+                call_graph_health * 0.1 +
+                dependency_health * 0.05
+            )
+            
+            return max(0.0, min(1.0, health_score))
+        except Exception as e:
+            logger.error(f"Error calculating health score: {e}")
+            return 0.5
+    
+    def _calculate_call_graph_health(self) -> float:
+        """Calculate call graph health score."""
+        try:
+            patterns = self.call_graph_analyzer.analyze_call_patterns()
+            
+            # Ideal metrics
+            ideal_avg_calls = 3.0
+            ideal_max_depth = 10
+            
+            avg_calls = patterns.get('average_calls_per_function', 0)
+            max_depth = patterns.get('max_call_depth', 0)
+            
+            # Score based on how close to ideal
+            calls_score = 1.0 - abs(avg_calls - ideal_avg_calls) / ideal_avg_calls
+            depth_score = 1.0 - max(0, max_depth - ideal_max_depth) / ideal_max_depth
+            
+            return (calls_score + depth_score) / 2.0
+        except Exception:
+            return 0.5
+    
+    def _calculate_dependency_health(self) -> float:
+        """Calculate dependency health score."""
+        try:
+            import_analysis = self.dependency_analyzer.analyze_imports()
+            
+            # Penalties for issues
+            penalty = 0.0
+            
+            if import_analysis.total_imports > 0:
+                unused_ratio = import_analysis.unused_imports / import_analysis.total_imports
+                circular_ratio = import_analysis.circular_imports / import_analysis.total_imports
+                
+                penalty += unused_ratio * 0.3
+                penalty += circular_ratio * 0.5
+                penalty += import_analysis.import_complexity_score * 0.2
+            
+            return max(0.0, 1.0 - penalty)
+        except Exception:
+            return 0.5
+    
+    def _score_to_grade(self, score: float) -> str:
+        """Convert numeric score to letter grade."""
+        if score >= 0.9:
+            return 'A'
+        elif score >= 0.8:
+            return 'B'
+        elif score >= 0.7:
+            return 'C'
+        elif score >= 0.6:
+            return 'D'
         else:
-            return "Poor"
+            return 'F'
     
-    def _generate_health_recommendations(self, maintainability: float, 
-                                       complexity: float, dead_code: float) -> List[str]:
-        """Generate health improvement recommendations."""
-        recommendations = []
-        
-        if maintainability < 50:
-            recommendations.append("Focus on improving code maintainability through refactoring")
-        
-        if complexity < 50:
-            recommendations.append("Reduce function complexity by breaking down large functions")
-        
-        if dead_code < 50:
-            recommendations.append("Remove dead code to improve codebase cleanliness")
-        
-        return recommendations
+    def _health_recommendations(self, score: float) -> List[str]:
+        """Generate health-based recommendations."""
+        if score >= 0.9:
+            return ["Excellent codebase health! Continue current practices."]
+        elif score >= 0.8:
+            return ["Good codebase health. Focus on minor improvements."]
+        elif score >= 0.7:
+            return ["Moderate health. Address documentation and test coverage."]
+        elif score >= 0.6:
+            return ["Below average health. Focus on reducing complexity and dead code."]
+        else:
+            return ["Poor health. Comprehensive refactoring recommended."]
     
-    def _get_stored_analysis_results(self) -> Dict[str, Any]:
-        """Get stored analysis results from database."""
-        # This would retrieve and reconstruct analysis results from the database
-        # For now, return empty dict
-        return {}
-    
-    def _generate_markdown_report(self, analysis_results: Dict[str, Any]) -> str:
-        """Generate a markdown report from analysis results."""
-        report = f"""# Codebase Analysis Report
+    def _generate_markdown_report(self, report: AnalysisReport) -> str:
+        """Generate markdown format report."""
+        try:
+            md = f"""# Codebase Analysis Report
 
-Generated on: {analysis_results['timestamp']}
+**Codebase ID:** {report.codebase_id}
+**Generated:** {report.timestamp}
+**Health Score:** {report.health_score:.2f} ({self._score_to_grade(report.health_score)})
 
 ## Summary
 
-- **Total Files**: {analysis_results['codebase_summary']['total_files']}
-- **Total Functions**: {analysis_results['codebase_summary']['total_functions']}
-- **Total Classes**: {analysis_results['codebase_summary']['total_classes']}
-- **Average Function Complexity**: {analysis_results['codebase_summary'].get('average_function_complexity', 'N/A')}
+- **Total Files:** {report.summary['total_files']}
+- **Total Functions:** {report.summary['total_functions']}
+- **Total Classes:** {report.summary['total_classes']}
+- **Total Lines:** {report.summary['total_lines']}
+- **Average Complexity:** {report.summary['average_complexity']:.1f}
+- **Documentation Coverage:** {report.summary['documentation_coverage']:.1%}
+- **Test Coverage:** {report.summary['test_coverage_estimate']:.1%}
 
-## Call Graph Metrics
-
-- **Total Function Calls**: {analysis_results['call_graph_metrics']['total_calls']}
-- **Max Call Depth**: {analysis_results['call_graph_metrics']['max_call_depth']}
-- **Recursive Functions**: {len(analysis_results['call_graph_metrics']['recursive_functions'])}
-
-## Dead Code Analysis
-
-- **Dead Functions**: {len(analysis_results['dead_code_report']['dead_functions'])}
-- **Dead Classes**: {len(analysis_results['dead_code_report']['dead_classes'])}
-- **Unused Imports**: {len(analysis_results['dead_code_report']['unused_imports'])}
-
-## Dependency Analysis
-
-- **Total Dependencies**: {analysis_results['dependency_metrics']['total_dependencies']}
-- **Circular Dependencies**: {analysis_results['dependency_metrics']['circular_dependencies']}
-- **Import Dependencies**: {analysis_results['dependency_metrics']['import_dependencies']}
-
-## Key Insights
+## Issues Found
 
 """
-        
-        insights = analysis_results.get('analysis_insights', {})
-        if insights.get('main_issues'):
-            report += "### Main Issues\n"
-            for issue in insights['main_issues']:
-                report += f"- {issue}\n"
-            report += "\n"
-        
-        if insights.get('strengths'):
-            report += "### Strengths\n"
-            for strength in insights['strengths']:
-                report += f"- {strength}\n"
-            report += "\n"
-        
-        if insights.get('improvement_areas'):
-            report += "### Improvement Areas\n"
-            for area in insights['improvement_areas']:
-                report += f"- {area}\n"
-            report += "\n"
-        
-        return report
+            for issue in report.issues:
+                md += f"- **{issue['severity'].upper()}:** {issue['description']}\n"
+                md += f"  - *Suggestion:* {issue['suggestion']}\n\n"
+            
+            md += "## Recommendations\n\n"
+            for rec in report.recommendations:
+                md += f"- {rec}\n"
+            
+            return md
+        except Exception as e:
+            logger.error(f"Error generating markdown report: {e}")
+            return f"Error generating report: {e}"
+
+
+# Convenience functions
+def run_full_analysis(codebase: Codebase, codebase_id: str = "default") -> AnalysisReport:
+    """Run comprehensive analysis."""
+    analyzer = EnhancedCodebaseAnalyzer(codebase, codebase_id)
+    return analyzer.run_full_analysis()
+
+
+def get_function_context_analysis(codebase: Codebase, function_name: str) -> Dict[str, Any]:
+    """Get function context analysis."""
+    analyzer = EnhancedCodebaseAnalyzer(codebase)
+    return analyzer.get_function_context_analysis(function_name)
+
+
+def get_codebase_health_score(codebase: Codebase) -> Dict[str, Any]:
+    """Get health assessment."""
+    analyzer = EnhancedCodebaseAnalyzer(codebase)
+    return analyzer.get_codebase_health_score()
+
+
+async def query_analysis_data(codebase: Codebase, query: str) -> Dict[str, Any]:
+    """Query analysis data."""
+    analyzer = EnhancedCodebaseAnalyzer(codebase)
+    return await analyzer.query_analysis_data(query)
+
+
+def generate_analysis_report(codebase: Codebase, format: str = 'json') -> str:
+    """Generate analysis report."""
+    analyzer = EnhancedCodebaseAnalyzer(codebase)
+    return analyzer.generate_analysis_report(format)
 
