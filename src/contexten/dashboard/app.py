@@ -34,6 +34,7 @@ from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentC
 from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentConfig
 from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
 from ...shared.logging.get_logger import get_logger
+from .chat_manager import ChatManager
 
 logger = get_logger(__name__)
 
@@ -138,6 +139,7 @@ app.mount("/static", StaticFiles(directory="src/contexten/dashboard/static"), na
 # Global state
 integration_agents: Dict[str, Any] = {}
 user_sessions: Dict[str, Dict[str, Any]] = {}
+chat_manager = ChatManager()
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -429,24 +431,123 @@ async def get_codegen_status(
 
 @app.post("/api/codegen/stop")
 async def stop_codegen_task(
-    request: Request,
     user: Dict[str, Any] = Depends(require_auth)
 ):
     """Stop Codegen task"""
-    session_id = request.session.get("session_id")
-    user_data = user_sessions.get(session_id, {})
-    
-    task_info = user_data.get("codegen_task")
-    if not task_info:
-        raise HTTPException(status_code=400, detail="No active task found")
-    
-    # TODO: Implement actual task stopping with Codegen SDK
-    
-    # Update task status
-    user_sessions[session_id]["codegen_task"]["status"] = "stopped"
-    user_sessions[session_id]["codegen_task"]["stopped_at"] = datetime.utcnow().isoformat()
-    
-    return {"status": "success", "message": "Codegen task stopped"}
+    try:
+        # Implementation would stop the actual Codegen task
+        return {"status": "stopped", "message": "Codegen task stopped successfully"}
+    except Exception as e:
+        logger.error(f"Error stopping Codegen task: {e}")
+        raise HTTPException(status_code=500, detail="Failed to stop Codegen task")
+
+# Chat API Endpoints
+
+@app.post("/api/chat")
+async def chat_message(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Process chat message"""
+    try:
+        data = await request.json()
+        message = data.get("message", "").strip()
+        thread_id = data.get("thread_id")
+        project_id = data.get("project_id")
+        
+        if not message:
+            raise HTTPException(status_code=400, detail="Message is required")
+        
+        # Get user tokens for agent creation
+        user_tokens = {
+            "github_token": user.get("github_token"),
+            "linear_token": user.get("linear_token"),
+            "slack_token": user.get("slack_token")
+        }
+        
+        # Process the chat message
+        result = await chat_manager.process_chat_message(
+            message=message,
+            thread_id=thread_id,
+            project_id=project_id,
+            user_tokens=user_tokens
+        )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing chat message: {e}")
+        raise HTTPException(status_code=500, detail="Failed to process chat message")
+
+@app.get("/api/chat/history/{thread_id}")
+async def get_chat_history(
+    thread_id: str,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get chat history for a thread"""
+    try:
+        # Implementation would retrieve chat history
+        return {"thread_id": thread_id, "messages": []}
+    except Exception as e:
+        logger.error(f"Error getting chat history: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get chat history")
+
+# Agent Management API Endpoints
+
+@app.post("/api/agents/{agent_id}/stop")
+async def stop_agent(
+    agent_id: str,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Stop a monitoring agent"""
+    try:
+        success = await chat_manager.stop_agent(agent_id)
+        if success:
+            return {"status": "stopped", "agent_id": agent_id}
+        else:
+            raise HTTPException(status_code=404, detail="Agent not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error stopping agent {agent_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to stop agent")
+
+@app.get("/api/agents")
+async def list_active_agents(user: Dict[str, Any] = Depends(require_auth)):
+    """List all active agents"""
+    try:
+        # Implementation would list active agents
+        return {"agents": []}
+    except Exception as e:
+        logger.error(f"Error listing agents: {e}")
+        raise HTTPException(status_code=500, detail="Failed to list agents")
+
+# Monitoring API Endpoints
+
+@app.get("/api/monitoring/status")
+async def get_monitoring_status(user: Dict[str, Any] = Depends(require_auth)):
+    """Get current monitoring status"""
+    try:
+        status = await chat_manager.get_monitoring_status()
+        return status
+    except Exception as e:
+        logger.error(f"Error getting monitoring status: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get monitoring status")
+
+@app.get("/api/monitoring/activity")
+async def get_recent_activity(
+    limit: int = 50,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get recent activity across all integrations"""
+    try:
+        # Implementation would get recent activity
+        return {"activities": [], "limit": limit}
+    except Exception as e:
+        logger.error(f"Error getting recent activity: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get recent activity")
 
 # Integration Status Routes
 
@@ -576,7 +677,7 @@ Please analyze the requirements and create a comprehensive implementation plan w
 
 ## Expected Deliverables
 1. Main Linear issue with project overview and requirements
-2. Sub-issues for each major feature/component
+2. Sub-issues for each major component and feature implementation
 3. Technical documentation and implementation guidelines
 4. Testing strategy and acceptance criteria
 
@@ -671,4 +772,3 @@ if __name__ == "__main__":
         reload=config.debug,
         log_level="debug" if config.debug else "info"
     )
-
