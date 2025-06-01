@@ -71,7 +71,7 @@ class AIResponse:
         return self.content
     
     def __repr__(self) -> str:
-        return f"AIResponse(provider={self.provider}, model={self.model}, tokens={self.tokens_used})"
+        return f"AIResponse(provider={self.provider}, model={self.model}, tokens={self.tokens_used}, health_score={self._calculate_health_score():.2f})"
     
     def get_quality_insights(self) -> Dict[str, Any]:
         """Get quality insights from the analysis."""
