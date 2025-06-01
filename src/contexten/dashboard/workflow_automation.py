@@ -9,7 +9,7 @@ to create fully automated development workflows.
 import asyncio
 import logging
 from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
 import json
@@ -349,7 +349,7 @@ class WorkflowEngine:
         self, 
         workflow_id: str, 
         variables: Dict[str, Any] = None,
-        trigger_type: str = "manual"
+        # trigger_type: str = "manual"  # TODO: implement trigger type handling
     ) -> str:
         """Execute a workflow"""
         

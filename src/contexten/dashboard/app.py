@@ -10,15 +10,14 @@ import os
 import json
 import logging
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 import secrets
-import hashlib
 
-from fastapi import FastAPI, Request, Response, HTTPException, Depends, status
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi import FastAPI, Request, HTTPException, Depends, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.sessions import SessionMiddleware
 
@@ -35,6 +34,10 @@ from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentC
 from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
 from ...shared.logging.get_logger import get_logger
 from .chat_manager import ChatManager
+from .multi_project_manager import (
+    MultiProjectManager, ProjectConfig, ProjectRequirement, CICDFlow, 
+    ProjectType, FlowStatus, FlowExecution
+)
 
 logger = get_logger(__name__)
 
@@ -140,6 +143,7 @@ app.mount("/static", StaticFiles(directory="src/contexten/dashboard/static"), na
 integration_agents: Dict[str, Any] = {}
 user_sessions: Dict[str, Dict[str, Any]] = {}
 chat_manager = ChatManager()
+multi_project_manager = MultiProjectManager()
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -727,12 +731,351 @@ Sub-issues will be created for each major component and feature implementation.
     except Exception as e:
         logger.error(f"Error creating Linear main issue: {e}")
 
-# Startup and shutdown events
+# Multi-Project Management API Endpoints
+
+@app.get("/api/multi-projects")
+async def get_multi_projects(
+    request: Request, 
+    active_only: bool = False,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get all projects in the multi-project system"""
+    try:
+        projects = await multi_project_manager.get_projects(active_only=active_only)
+        return {
+            "projects": [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "type": p.type.value,
+                    "source_url": p.source_url,
+                    "branch": p.branch,
+                    "description": p.description,
+                    "tags": p.tags,
+                    "created_at": p.created_at.isoformat(),
+                    "updated_at": p.updated_at.isoformat(),
+                    "is_active": p.id in multi_project_manager.active_projects
+                }
+                for p in projects
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get multi-projects: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/multi-projects")
+async def create_multi_project(
+    request: Request,
+    project_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Create a new project in the multi-project system"""
+    try:
+        # Create project configuration
+        project_config = ProjectConfig(
+            id=project_data.get("id", f"project_{int(datetime.now().timestamp())}"),
+            name=project_data["name"],
+            type=ProjectType(project_data["type"]),
+            source_url=project_data["source_url"],
+            branch=project_data.get("branch", "main"),
+            description=project_data.get("description", ""),
+            tags=project_data.get("tags", []),
+            settings=project_data.get("settings", {})
+        )
+        
+        success = await multi_project_manager.add_project(project_config)
+        
+        if success:
+            return {"message": "Project created successfully", "project_id": project_config.id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to create project")
+            
+    except Exception as e:
+        logger.error(f"Failed to create multi-project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/multi-projects/{project_id}")
+async def get_multi_project(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get specific project details"""
+    try:
+        project = await multi_project_manager.get_project(project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        # Get additional project data
+        requirements = await multi_project_manager.get_requirements(project_id)
+        flows = await multi_project_manager.get_flows(project_id)
+        
+        return {
+            "project": {
+                "id": project.id,
+                "name": project.name,
+                "type": project.type.value,
+                "source_url": project.source_url,
+                "branch": project.branch,
+                "description": project.description,
+                "tags": project.tags,
+                "settings": project.settings,
+                "created_at": project.created_at.isoformat(),
+                "updated_at": project.updated_at.isoformat(),
+                "is_active": project.id in multi_project_manager.active_projects
+            },
+            "requirements": [
+                {
+                    "id": r.id,
+                    "title": r.title,
+                    "description": r.description,
+                    "priority": r.priority,
+                    "status": r.status,
+                    "labels": r.labels,
+                    "assignee": r.assignee,
+                    "due_date": r.due_date.isoformat() if r.due_date else None,
+                    "created_at": r.created_at.isoformat()
+                }
+                for r in requirements
+            ],
+            "flows": [
+                {
+                    "id": f.id,
+                    "name": f.name,
+                    "description": f.description,
+                    "status": f.status.value,
+                    "auto_start": f.auto_start,
+                    "last_run": f.last_run.isoformat() if f.last_run else None,
+                    "run_count": f.run_count,
+                    "success_count": f.success_count,
+                    "failure_count": f.failure_count
+                }
+                for f in flows
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get multi-project {project_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/multi-projects/{project_id}/requirements")
+async def add_project_requirement(
+    project_id: str,
+    requirement_data: Dict[str, Any],
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Add a requirement to a project"""
+    try:
+        requirement = ProjectRequirement(
+            id=requirement_data.get("id", f"req_{int(datetime.now().timestamp())}"),
+            project_id=project_id,
+            title=requirement_data["title"],
+            description=requirement_data.get("description", ""),
+            priority=requirement_data.get("priority", 1),
+            labels=requirement_data.get("labels", []),
+            assignee=requirement_data.get("assignee"),
+            due_date=datetime.fromisoformat(requirement_data["due_date"]) if requirement_data.get("due_date") else None,
+            metadata=requirement_data.get("metadata", {})
+        )
+        
+        success = await multi_project_manager.add_requirement(requirement)
+        
+        if success:
+            return {"message": "Requirement added successfully", "requirement_id": requirement.id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to add requirement")
+            
+    except Exception as e:
+        logger.error(f"Failed to add requirement to project {project_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/multi-projects/{project_id}/flows")
+async def create_project_flow(
+    project_id: str,
+    flow_data: Dict[str, Any],
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Create a CI/CD flow for a project"""
+    try:
+        flow = CICDFlow(
+            id=flow_data.get("id", f"flow_{int(datetime.now().timestamp())}"),
+            project_id=project_id,
+            name=flow_data["name"],
+            description=flow_data.get("description", ""),
+            workflow_id=flow_data["workflow_id"],
+            status=FlowStatus.IDLE,
+            trigger_conditions=flow_data.get("trigger_conditions", {}),
+            auto_start=flow_data.get("auto_start", False),
+            schedule=flow_data.get("schedule"),
+            settings=flow_data.get("settings", {})
+        )
+        
+        success = await multi_project_manager.create_flow(flow)
+        
+        if success:
+            return {"message": "Flow created successfully", "flow_id": flow.id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to create flow")
+            
+    except Exception as e:
+        logger.error(f"Failed to create flow for project {project_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/multi-projects/flows/{flow_id}/start")
+async def start_project_flow(
+    flow_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Start a CI/CD flow execution"""
+    try:
+        execution_id = await multi_project_manager.start_flow(flow_id, triggered_by=user.get("email", "unknown"))
+        
+        if execution_id:
+            return {"message": "Flow started successfully", "execution_id": execution_id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to start flow")
+            
+    except Exception as e:
+        logger.error(f"Failed to start flow {flow_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/multi-projects/flows/{flow_id}/stop")
+async def stop_project_flow(
+    flow_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Stop a running CI/CD flow"""
+    try:
+        # Find running execution for this flow
+        running_flows = await multi_project_manager.get_running_flows()
+        execution_id = None
+        
+        for exec_id, execution in running_flows.items():
+            if execution.flow_id == flow_id:
+                execution_id = exec_id
+                break
+        
+        if execution_id:
+            success = await multi_project_manager.stop_flow_execution(execution_id)
+            if success:
+                return {"message": "Flow stopped successfully"}
+            else:
+                raise HTTPException(status_code=400, detail="Failed to stop flow")
+        else:
+            raise HTTPException(status_code=404, detail="No running execution found for this flow")
+            
+    except Exception as e:
+        logger.error(f"Failed to stop flow {flow_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/multi-projects/flows/{flow_id}/executions")
+async def get_flow_executions(
+    flow_id: str,
+    limit: int = 10,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get execution history for a flow"""
+    try:
+        executions = await multi_project_manager.get_flow_executions(flow_id, limit)
+        
+        return {
+            "executions": [
+                {
+                    "id": e.id,
+                    "status": e.status.value,
+                    "started_at": e.started_at.isoformat(),
+                    "completed_at": e.completed_at.isoformat() if e.completed_at else None,
+                    "progress": e.progress,
+                    "current_step": e.current_step,
+                    "triggered_by": e.triggered_by,
+                    "error": e.error
+                }
+                for e in executions
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get executions for flow {flow_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/multi-projects/analysis")
+async def analyze_multi_projects(
+    request: Request,
+    project_ids: Optional[str] = None,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Perform multi-project analysis"""
+    try:
+        target_projects = None
+        if project_ids:
+            target_projects = project_ids.split(",")
+        
+        analysis = await multi_project_manager.analyze_projects(target_projects)
+        return analysis
+        
+    except Exception as e:
+        logger.error(f"Failed to analyze multi-projects: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/multi-projects/status")
+async def get_multi_project_status(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get comprehensive multi-project system status"""
+    try:
+        status = await multi_project_manager.get_system_status()
+        return status
+        
+    except Exception as e:
+        logger.error(f"Failed to get multi-project status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/multi-projects/flows/running")
+async def get_running_flows(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get all currently running flows across all projects"""
+    try:
+        running_flows = await multi_project_manager.get_running_flows()
+        
+        return {
+            "running_flows": [
+                {
+                    "execution_id": exec_id,
+                    "flow_id": execution.flow_id,
+                    "project_id": execution.project_id,
+                    "status": execution.status.value,
+                    "started_at": execution.started_at.isoformat(),
+                    "progress": execution.progress,
+                    "current_step": execution.current_step,
+                    "triggered_by": execution.triggered_by
+                }
+                for exec_id, execution in running_flows.items()
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get running flows: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# Application Lifecycle Events
+# ============================================================================
 
 @app.on_event("startup")
 async def startup_event():
     """Application startup"""
     logger.info("Contexten Management Dashboard starting up...")
+    
+    # Initialize chat manager
+    await chat_manager.start()
+    
+    # Initialize multi-project manager
+    await multi_project_manager.start()
     
     # Validate configuration
     missing_config = []
@@ -742,7 +1085,7 @@ async def startup_event():
         missing_config.append("CODEGEN_TOKEN")
     
     if missing_config:
-        logger.warning(f"Missing configuration: {', '.join(missing_config)}")
+        logger.warning(f"Missing configuration: {", ".join(missing_config)}")
     
     logger.info("Dashboard startup complete")
 
@@ -750,6 +1093,14 @@ async def startup_event():
 async def shutdown_event():
     """Application shutdown"""
     logger.info("Contexten Management Dashboard shutting down...")
+    
+    # Stop chat manager
+    await chat_manager.stop()
+    
+    # Stop multi-project manager
+    await multi_project_manager.stop()
+    
+    logger.info("Dashboard shutdown complete")
     
     # Cleanup all integration agents
     for agent in integration_agents.values():

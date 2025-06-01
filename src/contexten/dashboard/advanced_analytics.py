@@ -7,8 +7,8 @@ code quality metrics, and team productivity analysis.
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 import json
@@ -485,4 +485,3 @@ class AdvancedAnalyticsEngine:
         except Exception as e:
             logger.error(f"Error getting analytics summary: {e}")
             return {"error": str(e)}
-

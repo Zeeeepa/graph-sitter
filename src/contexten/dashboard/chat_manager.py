@@ -13,8 +13,6 @@ from datetime import datetime
 
 from graph_sitter import Codebase
 from ..agents.chat_agent import ChatAgent
-from ..agents.langchain.agent import create_agent_with_tools
-from ..agents.tools.linear.linear import LinearIssueTool, LinearCommentTool, LinearWebhookTool
 from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentConfig
 from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentConfig
 from ...shared.logging.get_logger import get_logger
@@ -432,4 +430,3 @@ Let me help you create a structured approach to this. Could you provide more det
 4. **Resources** - What team members or tools are available?
 
 With these details, I can create a comprehensive implementation plan with Linear issues and GitHub integration."""
-

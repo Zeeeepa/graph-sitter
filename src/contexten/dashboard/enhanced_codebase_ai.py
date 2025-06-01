@@ -8,16 +8,16 @@ for context-aware code generation and analysis.
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Union
+from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 import json
 
 from graph_sitter import Codebase
-from graph_sitter.codebase.codebase_ai import codebase_ai, set_ai_key, set_codegen_credentials
+from graph_sitter.codebase.codebase_ai import codebase_ai
 from ..extensions.contexten_app import ContextenOrchestrator, ContextenConfig
-from ..autogenlib import AutogenClient, AutogenConfig, GenerationRequest, GenerationResult
+from ..autogenlib import AutogenClient, GenerationRequest
 from ...shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
@@ -582,4 +582,3 @@ class EnhancedCodebaseAI:
         ]
         
         return summary
-

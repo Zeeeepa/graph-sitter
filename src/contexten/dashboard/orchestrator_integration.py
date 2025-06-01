@@ -2,26 +2,19 @@
 Orchestrator Integration for Advanced Dashboard
 
 This module integrates the Contexten Orchestrator with the dashboard,
-providing enhanced task management, self-healing capabilities, and
-comprehensive monitoring through the contexten_app.py system.
+providing enhanced task management, monitoring, and automation capabilities.
 """
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
+from datetime import datetime
+from dataclasses import dataclass, field
+from enum import Enum
 import json
 
-from ..extensions.contexten_app import (
-    ContextenOrchestrator, 
-    ContextenConfig, 
-    TaskRequest, 
-    TaskResult,
-    HealthMonitor
-)
-from .advanced_analytics import AdvancedAnalyticsEngine, AnalyticsReport
-from .chat_manager import ChatManager
+from ..extensions.contexten_app import ContextenOrchestrator, ContextenConfig, TaskRequest
+from ..extensions.monitoring import HealthMonitor, TaskResult
 from ...shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
@@ -571,4 +564,3 @@ class OrchestratorDashboardIntegration:
         total_tasks = len([t for t in self.dashboard_tasks.values() if t.status in ["completed", "failed"]])
         
         return (completed_tasks / total_tasks * 100) if total_tasks > 0 else 100.0
-
