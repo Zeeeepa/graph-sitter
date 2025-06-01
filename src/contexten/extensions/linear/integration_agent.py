@@ -19,6 +19,7 @@ from .enhanced_client import EnhancedLinearClient
 from .webhook_processor import WebhookProcessor
 from .assignment_detector import AssignmentDetector
 from .workflow_automation import WorkflowAutomation
+from .events.manager import EnhancedEventManager  # Updated import
 from .types import (
     LinearIntegrationMetrics, IntegrationStatus, ComponentStats
 )
@@ -28,7 +29,7 @@ logger = get_logger(__name__)
 
 
 class LinearIntegrationAgent:
-    """Comprehensive Linear integration agent"""
+    """Comprehensive Linear integration agent with enhanced event processing"""
     
     def __init__(self, config: Optional[LinearIntegrationConfig] = None):
         # Load configuration
@@ -40,7 +41,17 @@ class LinearIntegrationAgent:
             logger.error(f"Configuration validation failed: {errors}")
             raise ValueError(f"Invalid configuration: {'; '.join(errors)}")
         
-        # Initialize components
+        # Initialize enhanced event manager with configuration
+        event_config = self.config.events
+        self.event_manager = EnhancedEventManager(
+            persistence_file=event_config.persistence_file,
+            batch_size=event_config.batch_size,
+            processing_interval=event_config.processing_interval,
+            retry_interval=event_config.retry_interval,
+            max_event_age_hours=event_config.max_event_age // 3600  # Convert seconds to hours
+        )
+        
+        # Initialize other components
         self.linear_client = EnhancedLinearClient(self.config)
         self.webhook_processor = WebhookProcessor(self.config)
         self.assignment_detector = AssignmentDetector(self.config)
@@ -48,6 +59,7 @@ class LinearIntegrationAgent:
         
         # Set up component relationships
         self.workflow_automation.set_linear_client(self.linear_client)
+        self.workflow_automation.set_event_manager(self.event_manager)
         
         # State tracking
         self.initialized = False
@@ -65,7 +77,7 @@ class LinearIntegrationAgent:
         # Register webhook handlers
         self._register_webhook_handlers()
         
-        logger.info("Linear integration agent initialized")
+        logger.info("Enhanced Linear integration agent initialized with persistent event processing")
     
     def _register_webhook_handlers(self) -> None:
         """Register webhook event handlers"""
@@ -101,88 +113,49 @@ class LinearIntegrationAgent:
                         if success:
                             logger.info(f"Successfully auto-assigned issue {issue_id}")
                         else:
-                            logger.warning(f"Failed to auto-assign issue {issue_id}")
+                            logger.error(f"Failed to auto-assign issue {issue_id}")
             except Exception as e:
                 logger.error(f"Error in auto-assignment handler: {e}")
         
-        # Progress tracking handler
-        async def progress_handler(event_data: Dict[str, Any]) -> None:
-            try:
-                # Handle issue updates that might affect task progress
-                event_type = event_data.get("type", "")
-                if event_type in ["IssueUpdate"]:
-                    issue_id = event_data.get("data", {}).get("id")
-                    if issue_id and issue_id in self.workflow_automation.active_tasks:
-                        # Check for status changes or comments that might indicate progress
-                        # This is a placeholder for more sophisticated progress tracking
-                        logger.debug(f"Received update for tracked issue {issue_id}")
-            except Exception as e:
-                logger.error(f"Error in progress handler: {e}")
+        # Register handlers with enhanced event manager
+        self.event_manager.register_handler("Issue", assignment_handler)
+        self.event_manager.register_handler("IssueUpdate", assignment_handler)
+        self.event_manager.register_handler("Issue", auto_assignment_handler)
         
-        # Register handlers with different priorities
-        self.webhook_processor.register_global_handler(
-            assignment_handler, 
-            name="assignment_detection",
-            priority=100
-        )
-        
-        self.webhook_processor.register_global_handler(
-            auto_assignment_handler,
-            name="auto_assignment",
-            priority=90
-        )
-        
-        self.webhook_processor.register_global_handler(
-            progress_handler,
-            name="progress_tracking",
-            priority=80
-        )
-        
-        logger.info("Registered webhook handlers")
+        # Register with webhook processor as well for backward compatibility
+        self.webhook_processor.register_global_handler(assignment_handler)
+        self.webhook_processor.register_global_handler(auto_assignment_handler)
     
     async def initialize(self) -> bool:
-        """Initialize the integration agent"""
+        """Initialize the integration with enhanced event processing"""
         try:
-            if not self.config.enabled:
-                logger.info("Linear integration is disabled")
-                return True
-            
-            logger.info("Initializing Linear integration agent...")
-            
-            # Initialize Linear client
-            await self.linear_client.initialize()
+            logger.info("Initializing Enhanced Linear integration...")
             
             # Authenticate with Linear
+            if not self.config.api.api_key:
+                logger.error("No Linear API key provided")
+                return False
+            
             if not await self.linear_client.authenticate(self.config.api.api_key):
                 logger.error("Failed to authenticate with Linear API")
                 return False
             
-            # Update bot configuration with authenticated user info
-            if self.linear_client.user_info:
-                if not self.config.bot.bot_user_id:
-                    self.config.bot.bot_user_id = self.linear_client.user_info.get("id")
-                if not self.config.bot.bot_email:
-                    self.config.bot.bot_email = self.linear_client.user_info.get("email")
-                
-                logger.info(f"Bot configured as: {self.config.bot.bot_email} ({self.config.bot.bot_user_id})")
+            # Start enhanced event manager
+            await self.event_manager.start()
+            logger.info("Enhanced event manager started with persistent storage")
             
-            # Load persisted events
-            await self.webhook_processor.load_failed_events()
-            
-            # Start webhook processing
-            await self.webhook_processor.start_processing()
-            
-            # Start workflow automation background tasks
-            await self.workflow_automation.start_background_tasks()
+            # Verify bot user configuration
+            if not await self._verify_bot_configuration():
+                logger.warning("Bot configuration verification failed")
             
             self.initialized = True
             self.last_sync = datetime.now()
             
-            logger.info("Linear integration agent initialized successfully")
+            logger.info("Enhanced Linear integration initialized successfully with event persistence")
             return True
             
         except Exception as e:
-            logger.error(f"Failed to initialize Linear integration agent: {e}")
+            logger.error(f"Failed to initialize Enhanced Linear integration: {e}")
             return False
     
     async def start_monitoring(self) -> None:
@@ -521,6 +494,18 @@ class LinearIntegrationAgent:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit"""
         await self.cleanup()
+    
+    async def _verify_bot_configuration(self) -> bool:
+        """Verify bot user configuration"""
+        if not self.config.bot.bot_user_id or not self.config.bot.bot_email:
+            logger.warning("Bot user ID or email is missing")
+            return False
+        
+        if not self.linear_client.user_info:
+            logger.warning("Bot user information is not available")
+            return False
+        
+        return True
 
 
 # Convenience function for creating and initializing the agent
@@ -533,4 +518,3 @@ async def create_linear_integration_agent(config: Optional[LinearIntegrationConf
         return agent
     else:
         raise RuntimeError("Failed to initialize Linear integration agent")
-
