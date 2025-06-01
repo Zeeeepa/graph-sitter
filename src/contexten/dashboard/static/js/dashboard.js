@@ -14,6 +14,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check for any initialization tasks
     checkIntegrationStatus();
     startMonitoring();
+    
+    // Start advanced monitoring
+    startAdvancedMonitoring();
+    
+    // Load recent analyses from localStorage
+    const recentAnalyses = JSON.parse(localStorage.getItem('recentAIAnalyses') || '[]');
+    if (recentAnalyses.length > 0) {
+        updateRecentAnalyses({ task_type: '', target: '', confidence_score: 0 }); // Trigger display update
+    }
 });
 
 // Chat functionality
@@ -363,48 +372,553 @@ function formatTime(timestamp) {
     return date.toLocaleDateString();
 }
 
-// Utility functions
-function showAlert(message, type = 'info') {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    const container = document.querySelector('.container');
-    container.insertBefore(alertDiv, container.firstChild);
-    
-    // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
-
-async function checkIntegrationStatus() {
+// Advanced Analytics Functions
+async function refreshAnalytics() {
     try {
-        const response = await fetch('/api/integrations/status');
+        showLoadingOverlay('analytics');
+        
+        const response = await fetch('/api/analytics/refresh', {
+            method: 'POST'
+        });
+        
         if (response.ok) {
-            integrationStatus = await response.json();
-            updateIntegrationIndicators();
+            const data = await response.json();
+            updateAnalyticsDisplay(data);
+            showAlert('Analytics refreshed successfully', 'success');
+        } else {
+            showAlert('Failed to refresh analytics', 'danger');
         }
     } catch (error) {
-        console.error('Error checking integration status:', error);
+        console.error('Error refreshing analytics:', error);
+        showAlert('Failed to refresh analytics', 'danger');
+    } finally {
+        hideLoadingOverlay('analytics');
     }
 }
 
-function updateIntegrationIndicators() {
-    // Update integration status indicators in the UI
-    // This would be called periodically to refresh status
-    console.log('Integration status updated:', integrationStatus);
+async function runComprehensiveAnalysis() {
+    if (!currentProject) {
+        showAlert('Please select a project first', 'warning');
+        return;
+    }
+    
+    try {
+        showLoadingOverlay('analytics');
+        
+        const response = await fetch('/api/analytics/comprehensive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                project_id: currentProject.full_name,
+                analysis_type: 'comprehensive'
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            updateAnalyticsDisplay(data);
+            updateInsightsPanel(data.insights);
+            showAlert('Comprehensive analysis completed', 'success');
+        } else {
+            showAlert('Analysis failed', 'danger');
+        }
+    } catch (error) {
+        console.error('Error running analysis:', error);
+        showAlert('Analysis failed', 'danger');
+    } finally {
+        hideLoadingOverlay('analytics');
+    }
 }
 
-function handleApiError(error, context = '') {
-    console.error(`API Error ${context}:`, error);
-    showAlert(`An error occurred ${context}. Please try again.`, 'danger');
+function updateAnalyticsDisplay(data) {
+    // Update metric values
+    document.getElementById('health-score').textContent = data.health_score?.toFixed(1) || '--';
+    document.getElementById('risk-score').textContent = data.risk_score?.toFixed(1) || '--';
+    document.getElementById('quality-score').textContent = data.quality_score?.toFixed(1) || '--';
+    document.getElementById('debt-score').textContent = data.debt_score?.toFixed(0) || '--';
+    
+    // Add updating animation
+    document.querySelectorAll('.metric-value').forEach(el => {
+        el.classList.add('updating');
+        setTimeout(() => el.classList.remove('updating'), 1000);
+    });
 }
+
+function updateInsightsPanel(insights) {
+    const insightsPanel = document.getElementById('ai-insights');
+    
+    if (insights && insights.length > 0) {
+        insightsPanel.innerHTML = insights.map(insight => `
+            <div class="insight-item ${getInsightSeverity(insight)}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>${insight.title || 'Insight'}</strong>
+                        <p class="mb-0 mt-1">${insight.description}</p>
+                    </div>
+                    <span class="badge bg-secondary">${insight.confidence || 'High'}</span>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        insightsPanel.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-brain fa-2x mb-2"></i>
+                <p>No insights available</p>
+            </div>
+        `;
+    }
+}
+
+function getInsightSeverity(insight) {
+    const severity = insight.severity?.toLowerCase() || 'info';
+    const severityMap = {
+        'critical': 'danger',
+        'high': 'danger',
+        'medium': 'warning',
+        'low': 'success',
+        'info': ''
+    };
+    return severityMap[severity] || '';
+}
+
+// Workflow Automation Functions
+async function startFeatureWorkflow() {
+    if (!currentProject) {
+        showAlert('Please select a project first', 'warning');
+        return;
+    }
+    
+    const requirements = prompt('Describe the feature you want to develop:');
+    if (!requirements) return;
+    
+    try {
+        const response = await fetch('/api/workflows/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                workflow_type: 'feature_development',
+                project_id: currentProject.full_name,
+                requirements: {
+                    description: requirements,
+                    type: 'feature'
+                }
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            showAlert('Feature development workflow started', 'success');
+            updateActiveWorkflows();
+        } else {
+            showAlert('Failed to start workflow', 'danger');
+        }
+    } catch (error) {
+        console.error('Error starting workflow:', error);
+        showAlert('Failed to start workflow', 'danger');
+    }
+}
+
+async function startBugfixWorkflow() {
+    if (!currentProject) {
+        showAlert('Please select a project first', 'warning');
+        return;
+    }
+    
+    const bugDescription = prompt('Describe the bug you want to fix:');
+    if (!bugDescription) return;
+    
+    try {
+        const response = await fetch('/api/workflows/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                workflow_type: 'bug_fix',
+                project_id: currentProject.full_name,
+                requirements: {
+                    description: bugDescription,
+                    type: 'bug'
+                }
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            showAlert('Bug fix workflow started', 'success');
+            updateActiveWorkflows();
+        } else {
+            showAlert('Failed to start workflow', 'danger');
+        }
+    } catch (error) {
+        console.error('Error starting workflow:', error);
+        showAlert('Failed to start workflow', 'danger');
+    }
+}
+
+async function startCodeReview() {
+    if (!currentProject) {
+        showAlert('Please select a project first', 'warning');
+        return;
+    }
+    
+    const prNumber = prompt('Enter PR number for review (or leave empty for latest):');
+    
+    try {
+        const response = await fetch('/api/workflows/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                workflow_type: 'code_review',
+                project_id: currentProject.full_name,
+                requirements: {
+                    pr_number: prNumber || null,
+                    type: 'review'
+                }
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            showAlert('Code review workflow started', 'success');
+            updateActiveWorkflows();
+        } else {
+            showAlert('Failed to start workflow', 'danger');
+        }
+    } catch (error) {
+        console.error('Error starting workflow:', error);
+        showAlert('Failed to start workflow', 'danger');
+    }
+}
+
+async function updateActiveWorkflows() {
+    try {
+        const response = await fetch('/api/workflows/active');
+        if (response.ok) {
+            const data = await response.json();
+            displayActiveWorkflows(data.workflows);
+        }
+    } catch (error) {
+        console.error('Error updating workflows:', error);
+    }
+}
+
+function displayActiveWorkflows(workflows) {
+    const container = document.getElementById('active-workflows');
+    
+    if (workflows && workflows.length > 0) {
+        container.innerHTML = `
+            <h6>Active Workflows</h6>
+            ${workflows.map(workflow => `
+                <div class="workflow-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${workflow.name}</h6>
+                            <small class="text-muted">${workflow.description}</small>
+                        </div>
+                        <div class="workflow-status">
+                            <span class="badge bg-${getWorkflowStatusColor(workflow.status)}">${workflow.status}</span>
+                            <button class="btn btn-outline-danger btn-sm" onclick="cancelWorkflow('${workflow.id}')">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="workflow-progress">
+                        <div class="progress">
+                            <div class="progress-bar" style="width: ${workflow.progress}%"></div>
+                        </div>
+                        <small class="text-muted">${workflow.progress}% complete</small>
+                    </div>
+                </div>
+            `).join('')}
+        `;
+    } else {
+        container.innerHTML = `
+            <h6>Active Workflows</h6>
+            <div class="text-center text-muted">
+                <i class="fas fa-cogs fa-2x mb-2"></i>
+                <p>No active workflows</p>
+            </div>
+        `;
+    }
+}
+
+function getWorkflowStatusColor(status) {
+    const statusColors = {
+        'running': 'primary',
+        'completed': 'success',
+        'failed': 'danger',
+        'paused': 'warning',
+        'pending': 'secondary'
+    };
+    return statusColors[status] || 'secondary';
+}
+
+async function cancelWorkflow(workflowId) {
+    try {
+        const response = await fetch(`/api/workflows/${workflowId}/cancel`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            showAlert('Workflow cancelled', 'success');
+            updateActiveWorkflows();
+        } else {
+            showAlert('Failed to cancel workflow', 'danger');
+        }
+    } catch (error) {
+        console.error('Error cancelling workflow:', error);
+        showAlert('Failed to cancel workflow', 'danger');
+    }
+}
+
+// Enhanced AI Functions
+async function runAIAnalysis() {
+    const taskType = document.getElementById('ai-task-type').value;
+    const target = document.getElementById('ai-target').value.trim();
+    const instructions = document.getElementById('ai-instructions').value.trim();
+    const contextText = document.getElementById('ai-context').value.trim();
+    
+    if (!target || !instructions) {
+        showAlert('Please provide target and instructions', 'warning');
+        return;
+    }
+    
+    let context = {};
+    if (contextText) {
+        try {
+            context = JSON.parse(contextText);
+        } catch (e) {
+            showAlert('Invalid JSON in context field', 'warning');
+            return;
+        }
+    }
+    
+    try {
+        showLoadingOverlay('ai-results');
+        
+        const response = await fetch('/api/ai/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                task_type: taskType,
+                target: target,
+                instructions: instructions,
+                context: context,
+                project_id: currentProject?.full_name
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            displayAIResults(data);
+            updateRecentAnalyses(data);
+            showAlert('AI analysis completed', 'success');
+        } else {
+            showAlert('AI analysis failed', 'danger');
+        }
+    } catch (error) {
+        console.error('Error running AI analysis:', error);
+        showAlert('AI analysis failed', 'danger');
+    } finally {
+        hideLoadingOverlay('ai-results');
+    }
+}
+
+function displayAIResults(result) {
+    const resultsPanel = document.getElementById('ai-results');
+    
+    resultsPanel.innerHTML = `
+        <div class="ai-result-item">
+            <div class="ai-result-header">
+                <h6>${result.task_type.replace('_', ' ').toUpperCase()}</h6>
+                <div class="ai-confidence-score">
+                    <span>Confidence:</span>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: ${result.confidence_score * 100}%"></div>
+                    </div>
+                    <span>${(result.confidence_score * 100).toFixed(0)}%</span>
+                </div>
+            </div>
+            
+            <div class="ai-analysis">
+                <h6>Analysis:</h6>
+                <p>${result.analysis}</p>
+            </div>
+            
+            ${result.code_changes ? `
+                <div class="ai-code-changes mt-3">
+                    <h6>Generated Code:</h6>
+                    <pre><code>${result.code_changes}</code></pre>
+                </div>
+            ` : ''}
+            
+            ${result.suggestions && result.suggestions.length > 0 ? `
+                <div class="ai-suggestions">
+                    <h6>Suggestions:</h6>
+                    ${result.suggestions.map(suggestion => `
+                        <div class="ai-suggestion">${suggestion}</div>
+                    `).join('')}
+                </div>
+            ` : ''}
+            
+            <div class="mt-3">
+                <small class="text-muted">
+                    Generated in ${result.generation_time?.toFixed(2)}s
+                </small>
+            </div>
+        </div>
+    `;
+}
+
+function updateRecentAnalyses(result) {
+    const recentContainer = document.getElementById('recent-ai-analyses');
+    
+    // Get existing analyses or initialize empty array
+    let recentAnalyses = JSON.parse(localStorage.getItem('recentAIAnalyses') || '[]');
+    
+    // Add new analysis
+    recentAnalyses.unshift({
+        id: Date.now(),
+        task_type: result.task_type,
+        target: result.target,
+        confidence: result.confidence_score,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Keep only last 10
+    recentAnalyses = recentAnalyses.slice(0, 10);
+    
+    // Save to localStorage
+    localStorage.setItem('recentAIAnalyses', JSON.stringify(recentAnalyses));
+    
+    // Update display
+    if (recentAnalyses.length > 0) {
+        recentContainer.innerHTML = recentAnalyses.map(analysis => `
+            <div class="analysis-item" onclick="loadAnalysis('${analysis.id}')">
+                <div>
+                    <strong>${analysis.task_type.replace('_', ' ')}</strong>
+                    <br>
+                    <small class="text-muted">${analysis.target}</small>
+                </div>
+                <div class="text-end">
+                    <small>${(analysis.confidence * 100).toFixed(0)}%</small>
+                    <br>
+                    <small class="text-muted">${formatTime(analysis.timestamp)}</small>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+// System Performance Functions
+async function updateSystemPerformance() {
+    try {
+        const response = await fetch('/api/system/performance');
+        if (response.ok) {
+            const data = await response.json();
+            updatePerformanceDisplay(data);
+        }
+    } catch (error) {
+        console.error('Error updating system performance:', error);
+    }
+}
+
+function updatePerformanceDisplay(data) {
+    // Update orchestrator health
+    const healthElement = document.getElementById('orchestrator-health');
+    healthElement.textContent = data.orchestrator_health || 'Unknown';
+    healthElement.className = `badge bg-${getHealthColor(data.orchestrator_health)}`;
+    
+    // Update active tasks
+    document.getElementById('active-tasks-count').textContent = data.active_tasks || 0;
+    
+    // Update success rate
+    document.getElementById('success-rate').textContent = `${data.success_rate?.toFixed(1) || 0}%`;
+    
+    // Update response time
+    document.getElementById('avg-response-time').textContent = `${data.avg_response_time || 0}ms`;
+}
+
+function getHealthColor(health) {
+    const healthColors = {
+        'healthy': 'success',
+        'degraded': 'warning',
+        'unhealthy': 'danger'
+    };
+    return healthColors[health?.toLowerCase()] || 'secondary';
+}
+
+// Utility Functions
+function showLoadingOverlay(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        const overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<div class="loading-spinner-large"></div>';
+        container.style.position = 'relative';
+        container.appendChild(overlay);
+    }
+}
+
+function hideLoadingOverlay(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        const overlay = container.querySelector('.loading-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+}
+
+function showWorkflowTemplates() {
+    // TODO: Implement workflow templates modal
+    showAlert('Workflow templates coming soon!', 'info');
+}
+
+function createCustomWorkflow() {
+    // TODO: Implement custom workflow creation
+    showAlert('Custom workflow creation coming soon!', 'info');
+}
+
+// Enhanced monitoring with advanced features
+function startAdvancedMonitoring() {
+    // Update analytics every 2 minutes
+    setInterval(updateSystemPerformance, 120000);
+    
+    // Update workflows every 30 seconds
+    setInterval(updateActiveWorkflows, 30000);
+    
+    // Initial updates
+    updateSystemPerformance();
+    updateActiveWorkflows();
+}
+
+// Initialize advanced features
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Contexten Dashboard loaded');
+    
+    // Check for any initialization tasks
+    checkIntegrationStatus();
+    startMonitoring();
+    
+    // Start advanced monitoring
+    startAdvancedMonitoring();
+    
+    // Load recent analyses from localStorage
+    const recentAnalyses = JSON.parse(localStorage.getItem('recentAIAnalyses') || '[]');
+    if (recentAnalyses.length > 0) {
+        updateRecentAnalyses({ task_type: '', target: '', confidence_score: 0 }); // Trigger display update
+    }
+});
 
 // Auto-refresh functionality
 setInterval(checkIntegrationStatus, 30000); // Check every 30 seconds
