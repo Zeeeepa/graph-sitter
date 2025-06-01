@@ -1,0 +1,59 @@
+# Continuous Learning and Analytics System Requirements
+
+# Core dependencies (already in graph-sitter)
+# graph-sitter>=0.1.0
+
+# Machine Learning and Analytics
+numpy>=1.21.0
+scipy>=1.7.0
+scikit-learn>=1.0.0
+
+# Graph Database (for production knowledge graph)
+neo4j>=5.0.0
+py2neo>=2021.2.3
+
+# Vector Database (for similarity search)
+pinecone-client>=2.2.0
+weaviate-client>=3.15.0
+
+# Stream Processing (for real-time analytics)
+kafka-python>=2.0.2
+apache-flink>=1.16.0
+
+# Caching and Storage
+redis>=4.3.0
+psycopg2-binary>=2.9.0
+
+# Async and Concurrency
+asyncio-mqtt>=0.11.0
+aioredis>=2.0.0
+
+# Monitoring and Observability
+prometheus-client>=0.14.0
+grafana-api>=1.0.3
+
+# Natural Language Processing (for pattern descriptions)
+transformers>=4.20.0
+sentence-transformers>=2.2.0
+
+# Time Series Analysis
+pandas>=1.4.0
+statsmodels>=0.13.0
+
+# Visualization (for dashboards)
+plotly>=5.10.0
+dash>=2.6.0
+
+# Configuration and Utilities
+pydantic>=1.9.0
+python-dotenv>=0.20.0
+click>=8.1.0
+
+# Testing and Development
+pytest>=7.1.0
+pytest-asyncio>=0.19.0
+pytest-mock>=3.8.0
+black>=22.6.0
+flake8>=5.0.0
+mypy>=0.971
+
