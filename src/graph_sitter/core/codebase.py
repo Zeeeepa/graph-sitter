@@ -9,7 +9,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
-from typing import Generic, Literal, Unpack, overload
+from typing import Generic, Literal, Unpack, overload, Optional, Union, Dict, Any, List
 
 import plotly.graph_objects as go
 import rich.repr
@@ -1193,95 +1193,6 @@ class Codebase(
             self._ai_helper = get_openai_client(key=self.ctx.secrets.openai_api_key)
         return self._ai_helper
 
-    def ai(
-        self,
-        prompt: str,
-        target: Editable | None = None,
-        context: Editable | list[Editable] | dict[str, Editable | list[Editable]] | None = None,
-        model: str = "gpt-4o",
-    ) -> str:
-        """Generates a response from the AI based on the provided prompt, target, and context.
-
-        A method that sends a prompt to the AI client along with optional target and context information to generate a response.
-        Used for tasks like code generation, refactoring suggestions, and documentation improvements.
-
-        Args:
-            prompt (str): The text prompt to send to the AI.
-            target (Editable | None): An optional editable object (like a function, class, etc.) that provides the main focus for the AI's response.
-            context (Editable | list[Editable] | dict[str, Editable | list[Editable]] | None): Additional context to help inform the AI's response.
-            model (str): The AI model to use for generating the response. Defaults to "gpt-4o".
-
-        Returns:
-            str: The generated response from the AI.
-
-        Raises:
-            MaxAIRequestsError: If the maximum number of allowed AI requests (default 150) has been exceeded.
-        """
-        # Check max transactions
-        logger.info("Creating call to OpenAI...")
-        self._num_ai_requests += 1
-        if self.ctx.session_options.max_ai_requests is not None and self._num_ai_requests > self.ctx.session_options.max_ai_requests:
-            logger.info(f"Max AI requests reached: {self.ctx.session_options.max_ai_requests}. Stopping codemod.")
-            msg = f"Maximum number of AI requests reached: {self.ctx.session_options.max_ai_requests}"
-            raise MaxAIRequestsError(msg, threshold=self.ctx.session_options.max_ai_requests)
-
-        params = {
-            "messages": [
-                {"role": "system", "content": generate_system_prompt(target, context)},
-                {"role": "user", "content": prompt},
-            ],
-            "model": model,
-            "functions": generate_tools(),
-            "temperature": 0,
-        }
-        if model.startswith("gpt"):
-            params["tool_choice"] = "required"
-
-        # Make the AI request
-        response = self.ai_client.chat.completions.create(
-            model=model,
-            messages=params["messages"],
-            tools=params["functions"],  # type: ignore
-            temperature=params["temperature"],
-            tool_choice=params["tool_choice"],
-        )
-
-        # Handle finish reasons
-        # First check if there is a response
-        if response.choices:
-            # Check response reason
-            choice = response.choices[0]
-            if choice.finish_reason == "tool_calls" or choice.finish_reason == "function_call" or choice.finish_reason == "stop":
-                # Check if there is a tool call
-                if choice.message.tool_calls:
-                    tool_call = choice.message.tool_calls[0]
-                    response_answer = json.loads(tool_call.function.arguments)
-                    if "answer" in response_answer:
-                        response_answer = response_answer["answer"]
-                    else:
-                        msg = "No answer found in tool call. (tool_call.function.arguments does not contain answer)"
-                        raise ValueError(msg)
-                else:
-                    msg = "No tool call found in AI response. (choice.message.tool_calls is empty)"
-                    raise ValueError(msg)
-            elif choice.finish_reason == "length":
-                msg = "AI response too long / ran out of tokens. (choice.finish_reason == length)"
-                raise ValueError(msg)
-            elif choice.finish_reason == "content_filter":
-                msg = "AI response was blocked by OpenAI's content filter. (choice.finish_reason == content_filter)"
-                raise ValueError(msg)
-            else:
-                msg = f"Unknown finish reason from AI: {choice.finish_reason}"
-                raise ValueError(msg)
-        else:
-            msg = "No response from AI Provider. (response.choices is empty)"
-            raise ValueError(msg)
-
-        # Agent sometimes fucks up and does \\\\n for some reason.
-        response_answer = codecs.decode(response_answer, "unicode_escape")
-        logger.info(f"OpenAI response: {response_answer}")
-        return response_answer
-
     def set_ai_key(self, key: str) -> None:
         """Sets the OpenAI key for the current Codebase instance."""
         # Reset the AI client
@@ -1289,6 +1200,178 @@ class Codebase(
 
         # Set the AI key
         self.ctx.secrets.openai_api_key = key
+
+    def set_codegen_credentials(self, org_id: str, token: str) -> None:
+        """Sets the Codegen SDK credentials for AI features.
+        
+        Args:
+            org_id: Codegen organization ID
+            token: Codegen API token
+        """
+        # Reset the AI client to use new credentials
+        self._ai_helper = None
+        
+        # Set the Codegen SDK credentials
+        self.ctx.secrets.codegen_org_id = org_id
+        self.ctx.secrets.codegen_token = token
+
+    async def ai(
+        self,
+        prompt: str,
+        target: Optional[Editable] = None,
+        context: Optional[Union[str, Editable, List[Editable], Dict[str, Any]]] = None,
+        provider: Optional[str] = None,
+        include_context: bool = True,
+        **kwargs
+    ) -> str:
+        """
+        AI-powered codebase analysis and code generation with rich context.
+        
+        This method leverages GraphSitter's static analysis to provide comprehensive
+        context to AI models for better code understanding and generation.
+        
+        Args:
+            prompt: The instruction or question for the AI
+            target: Optional target element (function, class, file) to focus on
+            context: Additional context (string, Editable objects, or dict)
+            provider: Preferred AI provider ("openai" or "codegen_sdk")
+            include_context: Whether to gather and include static analysis context
+            **kwargs: Additional parameters for AI generation
+            
+        Returns:
+            str: AI-generated response
+            
+        Examples:
+            # Analyze a function
+            function = codebase.get_function("process_data")
+            analysis = await codebase.ai(
+                "Analyze this function for potential improvements",
+                target=function
+            )
+            
+            # Generate code with context
+            new_code = await codebase.ai(
+                "Create a helper function to validate input data",
+                context={"style": "defensive programming", "return_type": "bool"}
+            )
+            
+            # Refactor with full context
+            method = codebase.get_class("DataProcessor").get_method("transform")
+            refactored = await codebase.ai(
+                "Refactor this method to be more efficient",
+                target=method,
+                context={
+                    "performance_requirements": "handle 10k+ records",
+                    "maintain_compatibility": True
+                }
+            )
+        """
+        from graph_sitter.ai.ai_client_factory import AIClientFactory
+        from graph_sitter.ai.context_gatherer import ContextGatherer
+        from graph_sitter.codebase.codebase_ai import generate_system_prompt, generate_tools
+        
+        # Increment AI request counter
+        self._num_ai_requests += 1
+        
+        # Check AI request limits
+        if hasattr(self.ctx, 'session_options') and self.ctx.session_options.max_ai_requests:
+            if self._num_ai_requests > self.ctx.session_options.max_ai_requests:
+                from graph_sitter.shared.exceptions.control_flow import MaxAIRequestsError
+                raise MaxAIRequestsError(f"Exceeded maximum AI requests ({self.ctx.session_options.max_ai_requests})")
+        
+        # Create AI client
+        ai_client = AIClientFactory.create_client(self.ctx.secrets, preferred_provider=provider)
+        
+        # Gather context if requested
+        gathered_context = None
+        if include_context:
+            context_gatherer = ContextGatherer(self)
+            gathered_context = context_gatherer.gather_context(
+                target=target,
+                context=context,
+                max_context_size=kwargs.get("max_context_size", 8000)
+            )
+        
+        # Generate system prompt
+        system_prompt = generate_system_prompt(target=target, context=gathered_context)
+        
+        # Add context information to the prompt if available
+        if gathered_context and include_context:
+            context_text = ContextGatherer(self).format_context_for_ai(gathered_context)
+            if context_text:
+                prompt = f"{prompt}\n\n=== CONTEXT ===\n{context_text}"
+        
+        # Generate tools for structured responses
+        tools = generate_tools()
+        
+        # Make AI request
+        try:
+            response = await ai_client.generate(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                tools=tools,
+                **kwargs
+            )
+            
+            logger.info(f"AI request completed using {response.provider} (tokens: {response.tokens_used}, time: {response.generation_time:.2f}s)")
+            
+            return response.content
+            
+        except Exception as e:
+            logger.error(f"AI request failed: {str(e)}")
+            raise
+
+    def ai_sync(
+        self,
+        prompt: str,
+        target: Optional[Editable] = None,
+        context: Optional[Union[str, Editable, List[Editable], Dict[str, Any]]] = None,
+        provider: Optional[str] = None,
+        include_context: bool = True,
+        **kwargs
+    ) -> str:
+        """
+        Synchronous version of the ai() method.
+        
+        This is a convenience method that runs the async ai() method in a new event loop.
+        Use ai() directly if you're already in an async context.
+        
+        Args:
+            prompt: The instruction or question for the AI
+            target: Optional target element (function, class, file) to focus on
+            context: Additional context (string, Editable objects, or dict)
+            provider: Preferred AI provider ("openai" or "codegen_sdk")
+            include_context: Whether to gather and include static analysis context
+            **kwargs: Additional parameters for AI generation
+            
+        Returns:
+            str: AI-generated response
+        """
+        import asyncio
+        
+        try:
+            # Try to get the current event loop
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If we're already in an async context, we can't use run()
+                # User should use ai() directly instead
+                raise RuntimeError(
+                    "Cannot use ai_sync() from within an async context. "
+                    "Use await codebase.ai() instead."
+                )
+        except RuntimeError:
+            # No event loop running, we can create one
+            pass
+        
+        # Run the async method
+        return asyncio.run(self.ai(
+            prompt=prompt,
+            target=target,
+            context=context,
+            provider=provider,
+            include_context=include_context,
+            **kwargs
+        ))
 
     def find_by_span(self, span: Span) -> list[Editable]:
         """Finds editable objects that overlap with the given source code span.
