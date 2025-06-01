@@ -1,0 +1,331 @@
+name: Autonomous CI/CD with Codegen SDK
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [develop]
+
+env:
+  CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+  CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  # Intelligent change analysis to determine optimal testing strategy
+  analyze-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      test-strategy: ${{ steps.analysis.outputs.strategy }}
+      estimated-time: ${{ steps.analysis.outputs.estimated-time }}
+      reasoning: ${{ steps.analysis.outputs.reasoning }}
+      has-critical-changes: ${{ steps.analysis.outputs.has-critical-changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install codegen graph-sitter
+      
+      - name: Intelligent Change Analysis
+        id: analysis
+        run: |
+          python scripts/intelligent_test_selector.py \
+            --base-ref ${{ github.event.pull_request.base.sha || 'HEAD~1' }} \
+            --head-ref ${{ github.event.pull_request.head.sha || 'HEAD' }} \
+            --output-format github-actions
+      
+      - name: Upload test selection
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-selection
+          path: test_selection.json
+
+  # Autonomous code review for PRs
+  autonomous-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      approval-status: ${{ steps.review.outputs.approval-status }}
+      overall-score: ${{ steps.review.outputs.overall-score }}
+      has-critical-issues: ${{ steps.review.outputs.has-critical-issues }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install codegen graph-sitter requests
+      
+      - name: AI Code Review
+        id: review
+        run: |
+          python scripts/autonomous_reviewer.py \
+            --pr-number ${{ github.event.pull_request.number }} \
+            --repository ${{ github.repository }} \
+            --post-comments \
+            --output-file review_result.json
+      
+      - name: Upload review results
+        uses: actions/upload-artifact@v3
+        with:
+          name: review-results
+          path: review_result.json
+
+  # Intelligent test execution based on change analysis
+  smart-testing:
+    needs: analyze-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.analyze-changes.outputs.test-strategy) }}
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+      
+      - name: Run Selected Tests
+        timeout-minutes: ${{ matrix.timeout / 60 }}
+        run: |
+          echo "Running test group: ${{ matrix.name }}"
+          echo "Test paths: ${{ matrix.paths }}"
+          
+          if [ "${{ matrix.parallel }}" = "true" ]; then
+            uv run pytest ${{ matrix.paths }} \
+              -n auto \
+              --cov src \
+              --timeout ${{ matrix.timeout }} \
+              -o junit_suite_name="smart-${{ matrix.name }}" \
+              --tb=short
+          else
+            uv run pytest ${{ matrix.paths }} \
+              --cov src \
+              --timeout ${{ matrix.timeout }} \
+              -o junit_suite_name="smart-${{ matrix.name }}" \
+              --tb=short
+          fi
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results-${{ matrix.name }}
+          path: |
+            .coverage
+            junit.xml
+
+  # Security and quality checks
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install security tools
+        run: |
+          pip install bandit safety semgrep
+      
+      - name: Run Bandit security scan
+        run: |
+          bandit -r src/ -f json -o bandit-report.json || true
+      
+      - name: Run Safety check
+        run: |
+          safety check --json --output safety-report.json || true
+      
+      - name: Run Semgrep
+        run: |
+          semgrep --config=auto src/ --json --output=semgrep-report.json || true
+      
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+            semgrep-report.json
+
+  # Performance regression detection
+  performance-check:
+    needs: analyze-changes
+    if: contains(needs.analyze-changes.outputs.reasoning, 'core') || contains(needs.analyze-changes.outputs.reasoning, 'high-impact')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+      
+      - name: Run performance benchmarks
+        run: |
+          # Run performance tests if they exist
+          if [ -d "tests/performance" ]; then
+            uv run pytest tests/performance/ \
+              --benchmark-json=benchmark-results.json \
+              --benchmark-only
+          fi
+      
+      - name: Compare with baseline
+        if: github.event_name == 'pull_request'
+        run: |
+          # Compare performance with base branch
+          git checkout ${{ github.event.pull_request.base.sha }}
+          if [ -d "tests/performance" ]; then
+            uv run pytest tests/performance/ \
+              --benchmark-json=baseline-results.json \
+              --benchmark-only || true
+          fi
+          
+          # Analyze performance regression (placeholder)
+          echo "Performance comparison would go here"
+      
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: |
+            benchmark-results.json
+            baseline-results.json
+
+  # Quality gate and decision making
+  quality-gate:
+    needs: [analyze-changes, autonomous-review, smart-testing, security-scan]
+    if: always()
+    runs-on: ubuntu-latest
+    outputs:
+      should-merge: ${{ steps.decision.outputs.should-merge }}
+      quality-score: ${{ steps.decision.outputs.quality-score }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Quality Gate Decision
+        id: decision
+        run: |
+          # Analyze all results and make merge decision
+          REVIEW_SCORE="${{ needs.autonomous-review.outputs.overall-score || '5' }}"
+          HAS_CRITICAL="${{ needs.autonomous-review.outputs.has-critical-issues || 'false' }}"
+          TESTS_PASSED="${{ needs.smart-testing.result == 'success' }}"
+          
+          echo "Review Score: $REVIEW_SCORE"
+          echo "Has Critical Issues: $HAS_CRITICAL"
+          echo "Tests Passed: $TESTS_PASSED"
+          
+          # Decision logic
+          if [ "$TESTS_PASSED" = "true" ] && [ "$HAS_CRITICAL" = "false" ] && [ "$REVIEW_SCORE" -ge "7" ]; then
+            echo "should-merge=true" >> $GITHUB_OUTPUT
+            echo "quality-score=high" >> $GITHUB_OUTPUT
+          elif [ "$TESTS_PASSED" = "true" ] && [ "$HAS_CRITICAL" = "false" ] && [ "$REVIEW_SCORE" -ge "5" ]; then
+            echo "should-merge=conditional" >> $GITHUB_OUTPUT
+            echo "quality-score=medium" >> $GITHUB_OUTPUT
+          else
+            echo "should-merge=false" >> $GITHUB_OUTPUT
+            echo "quality-score=low" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Post Quality Gate Summary
+        if: github.event_name == 'pull_request'
+        run: |
+          SHOULD_MERGE="${{ steps.decision.outputs.should-merge }}"
+          QUALITY_SCORE="${{ steps.decision.outputs.quality-score }}"
+          
+          if [ "$SHOULD_MERGE" = "true" ]; then
+            EMOJI="✅"
+            STATUS="APPROVED FOR MERGE"
+          elif [ "$SHOULD_MERGE" = "conditional" ]; then
+            EMOJI="⚠️"
+            STATUS="CONDITIONAL APPROVAL"
+          else
+            EMOJI="❌"
+            STATUS="CHANGES REQUIRED"
+          fi
+          
+          # Post summary comment (would need GitHub API call)
+          echo "Quality Gate: $EMOJI $STATUS (Score: $QUALITY_SCORE)"
+
+  # Autonomous merge for approved PRs
+  auto-merge:
+    needs: [quality-gate, autonomous-review, smart-testing]
+    if: |
+      github.event_name == 'pull_request' &&
+      needs.quality-gate.outputs.should-merge == 'true' &&
+      needs.smart-testing.result == 'success' &&
+      needs.autonomous-review.outputs.has-critical-issues == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-merge PR
+        run: |
+          echo "🤖 Autonomous merge approved!"
+          echo "All quality gates passed:"
+          echo "  ✅ Tests: ${{ needs.smart-testing.result }}"
+          echo "  ✅ Review Score: ${{ needs.autonomous-review.outputs.overall-score }}/10"
+          echo "  ✅ No Critical Issues: ${{ needs.autonomous-review.outputs.has-critical-issues == 'false' }}"
+          
+          # Enable auto-merge (requires admin permissions)
+          gh pr merge ${{ github.event.pull_request.number }} \
+            --auto --squash --delete-branch || echo "Auto-merge not available"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Notification and reporting
+  notify-results:
+    needs: [analyze-changes, autonomous-review, smart-testing, quality-gate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare notification
+        run: |
+          ESTIMATED_TIME="${{ needs.analyze-changes.outputs.estimated-time || 'Unknown' }}"
+          REASONING="${{ needs.analyze-changes.outputs.reasoning || 'Standard analysis' }}"
+          QUALITY_SCORE="${{ needs.quality-gate.outputs.quality-score || 'unknown' }}"
+          
+          echo "## 🤖 Autonomous CI/CD Results" > notification.md
+          echo "" >> notification.md
+          echo "**Strategy:** $REASONING" >> notification.md
+          echo "**Estimated Time:** $ESTIMATED_TIME" >> notification.md
+          echo "**Quality Score:** $QUALITY_SCORE" >> notification.md
+          echo "" >> notification.md
+          
+          if [ "${{ needs.smart-testing.result }}" = "success" ]; then
+            echo "✅ Smart Testing: Passed" >> notification.md
+          else
+            echo "❌ Smart Testing: Failed" >> notification.md
+          fi
+          
+          if [ "${{ needs.autonomous-review.outputs.has-critical-issues }}" = "false" ]; then
+            echo "✅ Code Review: No critical issues" >> notification.md
+          else
+            echo "⚠️ Code Review: Critical issues found" >> notification.md
+          fi
+      
+      - name: Upload notification
+        uses: actions/upload-artifact@v3
+        with:
+          name: ci-notification
+          path: notification.md
+
