@@ -1,139 +1,472 @@
-<br />
+# Graph-Sitter: Autonomous CI/CD Orchestration Platform
 
-<p align="center">
-  <a href="https://graph-sitter.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+A comprehensive multi-project management and autonomous CI/CD orchestration system with Codegen SDK integration, designed for intelligent workflow automation and cross-project analysis.
 
-<h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
-</h2>
+## 🚀 Overview
 
-<div align="center">
+Graph-Sitter combines three powerful modules to create an autonomous development environment:
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-graph-sitter.com-purple?style=flat-square)](https://graph-sitter.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/graph-sitter/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+1. **Codegen SDK** - AI-powered code generation and task automation
+2. **Contexten** - Agentic orchestrator with LangChain, GitHub, Linear, and Slack integrations
+3. **Graph-Sitter** - Advanced code analysis SDK with manipulation and resolution mechanics
 
-</div>
+## ✨ Key Features
 
-<br />
+### 🏗️ Multi-Project Management
+- **Dynamic Project Discovery**: Automatically detect and catalog projects from GitHub, local directories, and remote repositories
+- **Project Lifecycle Management**: Complete project registration, monitoring, and health tracking
+- **Cross-Project Analysis**: Intelligent insights and dependency mapping across multiple projects
+- **Flexible Configuration**: Per-project settings for analysis depth and CI/CD preferences
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+### 🔄 Autonomous CI/CD Orchestration
+- **Workflow Templates**: Pre-built templates for common development workflows (build, test, security, deploy)
+- **Intelligent Triggering**: Smart triggers based on code changes, schedules, and cross-project dependencies
+- **Codegen SDK Integration**: Autonomous workflow execution using AI agents
+- **Event-Driven Architecture**: Responds to GitHub webhooks, Linear updates, and custom events
 
-```python
-from graph_sitter import Codebase
-from codegen.agents.agent import Agent
-agent = Agent(
-    org_id="11",  # Your organization ID
-    token="your_api_token_here",  # Your API authentication token
-    base_url="https://codegen-sh-rest-api.modal.run",  # Optional - defaults to this URL
-)
+### 🤖 Chat-Agent Interface
+- **Natural Language Commands**: Create workflows, trigger builds, and get status updates through chat
+- **Intelligent Task Creation**: Automatically create Linear issues and GitHub PRs based on conversations
+- **Real-time Monitoring**: Live updates on workflow progress and system health
+- **Context-Aware Responses**: Understands project context and provides relevant suggestions
 
-# Run an agent with a prompt
-task = agent.run(prompt="Which github repos can you currently access?")
+### 📊 Comprehensive Dashboard
+- **Multi-Project View**: Unified dashboard showing all projects, workflows, and executions
+- **Real-time Analytics**: Live metrics on workflow success rates, execution times, and system health
+- **Interactive Visualizations**: Charts and graphs for project health, workflow performance, and trends
+- **Customizable Widgets**: Configurable dashboard components for different user roles
 
-# Check the initial status
-print(task.status)  # Returns the current status of the task (e.g., "queued", "in_progress", etc.)
+## 🛠️ Installation & Setup
 
+### Prerequisites
+- Python 3.8+
+- Node.js 16+ (for frontend components)
+- Docker (optional, for containerized deployment)
 
-# Graph-sitter builds a complete graph connecting
-# functions, classes, imports and their relationships
-codebase = Codebase("./")
+### Environment Configuration
 
-# Work with code without dealing with syntax trees or parsing
-for function in codebase.functions:
-    # Comprehensive static analysis for references, dependencies, etc.
-    if not function.usages:
-        # Auto-handles references and imports to maintain correctness
-        function.move_to_file("deprecated.py")
-# Refresh the task to get updated status
-task.refresh()
+Create a `.env` file with the following configuration:
 
-# Check the updated status
-print(task.status)
+```bash
+# Codegen SDK Configuration
+CODEGEN_ORG_ID=your_organization_id
+CODEGEN_TOKEN=your_codegen_api_token
 
-# Once task is complete, you can access the result
-if task.status == "completed":
-    print(task.result)
+# Dashboard Configuration
+DASHBOARD_HOST=0.0.0.0
+DASHBOARD_PORT=8080
+DASHBOARD_DEBUG=true
+DASHBOARD_SECRET_KEY=your_secret_key_here
+DASHBOARD_BASE_URL=http://localhost:8080
+
+# OAuth Configuration
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+LINEAR_CLIENT_ID=your_linear_client_id
+LINEAR_CLIENT_SECRET=your_linear_client_secret
+SLACK_CLIENT_ID=your_slack_client_id
+SLACK_CLIENT_SECRET=your_slack_client_secret
+
+# GitHub Integration
+GITHUB_TOKEN=your_github_token
+GITHUB_WEBHOOK_SECRET=your_github_webhook_secret
+GITHUB_APP_ID=your_github_app_id
+GITHUB_PRIVATE_KEY_PATH=/path/to/github/private/key.pem
+
+# Linear Integration
+LINEAR_API_KEY=your_linear_api_key_here
+LINEAR_WEBHOOK_SECRET=your_linear_webhook_secret
+
+# Enhanced Linear Event Management
+LINEAR_EVENT_PERSISTENCE_ENABLED=true
+LINEAR_EVENT_PERSISTENCE_FILE=linear_events.json
+LINEAR_EVENT_BATCH_SIZE=10
+LINEAR_EVENT_PROCESSING_INTERVAL=5
+LINEAR_EVENT_RETRY_INTERVAL=60
+LINEAR_EVENT_MAX_AGE_HOURS=24
+LINEAR_EVENT_MAX_RETRIES=3
+
+# Linear Auto-Assignment Intelligence
+LINEAR_AUTO_ASSIGN_LABELS=ai,automation,codegen,enhancement
+LINEAR_AUTO_ASSIGN_KEYWORDS=generate,evolve,optimize,automate,implement,create
+LINEAR_MAX_ASSIGNMENTS_PER_HOUR=10
+LINEAR_ASSIGNMENT_COOLDOWN=300
+
+# Linear Performance Optimization
+LINEAR_BATCH_PROCESSING_ENABLED=true
+LINEAR_BACKGROUND_PROCESSING=true
+LINEAR_EVENT_QUEUE_SIZE=1000
+
+# Slack Integration
+SLACK_BOT_TOKEN=your_slack_bot_token_here
+SLACK_SIGNING_SECRET=your_slack_signing_secret
+
+# AI Configuration
+ANTHROPIC_API_KEY=your_anthropic_api_key
+OPENAI_API_KEY=your_openai_api_key
+
+# Feature Flags
+ENABLE_AI_SUGGESTIONS=true
+ENABLE_REAL_TIME_SYNC=true
+ENABLE_WEBHOOK_PROCESSING=true
+ENABLE_BATCH_PROCESSING=true
 ```
 
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+### Installation Steps
 
-## Installation and Usage
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Zeeeepa/graph-sitter.git
+   cd graph-sitter
+   ```
 
-We support
+2. **Install Python dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
+3. **Install Codegen SDK**:
+   ```bash
+   pip install codegen
+   ```
 
+4. **Set up environment variables**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+5. **Initialize the database** (if using persistent storage):
+   ```bash
+   python -m src.contexten.cli.init_db
+   ```
+
+6. **Start the dashboard**:
+   ```bash
+   python -m src.contexten.dashboard.app
+   ```
+
+## 🎯 Quick Start Guide
+
+### 1. Add Your First Project
+
+```bash
+# Using the API
+curl -X POST http://localhost:8080/api/multi-projects \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Awesome Project",
+    "type": "github_repo",
+    "source_url": "https://github.com/username/repo",
+    "branch": "main",
+    "description": "My project description",
+    "tags": ["web", "python", "api"]
+  }'
 ```
-# Install inside existing project
-uv pip install graph-sitter
 
-# Install global CLI
-uv tool install graph-sitter --python 3.13
+### 2. Create Your First Workflow
 
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
+```bash
+# Create a build and test workflow
+curl -X POST http://localhost:8080/api/cicd/workflows \
+  -H "Content-Type: application/json" \
+  -d '{
+    "project_id": "your_project_id",
+    "template_id": "build_and_test_basic",
+    "name": "Build and Test Pipeline",
+    "triggers": ["push", "pull_request"]
+  }'
 ```
 
-## Usage
+### 3. Set Up Webhooks
 
-See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
+#### GitHub Webhook
+- Go to your repository settings
+- Add webhook: `http://your-domain.com/api/webhooks/github`
+- Select events: Push, Pull Request, Issues
 
+#### Linear Webhook
+- Go to Linear settings
+- Add webhook: `http://your-domain.com/api/webhooks/linear`
+- Select events: Issue created, Issue updated
+
+### 4. Use Chat Commands
+
+```bash
+# Chat with the system
+curl -X POST http://localhost:8080/api/chat/cicd \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "create a security workflow for my project",
+    "project_id": "your_project_id"
+  }'
 ```
-from graph_sitter import Codebase
+
+## 🏗️ Architecture
+
+### System Components
+
+```mermaid
+graph TB
+    A[Dashboard Frontend] --> B[FastAPI Backend]
+    B --> C[Multi-Project Manager]
+    B --> D[CI/CD Orchestrator]
+    B --> E[Chat Manager]
+    
+    C --> F[Project Storage]
+    D --> G[Workflow Engine]
+    E --> H[Codegen SDK]
+    
+    I[GitHub Webhooks] --> B
+    J[Linear Webhooks] --> B
+    K[Slack Events] --> B
+    
+    H --> L[AI Agents]
+    G --> H
+    
+    M[External Services] --> N[GitHub API]
+    M --> O[Linear API]
+    M --> P[Slack API]
 ```
 
-## Troubleshooting
+### Data Flow
 
-Having issues? Here are some common problems and their solutions:
+1. **Event Reception**: Webhooks from GitHub, Linear, or manual triggers
+2. **Event Processing**: Intelligent routing and condition evaluation
+3. **Workflow Orchestration**: Automatic workflow selection and execution
+4. **AI Integration**: Codegen SDK handles complex tasks and code generation
+5. **Result Processing**: Updates project status, creates issues, sends notifications
+6. **Dashboard Updates**: Real-time updates to the web interface
 
-- **I'm hitting an UV error related to `[[ packages ]]`**: This means you're likely using an outdated version of UV. Try updating to the latest version with: `uv self update`.
-- **I'm hitting an error about `No module named 'codegen.sdk.extensions.utils'`**: The compiled cython extensions are out of sync. Update them with `uv sync --reinstall-package codegen`.
-- **I'm hitting a `RecursionError: maximum recursion depth exceeded` error while parsing my codebase**: If you are using python 3.12, try upgrading to 3.13. If you are already on 3.13, try upping the recursion limit with `sys.setrecursionlimit(10000)`.
+## 📚 API Documentation
 
-If you run into additional issues not listed here, please [join our slack community](https://community.codegen.com) and we'll help you out!
+### Multi-Project Management
 
-## Resources
+#### Get All Projects
+```http
+GET /api/multi-projects
+```
 
-- [Docs](https://graph-sitter.com)
-- [Getting Started](https://graph-sitter.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+#### Create Project
+```http
+POST /api/multi-projects
+Content-Type: application/json
 
-## Why Graph-sitter?
+{
+  "name": "Project Name",
+  "type": "github_repo",
+  "source_url": "https://github.com/user/repo",
+  "branch": "main",
+  "description": "Project description",
+  "tags": ["tag1", "tag2"]
+}
+```
 
-Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
+#### Get Project Details
+```http
+GET /api/multi-projects/{project_id}
+```
 
-We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+### CI/CD Orchestration
 
-- **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
+#### Get Workflow Templates
+```http
+GET /api/cicd/templates
+```
 
-- **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
+#### Create Workflow
+```http
+POST /api/cicd/workflows
+Content-Type: application/json
 
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+{
+  "project_id": "project_id",
+  "template_id": "build_and_test_basic",
+  "name": "My Workflow",
+  "triggers": ["push", "pull_request"],
+  "settings": {}
+}
+```
 
-## Contributing
+#### Trigger Workflows
+```http
+POST /api/cicd/trigger
+Content-Type: application/json
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+{
+  "project_id": "project_id",
+  "trigger_type": "manual",
+  "data": {}
+}
+```
 
-## Enterprise
+#### Get Analytics
+```http
+GET /api/cicd/analytics
+```
 
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
+### Chat Interface
+
+#### Send Chat Command
+```http
+POST /api/chat/cicd
+Content-Type: application/json
+
+{
+  "message": "create a test workflow",
+  "project_id": "project_id"
+}
+```
+
+## 🔧 Configuration
+
+### Workflow Templates
+
+The system comes with pre-built workflow templates:
+
+- **Build and Test**: Basic CI pipeline with build, test, and reporting
+- **Security Scan**: Comprehensive security scanning with dependency checks
+- **Code Review**: AI-powered code review with automated comments
+- **Production Deploy**: Safe production deployment with rollback capabilities
+
+### Orchestration Rules
+
+Create intelligent automation rules:
+
+```json
+{
+  "name": "Auto Security Scan",
+  "conditions": {
+    "trigger_types": ["push"],
+    "project_ids": ["critical_project"],
+    "data_conditions": {
+      "branch": "main"
+    }
+  },
+  "actions": [
+    {
+      "type": "trigger_workflow",
+      "template_id": "security_scan_comprehensive"
+    }
+  ]
+}
+```
+
+### Chat Commands
+
+Supported natural language commands:
+
+- `"create a test workflow"` - Creates a build and test workflow
+- `"trigger all workflows"` - Manually triggers all project workflows
+- `"show status"` - Displays project and system status
+- `"recommend workflows"` - Suggests workflow improvements
+- `"create security scan"` - Sets up security scanning workflow
+
+## 🔍 Monitoring & Analytics
+
+### Dashboard Metrics
+
+- **Project Health Scores**: Calculated based on workflow success rates and requirement completion
+- **Workflow Performance**: Execution times, success rates, and failure analysis
+- **Cross-Project Insights**: Shared dependencies, collaboration opportunities
+- **Resource Utilization**: System resource usage and optimization recommendations
+
+### Real-time Monitoring
+
+- **Live Workflow Status**: Real-time updates on running workflows
+- **Event Processing**: Monitor webhook events and processing status
+- **System Health**: Overall system health and performance metrics
+- **Error Tracking**: Detailed error logs and failure analysis
+
+## 🚀 Advanced Features
+
+### Autonomous Task Creation
+
+The system can automatically create Linear issues and GitHub PRs based on:
+
+- Failed workflow executions
+- Security vulnerabilities detected
+- Code quality issues identified
+- Cross-project dependency updates needed
+
+### Intelligent Recommendations
+
+AI-powered recommendations for:
+
+- Missing essential workflows
+- Workflow optimization opportunities
+- Cross-project collaboration possibilities
+- Security and performance improvements
+
+### Event-Driven Automation
+
+Sophisticated event handling for:
+
+- GitHub push/PR events
+- Linear issue updates
+- Slack mentions and commands
+- Scheduled workflow executions
+- Cross-project dependency changes
+
+## 🔒 Security
+
+### Authentication & Authorization
+
+- OAuth integration with GitHub, Linear, and Slack
+- JWT-based session management
+- Role-based access control
+- API key authentication for webhooks
+
+### Security Features
+
+- Webhook signature verification
+- Encrypted credential storage
+- Audit logging for all actions
+- Rate limiting and DDoS protection
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### Development Setup
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+pytest
+
+# Run linting
+flake8 src/
+
+# Run type checking
+mypy src/
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Codegen SDK](https://github.com/codegen-sh/codegen-sdk) for AI-powered automation
+- [LangChain](https://github.com/hwchase17/langchain) for agent orchestration
+- [FastAPI](https://github.com/tiangolo/fastapi) for the web framework
+- [Tree-sitter](https://github.com/tree-sitter/tree-sitter) for code parsing
+
+## 📞 Support
+
+- 📧 Email: support@graph-sitter.dev
+- 💬 Discord: [Join our community](https://discord.gg/graph-sitter)
+- 📖 Documentation: [docs.graph-sitter.dev](https://docs.graph-sitter.dev)
+- 🐛 Issues: [GitHub Issues](https://github.com/Zeeeepa/graph-sitter/issues)
+
+---
+
+**Built with ❤️ by the Graph-Sitter team**
+

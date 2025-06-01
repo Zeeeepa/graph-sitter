@@ -35,6 +35,14 @@ from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentC
 from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
 from ...shared.logging.get_logger import get_logger
 from .chat_manager import ChatManager
+from .multi_project_manager import (
+    MultiProjectManager, ProjectConfig, ProjectRequirement, CICDFlow, 
+    ProjectType, FlowStatus, FlowExecution
+)
+from .cicd_orchestrator import (
+    CICDOrchestrator, WorkflowTemplate, OrchestrationRule,
+    WorkflowType, TriggerType
+)
 
 logger = get_logger(__name__)
 
@@ -140,6 +148,15 @@ app.mount("/static", StaticFiles(directory="src/contexten/dashboard/static"), na
 integration_agents: Dict[str, Any] = {}
 user_sessions: Dict[str, Dict[str, Any]] = {}
 chat_manager = ChatManager()
+multi_project_manager = MultiProjectManager(
+    codegen_org_id=config.codegen_org_id,
+    codegen_token=config.codegen_token
+)
+cicd_orchestrator = CICDOrchestrator(
+    multi_project_manager=multi_project_manager,
+    codegen_org_id=config.codegen_org_id,
+    codegen_token=config.codegen_token
+)
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -569,6 +586,396 @@ async def get_integration_status(
     
     return {"integrations": status}
 
+# CI/CD Orchestration API Endpoints
+
+@app.get("/api/cicd/templates")
+async def get_workflow_templates(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get all workflow templates"""
+    try:
+        templates = cicd_orchestrator.get_workflow_templates()
+        return {
+            "templates": [
+                {
+                    "id": t.id,
+                    "name": t.name,
+                    "type": t.type.value,
+                    "description": t.description,
+                    "estimated_duration": t.estimated_duration,
+                    "default_triggers": [trigger.value for trigger in t.default_triggers],
+                    "required_permissions": t.required_permissions
+                }
+                for t in templates
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get workflow templates: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/cicd/workflows")
+async def create_workflow_from_template(
+    request: Request,
+    workflow_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Create a workflow from a template"""
+    try:
+        flow_id = await cicd_orchestrator.create_workflow_from_template(
+            project_id=workflow_data["project_id"],
+            template_id=workflow_data["template_id"],
+            name=workflow_data["name"],
+            triggers=[TriggerType(t) for t in workflow_data.get("triggers", [])],
+            custom_settings=workflow_data.get("settings", {})
+        )
+        
+        if flow_id:
+            return {"message": "Workflow created successfully", "flow_id": flow_id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to create workflow")
+            
+    except Exception as e:
+        logger.error(f"Failed to create workflow: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/cicd/trigger")
+async def trigger_workflows(
+    request: Request,
+    trigger_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Trigger workflows based on events"""
+    try:
+        executions = await cicd_orchestrator.trigger_workflow(
+            project_id=trigger_data["project_id"],
+            trigger_type=TriggerType(trigger_data["trigger_type"]),
+            trigger_data=trigger_data.get("data", {})
+        )
+        
+        return {
+            "message": f"Triggered {len(executions)} workflows",
+            "execution_ids": executions
+        }
+    except Exception as e:
+        logger.error(f"Failed to trigger workflows: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/cicd/analytics")
+async def get_orchestration_analytics(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get CI/CD orchestration analytics"""
+    try:
+        analytics = await cicd_orchestrator.get_orchestration_analytics()
+        return analytics
+    except Exception as e:
+        logger.error(f"Failed to get orchestration analytics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/cicd/recommendations/{project_id}")
+async def get_workflow_recommendations(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get workflow recommendations for a project"""
+    try:
+        recommendations = await cicd_orchestrator.get_workflow_recommendations(project_id)
+        return {"recommendations": recommendations}
+    except Exception as e:
+        logger.error(f"Failed to get workflow recommendations: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/cicd/rules")
+async def create_orchestration_rule(
+    request: Request,
+    rule_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Create an orchestration rule"""
+    try:
+        rule = OrchestrationRule(
+            id=rule_data.get("id", f"rule_{int(datetime.now().timestamp())}"),
+            name=rule_data["name"],
+            description=rule_data.get("description", ""),
+            conditions=rule_data["conditions"],
+            actions=rule_data["actions"],
+            priority=rule_data.get("priority", 1),
+            enabled=rule_data.get("enabled", True)
+        )
+        
+        success = cicd_orchestrator.add_orchestration_rule(rule)
+        
+        if success:
+            return {"message": "Orchestration rule created successfully", "rule_id": rule.id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to create orchestration rule")
+            
+    except Exception as e:
+        logger.error(f"Failed to create orchestration rule: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/cicd/rules")
+async def get_orchestration_rules(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get all orchestration rules"""
+    try:
+        rules = cicd_orchestrator.get_orchestration_rules()
+        return {
+            "rules": [
+                {
+                    "id": r.id,
+                    "name": r.name,
+                    "description": r.description,
+                    "conditions": r.conditions,
+                    "actions": r.actions,
+                    "priority": r.priority,
+                    "enabled": r.enabled,
+                    "created_at": r.created_at.isoformat()
+                }
+                for r in rules
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get orchestration rules: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/cicd/rules/{rule_id}/toggle")
+async def toggle_orchestration_rule(
+    rule_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Enable or disable an orchestration rule"""
+    try:
+        # Get current rule state
+        rules = cicd_orchestrator.get_orchestration_rules()
+        rule = next((r for r in rules if r.id == rule_id), None)
+        
+        if not rule:
+            raise HTTPException(status_code=404, detail="Rule not found")
+        
+        # Toggle the rule
+        if rule.enabled:
+            success = cicd_orchestrator.disable_rule(rule_id)
+            action = "disabled"
+        else:
+            success = cicd_orchestrator.enable_rule(rule_id)
+            action = "enabled"
+        
+        if success:
+            return {"message": f"Rule {action} successfully"}
+        else:
+            raise HTTPException(status_code=400, detail=f"Failed to {action.replace('d', '')} rule")
+            
+    except Exception as e:
+        logger.error(f"Failed to toggle orchestration rule: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Webhook endpoints for external integrations
+@app.post("/api/webhooks/github")
+async def github_webhook(request: Request):
+    """Handle GitHub webhook events"""
+    try:
+        payload = await request.json()
+        event_type = request.headers.get("X-GitHub-Event", "unknown")
+        
+        await cicd_orchestrator.handle_github_event(event_type, payload)
+        
+        return {"message": "GitHub event processed successfully"}
+    except Exception as e:
+        logger.error(f"Failed to process GitHub webhook: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/webhooks/linear")
+async def linear_webhook(request: Request):
+    """Handle Linear webhook events"""
+    try:
+        payload = await request.json()
+        event_type = payload.get("type", "unknown")
+        
+        await cicd_orchestrator.handle_linear_event(event_type, payload)
+        
+        return {"message": "Linear event processed successfully"}
+    except Exception as e:
+        logger.error(f"Failed to process Linear webhook: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Enhanced Chat Agent Integration
+@app.post("/api/chat/cicd")
+async def chat_cicd_command(
+    request: Request,
+    chat_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Handle CI/CD related chat commands"""
+    try:
+        message = chat_data.get("message", "")
+        project_id = chat_data.get("project_id")
+        
+        # Parse chat commands for CI/CD operations
+        if "create workflow" in message.lower():
+            # Extract workflow creation parameters from natural language
+            response = await _handle_create_workflow_command(message, project_id, user)
+        elif "trigger" in message.lower() and "workflow" in message.lower():
+            # Handle workflow triggering
+            response = await _handle_trigger_workflow_command(message, project_id, user)
+        elif "status" in message.lower():
+            # Get project/workflow status
+            response = await _handle_status_command(message, project_id, user)
+        elif "recommend" in message.lower():
+            # Get recommendations
+            response = await _handle_recommendations_command(message, project_id, user)
+        else:
+            # Use Codegen SDK for general queries
+            if cicd_orchestrator.codegen_agent:
+                task = cicd_orchestrator.codegen_agent.run(
+                    prompt=f"Help with CI/CD question: {message}"
+                )
+                # Wait for completion (with timeout)
+                max_wait = 30
+                waited = 0
+                while task.status not in ["completed", "failed"] and waited < max_wait:
+                    await asyncio.sleep(1)
+                    task.refresh()
+                    waited += 1
+                
+                if task.status == "completed":
+                    response = {"message": task.result, "type": "codegen_response"}
+                else:
+                    response = {"message": "I'm still working on that. Please check back in a moment.", "type": "processing"}
+            else:
+                response = {"message": "I can help you with CI/CD workflows. Try asking me to 'create workflow', 'trigger workflow', or 'show status'.", "type": "help"}
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Failed to process CI/CD chat command: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Helper functions for chat commands
+async def _handle_create_workflow_command(message: str, project_id: str, user: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle workflow creation from chat"""
+    # Simple keyword extraction - could be enhanced with NLP
+    workflow_types = {
+        "test": "build_and_test_basic",
+        "security": "security_scan_comprehensive", 
+        "review": "code_review_ai",
+        "deploy": "deploy_production"
+    }
+    
+    template_id = None
+    for keyword, template in workflow_types.items():
+        if keyword in message.lower():
+            template_id = template
+            break
+    
+    if not template_id:
+        return {
+            "message": "I can create workflows for: testing, security scanning, code review, or deployment. Which would you like?",
+            "type": "clarification"
+        }
+    
+    # Create workflow with auto-generated name
+    workflow_name = f"Auto-created {template_id.replace('_', ' ').title()}"
+    
+    flow_id = await cicd_orchestrator.create_workflow_from_template(
+        project_id=project_id,
+        template_id=template_id,
+        name=workflow_name
+    )
+    
+    if flow_id:
+        return {
+            "message": f"✅ Created {workflow_name} workflow! Flow ID: {flow_id}",
+            "type": "success",
+            "flow_id": flow_id
+        }
+    else:
+        return {
+            "message": "❌ Failed to create workflow. Please check the project configuration.",
+            "type": "error"
+        }
+
+async def _handle_trigger_workflow_command(message: str, project_id: str, user: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle workflow triggering from chat"""
+    # Trigger all workflows for the project (manual trigger)
+    executions = await cicd_orchestrator.trigger_workflow(
+        project_id=project_id,
+        trigger_type=TriggerType.MANUAL,
+        trigger_data={"triggered_by": user.get("email", "chat_user")}
+    )
+    
+    if executions:
+        return {
+            "message": f"🚀 Triggered {len(executions)} workflows! Execution IDs: {', '.join(executions)}",
+            "type": "success",
+            "execution_ids": executions
+        }
+    else:
+        return {
+            "message": "No workflows available to trigger. Try creating some workflows first!",
+            "type": "info"
+        }
+
+async def _handle_status_command(message: str, project_id: str, user: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle status requests from chat"""
+    if project_id:
+        # Get project-specific status
+        project = await multi_project_manager.get_project(project_id)
+        flows = await multi_project_manager.get_flows(project_id)
+        running_flows = await multi_project_manager.get_running_flows()
+        
+        project_running = [e for e in running_flows.values() if e.project_id == project_id]
+        
+        status_msg = f"📊 **Project Status: {project.name if project else 'Unknown'}**\n"
+        status_msg += f"• Workflows: {len(flows)}\n"
+        status_msg += f"• Running: {len(project_running)}\n"
+        
+        if project_running:
+            status_msg += "\n🔄 **Currently Running:**\n"
+            for execution in project_running:
+                status_msg += f"• {execution.current_step} ({execution.progress:.0%})\n"
+        
+        return {"message": status_msg, "type": "status"}
+    else:
+        # Get system-wide status
+        system_status = await multi_project_manager.get_system_status()
+        analytics = await cicd_orchestrator.get_orchestration_analytics()
+        
+        status_msg = "📊 **System Status**\n"
+        status_msg += f"• Projects: {system_status['projects']['total']} ({system_status['projects']['active']} active)\n"
+        status_msg += f"• Running Flows: {system_status['flows']['running']}\n"
+        status_msg += f"• Success Rate: {analytics['workflow_statistics']['success_rate']:.1%}\n"
+        
+        return {"message": status_msg, "type": "status"}
+
+async def _handle_recommendations_command(message: str, project_id: str, user: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle recommendation requests from chat"""
+    if not project_id:
+        return {
+            "message": "Please specify a project to get recommendations for.",
+            "type": "clarification"
+        }
+    
+    recommendations = await cicd_orchestrator.get_workflow_recommendations(project_id)
+    
+    if not recommendations:
+        return {
+            "message": "🎉 Great! Your project looks well-configured with appropriate workflows.",
+            "type": "success"
+        }
+    
+    rec_msg = "💡 **Recommendations for your project:**\n"
+    for i, rec in enumerate(recommendations[:3], 1):  # Show top 3
+        rec_msg += f"{i}. {rec['description']}\n"
+    
+    return {"message": rec_msg, "type": "recommendations", "recommendations": recommendations}
+
 # Helper Functions
 
 async def get_github_user_info(token: str) -> Dict[str, Any]:
@@ -734,6 +1141,15 @@ async def startup_event():
     """Application startup"""
     logger.info("Contexten Management Dashboard starting up...")
     
+    # Initialize chat manager
+    await chat_manager.start()
+    
+    # Initialize multi-project manager
+    await multi_project_manager.start()
+    
+    # Initialize CI/CD orchestrator
+    await cicd_orchestrator.start()
+    
     # Validate configuration
     missing_config = []
     if not config.codegen_org_id:
@@ -751,17 +1167,24 @@ async def shutdown_event():
     """Application shutdown"""
     logger.info("Contexten Management Dashboard shutting down...")
     
+    # Stop chat manager
+    await chat_manager.stop()
+    
+    # Stop multi-project manager
+    await multi_project_manager.stop()
+    
+    # Stop CI/CD orchestrator
+    await cicd_orchestrator.stop()
+    
+    logger.info("Dashboard shutdown complete")
+    
     # Cleanup all integration agents
     for agent in integration_agents.values():
         try:
-            await agent.stop()
+            if hasattr(agent, 'stop'):
+                await agent.stop()
         except Exception as e:
-            logger.error(f"Error stopping agent during shutdown: {e}")
-    
-    integration_agents.clear()
-    user_sessions.clear()
-    
-    logger.info("Dashboard shutdown complete")
+            logger.error(f"Error stopping agent: {e}")
 
 if __name__ == "__main__":
     import uvicorn
