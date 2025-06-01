@@ -1,4 +1,4 @@
-name: Autonomous CI/CD with Codegen SDK
+name: Autonomous CI/CD with Prefect Orchestration
 
 on:
   workflow_run:
@@ -11,6 +11,8 @@ on:
   schedule:
     # Run autonomous maintenance daily at 2 AM UTC
     - cron: '0 2 * * *'
+    # Run health checks every 15 minutes
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -23,6 +25,8 @@ on:
         - fix
         - optimize
         - security-audit
+        - health-check
+        - initialize-orchestration
 
 permissions:
   contents: write
@@ -32,6 +36,166 @@ permissions:
   checks: read
 
 jobs:
+  # Initialize Prefect orchestration system
+  initialize-orchestration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'initialize-orchestration'
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: |
+          pip install -e .
+
+      - name: Initialize Prefect Orchestration
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          python .github/scripts/autonomous_orchestrator.py \
+            --action initialize
+
+  # Autonomous orchestrated operations
+  autonomous-orchestration:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'failure' || 
+      github.event_name == 'schedule' || 
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop')
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: |
+          pip install -e .
+
+      - name: Determine Operation Mode
+        id: determine-mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.conclusion }}" = "failure" ]; then
+            echo "mode=failure_analysis" >> $GITHUB_OUTPUT
+            echo "event_type=workflow_run.completed" >> $GITHUB_OUTPUT
+            echo "event_data={\"conclusion\": \"failure\", \"workflow_run_id\": \"${{ github.event.workflow_run.id }}\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" = "0 2 * * *" ]; then
+            echo "mode=dependency_management" >> $GITHUB_OUTPUT
+            echo "event_type=schedule" >> $GITHUB_OUTPUT
+            echo "event_data={\"schedule_type\": \"daily\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" = "*/15 * * * *" ]; then
+            echo "mode=health_check" >> $GITHUB_OUTPUT
+            echo "event_type=schedule" >> $GITHUB_OUTPUT
+            echo "event_data={\"schedule_type\": \"health_check\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "mode=performance_monitoring" >> $GITHUB_OUTPUT
+            echo "event_type=push" >> $GITHUB_OUTPUT
+            echo "event_data={\"ref\": \"${{ github.ref }}\", \"sha\": \"${{ github.sha }}\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+            echo "event_type=manual" >> $GITHUB_OUTPUT
+            echo "event_data={\"mode\": \"${{ github.event.inputs.mode }}\"}" >> $GITHUB_OUTPUT
+          else
+            echo "mode=health_check" >> $GITHUB_OUTPUT
+            echo "event_type=unknown" >> $GITHUB_OUTPUT
+            echo "event_data={}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Execute Autonomous Operation via Orchestration
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          # Initialize orchestration system
+          python .github/scripts/autonomous_orchestrator.py --action initialize
+          
+          # Execute the determined operation
+          if [ "${{ steps.determine-mode.outputs.mode }}" = "health_check" ]; then
+            python .github/scripts/autonomous_orchestrator.py --action health-check
+          else
+            python .github/scripts/autonomous_orchestrator.py \
+              --action execute \
+              --operation "${{ steps.determine-mode.outputs.mode }}" \
+              --parameters '${{ steps.determine-mode.outputs.event_data }}' \
+              --wait
+          fi
+
+      - name: Display System Status
+        if: always()
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          python .github/scripts/autonomous_orchestrator.py --action status
+
+  # Legacy autonomous operations (fallback)
+  autonomous-legacy-fallback:
+    runs-on: ubuntu-latest
+    if: failure() && (github.event.workflow_run.conclusion == 'failure' || github.event_name == 'schedule')
+    needs: [autonomous-orchestration]
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: |
+          pip install codegen graph-sitter requests PyGithub
+
+      - name: Fallback to Legacy Autonomous Scripts
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔄 Orchestration failed, falling back to legacy scripts..."
+          
+          if [ "${{ github.event.workflow_run.conclusion }}" = "failure" ]; then
+            echo "Running legacy failure analyzer..."
+            python .github/scripts/autonomous_failure_analyzer.py \
+              --workflow-run-id ${{ github.event.workflow_run.id }} \
+              --mode analyze-and-fix
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "Running legacy performance monitor..."
+            python .github/scripts/autonomous_performance_monitor.py \
+              --baseline-branch develop \
+              --alert-threshold 20 \
+              --auto-optimize true
+          fi
+
+  # Autonomous analysis
   autonomous-analysis:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'failure' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -97,6 +261,7 @@ jobs:
             --alert-threshold 20 \
             --auto-optimize true
 
+  # Autonomous dependency management
   autonomous-dependency-management:
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
@@ -127,6 +292,7 @@ jobs:
             --test-before-merge true \
             --security-priority high
 
+  # Autonomous test optimization
   autonomous-test-optimization:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'optimize'
@@ -157,6 +323,7 @@ jobs:
             --optimize-parallelization true \
             --suggest-new-tests true
 
+  # Autonomous release management
   autonomous-release-management:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -186,4 +353,3 @@ jobs:
             --analyze-changes true \
             --suggest-version-bump true \
             --auto-create-release false  # Start with suggestions only
-

@@ -70,6 +70,9 @@ dependencies = [
   "datasets",
   "colorlog>=6.9.0",
   "codegen-sdk-pink>=0.1.0",
+  "prefect>=3.0.0",
+  "prefect-github>=0.2.0",
+  "prefect-slack>=0.1.0",
 ]
 
 # renovate: datasource=python-version depName=python
