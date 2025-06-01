@@ -7,7 +7,7 @@
 </p>
 
 <h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
+  Scriptable interface to a powerful, multi-lingual language server with autonomous CI/CD capabilities.
 </h2>
 
 <div align="center">
@@ -22,11 +22,48 @@
 
 <br />
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases with **autonomous CI/CD capabilities** powered by the Codegen SDK.
+
+## 🚀 Autonomous CI/CD Features
+
+Graph-sitter now includes a fully autonomous CI/CD system that integrates with the Codegen SDK for intelligent automation:
+
+```python
+from contexten.autonomous_cicd import setup_autonomous_cicd
+
+# Setup autonomous CI/CD with Codegen SDK
+cicd = await setup_autonomous_cicd(
+    codegen_org_id="your-org-id",
+    codegen_token="your-token",
+    repo_path="./",
+    enable_all_features=True
+)
+
+# The system automatically:
+# - Analyzes code quality on every push
+# - Runs intelligent tests based on changes
+# - Deploys to staging environments
+# - Creates PR reviews with AI insights
+# - Tracks issues and manages workflows
+```
+
+### Key Autonomous Features
+
+- **🔍 Intelligent Code Analysis**: AI-powered code quality assessment using Codegen SDK
+- **🧪 Adaptive Testing**: Smart test selection based on code changes
+- **🚀 Automated Deployment**: Intelligent deployment to staging/production
+- **📊 Real-time Monitoring**: Health checks and performance metrics
+- **🔗 Platform Integration**: GitHub, Linear, and Slack webhooks
+- **🛡️ Security Scanning**: Automated vulnerability detection
+- **📈 Analytics Dashboard**: Comprehensive CI/CD metrics and insights
+
+## Core Capabilities
 
 ```python
 from graph_sitter import Codebase
 from codegen.agents.agent import Agent
+
+# Initialize Codegen agent
 agent = Agent(
     org_id="11",  # Your organization ID
     token="your_api_token_here",  # Your API authentication token
@@ -39,7 +76,6 @@ task = agent.run(prompt="Which github repos can you currently access?")
 # Check the initial status
 print(task.status)  # Returns the current status of the task (e.g., "queued", "in_progress", etc.)
 
-
 # Graph-sitter builds a complete graph connecting
 # functions, classes, imports and their relationships
 codebase = Codebase("./")
@@ -50,6 +86,7 @@ for function in codebase.functions:
     if not function.usages:
         # Auto-handles references and imports to maintain correctness
         function.move_to_file("deprecated.py")
+
 # Refresh the task to get updated status
 task.refresh()
 
@@ -61,7 +98,93 @@ if task.status == "completed":
     print(task.result)
 ```
 
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+## Quick Start with Autonomous CI/CD
+
+### 1. Installation
+
+```bash
+# Install graph-sitter with CI/CD capabilities
+uv pip install graph-sitter
+
+# Or install global CLI
+uv tool install graph-sitter --python 3.13
+```
+
+### 2. Setup Environment
+
+```bash
+# Set up your Codegen credentials
+export CODEGEN_ORG_ID="your-org-id"
+export CODEGEN_TOKEN="your-token"
+
+# Optional: GitHub and Linear integration
+export GITHUB_TOKEN="your-github-token"
+export LINEAR_API_KEY="your-linear-key"
+```
+
+### 3. Initialize Autonomous CI/CD
+
+```bash
+# Initialize CI/CD configuration
+python -m contexten.autonomous_cicd.cli init
+
+# Start the autonomous CI/CD system
+python -m contexten.autonomous_cicd.cli start
+```
+
+### 4. Web Dashboard
+
+```bash
+# Start the web API and dashboard
+python -m contexten.autonomous_cicd.web_api
+
+# Access dashboard at http://localhost:8000
+```
+
+## Autonomous CI/CD Architecture
+
+The system consists of three main components:
+
+### 1. **Intelligent Agents**
+- **Code Analysis Agent**: Uses Codegen SDK for deep code understanding
+- **Testing Agent**: Adaptive test execution based on changes
+- **Deployment Agent**: Smart deployment with rollback capabilities
+
+### 2. **Event Triggers**
+- **GitHub Webhooks**: Automatic pipeline triggers on push/PR
+- **Linear Integration**: Issue-driven CI/CD workflows
+- **Scheduled Tasks**: Periodic health checks and maintenance
+
+### 3. **Platform Integration**
+- **Contexten Orchestrator**: Seamless integration with existing workflows
+- **Graph-Sitter Analysis**: Enhanced code understanding and manipulation
+- **Codegen SDK**: AI-powered automation and decision making
+
+## Example: Autonomous Pipeline
+
+```python
+# Example: Run autonomous analysis pipeline
+from contexten.autonomous_cicd import AutonomousCICD, CICDConfig
+
+config = CICDConfig.from_env()
+cicd = AutonomousCICD(config)
+
+await cicd.initialize()
+
+# Trigger intelligent analysis
+result = await cicd.execute_pipeline(
+    trigger_event={
+        "branch": "feature/new-api",
+        "changes": ["src/api/endpoints.py", "tests/test_api.py"],
+        "trigger_type": "github_push"
+    },
+    pipeline_type="full"  # analysis + testing + deployment
+)
+
+print(f"Pipeline {result.pipeline_id} completed: {result.status}")
+print(f"Quality score: {result.stages['analysis'].quality_score}")
+print(f"Test coverage: {result.stages['testing'].coverage}%")
+```
 
 ## Installation and Usage
 

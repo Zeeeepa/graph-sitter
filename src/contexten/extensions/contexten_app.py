@@ -9,14 +9,11 @@ Renamed from codegen_app.py to contexten_app.py as part of system integration.
 """
 
 import asyncio
-import logging
 import time
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, field
-from pathlib import Path
-import json
+from typing import Dict, Optional, Any
+from dataclasses import dataclass
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 # Import existing graph_sitter capabilities
@@ -509,4 +506,3 @@ class ContextenOrchestrator:
             },
             'autogenlib_metrics': await self.autogen_client.get_performance_metrics() if self.autogen_client else {}
         }
-
