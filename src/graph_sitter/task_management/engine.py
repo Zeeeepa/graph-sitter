@@ -25,6 +25,7 @@ try:
     from openevolve.evaluator import Evaluator
     from openevolve.database import Database as OpenEvolveDB
     from openevolve.controller import Controller
+    from ..openevolve_integration import create_openevolve_integration
     OPENEVOLVE_AVAILABLE = True
 except ImportError:
     OPENEVOLVE_AVAILABLE = False
@@ -203,10 +204,8 @@ class TaskManagementEngine:
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         
         # Initialize OpenEvolve components if available
-        self.openevolve_evaluator = None
-        self.openevolve_db = None
-        self.openevolve_controller = None
-        
+        self.openevolve_integration = None
+
         if OPENEVOLVE_AVAILABLE and config.openevolve_enabled:
             self._initialize_openevolve()
         
@@ -216,11 +215,25 @@ class TaskManagementEngine:
         logger.info("Task Management Engine initialized successfully")
     
     def _initialize_openevolve(self):
-        """Initialize OpenEvolve components for step-by-step evaluation"""
+        """Initialize OpenEvolve integration for step-by-step evaluation"""
         try:
-            self.openevolve_evaluator = Evaluator()
-            self.openevolve_db = OpenEvolveDB()
-            self.openevolve_controller = Controller()
+            # Create OpenEvolve integration with configuration
+            openevolve_config = {
+                "evaluator": {
+                    "timeout_ms": 30000,
+                    "parallel_evaluations": 4
+                },
+                "database": {
+                    "connection_string": self.config.database_url,
+                    "pool_size": 10
+                },
+                "controller": {
+                    "max_generations": 50,
+                    "population_size": 20
+                }
+            }
+            
+            self.openevolve_integration = create_openevolve_integration(openevolve_config)
             logger.info("OpenEvolve integration initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize OpenEvolve: {e}")
@@ -570,7 +583,7 @@ class TaskManagementEngine:
     
     async def _evaluate_task_completion(self, task: Task):
         """Evaluate task completion using OpenEvolve"""
-        if not self.config.openevolve_enabled or not self.openevolve_evaluator:
+        if not self.config.openevolve_enabled or not self.openevolve_integration:
             return
         
         try:
@@ -579,19 +592,25 @@ class TaskManagementEngine:
                 "task_id": str(task.id),
                 "title": task.title,
                 "description": task.description,
-                "metadata": task.task_metadata,
-                "completion_time": task.completed_at.isoformat() if task.completed_at else None
+                "implementation": task.metadata.get("implementation", ""),
+                "requirements": task.metadata.get("requirements", []),
+                "context": {
+                    "priority": task.priority.value if task.priority else "medium",
+                    "complexity": task.metadata.get("complexity_score", 0),
+                    "completion_time": task.completed_at.isoformat() if task.completed_at else None
+                },
+                "metrics": task.metadata.get("metrics", {})
             }
             
             # Run OpenEvolve evaluation
-            evaluation_result = await self._run_openevolve_evaluation(evaluation_data)
+            evaluation_result = await self.openevolve_integration.evaluate_task_completion(evaluation_data)
             
-            # Store evaluation results
+            # Store evaluation results as metrics
             await self.record_metric(
                 project_id=task.project_id,
                 metric_name="openevolve_evaluation",
-                metric_value=evaluation_result,
-                metadata={"task_id": str(task.id)}
+                value=evaluation_result.get("effectiveness_score", 0.0),
+                metadata=evaluation_result
             )
             
             logger.info(f"OpenEvolve evaluation completed for task {task.id}")
@@ -599,14 +618,6 @@ class TaskManagementEngine:
         except Exception as e:
             logger.error(f"OpenEvolve evaluation failed for task {task.id}: {e}")
     
-    async def _run_openevolve_evaluation(self, evaluation_data: Dict) -> Dict[str, Any]:
-        """Run OpenEvolve evaluation (placeholder implementation)"""
-        # This would integrate with the actual OpenEvolve evaluation logic
-        return {
-            "effectiveness_score": 0.85,
-            "improvement_suggestions": ["Consider adding more detailed documentation"],
-            "evaluation_timestamp": datetime.utcnow().isoformat()
-        }
     
     # Workflow Management
     

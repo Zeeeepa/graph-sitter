@@ -10,212 +10,301 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import json
 
+# Import actual OpenEvolve components
+try:
+    from openevolve.evaluator import Evaluator
+    from openevolve.database import Database as OpenEvolveDB
+    from openevolve.controller import Controller
+    OPENEVOLVE_AVAILABLE = True
+except ImportError:
+    OPENEVOLVE_AVAILABLE = False
+    logging.warning("OpenEvolve components not available. Please install OpenEvolve package.")
+
 logger = logging.getLogger(__name__)
-
-class MockEvaluator:
-    """Mock evaluator for when OpenEvolve is not available"""
-    
-    async def evaluate(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Mock evaluation that returns a basic effectiveness score"""
-        return {
-            "effectiveness_score": 0.85,
-            "improvement_suggestions": [
-                "Consider adding more detailed documentation",
-                "Implement additional error handling",
-                "Add performance monitoring"
-            ],
-            "evaluation_timestamp": datetime.utcnow().isoformat(),
-            "mock_evaluation": True
-        }
-
-class MockDatabase:
-    """Mock database for when OpenEvolve is not available"""
-    
-    def __init__(self):
-        self.data = {}
-    
-    async def store_evaluation(self, evaluation_id: str, data: Dict[str, Any]):
-        """Store evaluation results"""
-        self.data[evaluation_id] = {
-            "data": data,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        logger.info(f"Stored evaluation {evaluation_id}")
-    
-    async def get_evaluation(self, evaluation_id: str) -> Optional[Dict[str, Any]]:
-        """Retrieve evaluation results"""
-        return self.data.get(evaluation_id)
-    
-    async def get_all_evaluations(self) -> List[Dict[str, Any]]:
-        """Get all stored evaluations"""
-        return list(self.data.values())
-
-class MockController:
-    """Mock controller for when OpenEvolve is not available"""
-    
-    def __init__(self):
-        self.evaluator = MockEvaluator()
-        self.database = MockDatabase()
-    
-    async def run_evaluation(self, task_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Run a complete evaluation workflow"""
-        evaluation_id = f"eval_{datetime.utcnow().timestamp()}"
-        
-        # Run evaluation
-        evaluation_result = await self.evaluator.evaluate(task_data)
-        
-        # Store results
-        await self.database.store_evaluation(evaluation_id, {
-            "task_data": task_data,
-            "evaluation_result": evaluation_result
-        })
-        
-        return {
-            "evaluation_id": evaluation_id,
-            "result": evaluation_result
-        }
-    
-    async def get_system_metrics(self) -> Dict[str, Any]:
-        """Get system-wide evaluation metrics"""
-        evaluations = await self.database.get_all_evaluations()
-        
-        if not evaluations:
-            return {
-                "total_evaluations": 0,
-                "average_effectiveness": 0,
-                "improvement_areas": []
-            }
-        
-        total_score = 0
-        improvement_suggestions = []
-        
-        for eval_data in evaluations:
-            result = eval_data["data"]["evaluation_result"]
-            total_score += result.get("effectiveness_score", 0)
-            improvement_suggestions.extend(result.get("improvement_suggestions", []))
-        
-        return {
-            "total_evaluations": len(evaluations),
-            "average_effectiveness": total_score / len(evaluations),
-            "improvement_areas": list(set(improvement_suggestions))
-        }
 
 class OpenEvolveIntegration:
     """
     Integration layer for OpenEvolve components
     
     This class provides a unified interface for interacting with OpenEvolve
-    components, with fallback to mock implementations when OpenEvolve is not available.
+    components for step-by-step effectiveness analysis and continuous improvement.
     """
     
-    def __init__(self, use_mock: bool = True):
-        self.use_mock = use_mock
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
         self.evaluator = None
         self.database = None
         self.controller = None
         
-        if use_mock:
-            self._initialize_mock_components()
-        else:
+        if OPENEVOLVE_AVAILABLE:
             self._initialize_openevolve_components()
-    
-    def _initialize_mock_components(self):
-        """Initialize mock components"""
-        self.controller = MockController()
-        self.evaluator = self.controller.evaluator
-        self.database = self.controller.database
-        logger.info("OpenEvolve integration initialized with mock components")
+        else:
+            raise ImportError(
+                "OpenEvolve components are not available. "
+                "Please install the OpenEvolve package to use this integration."
+            )
     
     def _initialize_openevolve_components(self):
         """Initialize actual OpenEvolve components"""
         try:
-            # This would import and initialize actual OpenEvolve components
-            # from openevolve.evaluator import Evaluator
-            # from openevolve.database import Database
-            # from openevolve.controller import Controller
+            # Initialize OpenEvolve components with configuration
+            evaluator_config = self.config.get('evaluator', {})
+            database_config = self.config.get('database', {})
+            controller_config = self.config.get('controller', {})
             
-            # self.evaluator = Evaluator()
-            # self.database = Database()
-            # self.controller = Controller()
+            self.evaluator = Evaluator(**evaluator_config)
+            self.database = OpenEvolveDB(**database_config)
+            self.controller = Controller(
+                evaluator=self.evaluator,
+                database=self.database,
+                **controller_config
+            )
             
-            # For now, fall back to mock components
-            logger.warning("Actual OpenEvolve components not available, using mock components")
-            self._initialize_mock_components()
+            logger.info("OpenEvolve integration initialized successfully")
             
-        except ImportError as e:
-            logger.warning(f"OpenEvolve not available: {e}. Using mock components.")
-            self._initialize_mock_components()
+        except Exception as e:
+            logger.error(f"Failed to initialize OpenEvolve components: {e}")
+            raise
     
     async def evaluate_task_completion(self, task_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Evaluate task completion effectiveness"""
-        return await self.controller.run_evaluation(task_data)
+        """Evaluate task completion effectiveness using OpenEvolve"""
+        if not self.controller:
+            raise RuntimeError("OpenEvolve controller not initialized")
+        
+        try:
+            # Prepare evaluation data for OpenEvolve
+            evaluation_request = {
+                "task_id": task_data.get("task_id"),
+                "implementation": task_data.get("implementation", ""),
+                "requirements": task_data.get("requirements", []),
+                "context": task_data.get("context", {}),
+                "metrics": task_data.get("metrics", {}),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+            # Run evaluation through OpenEvolve
+            evaluation_result = await self.controller.evaluate_implementation(evaluation_request)
+            
+            # Process and return results
+            return {
+                "evaluation_id": evaluation_result.get("evaluation_id"),
+                "effectiveness_score": evaluation_result.get("effectiveness_score", 0.0),
+                "quality_metrics": evaluation_result.get("quality_metrics", {}),
+                "improvement_suggestions": evaluation_result.get("improvement_suggestions", []),
+                "performance_analysis": evaluation_result.get("performance_analysis", {}),
+                "evolution_recommendations": evaluation_result.get("evolution_recommendations", []),
+                "evaluation_timestamp": evaluation_result.get("timestamp"),
+                "status": "completed"
+            }
+            
+        except Exception as e:
+            logger.error(f"OpenEvolve evaluation failed: {e}")
+            return {
+                "status": "failed",
+                "error": str(e),
+                "evaluation_timestamp": datetime.utcnow().isoformat()
+            }
     
     async def analyze_system_performance(self) -> Dict[str, Any]:
-        """Analyze overall system performance"""
-        return await self.controller.get_system_metrics()
+        """Analyze overall system performance using OpenEvolve analytics"""
+        if not self.database:
+            raise RuntimeError("OpenEvolve database not initialized")
+        
+        try:
+            # Get system-wide metrics from OpenEvolve database
+            performance_data = await self.database.get_system_analytics()
+            
+            return {
+                "total_evaluations": performance_data.get("total_evaluations", 0),
+                "average_effectiveness": performance_data.get("average_effectiveness", 0.0),
+                "quality_trends": performance_data.get("quality_trends", {}),
+                "performance_metrics": performance_data.get("performance_metrics", {}),
+                "improvement_areas": performance_data.get("improvement_areas", []),
+                "evolution_progress": performance_data.get("evolution_progress", {}),
+                "analysis_timestamp": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"System performance analysis failed: {e}")
+            return {
+                "status": "failed",
+                "error": str(e),
+                "analysis_timestamp": datetime.utcnow().isoformat()
+            }
     
     async def get_improvement_recommendations(self, project_id: str) -> List[str]:
-        """Get improvement recommendations for a project"""
-        metrics = await self.analyze_system_performance()
-        return metrics.get("improvement_areas", [])
+        """Get improvement recommendations for a project using OpenEvolve analysis"""
+        if not self.controller:
+            raise RuntimeError("OpenEvolve controller not initialized")
+        
+        try:
+            # Get project-specific recommendations from OpenEvolve
+            recommendations = await self.controller.get_project_recommendations(project_id)
+            return recommendations.get("recommendations", [])
+            
+        except Exception as e:
+            logger.error(f"Failed to get improvement recommendations: {e}")
+            return []
     
     async def continuous_evaluation_loop(self, evaluation_data: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Run continuous evaluation on multiple data points"""
-        results = []
+        """Run continuous evaluation on multiple data points using OpenEvolve"""
+        if not self.controller:
+            raise RuntimeError("OpenEvolve controller not initialized")
         
-        for data in evaluation_data:
-            result = await self.evaluate_task_completion(data)
-            results.append(result)
+        try:
+            # Process multiple evaluations through OpenEvolve
+            batch_results = await self.controller.batch_evaluate(evaluation_data)
+            
+            # Aggregate and analyze results
+            total_evaluations = len(batch_results)
+            if total_evaluations == 0:
+                return {"status": "no_data", "message": "No evaluation data provided"}
+            
+            effectiveness_scores = [
+                result.get("effectiveness_score", 0.0) 
+                for result in batch_results
+            ]
+            
+            average_effectiveness = sum(effectiveness_scores) / len(effectiveness_scores)
+            
+            # Get evolution insights from OpenEvolve
+            evolution_analysis = await self.controller.analyze_evolution_progress(batch_results)
+            
+            return {
+                "status": "completed",
+                "total_evaluations": total_evaluations,
+                "average_effectiveness": average_effectiveness,
+                "effectiveness_distribution": {
+                    "min": min(effectiveness_scores),
+                    "max": max(effectiveness_scores),
+                    "std_dev": self._calculate_std_dev(effectiveness_scores)
+                },
+                "evolution_insights": evolution_analysis,
+                "evaluation_results": batch_results,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Continuous evaluation loop failed: {e}")
+            return {
+                "status": "failed",
+                "error": str(e),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+    async def evolve_implementation(self, 
+                                  implementation: str, 
+                                  requirements: List[str],
+                                  evolution_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Evolve an implementation using OpenEvolve's evolution engine"""
+        if not self.controller:
+            raise RuntimeError("OpenEvolve controller not initialized")
         
-        # Aggregate results
-        total_evaluations = len(results)
-        if total_evaluations == 0:
-            return {"status": "no_data", "message": "No evaluation data provided"}
+        try:
+            evolution_request = {
+                "implementation": implementation,
+                "requirements": requirements,
+                "config": evolution_config or {},
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+            # Run evolution process through OpenEvolve
+            evolution_result = await self.controller.evolve_implementation(evolution_request)
+            
+            return {
+                "evolved_implementation": evolution_result.get("evolved_implementation"),
+                "evolution_steps": evolution_result.get("evolution_steps", []),
+                "improvement_metrics": evolution_result.get("improvement_metrics", {}),
+                "generation_count": evolution_result.get("generation_count", 0),
+                "convergence_info": evolution_result.get("convergence_info", {}),
+                "status": "completed",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Implementation evolution failed: {e}")
+            return {
+                "status": "failed",
+                "error": str(e),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+    def _calculate_std_dev(self, values: List[float]) -> float:
+        """Calculate standard deviation of values"""
+        if len(values) < 2:
+            return 0.0
         
-        effectiveness_scores = [
-            r["result"]["effectiveness_score"] 
-            for r in results 
-            if "effectiveness_score" in r.get("result", {})
-        ]
-        
-        average_effectiveness = sum(effectiveness_scores) / len(effectiveness_scores) if effectiveness_scores else 0
-        
-        return {
-            "status": "completed",
-            "total_evaluations": total_evaluations,
-            "average_effectiveness": average_effectiveness,
-            "evaluation_results": results,
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        mean = sum(values) / len(values)
+        variance = sum((x - mean) ** 2 for x in values) / len(values)
+        return variance ** 0.5
+    
+    async def close(self):
+        """Clean up OpenEvolve components"""
+        try:
+            if self.controller:
+                await self.controller.close()
+            if self.database:
+                await self.database.close()
+            if self.evaluator:
+                await self.evaluator.close()
+            logger.info("OpenEvolve integration closed successfully")
+        except Exception as e:
+            logger.error(f"Error closing OpenEvolve integration: {e}")
 
 # Factory function for easy initialization
-def create_openevolve_integration(use_mock: bool = True) -> OpenEvolveIntegration:
+def create_openevolve_integration(config: Optional[Dict[str, Any]] = None) -> OpenEvolveIntegration:
     """Create and configure an OpenEvolve integration instance"""
-    return OpenEvolveIntegration(use_mock=use_mock)
+    return OpenEvolveIntegration(config=config)
 
 # Example usage
 async def main():
     """Example usage of OpenEvolve integration"""
-    integration = create_openevolve_integration(use_mock=True)
-    
-    # Evaluate a task
-    task_data = {
-        "task_id": "test-task-123",
-        "title": "Implement feature X",
-        "completion_time": "2024-01-01T12:00:00Z",
-        "complexity": "medium"
+    config = {
+        "evaluator": {
+            "timeout_ms": 30000,
+            "parallel_evaluations": 4
+        },
+        "database": {
+            "connection_string": "postgresql://localhost/openevolve",
+            "pool_size": 10
+        },
+        "controller": {
+            "max_generations": 50,
+            "population_size": 20
+        }
     }
     
-    evaluation_result = await integration.evaluate_task_completion(task_data)
-    print(f"Evaluation result: {evaluation_result}")
+    integration = create_openevolve_integration(config)
     
-    # Analyze system performance
-    system_metrics = await integration.analyze_system_performance()
-    print(f"System metrics: {system_metrics}")
-    
-    # Get improvement recommendations
-    recommendations = await integration.get_improvement_recommendations("project-123")
-    print(f"Recommendations: {recommendations}")
+    try:
+        # Evaluate a task
+        task_data = {
+            "task_id": "task-123",
+            "implementation": "def solve_problem(): return 42",
+            "requirements": ["Function should return correct answer", "Should be efficient"],
+            "context": {"language": "python", "complexity": "medium"}
+        }
+        
+        evaluation_result = await integration.evaluate_task_completion(task_data)
+        print(f"Evaluation result: {evaluation_result}")
+        
+        # Analyze system performance
+        system_metrics = await integration.analyze_system_performance()
+        print(f"System metrics: {system_metrics}")
+        
+        # Get improvement recommendations
+        recommendations = await integration.get_improvement_recommendations("project-123")
+        print(f"Recommendations: {recommendations}")
+        
+        # Evolve implementation
+        evolution_result = await integration.evolve_implementation(
+            implementation="def solve_problem(): return 42",
+            requirements=["Function should return correct answer", "Should be efficient", "Should handle edge cases"]
+        )
+        print(f"Evolution result: {evolution_result}")
+        
+    finally:
+        await integration.close()
 
 if __name__ == "__main__":
     import asyncio
