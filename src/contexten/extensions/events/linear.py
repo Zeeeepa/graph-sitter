@@ -1,12 +1,13 @@
-import logging
+
 from typing import Any, Callable, TypeVar, Optional
+import logging
 
 from pydantic import BaseModel
 
 from contexten.extensions.events.interface import EventHandlerManagerProtocol
-from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.linear.config import get_linear_config
 from contexten.extensions.linear.integration_agent import LinearIntegrationAgent
+from contexten.extensions.linear.types import LinearEvent
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
@@ -14,7 +15,6 @@ logger.setLevel(logging.DEBUG)
 
 # Type variable for event types
 T = TypeVar("T", bound=BaseModel)
-
 
 class Linear(EventHandlerManagerProtocol):
     def __init__(self, app):

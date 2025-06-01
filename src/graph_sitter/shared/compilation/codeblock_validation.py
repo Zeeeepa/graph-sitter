@@ -1,7 +1,7 @@
+
 import re
 
 from graph_sitter.shared.exceptions.compilation import DangerousUserCodeException
-
 
 def check_for_dangerous_operations(user_code: str) -> None:
     """If codeblock has dangerous operations (ex: exec, os.environ, etc) then raise an error and prevent the user from executing it."""

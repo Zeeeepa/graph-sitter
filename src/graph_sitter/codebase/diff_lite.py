@@ -1,3 +1,4 @@
+
 from enum import IntEnum, auto
 from os import PathLike
 from pathlib import Path
@@ -5,7 +6,6 @@ from typing import NamedTuple, Self
 
 from git import Diff
 from watchfiles import Change
-
 
 class ChangeType(IntEnum):
     Modified = auto()
@@ -34,7 +34,6 @@ class ChangeType(IntEnum):
             return ChangeType.Added
         msg = f"Invalid change type: {change_type}"
         raise ValueError(msg)
-
 
 class DiffLite(NamedTuple):
     """Simple diff for recomputing the graph"""

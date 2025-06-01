@@ -1,3 +1,4 @@
+
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
@@ -5,10 +6,9 @@ from langchain.tools import BaseTool
 from langchain_core.messages import AIMessage
 
 from contexten.extensions.langchain.agent import create_chat_agent
+from graph_sitter import Codebase
 
 if TYPE_CHECKING:
-    from graph_sitter import Codebase
-
 
 class ChatAgent:
     """Agent for interacting with a codebase."""

@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 
+from pydantic import BaseModel
 
 class GithubNamedUserContext(BaseModel):
     """Represents a GitHub user parsed from a webhook payload"""

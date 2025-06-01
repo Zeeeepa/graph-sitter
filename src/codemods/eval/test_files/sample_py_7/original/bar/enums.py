@@ -1,5 +1,5 @@
-from enum import Enum
 
+from enum import Enum
 
 class Char(Enum):
     BAR = 1

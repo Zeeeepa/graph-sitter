@@ -1,10 +1,15 @@
-import time
+
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
+import time
 
 from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
 from graph_sitter.codebase.transactions import (
+from graph_sitter.core.file import File
+from graph_sitter.shared.exceptions.control_flow import MaxPreviewTimeExceeded, MaxTransactionsExceeded
+from graph_sitter.shared.logging.get_logger import get_logger
+
     EditTransaction,
     FileAddTransaction,
     FileRemoveTransaction,
@@ -13,19 +18,13 @@ from graph_sitter.codebase.transactions import (
     Transaction,
     TransactionPriority,
 )
-from graph_sitter.shared.exceptions.control_flow import MaxPreviewTimeExceeded, MaxTransactionsExceeded
-from graph_sitter.shared.logging.get_logger import get_logger
 
 if TYPE_CHECKING:
-    from graph_sitter.core.file import File
-
 
 logger = get_logger(__name__)
 
-
 class TransactionError(Exception):
     pass
-
 
 class TransactionManager:
     """Responsible for handling `Transaction` objects - basically an atomic modification of a codebase.

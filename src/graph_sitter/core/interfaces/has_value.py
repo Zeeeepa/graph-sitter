@@ -1,7 +1,7 @@
+
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.expressions.expression import Expression
 from graph_sitter.shared.decorators.docs import apidoc
-
 
 @apidoc
 class HasValue:

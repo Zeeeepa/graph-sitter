@@ -1,6 +1,7 @@
+
+from typing import Any, Callable, TypeVar
 import logging
 import os
-from typing import Any, Callable, TypeVar
 
 from fastapi import Request
 from github import Github
@@ -13,10 +14,8 @@ from graph_sitter.shared.logging.get_logger import get_logger
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
 
-
 # Type variable for event types
 T = TypeVar("T", bound=BaseModel)
-
 
 class GitHub(EventHandlerManagerProtocol):
     def __init__(self, app):

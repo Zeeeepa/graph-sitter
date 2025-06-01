@@ -1,7 +1,12 @@
-from __future__ import annotations
 
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Literal, Self, TypeVar, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import commiter, reader
 from graph_sitter.core.autocommit.decorators import writer
@@ -11,8 +16,13 @@ from graph_sitter.core.expressions.name import Name
 from graph_sitter.core.external_module import ExternalModule
 from graph_sitter.core.import_resolution import Import
 from graph_sitter.core.interfaces.chainable import Chainable
+from graph_sitter.core.interfaces.exportable import Exportable
+from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.interfaces.has_value import HasValue
 from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.export_statement import ExportStatement
+from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.enums import EdgeType, ImportType, NodeType
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 from graph_sitter.typescript.assignment import TSAssignment
@@ -24,23 +34,11 @@ from graph_sitter.typescript.import_resolution import TSImport
 from graph_sitter.typescript.interface import TSInterface
 from graph_sitter.typescript.namespace import TSNamespace
 from graph_sitter.typescript.statements.assignment_statement import TSAssignmentStatement
+from graph_sitter.typescript.symbol import TSSymbol
 from graph_sitter.typescript.type_alias import TSTypeAlias
 from graph_sitter.utils import find_all_descendants
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.codebase.resolution_stack import ResolutionStack
-    from graph_sitter.core.interfaces.exportable import Exportable
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.export_statement import ExportStatement
-    from graph_sitter.core.symbol_groups.collection import Collection
-    from graph_sitter.typescript.symbol import TSSymbol
-
 
 @ts_apidoc
 class TSExport(Export["Collection[TSExport, ExportStatement[TSExport]]"], HasValue, Chainable):
@@ -678,9 +676,7 @@ class TSExport(Export["Collection[TSExport, ExportStatement[TSExport]]"], HasVal
 
         return None
 
-
 TExport = TypeVar("TExport", bound="Export")
-
 
 class WildcardExport(Chainable, Generic[TExport]):
     """Class to represent one of many wildcard exports."""

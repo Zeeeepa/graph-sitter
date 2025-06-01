@@ -1,20 +1,19 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import commiter, reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.statement import Statement, StatementType
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-
 
 def lowest_indentation(text_blocks, skip_lines: int = 0):
     if not text_blocks:
@@ -35,9 +34,7 @@ def lowest_indentation(text_blocks, skip_lines: int = 0):
     # Return the minimum indentation
     return min(indentations)
 
-
 TCodeBlock = TypeVar("TCodeBlock", bound="CodeBlock")
-
 
 @apidoc
 class Comment(Statement[TCodeBlock], Generic[TCodeBlock]):

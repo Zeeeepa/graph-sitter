@@ -1,8 +1,9 @@
+
+from collections.abc import Callable
+from typing import Any
 import linecache
 import sys
 import traceback
-from collections.abc import Callable
-from typing import Any
 
 from graph_sitter.shared.compilation.codeblock_validation import check_for_dangerous_operations
 from graph_sitter.shared.compilation.exception_utils import get_local_frame, get_offset_traceback
@@ -12,7 +13,6 @@ from graph_sitter.shared.exceptions.control_flow import StopCodemodException
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 def create_execute_function_from_codeblock(codeblock: str, custom_scope: dict | None = None, func_name: str = "execute") -> Callable:
     """Convert a user code string into a Callable that takes in a Codebase.

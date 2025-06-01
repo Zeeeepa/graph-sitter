@@ -1,3 +1,4 @@
+
 import os
 import shutil
 import subprocess
@@ -6,7 +7,6 @@ from graph_sitter.core.external.external_process import ExternalProcess
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class TSDeclassify(ExternalProcess):
     def __init__(self, repo_path: str, base_path: str, working_dir: str = "/tmp/ts_declassify"):

@@ -1,23 +1,22 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
 from graph_sitter._proxy import proxy_property
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.attribute import Attribute
 from graph_sitter.shared.decorators.docs import ts_apidoc
 from graph_sitter.typescript.assignment import TSAssignment
 from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
+from graph_sitter.typescript.interfaces.has_block import TSHasBlock
 from graph_sitter.typescript.statements.assignment_statement import TSAssignmentStatement
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.interfaces.has_block import TSHasBlock
-
 
 @ts_apidoc
 class TSAttribute(Attribute[TSCodeBlock, TSAssignment], TSAssignmentStatement):

@@ -1,6 +1,7 @@
+
+from pathlib import Path
 import os
 import subprocess
-from pathlib import Path
 
 import rich_click as click
 
@@ -10,13 +11,11 @@ from graph_sitter.cli.utils.notebooks import create_notebook
 from graph_sitter.cli.workspace.decorators import requires_init
 from graph_sitter.cli.workspace.venv_manager import VenvManager
 
-
 def create_jupyter_dir(codegen_dir: Path) -> Path:
     """Create and return the jupyter directory."""
     jupyter_dir = codegen_dir / "jupyter"
     jupyter_dir.mkdir(parents=True, exist_ok=True)
     return jupyter_dir
-
 
 @click.command(name="notebook")
 @click.option("--background", is_flag=True, help="Run Jupyter Lab in the background")

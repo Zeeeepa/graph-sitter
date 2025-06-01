@@ -13,4 +13,3 @@ __all__ = [
     "LinesOfCodeCalculator",
     "DepthOfInheritanceCalculator",
 ]
-

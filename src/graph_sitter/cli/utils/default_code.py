@@ -1,6 +1,6 @@
-DEFAULT_CODEMOD = '''import graph_sitter
 from graph_sitter.core.codebase import Codebase
 
+DEFAULT_CODEMOD = '''import graph_sitter
 
 @graph_sitter.function("{name}")
 def run(codebase: Codebase):
@@ -9,7 +9,6 @@ def run(codebase: Codebase):
     print('Total files: ', len(codebase.files))
     print('Total functions: ', len(codebase.functions))
     print('Total imports: ', len(codebase.imports))
-
 
 if __name__ == "__main__":
     print('Parsing codebase...')

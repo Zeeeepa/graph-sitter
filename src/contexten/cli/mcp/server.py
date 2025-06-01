@@ -1,12 +1,13 @@
+
 from typing import Annotated, Any
 
 from mcp.server.fastmcp import Context, FastMCP
 
 from contexten.cli.api.client import RestAPI
 from contexten.cli.mcp.agent.docs_expert import create_sdk_expert_agent
+from graph_sitter import Codebase
 from graph_sitter.cli.mcp.resources.system_prompt import SYSTEM_PROMPT
 from graph_sitter.cli.mcp.resources.system_setup_instructions import SETUP_INSTRUCTIONS
-from graph_sitter import Codebase
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 # Initialize FastMCP server
@@ -15,18 +16,15 @@ mcp = FastMCP("codegen-mcp", instructions="MCP server for the Codegen SDK. Use t
 
 # ----- RESOURCES -----
 
-
 @mcp.resource("system://agent_prompt", description="Provides all the information the agent needs to know about Codegen SDK", mime_type="text/plain")
 def get_docs() -> str:
     """Get the sdk doc url."""
     return SYSTEM_PROMPT
 
-
 @mcp.resource("system://setup_instructions", description="Provides all the instructions to setup the environment for the agent", mime_type="text/plain")
 def get_setup_instructions() -> str:
     """Get the setup instructions."""
     return SETUP_INSTRUCTIONS
-
 
 @mcp.resource("system://manifest", mime_type="application/json")
 def get_service_config() -> dict[str, Any]:
@@ -37,9 +35,7 @@ def get_service_config() -> dict[str, Any]:
         "description": "The MCP server for assisting with creating/writing/improving codegen codemods.",
     }
 
-
 # ----- TOOLS -----
-
 
 @mcp.tool()
 def ask_codegen_sdk(query: Annotated[str, "Ask a question to an exper agent for details about any aspect of the codegen sdk core set of classes and utilities"]):
@@ -52,7 +48,6 @@ def ask_codegen_sdk(query: Annotated[str, "Ask a question to an exper agent for 
     )
 
     return result["messages"][-1].content
-
 
 @mcp.tool()
 def generate_codemod(
@@ -67,7 +62,6 @@ def generate_codemod(
 
     codegen create {title} -d "{task}"
     '''
-
 
 @mcp.tool()
 def improve_codemod(
@@ -85,7 +79,6 @@ def improve_codemod(
         return response.codemod_source
     except Exception as e:
         return f"Error: {e}"
-
 
 if __name__ == "__main__":
     # Initialize and run the server

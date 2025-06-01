@@ -1,9 +1,8 @@
+
 from typing import Literal
 
-from pydantic import BaseModel
-
 from .base import GitHubRepository, GitHubUser
-
+from pydantic import BaseModel
 
 class PullRequestRef(BaseModel):
     label: str
@@ -11,7 +10,6 @@ class PullRequestRef(BaseModel):
     sha: str
     user: GitHubUser
     repo: GitHubRepository
-
 
 class PullRequestLinks(BaseModel):
     self: dict
@@ -23,7 +21,6 @@ class PullRequestLinks(BaseModel):
     commits: dict
     statuses: dict
 
-
 class Label(BaseModel):
     id: int
     node_id: str
@@ -32,7 +29,6 @@ class Label(BaseModel):
     description: str | None = None
     color: str
     default: bool
-
 
 class PullRequest(BaseModel):
     url: str
@@ -78,7 +74,6 @@ class PullRequest(BaseModel):
     additions: int
     deletions: int
     changed_files: int
-
 
 class PullRequestLabeledEvent(BaseModel):
     action: Literal["labeled"]

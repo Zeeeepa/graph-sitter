@@ -1,5 +1,20 @@
 """Halstead Volume Calculator.
 
+from collections import Counter
+from typing import TYPE_CHECKING, Optional, Set, Dict, List, Any
+import math
+import re
+
+from ..core.base_calculator import BaseMetricsCalculator
+from ..models.metrics_data import HalsteadMetrics
+
+from __future__ import annotations
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.metrics.models.metrics_data import (
+
 Calculates Halstead complexity metrics including volume, difficulty, and effort.
 Halstead metrics are based on the count of operators and operands in the code.
 
@@ -13,28 +28,12 @@ Key metrics:
 - Effort: E = D * V
 """
 
-from __future__ import annotations
-
-import re
-import math
-from typing import TYPE_CHECKING, Optional, Set, Dict, List, Any
-from collections import Counter
-
-from ..core.base_calculator import BaseMetricsCalculator
-from ..models.metrics_data import HalsteadMetrics
-
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.metrics.models.metrics_data import (
         FunctionMetrics,
         ClassMetrics,
         FileMetrics,
         CodebaseMetrics,
     )
-
 
 class HalsteadVolumeCalculator(BaseMetricsCalculator):
     """Calculator for Halstead complexity metrics."""
@@ -545,4 +544,3 @@ class HalsteadVolumeCalculator(BaseMetricsCalculator):
             },
             "additionalProperties": False
         }
-

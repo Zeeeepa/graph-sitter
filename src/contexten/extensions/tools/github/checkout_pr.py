@@ -6,7 +6,6 @@ from graph_sitter import Codebase
 
 from ..observation import Observation
 
-
 class CheckoutPRObservation(Observation):
     """Response from checking out a PR."""
 
@@ -17,7 +16,6 @@ class CheckoutPRObservation(Observation):
         description="Whether the checkout was successful",
         default=False,
     )
-
 
 def checkout_pr(codebase: Codebase, pr_number: int) -> CheckoutPRObservation:
     """Checkout a PR.

@@ -1,9 +1,9 @@
+
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
 from graph_sitter.core.statements.statement import Statement
 from graph_sitter.shared.decorators.docs import noapidoc
-
 
 class ConditionalBlock(Statement, ABC):
     """An interface for any code block that might not be executed in the code,

@@ -1,8 +1,4 @@
 """
-Core models for the task management system.
-
-This module defines the core data models for tasks, workflows, and execution tracking.
-"""
 
 from datetime import datetime, timedelta
 from enum import Enum
@@ -11,6 +7,10 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, validator
 
+Core models for the task management system.
+
+This module defines the core data models for tasks, workflows, and execution tracking.
+"""
 
 class TaskStatus(str, Enum):
     """Task execution status."""
@@ -21,7 +21,6 @@ class TaskStatus(str, Enum):
     CANCELLED = "cancelled"
     RETRYING = "retrying"
 
-
 class TaskType(str, Enum):
     """Types of tasks that can be executed."""
     CODE_ANALYSIS = "code_analysis"
@@ -31,7 +30,6 @@ class TaskType(str, Enum):
     WORKFLOW = "workflow"
     CUSTOM = "custom"
 
-
 class Priority(str, Enum):
     """Task priority levels."""
     LOW = "low"
@@ -39,7 +37,6 @@ class Priority(str, Enum):
     HIGH = "high"
     URGENT = "urgent"
     CRITICAL = "critical"
-
 
 class WorkflowStepType(str, Enum):
     """Types of workflow steps."""
@@ -50,7 +47,6 @@ class WorkflowStepType(str, Enum):
     DEPLOYMENT = "deployment"
     NOTIFICATION = "notification"
     CUSTOM = "custom"
-
 
 class Task(BaseModel):
     """Core task model with execution tracking."""
@@ -152,7 +148,6 @@ class Task(BaseModel):
             self.error_message = None
             self.updated_at = datetime.utcnow()
 
-
 class WorkflowStep(BaseModel):
     """Individual step in a workflow."""
     
@@ -176,7 +171,6 @@ class WorkflowStep(BaseModel):
     
     # Metadata
     metadata: Dict[str, Any] = Field(default_factory=dict)
-
 
 class Workflow(BaseModel):
     """Workflow definition with multiple steps."""
@@ -230,7 +224,6 @@ class Workflow(BaseModel):
                 ready_steps.append(step)
         return ready_steps
 
-
 class TaskExecution(BaseModel):
     """Detailed execution tracking for tasks."""
     
@@ -273,7 +266,6 @@ class TaskExecution(BaseModel):
         self.logs.append(f"[{timestamp}] {message}")
         self.updated_at = datetime.utcnow()
 
-
 class TaskDependency(BaseModel):
     """Task dependency relationship."""
     
@@ -292,7 +284,6 @@ class TaskDependency(BaseModel):
         if v not in valid_types:
             raise ValueError(f"dependency_type must be one of {valid_types}")
         return v
-
 
 # Factory functions for common task types
 class TaskFactory:

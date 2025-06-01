@@ -1,12 +1,20 @@
-from __future__ import annotations
 
-import re
+from collections.abc import Generator
 from typing import TYPE_CHECKING, override
+import re
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import commiter, reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.function import Function
+from graph_sitter.core.import_resolution import Import, WildcardImport
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 from graph_sitter.python.detached_symbols.decorator import PyDecorator
@@ -19,18 +27,8 @@ from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.import_resolution import Import, WildcardImport
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.symbol import Symbol
 
 logger = get_logger(__name__)
-
 
 @py_apidoc
 class PyFunction(Function[PyDecorator, PyCodeBlock, PyParameter, PyType], PyHasBlock, PySymbol):

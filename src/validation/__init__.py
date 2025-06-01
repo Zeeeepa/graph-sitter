@@ -1,10 +1,11 @@
 """
+
+from .code_validator import CodeValidator, CodeIssue, ValidationSeverity
+from .config_validator import ConfigValidator, ValidationResult, ValidationLevel
+
 Validation Module for Graph-Sitter Project
 Provides comprehensive validation for configuration, code quality, and system integrity
 """
-
-from .config_validator import ConfigValidator, ValidationResult, ValidationLevel
-from .code_validator import CodeValidator, CodeIssue, ValidationSeverity
 
 __all__ = [
     'ConfigValidator',
@@ -16,4 +17,3 @@ __all__ = [
 ]
 
 __version__ = "1.0.0"
-

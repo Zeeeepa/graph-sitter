@@ -1,23 +1,23 @@
 """
+
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple, Any
+import ast
+import importlib.util
+import logging
+import os
+import subprocess
+import sys
+
 Code Validation System
 Validates all code files in the Graph-Sitter project for syntax, imports, and functionality
 """
 
-import ast
-import os
-import sys
-import logging
-from typing import Dict, List, Optional, Set, Tuple, Any
-from pathlib import Path
-import importlib.util
-import subprocess
-from dataclasses import dataclass
-from enum import Enum
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 class ValidationSeverity(Enum):
     """Validation issue severity levels"""
@@ -25,7 +25,6 @@ class ValidationSeverity(Enum):
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
-
 
 @dataclass
 class CodeIssue:
@@ -36,7 +35,6 @@ class CodeIssue:
     issue_type: str
     message: str
     suggestion: Optional[str] = None
-
 
 class CodeValidator:
     """Comprehensive code validation system"""
@@ -675,7 +673,6 @@ class CodeValidator:
         print(f"\n📊 SUMMARY: {len(critical)} critical, {len(errors)} errors, {len(warnings)} warnings, {len(info)} info")
         print(f"📁 FILES VALIDATED: {len(self.validated_files)}")
 
-
 def main():
     """Main validation entry point"""
     print("🔍 Graph-Sitter Code Validator")
@@ -693,7 +690,5 @@ def main():
         print("\n❌ Code validation failed - please fix the critical issues above")
         return 1
 
-
 if __name__ == "__main__":
     sys.exit(main())
-

@@ -1,32 +1,31 @@
-from __future__ import annotations
 
-import os
 from collections import deque
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Self, override
+import os
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import reader
 from graph_sitter.core.expressions import Name
+from graph_sitter.core.external_module import ExternalModule
 from graph_sitter.core.import_resolution import Import, ImportResolution, WildcardImport
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.exportable import Exportable
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.import_statement import ImportStatement
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import ImportType, NodeType, SymbolType
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
+from graph_sitter.typescript.file import TSFile
+from graph_sitter.typescript.namespace import TSNamespace
+from graph_sitter.typescript.namespace import TSNamespace
+from graph_sitter.typescript.statements.import_statement import TSImportStatement
 from graph_sitter.utils import find_all_descendants, find_first_ancestor, find_first_descendant
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.external_module import ExternalModule
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.import_statement import ImportStatement
-    from graph_sitter.core.symbol import Symbol
-    from graph_sitter.typescript.file import TSFile
-    from graph_sitter.typescript.namespace import TSNamespace
-    from graph_sitter.typescript.statements.import_statement import TSImportStatement
-
 
 @ts_apidoc
 class TSImport(Import["TSFile"], Exportable):
@@ -591,8 +590,6 @@ class TSImport(Import["TSFile"], Exportable):
         """
         if not self.is_namespace_import():
             return []
-
-        from graph_sitter.typescript.namespace import TSNamespace
 
         resolved = self.resolved_symbol
         if resolved is None or not isinstance(resolved, TSNamespace):

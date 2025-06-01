@@ -1,30 +1,29 @@
-from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.class_definition import Class
 from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
+from graph_sitter.core.expressions.name import Name
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.interface import Interface
 from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.inherits import Inherits
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.enums import EdgeType
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.codebase.resolution_stack import ResolutionStack
-    from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
-    from graph_sitter.core.expressions.name import Name
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.interfaces.inherits import Inherits
-    from graph_sitter.core.node_id_factory import NodeId
-
 
 TType = TypeVar("TType", bound="Type")
 Parent = TypeVar("Parent", bound="Inherits")
-
 
 class Parents(Collection["TType", Parent], Generic[TType, Parent]):
     type_arguments: list[Type]
@@ -60,8 +59,6 @@ class Parents(Collection["TType", Parent], Generic[TType, Parent]):
     @reader
     def is_subclass_of(self, parent: str | HasName, max_depth: int | None = None) -> bool:
         """Returns True if the class is a subclass of the given parent class."""
-        from graph_sitter.core.class_definition import Class
-        from graph_sitter.core.interface import Interface
 
         if isinstance(parent, HasName):
             parent = parent.name

@@ -1,18 +1,17 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from __future__ import annotations
 from graph_sitter.compiled.autocommit import commiter
+from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions.expression import Expression
+from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.interfaces.has_name import HasName
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Value(Expression[Parent], Generic[Parent]):

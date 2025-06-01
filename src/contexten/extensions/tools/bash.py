@@ -25,7 +25,6 @@ ALLOWED_COMMANDS = {
     "wc": {"-l", "-w", "-c"},
 }
 
-
 class RunBashCommandObservation(Observation):
     """Response from running a bash command."""
 
@@ -46,7 +45,6 @@ class RunBashCommandObservation(Observation):
     )
 
     str_template: ClassVar[str] = "Command '{command}' completed"
-
 
 def validate_command(command: str) -> tuple[bool, str]:
     """Validate if a command is safe to execute.
@@ -114,7 +112,6 @@ def validate_command(command: str) -> tuple[bool, str]:
 
     except Exception as e:
         return False, f"Failed to validate command: {e!s}"
-
 
 def run_bash_command(command: str, is_background: bool = False) -> RunBashCommandObservation:
     """Run a bash command and return its output.

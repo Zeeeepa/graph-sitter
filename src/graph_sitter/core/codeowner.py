@@ -1,3 +1,4 @@
+
 from collections.abc import Callable, Iterable, Iterator
 from typing import Generic, Literal
 
@@ -5,6 +6,10 @@ from codeowners import CodeOwners as CodeOwnersParser
 
 from graph_sitter._proxy import proxy_property
 from graph_sitter.core.interfaces.has_symbols import (
+from graph_sitter.core.utils.cache_utils import cached_generator
+from graph_sitter.shared.decorators.docs import apidoc, noapidoc
+from graph_sitter.shared.logging.get_logger import get_logger
+
     FilesParam,
     HasSymbols,
     TClass,
@@ -15,12 +20,8 @@ from graph_sitter.core.interfaces.has_symbols import (
     TImportStatement,
     TSymbol,
 )
-from graph_sitter.core.utils.cache_utils import cached_generator
-from graph_sitter.shared.decorators.docs import apidoc, noapidoc
-from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 @apidoc
 class CodeOwner(

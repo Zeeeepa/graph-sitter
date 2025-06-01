@@ -1,3 +1,4 @@
+
 from collections.abc import Generator
 from typing import Generic, Self, TypeVar, override
 
@@ -15,7 +16,6 @@ from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 Parent = TypeVar("Parent", bound="Expression")
-
 
 @apidoc
 class UnaryExpression(Expression[Parent], Chainable, Generic[Parent]):
@@ -46,7 +46,6 @@ class UnaryExpression(Expression[Parent], Chainable, Generic[Parent]):
     @writer
     def reduce_condition(self, bool_condition: bool, node: Editable | None = None) -> None:
         """Simplifies a unary expression by reducing it based on a boolean condition.
-
 
         Args:
             bool_condition (bool): The boolean value to reduce the condition to.

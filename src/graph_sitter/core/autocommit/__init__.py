@@ -1,5 +1,10 @@
 """Autocommit implementation.
 
+from graph_sitter.compiled.autocommit import commiter, reader
+from graph_sitter.core.autocommit.constants import enabled
+from graph_sitter.core.autocommit.decorators import mover, remover, repr_func, writer
+from graph_sitter.core.autocommit.manager import AutoCommit
+
 Theory of Operation:
 -------------------
 Context: We operate on 3 kinds of nodes: Files, Symbols, and DetachedSymbols.
@@ -16,11 +21,6 @@ Edge Cases:
 - We cannot handle removing then operating on a symbol
 - We skip commits when you do raw edits and inserts, but will fall back to autocommit if needed
 """
-
-from graph_sitter.core.autocommit.constants import enabled
-from graph_sitter.core.autocommit.decorators import mover, remover, repr_func, writer
-from graph_sitter.core.autocommit.manager import AutoCommit
-from graph_sitter.compiled.autocommit import commiter, reader
 
 __all__ = [
     "AutoCommit",

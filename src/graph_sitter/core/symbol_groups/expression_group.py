@@ -1,21 +1,19 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from __future__ import annotations
 from graph_sitter.compiled.autocommit import reader
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.expressions import Expression
 from graph_sitter.core.symbol_group import SymbolGroup
 from graph_sitter.shared.decorators.docs import apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.expressions import Expression
 
 Parent = TypeVar("Parent")
-
 
 TExpression = TypeVar("TExpression", bound="Expression")
 Parent = TypeVar("Parent")
-
 
 @apidoc
 class ExpressionGroup(SymbolGroup[TExpression, Parent], Generic[TExpression, Parent]):

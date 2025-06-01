@@ -1,14 +1,13 @@
-import os
+
 from dataclasses import dataclass
+import os
 
 import psutil
-
 
 @dataclass
 class MemoryStats:
     memory_rss_gb: float
     memory_vms_gb: float
-
 
 def get_memory_stats() -> MemoryStats:
     process = psutil.Process(os.getpid())

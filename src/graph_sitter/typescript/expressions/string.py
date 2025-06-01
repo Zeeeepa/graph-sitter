@@ -1,17 +1,16 @@
+
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.expressions import Expression, String
 from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.shared.decorators.docs import ts_apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-
 
 Parent = TypeVar("Parent", bound="Expression")
-
 
 @ts_apidoc
 class TSString(String, Generic[Parent]):

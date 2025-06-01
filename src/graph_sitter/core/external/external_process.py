@@ -1,12 +1,12 @@
+
+from abc import ABC, abstractmethod
 import os
 import threading
 import time
-from abc import ABC, abstractmethod
 
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class ExternalProcess(ABC):
     """Base class for all additional extrnal services that require a separate process.

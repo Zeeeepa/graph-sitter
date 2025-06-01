@@ -1,10 +1,10 @@
-import rustworkx as nx
+
 from rustworkx import DAGHasCycle, PyDiGraph
+import rustworkx as nx
 
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 def pseudo_topological_sort(graph: PyDiGraph, flatten: bool = True):
     """This will come up with an ordering of nodes within the graph respecting topological"""

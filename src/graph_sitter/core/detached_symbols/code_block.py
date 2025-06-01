@@ -1,43 +1,39 @@
-from __future__ import annotations
 
 from abc import abstractmethod
 from collections import deque
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
-
 from typing_extensions import deprecated
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
 from graph_sitter.compiled.sort import sort_editables
 from graph_sitter.compiled.utils import find_line_start_and_end_nodes
+from graph_sitter.core.assignment import Assignment
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind, UsageType
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
 from graph_sitter.core.expressions import Expression, Value
+from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.has_block import HasBlock
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.statements.assignment_statement import AssignmentStatement
+from graph_sitter.core.statements.attribute import Attribute
+from graph_sitter.core.statements.comment import Comment
+from graph_sitter.core.statements.if_block_statement import IfBlockStatement
+from graph_sitter.core.statements.return_statement import ReturnStatement
 from graph_sitter.core.statements.statement import Statement, StatementType
+from graph_sitter.core.statements.symbol_statement import SymbolStatement
+from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
+from graph_sitter.output.ast import AST
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.core.assignment import Assignment
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.interfaces.has_block import HasBlock
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.statements.assignment_statement import AssignmentStatement
-    from graph_sitter.core.statements.attribute import Attribute
-    from graph_sitter.core.statements.comment import Comment
-    from graph_sitter.core.statements.if_block_statement import IfBlockStatement
-    from graph_sitter.core.statements.return_statement import ReturnStatement
-    from graph_sitter.core.statements.symbol_statement import SymbolStatement
-    from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
-    from graph_sitter.output.ast import AST
-
 
 Parent = TypeVar("Parent", bound="HasBlock")
 TAssignment = TypeVar("TAssignment", bound="Assignment")
-
 
 @apidoc
 class CodeBlock(Expression[Parent], Generic[Parent, TAssignment]):
@@ -296,7 +292,6 @@ class CodeBlock(Expression[Parent], Generic[Parent, TAssignment]):
             var_name (str): The name of the local variable to search for.
             fuzzy_match (bool, optional): If True, matches variables whose names contain var_name.
                 If False, only matches exact variable names. Defaults to False.
-
 
         Returns:
             list[Assignment[Parent, Self]]: List of Assignment objects representing local variable assignments

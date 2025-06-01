@@ -1,15 +1,15 @@
+
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 import ast
 import os
 import re
-from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor
 
 import astor
 
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class MethodRemover(ast.NodeTransformer):
     def __init__(self, conditions: list[Callable[[ast.FunctionDef], bool]]):
@@ -42,7 +42,6 @@ class MethodRemover(ast.NodeTransformer):
 
         return False
 
-
 class FieldRemover(ast.NodeTransformer):
     def __init__(self, conditions: list[Callable[[ast.FunctionDef], bool]]):
         self.conditions = conditions
@@ -71,20 +70,17 @@ class FieldRemover(ast.NodeTransformer):
                 return any(cond(node) for cond in self.conditions)
         return False
 
-
 def _remove_methods(source: str, conditions: list[Callable[[ast.FunctionDef], bool]]) -> str:
     tree = ast.parse(source)
     transformer = MethodRemover(conditions)
     modified_tree = transformer.visit(tree)
     return astor.to_source(modified_tree)
 
-
 def _remove_fields(source: str, conditions: list[Callable[[ast.FunctionDef], bool]]) -> str:
     tree = ast.parse(source)
     transformer = FieldRemover(conditions)
     modified_tree = transformer.visit(tree)
     return astor.to_source(modified_tree)
-
 
 def _starts_with_underscore(node: ast.FunctionDef | ast.AnnAssign | ast.Assign) -> bool:
     if isinstance(node, ast.FunctionDef):
@@ -95,7 +91,6 @@ def _starts_with_underscore(node: ast.FunctionDef | ast.AnnAssign | ast.Assign) 
         return node.target.id.startswith("_")
     return False
 
-
 def _has_decorator(decorator_name: str) -> Callable[[ast.FunctionDef], bool]:
     def test(node):
         has = any(isinstance(d, ast.Name) and d.id == decorator_name for d in node.decorator_list)
@@ -105,10 +100,8 @@ def _has_decorator(decorator_name: str) -> Callable[[ast.FunctionDef], bool]:
 
     return test
 
-
 def _matches_regex(pattern: str) -> Callable[[ast.FunctionDef], bool]:
     return lambda node: re.match(pattern, node.name) is not None
-
 
 def _strip_internal_symbols(file: str, root: str) -> None:
     if file.endswith(".pyi"):
@@ -129,7 +122,6 @@ def _strip_internal_symbols(file: str, root: str) -> None:
         with open(file_path, "w") as f:
             f.write(modified_content)
         logger.debug(f"Typestub file {file_path} has been modified.")
-
 
 def strip_internal_symbols(typing_directory: str) -> None:
     with ThreadPoolExecutor() as exec:

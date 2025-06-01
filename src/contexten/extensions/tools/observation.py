@@ -10,7 +10,6 @@ from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
-
 class Observation(BaseModel):
     """Base class for all tool observations.
 

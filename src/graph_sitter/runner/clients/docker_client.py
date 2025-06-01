@@ -7,7 +7,6 @@ from graph_sitter.runner.clients.client import Client
 from graph_sitter.runner.models.apis import RUN_FUNCTION_ENDPOINT, RunFunctionRequest
 from graph_sitter.runner.models.codemod import CodemodRunResult
 
-
 class DockerClient(Client):
     """Client for interacting with the locally hosted sandbox server hosted on a docker container."""
 
@@ -26,7 +25,6 @@ class DockerClient(Client):
         req = RunFunctionRequest(function_name=function.name, codemod_source=function.source, commit=commit)
         response = self.post(RUN_FUNCTION_ENDPOINT, req.model_dump())
         return CodemodRunResult.model_validate(response.json())
-
 
 if __name__ == "__main__":
     fleet = DockerFleet.load()

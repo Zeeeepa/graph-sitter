@@ -1,41 +1,37 @@
-from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
-
 from typing_extensions import deprecated
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.compiled.resolution import UsageKind
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.dataclasses.usage import UsageType
 from graph_sitter.core.expressions import Expression
 from graph_sitter.core.expressions.name import Name
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.function import Function
+from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.interfaces.has_value import HasValue
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.interfaces.typeable import Typeable
 from graph_sitter.core.interfaces.usable import Usable
+from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.utils import find_first_descendant
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.resolution_stack import ResolutionStack
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.symbol_groups.collection import Collection
-
 
 logger = get_logger(__name__)
 
 TType = TypeVar("TType", bound="Type")
 Parent = TypeVar("Parent", bound="Collection[Parameter, Function]")
-
 
 @apidoc
 class Parameter(Usable[Parent], Typeable[TType, Parent], HasValue, Expression[Parent], Generic[TType, Parent]):

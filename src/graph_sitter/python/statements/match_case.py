@@ -1,7 +1,10 @@
+
 from typing import TYPE_CHECKING
 
 from tree_sitter import Node as PyNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
 from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.switch_case import SwitchCase
 from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
@@ -9,9 +12,6 @@ from graph_sitter.python.statements.block_statement import PyBlockStatement
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
-
 
 @py_apidoc
 class PyMatchCase(SwitchCase[PyCodeBlock["PyMatchStatement"]], PyBlockStatement):

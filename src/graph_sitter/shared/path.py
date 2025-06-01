@@ -1,7 +1,7 @@
+
+from pathlib import Path
 import os
 import subprocess
-from pathlib import Path
-
 
 def get_git_root_path(path: Path | None = None) -> Path | None:
     """Get the closest root of the git repository containing the given path"""

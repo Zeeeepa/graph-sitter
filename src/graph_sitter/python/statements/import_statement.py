@@ -1,7 +1,11 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.import_statement import ImportStatement
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
@@ -9,11 +13,6 @@ from graph_sitter.python.import_resolution import PyImport
 from graph_sitter.shared.decorators.docs import py_apidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-
 
 @py_apidoc
 class PyImportStatement(ImportStatement["PyFile", PyImport, PyCodeBlock]):

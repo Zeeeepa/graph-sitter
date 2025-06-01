@@ -1,13 +1,14 @@
+
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.external.external_process import ExternalProcess
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.typescript.external.ts_analyzer_engine import NodeTypescriptEngine, V8TypescriptEngine
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.interfaces.editable import Editable
-
 
 class LanguageEngine(ExternalProcess):
     """Base class for all third part language engine support.
@@ -20,9 +21,7 @@ class LanguageEngine(ExternalProcess):
     def get_return_type(self, node: "Editable") -> str | None:
         pass
 
-
 def get_language_engine(language: ProgrammingLanguage, codebase_context: "CodebaseContext", use_ts: bool = False, use_v8: bool = False) -> LanguageEngine | None:
-    from graph_sitter.typescript.external.ts_analyzer_engine import NodeTypescriptEngine, V8TypescriptEngine
 
     use_ts = use_ts or codebase_context.config.ts_language_engine
     use_v8 = use_v8 or codebase_context.config.v8_ts_engine

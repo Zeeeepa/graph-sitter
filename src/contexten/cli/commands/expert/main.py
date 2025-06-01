@@ -1,13 +1,13 @@
+
+from rich.status import Status
 import rich
 import rich_click as click
-from rich.status import Status
 
 from contexten.cli.api.client import RestAPI
 from contexten.cli.auth.decorators import requires_auth
 from contexten.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.errors import ServerError
 from graph_sitter.cli.workspace.decorators import requires_init
-
 
 @click.command(name="expert")
 @click.option("--query", "-q", help="The question to ask the expert.")

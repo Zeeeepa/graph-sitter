@@ -1,4 +1,20 @@
 """
+
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, List, Union
+import asyncio
+import hashlib
+import json
+import time
+
+from .config import LinearIntegrationConfig
+from .types import (
+from aiohttp import ClientSession, ClientTimeout, ClientError
+import aiohttp
+
+from graph_sitter.shared.logging.get_logger import get_logger
+
 Enhanced Linear GraphQL Client
 
 Comprehensive Linear API client with advanced features including:
@@ -10,26 +26,11 @@ Comprehensive Linear API client with advanced features including:
 - Performance metrics
 """
 
-import asyncio
-import hashlib
-import json
-import time
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Union
-from dataclasses import dataclass, field
-
-import aiohttp
-from aiohttp import ClientSession, ClientTimeout, ClientError
-
-from .config import LinearIntegrationConfig
-from .types import (
     LinearIssue, LinearComment, LinearUser, LinearTeam, LinearLabel,
     LinearProject, LinearState, ComponentStats
 )
-from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 @dataclass
 class CacheEntry:
@@ -39,7 +40,6 @@ class CacheEntry:
     
     def is_expired(self) -> bool:
         return datetime.now() > self.expires_at
-
 
 @dataclass
 class RateLimiter:
@@ -65,7 +65,6 @@ class RateLimiter:
         """Time in seconds until rate limit resets"""
         reset_time = self.window_start + timedelta(seconds=self.window_seconds)
         return max(0, (reset_time - datetime.now()).total_seconds())
-
 
 class EnhancedLinearClient:
     """Enhanced Linear GraphQL client with comprehensive features"""
@@ -596,4 +595,3 @@ class EnhancedLinearClient:
             "active_entries": total_entries - expired_entries,
             "cache_hit_rate": self.stats.cache_hits / (self.stats.cache_hits + self.stats.cache_misses) if (self.stats.cache_hits + self.stats.cache_misses) > 0 else 0.0
         }
-

@@ -1,3 +1,4 @@
+
 from typing import Self
 
 from tree_sitter import Node as TSNode
@@ -21,7 +22,6 @@ from graph_sitter.python.function import PyFunction
 from graph_sitter.python.interfaces.has_block import PyHasBlock
 from graph_sitter.python.symbol import PySymbol
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
-
 
 @py_apidoc
 class PyClass(Class[PyFunction, PyDecorator, PyCodeBlock, PyParameter, PyType], PyHasBlock, PySymbol):

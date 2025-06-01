@@ -1,7 +1,9 @@
+
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.autocommit import reader
 from graph_sitter.core.dataclasses.usage import UsageKind
@@ -14,11 +16,8 @@ from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-
 
 Parent = TypeVar("Parent", bound="Expression")
-
 
 @apidoc
 class String(Expression[Parent], Builtin, Generic[Parent]):

@@ -1,15 +1,15 @@
+
 from typing import TYPE_CHECKING
 
 from github import Repository
 from github.PullRequest import PullRequest
 from unidiff import PatchSet
 
+from graph_sitter.core.codebase import Codebase, Editable, File
 from graph_sitter.git.models.pull_request_context import PullRequestContext
 from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase, Editable, File
-
 
 def get_merge_base(git_repo_client: Repository, pull: PullRequest | PullRequestContext) -> str:
     """Gets the merge base of a pull request using a remote GitHub API client.
@@ -24,7 +24,6 @@ def get_merge_base(git_repo_client: Repository, pull: PullRequest | PullRequestC
     comparison = git_repo_client.compare(pull.base.sha, pull.head.sha)
     return comparison.merge_base_commit.sha
 
-
 def get_file_to_changed_ranges(pull_patch_set: PatchSet) -> dict[str, list]:
     file_to_changed_ranges = {}
     for patched_file in pull_patch_set:
@@ -37,18 +36,15 @@ def get_file_to_changed_ranges(pull_patch_set: PatchSet) -> dict[str, list]:
         file_to_changed_ranges[patched_file.path] = changed_ranges
     return file_to_changed_ranges
 
-
 def to_1_indexed(zero_indexed_range: range) -> range:
     """Converts a n-indexed range to n+1-indexed.
     Primarily to convert 0-indexed ranges to 1 indexed
     """
     return range(zero_indexed_range.start + 1, zero_indexed_range.stop + 1)
 
-
 def overlaps(range1: range, range2: range) -> bool:
     """Returns True if the two ranges overlap, False otherwise."""
     return max(range1.start, range2.start) < min(range1.stop, range2.stop)
-
 
 def get_file_to_commit_sha(op: RepoOperator, pull: PullRequest) -> dict[str, str]:
     """Gets a mapping of file paths to their latest commit SHA in the PR.
@@ -87,7 +83,6 @@ def get_file_to_commit_sha(op: RepoOperator, pull: PullRequest) -> dict[str, str
             file_to_commit[file.filename] = pull.head.sha
 
     return file_to_commit
-
 
 class CodegenPR:
     """Wrapper around PRs - enables codemods to interact with them"""

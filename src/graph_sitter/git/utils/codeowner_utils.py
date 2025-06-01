@@ -1,3 +1,4 @@
+
 from codeowners import CodeOwners
 from github.PullRequest import PullRequest
 
@@ -7,11 +8,9 @@ from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
-
 def get_filepath_owners(codeowners: CodeOwners, filepath: str) -> set[str]:
     filename_owners = codeowners.of(filepath)
     return {owner[1] for owner in filename_owners}
-
 
 def is_path_owned_by_codeowner(codeowners: CodeOwners, path: str, codeowner: str) -> bool:
     filename_owners = codeowners.of(path)
@@ -19,7 +18,6 @@ def is_path_owned_by_codeowner(codeowners: CodeOwners, path: str, codeowner: str
         if owner[1] == codeowner:
             return True
     return False
-
 
 def create_codeowners_parser_for_repo(py_github_repo: GitRepoClient) -> CodeOwners | None:
     for codeowners_filepath in CODEOWNERS_FILEPATHS:
@@ -32,7 +30,6 @@ def create_codeowners_parser_for_repo(py_github_repo: GitRepoClient) -> CodeOwne
             continue
     logger.info(f"Failed to create CODEOWNERS parser for repo: {py_github_repo.repo_config.name}. Returning None.")
     return None
-
 
 def get_codeowners_for_pull(repo: GitRepoClient, pull: PullRequest) -> list[str]:
     codeowners_parser = create_codeowners_parser_for_repo(repo)

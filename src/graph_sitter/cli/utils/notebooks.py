@@ -1,6 +1,7 @@
-import json
+
 from pathlib import Path
 from typing import Any
+import json
 
 DEFAULT_CELLS = [
     {
@@ -178,7 +179,6 @@ Learn more in [commit and reset](https://graph-sitter.com/building-with-graph-si
     },
 ]
 
-
 def create_cells(cells_data: list[dict[str, str]]) -> list[dict[str, Any]]:
     """Convert cell data into Jupyter notebook cell format."""
     return [
@@ -191,7 +191,6 @@ def create_cells(cells_data: list[dict[str, str]]) -> list[dict[str, Any]]:
         }
         for cell in cells_data
     ]
-
 
 def create_notebook(jupyter_dir: Path, demo: bool = False) -> Path:
     """Create a new Jupyter notebook if it doesn't exist.

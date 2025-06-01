@@ -17,7 +17,6 @@ if TYPE_CHECKING:
         CodebaseMetrics,
     )
 
-
 class BaseMetricsCalculator(ABC):
     """Base class for all metrics calculators.
     
@@ -206,4 +205,3 @@ class BaseMetricsCalculator(ABC):
             "properties": {},
             "additionalProperties": True
         }
-

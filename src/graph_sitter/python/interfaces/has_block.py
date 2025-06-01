@@ -1,3 +1,4 @@
+
 from functools import cached_property
 
 from graph_sitter.core.autocommit import reader, writer
@@ -7,7 +8,6 @@ from graph_sitter.python.detached_symbols.decorator import PyDecorator
 from graph_sitter.python.statements.comment import PyComment, PyCommentType
 from graph_sitter.python.symbol_groups.comment_group import PyCommentGroup
 from graph_sitter.shared.decorators.docs import py_apidoc
-
 
 @py_apidoc
 class PyHasBlock(HasBlock[PyCodeBlock, PyDecorator]):

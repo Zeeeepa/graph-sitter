@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag, auto, unique
@@ -6,17 +5,17 @@ from typing import TYPE_CHECKING
 
 from dataclasses_json import dataclass_json
 
+from __future__ import annotations
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.export import Export
+from graph_sitter.core.expressions import Name
+from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.shared.decorators.docs import apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.export import Export
-    from graph_sitter.core.expressions import Name
-    from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.import_resolution import Import
-    from graph_sitter.core.symbol import Symbol
-
 
 @apidoc
 @dataclass_json
@@ -38,7 +37,6 @@ class Usage:
     usage_type: UsageType
     kind: UsageKind
 
-
 @unique
 @apidoc
 class UsageType(IntFlag):
@@ -55,7 +53,6 @@ class UsageType(IntFlag):
     CHAINED = auto()
     INDIRECT = auto()
     ALIASED = auto()
-
 
 @apidoc
 class UsageKind(IntEnum):

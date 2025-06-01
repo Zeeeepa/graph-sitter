@@ -1,16 +1,16 @@
 """
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, Optional
+import json
+import os
+
 LLM Configuration Manager
 
 Provides program-wide configuration for LLM providers, including
 the ability to set Codegen SDK as the default provider.
 """
-
-import os
-from typing import Any, Dict, Optional
-from dataclasses import dataclass, field
-from pathlib import Path
-import json
-
 
 @dataclass
 class LLMConfig:
@@ -209,10 +209,8 @@ class LLMConfig:
         
         raise ValueError("No LLM providers are available. Please configure at least one provider.")
 
-
 # Global configuration instance
 _global_config: Optional[LLMConfig] = None
-
 
 def get_llm_config() -> LLMConfig:
     """Get the global LLM configuration"""
@@ -221,19 +219,16 @@ def get_llm_config() -> LLMConfig:
         _global_config = LLMConfig()
     return _global_config
 
-
 def set_llm_config(config: LLMConfig):
     """Set the global LLM configuration"""
     global _global_config
     _global_config = config
-
 
 def configure_codegen_default(org_id: str, token: str, model: str = "codegen-agent"):
     """Configure Codegen SDK as the default provider program-wide"""
     config = get_llm_config()
     config.set_codegen_as_default(org_id, token, model)
     return config
-
 
 def create_llm_with_config(
     provider: Optional[str] = None,
@@ -260,4 +255,3 @@ def create_llm_with_config(
         model_name=model,
         **final_kwargs
     )
-

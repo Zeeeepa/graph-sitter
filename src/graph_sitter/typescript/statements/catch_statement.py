@@ -1,21 +1,20 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.catch_statement import CatchStatement
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
+from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 from graph_sitter.typescript.statements.block_statement import TSBlockStatement
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 
 Parent = TypeVar("Parent", bound="TSCodeBlock")
-
 
 @apidoc
 class TSCatchStatement(CatchStatement[Parent], TSBlockStatement, Generic[Parent]):

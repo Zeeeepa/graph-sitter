@@ -1,13 +1,15 @@
+
 from enum import IntEnum, unique
 from typing import TYPE_CHECKING
 
+from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.symbol import Symbol
+
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
 
 REMOVED = "REMOVED"
 
 AutoCommitSymbol = "Editable"
-
 
 @unique
 class AutoCommitState(IntEnum):
@@ -18,7 +20,6 @@ class AutoCommitState(IntEnum):
     Committing = 2  # During a commit/reset, Prevents any updates
     Special = 4  # During Hash or Repr, prevents further changes to state
 
-
 class IllegalWriteError(Exception):
     """Indicates there is a write, move, or commit called inside a read, commit, or repr
     function.
@@ -26,19 +27,16 @@ class IllegalWriteError(Exception):
 
     pass
 
-
 class NodeNotFoundError(Exception):
     """Indicates a node was not found during the update process, such as when editing the type."""
 
     pass
-
 
 class OutdatedNodeError(Exception):
     """Indicates a node is out of date."""
 
     def __init__(self, node: "Editable") -> None:
         parent = node
-        from graph_sitter.core.symbol import Symbol
 
         while parent is not None and not isinstance(parent, Symbol):
             parent = parent.parent
@@ -53,7 +51,6 @@ class OutdatedNodeError(Exception):
             if parent
             else ""
         )
-
 
 # SAFETY TOGGLE
 enabled = False

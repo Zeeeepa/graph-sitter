@@ -1,13 +1,13 @@
+
 import rich
 import rich_click as click
 
 from contexten.cli.api.client import RestAPI
 from contexten.cli.auth.decorators import requires_auth
-from graph_sitter.cli.auth.session import CodegenSession
 from contexten.cli.auth.token_manager import get_current_token
+from graph_sitter.cli.auth.session import CodegenSession
 from graph_sitter.cli.rich.spinners import create_spinner
 from graph_sitter.cli.utils.codemod_manager import CodemodManager
-
 
 def run_on_pr(session: CodegenSession, codemod_name: str, pr_number: int) -> None:
     """Test a webhook against a specific PR."""
@@ -31,7 +31,6 @@ def run_on_pr(session: CodegenSession, codemod_name: str, pr_number: int) -> Non
             status.stop()
             msg = f"Failed to test webhook: {e!s}"
             raise click.ClickException(msg)
-
 
 @click.command(name="run-on-pr")
 @requires_auth

@@ -1,9 +1,11 @@
+
 from collections import defaultdict
 from collections.abc import Iterable, Iterator, MutableSequence
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, overload
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.transactions import TransactionPriority
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.interfaces.editable import Editable
@@ -12,12 +14,9 @@ from graph_sitter.core.symbol_group import SymbolGroup
 from graph_sitter.shared.decorators.docs import noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-
 
 Child = TypeVar("Child", bound="Editable")
 Parent = TypeVar("Parent")
-
 
 class Collection(SymbolGroup[Child, Parent], MutableSequence[Child], Generic[Child, Parent]):
     """Ordered collection of nodes

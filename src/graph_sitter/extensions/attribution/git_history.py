@@ -1,16 +1,16 @@
-import time
+
 from collections import defaultdict, deque
 from datetime import datetime
+import time
 
-import pygit2
 from intervaltree import IntervalTree
 from pygit2 import Commit, Patch
 from pygit2.enums import CheckoutStrategy, DeltaStatus, SortMode
+import pygit2
 
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.file import SourceFile
 from graph_sitter.core.symbol import Symbol
-
 
 class GitAttributionTracker:
     """Tracks attribution information for code symbols based on git history."""

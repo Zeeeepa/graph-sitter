@@ -14,9 +14,7 @@ DEFAULT_SERVER_PORT = 4002
 EPHEMERAL_SERVER_PATH = "graph_sitter.runner.sandbox.ephemeral_server:app"
 RUNNER_SERVER_PATH = "graph_sitter.runner.sandbox.server:app"
 
-
 logger = get_logger(__name__)
-
 
 class CodebaseClient(Client):
     """Client for interacting with the locally hosted sandbox server."""
@@ -74,7 +72,6 @@ class CodebaseClient(Client):
 
         envs.update(codebase_envs)
         return envs
-
 
 if __name__ == "__main__":
     test_config = RepoConfig.from_repo_path("/Users/caroljung/git/codegen/codegen-agi")

@@ -1,3 +1,4 @@
+
 from typing import TypeVar
 
 from tree_sitter import Node as TSNode
@@ -6,7 +7,6 @@ from graph_sitter.shared.decorators.docs import ts_apidoc
 from graph_sitter.typescript.expressions.named_type import TSNamedType
 
 Parent = TypeVar("Parent")
-
 
 @ts_apidoc
 class TSArrayType(TSNamedType[Parent]):

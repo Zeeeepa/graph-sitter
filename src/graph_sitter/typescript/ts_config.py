@@ -1,7 +1,8 @@
-import os
+
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
+import os
 
 import pyjson5
 
@@ -9,13 +10,12 @@ from graph_sitter.core.directory import Directory
 from graph_sitter.core.file import File
 from graph_sitter.shared.decorators.docs import ts_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
+from graph_sitter.typescript.config_parser import TSConfigParser
+from graph_sitter.typescript.file import TSFile
 
 if TYPE_CHECKING:
-    from graph_sitter.typescript.config_parser import TSConfigParser
-    from graph_sitter.typescript.file import TSFile
 
 logger = get_logger(__name__)
-
 
 @ts_apidoc
 class TSConfig:

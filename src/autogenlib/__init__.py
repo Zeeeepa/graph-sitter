@@ -1,4 +1,12 @@
 """
+
+from .context.codebase_analyzer import CodebaseAnalyzer
+from .core.client import AutogenClient
+from .core.config import AutogenConfig
+from .generators.batch_generator import BatchGenerator
+from .generators.dynamic_generator import DynamicGenerator
+from .monitoring.usage_tracker import UsageTracker
+
 Enhanced Autogenlib Module with Codegen SDK Integration
 
 This module provides intelligent code generation capabilities by integrating
@@ -12,13 +20,6 @@ Key Features:
 - Batch processing capabilities
 - Integration with contexten orchestrator
 """
-
-from .core.client import AutogenClient
-from .core.config import AutogenConfig
-from .generators.dynamic_generator import DynamicGenerator
-from .generators.batch_generator import BatchGenerator
-from .context.codebase_analyzer import CodebaseAnalyzer
-from .monitoring.usage_tracker import UsageTracker
 
 __version__ = "2.0.0"
 __all__ = [
@@ -63,4 +64,3 @@ async def generate_batch(requests: list, **kwargs):
     """Generate multiple code pieces using batch processing"""
     client = get_client()
     return await client.generate_batch(requests, **kwargs)
-

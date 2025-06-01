@@ -1,5 +1,5 @@
-from graph_sitter.shared.exceptions.control_flow import StopCodemodException
 
+from graph_sitter.shared.exceptions.control_flow import StopCodemodException
 
 def update_observation_meta(
     e: StopCodemodException,

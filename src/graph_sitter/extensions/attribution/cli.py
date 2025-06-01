@@ -1,12 +1,12 @@
+
 import json
 import os
 
 import pygit2
 
-import graph_sitter
-from graph_sitter.core.codebase import Codebase
 from contexten.extensions.attribution.main import add_attribution_to_symbols, analyze_ai_impact
-
+from graph_sitter.core.codebase import Codebase
+import graph_sitter
 
 def diagnose_repository(codebase):
     """Print diagnostic information about the repository."""
@@ -56,7 +56,6 @@ def diagnose_repository(codebase):
 
     except Exception as e:
         print(f"⚠️ Error during repository diagnosis: {e}")
-
 
 @graph_sitter.function("analyze-ai-impact")
 def run(codebase: Codebase):

@@ -1,8 +1,9 @@
-import os
-import sys
+
 from collections.abc import Generator
 from contextlib import AbstractContextManager, contextmanager
 from typing import Literal, overload
+import os
+import sys
 
 from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.config import ProjectConfig, SessionOptions, TestFlags
@@ -14,7 +15,6 @@ from graph_sitter.core.file import SourceFile
 from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.tree_sitter_parser import print_errors
-
 
 @overload
 def get_codebase_session(
@@ -30,7 +30,6 @@ def get_codebase_session(
     secrets: SecretsConfig | None = None,
 ) -> AbstractContextManager[PyCodebaseType]: ...
 
-
 @overload
 def get_codebase_session(
     tmpdir: str | os.PathLike[str],
@@ -45,7 +44,6 @@ def get_codebase_session(
     secrets: SecretsConfig | None = None,
 ) -> AbstractContextManager[PyCodebaseType]: ...
 
-
 @overload
 def get_codebase_session(
     tmpdir: str | os.PathLike[str],
@@ -59,7 +57,6 @@ def get_codebase_session(
     session_options: SessionOptions = SessionOptions(),
     secrets: SecretsConfig | None = None,
 ) -> AbstractContextManager[TSCodebaseType]: ...
-
 
 @contextmanager
 def get_codebase_session(
@@ -101,7 +98,6 @@ def get_codebase_session(
                     print(file.content, file=sys.stderr)
                 print_errors(file.filepath, file.content)
                 assert not file.ts_node.has_error, "Invalid syntax in file after commiting"
-
 
 @contextmanager
 def get_codebase_graph_session(

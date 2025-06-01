@@ -1,19 +1,30 @@
 """
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+import asyncio
+import hashlib
+import time
+
+from ..context.codebase_analyzer import CodebaseAnalyzer
+from ..context.prompt_enhancer import PromptEnhancer
+from ..monitoring.performance_monitor import PerformanceMonitor
+from ..monitoring.usage_tracker import UsageTracker
+from .cache_manager import CacheManager
+from .config import AutogenConfig
+from codegen import Agent
+
+from graph_sitter.codebase.codebase_analysis import (
+from graph_sitter.core.codebase import Codebase
+
 Enhanced Autogenlib Client with Codegen SDK Integration
 
 This module provides the core client implementation that integrates with
 the Codegen SDK while leveraging graph_sitter's codebase analysis capabilities.
 """
 
-import asyncio
-import hashlib
-import time
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
-from pathlib import Path
-
 try:
-    from codegen import Agent
 except ImportError:
     # Fallback for development/testing
     class Agent:
@@ -25,20 +36,11 @@ except ImportError:
             # Mock implementation for development
             return MockTask(prompt)
 
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.codebase.codebase_analysis import (
     get_codebase_summary,
     get_file_summary,
     get_class_summary,
     get_function_summary
 )
-
-from .config import AutogenConfig
-from .cache_manager import CacheManager
-from ..context.codebase_analyzer import CodebaseAnalyzer
-from ..context.prompt_enhancer import PromptEnhancer
-from ..monitoring.usage_tracker import UsageTracker
-from ..monitoring.performance_monitor import PerformanceMonitor
 
 @dataclass
 class CallerContext:
@@ -316,4 +318,3 @@ class MockTask:
     
     def refresh(self):
         self.status = "completed"
-

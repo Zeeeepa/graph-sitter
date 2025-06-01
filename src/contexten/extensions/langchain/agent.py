@@ -32,7 +32,6 @@ from .graph import create_react_agent
 if TYPE_CHECKING:
     from graph_sitter import Codebase
 
-
 def create_codebase_agent(
     codebase: "Codebase",
     model_provider: str = "anthropic",
@@ -93,7 +92,6 @@ def create_codebase_agent(
 
     return create_react_agent(model=llm, tools=tools, system_message=system_message, checkpointer=memory, debug=debug, config=config)
 
-
 def create_chat_agent(
     codebase: "Codebase",
     model_provider: str = "anthropic",
@@ -143,7 +141,6 @@ def create_chat_agent(
 
     return create_react_agent(model=llm, tools=tools, system_message=system_message, checkpointer=memory, debug=debug, config=config)
 
-
 def create_codebase_inspector_agent(
     codebase: "Codebase",
     model_provider: str = "openai",
@@ -180,7 +177,6 @@ def create_codebase_inspector_agent(
 
     memory = MemorySaver() if memory else None
     return create_react_agent(model=llm, tools=tools, system_message=system_message, checkpointer=memory, debug=debug, config=config)
-
 
 def create_agent_with_tools(
     tools: list[BaseTool],

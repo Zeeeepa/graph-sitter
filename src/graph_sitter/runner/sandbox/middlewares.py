@@ -1,7 +1,8 @@
-import traceback
+
 from collections.abc import Callable
 from http import HTTPStatus
 from typing import TypeVar
+import traceback
 
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
@@ -15,7 +16,6 @@ logger = get_logger(__name__)
 
 TRequest = TypeVar("TRequest", bound=Request)
 TResponse = TypeVar("TResponse", bound=Response)
-
 
 class CodemodRunMiddleware[TRequest, TResponse](BaseHTTPMiddleware):
     def __init__(self, app, path: str, runner_fn: Callable[[], SandboxRunner]) -> None:

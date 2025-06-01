@@ -1,16 +1,15 @@
-import inspect
+
 from enum import StrEnum
 from itertools import chain
+import inspect
 
 from graph_sitter.code_generation.current_code_codebase import get_documented_objects
 from graph_sitter.core import codebase
-
 
 class LanguageType(StrEnum):
     PYTHON = "PYTHON"
     TYPESCRIPT = "TYPESCRIPT"
     BOTH = "BOTH"
-
 
 def generate_builtins_file(path_to_builtins: str, language_type: LanguageType):
     """Generates and writes the builtins file"""

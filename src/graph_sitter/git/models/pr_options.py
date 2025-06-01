@@ -1,7 +1,7 @@
+
 from pydantic import BaseModel
 
 from graph_sitter.shared.decorators.docs import apidoc
-
 
 @apidoc
 class PROptions(BaseModel):

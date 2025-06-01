@@ -1,15 +1,15 @@
-import json
+
 from dataclasses import dataclass
 from pathlib import Path
 from pprint import pprint
 from typing import Literal
+import json
 
 from datasets import load_dataset
 
 from contexten.extensions.swebench.enums import SWEBenchDataset, SWEBenchLiteSubset
 from contexten.extensions.swebench.subsets import LITE_SUBSETS
 from contexten.extensions.swebench.success_rates import LITE_SUCCESS_RATES
-
 
 @dataclass
 class SweBenchExample:
@@ -28,7 +28,6 @@ class SweBenchExample:
     pass_to_pass: str | None
     environment_setup_commit: str | None
     difficulty: int | None
-
 
 def load_predictions(paths):
     prediction_paths = []
@@ -61,12 +60,10 @@ def load_predictions(paths):
 
     return predictions
 
-
 def get_difficulty(instance_id: str) -> int | None:
     if instance_id in LITE_SUCCESS_RATES:
         return 10 - int(LITE_SUCCESS_RATES[instance_id] * 10)
     return None
-
 
 def get_swe_bench_examples(
     dataset: SWEBenchDataset | SWEBenchLiteSubset = SWEBenchLiteSubset.LITE_SMALL,

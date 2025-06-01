@@ -1,16 +1,27 @@
-from __future__ import annotations
 
+from collections.abc import Generator
 from functools import cached_property
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import commiter, reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.function import Function
+from graph_sitter.core.import_resolution import Import, WildcardImport
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.export_statement import ExportStatement
+from graph_sitter.core.statements.symbol_statement import SymbolStatement
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.typescript.detached_symbols.decorator import TSDecorator
 from graph_sitter.typescript.detached_symbols.parameter import TSParameter
+from graph_sitter.typescript.detached_symbols.promise_chain import TSPromiseChain
 from graph_sitter.typescript.enums import TSFunctionTypeNames
 from graph_sitter.typescript.expressions.type import TSType
 from graph_sitter.typescript.interfaces.has_block import TSHasBlock
@@ -19,21 +30,9 @@ from graph_sitter.typescript.symbol import TSSymbol
 from graph_sitter.utils import find_all_descendants
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
 
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.import_resolution import Import, WildcardImport
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.export_statement import ExportStatement
-    from graph_sitter.core.statements.symbol_statement import SymbolStatement
-    from graph_sitter.core.symbol import Symbol
-    from graph_sitter.typescript.detached_symbols.promise_chain import TSPromiseChain
 _VALID_TYPE_NAMES = {function_type.value for function_type in TSFunctionTypeNames}
 logger = get_logger(__name__)
-
 
 @ts_apidoc
 class TSFunction(Function[TSDecorator, "TSCodeBlock", TSParameter, TSType], TSHasBlock, TSSymbol):

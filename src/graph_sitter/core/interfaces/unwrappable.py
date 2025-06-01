@@ -1,6 +1,6 @@
+
 from abc import abstractmethod
 from typing import Generic
-
 from typing_extensions import TypeVar
 
 from graph_sitter.core.expressions import Expression
@@ -8,7 +8,6 @@ from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.shared.decorators.docs import apidoc
 
 Parent = TypeVar("Parent", bound=Editable)
-
 
 @apidoc
 class Unwrappable(Expression[Parent], Generic[Parent]):

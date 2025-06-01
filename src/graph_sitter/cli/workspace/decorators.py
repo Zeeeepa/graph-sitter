@@ -1,10 +1,10 @@
+
+from collections.abc import Callable
 import functools
 import sys
-from collections.abc import Callable
 
 from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.rich.pretty_print import pretty_print_error
-
 
 def requires_init(f: Callable) -> Callable:
     """Decorator that ensures codegen has been initialized."""

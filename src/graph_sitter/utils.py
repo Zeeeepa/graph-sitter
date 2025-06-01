@@ -1,24 +1,25 @@
+
+"""
+
+from collections.abc import Iterable
+from contextlib import contextmanager
+from xml.dom.minidom import parseString
 import os
 import re
 import shutil
 import statistics
-from collections.abc import Iterable
-from contextlib import contextmanager
-from xml.dom.minidom import parseString
 
+from tree_sitter import Node as TSNode
 import dicttoxml
 import xmltodict
-from tree_sitter import Node as TSNode
 
 from graph_sitter.compiled.utils import find_all_descendants, find_first_descendant, get_all_identifiers
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.typescript.enums import TSFunctionTypeNames
 
-"""
 Utility functions for traversing the tree sitter structure.
 Do not include language specific traversals, or string manipulations here.
 """
-
 
 class XMLUtils:
     @staticmethod
@@ -81,11 +82,9 @@ class XMLUtils:
         else:
             return [match.strip(f"<{tag}>").strip(f"</{tag}>") for match in matches]
 
-
 def find_first_function_descendant(node: TSNode) -> TSNode:
     type_names = [function_type.value for function_type in TSFunctionTypeNames]
     return find_first_descendant(node=node, type_names=type_names, max_depth=2)
-
 
 def find_import_node(node: TSNode) -> TSNode | None:
     """Get the import node from a node that may contain an import.
@@ -123,7 +122,6 @@ def find_import_node(node: TSNode) -> TSNode | None:
 
     return None
 
-
 def find_index(target: TSNode, siblings: list[TSNode]) -> int:
     """Returns the index of the target node in the list of siblings, or -1 if not found. Recursive implementation."""
     if target in siblings:
@@ -135,7 +133,6 @@ def find_index(target: TSNode, siblings: list[TSNode]) -> int:
             return i
     return -1
 
-
 def find_first_ancestor(node: TSNode, type_names: list[str], max_depth: int | None = None) -> TSNode | None:
     depth = 0
     while node is not None and (max_depth is None or depth <= max_depth):
@@ -144,7 +141,6 @@ def find_first_ancestor(node: TSNode, type_names: list[str], max_depth: int | No
         node = node.parent
         depth += 1
     return None
-
 
 def find_first_child_by_field_name(node: TSNode, field_name: str) -> TSNode | None:
     child = node.child_by_field_name(field_name)
@@ -156,7 +152,6 @@ def find_first_child_by_field_name(node: TSNode, field_name: str) -> TSNode | No
             return first_descendant
     return None
 
-
 def has_descendant(node: TSNode, type_name: str) -> bool:
     def traverse(current_node: TSNode, depth: int = 0) -> bool:
         if current_node.type == type_name:
@@ -164,7 +159,6 @@ def has_descendant(node: TSNode, type_name: str) -> bool:
         return any(traverse(child, depth + 1) for child in current_node.children)
 
     return traverse(node)
-
 
 def get_first_identifier(node: TSNode) -> TSNode | None:
     """Get the text of the first identifier child of a tree-sitter node. Recursive implementation"""
@@ -175,7 +169,6 @@ def get_first_identifier(node: TSNode) -> TSNode | None:
         if output is not None:
             return output
     return None
-
 
 def descendant_for_byte_range(node: TSNode, start_byte: int, end_byte: int, allow_comment_boundaries: bool = True) -> TSNode | None:
     """Proper implementation of descendant_for_byte_range, which returns the lowest node that contains the byte range."""
@@ -194,7 +187,6 @@ def descendant_for_byte_range(node: TSNode, start_byte: int, end_byte: int, allo
         if any(comment.start_byte < start_byte < comment.end_byte or comment.start_byte < end_byte < comment.end_byte for comment in comments):
             return None
         return ts_match
-
 
 @contextmanager
 def shadow_files(files: str | list[str]):
@@ -228,7 +220,6 @@ def shadow_files(files: str | list[str]):
                 # Delete the shadow file
                 os.remove(shadow_file_name)
 
-
 def calculate_base_path(full_path, relative_path):
     """Calculate the base path represented by './' in a relative path.
 
@@ -256,7 +247,6 @@ def calculate_base_path(full_path, relative_path):
 
     return base_path
 
-
 __all__ = [
     "find_all_descendants",
     "find_first_ancestor",
@@ -265,7 +255,6 @@ __all__ = [
     "get_all_identifiers",
     "has_descendant",
 ]
-
 
 def get_language_file_extensions(language: ProgrammingLanguage):
     """Returns the file extensions for the given language."""
@@ -277,13 +266,11 @@ def get_language_file_extensions(language: ProgrammingLanguage):
     elif language == ProgrammingLanguage.TYPESCRIPT:
         return set(TSFile.get_extensions())
 
-
 def truncate_line(input: str, max_chars: int) -> str:
     input = str(input)
     if len(input) > max_chars:
         return input[:max_chars] + f"...(truncated from {len(input)} characters)."
     return input
-
 
 def is_minified_js(content):
     """Analyzes a string to determine if it contains minified JavaScript code.

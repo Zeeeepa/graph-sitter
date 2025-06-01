@@ -1,3 +1,4 @@
+
 from dataclasses import dataclass, field
 from typing import TypeVar
 
@@ -8,7 +9,6 @@ from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.shared.decorators.docs import noapidoc
 
 Symbol = TypeVar("Symbol", bound=Editable)
-
 
 @dataclass
 class Flags:

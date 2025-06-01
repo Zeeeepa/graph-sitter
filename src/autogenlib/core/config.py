@@ -1,10 +1,11 @@
 """
-Configuration management for enhanced autogenlib module
-"""
 
-import os
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any
+import os
+
+Configuration management for enhanced autogenlib module
+"""
 
 @dataclass
 class CacheConfig:
@@ -121,4 +122,3 @@ class AutogenConfig:
             'max_retries': self.max_retries,
             'retry_delay_seconds': self.retry_delay_seconds
         }
-

@@ -1,27 +1,24 @@
-from __future__ import annotations
 
 from abc import ABC
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 
+from __future__ import annotations
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
+from graph_sitter.core.expressions import Expression
+from graph_sitter.core.import_resolution import Import, WildcardImport
 from graph_sitter.core.interfaces.chainable import Chainable
 from graph_sitter.core.interfaces.has_block import HasBlock
 from graph_sitter.core.statements.block_statement import BlockStatement
 from graph_sitter.core.statements.statement import StatementType
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.expressions import Expression
-    from graph_sitter.core.import_resolution import Import, WildcardImport
-    from graph_sitter.core.symbol import Symbol
-
 
 Parent = TypeVar("Parent", bound="CodeBlock")
-
 
 @apidoc
 class ForLoopStatement(BlockStatement[Parent], HasBlock, ABC, Generic[Parent]):

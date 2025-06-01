@@ -1,5 +1,6 @@
-import time
+
 from pathlib import Path
+import time
 
 import rich
 import rich_click as click
@@ -11,7 +12,6 @@ from graph_sitter.cli.rich.codeblocks import format_command
 from graph_sitter.cli.rich.spinners import create_spinner
 from graph_sitter.cli.utils.codemod_manager import CodemodManager
 from graph_sitter.cli.utils.function_finder import DecoratedFunction
-
 
 def deploy_functions(functions: list[DecoratedFunction], message: str | None = None) -> None:
     """Deploy a list of functions."""
@@ -40,7 +40,6 @@ def deploy_functions(functions: list[DecoratedFunction], message: str | None = N
         rich.print(f"✅ {func_type} '{func.name}' deployed in {deploy_time:.3f}s! 🎉")
         rich.print("   [dim]View deployment:[/dim]")
         rich.print(format_command(f"codegen run {func.name}"))
-
 
 @click.command(name="deploy")
 @requires_auth

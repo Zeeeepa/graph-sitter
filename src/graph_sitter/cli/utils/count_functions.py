@@ -1,15 +1,15 @@
+
 from pydantic import BaseModel
 from pydantic.fields import Field
 
-import graph_sitter.cli.sdk.decorator
 from graph_sitter.cli.utils.count_functions_2 import NumberType
+import graph_sitter.cli.sdk.decorator
 
 # from app.codemod.compilation.models.context import CodemodContext
 # from app.codemod.compilation.models.pr_options import PROptions
 # from graph_sitter import PyCodebaseType
 
 # context: CodemodContext
-
 
 class CountFunctionsArgs(BaseModel):
     number_attr: NumberType
@@ -18,7 +18,6 @@ class CountFunctionsArgs(BaseModel):
     list_attr: list[str]
     dict_attr: dict[str, str]
     complex_attr: str = Field(default_factory=lambda: "hello")
-
 
 @graph_sitter.cli.sdk.decorator.function("count-functions")
 def run(codebase, pr_options, arguments: CountFunctionsArgs):

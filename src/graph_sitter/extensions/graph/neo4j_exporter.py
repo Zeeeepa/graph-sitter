@@ -1,7 +1,7 @@
+
 from neo4j import GraphDatabase
 
 from contexten.extensions.graph.utils import SimpleGraph
-
 
 class Neo4jExporter:
     """Class to handle exporting the codebase graph to Neo4j."""

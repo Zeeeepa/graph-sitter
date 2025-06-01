@@ -1,3 +1,4 @@
+
 import io
 
 from unidiff import LINE_TYPE_CONTEXT, Hunk, PatchedFile, PatchSet
@@ -7,7 +8,6 @@ from graph_sitter.core.codebase import Codebase
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 def append_flag(file: PatchedFile, append_at: int, line_no: int, codebase: Codebase) -> None:
     added_hunk = Hunk(
@@ -19,7 +19,6 @@ def append_flag(file: PatchedFile, append_at: int, line_no: int, codebase: Codeb
     line = codebase.get_file(file.path).content.split("\n")[line_no - 1]
     added_hunk.append(Line(f"{line}\n", line_type=LINE_TYPE_CONTEXT))
     file.insert(append_at, added_hunk)
-
 
 def patch_to_limited_diff_string(patch, codebase: Codebase, max_lines=10000):
     diff_lines = []
@@ -75,7 +74,6 @@ def patch_to_limited_diff_string(patch, codebase: Codebase, max_lines=10000):
 
     return "\n".join(diff_lines)
 
-
 def get_raw_diff(codebase: Codebase, base: str = "HEAD", max_lines: int = 10000) -> str:
     raw_diff = codebase.get_diff(base)
     patch_set = PatchSet(io.StringIO(raw_diff))
@@ -85,7 +83,6 @@ def get_raw_diff(codebase: Codebase, base: str = "HEAD", max_lines: int = 10000)
     raw_diff_trunc = patch_to_limited_diff_string(patch=patch_set, max_lines=max_lines, codebase=codebase)
 
     return raw_diff_trunc
-
 
 def get_filenames_from_diff(diff: str) -> list[str]:
     patch_set = PatchSet(io.StringIO(diff))

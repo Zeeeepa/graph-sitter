@@ -1,12 +1,12 @@
-import rich
-import rich_click as click
+
 from rich import box
 from rich.panel import Panel
+import rich
+import rich_click as click
 
 from contexten.cli.auth.decorators import requires_auth
 from graph_sitter.cli.auth.session import CodegenSession
 from graph_sitter.cli.workspace.decorators import requires_init
-
 
 @click.command(name="profile")
 @requires_auth

@@ -1,13 +1,13 @@
+
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.placeholder.placeholder import Placeholder
 from graph_sitter.shared.decorators.docs import py_apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @py_apidoc
 class PyReturnTypePlaceholder(Placeholder[Parent], Generic[Parent]):

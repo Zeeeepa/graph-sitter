@@ -1,5 +1,17 @@
 """Cyclomatic Complexity Calculator.
 
+from typing import TYPE_CHECKING, Optional, Set, Any, Dict
+import re
+
+from ..core.base_calculator import BaseMetricsCalculator
+
+from __future__ import annotations
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.metrics.models.metrics_data import (
+
 Calculates cyclomatic complexity for functions, classes, files, and codebases.
 Cyclomatic complexity measures the number of linearly independent paths through
 a program's source code.
@@ -14,25 +26,12 @@ Simplified approach: CC = 1 + number of decision points
 Decision points include: if, elif, while, for, try/except, and, or, etc.
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Optional, Set, Any, Dict
-import re
-
-from ..core.base_calculator import BaseMetricsCalculator
-
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.metrics.models.metrics_data import (
         FunctionMetrics,
         ClassMetrics,
         FileMetrics,
         CodebaseMetrics,
     )
-
 
 class CyclomaticComplexityCalculator(BaseMetricsCalculator):
     """Calculator for cyclomatic complexity metrics."""
@@ -446,4 +445,3 @@ class CyclomaticComplexityCalculator(BaseMetricsCalculator):
             },
             "additionalProperties": False
         }
-

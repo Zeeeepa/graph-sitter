@@ -1,5 +1,9 @@
 """Database storage for metrics data."""
 
+from psycopg2.extras import RealDictCursor
+import mysql.connector
+import psycopg2
+
 from __future__ import annotations
 
 import json
@@ -19,7 +23,6 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__name__)
-
 
 class MetricsDatabase:
     """Database interface for storing and retrieving metrics data.
@@ -74,8 +77,6 @@ class MetricsDatabase:
     def _initialize_postgresql(self) -> None:
         """Initialize PostgreSQL connection."""
         try:
-            import psycopg2
-            from psycopg2.extras import RealDictCursor
             
             if self.connection_string:
                 self.connection = psycopg2.connect(
@@ -121,7 +122,6 @@ class MetricsDatabase:
     def _initialize_mysql(self) -> None:
         """Initialize MySQL connection."""
         try:
-            import mysql.connector
             
             if self.connection_string:
                 # Parse MySQL connection string
@@ -568,4 +568,3 @@ class MetricsDatabase:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
         self.close()
-

@@ -1,3 +1,4 @@
+
 from lsprotocol.types import SymbolKind
 
 from graph_sitter.core.assignment import Assignment
@@ -18,7 +19,6 @@ kinds = {
     TSNamespace: SymbolKind.Namespace,
     Attribute: SymbolKind.Variable,
 }
-
 
 def get_kind(node: Editable) -> SymbolKind:
     if isinstance(node, Function):

@@ -1,11 +1,10 @@
-from __future__ import annotations
 
 from enum import StrEnum
 
+from __future__ import annotations
 from graph_sitter.core.autocommit import commiter, reader
 from graph_sitter.core.statements.comment import Comment, lowest_indentation
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
-
 
 @py_apidoc
 class PyCommentType(StrEnum):
@@ -22,7 +21,6 @@ class PyCommentType(StrEnum):
     MULTI_LINE_QUOTE = "MULTI_LINE_QUOTE"
     MULTI_LINE_DOUBLE_QUOTE = "MULTI_LINE_DOUBLE_QUOTE"
     UNKNOWN = "UNKNOWN"
-
 
 @py_apidoc
 class PyComment(Comment):

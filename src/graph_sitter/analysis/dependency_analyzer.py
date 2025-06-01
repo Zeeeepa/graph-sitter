@@ -1,4 +1,17 @@
 """
+
+from dataclasses import dataclass
+from typing import Dict, List, Set, Optional, Tuple, Any
+
+import networkx as nx
+
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.symbol import Symbol
+
 Dependency analysis implementation following graph-sitter.com patterns.
 
 This module provides comprehensive dependency analysis including:
@@ -7,17 +20,6 @@ This module provides comprehensive dependency analysis including:
 - Circular dependency detection
 - Dependency impact analysis
 """
-
-import networkx as nx
-from typing import Dict, List, Set, Optional, Tuple, Any
-from dataclasses import dataclass
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.core.function import Function
-from graph_sitter.core.class_definition import Class
-from graph_sitter.core.file import SourceFile
-from graph_sitter.core.symbol import Symbol
-from graph_sitter.core.import_resolution import Import
-
 
 @dataclass
 class DependencyPath:
@@ -34,7 +36,6 @@ class DependencyPath:
         """Get human-readable path description."""
         return " -> ".join(self.path)
 
-
 @dataclass
 class CircularDependency:
     """Represents a circular dependency."""
@@ -49,7 +50,6 @@ class CircularDependency:
         """Get human-readable cycle description."""
         return " -> ".join(self.cycle + [self.cycle[0]])
 
-
 @dataclass
 class DependencyMetrics:
     """Comprehensive dependency metrics."""
@@ -63,7 +63,6 @@ class DependencyMetrics:
     most_depended_upon: str
     most_dependent: str
     dependency_clusters: int
-
 
 @dataclass
 class ImportAnalysis:
@@ -80,7 +79,6 @@ class ImportAnalysis:
     def external_dependency_ratio(self) -> float:
         """Ratio of external to total imports."""
         return self.external_imports / max(self.total_imports, 1)
-
 
 class DependencyAnalyzer:
     """
@@ -614,4 +612,3 @@ class DependencyAnalyzer:
         # This would need to traverse the import graph to find the source
         # For now, return None as this requires more sophisticated analysis
         return None
-

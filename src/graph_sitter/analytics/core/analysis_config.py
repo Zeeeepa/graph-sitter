@@ -1,16 +1,19 @@
 """
+
+from enum import Enum
+from fnmatch import fnmatch
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+import json
+
+from pydantic import BaseModel, Field, validator
+import yaml
+
 Configuration system for the analytics engine.
 
 This module provides comprehensive configuration management for code analysis,
 including analyzer settings, thresholds, and performance tuning options.
 """
-
-from enum import Enum
-from typing import Any, Dict, List, Optional, Set
-from pathlib import Path
-
-from pydantic import BaseModel, Field, validator
-
 
 class AnalysisLanguage(str, Enum):
     """Supported programming languages for analysis."""
@@ -25,7 +28,6 @@ class AnalysisLanguage(str, Enum):
     PHP = "php"
     RUBY = "ruby"
 
-
 class AnalyzerType(str, Enum):
     """Types of code analyzers available."""
     COMPLEXITY = "complexity"
@@ -39,7 +41,6 @@ class AnalyzerType(str, Enum):
     TESTING = "testing"
     CUSTOM = "custom"
 
-
 class ExportFormat(str, Enum):
     """Supported export formats for analysis results."""
     JSON = "json"
@@ -48,7 +49,6 @@ class ExportFormat(str, Enum):
     PDF = "pdf"
     MARKDOWN = "markdown"
     XML = "xml"
-
 
 class QualityThresholds(BaseModel):
     """Quality thresholds for different metrics."""
@@ -76,7 +76,6 @@ class QualityThresholds(BaseModel):
     test_coverage_min: float = Field(default=80.0, ge=0.0, le=100.0)
     branch_coverage_min: float = Field(default=70.0, ge=0.0, le=100.0)
 
-
 class AnalyzerConfig(BaseModel):
     """Configuration for individual analyzers."""
     
@@ -93,7 +92,6 @@ class AnalyzerConfig(BaseModel):
     
     # Language-specific configuration
     language_settings: Dict[AnalysisLanguage, Dict[str, Any]] = Field(default_factory=dict)
-
 
 class PerformanceConfig(BaseModel):
     """Performance and resource configuration."""
@@ -119,7 +117,6 @@ class PerformanceConfig(BaseModel):
     batch_size: int = Field(default=50, ge=1, le=1000)
     batch_timeout_seconds: int = Field(default=600, ge=60, le=3600)
 
-
 class OutputConfig(BaseModel):
     """Configuration for analysis output and reporting."""
     
@@ -144,7 +141,6 @@ class OutputConfig(BaseModel):
     # Filtering
     min_severity_level: str = "info"  # debug, info, warning, error, critical
     max_results_per_analyzer: int = Field(default=1000, ge=1, le=10000)
-
 
 class AnalysisConfig(BaseModel):
     """Comprehensive configuration for code analysis."""
@@ -267,7 +263,6 @@ class AnalysisConfig(BaseModel):
     
     def should_analyze_file(self, file_path: str) -> bool:
         """Check if a file should be analyzed based on patterns."""
-        from fnmatch import fnmatch
         
         # Check exclude patterns first
         for pattern in self.exclude_file_patterns:
@@ -310,8 +305,6 @@ class AnalysisConfig(BaseModel):
     
     def save_to_file(self, file_path: Path) -> None:
         """Save configuration to file."""
-        import json
-        import yaml
         
         data = self.to_dict()
         
@@ -323,7 +316,6 @@ class AnalysisConfig(BaseModel):
                 yaml.dump(data, f, default_flow_style=False)
         else:
             raise ValueError(f"Unsupported configuration file format: {file_path.suffix}")
-
 
 # Predefined configuration templates
 class ConfigTemplates:
@@ -384,4 +376,3 @@ class ConfigTemplates:
                 AnalyzerType.DEAD_CODE
             }
         )
-

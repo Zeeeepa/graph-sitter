@@ -1,10 +1,12 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.file import SourceFile
+from graph_sitter.core.import_resolution import Import, WildcardImport
 from graph_sitter.core.interface import Interface
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import ImportType
@@ -16,14 +18,11 @@ from graph_sitter.python.function import PyFunction
 from graph_sitter.python.import_resolution import PyImport
 from graph_sitter.python.interfaces.has_block import PyHasBlock
 from graph_sitter.python.statements.attribute import PyAttribute
+from graph_sitter.python.symbol import PySymbol
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.import_resolution import Import, WildcardImport
-    from graph_sitter.python.symbol import PySymbol
-
 
 @py_apidoc
 class PyFile(SourceFile[PyImport, PyFunction, PyClass, PyAssignment, Interface[PyCodeBlock, PyAttribute, PyFunction, PyType], PyCodeBlock], PyHasBlock):

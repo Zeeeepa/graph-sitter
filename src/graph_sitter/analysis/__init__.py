@@ -1,4 +1,12 @@
 """
+
+from .call_graph import CallGraphAnalyzer
+from .database import AnalysisDatabase
+from .dead_code import DeadCodeDetector
+from .dependency_analyzer import DependencyAnalyzer
+from .enhanced_analysis import EnhancedCodebaseAnalysis
+from .metrics import CodeMetrics, FunctionMetrics, ClassMetrics
+
 Graph-sitter Analysis Module
 
 This module provides comprehensive codebase analysis capabilities including:
@@ -10,13 +18,6 @@ This module provides comprehensive codebase analysis capabilities including:
 - Integration with graph-sitter.com API patterns
 """
 
-from .database import AnalysisDatabase
-from .metrics import CodeMetrics, FunctionMetrics, ClassMetrics
-from .call_graph import CallGraphAnalyzer
-from .dead_code import DeadCodeDetector
-from .dependency_analyzer import DependencyAnalyzer
-from .enhanced_analysis import EnhancedCodebaseAnalysis
-
 __all__ = [
     'AnalysisDatabase',
     'CodeMetrics',
@@ -27,4 +28,3 @@ __all__ = [
     'DependencyAnalyzer',
     'EnhancedCodebaseAnalysis'
 ]
-

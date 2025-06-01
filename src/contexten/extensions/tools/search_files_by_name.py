@@ -1,7 +1,8 @@
+
+from typing import ClassVar, Optional
 import math
 import shutil
 import subprocess
-from typing import ClassVar, Optional
 
 from pydantic import Field
 
@@ -10,7 +11,6 @@ from graph_sitter import Codebase
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class SearchFilesByNameResultObservation(Observation):
     """Response from searching files by filename pattern."""
@@ -39,7 +39,6 @@ class SearchFilesByNameResultObservation(Observation):
     @property
     def total(self) -> int:
         return self.total_files
-
 
 def search_files_by_name(
     codebase: Codebase,
@@ -90,7 +89,6 @@ def search_files_by_name(
             total_pages = 1
         else: 
             total_pages = (total_files + files_per_page - 1) // files_per_page if total_files > 0 else 1
-        
         
         # Ensure page is within valid range
         page = min(page, total_pages)

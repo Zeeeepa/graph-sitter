@@ -1,5 +1,5 @@
-from graph_sitter.configs.models.base_config import BaseConfig
 
+from graph_sitter.configs.models.base_config import BaseConfig
 
 class SecretsConfig(BaseConfig):
     """Configuration for various API secrets and tokens.

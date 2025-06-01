@@ -1,20 +1,19 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.assignment import Assignment
 from graph_sitter.core.autocommit import writer
 from graph_sitter.core.expressions.multi_expression import MultiExpression
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
+from graph_sitter.typescript.statements.assignment_statement import TSAssignmentStatement
 from graph_sitter.typescript.symbol import TSSymbol
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.statements.assignment_statement import TSAssignmentStatement
-
 
 @ts_apidoc
 class TSAssignment(Assignment["TSAssignmentStatement | ExportStatement"], TSSymbol):

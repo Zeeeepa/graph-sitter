@@ -1,23 +1,21 @@
+
 from logging import getLogger
 from typing import TYPE_CHECKING
 
+from graph_sitter.core.codebase import PyCodebaseType
 from graph_sitter.core.plugins.plugin import Plugin
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import PyCodebaseType
 logger = getLogger(__name__)
-
 
 def is_flask_route(decorator):
     return (decorator.call and decorator.call.name in ["route", "get", "post", "put", "delete"]) or (decorator.call and "route" in decorator.call.name)
-
 
 def extract_route(decorator):
     if decorator.call and decorator.call.args:
         return decorator.call.args[0].value
     return None
-
 
 def extract_methods(decorator):
     if decorator.call and len(decorator.call.args) > 1:
@@ -25,7 +23,6 @@ def extract_methods(decorator):
         if isinstance(methods_arg, list):
             return [m.strip("'\"") for m in methods_arg.value.strip("[]").split(",")]
     return None
-
 
 class FlaskApiFinder(Plugin):
     language: ProgrammingLanguage = ProgrammingLanguage.PYTHON

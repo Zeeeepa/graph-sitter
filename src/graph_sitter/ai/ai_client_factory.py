@@ -1,21 +1,23 @@
 """
+
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Union
+import asyncio
+import time
+
+from codegen import Agent
+
+from graph_sitter.ai.client import get_openai_client
+from graph_sitter.configs.models.secrets import SecretsConfig
+from graph_sitter.shared.logging.get_logger import get_logger
+
 AI Client Factory and Abstraction Layer
 
 Provides a unified interface for working with different AI providers
 (OpenAI, Codegen SDK) with automatic fallback and configuration-based selection.
 """
 
-import asyncio
-import time
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
-
-from graph_sitter.ai.client import get_openai_client
-from graph_sitter.configs.models.secrets import SecretsConfig
-from graph_sitter.shared.logging.get_logger import get_logger
-
 logger = get_logger(__name__)
-
 
 class AIResponse:
     """Standardized AI response format"""
@@ -35,7 +37,6 @@ class AIResponse:
         self.tokens_used = tokens_used
         self.cost_estimate = cost_estimate
         self.generation_time = generation_time
-
 
 class AIClientInterface(ABC):
     """Abstract interface for AI clients"""
@@ -61,7 +62,6 @@ class AIClientInterface(ABC):
     def provider_name(self) -> str:
         """Name of the AI provider"""
         pass
-
 
 class OpenAIClient(AIClientInterface):
     """OpenAI client implementation"""
@@ -154,7 +154,6 @@ class OpenAIClient(AIClientInterface):
         cost_per_1k = 0.03  # This is a rough estimate
         return (tokens / 1000) * cost_per_1k
 
-
 class CodegenSDKClient(AIClientInterface):
     """Codegen SDK client implementation"""
     
@@ -167,7 +166,6 @@ class CodegenSDKClient(AIClientInterface):
     def agent(self):
         if self._agent is None:
             try:
-                from codegen import Agent
                 self._agent = Agent(org_id=self.org_id, token=self.token)
             except ImportError:
                 logger.error("Codegen SDK not available. Install with: pip install codegen")
@@ -255,7 +253,6 @@ class CodegenSDKClient(AIClientInterface):
     def provider_name(self) -> str:
         return "codegen_sdk"
 
-
 class AIClientFactory:
     """Factory for creating AI clients with automatic provider selection"""
     
@@ -313,4 +310,3 @@ class AIClientFactory:
             providers.append("openai")
         
         return providers
-

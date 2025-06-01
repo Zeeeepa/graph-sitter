@@ -1,14 +1,9 @@
 """
-LangChain wrapper for Codegen SDK
 
-Provides a LangChain-compatible interface for the Codegen SDK,
-allowing it to be used as a chat model in LangChain applications.
-"""
-
+from typing import Any, Dict, List, Optional, Union
 import asyncio
 import json
 import time
-from typing import Any, Dict, List, Optional, Union
 
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -16,6 +11,51 @@ from langchain_core.messages import BaseMessage, AIMessage, HumanMessage, System
 from langchain_core.outputs import ChatGeneration, ChatResult
 from pydantic import Field
 
+LangChain wrapper for Codegen SDK
+
+Provides a LangChain-compatible interface for the Codegen SDK,
+allowing it to be used as a chat model in LangChain applications.
+"""
+
+# Handle LangChain dependencies with graceful fallback
+try:
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    # Create mock classes for when LangChain is not available
+    LANGCHAIN_AVAILABLE = False
+    
+    class BaseChatModel:
+        def __init__(self, **kwargs):
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+    
+    class BaseMessage:
+        def __init__(self, content=""):
+            self.content = content
+    
+    class AIMessage(BaseMessage):
+        pass
+    
+    class HumanMessage(BaseMessage):
+        pass
+    
+    class SystemMessage(BaseMessage):
+        pass
+    
+    class ChatGeneration:
+        def __init__(self, message=None, generation_info=None):
+            self.message = message
+            self.generation_info = generation_info or {}
+    
+    class ChatResult:
+        def __init__(self, generations=None):
+            self.generations = generations or []
+    
+    class CallbackManagerForLLMRun:
+        pass
+    
+    def Field(**kwargs):
+        return None
 
 class ChatCodegen(BaseChatModel):
     """LangChain wrapper for Codegen SDK"""
@@ -212,4 +252,3 @@ class ChatCodegen(BaseChatModel):
             "max_tokens": self.max_tokens,
             "timeout": self.timeout
         }
-

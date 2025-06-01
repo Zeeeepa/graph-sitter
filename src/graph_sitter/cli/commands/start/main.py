@@ -1,12 +1,13 @@
-import platform as py_platform
-import subprocess
+
 from importlib.metadata import version
 from pathlib import Path
+import platform as py_platform
+import subprocess
 
-import click
-import rich
 from rich.box import ROUNDED
 from rich.panel import Panel
+import click
+import rich
 
 from graph_sitter.cli.commands.start.docker_container import DockerContainer
 from graph_sitter.cli.commands.start.docker_fleet import GRAPH_SITTER_RUNNER_IMAGE
@@ -16,7 +17,6 @@ from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.shared.network.port import get_free_port
 
 _default_host = "0.0.0.0"
-
 
 @click.command(name="start")
 @click.option("--port", "-p", type=int, default=None, help="Port to run the server on")
@@ -49,7 +49,6 @@ def start_command(port: int | None, detached: bool = False, skip_build: bool = F
         rich.print(f"[bold red]Error:[/bold red] {e!s}")
         raise click.Abort()
 
-
 def _handle_existing_container(repo_config: RepoConfig, container: DockerContainer) -> None:
     if container.is_running():
         rich.print(
@@ -67,7 +66,6 @@ def _handle_existing_container(repo_config: RepoConfig, container: DockerContain
 
     rich.print(Panel(f"[red]Failed to restart container for {repo_config.name}[/red]", box=ROUNDED, title="Docker Session"))
     click.Abort()
-
 
 def _build_docker_image(codegen_root: Path, codegen_version: str) -> None:
     build_type = _get_build_type(codegen_version)
@@ -105,11 +103,9 @@ def _build_docker_image(codegen_root: Path, codegen_version: str) -> None:
     )
     subprocess.run(build_cmd, check=True)
 
-
 def _get_build_type(version: str) -> str:
     """Get the build type based on the version string."""
     return "dev" if "dev" in version or "+" in version else "release"
-
 
 def _get_platform() -> str:
     machine = py_platform.machine().lower()
@@ -120,7 +116,6 @@ def _get_platform() -> str:
     else:
         rich.print(f"[yellow]Warning: Unknown architecture {machine}, defaulting to linux/amd64[/yellow]")
         return "linux/amd64"
-
 
 def _run_docker_container(repo_config: RepoConfig, port: int, detached: bool) -> None:
     rich.print("[bold blue]Starting Docker container...[/bold blue]")

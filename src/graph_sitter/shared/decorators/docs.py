@@ -1,9 +1,9 @@
-import bisect
-import inspect
+
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
-
+import bisect
+import inspect
 
 @dataclass
 class DocumentedObject:
@@ -17,9 +17,7 @@ class DocumentedObject:
     def signature(self) -> str:
         return f"{self.name}"
 
-
 apidoc_objects: list[DocumentedObject] = []
-
 
 def apidoc(obj):
     """Decorator for objects that will be used as API documentation for AI-agent prompts."""
@@ -29,9 +27,7 @@ def apidoc(obj):
         bisect.insort(apidoc_objects, doc_obj)
     return obj
 
-
 py_apidoc_objects: list[DocumentedObject] = []
-
 
 def py_apidoc(obj):
     """Decorator for objects that will be used as Python API documentation for AI-agent prompts."""
@@ -41,9 +37,7 @@ def py_apidoc(obj):
         bisect.insort(py_apidoc_objects, doc_obj)
     return obj
 
-
 ts_apidoc_objects: list[DocumentedObject] = []
-
 
 def ts_apidoc(obj):
     """Decorator for objects that will be used as Typescript API documentation for AI-agent prompts."""
@@ -53,12 +47,10 @@ def ts_apidoc(obj):
         bisect.insort(ts_apidoc_objects, doc_obj)
     return obj
 
-
 no_apidoc_objects: list[DocumentedObject] = []
 no_apidoc_signatures: set[str] = set()
 
 T = TypeVar("T", bound=Callable)
-
 
 def noapidoc(obj: T) -> T:
     """Decorator for things that are hidden from the API documentation for AI-agent prompts."""
@@ -69,10 +61,8 @@ def noapidoc(obj: T) -> T:
         no_apidoc_signatures.add(doc_obj.signature())
     return obj
 
-
 py_no_apidoc_objects: list[DocumentedObject] = []
 py_no_apidoc_signatures: set[str] = set()
-
 
 def py_noapidoc(obj: T) -> T:
     """Decorator for things that are hidden from the Python API documentation for AI-agent prompts."""
@@ -82,7 +72,6 @@ def py_noapidoc(obj: T) -> T:
         bisect.insort(py_no_apidoc_objects, doc_obj)
         py_no_apidoc_signatures.add(doc_obj.signature())
     return obj
-
 
 def get_documented_object(obj) -> DocumentedObject | None:
     module = inspect.getmodule(obj)

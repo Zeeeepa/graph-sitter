@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
 class MetricsEngine:
     """Main engine for calculating comprehensive code metrics.
     
@@ -500,4 +499,3 @@ class MetricsEngine:
             "active_calculators": len(self._get_active_calculators()),
             "registry_info": self.registry.get_registry_info()
         }
-

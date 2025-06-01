@@ -5,7 +5,6 @@ from pathlib import Path
 
 from graph_sitter.configs.constants import SESSION_FILE
 
-
 class SessionManager:
     active_session_path: str | None
     sessions: list[str]
@@ -59,6 +58,5 @@ class SessionManager:
         sessions_str = "\n    ".join(self.sessions) if self.sessions else "None"
 
         return f"GlobalConfig:\n  Active Session: {active}\n  Sessions:\n    {sessions_str}\n  Global Session:\n    {self.session_config}"
-
 
 session_manager = SessionManager()

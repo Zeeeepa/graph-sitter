@@ -1,36 +1,35 @@
-from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING
+import os
 
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.sort import sort_editables
 from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import mover, reader, writer
 from graph_sitter.core.file import SourceFile
 from graph_sitter.core.interfaces.exportable import Exportable
+from graph_sitter.core.statements.export_statement import ExportStatement
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import ImportType, NodeType, SymbolType
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.typescript.assignment import TSAssignment
 from graph_sitter.typescript.class_definition import TSClass
 from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
+from graph_sitter.typescript.detached_symbols.promise_chain import TSPromiseChain
 from graph_sitter.typescript.export import TSExport
 from graph_sitter.typescript.function import TSFunction
 from graph_sitter.typescript.import_resolution import TSImport
 from graph_sitter.typescript.interface import TSInterface
 from graph_sitter.typescript.interfaces.has_block import TSHasBlock
 from graph_sitter.typescript.namespace import TSNamespace
+from graph_sitter.typescript.symbol import TSSymbol
+from graph_sitter.typescript.ts_config import TSConfig
+from graph_sitter.typescript.type_alias import TSTypeAlias
 from graph_sitter.utils import calculate_base_path
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.statements.export_statement import ExportStatement
-    from graph_sitter.core.symbol import Symbol
-    from graph_sitter.typescript.detached_symbols.promise_chain import TSPromiseChain
-    from graph_sitter.typescript.symbol import TSSymbol
-    from graph_sitter.typescript.ts_config import TSConfig
-    from graph_sitter.typescript.type_alias import TSTypeAlias
-
 
 @ts_apidoc
 class TSFile(SourceFile[TSImport, TSFunction, TSClass, TSAssignment, TSInterface, TSCodeBlock], TSHasBlock, Exportable):

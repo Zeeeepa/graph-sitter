@@ -1,12 +1,14 @@
-import codecs
-import fnmatch
-import glob
-import os
+
 from collections.abc import Generator
 from datetime import UTC, datetime
 from functools import cached_property
 from time import perf_counter
 from typing import Self
+import codecs
+import fnmatch
+import glob
+import os
+import shutil
 
 from codeowners import CodeOwners as CodeOwnersParser
 from git import Commit as GitCommit
@@ -32,7 +34,6 @@ from graph_sitter.shared.performance.stopwatch_utils import stopwatch
 from graph_sitter.shared.performance.time_utils import humanize_duration
 
 logger = get_logger(__name__)
-
 
 class RepoOperator:
     """A wrapper around GitPython to make it easier to interact with a repo."""
@@ -901,7 +902,6 @@ class RepoOperator:
 
             # If we get here, repo exists but is not up to date or valid
             # Remove the existing directory to do a fresh clone
-            import shutil
 
             shutil.rmtree(repo_path)
 

@@ -1,8 +1,8 @@
+
 import re
 
 from graph_sitter.code_generation.doc_utils.schemas import ClassDoc, MethodDoc, ParameterDoc
 from graph_sitter.code_generation.doc_utils.utils import sanitize_html_for_mdx, sanitize_mdx_mintlify_description
-
 
 def render_mdx_page_for_class(cls_doc: ClassDoc) -> str:
     """Renders the MDX for a single class"""
@@ -11,7 +11,6 @@ def render_mdx_page_for_class(cls_doc: ClassDoc) -> str:
 {render_mdx_attributes_section(cls_doc)}
 {render_mdx_methods_section(cls_doc)}
 """
-
 
 def render_mdx_page_title(cls_doc: ClassDoc, icon: str | None = None) -> str:
     """Renders the MDX for the page title"""
@@ -33,7 +32,6 @@ import {{Attribute}} from '/snippets/Attribute.mdx';
 <GithubLinkNote link="{cls_doc.github_url}" />
 """
 
-
 def render_mdx_inheritence_section(cls_doc: ClassDoc) -> str:
     """Renders the MDX for the inheritence section"""
     # Filter on parents who we have docs for
@@ -44,7 +42,6 @@ def render_mdx_inheritence_section(cls_doc: ClassDoc) -> str:
     return f"""### Inherits from
 {parents_string}
 """
-
 
 def render_mdx_attributes_section(cls_doc: ClassDoc) -> str:
     """Renders the MDX for the attributes section"""
@@ -58,7 +55,6 @@ def render_mdx_attributes_section(cls_doc: ClassDoc) -> str:
 {attributes_mdx_string}
 """
 
-
 def render_mdx_methods_section(cls_doc: ClassDoc) -> str:
     """Renders the MDX for the methods section"""
     sorted_methods = sorted(cls_doc.methods, key=lambda x: x.name)
@@ -70,7 +66,6 @@ def render_mdx_methods_section(cls_doc: ClassDoc) -> str:
 <HorizontalDivider />
 {methods_mdx_string}
 """
-
 
 def render_mdx_for_attribute(attribute: MethodDoc) -> str:
     """Renders the MDX for a single attribute"""
@@ -86,11 +81,9 @@ def render_mdx_for_attribute(attribute: MethodDoc) -> str:
 <Attribute type={{ {return_type if return_type else "<span></span>"} }} description="{attribute_docstring}" />
 """
 
-
 ########################################################################################################################
 # METHODS
 ########################################################################################################################
-
 
 def format_parameter_for_mdx(parameter: ParameterDoc) -> str:
     type_string = resolve_type_string(parameter.type)
@@ -103,10 +96,8 @@ def format_parameter_for_mdx(parameter: ParameterDoc) -> str:
 />
 """.strip()
 
-
 def format_parameters_for_mdx(parameters: list[ParameterDoc]) -> str:
     return "\n".join([format_parameter_for_mdx(parameter) for parameter in parameters])
-
 
 def format_return_for_mdx(return_type: list[str], return_description: str) -> str:
     description = sanitize_html_for_mdx(return_description) if return_description else ""
@@ -115,7 +106,6 @@ def format_return_for_mdx(return_type: list[str], return_description: str) -> st
     return f"""
 <Return return_type={{ {return_type} }} description="{description}"/>
 """
-
 
 def render_mdx_for_method(method: MethodDoc) -> str:
     description = sanitize_mdx_mintlify_description(method.description)
@@ -139,7 +129,6 @@ def render_mdx_for_method(method: MethodDoc) -> str:
 
     return mdx_string
 
-
 def get_mdx_route_for_class(cls_doc: ClassDoc) -> str:
     """Get the expected MDX route for a class
     split by /core, /python, and /typescript
@@ -152,11 +141,9 @@ def get_mdx_route_for_class(cls_doc: ClassDoc) -> str:
     else:
         return f"codebase-sdk/core/{cls_doc.title}"
 
-
 def format_type_string(type_string: str) -> str:
     type_string = type_string.split("|")
     return " | ".join([type_str.strip() for type_str in type_string])
-
 
 def resolve_type_string(type_string: str) -> str:
     if "<" in type_string:
@@ -164,20 +151,17 @@ def resolve_type_string(type_string: str) -> str:
     else:
         return f'<code className="text-sm bg-gray-100 px-2 py-0.5 rounded">{format_type_string(type_string)}</code>'
 
-
 def format_builtin_type_string(type_string: str) -> str:
     if "|" in type_string:
         type_strings = type_string.split("|")
         return " | ".join([type_str.strip() for type_str in type_strings])
     return type_string
 
-
 def span_type_string_by_pipe(type_string: str) -> str:
     if "|" in type_string:
         type_strings = type_string.split("|")
         return " | ".join([f"<span>{type_str.strip()}</span>" for type_str in type_strings])
     return type_string
-
 
 def parse_link(type_string: str, href: bool = False) -> str:
     # Match components with angle brackets, handling nested structures

@@ -1,4 +1,17 @@
 """
+
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, List, Callable, Awaitable
+import asyncio
+import re
+import uuid
+
+from .config import LinearIntegrationConfig
+from .types import (
+
+from graph_sitter.shared.logging.get_logger import get_logger
+
 Linear Workflow Automation
 
 Comprehensive workflow automation system that:
@@ -9,21 +22,11 @@ Comprehensive workflow automation system that:
 - Manages task lifecycle
 """
 
-import asyncio
-import uuid
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Callable, Awaitable
-from dataclasses import dataclass, field
-
-from .config import LinearIntegrationConfig
-from .types import (
     LinearIssue, AssignmentEvent, WorkflowTask, TaskStatus, TaskProgress,
     ComponentStats
 )
-from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 @dataclass
 class TaskTemplate:
@@ -35,7 +38,6 @@ class TaskTemplate:
     optional_fields: List[str] = field(default_factory=list)
     estimated_duration: int = 3600  # seconds
     priority: int = 0
-
 
 @dataclass
 class WorkflowStats:
@@ -49,7 +51,6 @@ class WorkflowStats:
     last_task_created: Optional[datetime] = None
     last_progress_update: Optional[datetime] = None
     last_error: Optional[str] = None
-
 
 class WorkflowAutomation:
     """Comprehensive workflow automation for Linear integration"""
@@ -287,7 +288,6 @@ class WorkflowAutomation:
     
     def _extract_section(self, text: str, section_name: str) -> Optional[str]:
         """Extract a specific section from text"""
-        import re
         
         pattern = rf"{re.escape(section_name)}:\s*(.*?)(?=\n\w+:|$)"
         match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
@@ -809,4 +809,3 @@ class WorkflowAutomation:
             except Exception as e:
                 logger.error(f"Error in status sync loop: {e}")
                 await asyncio.sleep(60)
-

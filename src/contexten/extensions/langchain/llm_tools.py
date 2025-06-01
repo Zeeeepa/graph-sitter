@@ -1,23 +1,45 @@
 """
+
+from typing import Any, Dict, List, Optional
+
+from .llm_config import get_llm_config, configure_codegen_default, create_llm_with_config
+from langchain_core.tools import BaseTool
+from pydantic import BaseModel, Field
+
 LLM Configuration Tools
 
 Provides function/tool interfaces for agents to configure LLM providers,
 including setting Codegen SDK as the default provider.
 """
 
-from typing import Any, Dict, List, Optional
-from langchain_core.tools import BaseTool
-from pydantic import BaseModel, Field
-
-from .llm_config import get_llm_config, configure_codegen_default, create_llm_with_config
-
+# Handle LangChain dependencies with graceful fallback
+try:
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    # Create mock classes for when LangChain is not available
+    LANGCHAIN_AVAILABLE = False
+    
+    class BaseTool:
+        def __init__(self, **kwargs):
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+        
+        def _run(self, *args, **kwargs):
+            return "Tool execution not available without LangChain"
+    
+    class BaseModel:
+        def __init__(self, **kwargs):
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+    
+    def Field(**kwargs):
+        return None
 
 class SetCodegenDefaultInput(BaseModel):
     """Input for setting Codegen SDK as default provider"""
     org_id: str = Field(description="Codegen organization ID")
     token: str = Field(description="Codegen API token")
     model: str = Field(default="codegen-agent", description="Model name to use")
-
 
 class SetLLMProviderInput(BaseModel):
     """Input for setting LLM provider"""
@@ -26,11 +48,9 @@ class SetLLMProviderInput(BaseModel):
     temperature: Optional[float] = Field(default=None, description="Temperature setting")
     max_tokens: Optional[int] = Field(default=None, description="Maximum tokens")
 
-
 class GetLLMStatusInput(BaseModel):
     """Input for getting LLM status (no parameters needed)"""
     pass
-
 
 class SetCodegenDefaultTool(BaseTool):
     """Tool for setting Codegen SDK as the default LLM provider"""
@@ -63,7 +83,6 @@ You can override this on a per-call basis if needed."""
             
         except Exception as e:
             return f"❌ Failed to configure Codegen SDK: {str(e)}"
-
 
 class SetLLMProviderTool(BaseTool):
     """Tool for setting the default LLM provider"""
@@ -126,7 +145,6 @@ The system will now use {provider} for LLM operations by default."""
         except Exception as e:
             return f"❌ Failed to configure LLM provider: {str(e)}"
 
-
 class GetLLMStatusTool(BaseTool):
     """Tool for getting current LLM configuration status"""
     
@@ -174,13 +192,11 @@ class GetLLMStatusTool(BaseTool):
         except Exception as e:
             return f"❌ Failed to get LLM status: {str(e)}"
 
-
 # Convenience functions for direct use
 def set_codegen_as_default_llm(org_id: str, token: str, model: str = "codegen-agent") -> str:
     """Convenience function to set Codegen SDK as default LLM"""
     tool = SetCodegenDefaultTool()
     return tool._run(org_id, token, model)
-
 
 def set_llm_provider(
     provider: str, 
@@ -192,12 +208,10 @@ def set_llm_provider(
     tool = SetLLMProviderTool()
     return tool._run(provider, model, temperature, max_tokens)
 
-
 def get_llm_status() -> str:
     """Convenience function to get LLM status"""
     tool = GetLLMStatusTool()
     return tool._run()
-
 
 # Function definitions for agent prompt function calls
 def configure_llm_provider(
@@ -241,7 +255,6 @@ def configure_llm_provider(
     else:
         return f"❌ Unknown action '{action}'. Valid actions: set_codegen_default, set_provider, get_status"
 
-
 # Export tools for LangChain agent use
 def get_llm_configuration_tools() -> List[BaseTool]:
     """Get all LLM configuration tools for use in LangChain agents"""
@@ -250,4 +263,3 @@ def get_llm_configuration_tools() -> List[BaseTool]:
         SetLLMProviderTool(),
         GetLLMStatusTool()
     ]
-

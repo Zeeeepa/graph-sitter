@@ -1,3 +1,4 @@
+
 from collections.abc import Callable
 from difflib import unified_diff
 from enum import IntEnum
@@ -6,10 +7,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
+from graph_sitter.core.file import File
 
 if TYPE_CHECKING:
-    from graph_sitter.core.file import File
-
 
 class TransactionPriority(IntEnum):
     Remove = 0  # Remove always has highest priority
@@ -20,13 +20,11 @@ class TransactionPriority(IntEnum):
     FileRename = 11
     FileRemove = 12
 
-
 @runtime_checkable
 class ContentFunc(Protocol):
     """A function executed to generate a content block dynamically."""
 
     def __call__(self) -> str: ...
-
 
 class Transaction:
     start_byte: int
@@ -105,7 +103,6 @@ class Transaction:
     def new_content(self) -> str | None:
         return self._new_content() if isinstance(self._new_content, ContentFunc) else self._new_content
 
-
 class RemoveTransaction(Transaction):
     transaction_order = TransactionPriority.Remove
 
@@ -135,7 +132,6 @@ class RemoveTransaction(Transaction):
         """Human-readable string representation of the change"""
         diff = "".join(unified_diff(self.file.content.splitlines(True), self._generate_new_content_bytes().decode("utf-8").splitlines(True)))
         return f"Remove {self.length} bytes at bytes ({self.start_byte}, {self.end_byte})\n{diff}"
-
 
 class InsertTransaction(Transaction):
     transaction_order = TransactionPriority.Insert
@@ -178,7 +174,6 @@ class InsertTransaction(Transaction):
         """Human-readable string representation of the change"""
         diff = "".join(unified_diff(self.file.content.splitlines(True), self._generate_new_content_bytes().decode("utf-8").splitlines(True)))
         return f"Insert {len(self.new_content)} bytes at bytes ({self.start_byte}, {self.end_byte})\n{diff}"
-
 
 class EditTransaction(Transaction):
     transaction_order = TransactionPriority.Edit
@@ -227,7 +222,6 @@ class EditTransaction(Transaction):
             return ret
         return None
 
-
 class FileAddTransaction(Transaction):
     transaction_order = TransactionPriority.FileAdd
 
@@ -249,7 +243,6 @@ class FileAddTransaction(Transaction):
     def diff_str(self) -> str:
         """Human-readable string representation of the change"""
         return f"Add file at {self.file_path}"
-
 
 class FileRenameTransaction(Transaction):
     transaction_order = TransactionPriority.FileRename
@@ -276,7 +269,6 @@ class FileRenameTransaction(Transaction):
     def diff_str(self) -> str:
         """Human-readable string representation of the change"""
         return f"Rename file from {self.file_path} to {self.new_file_path}"
-
 
 class FileRemoveTransaction(Transaction):
     transaction_order = TransactionPriority.FileRemove

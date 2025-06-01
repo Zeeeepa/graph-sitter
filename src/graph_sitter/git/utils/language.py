@@ -1,16 +1,23 @@
+
 from collections import Counter
 from pathlib import Path
 from typing import Literal
 
+from graph_sitter.codebase.codebase_context import GLOBAL_FILE_IGNORE_LIST
+from graph_sitter.git.repo_operator.repo_operator import RepoOperator
+from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.git.utils.file_utils import split_git_path
+from graph_sitter.python import PyFile
+from graph_sitter.python import PyFile
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.shared.logging.get_logger import get_logger
+from graph_sitter.typescript.file import TSFile
+from graph_sitter.typescript.file import TSFile
 
 logger = get_logger(__name__)
 
 # Minimum ratio of files that must match the dominant language
 MIN_LANGUAGE_RATIO = 0.1
-
 
 def determine_project_language(folder_path: str, strategy: Literal["most_common", "git_most_common", "package_json"] = "git_most_common") -> ProgrammingLanguage:
     """Determines the primary programming language of a project.
@@ -34,7 +41,6 @@ def determine_project_language(folder_path: str, strategy: Literal["most_common"
         msg = f"Invalid strategy: {strategy}"
         raise ValueError(msg)
 
-
 def _determine_language_by_file_count(folder_path: str) -> ProgrammingLanguage:
     """Analyzes a folder to determine the primary programming language based on file extensions.
     Returns the language with the most matching files.
@@ -46,8 +52,6 @@ def _determine_language_by_file_count(folder_path: str) -> ProgrammingLanguage:
         ProgrammingLanguage: The dominant programming language, or OTHER if no matching files found
         or if less than MIN_LANGUAGE_RATIO of files match the dominant language
     """
-    from graph_sitter.python import PyFile
-    from graph_sitter.typescript.file import TSFile
 
     EXTENSIONS = {
         ProgrammingLanguage.PYTHON: PyFile.get_extensions(),
@@ -95,7 +99,6 @@ def _determine_language_by_file_count(folder_path: str) -> ProgrammingLanguage:
 
     return most_common_language
 
-
 def _determine_language_by_git_file_count(folder_path: str) -> ProgrammingLanguage:
     """Analyzes a git repo to determine the primary programming language based on file extensions.
     Returns the language with the most matching files.
@@ -107,11 +110,6 @@ def _determine_language_by_git_file_count(folder_path: str) -> ProgrammingLangua
         ProgrammingLanguage: The dominant programming language, or OTHER if no matching files found
         or if less than MIN_LANGUAGE_RATIO of files match the dominant language
     """
-    from graph_sitter.codebase.codebase_context import GLOBAL_FILE_IGNORE_LIST
-    from graph_sitter.git.repo_operator.repo_operator import RepoOperator
-    from graph_sitter.git.schemas.repo_config import RepoConfig
-    from graph_sitter.python import PyFile
-    from graph_sitter.typescript.file import TSFile
 
     EXTENSIONS = {
         ProgrammingLanguage.PYTHON: PyFile.get_extensions(),
@@ -162,7 +160,6 @@ def _determine_language_by_git_file_count(folder_path: str) -> ProgrammingLangua
         return ProgrammingLanguage.OTHER
 
     return most_common_language
-
 
 def _determine_language_by_package_json(folder_path: str) -> ProgrammingLanguage:
     """Determines project language by checking for presence of package.json.

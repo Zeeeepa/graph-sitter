@@ -1,11 +1,11 @@
+
+from pathlib import Path
 import json
 import os
-from pathlib import Path
 
 from contexten.cli.api.client import RestAPI
 from graph_sitter.cli.auth.constants import AUTH_FILE, CONFIG_DIR
 from graph_sitter.cli.errors import AuthError
-
 
 class TokenManager:
     # Simple token manager to store and retrieve tokens.
@@ -69,7 +69,6 @@ class TokenManager:
         """Remove stored token."""
         if os.path.exists(self.token_file):
             os.remove(self.token_file)
-
 
 def get_current_token() -> str | None:
     """Get the current authentication token if one exists.

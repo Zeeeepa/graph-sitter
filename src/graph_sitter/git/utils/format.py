@@ -1,5 +1,5 @@
-from github.Comparison import Comparison
 
+from github.Comparison import Comparison
 
 def format_comparison(comparison: Comparison, show_commits: bool = True) -> str:
     diff_str_list = []

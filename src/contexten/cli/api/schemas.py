@@ -1,3 +1,4 @@
+
 from enum import Enum
 from typing import TypeVar
 
@@ -9,18 +10,15 @@ from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 T = TypeVar("T")
 
-
 ###########################################################################
 # RUN
 ###########################################################################
-
 
 class CodemodRunType(str, Enum):
     """Type of codemod run."""
 
     DIFF = "diff"
     PR = "pr"
-
 
 class RunCodemodInput(SafeBaseModel):
     class BaseRunCodemodInput(SafeBaseModel):
@@ -33,7 +31,6 @@ class RunCodemodInput(SafeBaseModel):
 
     input: BaseRunCodemodInput
 
-
 class RunCodemodOutput(SafeBaseModel):
     success: bool = False
     web_link: str | None = None
@@ -41,11 +38,9 @@ class RunCodemodOutput(SafeBaseModel):
     observation: str | None = None
     error: str | None = None
 
-
 ###########################################################################
 # EXPERT
 ###########################################################################
-
 
 class AskExpertInput(SafeBaseModel):
     class BaseAskExpertInput(SafeBaseModel):
@@ -53,16 +48,13 @@ class AskExpertInput(SafeBaseModel):
 
     input: BaseAskExpertInput
 
-
 class AskExpertResponse(SafeBaseModel):
     response: str
     success: bool
 
-
 ###########################################################################
 # DOCS
 ###########################################################################
-
 
 class SerializedExample(SafeBaseModel):
     name: str | None = None
@@ -71,24 +63,20 @@ class SerializedExample(SafeBaseModel):
     language: ProgrammingLanguage
     docstring: str = ""
 
-
 class DocsInput(SafeBaseModel):
     class BaseDocsInput(SafeBaseModel):
         repo_full_name: str
 
     docs_input: BaseDocsInput
 
-
 class DocsResponse(SafeBaseModel):
     docs: dict[str, str]
     examples: list[SerializedExample]
     language: ProgrammingLanguage
 
-
 ###########################################################################
 # CREATE
 ###########################################################################
-
 
 class CreateInput(SafeBaseModel):
     class BaseCreateInput(SafeBaseModel):
@@ -98,18 +86,15 @@ class CreateInput(SafeBaseModel):
 
     input: BaseCreateInput
 
-
 class CreateResponse(SafeBaseModel):
     success: bool
     response: str
     code: str
     context: str
 
-
 ###########################################################################
 # IDENTIFY
 ###########################################################################
-
 
 class IdentifyResponse(SafeBaseModel):
     class AuthContext(SafeBaseModel):
@@ -133,11 +118,9 @@ class IdentifyResponse(SafeBaseModel):
     auth_context: AuthContext
     user: User
 
-
 ###########################################################################
 # DEPLOY
 ###########################################################################
-
 
 class DeployInput(BaseModel):
     """Input for deploying a codemod."""
@@ -153,7 +136,6 @@ class DeployInput(BaseModel):
 
     input: BaseDeployInput = Field(..., description="Input data for deployment")
 
-
 class DeployResponse(BaseModel):
     """Response from deploying a codemod."""
 
@@ -163,11 +145,9 @@ class DeployResponse(BaseModel):
     version_id: int = Field(..., description="Version ID of the deployed codemod")
     url: str = Field(..., description="URL of the deployed codemod")
 
-
 ###########################################################################
 # LOOKUP
 ###########################################################################
-
 
 class LookupInput(BaseModel):
     """Input for looking up a codemod."""
@@ -178,18 +158,15 @@ class LookupInput(BaseModel):
 
     input: BaseLookupInput = Field(..., description="Input data for lookup")
 
-
 class LookupOutput(BaseModel):
     """Response from looking up a codemod."""
 
     codemod_id: int = Field(..., description="ID of the codemod")
     version_id: int = Field(..., description="Version ID of the codemod")
 
-
 ###########################################################################
 # PR LOOKUP
 ###########################################################################
-
 
 class PRSchema(BaseModel):
     url: str
@@ -198,7 +175,6 @@ class PRSchema(BaseModel):
     github_pr_number: int
     codegen_pr_id: int
 
-
 class PRLookupInput(BaseModel):
     class BasePRLookupInput(BaseModel):
         repo_full_name: str
@@ -206,15 +182,12 @@ class PRLookupInput(BaseModel):
 
     input: BasePRLookupInput
 
-
 class PRLookupResponse(BaseModel):
     pr: PRSchema
-
 
 ###########################################################################
 # TEST WEBHOOK
 ###########################################################################
-
 
 class RunOnPRInput(BaseModel):
     """Input for testing a webhook against a PR."""
@@ -227,7 +200,6 @@ class RunOnPRInput(BaseModel):
 
     input: BaseRunOnPRInput = Field(..., description="Input data for webhook test")
 
-
 class RunOnPRResponse(BaseModel):
     """Response from testing a webhook."""
 
@@ -235,11 +207,9 @@ class RunOnPRResponse(BaseModel):
     codemod_run_id: int = Field(..., description="ID of the codemod run")
     web_url: str = Field(..., description="URL to view the test results")
 
-
 ###########################################################################
 # IMPROVE
 ###########################################################################
-
 
 class ImproveCodemodInput(BaseModel):
     class BaseImproveCodemodInput(BaseModel):
@@ -250,7 +220,6 @@ class ImproveCodemodInput(BaseModel):
         language: ProgrammingLanguage = Field(..., description="Language of the codemod")
 
     input: BaseImproveCodemodInput = Field(..., description="Input data for improvement")
-
 
 class ImproveCodemodResponse(BaseModel):
     success: bool = Field(..., description="Whether the improvement was successful")

@@ -5,7 +5,6 @@
 # without one or both of those patches.
 NOOP_PATCH = "diff --git a/empty.file.{nonce}.ignore b/empty.file.{nonce}.ignore\nnew file mode 100644\nindex 0000000..e69de29\n"
 
-
 def remove_patches_to_tests(model_patch):
     """Remove any changes to the tests directory from the provided patch.
     This is to ensure that the model_patch does not disturb the repo's

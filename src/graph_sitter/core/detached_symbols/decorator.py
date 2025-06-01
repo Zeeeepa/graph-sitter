@@ -1,30 +1,27 @@
-from __future__ import annotations
 
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Generic
-
 from typing_extensions import TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.class_definition import Class
 from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.detached_symbols.parameter import Parameter
 from graph_sitter.core.expressions import Expression
 from graph_sitter.core.expressions.name import Name
+from graph_sitter.core.function import Function
 from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.detached_symbols.parameter import Parameter
-    from graph_sitter.core.function import Function
-
 
 TClass = TypeVar("TClass", bound="Class", default="Class")
 TFunction = TypeVar("TFunction", bound="Function", default="Function")
 TParameter = TypeVar("TParameter", bound="Parameter", default="Parameter")
-
 
 @apidoc
 class Decorator(Expression[TClass | TFunction], HasName, Generic[TClass, TFunction, TParameter]):

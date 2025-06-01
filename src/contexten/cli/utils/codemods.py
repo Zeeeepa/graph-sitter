@@ -1,9 +1,9 @@
+
 from dataclasses import dataclass
 from pathlib import Path
 
 from contexten.cli.api.webapp_routes import generate_webapp_url
 from graph_sitter.cli.utils.schema import CodemodConfig
-
 
 @dataclass
 class Codemod:

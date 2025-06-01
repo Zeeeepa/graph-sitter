@@ -8,7 +8,6 @@ from typing import Any
 
 from graph_sitter import Codebase
 
-
 def run_codemod(codebase: Codebase, codemod_source: str) -> dict[str, Any]:
     """Run a custom codemod function on the codebase.
 

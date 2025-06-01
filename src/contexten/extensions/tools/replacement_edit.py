@@ -11,7 +11,6 @@ from graph_sitter import Codebase
 from .observation import Observation
 from .view_file import add_line_numbers
 
-
 class ReplacementEditObservation(Observation):
     """Response from making regex-based replacements in a file."""
 
@@ -41,7 +40,6 @@ class ReplacementEditObservation(Observation):
 
     str_template: ClassVar[str] = "{message}" if "{message}" else "Edited file {filepath}"
 
-
 def generate_diff(original: str, modified: str) -> str:
     """Generate a unified diff between two strings.
 
@@ -64,7 +62,6 @@ def generate_diff(original: str, modified: str) -> str:
     )
 
     return "".join(diff)
-
 
 def _merge_content(original_content: str, edited_content: str, start: int, end: int) -> str:
     """Merge edited content with original content, preserving content outside the edit range.
@@ -92,7 +89,6 @@ def _merge_content(original_content: str, edited_content: str, start: int, end: 
     result_lines = original_lines[:start_idx] + edited_lines + original_lines[end_idx + 1 :]
 
     return "\n".join(result_lines)
-
 
 def replacement_edit(
     codebase: Codebase,

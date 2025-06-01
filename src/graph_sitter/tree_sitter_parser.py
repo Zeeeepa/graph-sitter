@@ -1,13 +1,14 @@
-import os
+
 from os import PathLike
 from pathlib import Path
 from typing import Union
+import os
 
+from tree_sitter import Language, Parser
+from tree_sitter import Node as TSNode
 import tree_sitter_javascript as ts_javascript
 import tree_sitter_python as ts_python
 import tree_sitter_typescript as ts_typescript
-from tree_sitter import Language, Parser
-from tree_sitter import Node as TSNode
 
 from graph_sitter.output.utils import stylize_error
 
@@ -16,10 +17,8 @@ JS_LANGUAGE = Language(ts_javascript.language())
 TS_LANGUAGE = Language(ts_typescript.language_typescript())
 TSX_LANGUAGE = Language(ts_typescript.language_tsx())
 
-
 def to_extension(filepath_or_extension: str | PathLike) -> str:
     return Path(filepath_or_extension).suffix
-
 
 class _TreeSitterAbstraction:
     """Class to facilitate loading/retrieval of the Parser object for a given language.
@@ -49,9 +48,7 @@ class _TreeSitterAbstraction:
             parser = Parser(language)
             self.extension_to_parser[extension] = parser
 
-
 _ts_parser_factory = _TreeSitterAbstraction()
-
 
 def get_parser_by_filepath_or_extension(filepath_or_extension: str | PathLike = ".py") -> Parser:
     extension = to_extension(filepath_or_extension)
@@ -60,7 +57,6 @@ def get_parser_by_filepath_or_extension(filepath_or_extension: str | PathLike = 
         extension = ".py"
     return _ts_parser_factory.extension_to_parser[extension]
 
-
 def get_lang_by_filepath_or_extension(filepath_or_extension: str = ".py") -> Language:
     extension = to_extension(filepath_or_extension)
     # HACK: we do not currently use a plain text parser, so default to python for now
@@ -68,12 +64,10 @@ def get_lang_by_filepath_or_extension(filepath_or_extension: str = ".py") -> Lan
         extension = ".py"
     return _ts_parser_factory.extension_to_lang[extension]
 
-
 def parse_file(filepath: PathLike, content: str) -> TSNode:
     parser = get_parser_by_filepath_or_extension(filepath)
     ts_node = parser.parse(bytes(content, "utf-8")).root_node
     return ts_node
-
 
 def print_errors(filepath: PathLike, content: str) -> None:
     if not os.path.exists(filepath):

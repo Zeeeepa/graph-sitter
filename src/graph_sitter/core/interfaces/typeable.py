@@ -1,23 +1,20 @@
-from __future__ import annotations
 
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
 
+from __future__ import annotations
+from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.core.autocommit import commiter, reader
+from graph_sitter.core.expressions.type import Type
 from graph_sitter.core.interfaces.chainable import Chainable
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.placeholder.placeholder_type import TypePlaceholder
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from graph_sitter.codebase.resolution_stack import ResolutionStack
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.interfaces.editable import Editable
-
 
 TType = TypeVar("TType", bound="Type")
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Typeable(Chainable[Parent], Generic[TType, Parent]):

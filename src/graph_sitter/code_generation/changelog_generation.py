@@ -1,6 +1,7 @@
-import json
+
 from dataclasses import dataclass
 from pathlib import Path
+import json
 
 from git import Repo
 from openai import OpenAI
@@ -9,8 +10,8 @@ from semantic_release.changelog.release_history import Release, ReleaseHistory
 from semantic_release.cli.cli_context import CliContextObj
 from semantic_release.cli.config import GlobalCommandLineOptions
 
-import graph_sitter
 from graph_sitter.shared.logging.get_logger import get_logger
+import graph_sitter
 
 logger = get_logger(__name__)
 
@@ -59,7 +60,6 @@ Please do not include specific details about pull requests or commits, only summ
 - "ARM support for Linux"
 """
 
-
 @dataclass
 class ContextMock:
     config_file = "/Users/jesusmeza/Documents/codegen-sdk/pyproject.toml"
@@ -68,7 +68,6 @@ class ContextMock:
         if hasattr(self, param_name):
             return getattr(self, param_name)
         return None
-
 
 def generate_release_summary_context(release: Release):
     release_summary_context = {"version": release["version"].tag_format, "date": release["tagged_date"].strftime("%B %d, %Y"), "commits": dict()}
@@ -81,7 +80,6 @@ def generate_release_summary_context(release: Release):
             elif isinstance(parsed_commit, ParseError):
                 release_summary_context["commits"][title].append(parsed_commit.message)
     return release_summary_context
-
 
 def generate_release_summary(client: OpenAI, release: Release) -> str:
     release_summary_context = generate_release_summary_context(release)
@@ -107,7 +105,6 @@ Please write a high level summary of the changes in 1 to 5 bullet points.
     )
 
     return json.loads(response.choices[0].message.content)
-
 
 def generate_changelog(client: OpenAI, latest_existing_version: str | None = None):
     ctx = CliContextObj(ContextMock(), logger=logger, global_opts=GlobalCommandLineOptions())

@@ -1,4 +1,20 @@
 """
+
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+import asyncio
+
+from .assignment_detector import AssignmentDetector
+from .config import LinearIntegrationConfig, get_linear_config
+from .enhanced_client import EnhancedLinearClient
+from .types import (
+from .types import AssignmentEvent, AssignmentAction
+from .webhook_processor import WebhookProcessor
+from .workflow_automation import WorkflowAutomation
+
+from graph_sitter.shared.logging.get_logger import get_logger
+
 Linear Integration Agent
 
 Main orchestrator for comprehensive Linear integration that coordinates:
@@ -9,23 +25,10 @@ Main orchestrator for comprehensive Linear integration that coordinates:
 - Real-time monitoring and health checks
 """
 
-import asyncio
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
-from pathlib import Path
-
-from .config import LinearIntegrationConfig, get_linear_config
-from .enhanced_client import EnhancedLinearClient
-from .webhook_processor import WebhookProcessor
-from .assignment_detector import AssignmentDetector
-from .workflow_automation import WorkflowAutomation
-from .types import (
     LinearIntegrationMetrics, IntegrationStatus, ComponentStats
 )
-from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class LinearIntegrationAgent:
     """Comprehensive Linear integration agent"""
@@ -407,7 +410,6 @@ class LinearIntegrationAgent:
             # Check if issue should be processed
             if await self.assignment_detector.is_bot_assigned(issue):
                 # Create assignment event
-                from .types import AssignmentEvent, AssignmentAction
                 assignment_event = AssignmentEvent(
                     issue_id=issue.id,
                     action=AssignmentAction.ASSIGNED,
@@ -522,7 +524,6 @@ class LinearIntegrationAgent:
         """Async context manager exit"""
         await self.cleanup()
 
-
 # Convenience function for creating and initializing the agent
 async def create_linear_integration_agent(config: Optional[LinearIntegrationConfig] = None) -> LinearIntegrationAgent:
     """Create and initialize a Linear integration agent"""
@@ -533,4 +534,3 @@ async def create_linear_integration_agent(config: Optional[LinearIntegrationConf
         return agent
     else:
         raise RuntimeError("Failed to initialize Linear integration agent")
-

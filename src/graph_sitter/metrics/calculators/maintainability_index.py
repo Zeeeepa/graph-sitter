@@ -1,5 +1,17 @@
 """Maintainability Index Calculator.
 
+from typing import TYPE_CHECKING, Optional, Dict, Any
+import math
+
+from ..core.base_calculator import BaseMetricsCalculator
+
+from __future__ import annotations
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.metrics.models.metrics_data import (
+
 Calculates the Maintainability Index (MI) which is a composite metric that
 combines Halstead Volume, Cyclomatic Complexity, and Lines of Code to
 provide an overall assessment of code maintainability.
@@ -17,25 +29,12 @@ The result is typically normalized to a 0-100 scale where:
 - 0-64: Difficult to maintain
 """
 
-from __future__ import annotations
-
-import math
-from typing import TYPE_CHECKING, Optional, Dict, Any
-
-from ..core.base_calculator import BaseMetricsCalculator
-
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.metrics.models.metrics_data import (
         FunctionMetrics,
         ClassMetrics,
         FileMetrics,
         CodebaseMetrics,
     )
-
 
 class MaintainabilityIndexCalculator(BaseMetricsCalculator):
     """Calculator for Maintainability Index metrics."""
@@ -400,4 +399,3 @@ class MaintainabilityIndexCalculator(BaseMetricsCalculator):
             },
             "additionalProperties": False
         }
-

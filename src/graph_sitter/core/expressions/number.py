@@ -1,3 +1,4 @@
+
 from typing import Generic, TypeVar, override
 
 from graph_sitter.compiled.autocommit import commiter
@@ -8,7 +9,6 @@ from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 Parent = TypeVar("Parent", bound="Expression")
-
 
 @apidoc
 class Number(Expression[Parent], Builtin, Generic[Parent]):

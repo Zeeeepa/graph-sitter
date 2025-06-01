@@ -1,4 +1,16 @@
 """
+
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, List, Set
+import asyncio
+import re
+
+from .config import LinearIntegrationConfig
+from .types import (
+
+from graph_sitter.shared.logging.get_logger import get_logger
+
 Linear Assignment Detector
 
 Intelligent assignment detection system that:
@@ -8,21 +20,11 @@ Intelligent assignment detection system that:
 - Provides assignment analytics and monitoring
 """
 
-import asyncio
-import re
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Set
-from dataclasses import dataclass, field
-
-from .config import LinearIntegrationConfig
-from .types import (
     LinearIssue, LinearEvent, AssignmentEvent, AssignmentAction, 
     ComponentStats
 )
-from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 @dataclass
 class AssignmentRecord:
@@ -34,7 +36,6 @@ class AssignmentRecord:
     source: str  # 'webhook', 'monitoring', 'auto'
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class AssignmentStats:
     """Assignment detection statistics"""
@@ -45,7 +46,6 @@ class AssignmentStats:
     rate_limit_hits: int = 0
     last_assignment: Optional[datetime] = None
     last_error: Optional[str] = None
-
 
 class AssignmentDetector:
     """Intelligent assignment detection and auto-assignment system"""
@@ -509,4 +509,3 @@ class AssignmentDetector:
         self.assignment_counts.clear()
         self.assignment_stats.rate_limit_hits = 0
         logger.info("Reset rate limiting counters")
-

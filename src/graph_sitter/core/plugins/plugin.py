@@ -1,12 +1,12 @@
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase
-
 
 class Plugin(ABC):
     language: ProgrammingLanguage

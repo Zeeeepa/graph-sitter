@@ -1,13 +1,15 @@
-from __future__ import annotations
 
-import functools
-import socket
 from collections import Counter, defaultdict
 from enum import StrEnum
 from typing import TYPE_CHECKING
+import functools
+import socket
 
+from rustworkx import PyDiGraph
 from tabulate import tabulate
 
+from __future__ import annotations
+from graph_sitter.core.codebase import CodebaseType
 from graph_sitter.enums import NodeType
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.utils import truncate_line
@@ -15,10 +17,6 @@ from graph_sitter.utils import truncate_line
 logger = get_logger(__name__)
 
 if TYPE_CHECKING:
-    from rustworkx import PyDiGraph
-
-    from graph_sitter.core.codebase import CodebaseType
-
 
 class PostInitValidationStatus(StrEnum):
     NO_NODES = "NO_NODES"
@@ -26,7 +24,6 @@ class PostInitValidationStatus(StrEnum):
     MISSING_FILES = "MISSING_FILES"
     LOW_IMPORT_RESOLUTION_RATE = "LOW_IMPORT_RESOLUTION_RATE"
     SUCCESS = "SUCCESS"
-
 
 def post_init_validation(codebase: CodebaseType) -> PostInitValidationStatus:
     """Post codebase._init_graph verifies that the built graph is valid."""
@@ -47,7 +44,6 @@ def post_init_validation(codebase: CodebaseType) -> PostInitValidationStatus:
         return PostInitValidationStatus.LOW_IMPORT_RESOLUTION_RATE
     return PostInitValidationStatus.SUCCESS
 
-
 def post_reset_validation(init_nodes, nodes, init_edges, edges, repo_name: str, subdirectories: list[str] | None) -> None:
     logger.info("Verifying graph state and alerting if necessary")
     hostname = socket.gethostname()
@@ -61,7 +57,6 @@ def post_reset_validation(init_nodes, nodes, init_edges, edges, repo_name: str, 
         message = get_edges_error(edges, init_edges)
         log_or_throw(post_message, message)
 
-
 def post_sync_validation(codebase: CodebaseType) -> bool:
     """Post codebase.sync, checks that the codebase graph is in a valid state (i.e. not corrupted by codebase.sync)"""
     if len(codebase.ctx.all_syncs) > 0 or len(codebase.ctx.pending_syncs) > 0 or len(codebase.ctx.transaction_manager.to_commit()) > 0:
@@ -74,7 +69,6 @@ def post_sync_validation(codebase: CodebaseType) -> bool:
         dict.fromkeys(codebase.ctx.edges)
     )
 
-
 def log_or_throw(message, thread_message: str):
     hostname = socket.gethostname()
     logger.error(message)
@@ -83,7 +77,6 @@ def log_or_throw(message, thread_message: str):
         msg = f"{message}\n{thread_message}"
         raise Exception(msg)
     return
-
 
 def get_edges_error(edges, init_edges):
     set_edges = set(edges)
@@ -121,7 +114,6 @@ Missing edges
         message += extras
     return message
 
-
 def get_nodes_error(init_nodes, nodes):
     set_nodes = set(nodes)
     set_init_nodes = set(init_nodes)
@@ -142,7 +134,6 @@ Missing nodes
         if isinstance(node, ExternalModule):
             message += "External Module persisted with following dependencies: " + str(list((node.ctx.get_node(source), edge) for source, _, edge in node.ctx.in_edges(node.node_id)))
     return message
-
 
 def get_edges(graph: PyDiGraph):
     ret = []

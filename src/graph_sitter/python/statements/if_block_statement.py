@@ -1,21 +1,21 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import reader, writer
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.if_block_statement import IfBlockStatement
 from graph_sitter.core.statements.statement import StatementType
+from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
+from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 from graph_sitter.shared.decorators.docs import apidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 
 Parent = TypeVar("Parent", bound="PyCodeBlock")
-
 
 @apidoc
 class PyIfBlockStatement(IfBlockStatement[Parent, "PyIfBlockStatement"], Generic[Parent]):
@@ -43,7 +43,6 @@ class PyIfBlockStatement(IfBlockStatement[Parent, "PyIfBlockStatement"], Generic
 
     @reader
     def _parse_consequence_block(self) -> PyCodeBlock:
-        from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 
         body_node = self.ts_node.child_by_field_name("body") if self.is_else_statement else self.ts_node.child_by_field_name("consequence")
         return PyCodeBlock(body_node, self.parent.level + 1, self.parent, self)

@@ -1,29 +1,29 @@
 """Integration module for advanced metrics with existing graph_sitter functionality.
 
+from typing import TYPE_CHECKING, Dict, List, Optional, Any
+import logging
+
+from .calculators.cyclomatic_complexity import CyclomaticComplexityCalculator
+from .calculators.depth_of_inheritance import DepthOfInheritanceCalculator
+from .calculators.halstead_volume import HalsteadVolumeCalculator
+from .calculators.lines_of_code import LinesOfCodeCalculator
+from .calculators.maintainability_index import MaintainabilityIndexCalculator
+from .core.metrics_engine import MetricsEngine
+from .core.metrics_registry import get_global_registry, register_calculator
+from .storage.metrics_database import MetricsDatabase
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_analysis import get_codebase_summary
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.metrics.models.metrics_data import MetricsData
+
 This module provides integration points to extend the existing codebase analysis
 with advanced metrics capabilities while maintaining backward compatibility.
 """
 
-from __future__ import annotations
-
-import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Any
-
-from .core.metrics_engine import MetricsEngine
-from .core.metrics_registry import get_global_registry, register_calculator
-from .calculators.cyclomatic_complexity import CyclomaticComplexityCalculator
-from .calculators.halstead_volume import HalsteadVolumeCalculator
-from .calculators.maintainability_index import MaintainabilityIndexCalculator
-from .calculators.lines_of_code import LinesOfCodeCalculator
-from .calculators.depth_of_inheritance import DepthOfInheritanceCalculator
-from .storage.metrics_database import MetricsDatabase
-
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase
-    from graph_sitter.metrics.models.metrics_data import MetricsData
 
 logger = logging.getLogger(__name__)
-
 
 class AdvancedMetricsIntegration:
     """Integration class for advanced metrics functionality."""
@@ -403,7 +403,6 @@ class AdvancedMetricsIntegration:
         if self.database:
             self.database.close()
 
-
 # Convenience functions for integration with existing codebase analysis
 
 def enhance_codebase_analysis(codebase: Codebase, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -420,7 +419,6 @@ def enhance_codebase_analysis(codebase: Codebase, config: Optional[Dict[str, Any
         Enhanced analysis results.
     """
     # Import the existing analysis function
-    from graph_sitter.codebase.codebase_analysis import get_codebase_summary
     
     # Get basic analysis
     basic_summary = get_codebase_summary(codebase)
@@ -445,7 +443,6 @@ def enhance_codebase_analysis(codebase: Codebase, config: Optional[Dict[str, Any
     finally:
         integration.close()
 
-
 def get_advanced_file_analysis(codebase: Codebase, file_path: str, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Get advanced analysis for a specific file.
     
@@ -467,12 +464,10 @@ def get_advanced_file_analysis(codebase: Codebase, file_path: str, config: Optio
     finally:
         integration.close()
 
-
 # Registry access for external use
 def get_metrics_registry():
     """Get the global metrics registry for external access."""
     return get_global_registry()
-
 
 def register_custom_calculator(calculator_class, category: str = "custom", config: Optional[Dict[str, Any]] = None):
     """Register a custom metrics calculator.
@@ -483,4 +478,3 @@ def register_custom_calculator(calculator_class, category: str = "custom", confi
         config: Configuration for the calculator.
     """
     register_calculator(calculator_class, category, config)
-

@@ -1,8 +1,10 @@
+
 from collections.abc import Iterator, MutableMapping
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions.builtin import Builtin
@@ -12,18 +14,15 @@ from graph_sitter.core.expressions.unpack import Unpack
 from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.interfaces.has_value import HasValue
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.interfaces.importable import Importable
-
 
 TExpression = TypeVar("TExpression", bound="Expression")
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Pair(Editable[Parent], HasValue, Generic[TExpression, Parent]):
@@ -72,10 +71,8 @@ class Pair(Editable[Parent], HasValue, Generic[TExpression, Parent]):
         if self.value and self.value is not self.key:
             self.value._compute_dependencies(usage_type, dest)
 
-
 TExpression = TypeVar("TExpression", bound="Expression")
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Dict(Expression[Parent], Builtin, MutableMapping[str, TExpression], Generic[TExpression, Parent]):

@@ -1,27 +1,26 @@
+
+from abc import abstractmethod
+from pathlib import Path
+from typing import TYPE_CHECKING
 import json
 import os
 import shutil
 import subprocess
 import uuid
-from abc import abstractmethod
-from pathlib import Path
-from typing import TYPE_CHECKING
 
 from py_mini_racer import MiniRacer
 from py_mini_racer._objects import JSMappedObject
 from py_mini_racer._types import JSEvalException
 
+from graph_sitter.core.external.dependency_manager import DependencyManager
 from graph_sitter.core.external.language_engine import LanguageEngine
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.typescript.external.mega_racer import MegaRacer
 
 if TYPE_CHECKING:
-    from graph_sitter.core.external.dependency_manager import DependencyManager
-    from graph_sitter.core.interfaces.editable import Editable
-
 
 logger = get_logger(__name__)
-
 
 class TypescriptEngine(LanguageEngine):
     dependency_manager: "DependencyManager | None"
@@ -38,7 +37,6 @@ class TypescriptEngine(LanguageEngine):
             self.dependency_manager.wait_until_ready(ignore_error=True)
         # Start the engine
         super()._start()
-
 
 class V8TypescriptEngine(TypescriptEngine):
     """Typescript-compiler based language engine using MiniRacer's V8-based JS engine.
@@ -155,7 +153,6 @@ class V8TypescriptEngine(TypescriptEngine):
             return self.ctx.eval(f"type_script_analyzer.getFunctionAtPosition('{file_path}', {node.start_byte})")
         except JSEvalException as e:
             return None
-
 
 class NodeTypescriptEngine(TypescriptEngine):
     """Typescript-compiler based language engine using NodeJS and the TypeScript compiler.

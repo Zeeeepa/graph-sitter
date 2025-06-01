@@ -1,12 +1,12 @@
+
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.editable import Editable
 
+if TYPE_CHECKING:
 
 Attribute = TypeVar("Attribute", bound="Editable")
-
 
 class HasAttribute(Generic[Attribute]):
     @abstractmethod

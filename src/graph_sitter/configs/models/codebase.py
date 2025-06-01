@@ -1,9 +1,9 @@
+
 from enum import IntEnum, auto
 
 from pydantic import Field
 
 from graph_sitter.configs.models.base_config import BaseConfig
-
 
 class PinkMode(IntEnum):
     # Use the python SDK for all files
@@ -12,7 +12,6 @@ class PinkMode(IntEnum):
     ALL_FILES = auto()
     # Use the Rust SDK for files the python SDK can't parse (non-source files). Make sure to install the pink extra
     NON_SOURCE_FILES = auto()
-
 
 class CodebaseConfig(BaseConfig):
     def __init__(self, prefix: str = "CODEBASE", *args, **kwargs) -> None:
@@ -39,6 +38,5 @@ class CodebaseConfig(BaseConfig):
     unpacking_assignment_partial_removal: bool = True
     conditional_type_resolution: bool = False
     use_pink: PinkMode = PinkMode.OFF
-
 
 DefaultCodebaseConfig = CodebaseConfig()

@@ -1,7 +1,9 @@
+
 from typing import TYPE_CHECKING, Self, TypeVar, override
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import reader
 from graph_sitter.core.autocommit import writer
 from graph_sitter.core.expressions import Expression
@@ -12,15 +14,14 @@ from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol_groups.dict import Dict, Pair
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc, ts_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
+from graph_sitter.typescript.function import TSFunction
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
 
 Parent = TypeVar("Parent", bound="Editable")
 TExpression = TypeVar("TExpression", bound=Expression)
 
 logger = get_logger(__name__)
-
 
 @ts_apidoc
 class TSPair(Pair):
@@ -42,7 +43,6 @@ class TSPair(Pair):
         self.shorthand = ts_node.type == "shorthand_property_identifier"
 
     def _get_key_value(self) -> tuple[Expression[Self] | None, Expression[Self] | None]:
-        from graph_sitter.typescript.function import TSFunction
 
         key, value = None, None
 
@@ -68,7 +68,6 @@ class TSPair(Pair):
             self.parent[self.key.source] = self.ctx.node_classes.bool_conversion[bool_condition]
         else:
             super().reduce_condition(bool_condition, node)
-
 
 @apidoc
 class TSDict(Dict, HasAttribute):

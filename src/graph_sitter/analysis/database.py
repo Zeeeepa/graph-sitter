@@ -1,17 +1,17 @@
 """
+
+from dataclasses import dataclass, asdict
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Tuple
+import json
+import sqlite3
+
 Database schema and storage layer for comprehensive codebase analysis.
 
 This module implements the database layer for storing analysis results,
 following the patterns identified from graph-sitter.com documentation.
 """
-
-import sqlite3
-import json
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
-from datetime import datetime
-from pathlib import Path
-
 
 @dataclass
 class CodebaseRecord:
@@ -26,7 +26,6 @@ class CodebaseRecord:
     total_symbols: int = 0
     analysis_timestamp: str = ""
     metadata: str = "{}"  # JSON string for additional data
-
 
 @dataclass
 class FileRecord:
@@ -43,7 +42,6 @@ class FileRecord:
     complexity_score: float = 0.0
     maintainability_index: float = 0.0
     metadata: str = "{}"
-
 
 @dataclass
 class FunctionRecord:
@@ -66,7 +64,6 @@ class FunctionRecord:
     docstring: str = ""
     metadata: str = "{}"
 
-
 @dataclass
 class ClassRecord:
     """Database record for class-level analysis."""
@@ -85,7 +82,6 @@ class ClassRecord:
     docstring: str = ""
     metadata: str = "{}"
 
-
 @dataclass
 class FunctionCallRecord:
     """Database record for function call analysis."""
@@ -101,7 +97,6 @@ class FunctionCallRecord:
     call_chain_position: int = 0
     metadata: str = "{}"
 
-
 @dataclass
 class DependencyRecord:
     """Database record for dependency relationships."""
@@ -111,7 +106,6 @@ class DependencyRecord:
     dependency_type: str = ""  # 'import', 'call', 'inheritance', 'usage'
     strength: float = 1.0
     metadata: str = "{}"
-
 
 @dataclass
 class ImportRecord:
@@ -124,7 +118,6 @@ class ImportRecord:
     is_external: bool = False
     import_line: int = 0
     metadata: str = "{}"
-
 
 class AnalysisDatabase:
     """
@@ -433,4 +426,3 @@ class AnalysisDatabase:
     
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
-

@@ -1,5 +1,6 @@
-import os.path
+
 from pathlib import Path
+import os.path
 
 from pydantic import BaseModel
 
@@ -9,7 +10,6 @@ from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class RepoConfig(BaseModel):
     """All the information about the repo needed to build a codebase"""

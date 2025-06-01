@@ -1,8 +1,8 @@
+
 import rich
 import rich_click as click
 
 from contexten.cli.auth.token_manager import TokenManager
-
 
 @click.command(name="logout")
 def logout_command():

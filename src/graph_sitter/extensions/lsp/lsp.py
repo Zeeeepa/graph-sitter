@@ -1,22 +1,22 @@
+
 import logging
 
 from lsprotocol import types
 
-import graph_sitter
-from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
-from graph_sitter.core.file import SourceFile
 from contexten.extensions.lsp.definition import go_to_definition
 from contexten.extensions.lsp.document_symbol import get_document_symbol
 from contexten.extensions.lsp.protocol import GraphSitterLanguageServerProtocol
 from contexten.extensions.lsp.range import get_range
 from contexten.extensions.lsp.server import GraphSitterLanguageServer
 from contexten.extensions.lsp.utils import get_path
+from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
+from graph_sitter.core.file import SourceFile
 from graph_sitter.shared.logging.get_logger import get_logger
+import graph_sitter
 
 version = getattr(graph_sitter, "__version__", "v0.1")
 server = GraphSitterLanguageServer("codegen", version, protocol_cls=GraphSitterLanguageServerProtocol)
 logger = get_logger(__name__)
-
 
 @server.feature(types.TEXT_DOCUMENT_DID_OPEN)
 def did_open(server: GraphSitterLanguageServer, params: types.DidOpenTextDocumentParams) -> None:
@@ -31,7 +31,6 @@ def did_open(server: GraphSitterLanguageServer, params: types.DidOpenTextDocumen
         sync = DiffLite(change_type=ChangeType.Added, path=path)
         server.codebase.ctx.apply_diffs([sync])
 
-
 @server.feature(types.TEXT_DOCUMENT_DID_CHANGE)
 def did_change(server: GraphSitterLanguageServer, params: types.DidChangeTextDocumentParams) -> None:
     """Handle document change notification."""
@@ -42,7 +41,6 @@ def did_change(server: GraphSitterLanguageServer, params: types.DidChangeTextDoc
     server.io.update_file(path, params.text_document.version)
     sync = DiffLite(change_type=ChangeType.Modified, path=path)
     server.codebase.ctx.apply_diffs([sync])
-
 
 @server.feature(types.WORKSPACE_TEXT_DOCUMENT_CONTENT)
 def workspace_text_document_content(server: GraphSitterLanguageServer, params: types.TextDocumentContentParams) -> types.TextDocumentContentResult:
@@ -59,7 +57,6 @@ def workspace_text_document_content(server: GraphSitterLanguageServer, params: t
         text=content,
     )
 
-
 @server.feature(types.TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: GraphSitterLanguageServer, params: types.DidCloseTextDocumentParams) -> None:
     """Handle document close notification."""
@@ -68,7 +65,6 @@ def did_close(server: GraphSitterLanguageServer, params: types.DidCloseTextDocum
     # We can perform any additional cleanup here if needed
     path = get_path(params.text_document.uri)
     server.io.close_file(path)
-
 
 @server.feature(
     types.TEXT_DOCUMENT_RENAME,
@@ -87,7 +83,6 @@ def rename(server: GraphSitterLanguageServer, params: types.RenameParams) -> typ
     task.end()
     return server.io.get_workspace_edit()
 
-
 @server.feature(
     types.TEXT_DOCUMENT_DOCUMENT_SYMBOL,
     options=types.DocumentSymbolOptions(work_done_progress=True),
@@ -101,7 +96,6 @@ def document_symbol(server: GraphSitterLanguageServer, params: types.DocumentSym
         symbols.append(get_document_symbol(symbol))
     task.end()
     return symbols
-
 
 @server.feature(
     types.TEXT_DOCUMENT_DEFINITION,
@@ -117,7 +111,6 @@ def definition(server: GraphSitterLanguageServer, params: types.DefinitionParams
         range=get_range(resolved),
     )
 
-
 @server.feature(
     types.TEXT_DOCUMENT_CODE_ACTION,
     options=types.CodeActionOptions(resolve_provider=True, work_done_progress=True),
@@ -127,13 +120,11 @@ def code_action(server: GraphSitterLanguageServer, params: types.CodeActionParam
     actions = server.get_actions_for_range(params)
     return actions
 
-
 @server.feature(
     types.CODE_ACTION_RESOLVE,
 )
 def code_action_resolve(server: GraphSitterLanguageServer, params: types.CodeAction) -> types.CodeAction:
     return server.resolve_action(params)
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

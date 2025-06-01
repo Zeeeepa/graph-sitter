@@ -1,8 +1,8 @@
+
 from graph_sitter.codebase.flagging.code_flag import CodeFlag
 from graph_sitter.codebase.flagging.group import Group
 from graph_sitter.codebase.flagging.groupers.enums import GroupBy
 from graph_sitter.git.repo_operator.repo_operator import RepoOperator
-
 
 class BaseGrouper:
     """Base class of all groupers.

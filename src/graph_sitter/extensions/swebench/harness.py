@@ -1,6 +1,7 @@
 """This is the harness for running an AI agent on the SWE Bench dataset."""
 
 #!/usr/bin/env python
+
 import json
 import pprint
 import random
@@ -22,13 +23,11 @@ PARENT_DIR = Path(__file__).parent
 
 PREDS_DNAME = PARENT_DIR / "predictions"
 
-
 def diff_versus_commit(git_dname, commit):
     """Take a diff of `git_dname` current contents versus the `commit`."""
     diff_cmd = f"git -C {git_dname} diff {commit}"
     diff_output = subprocess.check_output(diff_cmd.split()).decode()
     return diff_output
-
 
 def files_in_patch(patch):
     """Extract the list of modified files from a unified diff patch string."""
@@ -40,13 +39,11 @@ def files_in_patch(patch):
                 files.append(fname)
     return files
 
-
 def show_problems(dataset):
     """Print out all the instance_id and problem_descriptions."""
     for inst, entry in dataset.items():
         problem = entry.problem_statement.splitlines()[0]
         print(f"{inst}: {problem}")
-
 
 def run_agent_on_entry(entry: SweBenchExample, model: str, codebase: Codebase | None = None, run_id: str | None = None):
     """Process one `entry` from SWE Bench using the LLM `models` at the
@@ -129,7 +126,6 @@ Also DO NOT ADD OR EDIT ANY TESTS!
 
     return result
 
-
 def process_instances(dataset: dict[str, SweBenchExample], threads: int):
     """Dataset - The subset of the SWE Bench dataset to process.
     threads - How many problems to attempt concurrently.
@@ -188,12 +184,10 @@ def process_instances(dataset: dict[str, SweBenchExample], threads: int):
     if threads > 1:
         gather()
 
-
 def main():
     # Load the SWE Bench dataset
     dataset = {example.instance_id: example for example in get_swe_bench_examples()}
     process_instances(dataset, threads=10)
-
 
 if __name__ == "__main__":
     status = main()

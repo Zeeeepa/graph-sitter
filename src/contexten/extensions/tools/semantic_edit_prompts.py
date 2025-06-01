@@ -273,7 +273,6 @@ def helper():
 """
 )
 
-
 COMMANDER_SYSTEM_PROMPT = """You are an expert code editor.
 
 Another agent has determined an edit needs to be made to this file.
@@ -326,7 +325,6 @@ Note how the example maintains:
 4. No content outside the edit range
 """
 
-
 _HUMAN_PROMPT_DRAFT_EDITOR = """
 HERE IS THE OLD VERSION OF THE SECTION:
 ```
@@ -337,7 +335,6 @@ HERE ARE INSTRUCTIONS FOR THE EDIT:
 ```
 {edit_content}
 ```
-
 
 OUTPUT REQUIREMENTS:
 1. Wrap your response in a code block using triple backticks (```).

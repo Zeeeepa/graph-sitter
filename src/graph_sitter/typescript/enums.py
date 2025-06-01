@@ -1,5 +1,5 @@
-from enum import StrEnum
 
+from enum import StrEnum
 
 class TSFunctionTypeNames(StrEnum):
     # const a = function functionExpression(): void {

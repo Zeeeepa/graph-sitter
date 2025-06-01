@@ -1,12 +1,13 @@
+
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.external.external_process import ExternalProcess
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.typescript.external.dependency_manager import TypescriptDependencyManager
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-
 
 class DependencyManager(ExternalProcess):
     """Manages dependencies for the given repository.
@@ -26,9 +27,7 @@ class DependencyManager(ExternalProcess):
     def remove_dependencies(self):
         pass
 
-
 def get_dependency_manager(language: ProgrammingLanguage, codebase_context: "CodebaseContext", enabled: bool = False) -> DependencyManager | None:
-    from graph_sitter.typescript.external.dependency_manager import TypescriptDependencyManager
 
     ts_enabled = enabled or codebase_context.config.ts_dependency_manager
     if language == ProgrammingLanguage.TYPESCRIPT:

@@ -1,55 +1,51 @@
-from __future__ import annotations
 
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Generic, Literal, Self, overload, override
-
 from typing_extensions import TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
 from graph_sitter._proxy import proxy_property
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import commiter, reader, writer
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
+from graph_sitter.core.detached_symbols.decorator import Decorator
+from graph_sitter.core.detached_symbols.parameter import Parameter
+from graph_sitter.core.expressions import Name
+from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.function import Function
 from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.interface import Interface
 from graph_sitter.core.interfaces.callable import Callable
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
 from graph_sitter.core.interfaces.has_block import HasBlock
 from graph_sitter.core.interfaces.inherits import Inherits
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.attribute import Attribute
 from graph_sitter.core.statements.statement import StatementType
+from graph_sitter.core.statements.symbol_statement import SymbolStatement
 from graph_sitter.core.symbol import Symbol
+from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
+from graph_sitter.core.symbol_groups.parents import Parents
 from graph_sitter.enums import SymbolType
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.detached_symbols.decorator import Decorator
-    from graph_sitter.core.detached_symbols.parameter import Parameter
-    from graph_sitter.core.expressions import Name
-    from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.external_module import ExternalModule
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.interface import Interface
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.symbol_statement import SymbolStatement
-    from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
-    from graph_sitter.core.symbol_groups.parents import Parents
-
 
 logger = get_logger(__name__)
-
 
 TFunction = TypeVar("TFunction", bound="Function", default="Function")
 TDecorator = TypeVar("TDecorator", bound="Decorator", default="Decorator")
 TCodeBlock = TypeVar("TCodeBlock", bound="CodeBlock", default="CodeBlock")
 TParameter = TypeVar("TParameter", bound="Parameter", default="Parameter")
 TType = TypeVar("TType", bound="Type", default="Type")
-
 
 @apidoc
 class Class(Inherits[TType], HasBlock[TCodeBlock, TDecorator], Callable[TParameter, TType], HasAttribute[TFunction | Attribute], Generic[TFunction, TDecorator, TCodeBlock, TParameter, TType]):

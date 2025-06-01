@@ -12,7 +12,6 @@ DEFAULT_SERVER_PORT = 4002
 
 EPHEMERAL_SERVER_PATH = "graph_sitter.runner.sandbox.ephemeral_server:app"
 
-
 class Client:
     """Client for interacting with the sandbox server."""
 

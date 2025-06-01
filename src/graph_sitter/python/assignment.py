@@ -1,28 +1,27 @@
-from __future__ import annotations
 
 from collections.abc import Collection
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.transactions import RemoveTransaction, TransactionPriority
 from graph_sitter.compiled.autocommit import reader
 from graph_sitter.core.assignment import Assignment
 from graph_sitter.core.autocommit.decorators import remover
 from graph_sitter.core.expressions.multi_expression import MultiExpression
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.assignment_statement import AssignmentStatement
+from graph_sitter.python.statements.assignment_statement import PyAssignmentStatement
 from graph_sitter.python.symbol import PySymbol
 from graph_sitter.python.symbol_groups.comment_group import PyCommentGroup
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.python.statements.assignment_statement import PyAssignmentStatement
 
 logger = get_logger(__name__)
-
 
 @py_apidoc
 class PyAssignment(Assignment["PyAssignmentStatement"], PySymbol):
@@ -131,7 +130,6 @@ class PyAssignment(Assignment["PyAssignmentStatement"], PySymbol):
     @remover
     def remove(self, delete_formatting: bool = True, priority: int = 0, dedupe: bool = True) -> None:
         """Deletes this assignment and its related extended nodes (e.g. decorators, comments).
-
 
         Removes the current node and its extended nodes (e.g. decorators, comments) from the codebase.
         After removing the node, it handles cleanup of any surrounding formatting based on the context.

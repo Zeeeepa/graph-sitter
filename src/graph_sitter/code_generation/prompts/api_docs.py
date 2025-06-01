@@ -1,3 +1,4 @@
+
 from graph_sitter.code_generation.codegen_sdk_codebase import get_codegen_sdk_codebase
 from graph_sitter.code_generation.prompts.utils import get_api_classes_by_decorator, get_codegen_sdk_class_docstring
 from graph_sitter.core.codebase import Codebase
@@ -12,19 +13,16 @@ logger = get_logger(__name__)
 # UTILS
 ########################################################################################################################
 
-
 def get_docstrings_for_classes(codebase: Codebase, language: ProgrammingLanguage, classnames: list[str]) -> dict[str, str]:
     """Returns map of ClassName -> Docstring"""
     classes = get_api_classes_by_decorator(codebase=codebase, language=language)
     class_docstrings = {k: get_codegen_sdk_class_docstring(cls=v, codebase=codebase) for k, v in classes.items()}
     return {k: class_docstrings[k] for k in classnames}
 
-
 ########################################################################################################################
 # API STUBS
 ########################################################################################################################
 # This is like `PyFile` definition etc.
-
 
 def get_codebase_docstring(codebase: Codebase, language: ProgrammingLanguage) -> str:
     """Returns the docstring for the `Codebase` class."""
@@ -35,7 +33,6 @@ The `Codebase` class is the main entrypoint to manipulating a codebase with Grap
 
 {docstring}
 """  # noqa: E501
-
 
 def get_behavior_docstring(codebase: Codebase, language: ProgrammingLanguage) -> str:
     """These are the core classes in GraphSitter - they define things like `HasName` etc."""
@@ -62,11 +59,9 @@ Look in the type inheritance of the core symbols to see which behaviors they sup
 {cls_sections}
 """  # noqa: E501
 
-
 ########################################################################################################################
 # CORE SYMBOLS
 ########################################################################################################################
-
 
 def get_core_symbol_docstring(codebase: Codebase, language: ProgrammingLanguage) -> str:
     """This should return the docstrings for the symbol types in GraphSitter. Also should include the language-specific extensions."""
@@ -106,11 +101,9 @@ Most codemods will begin by identifying the symbols in the codebase that need to
 {cls_sections}
 """  # noqa: E501
 
-
 ########################################################################################################################
 # LANGUAGE SPECIFIC
 ########################################################################################################################
-
 
 def get_language_specific_docstring(codebase: Codebase, language: ProgrammingLanguage) -> str:
     # =====[ Get language prefix ]=====
@@ -140,11 +133,9 @@ For example, all `File` that you encounter will be of type {prefix}File, {prefix
 {cls_docstrings}
 """
 
-
 ########################################################################################################################
 # FULL DOCS
 ########################################################################################################################
-
 
 def get_codegen_sdk_docs(language: ProgrammingLanguage = ProgrammingLanguage.PYTHON, codebase: Codebase | None = None) -> str:
     """Computes the GraphSitter docs from scratch"""
@@ -201,7 +192,6 @@ Given a Codemod like so, the Graph-sitter infrastructure will:
 - Visualise the diff, log or other artifacts created for the developer
 - Split up the changes into logical PRs, e.g. by CODEOWNER or by file (according to the developer's request)
 - Upload results to version control (e.g. GitHub)
-
 
 ## `Codebase` Class Documentation
 

@@ -1,3 +1,4 @@
+
 from typing import TYPE_CHECKING, Self
 
 from tree_sitter import Node as TSNode
@@ -7,13 +8,13 @@ from graph_sitter.core.autocommit import reader
 from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.statements.attribute import Attribute
 from graph_sitter.python.assignment import PyAssignment
+from graph_sitter.python.class_definition import PyClass
+from graph_sitter.python.class_definition import PyClass
 from graph_sitter.python.statements.assignment_statement import PyAssignmentStatement
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 from graph_sitter.shared.exceptions.api import APINotApplicableForLanguageError
 
 if TYPE_CHECKING:
-    from graph_sitter.python.class_definition import PyClass
-
 
 @py_apidoc
 class PyAttribute(Attribute["PyCodeBlock", "PyAssignment"], PyAssignmentStatement):
@@ -97,7 +98,6 @@ class PyAttribute(Attribute["PyCodeBlock", "PyAssignment"], PyAssignmentStatemen
     @reader
     def docstring(self, base_class: "PyClass") -> str | None:
         """Parse the docstring of the attribute from it's parent class docstrings."""
-        from graph_sitter.python.class_definition import PyClass
 
         to_search = [base_class]
         to_search.extend(base_class.superclasses())

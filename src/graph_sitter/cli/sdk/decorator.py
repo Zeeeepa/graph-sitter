@@ -1,3 +1,4 @@
+
 from collections.abc import Callable, Sequence
 from functools import wraps
 from typing import Literal, ParamSpec, TypeVar, get_type_hints
@@ -8,7 +9,6 @@ P = ParamSpec("P")
 T = TypeVar("T")
 WebhookType = Literal["pr", "push", "issue", "release"]
 WebhookEvent = Literal["created", "updated", "closed", "reopened", "synchronized"]
-
 
 class DecoratedFunction:
     """Represents a Python function decorated with a codegen decorator."""
@@ -47,7 +47,6 @@ class DecoratedFunction:
         self.func = wrapper
         return wrapper
 
-
 def function(name: str, subdirectories: list[str] | None = None, language: ProgrammingLanguage | None = None) -> DecoratedFunction:
     """Decorator for codegen functions.
 
@@ -61,7 +60,6 @@ def function(name: str, subdirectories: list[str] | None = None, language: Progr
 
     """
     return DecoratedFunction(name=name, subdirectories=subdirectories, language=language)
-
 
 def webhook(
     label: str,

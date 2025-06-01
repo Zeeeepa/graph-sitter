@@ -1,3 +1,4 @@
+
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Optional, Self, TypeVar, override
 
@@ -7,23 +8,22 @@ from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
 from graph_sitter.core.expressions import Name
 from graph_sitter.core.expressions.expression import Expression
 from graph_sitter.core.interfaces.chainable import Chainable
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.interfaces.resolvable import Resolvable
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-
 
 Object = TypeVar("Object", bound="Chainable")
 Attribute = TypeVar("Attribute", bound="Resolvable")
 Parent = TypeVar("Parent", bound="Expression")
-
 
 @apidoc
 class ChainedAttribute(Expression[Parent], Resolvable, Generic[Object, Attribute, Parent]):
@@ -87,7 +87,6 @@ class ChainedAttribute(Expression[Parent], Resolvable, Generic[Object, Attribute
         Returns:
             list[FunctionCall | Name]: List of Name nodes (property access) and FunctionCall nodes (method calls)
         """
-        from graph_sitter.core.detached_symbols.function_call import FunctionCall
 
         ret = []
         curr = self

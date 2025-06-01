@@ -1,19 +1,19 @@
 """
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, Any, List, Optional
+import os
+
+from graph_sitter.shared.logging.get_logger import get_logger
+
 Linear Integration Configuration Management
 
 Comprehensive configuration system for Linear integration with support for
 environment variables, validation, and default values.
 """
 
-import os
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, field
-from pathlib import Path
-
-from graph_sitter.shared.logging.get_logger import get_logger
-
 logger = get_logger(__name__)
-
 
 @dataclass
 class LinearAPIConfig:
@@ -26,7 +26,6 @@ class LinearAPIConfig:
     cache_ttl: int = 300
     base_url: str = "https://api.linear.app/graphql"
 
-
 @dataclass
 class LinearWebhookConfig:
     """Linear webhook configuration"""
@@ -37,14 +36,12 @@ class LinearWebhookConfig:
     signature_header: str = "Linear-Signature"
     timestamp_tolerance: int = 300  # 5 minutes
 
-
 @dataclass
 class LinearBotConfig:
     """Linear bot configuration"""
     bot_user_id: Optional[str] = None
     bot_email: Optional[str] = None
     bot_names: List[str] = field(default_factory=lambda: ["codegen", "openalpha", "bot"])
-
 
 @dataclass
 class LinearAssignmentConfig:
@@ -54,7 +51,6 @@ class LinearAssignmentConfig:
     max_assignments_per_hour: int = 10
     assignment_cooldown: int = 300  # 5 minutes
 
-
 @dataclass
 class LinearWorkflowConfig:
     """Linear workflow automation configuration"""
@@ -63,7 +59,6 @@ class LinearWorkflowConfig:
     progress_update_interval: int = 60
     status_sync_interval: int = 300
     task_timeout: int = 3600  # 1 hour
-
 
 @dataclass
 class LinearEventConfig:
@@ -76,7 +71,6 @@ class LinearEventConfig:
     persistence_file: str = "linear_events.json"
     max_event_age: int = 86400  # 24 hours
 
-
 @dataclass
 class LinearMonitoringConfig:
     """Linear monitoring configuration"""
@@ -85,7 +79,6 @@ class LinearMonitoringConfig:
     health_check_interval: int = 300
     metrics_retention: int = 86400  # 24 hours
     alert_on_failures: bool = True
-
 
 @dataclass
 class LinearIntegrationConfig:
@@ -270,7 +263,6 @@ class LinearIntegrationConfig:
             }
         }
 
-
 def get_linear_config() -> LinearIntegrationConfig:
     """Get Linear integration configuration from environment"""
     config = LinearIntegrationConfig.from_env()
@@ -284,7 +276,6 @@ def get_linear_config() -> LinearIntegrationConfig:
     
     logger.info("Linear integration configuration loaded")
     return config
-
 
 def create_config_template() -> str:
     """Create a configuration template with all available options"""
@@ -343,4 +334,3 @@ LINEAR_HEALTH_CHECK_INTERVAL=300
 LINEAR_METRICS_RETENTION=86400
 LINEAR_ALERT_ON_FAILURES=true
 """
-

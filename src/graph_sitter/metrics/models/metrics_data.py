@@ -8,7 +8,6 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
-
 @dataclass
 class HalsteadMetrics:
     """Halstead complexity metrics.
@@ -53,7 +52,6 @@ class HalsteadMetrics:
     def effort(self) -> float:
         """Halstead effort: E = D * V."""
         return self.difficulty * self.volume
-
 
 @dataclass
 class FunctionMetrics:
@@ -107,7 +105,6 @@ class FunctionMetrics:
             return 0.0
         return self.cyclomatic_complexity / self.logical_lines
 
-
 @dataclass
 class ClassMetrics:
     """Metrics for a single class."""
@@ -156,7 +153,6 @@ class ClassMetrics:
         if not self.function_metrics:
             return 0.0
         return sum(m.cyclomatic_complexity for m in self.function_metrics) / len(self.function_metrics)
-
 
 @dataclass
 class FileMetrics:
@@ -216,7 +212,6 @@ class FileMetrics:
             return 0.0
         return sum(c.cyclomatic_complexity for c in self.class_metrics) / len(self.class_metrics)
 
-
 @dataclass
 class CodebaseMetrics:
     """Metrics for an entire codebase."""
@@ -272,7 +267,6 @@ class CodebaseMetrics:
             return 0.0
         return self.test_files / self.total_files
 
-
 @dataclass
 class MetricsData:
     """Container for all metrics data."""
@@ -321,4 +315,3 @@ class MetricsData:
             "errors": self.errors,
             "warnings": self.warnings,
         }
-

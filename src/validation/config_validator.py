@@ -1,28 +1,29 @@
 """
+
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Tuple
+import logging
+import os
+import re
+import sys
+
+import requests
+
 Configuration Validation System
 Validates environment variables and system configuration for Graph-Sitter project
 """
 
-import os
-import sys
-import logging
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
-import re
-from dataclasses import dataclass
-from enum import Enum
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 class ValidationLevel(Enum):
     """Validation severity levels"""
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
-
 
 @dataclass
 class ValidationResult:
@@ -31,7 +32,6 @@ class ValidationResult:
     component: str
     message: str
     suggestion: Optional[str] = None
-
 
 class ConfigValidator:
     """Comprehensive configuration validation system"""
@@ -125,7 +125,6 @@ class ConfigValidator:
         if org_id and token:
             try:
                 # Test Codegen API connection
-                import requests
                 headers = {
                     'Authorization': f'Bearer {token}',
                     'Content-Type': 'application/json'
@@ -394,7 +393,6 @@ class ConfigValidator:
         # Summary
         print(f"\n📊 SUMMARY: {len(errors)} errors, {len(warnings)} warnings, {len(info)} info")
 
-
 def main():
     """Main validation entry point"""
     print("🔍 Graph-Sitter Configuration Validator")
@@ -412,7 +410,5 @@ def main():
         print("\n❌ Validation failed - please fix the errors above")
         return 1
 
-
 if __name__ == "__main__":
     sys.exit(main())
-

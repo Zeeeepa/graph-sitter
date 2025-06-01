@@ -1,5 +1,5 @@
-from typing import TypedDict
 
+from typing import TypedDict
 
 class AgentConfig(TypedDict, total=False):
     """Configuration options for the CodeAgent."""

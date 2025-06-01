@@ -1,21 +1,30 @@
-from __future__ import annotations
 
-import os
 from collections import Counter, defaultdict
+from collections.abc import Generator, Mapping, Sequence
 from contextlib import contextmanager
 from enum import IntEnum, auto, unique
 from functools import cached_property, lru_cache
 from os import PathLike
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+import os
 
+from codeowners import CodeOwners as CodeOwnersParser
+from git import Commit as GitCommit
 from rustworkx import PyDiGraph, WeightedEdgeList
 
+from __future__ import annotations
 from graph_sitter.codebase.config import ProjectConfig, SessionOptions
 from graph_sitter.codebase.config_parser import ConfigParser, get_config_parser_for_language
 from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
 from graph_sitter.codebase.flagging.flags import Flags
 from graph_sitter.codebase.io.file_io import FileIO
+from graph_sitter.codebase.io.io import IO
+from graph_sitter.codebase.node_classes.generic_node_classes import GenericNodeClasses
+from graph_sitter.codebase.node_classes.node_classes import NodeClasses
+from graph_sitter.codebase.node_classes.py_node_classes import PyNodeClasses
+from graph_sitter.codebase.node_classes.ts_node_classes import TSNodeClasses
+from graph_sitter.codebase.progress.progress import Progress
 from graph_sitter.codebase.progress.stub_progress import StubProgress
 from graph_sitter.codebase.transaction_manager import TransactionManager
 from graph_sitter.codebase.validation import get_edges, post_reset_validation
@@ -24,10 +33,20 @@ from graph_sitter.compiled.utils import uncache_all
 from graph_sitter.configs.models.codebase import CodebaseConfig, PinkMode
 from graph_sitter.configs.models.secrets import SecretsConfig
 from graph_sitter.core.autocommit import AutoCommit, commiter
+from graph_sitter.core.dataclasses.usage import Usage
 from graph_sitter.core.directory import Directory
+from graph_sitter.core.expressions import Expression
 from graph_sitter.core.external.dependency_manager import DependencyManager, get_dependency_manager
 from graph_sitter.core.external.language_engine import LanguageEngine, get_language_engine
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.file import File, SourceFile
+from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.interfaces.inherits import Inherits
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.parser import Parser
+from graph_sitter.core.parser import Parser
 from graph_sitter.enums import Edge, EdgeType, NodeType
+from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.shared.exceptions.control_flow import StopCodemodException
 from graph_sitter.shared.logging.get_logger import get_logger
@@ -35,25 +54,8 @@ from graph_sitter.shared.performance.stopwatch_utils import stopwatch
 from graph_sitter.typescript.external.ts_declassify.ts_declassify import TSDeclassify
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Mapping, Sequence
-
-    from codeowners import CodeOwners as CodeOwnersParser
-    from git import Commit as GitCommit
-
-    from graph_sitter.codebase.io.io import IO
-    from graph_sitter.codebase.node_classes.node_classes import NodeClasses
-    from graph_sitter.codebase.progress.progress import Progress
-    from graph_sitter.core.dataclasses.usage import Usage
-    from graph_sitter.core.expressions import Expression
-    from graph_sitter.core.external_module import ExternalModule
-    from graph_sitter.core.file import File, SourceFile
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.parser import Parser
-    from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 
 logger = get_logger(__name__)
-
 
 # src/vs/platform/contextview/browser/contextMenuService.ts is ignored as there is a parsing error with tree-sitter
 GLOBAL_FILE_IGNORE_LIST = [
@@ -71,28 +73,22 @@ GLOBAL_FILE_IGNORE_LIST = [
     "*@*.js",
 ]
 
-
 @unique
 class SyncType(IntEnum):
     DELETE = auto()
     REPARSE = auto()
     ADD = auto()
 
-
 def get_node_classes(programming_language: ProgrammingLanguage) -> NodeClasses:
     if programming_language == ProgrammingLanguage.PYTHON:
-        from graph_sitter.codebase.node_classes.py_node_classes import PyNodeClasses
 
         return PyNodeClasses
     elif programming_language == ProgrammingLanguage.TYPESCRIPT:
-        from graph_sitter.codebase.node_classes.ts_node_classes import TSNodeClasses
 
         return TSNodeClasses
     else:
-        from graph_sitter.codebase.node_classes.generic_node_classes import GenericNodeClasses
 
         return GenericNodeClasses
-
 
 class CodebaseContext:
     """MultiDiGraph Wrapper with TransactionManager"""
@@ -140,7 +136,6 @@ class CodebaseContext:
         progress: Progress | None = None,
     ) -> None:
         """Initializes codebase graph and TransactionManager"""
-        from graph_sitter.core.parser import Parser
 
         self.progress = progress or StubProgress()
         self.__graph = PyDiGraph()
@@ -561,7 +556,6 @@ class CodebaseContext:
                             to_resolve.extend(node.symbol_usages)
                     task.end()
                 if counter[NodeType.SYMBOL] > 0:
-                    from graph_sitter.core.interfaces.inherits import Inherits
 
                     logger.info("> Computing superclass dependencies")
                     task = self.progress.begin("Computing superclass dependencies", count=counter[NodeType.SYMBOL])

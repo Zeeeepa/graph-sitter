@@ -1,9 +1,9 @@
+
 import tiktoken
 
 ENCODERS = {
     "gpt-4o": tiktoken.encoding_for_model("gpt-4o"),
 }
-
 
 def count_tokens(s: str, model_name: str = "gpt-4o") -> int:
     """Uses tiktoken"""

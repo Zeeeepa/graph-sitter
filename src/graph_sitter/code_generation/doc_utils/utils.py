@@ -1,3 +1,4 @@
+
 import re
 import textwrap
 
@@ -17,7 +18,6 @@ logger = get_logger(__name__)
 # These are the classes that are not language specific, but have language specific subclasses with different names
 SPECIAL_BASE_CLASSES = {"SourceFile": "File"}
 
-
 def sanitize_docstring_for_markdown(docstring: str | None) -> str:
     """Sanitize the docstring for MDX"""
     if docstring is None:
@@ -31,7 +31,6 @@ def sanitize_docstring_for_markdown(docstring: str | None) -> str:
     if docstring.endswith('"""'):
         docstring = docstring[:-3]
     return docstring
-
 
 def sanitize_mdx_mintlify_description(content: str) -> str:
     """Mintlify description field needs to have string escaped, which content doesn't need.
@@ -47,7 +46,6 @@ def sanitize_mdx_mintlify_description(content: str) -> str:
         return content  # No-op if already escaped
     return re.sub(r'(")', r"\\\1", content)
 
-
 def sanitize_html_for_mdx(html_string: str) -> str:
     """Sanitize HTML string for MDX by escaping double quotes in attribute values.
 
@@ -60,7 +58,6 @@ def sanitize_html_for_mdx(html_string: str) -> str:
     # Replace double quotes with &quot; but only in HTML attributes
     return re.sub(r'"', "&quot;", html_string)
 
-
 def get_type_str(parent, curr_depth=0, max_depth=5):
     """Returns the type node for an attribute."""
     if curr_depth >= max_depth:
@@ -71,7 +68,6 @@ def get_type_str(parent, curr_depth=0, max_depth=5):
         if attr_type := get_type_str(child, curr_depth=curr_depth + 1):
             return attr_type
     return None
-
 
 def is_language_base_class(cls_obj: Class):
     """Returns true if `cls_obj` is a direct parent of a language specific class.
@@ -92,14 +88,12 @@ def is_language_base_class(cls_obj: Class):
     base_name = cls_obj.name.lower()
     return any(sub_class.name.lower() in [f"py{base_name}", f"ts{base_name}"] for sub_class in sub_classes)
 
-
 def get_section(symbol: Symbol, parent_class: Class | None = None):
     if parent_class:
         doc_section = parent_class.filepath.split("/")[1]
     else:
         doc_section = symbol.filepath.split("/")[1]
     return doc_section
-
 
 def get_language(symbol: Class | Function | PyAttribute) -> str:
     """Gets the language of which the symbol is an abstract representation.
@@ -120,7 +114,6 @@ def get_language(symbol: Class | Function | PyAttribute) -> str:
     else:
         return "ALL"
 
-
 def get_type(method: Function):
     """Return the type of method.
 
@@ -135,7 +128,6 @@ def get_type(method: Function):
     else:
         return "method"
 
-
 def is_settter(m: Function):
     """Checks if `m` is a setter method
     Args:
@@ -144,7 +136,6 @@ def is_settter(m: Function):
         bool: `True` if `m` is a setter method, `False` otherwise
     """
     return any([dec.name == f"{m.name}.setter" for dec in m.decorators])
-
 
 def create_path(symbol: Class | Function | PyAttribute, parent_class: Class | None = None) -> str:
     """Creates a route path for `symbol` that will be used in the frontend
@@ -178,7 +169,6 @@ def create_path(symbol: Class | Function | PyAttribute, parent_class: Class | No
 
     return f"api-reference/{doc_section}/{parent_name}/{name}"
 
-
 def has_documentation(c: Class):
     """If the class c is meant to be documented.
 
@@ -188,7 +178,6 @@ def has_documentation(c: Class):
         bool: `True` if the class is meant to be documented, `False` otherwise
     """
     return any([dec.name == "ts_apidoc" or dec.name == "py_apidoc" or dec.name == "apidoc" for dec in c.decorators])
-
 
 def safe_get_class(codebase: Codebase, class_name: str, language: str | None = None) -> Class | None:
     """Find the class in the codebase.
@@ -234,7 +223,6 @@ def safe_get_class(codebase: Codebase, class_name: str, language: str | None = N
         if len(sub_classes) == 1:
             class_obj = sub_classes[0]
     return class_obj
-
 
 def resolve_type_symbol(codebase: Codebase, symbol_name: str, resolved_types: list[Type], parent_class: Class, parent_symbol: Symbol, types_cache: dict):
     """Find the symbol in the codebase.
@@ -282,7 +270,6 @@ def resolve_type_symbol(codebase: Codebase, symbol_name: str, resolved_types: li
         return trgt_path
 
     return symbol_name
-
 
 def replace_multiple_types(codebase: Codebase, input_str: str, resolved_types: list[Type], parent_class: Class, parent_symbol: Symbol, types_cache: dict) -> str:
     """Replace multiple types in a string.
@@ -385,7 +372,6 @@ def replace_multiple_types(codebase: Codebase, input_str: str, resolved_types: l
     else:
         replacement = resolve_type_symbol(codebase=codebase, symbol_name=input_str, resolved_types=resolved_types, parent_class=parent_class, parent_symbol=parent_symbol, types_cache=types_cache)
         return replacement
-
 
 def extract_class_description(docstring):
     """Extract the class description from a docstring, excluding the attributes section.

@@ -1,15 +1,24 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, Self, Unpack
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.flagging.code_flag import CodeFlag
+from graph_sitter.codebase.flagging.enums import FlagKwargs
 from graph_sitter.core.assignment import Assignment
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind, UsageType
 from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.detached_symbols.parameter import Parameter
 from graph_sitter.core.expressions import Value
 from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
 from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.exportable import Exportable
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.type_alias import TypeAlias
 from graph_sitter.enums import ImportType, NodeType
@@ -19,16 +28,6 @@ from graph_sitter.typescript.statements.comment import TSComment, TSCommentType
 from graph_sitter.typescript.symbol_groups.comment_group import TSCommentGroup
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.flagging.code_flag import CodeFlag
-    from graph_sitter.codebase.flagging.enums import FlagKwargs
-    from graph_sitter.core.detached_symbols.parameter import Parameter
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.import_resolution import Import
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.node_id_factory import NodeId
-
 
 @ts_apidoc
 class TSSymbol(Symbol["TSHasBlock", "TSCodeBlock"], Exportable):

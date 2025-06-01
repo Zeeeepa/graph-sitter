@@ -1,13 +1,13 @@
+
+from collections.abc import Callable
 import linecache
 import sys
 import traceback
-from collections.abc import Callable
 
 from graph_sitter.shared.exceptions.compilation import InvalidUserCodeException
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 def get_compilation_error_context(filename: str, line_number: int, window_size: int = 2):
     """Get lines of context around SyntaxError + Exceptions that occur when compiling functions."""
@@ -19,7 +19,6 @@ def get_compilation_error_context(filename: str, line_number: int, window_size: 
         if line:
             lines.append((i, line))
     return lines
-
 
 def safe_compile_function_string(custom_scope: dict, func_name: str, func_str: str) -> Callable:
     # =====[ Add function string to linecache ]=====

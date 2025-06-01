@@ -1,12 +1,12 @@
-import json
+
 from pathlib import Path
+import json
 
 from pydantic import Field
 
 from graph_sitter.configs.models.codebase import CodebaseConfig
 from graph_sitter.configs.models.repository import RepositoryConfig
 from graph_sitter.configs.models.secrets import SecretsConfig
-
 
 class UserConfig:
     env_filepath: Path

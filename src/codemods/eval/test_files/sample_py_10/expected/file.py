@@ -1,12 +1,11 @@
-from typing import Any
 
+from typing import Any
 
 def greet_user(name: str | None = None) -> None:
     if name:
         print("Hello, " + name)
     else:
         print("Hello, Guest")
-
 
 def process_data(data: list[int], factor: int | None = None) -> dict[str, int]:
     result = {}
@@ -18,12 +17,10 @@ def process_data(data: list[int], factor: int | None = None) -> dict[str, int]:
     print("Processed " + str(len(data)) + " items")
     return result
 
-
 def complex_operation(x: Any, y: Any) -> Any:
     result = x * y
     print("Result: " + str(result))
     return result
-
 
 def main() -> None:
     greet_user("Alice")
@@ -31,7 +28,6 @@ def main() -> None:
     processed: dict[str, int] = process_data(data, 2)
     print("Processed data: " + str(processed))
     complex_operation(3, 4)
-
 
 if __name__ == "__main__":
     main()

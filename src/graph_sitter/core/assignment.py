@@ -1,8 +1,13 @@
-from __future__ import annotations
 
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
 from graph_sitter._proxy import proxy_property
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.compiled.autocommit import commiter, reader
 from graph_sitter.compiled.sort import sort_editables
 from graph_sitter.core.autocommit import writer
@@ -11,9 +16,19 @@ from graph_sitter.core.expressions import Expression, Name
 from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
 from graph_sitter.core.expressions.multi_expression import MultiExpression
 from graph_sitter.core.expressions.subscript_expression import SubscriptExpression
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.file import File
 from graph_sitter.core.interfaces.chainable import Chainable
+from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.interfaces.has_value import HasValue
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.interfaces.typeable import Typeable
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.assignment_statement import AssignmentStatement
+from graph_sitter.core.statements.assignment_statement import AssignmentStatement
+from graph_sitter.core.statements.export_statement import ExportStatement
+from graph_sitter.core.statements.statement import Statement
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.core.symbol_groups.dict import Dict
@@ -23,23 +38,8 @@ from graph_sitter.typescript.expressions.object_type import TSObjectType
 from graph_sitter.utils import find_index
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.codebase.resolution_stack import ResolutionStack
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.assignment_statement import AssignmentStatement
-    from graph_sitter.core.statements.export_statement import ExportStatement
-    from graph_sitter.core.statements.statement import Statement
 
 Parent = TypeVar("Parent", bound="AssignmentStatement | ExportStatement")
-
 
 @apidoc
 class Assignment(Symbol[Parent, ...], Typeable[Parent, ...], HasValue, Generic[Parent]):
@@ -139,7 +139,6 @@ class Assignment(Symbol[Parent, ...], Typeable[Parent, ...], HasValue, Generic[P
         Returns:
             bool: True if the assignment is a local variable, False otherwise.
         """
-        from graph_sitter.core.file import File
 
         if isinstance(self._left, ChainedAttribute):
             return False
@@ -222,7 +221,6 @@ class Assignment(Symbol[Parent, ...], Typeable[Parent, ...], HasValue, Generic[P
             yield from self.with_resolution_frame(self.type, direct=False)
         elif self.value:
             resolved = False
-            from graph_sitter.core.statements.assignment_statement import AssignmentStatement
 
             if self.parent_of_type(AssignmentStatement) and len(self.parent_of_type(AssignmentStatement).assignments) > 0:
                 name_node = self._name_node.ts_node
@@ -275,7 +273,6 @@ class Assignment(Symbol[Parent, ...], Typeable[Parent, ...], HasValue, Generic[P
     @writer
     def reduce_condition(self, bool_condition: bool, node: Editable | None = None) -> None:
         """Simplifies an assignment expression by reducing it based on a boolean condition and updating all the usages.
-
 
         Args:
             bool_condition (bool): The boolean value to reduce the condition to.

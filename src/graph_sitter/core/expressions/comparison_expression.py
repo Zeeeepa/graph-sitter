@@ -1,3 +1,4 @@
+
 from functools import cached_property
 from typing import Self, TypeVar
 
@@ -7,7 +8,6 @@ from graph_sitter.core.symbol_groups.expression_group import ExpressionGroup
 from graph_sitter.shared.decorators.docs import apidoc
 
 Parent = TypeVar("Parent")
-
 
 @apidoc
 class ComparisonExpression(BinaryExpression):

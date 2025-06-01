@@ -1,19 +1,20 @@
 """Examples demonstrating the Advanced Code Metrics and Analysis Engine.
 
-This module provides comprehensive examples of how to use the advanced metrics
-system for various analysis scenarios.
-"""
+from pathlib import Path
+from typing import Dict, Any, Optional
+import json
+
+from .core.base_calculator import BaseMetricsCalculator
+from .core.metrics_registry import get_global_registry
+from .core.metrics_registry import register_calculator
+from .integration import AdvancedMetricsIntegration, enhance_codebase_analysis
+from .storage.metrics_database import MetricsDatabase
 
 from __future__ import annotations
 
-import json
-from typing import Dict, Any, Optional
-from pathlib import Path
-
-from .integration import AdvancedMetricsIntegration, enhance_codebase_analysis
-from .core.metrics_registry import get_global_registry
-from .storage.metrics_database import MetricsDatabase
-
+This module provides comprehensive examples of how to use the advanced metrics
+system for various analysis scenarios.
+"""
 
 def basic_metrics_example(codebase) -> Dict[str, Any]:
     """Basic example of calculating metrics for a codebase.
@@ -55,7 +56,6 @@ def basic_metrics_example(codebase) -> Dict[str, Any]:
         
     finally:
         integration.close()
-
 
 def detailed_analysis_example(codebase) -> Dict[str, Any]:
     """Detailed analysis example with quality hotspots.
@@ -122,7 +122,6 @@ def detailed_analysis_example(codebase) -> Dict[str, Any]:
     finally:
         integration.close()
 
-
 def database_integration_example(codebase) -> Dict[str, Any]:
     """Example of using database integration for metrics storage.
     
@@ -176,7 +175,6 @@ def database_integration_example(codebase) -> Dict[str, Any]:
     finally:
         integration.close()
 
-
 def custom_calculator_example(codebase) -> Dict[str, Any]:
     """Example of creating and using a custom metrics calculator.
     
@@ -188,9 +186,6 @@ def custom_calculator_example(codebase) -> Dict[str, Any]:
     """
     print("\n🛠️ Custom Calculator Example")
     print("=" * 50)
-    
-    from .core.base_calculator import BaseMetricsCalculator
-    from .core.metrics_registry import register_calculator
     
     # Define a custom calculator
     class CustomComplexityCalculator(BaseMetricsCalculator):
@@ -283,7 +278,6 @@ def custom_calculator_example(codebase) -> Dict[str, Any]:
     finally:
         integration.close()
 
-
 def performance_analysis_example(codebase) -> Dict[str, Any]:
     """Example of performance analysis and optimization.
     
@@ -341,7 +335,6 @@ def performance_analysis_example(codebase) -> Dict[str, Any]:
         "best_configuration": best_result
     }
 
-
 def export_metrics_example(codebase, output_file: str = "metrics_export.json") -> Dict[str, Any]:
     """Example of exporting metrics data to various formats.
     
@@ -389,7 +382,6 @@ def export_metrics_example(codebase, output_file: str = "metrics_export.json") -
     finally:
         integration.close()
 
-
 def comprehensive_example(codebase) -> Dict[str, Any]:
     """Comprehensive example combining all features.
     
@@ -421,7 +413,6 @@ def comprehensive_example(codebase) -> Dict[str, Any]:
         print(f"\n❌ Error in comprehensive example: {str(e)}")
         return {"error": str(e), "partial_results": results}
 
-
 # Utility function for easy testing
 def run_example(codebase, example_name: str = "basic") -> Dict[str, Any]:
     """Run a specific example.
@@ -449,11 +440,9 @@ def run_example(codebase, example_name: str = "basic") -> Dict[str, Any]:
     
     return examples[example_name](codebase)
 
-
 if __name__ == "__main__":
     print("Advanced Code Metrics and Analysis Engine - Examples")
     print("=" * 60)
     print("This module contains examples for using the metrics system.")
     print("Import this module and call run_example(codebase, 'example_name')")
     print(f"Available examples: {', '.join(['basic', 'detailed', 'database', 'custom', 'performance', 'export', 'comprehensive'])}")
-

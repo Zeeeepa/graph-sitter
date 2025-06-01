@@ -1,5 +1,5 @@
-from enum import Enum
 
+from enum import Enum
 
 class Foo(Enum):
     BAR = 1

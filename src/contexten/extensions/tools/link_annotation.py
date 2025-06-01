@@ -6,29 +6,23 @@ from typing import Callable
 
 from graph_sitter import Codebase
 
-
 class MessageChannel(StrEnum):
     LINEAR = "linear"
     MARKDOWN = "markdown"
     HTML = "html"
     SLACK = "slack"
 
-
 def format_link_linear(name: str, url: str) -> str:
     return f"[{name}]({url})"
-
 
 def format_link_markdown(name: str, url: str) -> str:
     return f"[{name}]({url})"
 
-
 def format_link_html(name: str, url: str) -> str:
     return f"<a href='{url}'>{name}</a>"
 
-
 def format_link_slack(name: str, url: str) -> str:
     return f"<{url}|{name}>"
-
 
 LINK_FORMATS: dict[MessageChannel, Callable[[str, str], str]] = {
     "linear": format_link_linear,
@@ -36,7 +30,6 @@ LINK_FORMATS: dict[MessageChannel, Callable[[str, str], str]] = {
     "html": format_link_html,
     "slack": format_link_slack,
 }
-
 
 def clean_github_url(url: str) -> str:
     """Clean a GitHub URL by removing access tokens and standardizing format."""
@@ -49,7 +42,6 @@ def clean_github_url(url: str) -> str:
 
     return url
 
-
 def format_link(name: str, url: str | None, format: MessageChannel = MessageChannel.SLACK) -> str:
     # Clean the URL if it's a GitHub URL
     if url is None:
@@ -57,7 +49,6 @@ def format_link(name: str, url: str | None, format: MessageChannel = MessageChan
     if "github.com" in url:
         url = clean_github_url(url)
     return LINK_FORMATS[format](name, url)
-
 
 def extract_code_snippets(message: str) -> list[str]:
     """Find all text wrapped in single backticks, excluding content in code blocks.
@@ -76,7 +67,6 @@ def extract_code_snippets(message: str) -> list[str]:
     matches = re.findall(r"`([^`]+)`", message_without_blocks)
     return matches
 
-
 def is_likely_filepath(text: str) -> bool:
     """Check if a string looks like a filepath."""
     # Common file extensions we want to link
@@ -88,7 +78,6 @@ def is_likely_filepath(text: str) -> bool:
 
     # Check if it ends with a common file extension
     return any(text.endswith(ext) for ext in extensions)
-
 
 def add_links_to_message(message: str, codebase: Codebase, channel: MessageChannel = MessageChannel.SLACK) -> str:
     """Add links to symbols and files in a message.

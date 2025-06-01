@@ -4,22 +4,70 @@ import os
 from collections.abc import Sequence
 from typing import Any, Optional
 
-from langchain_anthropic import ChatAnthropic
-from langchain_core.callbacks import CallbackManagerForLLMRun
-from langchain_core.language_models.base import LanguageModelInput
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import BaseMessage
-from langchain_core.outputs import ChatResult
-from langchain_core.runnables import Runnable
-from langchain_core.tools import BaseTool
-from langchain_openai import ChatOpenAI
-from langchain_xai import ChatXAI
-from pydantic import Field
+# Handle LangChain dependencies with graceful fallback
+try:
+    from langchain_anthropic import ChatAnthropic
+    from langchain_core.callbacks import CallbackManagerForLLMRun
+    from langchain_core.language_models.base import LanguageModelInput
+    from langchain_core.language_models.chat_models import BaseChatModel
+    from langchain_core.messages import BaseMessage
+    from langchain_core.outputs import ChatResult
+    from langchain_core.runnables import Runnable
+    from langchain_core.tools import BaseTool
+    from langchain_openai import ChatOpenAI
+    from langchain_xai import ChatXAI
+    from pydantic import Field
+    LANGCHAIN_AVAILABLE = True
+except ImportError as e:
+    # Create mock classes for when LangChain is not available
+    LANGCHAIN_AVAILABLE = False
+    
+    class BaseChatModel:
+        def __init__(self, **kwargs):
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+    
+    class BaseMessage:
+        pass
+    
+    class ChatResult:
+        pass
+    
+    class Runnable:
+        pass
+    
+    class BaseTool:
+        pass
+    
+    class CallbackManagerForLLMRun:
+        pass
+    
+    class LanguageModelInput:
+        pass
+    
+    def Field(**kwargs):
+        return None
+    
+    # Mock provider classes
+    class ChatAnthropic(BaseChatModel):
+        pass
+    
+    class ChatOpenAI(BaseChatModel):
+        pass
+    
+    class ChatXAI(BaseChatModel):
+        pass
 
-# Import our custom Codegen chat model
-from .codegen_chat import ChatCodegen
+# Import our custom Codegen chat model with fallback
+try:
+    from .codegen_chat import ChatCodegen
+except ImportError:
+    class ChatCodegen(BaseChatModel):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            raise ImportError("Codegen SDK not available. Install with: pip install codegen")
+
 from .llm_config import get_llm_config
-
 
 class LLM(BaseChatModel):
     """A unified chat model that supports OpenAI, Anthropic, XAI, and Codegen SDK."""

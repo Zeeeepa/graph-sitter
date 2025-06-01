@@ -1,14 +1,14 @@
+
 from logging import getLogger
 from typing import TYPE_CHECKING
 
+from graph_sitter.core.codebase import PyCodebaseType
 from graph_sitter.core.plugins.plugin import Plugin
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import PyCodebaseType
 
 logger = getLogger(__name__)
-
 
 class ModalApiFinder(Plugin):
     language: ProgrammingLanguage = ProgrammingLanguage.PYTHON

@@ -1,4 +1,18 @@
 """
+
+from dataclasses import asdict
+from datetime import datetime
+from typing import Dict, List, Any, Optional
+import json
+
+from .call_graph import CallGraphAnalyzer, CallGraphMetrics
+from .database import (
+from .dead_code import DeadCodeDetector, DeadCodeReport
+from .dependency_analyzer import DependencyAnalyzer, DependencyMetrics, ImportAnalysis
+from .metrics import CodeMetrics, FunctionMetrics, ClassMetrics, FileMetrics
+
+from graph_sitter.core.codebase import Codebase
+
 Enhanced codebase analysis integrating all analysis capabilities.
 
 This module provides the main interface for comprehensive codebase analysis,
@@ -6,21 +20,9 @@ integrating metrics, call graph analysis, dead code detection, and dependency an
 with database storage capabilities.
 """
 
-import json
-from datetime import datetime
-from typing import Dict, List, Any, Optional
-from dataclasses import asdict
-
-from graph_sitter.core.codebase import Codebase
-from .database import (
     AnalysisDatabase, CodebaseRecord, FileRecord, FunctionRecord, 
     ClassRecord, FunctionCallRecord, DependencyRecord, ImportRecord
 )
-from .metrics import CodeMetrics, FunctionMetrics, ClassMetrics, FileMetrics
-from .call_graph import CallGraphAnalyzer, CallGraphMetrics
-from .dead_code import DeadCodeDetector, DeadCodeReport
-from .dependency_analyzer import DependencyAnalyzer, DependencyMetrics, ImportAnalysis
-
 
 class EnhancedCodebaseAnalysis:
     """
@@ -538,4 +540,3 @@ Generated on: {analysis_results['timestamp']}
             report += "\n"
         
         return report
-

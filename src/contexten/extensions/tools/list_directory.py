@@ -10,7 +10,6 @@ from contexten.extensions.tools.tool_output_types import ListDirectoryArtifacts
 from graph_sitter import Codebase
 from graph_sitter.core.directory import Directory
 
-
 class DirectoryInfo(Observation):
     """Information about a directory."""
 
@@ -126,7 +125,6 @@ class DirectoryInfo(Observation):
 
         return artifacts
 
-
 class ListDirectoryObservation(Observation):
     """Response from listing directory contents."""
 
@@ -159,7 +157,6 @@ class ListDirectoryObservation(Observation):
             artifact=self.directory_info.to_artifacts(),
             tool_call_id=tool_call_id,
         )
-
 
 def list_directory(codebase: Codebase, path: str = "./", depth: int = 2) -> ListDirectoryObservation:
     """List contents of a directory.

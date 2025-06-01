@@ -1,27 +1,27 @@
-from __future__ import annotations
 
 from enum import StrEnum
 from functools import cached_property
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, final
 
+from tree_sitter import Node as TSNode
+import rich.repr
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
 from graph_sitter.core.expressions import Expression
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
 from graph_sitter.output.constants import ANGULAR_STYLE
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.utils import find_all_descendants
 
 if TYPE_CHECKING:
-    import rich.repr
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
-
 
 @apidoc
 class StatementType(StrEnum):
@@ -70,9 +70,7 @@ class StatementType(StrEnum):
     EXPORT_STATEMENT = "export_statement"
     IMPORT_STATEMENT = "import_statement"
 
-
 Parent = TypeVar("Parent", bound="CodeBlock")
-
 
 @apidoc
 class Statement(Expression[Parent], Generic[Parent]):
@@ -152,7 +150,6 @@ class Statement(Expression[Parent], Generic[Parent]):
         return nested_statements
 
     def _get_indent(self) -> int:
-        from graph_sitter.core.detached_symbols.code_block import CodeBlock
 
         if isinstance(self.parent, CodeBlock):
             return self.parent.level * 4

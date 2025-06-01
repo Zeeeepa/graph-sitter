@@ -1,4 +1,16 @@
 """
+
+from dataclasses import dataclass
+from typing import Dict, List, Set, Optional, Tuple
+
+import networkx as nx
+
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.core.symbol import Symbol
+
 Dead code detection implementation following graph-sitter.com patterns.
 
 This module provides comprehensive dead code detection including:
@@ -7,15 +19,6 @@ This module provides comprehensive dead code detection including:
 - Unused variables
 - Dead code elimination strategies
 """
-
-from typing import Dict, List, Set, Optional, Tuple
-from dataclasses import dataclass
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.core.function import Function
-from graph_sitter.core.class_definition import Class
-from graph_sitter.core.file import SourceFile
-from graph_sitter.core.symbol import Symbol
-
 
 @dataclass
 class DeadCodeItem:
@@ -34,7 +37,6 @@ class DeadCodeItem:
     def location(self) -> str:
         """Get human-readable location."""
         return f"{self.file_path}:{self.line_number}"
-
 
 @dataclass
 class DeadCodeReport:
@@ -56,7 +58,6 @@ class DeadCodeReport:
     def total_potential_loc_savings(self) -> int:
         """Get total lines of code that could be saved."""
         return sum(self.potential_savings.values())
-
 
 class DeadCodeDetector:
     """
@@ -142,7 +143,6 @@ class DeadCodeDetector:
     
     def find_circular_imports(self) -> List[List[str]]:
         """Find circular import dependencies."""
-        import networkx as nx
         
         # Build import dependency graph
         import_graph = nx.DiGraph()
@@ -499,4 +499,3 @@ class DeadCodeDetector:
         # Maintenance reduction is proportional to code removed
         total_items = dead_code_report.total_dead_items
         return min(total_items * 0.5, 50.0)  # Cap at 50% reduction
-

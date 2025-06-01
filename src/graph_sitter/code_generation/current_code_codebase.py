@@ -1,21 +1,21 @@
-# TODO: move out of graph sitter, useful for other projects
-
-import importlib
 from pathlib import Path
 from typing import TypedDict
+import importlib
 
 from graph_sitter.codebase.config import ProjectConfig
 from graph_sitter.configs.models.codebase import CodebaseConfig
 from graph_sitter.configs.models.secrets import SecretsConfig
 from graph_sitter.core.codebase import Codebase, CodebaseType
+from graph_sitter.core.codebase import CodebaseType, PyCodebaseType, TSCodebaseType
 from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.shared.decorators.docs import DocumentedObject, apidoc_objects, no_apidoc_objects, py_apidoc_objects, ts_apidoc_objects
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.shared.logging.get_logger import get_logger
 
-logger = get_logger(__name__)
+# TODO: move out of graph sitter, useful for other projects
 
+logger = get_logger(__name__)
 
 def get_graphsitter_repo_path() -> str:
     """Points to base directory of the Graph-sitter repo (.git) that is currently running"""
@@ -26,14 +26,12 @@ def get_graphsitter_repo_path() -> str:
     codegen_base_dir = codegen_base_dir.replace("/src", "")
     return codegen_base_dir
 
-
 def get_codegen_codebase_base_path() -> str:
     import graph_sitter as sdk
 
     filepath = sdk.__file__
     codegen_base_dir = filepath.replace("/graph_sitter/__init__.py", "")
     return "src" if "src" in codegen_base_dir else ""
-
 
 def get_current_code_codebase(config: CodebaseConfig | None = None, secrets: SecretsConfig | None = None, subdirectories: list[str] | None = None) -> CodebaseType:
     """Returns a Codebase for the code that is *currently running* (i.e. the Graph-sitter repo)"""
@@ -49,7 +47,6 @@ def get_current_code_codebase(config: CodebaseConfig | None = None, secrets: Sec
     projects = [ProjectConfig(repo_operator=op, programming_language=ProgrammingLanguage.PYTHON, subdirectories=subdirectories, base_path=base_dir)]
     codebase = Codebase(projects=projects, config=config, secrets=secrets)
     return codebase
-
 
 def import_all_codegen_sdk_modules():
     # for file in codegen.sdk:
@@ -69,13 +66,11 @@ def import_all_codegen_sdk_modules():
         except Exception as e:
             print(f"Error importing {module_name}: {e}")
 
-
 class DocumentedObjects(TypedDict):
     apidoc: list[DocumentedObject]
     ts_apidoc: list[DocumentedObject]
     py_apidoc: list[DocumentedObject]
     no_apidoc: list[DocumentedObject]
-
 
 def get_documented_objects() -> DocumentedObjects:
     """Get all the objects decorated with apidoc, py_apidoc, ts_apidoc, and no_apidoc decorators,
@@ -83,7 +78,6 @@ def get_documented_objects() -> DocumentedObjects:
     the respective decorators
     """
     import_all_codegen_sdk_modules()
-    from graph_sitter.core.codebase import CodebaseType, PyCodebaseType, TSCodebaseType
 
     if PyCodebaseType not in apidoc_objects:
         apidoc_objects.append(DocumentedObject(name="PyCodebaseType", module="graph_sitter.core.codebase", object=PyCodebaseType))

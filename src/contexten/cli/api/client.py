@@ -1,11 +1,21 @@
-import json
-from typing import ClassVar, TypeVar
 
-import requests
+from typing import ClassVar, TypeVar
+import json
+
 from pydantic import BaseModel
 from rich import print as rprint
+import requests
 
 from contexten.cli.api.endpoints import (
+from contexten.cli.api.schemas import (
+from contexten.cli.env.global_env import global_env
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.codemod.convert import convert_to_ui
+from graph_sitter.cli.errors import InvalidTokenError, ServerError
+from graph_sitter.cli.utils.codemods import Codemod
+from graph_sitter.cli.utils.function_finder import DecoratedFunction
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+
     CREATE_ENDPOINT,
     DEPLOY_ENDPOINT,
     DOCS_ENDPOINT,
@@ -17,7 +27,6 @@ from contexten.cli.api.endpoints import (
     RUN_ENDPOINT,
     RUN_ON_PR_ENDPOINT,
 )
-from contexten.cli.api.schemas import (
     AskExpertInput,
     AskExpertResponse,
     CodemodRunType,
@@ -39,17 +48,9 @@ from contexten.cli.api.schemas import (
     RunOnPRInput,
     RunOnPRResponse,
 )
-from graph_sitter.cli.auth.session import CodegenSession
-from graph_sitter.cli.codemod.convert import convert_to_ui
-from contexten.cli.env.global_env import global_env
-from graph_sitter.cli.errors import InvalidTokenError, ServerError
-from graph_sitter.cli.utils.codemods import Codemod
-from graph_sitter.cli.utils.function_finder import DecoratedFunction
-from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 InputT = TypeVar("InputT", bound=BaseModel)
 OutputT = TypeVar("OutputT", bound=BaseModel)
-
 
 class RestAPI:
     """Handles auth + validation with the codegen API."""

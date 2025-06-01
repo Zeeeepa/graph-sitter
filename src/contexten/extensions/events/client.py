@@ -1,8 +1,8 @@
+
 from typing import Any
 
-import httpx
 from pydantic import BaseModel
-
+import httpx
 
 class SlackTestEvent(BaseModel):
     """Helper class to construct test Slack events"""
@@ -16,7 +16,6 @@ class SlackTestEvent(BaseModel):
     channel: str = "C123456"
     event_ts: str = "1234567890.123456"
     blocks: list = []
-
 
 class CodegenClient:
     """Client for testing CodegenApp endpoints"""

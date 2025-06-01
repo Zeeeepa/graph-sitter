@@ -1,10 +1,9 @@
+
 from enum import IntFlag, auto
 from typing import TypedDict
-
 from typing_extensions import ReadOnly
 
 from graph_sitter.shared.decorators.docs import apidoc
-
 
 @apidoc
 class MessageType(IntFlag):
@@ -19,7 +18,6 @@ class MessageType(IntFlag):
     CODEGEN = auto()
     GITHUB = auto()
     SLACK = auto()
-
 
 @apidoc
 class FlagKwargs(TypedDict, total=False):

@@ -1,4 +1,16 @@
 """
+
+from dataclasses import dataclass
+from typing import Dict, List, Any, Optional, Set
+import ast
+import math
+import re
+
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+
 Advanced code metrics implementation following graph-sitter.com patterns.
 
 This module provides comprehensive code metrics including:
@@ -7,16 +19,6 @@ This module provides comprehensive code metrics including:
 - Function and class metrics
 - Codebase-level statistics
 """
-
-import ast
-import re
-from typing import Dict, List, Any, Optional, Set
-from dataclasses import dataclass
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.core.function import Function
-from graph_sitter.core.class_definition import Class
-from graph_sitter.core.file import SourceFile
-
 
 @dataclass
 class FunctionMetrics:
@@ -47,7 +49,6 @@ class FunctionMetrics:
             return "High"
         else:
             return "Very High"
-
 
 @dataclass
 class ClassMetrics:
@@ -83,7 +84,6 @@ class ClassMetrics:
         else:
             return "Poor"
 
-
 @dataclass
 class FileMetrics:
     """Comprehensive metrics for a file."""
@@ -107,7 +107,6 @@ class FileMetrics:
             self.documentation_coverage * 0.25 +
             (100 - min(self.complexity_score, 100)) * 0.2
         ) / 100
-
 
 class CodeMetrics:
     """
@@ -418,8 +417,6 @@ class CodeMetrics:
         # Simplified maintainability index calculation
         # MI = 171 - 5.2 * ln(Halstead Volume) - 0.23 * (Cyclomatic Complexity) - 16.2 * ln(Lines of Code)
         
-        import math
-        
         # Estimate Halstead volume (simplified)
         halstead_volume = max(loc * 2, 1)  # Simplified estimation
         
@@ -618,4 +615,3 @@ class CodeMetrics:
         
         debt_indicators = high_complexity_count + dead_code_count
         return (debt_indicators / len(functions)) * 100
-

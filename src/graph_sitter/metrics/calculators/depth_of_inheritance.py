@@ -1,5 +1,17 @@
 """Depth of Inheritance Calculator.
 
+from collections import defaultdict, deque
+from typing import TYPE_CHECKING, Optional, Dict, Any, Set, List
+
+from ..core.base_calculator import BaseMetricsCalculator
+
+from __future__ import annotations
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.metrics.models.metrics_data import (
+
 Calculates the Depth of Inheritance (DOI) metric which measures how deep
 a class is in the inheritance hierarchy. This metric helps assess the
 complexity of the inheritance structure and potential maintenance issues.
@@ -10,25 +22,12 @@ Key metrics:
 - Inheritance Tree Analysis: Overall inheritance structure complexity
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Optional, Dict, Any, Set, List
-from collections import defaultdict, deque
-
-from ..core.base_calculator import BaseMetricsCalculator
-
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.metrics.models.metrics_data import (
         FunctionMetrics,
         ClassMetrics,
         FileMetrics,
         CodebaseMetrics,
     )
-
 
 class DepthOfInheritanceCalculator(BaseMetricsCalculator):
     """Calculator for Depth of Inheritance metrics."""
@@ -503,4 +502,3 @@ class DepthOfInheritanceCalculator(BaseMetricsCalculator):
             },
             "additionalProperties": False
         }
-

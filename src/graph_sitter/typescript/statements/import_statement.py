@@ -1,20 +1,19 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.expressions.builtin import Builtin
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.import_statement import ImportStatement
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import ts_apidoc
+from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 from graph_sitter.typescript.import_resolution import TSImport
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
-
 
 @ts_apidoc
 class TSImportStatement(ImportStatement["TSFile", TSImport, "TSCodeBlock"], Builtin):

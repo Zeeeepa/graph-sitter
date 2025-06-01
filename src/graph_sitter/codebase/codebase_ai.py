@@ -1,6 +1,6 @@
+
 from graph_sitter.core.file import File
 from graph_sitter.core.interfaces.editable import Editable
-
 
 def generate_system_prompt(target: Editable | None = None, context: None | str | Editable | list[Editable] | dict[str, str | Editable | list[Editable]] = None) -> str:
     prompt = """Hey CodegenBot!
@@ -35,7 +35,6 @@ Here is the additional context:
     prompt += """
 Please ensure your response is accurate and relevant to the user's request. You may think out loud in the response.
 
-
 Generally, when responding with an an answer, try to follow these general "ground rules":
 Remember, these are just rules you should follow by default. If the user explicitly asks for something else, you should follow their instructions instead.
 
@@ -47,7 +46,6 @@ Remember, these are just rules you should follow by default. If the user explici
 - Only return the NEW code without re-iterating any existing code that the user has provided to you, unless the user explicitly asks for something else.
 - Do not include any code that the user has explicitly asked you to remove, unless the user explicitly asks for something else.
 
-
 > When changing existing code, such as "change this method to do XYZ" or "update this function to do XYZ" or "remove all instances of XYZ from this class", try to:
 
 - Do not include extra indentation that is not necessary, unless the user explicitly asks for something else.
@@ -57,7 +55,6 @@ Remember, these are just rules you should follow by default. If the user explici
 - Avoid edit existing code that does not need editing, unless the user explicitly asks for something else.
 - When asked to modify a very small or trivial part of the code, try to only modify the part that the user has asked you to modify, unless the user explicitly asks for something else.
 - If asked to make improvements, try not to change existing function signatures, decorators, or returns, unless the user explicitly asks for something else.
-
 
 > When dealing with anything related to docstrings, for example "Generate a google style docstring for this method." or "Convert these existing docs to google style docstrings.", try to:
 
@@ -80,7 +77,6 @@ Google docstrings may also include other information like exceptions and example
 When generating NEW code or NEW classes, also try to generate docstrings alongside the code with the google style docstring format,
 unless the user explicitly asks for something else.
 
-
 > When dealing with anything related to comments, such as "write me a comment for this method" or "change this existing comment to be more descriptive", try to:
 
 - Do not include extra indentation that is not necessary, unless the user explicitly asks for something else.
@@ -88,7 +84,6 @@ unless the user explicitly asks for something else.
 - Do not include any markdown formatting, unless the user explicitly asks for something else.
 - Try to keep each line of the comment to be less than 80 characters, unless the user explicitly asks for something else.
 - If you are only requested to edit or create a comment, do not include any code or other context that the user has provided to you, unless the user explicitly asks for something else.
-
 
 > When dealing with single-word or single-phrase answers, like "what is a better name for this function" or "what is a better name for this class", try to:
 
@@ -101,7 +96,6 @@ REMEMBER: When giving the final answer, you must use the set_answer tool to prov
     """
 
     return prompt
-
 
 def generate_flag_system_prompt(target: Editable, context: None | str | Editable | list[Editable] | dict[str, str | Editable | list[Editable]] = None) -> str:
     prompt = f"""Hey CodegenBot!
@@ -136,7 +130,6 @@ as a chunk of code that should be modified, edited, or changed in a later step.
 
     return prompt
 
-
 def generate_context(context: None | str | Editable | list[Editable | File] | dict[str, str | Editable | list[Editable] | File] | File = None) -> str:
     output = ""
     if not context:
@@ -163,7 +156,6 @@ def generate_context(context: None | str | Editable | list[Editable | File] | di
                 output += "\n\n"
         return output
 
-
 def generate_tools() -> list:
     return [
         {
@@ -184,7 +176,6 @@ def generate_tools() -> list:
             },
         }
     ]
-
 
 def generate_flag_tools() -> list:
     return [

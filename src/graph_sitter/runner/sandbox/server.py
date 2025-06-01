@@ -1,5 +1,6 @@
-import os
+
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import FastAPI
 
@@ -7,6 +8,11 @@ from graph_sitter.configs.models.repository import RepositoryConfig
 from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.runner.enums.warmup_state import WarmupState
 from graph_sitter.runner.models.apis import (
+from graph_sitter.runner.sandbox.middlewares import CodemodRunMiddleware
+from graph_sitter.runner.sandbox.runner import SandboxRunner
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.shared.logging.get_logger import get_logger
+
     BRANCH_ENDPOINT,
     DIFF_ENDPOINT,
     CreateBranchRequest,
@@ -15,16 +21,11 @@ from graph_sitter.runner.models.apis import (
     GetDiffResponse,
     ServerInfo,
 )
-from graph_sitter.runner.sandbox.middlewares import CodemodRunMiddleware
-from graph_sitter.runner.sandbox.runner import SandboxRunner
-from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
-from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
 server_info: ServerInfo
 runner: SandboxRunner
-
 
 @asynccontextmanager
 async def lifespan(server: FastAPI):
@@ -55,7 +56,6 @@ async def lifespan(server: FastAPI):
     yield
     logger.info("Shutting down sandbox fastapi server")
 
-
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CodemodRunMiddleware[GetDiffRequest, GetDiffResponse],
@@ -68,16 +68,13 @@ app.add_middleware(
     runner_fn=lambda: runner,
 )
 
-
 @app.get("/")
 def health() -> ServerInfo:
     return server_info
 
-
 @app.post(DIFF_ENDPOINT)
 async def get_diff(request: GetDiffRequest) -> GetDiffResponse:
     return await runner.get_diff(request=request)
-
 
 @app.post(BRANCH_ENDPOINT)
 async def create_branch(request: CreateBranchRequest) -> CreateBranchResponse:

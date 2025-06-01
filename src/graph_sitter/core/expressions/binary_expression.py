@@ -1,8 +1,9 @@
-import itertools
+
 from collections import deque
 from collections.abc import Generator
 from functools import cached_property
 from typing import Generic, Self, TypeVar, override
+import itertools
 
 from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.compiled.autocommit import commiter, reader
@@ -19,7 +20,6 @@ from graph_sitter.core.symbol_groups.expression_group import ExpressionGroup
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class BinaryExpression(Expression[Parent], Chainable, Generic[Parent]):
@@ -109,7 +109,6 @@ class BinaryExpression(Expression[Parent], Chainable, Generic[Parent]):
     @writer
     def reduce_condition(self, bool_condition: bool, node: Editable) -> None:
         """Simplifies a binary expression by reducing it based on a boolean condition.
-
 
         Args:
             bool_condition (bool): The boolean value to reduce the condition to.

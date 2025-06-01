@@ -1,18 +1,17 @@
+
+from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
+import os
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.config_parser import ConfigParser
 from graph_sitter.core.file import File
 from graph_sitter.enums import NodeType
+from graph_sitter.typescript.file import TSFile
 from graph_sitter.typescript.ts_config import TSConfig
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.typescript.file import TSFile
-
-import os
-from functools import cache
-
 
 class TSConfigParser(ConfigParser):
     # Cache of path names to TSConfig objects

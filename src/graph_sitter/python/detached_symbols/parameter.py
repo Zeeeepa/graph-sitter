@@ -1,3 +1,4 @@
+
 from typing_extensions import deprecated
 
 from graph_sitter.core.autocommit import reader, writer
@@ -5,7 +6,6 @@ from graph_sitter.core.detached_symbols.parameter import Parameter
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.python.expressions.type import PyType
 from graph_sitter.shared.decorators.docs import py_apidoc
-
 
 @py_apidoc
 class PyParameter(Parameter[PyType, Collection["PyParameter", "PyFunction"]]):

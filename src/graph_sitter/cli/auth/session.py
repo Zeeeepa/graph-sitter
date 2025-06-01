@@ -1,9 +1,10 @@
+
 from pathlib import Path
 
-import click
-import rich
 from github import BadCredentialsException
 from github.MainClass import Github
+import click
+import rich
 
 from graph_sitter.cli.git.repo import get_git_repo
 from graph_sitter.cli.rich.codeblocks import format_command
@@ -11,7 +12,6 @@ from graph_sitter.configs.constants import CODEGEN_DIR_NAME, ENV_FILENAME
 from graph_sitter.configs.session_manager import session_manager
 from graph_sitter.configs.user_config import UserConfig
 from graph_sitter.git.repo_operator.local_git_repo import LocalGitRepo
-
 
 class CliSession:
     """Represents an authenticated codegen session with user and repository context"""

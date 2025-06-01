@@ -1,4 +1,20 @@
 """
+
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, Any, Optional, List, Callable, Awaitable
+import asyncio
+import hashlib
+import hmac
+import json
+import time
+
+from .config import LinearIntegrationConfig
+from .types import (
+
+from graph_sitter.shared.logging.get_logger import get_logger
+
 Linear Webhook Processor
 
 Comprehensive webhook processing system with:
@@ -9,24 +25,10 @@ Comprehensive webhook processing system with:
 - Performance monitoring
 """
 
-import asyncio
-import hashlib
-import hmac
-import json
-import time
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Callable, Awaitable
-from dataclasses import dataclass, field
-from pathlib import Path
-
-from .config import LinearIntegrationConfig
-from .types import (
     LinearEvent, LinearEventType, WebhookEvent, ComponentStats
 )
-from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 @dataclass
 class EventHandler:
@@ -40,7 +42,6 @@ class EventHandler:
         """Check if handler matches event type"""
         return self.event_type is None or self.event_type.value == event_type
 
-
 @dataclass
 class ProcessingStats:
     """Webhook processing statistics"""
@@ -51,7 +52,6 @@ class ProcessingStats:
     signature_failures: int = 0
     last_event_time: Optional[datetime] = None
     last_error: Optional[str] = None
-
 
 class WebhookProcessor:
     """Comprehensive webhook processor for Linear events"""
@@ -529,4 +529,3 @@ class WebhookProcessor:
             await self.save_failed_events()
         
         logger.info("Webhook processor cleanup completed")
-

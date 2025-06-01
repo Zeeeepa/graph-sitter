@@ -1,12 +1,12 @@
-import functools
+
 from collections.abc import Callable, Iterator
 from typing import Generic, ParamSpec, TypeVar
+import functools
 
 from graph_sitter.compiled.utils import lru_cache
 
 ItemType = TypeVar("ItemType")
 GenParamSpec = ParamSpec("GenParamSpec")
-
 
 class LazyGeneratorCache(Generic[ItemType]):
     """A cache for a generator that is lazily evaluated."""
@@ -25,7 +25,6 @@ class LazyGeneratorCache(Generic[ItemType]):
         for item in self.gen:
             self._cache.append(item)
             yield item
-
 
 def cached_generator(maxsize: int = 16, typed: bool = False) -> Callable[[Callable[GenParamSpec, Iterator[ItemType]]], Callable[GenParamSpec, Iterator[ItemType]]]:
     """Decorator to cache the output of a generator function.

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from rich.status import Status
 
-
 @dataclass
 class SpinnerConfig:
     """Configuration for a consistent spinner style."""
@@ -13,7 +12,6 @@ class SpinnerConfig:
     spinner: str = "dots"
     style: str = "bold"
     spinner_style: str = "blue"
-
 
 def create_spinner(text: str) -> Status:
     """Create a spinner with consistent styling.

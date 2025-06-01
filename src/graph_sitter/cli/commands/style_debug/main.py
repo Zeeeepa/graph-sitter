@@ -6,7 +6,6 @@ import rich_click as click
 
 from graph_sitter.cli.rich.spinners import create_spinner
 
-
 @click.command(name="style-debug")
 @click.option("--text", default="Loading...", help="Text to show in the spinner")
 def style_debug_command(text: str):

@@ -9,7 +9,6 @@ from graph_sitter import Codebase
 
 from .observation import Observation
 
-
 class SearchResult(Observation):
     """Information about a single search result."""
 
@@ -24,7 +23,6 @@ class SearchResult(Observation):
     )
 
     str_template: ClassVar[str] = "{filepath} (score: {score})"
-
 
 class SemanticSearchObservation(Observation):
     """Response from semantic search over codebase."""
@@ -44,7 +42,6 @@ class SemanticSearchObservation(Observation):
             "result_count": len(self.results),
             "query": self.query,
         }
-
 
 def semantic_search(
     codebase: Codebase,

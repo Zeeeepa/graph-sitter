@@ -13,7 +13,6 @@ from graph_sitter.core.symbol import Symbol
 
 from .observation import Observation
 
-
 class SymbolInfo(Observation):
     """Information about a symbol."""
 
@@ -22,7 +21,6 @@ class SymbolInfo(Observation):
     source: str = Field(description="Source code of the symbol")
 
     str_template: ClassVar[str] = "{name} in {filepath}"
-
 
 class RevealSymbolObservation(Observation):
     """Response from revealing symbol dependencies and usages."""
@@ -52,7 +50,6 @@ class RevealSymbolObservation(Observation):
             "dependencies_count": len(self.dependencies or []),
             "usages_count": len(self.usages or []),
         }
-
 
 def truncate_source(source: str, max_tokens: int) -> str:
     """Truncate source code to fit within max_tokens while preserving meaning.
@@ -114,7 +111,6 @@ def truncate_source(source: str, max_tokens: int) -> str:
 
     return "".join(result)
 
-
 def get_symbol_info(symbol: Symbol, max_tokens: Optional[int] = None) -> SymbolInfo:
     """Get relevant information about a symbol.
 
@@ -136,7 +132,6 @@ def get_symbol_info(symbol: Symbol, max_tokens: Optional[int] = None) -> SymbolI
         source=source,
     )
 
-
 def hop_through_imports(symbol: Symbol, seen_imports: Optional[set[str]] = None) -> Symbol:
     """Follow import chain to find the root symbol, stopping at ExternalModule."""
     if seen_imports is None:
@@ -157,7 +152,6 @@ def hop_through_imports(symbol: Symbol, seen_imports: Optional[set[str]] = None)
         return symbol.imported_symbol
     else:
         return symbol.imported_symbol
-
 
 def get_extended_context(
     symbol: Symbol,
@@ -250,7 +244,6 @@ def get_extended_context(
                     total_tokens = new_total
 
     return dependencies, usages, total_tokens
-
 
 def reveal_symbol(
     codebase: Codebase,

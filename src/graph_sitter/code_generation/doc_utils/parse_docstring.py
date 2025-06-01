@@ -1,10 +1,10 @@
+
 import re
 
 from graph_sitter.code_generation.doc_utils.schemas import ParameterDoc
 
 SECTION_PATTERN = re.compile(r"(Args|Returns|Raises|Note):\s*(.+?)(?=(?:Args|Returns|Raises|Note):|$)", re.DOTALL)
 ARG_PATTERN = re.compile(r"\s*(\w+)\s*\(([^)]+)\):\s*([^\n]+)")
-
 
 def parse_docstring(docstring: str) -> dict | None:
     """Parse a docstring into its components with optimized performance.

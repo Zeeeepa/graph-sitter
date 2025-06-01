@@ -1,3 +1,4 @@
+
 import uuid
 
 from lsprotocol import types
@@ -7,7 +8,6 @@ from pygls.lsp.server import LanguageServer
 from graph_sitter.codebase.progress.progress import Progress
 from graph_sitter.codebase.progress.stub_task import StubTask
 from graph_sitter.codebase.progress.task import Task
-
 
 class LSPTask(Task):
     count: int | None
@@ -31,7 +31,6 @@ class LSPTask(Task):
     def end(self) -> None:
         if self.create_token:
             self.server.work_done_progress.end(self.token, value=types.WorkDoneProgressEnd())
-
 
 class LSPProgress(Progress[LSPTask | StubTask]):
     initialized = False

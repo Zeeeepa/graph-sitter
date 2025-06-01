@@ -1,18 +1,20 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from __future__ import annotations
 from graph_sitter.core.autocommit import reader, writer
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
 from graph_sitter.core.expressions import Name
+from graph_sitter.core.statements.statement import Statement
 from graph_sitter.core.statements.statement import StatementType
+from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
+from graph_sitter.typescript.function import TSFunction
+from graph_sitter.typescript.function import TSFunction
+from graph_sitter.typescript.function import TSFunction
+from graph_sitter.typescript.function import TSFunction
 
 if TYPE_CHECKING:
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.statements.statement import Statement
-    from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
-    from graph_sitter.typescript.function import TSFunction
-
 
 class TSPromiseChain:
     """A class representing a TypeScript Promise chain.
@@ -128,7 +130,6 @@ class TSPromiseChain:
 
     @reader
     def get_next_call_params(self, call: FunctionCall | None) -> list[str]:
-        from graph_sitter.typescript.function import TSFunction
 
         """Get parameters from the next then/catch/finally call.
 
@@ -210,7 +211,6 @@ class TSPromiseChain:
 
     @reader
     def handle_then_block(self, call: FunctionCall, next_call: FunctionCall | None = None) -> str:
-        from graph_sitter.typescript.function import TSFunction
 
         """Format a then block in the promise chain.
 
@@ -260,7 +260,6 @@ class TSPromiseChain:
 
     @reader
     def parse_last_then_block(self, call: FunctionCall, assignment_variable_name: str | None = None) -> str:
-        from graph_sitter.typescript.function import TSFunction
 
         """Parse the last .then() block in the chain.
 

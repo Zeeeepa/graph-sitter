@@ -1,3 +1,4 @@
+
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 
 from graph_sitter.compiled.utils import find_line_start_and_end_nodes
@@ -7,13 +8,11 @@ from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.statements.statement import Statement
 from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
+from graph_sitter.typescript.interfaces.has_block import TSHasBlock
 
 if TYPE_CHECKING:
-    from graph_sitter.typescript.interfaces.has_block import TSHasBlock
-
 
 Parent = TypeVar("Parent", bound="TSHasBlock")
-
 
 @ts_apidoc
 class TSCodeBlock(CodeBlock[Parent, "TSAssignment"], Generic[Parent]):

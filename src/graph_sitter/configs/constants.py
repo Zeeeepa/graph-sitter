@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 CODEGEN_DIR_NAME = ".codegen"
@@ -11,7 +12,6 @@ CODEGEN_DIR_PATH = CODEGEN_REPO_ROOT / CODEGEN_DIR_NAME
 PROMPTS_DIR = Path(CODEGEN_DIR_NAME) / "prompts"
 DOCS_DIR = Path(CODEGEN_DIR_NAME) / "docs"
 EXAMPLES_DIR = Path(CODEGEN_DIR_NAME) / "examples"
-
 
 # ====[ User global config paths ]====
 GLOBAL_CONFIG_DIR = Path("~/.config/codegen-sh").expanduser()

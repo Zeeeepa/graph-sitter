@@ -1,3 +1,4 @@
+
 import webbrowser
 
 import rich
@@ -7,7 +8,6 @@ from contexten.cli.api.webapp_routes import USER_SECRETS_ROUTE
 from contexten.cli.auth.token_manager import TokenManager
 from contexten.cli.env.global_env import global_env
 from graph_sitter.cli.errors import AuthError
-
 
 def login_routine(token: str | None = None) -> str:
     """Guide user through login flow and return authenticated session.

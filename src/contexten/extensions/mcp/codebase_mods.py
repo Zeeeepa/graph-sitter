@@ -1,6 +1,7 @@
+
+from typing import Annotated
 import json
 import os
-from typing import Annotated
 
 from mcp.server.fastmcp import FastMCP
 
@@ -11,7 +12,6 @@ mcp = FastMCP(
     "codebase-mods-mcp",
     instructions="Use this server to invoke deterministic codemods for your codebase. This implements a variety of codemods to be used to modify your codebase to your satisfaction",
 )
-
 
 @mcp.tool(name="split_files_by_function", description="split out the functions in defined in the provided file into new files")
 def split_files_by_function(
@@ -39,7 +39,6 @@ def split_files_by_function(
     result = {"description": "the following new files have been created with each with containing the function specified", "new_files": new_files}
 
     return json.dumps(result, indent=2)
-
 
 if __name__ == "__main__":
     # Initialize and run the server

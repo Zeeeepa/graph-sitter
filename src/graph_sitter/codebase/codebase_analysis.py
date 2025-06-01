@@ -1,3 +1,4 @@
+
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.external_module import ExternalModule
@@ -6,7 +7,6 @@ from graph_sitter.core.function import Function
 from graph_sitter.core.import_resolution import Import
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import EdgeType, SymbolType
-
 
 def get_codebase_summary(codebase: Codebase) -> str:
     node_summary = f"""Contains {len(codebase.ctx.get_nodes())} nodes
@@ -27,7 +27,6 @@ def get_codebase_summary(codebase: Codebase) -> str:
 
     return f"{node_summary}\n{edge_summary}"
 
-
 def get_file_summary(file: SourceFile) -> str:
     return f"""==== [ `{file.name}` (SourceFile) Dependency Summary ] ====
 - {len(file.imports)} imports
@@ -41,7 +40,6 @@ def get_file_summary(file: SourceFile) -> str:
 - {len(file.imports)} importers
 """
 
-
 def get_class_summary(cls: Class) -> str:
     return f"""==== [ `{cls.name}` (Class) Dependency Summary ] ====
 - parent classes: {cls.parent_class_names}
@@ -52,7 +50,6 @@ def get_class_summary(cls: Class) -> str:
 
 {get_symbol_summary(cls)}
     """
-
 
 def get_function_summary(func: Function) -> str:
     return f"""==== [ `{func.name}` (Function) Dependency Summary ] ====
@@ -65,7 +62,6 @@ def get_function_summary(func: Function) -> str:
 
 {get_symbol_summary(func)}
         """
-
 
 def get_symbol_summary(symbol: Symbol) -> str:
     usages = symbol.symbol_usages

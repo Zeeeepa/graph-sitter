@@ -9,7 +9,6 @@ from .base_calculator import BaseMetricsCalculator
 
 logger = logging.getLogger(__name__)
 
-
 class MetricsRegistry:
     """Registry for managing and organizing metrics calculators.
     
@@ -247,10 +246,8 @@ class MetricsRegistry:
         
         logger.info("Cleared metrics registry")
 
-
 # Global registry instance
 _global_registry = MetricsRegistry()
-
 
 def get_global_registry() -> MetricsRegistry:
     """Get the global metrics registry instance.
@@ -259,7 +256,6 @@ def get_global_registry() -> MetricsRegistry:
         Global MetricsRegistry instance.
     """
     return _global_registry
-
 
 def register_calculator(
     calculator_class: Type[BaseMetricsCalculator],
@@ -274,4 +270,3 @@ def register_calculator(
         config: Optional configuration for the calculator instance.
     """
     _global_registry.register_calculator(calculator_class, category, config)
-

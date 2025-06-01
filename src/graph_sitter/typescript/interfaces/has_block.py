@@ -1,8 +1,8 @@
-from __future__ import annotations
 
 from functools import cached_property
 from typing import TYPE_CHECKING, Self
 
+from __future__ import annotations
 from graph_sitter.compiled.utils import find_all_descendants
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.detached_symbols.code_block import CodeBlock
@@ -10,13 +10,12 @@ from graph_sitter.core.interfaces.has_block import HasBlock
 from graph_sitter.core.statements.statement import StatementType
 from graph_sitter.shared.decorators.docs import ts_apidoc
 from graph_sitter.typescript.detached_symbols.decorator import TSDecorator
+from graph_sitter.typescript.detached_symbols.jsx.element import JSXElement
 from graph_sitter.typescript.statements.comment import TSComment, TSCommentType
 from graph_sitter.typescript.symbol_groups.comment_group import TSCommentGroup
 from graph_sitter.utils import find_index
 
 if TYPE_CHECKING:
-    from graph_sitter.typescript.detached_symbols.jsx.element import JSXElement
-
 
 @ts_apidoc
 class TSHasBlock(HasBlock["TSCodeBlock", TSDecorator]):

@@ -1,9 +1,9 @@
-import inspect
+
 from collections.abc import Callable
 from inspect import Parameter
+import inspect
 
 from graph_sitter.shared.decorators.docs import DocumentedObject, no_apidoc_signatures
-
 
 def only_default_args(method: Callable) -> bool:
     sig = inspect.signature(method)
@@ -13,7 +13,6 @@ def only_default_args(method: Callable) -> bool:
         if param.default != Parameter.empty:
             return False
     return True
-
 
 def is_noapidoc(obj: object, attr: str) -> bool:
     module = inspect.getmodule(obj)

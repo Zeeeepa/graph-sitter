@@ -1,4 +1,7 @@
 """
+
+from .core.analysis_config import (
+
 Analytics Module
 
 This module provides comprehensive code analysis capabilities including:
@@ -10,7 +13,6 @@ This module provides comprehensive code analysis capabilities including:
 - Configurable analysis pipelines
 """
 
-from .core.analysis_config import (
     # Configuration classes
     AnalysisConfig,
     QualityThresholds,
@@ -45,4 +47,3 @@ __all__ = [
 ]
 
 __version__ = '1.0.0'
-

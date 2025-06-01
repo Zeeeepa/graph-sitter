@@ -1,25 +1,27 @@
-import tempfile
+
 from contextlib import asynccontextmanager
+import tempfile
 
 from fastapi import FastAPI
+import uvicorn
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
 from graph_sitter.runner.enums.warmup_state import WarmupState
 from graph_sitter.runner.models.apis import (
-    RUN_ON_STRING_ENDPOINT,
-    GetRunOnStringRequest,
-    GetRunOnStringResult,
-    ServerInfo,
-)
 from graph_sitter.runner.sandbox.executor import SandboxExecutor
 from graph_sitter.shared.compilation.string_to_code import create_execute_function_from_codeblock
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.shared.logging.get_logger import get_logger
 
+    RUN_ON_STRING_ENDPOINT,
+    GetRunOnStringRequest,
+    GetRunOnStringResult,
+    ServerInfo,
+)
+
 logger = get_logger(__name__)
 
 server_info: ServerInfo
-
 
 @asynccontextmanager
 async def lifespan(server: FastAPI):
@@ -29,14 +31,11 @@ async def lifespan(server: FastAPI):
     yield
     logger.info("Shutting down fastapi server")
 
-
 app = FastAPI(lifespan=lifespan)
-
 
 @app.get("/")
 def health() -> ServerInfo:
     return server_info
-
 
 @app.post(RUN_ON_STRING_ENDPOINT)
 async def run_on_string(request: GetRunOnStringRequest) -> GetRunOnStringResult:
@@ -49,8 +48,6 @@ async def run_on_string(request: GetRunOnStringRequest) -> GetRunOnStringResult:
         logger.info(f"Result: {result}")
         return GetRunOnStringResult(result=result)
 
-
 if __name__ == "__main__":
-    import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)

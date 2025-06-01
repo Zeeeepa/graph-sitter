@@ -1,6 +1,5 @@
-from typing import Literal
 
-from pydantic import BaseModel
+from typing import Literal
 
 from ..base import GitHubRepository, GitHubUser
 from ..enterprise import GitHubEnterprise
@@ -8,12 +7,11 @@ from ..installation import GitHubInstallation
 from ..label import GitHubLabel
 from ..organization import GitHubOrganization
 from ..pull_request import PullRequest
-
+from pydantic import BaseModel
 
 class User(BaseModel):
     id: int
     login: str
-
 
 class Label(BaseModel):
     id: int
@@ -23,7 +21,6 @@ class Label(BaseModel):
     description: str | None = None
     color: str
     default: bool
-
 
 class SimplePullRequest(BaseModel):
     id: int
@@ -38,7 +35,6 @@ class SimplePullRequest(BaseModel):
     updated_at: str
     draft: bool = False
 
-
 class PullRequestLabeledEvent(BaseModel):
     """Simplified version of the PR labeled event for testing"""
 
@@ -49,7 +45,6 @@ class PullRequestLabeledEvent(BaseModel):
     repository: dict  # Simplified for now
     sender: User
 
-
 class PullRequestOpenedEvent(BaseModel):
     action: str = "opened"  # Always "opened" for this event
     number: int
@@ -59,7 +54,6 @@ class PullRequestOpenedEvent(BaseModel):
     enterprise: GitHubEnterprise
     sender: GitHubUser
     installation: GitHubInstallation
-
 
 class PullRequestUnlabeledEvent(BaseModel):
     action: str

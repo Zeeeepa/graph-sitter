@@ -1,16 +1,17 @@
+
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from graph_sitter.core.expressions import Expression
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.has_value import HasValue
 from graph_sitter.core.interfaces.unwrappable import Unwrappable
 from graph_sitter.core.interfaces.wrapper_expression import IWrapper
+from graph_sitter.core.symbol_groups.dict import Dict
 from graph_sitter.shared.decorators.docs import apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Unpack(Unwrappable[Parent], HasValue, IWrapper, Generic[Parent]):
@@ -38,7 +39,6 @@ class Unpack(Unwrappable[Parent], HasValue, IWrapper, Generic[Parent]):
         Returns:
             None
         """
-        from graph_sitter.core.symbol_groups.dict import Dict
 
         node = node or self._value_node
         if isinstance(node, Dict) and isinstance(self.parent, Dict):

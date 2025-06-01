@@ -1,4 +1,16 @@
 """
+
+from dataclasses import dataclass
+from typing import Dict, List, Any, Optional, Set, Tuple
+import re
+
+import matplotlib.pyplot as plt
+import networkx as nx
+
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.function import Function
+
 Call graph analysis implementation following graph-sitter.com patterns.
 
 This module provides comprehensive call graph analysis including:
@@ -7,14 +19,6 @@ This module provides comprehensive call graph analysis including:
 - Call chain analysis
 - Method chaining detection
 """
-
-import networkx as nx
-from typing import Dict, List, Any, Optional, Set, Tuple
-from dataclasses import dataclass
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.core.function import Function
-from graph_sitter.core.external_module import ExternalModule
-
 
 @dataclass
 class CallPath:
@@ -30,7 +34,6 @@ class CallPath:
         """Get human-readable path description."""
         return " -> ".join(self.path)
 
-
 @dataclass
 class CallChain:
     """Represents a method call chain."""
@@ -45,7 +48,6 @@ class CallChain:
         """Get human-readable chain description."""
         return f"{self.base_object}.{'.'.join(self.chain_calls)}"
 
-
 @dataclass
 class CallGraphMetrics:
     """Metrics for the call graph."""
@@ -59,7 +61,6 @@ class CallGraphMetrics:
     dead_end_functions: List[str]
     entry_point_functions: List[str]
     strongly_connected_components: int
-
 
 class CallGraphAnalyzer:
     """
@@ -377,7 +378,6 @@ class CallGraphAnalyzer:
             viz_graph = viz_graph.subgraph(nodes_to_keep).copy()
         
         try:
-            import matplotlib.pyplot as plt
             
             plt.figure(figsize=(12, 8))
             pos = nx.spring_layout(viz_graph, k=1, iterations=50)
@@ -440,7 +440,6 @@ class CallGraphAnalyzer:
             return chains
         
         # Simple regex-based chain detection
-        import re
         
         # Look for chained method calls like obj.method1().method2().method3()
         chain_pattern = r'(\\w+)(\\.\\w+\\(\\))+' 
@@ -483,4 +482,3 @@ class CallGraphAnalyzer:
                 f.write(f"  {edge[0]} -> {edge[1]}\\n")
         
         return output_file
-

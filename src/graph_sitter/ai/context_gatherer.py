@@ -1,22 +1,22 @@
 """
+
+from typing import Any, Dict, List, Optional, Union
+import json
+
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.file import File
+from graph_sitter.core.function import Function
+from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.symbol import Symbol
+from graph_sitter.shared.logging.get_logger import get_logger
+
 Context Gathering System for AI-Enhanced Codebase Operations
 
 Leverages GraphSitter's static analysis to gather rich contextual information
 for AI-powered code analysis, generation, and refactoring.
 """
 
-import json
-from typing import Any, Dict, List, Optional, Union
-
-from graph_sitter.core.interfaces.editable import Editable
-from graph_sitter.core.file import File
-from graph_sitter.core.function import Function
-from graph_sitter.core.class_definition import Class
-from graph_sitter.core.symbol import Symbol
-from graph_sitter.shared.logging.get_logger import get_logger
-
 logger = get_logger(__name__)
-
 
 class ContextGatherer:
     """Gathers and formats contextual information for AI operations"""
@@ -392,4 +392,3 @@ class ContextGatherer:
             formatted_sections.append(section)
         
         return "\n\n".join(formatted_sections)
-

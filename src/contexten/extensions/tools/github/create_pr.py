@@ -10,7 +10,6 @@ from graph_sitter import Codebase
 
 from ..observation import Observation
 
-
 class CreatePRObservation(Observation):
     """Response from creating a pull request."""
 
@@ -25,7 +24,6 @@ class CreatePRObservation(Observation):
     )
 
     str_template: ClassVar[str] = "Created PR #{number}: {title}"
-
 
 def create_pr(codebase: Codebase, title: str, body: str) -> CreatePRObservation:
     """Create a PR for the current branch.

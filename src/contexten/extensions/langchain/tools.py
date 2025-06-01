@@ -51,7 +51,6 @@ from ..tools import (
 from ..tools.relace_edit_prompts import RELACE_EDIT_PROMPT
 from ..tools.semantic_edit_prompts import FILE_EDIT_PROMPT
 
-
 class ViewFileInput(BaseModel):
     """Input for viewing a file."""
 
@@ -61,7 +60,6 @@ class ViewFileInput(BaseModel):
     max_lines: Optional[int] = Field(None, description="Maximum number of lines to view at once, defaults to 500")
     line_numbers: Optional[bool] = Field(True, description="If True, add line numbers to the content (1-indexed)")
     tool_call_id: Annotated[str, InjectedToolCallId]
-
 
 class ViewFileTool(BaseTool):
     """Tool for viewing file contents and metadata."""
@@ -96,14 +94,12 @@ The response will indicate if there are more lines available to view."""
 
         return result.render(tool_call_id)
 
-
 class ListDirectoryInput(BaseModel):
     """Input for listing directory contents."""
 
     dirpath: str = Field(default="./", description="Path to directory relative to workspace root")
     depth: int = Field(default=1, description="How deep to traverse. Use -1 for unlimited depth.")
     tool_call_id: Annotated[str, InjectedToolCallId]
-
 
 class ListDirectoryTool(BaseTool):
     """Tool for listing directory contents."""
@@ -120,7 +116,6 @@ class ListDirectoryTool(BaseTool):
         result = list_directory(self.codebase, dirpath, depth)
         return result.render(tool_call_id)
 
-
 class SearchInput(BaseModel):
     """Input for searching the codebase."""
 
@@ -133,7 +128,6 @@ class SearchInput(BaseModel):
     files_per_page: int = Field(default=10, description="Number of files to return per page (default: 10)")
     use_regex: bool = Field(default=False, description="Whether to treat query as a regex pattern (default: False)")
     tool_call_id: Annotated[str, InjectedToolCallId]
-
 
 class RipGrepTool(BaseTool):
     """Tool for searching the codebase via RipGrep."""
@@ -150,14 +144,12 @@ class RipGrepTool(BaseTool):
         result = search(self.codebase, query, file_extensions=file_extensions, page=page, files_per_page=files_per_page, use_regex=use_regex)
         return result.render(tool_call_id)
 
-
 class EditFileInput(BaseModel):
     """Input for editing a file."""
 
     filepath: str = Field(..., description="Path to the file to edit")
     content: str = Field(..., description="New content for the file")
     tool_call_id: Annotated[str, InjectedToolCallId]
-
 
 class EditFileTool(BaseTool):
     """Tool for editing files."""
@@ -193,7 +185,6 @@ Input for searching the codebase.
         result = edit_file(self.codebase, filepath, content)
         return result.render(tool_call_id)
 
-
 class CreateFileInput(BaseModel):
     """Input for creating a file."""
 
@@ -210,7 +201,6 @@ Example: content="print('Hello world')"
 NOT: content={"code": "print('Hello world')"}
                          """,
     )
-
 
 class CreateFileTool(BaseTool):
     """Tool for creating files."""
@@ -244,12 +234,10 @@ missing content, you are likely trying to pass a dictionary instead of a string.
 
         return result.render()
 
-
 class DeleteFileInput(BaseModel):
     """Input for deleting a file."""
 
     filepath: str = Field(..., description="Path to the file to delete")
-
 
 class DeleteFileTool(BaseTool):
     """Tool for deleting files."""
@@ -266,7 +254,6 @@ class DeleteFileTool(BaseTool):
         result = delete_file(self.codebase, filepath)
         return result.render()
 
-
 class CommitTool(BaseTool):
     """Tool for committing changes."""
 
@@ -281,7 +268,6 @@ class CommitTool(BaseTool):
         result = commit(self.codebase)
         return result.render()
 
-
 class RevealSymbolInput(BaseModel):
     """Input for revealing symbol relationships."""
 
@@ -293,7 +279,6 @@ class RevealSymbolInput(BaseModel):
     )
     collect_dependencies: bool = Field(default=True, description="Whether to collect dependencies")
     collect_usages: bool = Field(default=True, description="Whether to collect usages")
-
 
 class RevealSymbolTool(BaseTool):
     """Tool for revealing symbol relationships."""
@@ -324,7 +309,6 @@ class RevealSymbolTool(BaseTool):
         )
         return result.render()
 
-
 # Note: a large file is over 300 lines. Please specify a range larger than the edit you want to make.
 _SEMANTIC_EDIT_BRIEF = """Tool for file editing via an LLM delegate. Describe the changes you want to make and an expert will apply them to the file.
 
@@ -344,7 +328,6 @@ Another agent will be responsible for applying your edit and will only see the `
 For large files, specify a range slightly larger than the edit you want to make, and be clear in your description what should and shouldn't change.
 """
 
-
 class SemanticEditInput(BaseModel):
     """Input for semantic editing."""
 
@@ -353,7 +336,6 @@ class SemanticEditInput(BaseModel):
     start: int = Field(default=1, description="Starting line number (1-indexed, inclusive). Default is 1.")
     end: int = Field(default=-1, description="Ending line number (1-indexed, inclusive). Default is -1 (end of file).")
     tool_call_id: Annotated[str, InjectedToolCallId]
-
 
 class SemanticEditTool(BaseTool):
     """Tool for semantic editing of files."""
@@ -371,13 +353,11 @@ class SemanticEditTool(BaseTool):
         result = semantic_edit(self.codebase, filepath, edit_content, start=start, end=end)
         return result.render(tool_call_id)
 
-
 class RenameFileInput(BaseModel):
     """Input for renaming a file."""
 
     filepath: str = Field(..., description="Current path of the file relative to workspace root")
     new_filepath: str = Field(..., description="New path for the file relative to workspace root")
-
 
 class RenameFileTool(BaseTool):
     """Tool for renaming files and updating imports."""
@@ -394,7 +374,6 @@ class RenameFileTool(BaseTool):
         result = rename_file(self.codebase, filepath, new_filepath)
         return result.render()
 
-
 class MoveSymbolInput(BaseModel):
     """Input for moving a symbol between files."""
 
@@ -406,7 +385,6 @@ class MoveSymbolInput(BaseModel):
         description="Strategy for handling imports: 'update_all_imports' (default) or 'add_back_edge'",
     )
     include_dependencies: bool = Field(default=True, description="Whether to move dependencies along with the symbol")
-
 
 class MoveSymbolTool(BaseTool):
     """Tool for moving symbols between files."""
@@ -437,14 +415,12 @@ class MoveSymbolTool(BaseTool):
         )
         return result.render()
 
-
 class SemanticSearchInput(BaseModel):
     """Input for Semantic search of a codebase"""
 
     query: str = Field(..., description="The natural language search query")
     k: int = Field(default=5, description="Number of results to return")
     preview_length: int = Field(default=200, description="Length of content preview in characters")
-
 
 class SemanticSearchTool(BaseTool):
     """Tool for semantic code search."""
@@ -461,18 +437,15 @@ class SemanticSearchTool(BaseTool):
         result = semantic_search(self.codebase, query, k=k, preview_length=preview_length)
         return result.render()
 
-
 ########################################################################################################################
 # BASH
 ########################################################################################################################
-
 
 class RunBashCommandInput(BaseModel):
     """Input for running a bash command."""
 
     command: str = Field(..., description="The command to run")
     is_background: bool = Field(default=False, description="Whether to run the command in the background")
-
 
 class RunBashCommandTool(BaseTool):
     """Tool for running bash commands."""
@@ -485,18 +458,15 @@ class RunBashCommandTool(BaseTool):
         result = run_bash_command(command, is_background)
         return result.render()
 
-
 ########################################################################################################################
 # GITHUB
 ########################################################################################################################
-
 
 class GithubCreatePRInput(BaseModel):
     """Input for creating a PR"""
 
     title: str = Field(..., description="The title of the PR")
     body: str = Field(..., description="The body of the PR")
-
 
 class GithubCreatePRTool(BaseTool):
     """Tool for creating a PR."""
@@ -513,12 +483,10 @@ class GithubCreatePRTool(BaseTool):
         result = create_pr(self.codebase, title, body)
         return result.render()
 
-
 class GithubSearchIssuesInput(BaseModel):
     """Input for searching GitHub issues."""
 
     query: str = Field(..., description="Search query string to find issues")
-
 
 class GithubSearchIssuesTool(BaseTool):
     """Tool for searching GitHub issues."""
@@ -535,12 +503,10 @@ class GithubSearchIssuesTool(BaseTool):
         result = search(self.codebase, query)
         return result.render()
 
-
 class GithubViewPRInput(BaseModel):
     """Input for getting PR contents."""
 
     pr_id: int = Field(..., description="Number of the PR to get the contents for")
-
 
 class GithubViewPRTool(BaseTool):
     """Tool for getting PR data."""
@@ -557,12 +523,10 @@ class GithubViewPRTool(BaseTool):
         result = view_pr(self.codebase, pr_id)
         return result.render()
 
-
 class GithubCheckoutPRInput(BaseModel):
     """Input for checkout out a PR head branch."""
 
     pr_number: int = Field(..., description="Number of the PR to checkout")
-
 
 class GithubCheckoutPRTool(BaseTool):
     """Tool for checking out a PR head branch."""
@@ -579,13 +543,11 @@ class GithubCheckoutPRTool(BaseTool):
         result = checkout_pr(self.codebase, pr_number)
         return result.render()
 
-
 class GithubCreatePRCommentInput(BaseModel):
     """Input for creating a PR comment"""
 
     pr_number: int = Field(..., description="The PR number to comment on")
     body: str = Field(..., description="The comment text")
-
 
 class GithubCreatePRCommentTool(BaseTool):
     """Tool for creating a general PR comment."""
@@ -602,7 +564,6 @@ class GithubCreatePRCommentTool(BaseTool):
         result = create_pr_comment(self.codebase, pr_number, body)
         return result.render()
 
-
 class GithubCreatePRReviewCommentInput(BaseModel):
     """Input for creating an inline PR review comment"""
 
@@ -612,7 +573,6 @@ class GithubCreatePRReviewCommentInput(BaseModel):
     path: str = Field(..., description="The file path to comment on")
     line: int = Field(..., description="The line number to comment on use the indices from the diff")
     start_line: int | None = Field(None, description="For multi-line comments, the starting line")
-
 
 class GithubCreatePRReviewCommentTool(BaseTool):
     """Tool for creating inline PR review comments."""
@@ -644,12 +604,10 @@ class GithubCreatePRReviewCommentTool(BaseTool):
         )
         return result.render()
 
-
 class GithubViewPRCheckInput(BaseModel):
     """Input for viewing PR checks"""
 
     pr_number: int = Field(..., description="The PR number to view checks for")
-
 
 class GithubViewPRCheckTool(BaseTool):
     """Tool for viewing PR checks."""
@@ -666,17 +624,14 @@ class GithubViewPRCheckTool(BaseTool):
         result = view_pr_checks(self.codebase, pr_number=pr_number)
         return result.render()
 
-
 ########################################################################################################################
 # LINEAR
 ########################################################################################################################
-
 
 class LinearGetIssueInput(BaseModel):
     """Input for getting a Linear issue."""
 
     issue_id: str = Field(..., description="ID of the Linear issue to retrieve")
-
 
 class LinearGetIssueTool(BaseTool):
     """Tool for getting Linear issue details."""
@@ -693,12 +648,10 @@ class LinearGetIssueTool(BaseTool):
         result = linear_get_issue_tool(self.client, issue_id)
         return result.render()
 
-
 class LinearGetIssueCommentsInput(BaseModel):
     """Input for getting Linear issue comments."""
 
     issue_id: str = Field(..., description="ID of the Linear issue to get comments for")
-
 
 class LinearGetIssueCommentsTool(BaseTool):
     """Tool for getting Linear issue comments."""
@@ -715,13 +668,11 @@ class LinearGetIssueCommentsTool(BaseTool):
         result = linear_get_issue_comments_tool(self.client, issue_id)
         return result.render()
 
-
 class LinearCommentOnIssueInput(BaseModel):
     """Input for commenting on a Linear issue."""
 
     issue_id: str = Field(..., description="ID of the Linear issue to comment on")
     body: str = Field(..., description="The comment text")
-
 
 class LinearCommentOnIssueTool(BaseTool):
     """Tool for commenting on Linear issues."""
@@ -738,13 +689,11 @@ class LinearCommentOnIssueTool(BaseTool):
         result = linear_comment_on_issue_tool(self.client, issue_id, body)
         return result.render()
 
-
 class LinearSearchIssuesInput(BaseModel):
     """Input for searching Linear issues."""
 
     query: str = Field(..., description="Search query string")
     limit: int = Field(default=10, description="Maximum number of issues to return")
-
 
 class LinearSearchIssuesTool(BaseTool):
     """Tool for searching Linear issues."""
@@ -761,14 +710,12 @@ class LinearSearchIssuesTool(BaseTool):
         result = linear_search_issues_tool(self.client, query, limit)
         return result.render()
 
-
 class LinearCreateIssueInput(BaseModel):
     """Input for creating a Linear issue."""
 
     title: str = Field(..., description="Title of the issue")
     description: str | None = Field(None, description="Optional description of the issue")
     team_id: str | None = Field(None, description="Optional team ID. If not provided, uses the default team_id (recommended)")
-
 
 class LinearCreateIssueTool(BaseTool):
     """Tool for creating Linear issues."""
@@ -785,7 +732,6 @@ class LinearCreateIssueTool(BaseTool):
         result = linear_create_issue_tool(self.client, title, description, team_id)
         return result.render()
 
-
 class LinearGetTeamsTool(BaseTool):
     """Tool for getting Linear teams."""
 
@@ -800,17 +746,14 @@ class LinearGetTeamsTool(BaseTool):
         result = linear_get_teams_tool(self.client)
         return result.render()
 
-
 ########################################################################################################################
 # SLACK
 ########################################################################################################################
-
 
 class SlackSendMessageInput(BaseModel):
     """Input for sending a message to Slack."""
 
     content: str = Field(..., description="Message to send to Slack")
-
 
 class SlackSendMessageTool(BaseTool):
     """Tool for sending a message to Slack."""
@@ -838,11 +781,9 @@ class SlackSendMessageTool(BaseTool):
         self.say(content_formatted)
         return "✅ Message sent successfully"
 
-
 ########################################################################################################################
 # EXPORT
 ########################################################################################################################
-
 
 def get_workspace_tools(codebase: Codebase) -> list["BaseTool"]:
     """Get all workspace tools initialized with a codebase.
@@ -888,7 +829,6 @@ def get_workspace_tools(codebase: Codebase) -> list["BaseTool"]:
         LinearGetTeamsTool(codebase),
     ]
 
-
 class GlobalReplacementEditInput(BaseModel):
     """Input for replacement editing across the entire codebase."""
 
@@ -919,7 +859,6 @@ class GlobalReplacementEditInput(BaseModel):
         ),
     )
 
-
 class GlobalReplacementEditTool(BaseTool):
     """Tool for regex-based replacement editing of files across the entire codebase.
 
@@ -943,7 +882,6 @@ class GlobalReplacementEditTool(BaseTool):
     ) -> str:
         result = replacement_edit_global(self.codebase, file_pattern, pattern, replacement, count)
         return result.render()
-
 
 class ReplacementEditInput(BaseModel):
     """Input for replacement editing."""
@@ -987,7 +925,6 @@ class ReplacementEditInput(BaseModel):
         ),
     )
 
-
 class ReplacementEditTool(BaseTool):
     """Tool for regex-based replacement editing of files."""
 
@@ -1019,7 +956,6 @@ class ReplacementEditTool(BaseTool):
         )
         return result.render()
 
-
 # Brief description for the Relace Edit tool
 _RELACE_EDIT_BRIEF = """Tool for file editing using the Relace Instant Apply API.
 This high-speed code generation engine optimizes for real-time performance at 2000 tokens/second.
@@ -1040,14 +976,12 @@ The API will merge your edit snippet with the existing code to produce the final
 The API key will be automatically retrieved from the RELACE_API environment variable.
 """
 
-
 class RelaceEditInput(BaseModel):
     """Input for Relace editing."""
 
     filepath: str = Field(..., description="Path of the file relative to workspace root")
     edit_snippet: str = Field(..., description=RELACE_EDIT_PROMPT)
     tool_call_id: Annotated[str, InjectedToolCallId]
-
 
 class RelaceEditTool(BaseTool):
     """Tool for editing files using the Relace Instant Apply API."""
@@ -1064,7 +998,6 @@ class RelaceEditTool(BaseTool):
         result = relace_edit(self.codebase, filepath, edit_snippet)
         return result.render(tool_call_id=tool_call_id)
 
-
 class ReflectionInput(BaseModel):
     """Input for agent reflection."""
 
@@ -1072,7 +1005,6 @@ class ReflectionInput(BaseModel):
     findings_so_far: str = Field(..., description="Key information and insights gathered so far")
     current_challenges: str = Field(default="", description="Current obstacles or questions that need to be addressed")
     reflection_focus: str | None = Field(default=None, description="Optional specific aspect to focus reflection on (e.g., 'architecture', 'performance', 'next steps')")
-
 
 class ReflectionTool(BaseTool):
     """Tool for agent self-reflection and planning."""
@@ -1100,14 +1032,12 @@ class ReflectionTool(BaseTool):
 
         return result.render()
 
-
 class SearchFilesByNameInput(BaseModel):
     """Input for searching files by name pattern."""
 
     pattern: str = Field(..., description="`fd`-compatible glob pattern to search for (e.g. '*.py', 'test_*.py')")
     page: int = Field(default=1, description="Page number to return (1-based)")
     files_per_page: int | float = Field(default=10, description="Number of files per page to return, use math.inf to return all files")
-
 
 class SearchFilesByNameTool(BaseTool):
     """Tool for searching files by filename across a codebase."""

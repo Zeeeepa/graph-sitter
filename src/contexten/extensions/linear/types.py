@@ -1,8 +1,9 @@
-from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+
 from datetime import datetime
 from enum import Enum
+from typing import Optional, List, Dict, Any
 
+from pydantic import BaseModel
 
 class LinearUser(BaseModel):
     id: str
@@ -11,7 +12,6 @@ class LinearUser(BaseModel):
     avatar_url: Optional[str] = None
     active: bool = True
 
-
 class LinearTeam(BaseModel):
     id: str
     name: str
@@ -19,20 +19,17 @@ class LinearTeam(BaseModel):
     description: Optional[str] = None
     private: bool = False
 
-
 class LinearLabel(BaseModel):
     id: str
     name: str
     color: str
     description: Optional[str] = None
 
-
 class LinearProject(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
     url: Optional[str] = None
-
 
 class LinearState(BaseModel):
     id: str
@@ -41,7 +38,6 @@ class LinearState(BaseModel):
     color: str
     position: float
 
-
 class LinearComment(BaseModel):
     id: str
     body: str
@@ -49,7 +45,6 @@ class LinearComment(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     url: Optional[str] = None
-
 
 class LinearIssue(BaseModel):
     id: str
@@ -71,7 +66,6 @@ class LinearIssue(BaseModel):
     completed_at: Optional[datetime] = None
     due_date: Optional[datetime] = None
 
-
 class LinearEventType(str, Enum):
     """Linear webhook event types"""
     ISSUE_CREATE = "Issue"
@@ -83,20 +77,17 @@ class LinearEventType(str, Enum):
     PROJECT_UPDATE = "ProjectUpdate"
     CYCLE_UPDATE = "CycleUpdate"
 
-
 class LinearEventAction(str, Enum):
     """Linear event actions"""
     CREATE = "create"
     UPDATE = "update"
     REMOVE = "remove"
 
-
 class AssignmentAction(str, Enum):
     """Assignment actions"""
     ASSIGNED = "assigned"
     UNASSIGNED = "unassigned"
     REASSIGNED = "reassigned"
-
 
 class AssignmentEvent(BaseModel):
     """Assignment event for tracking bot assignments"""
@@ -107,7 +98,6 @@ class AssignmentEvent(BaseModel):
     timestamp: datetime
     metadata: Dict[str, Any] = {}
 
-
 class TaskStatus(str, Enum):
     """Task execution status"""
     PENDING = "pending"
@@ -115,7 +105,6 @@ class TaskStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
-
 
 class TaskProgress(BaseModel):
     """Task progress information"""
@@ -128,7 +117,6 @@ class TaskProgress(BaseModel):
     completed_at: Optional[datetime] = None
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = {}
-
 
 class WorkflowTask(BaseModel):
     """Workflow task representation"""
@@ -143,7 +131,6 @@ class WorkflowTask(BaseModel):
     assigned_to: Optional[str] = None
     metadata: Dict[str, Any] = {}
 
-
 class WebhookEvent(BaseModel):
     """Webhook event wrapper"""
     event_id: str
@@ -154,7 +141,6 @@ class WebhookEvent(BaseModel):
     processed: bool = False
     retry_count: int = 0
     error_message: Optional[str] = None
-
 
 class IntegrationStatus(BaseModel):
     """Integration status information"""
@@ -170,7 +156,6 @@ class IntegrationStatus(BaseModel):
     failed_events: int = 0
     last_error: Optional[str] = None
 
-
 class ComponentStats(BaseModel):
     """Component statistics"""
     requests_made: int = 0
@@ -182,7 +167,6 @@ class ComponentStats(BaseModel):
     last_error: Optional[str] = None
     uptime_seconds: float = 0.0
 
-
 class LinearIntegrationMetrics(BaseModel):
     """Comprehensive integration metrics"""
     status: IntegrationStatus
@@ -192,7 +176,6 @@ class LinearIntegrationMetrics(BaseModel):
     workflow_stats: ComponentStats
     event_stats: ComponentStats
     collected_at: datetime
-
 
 class LinearEvent(BaseModel):
     """Represents a Linear webhook event."""
@@ -204,4 +187,3 @@ class LinearEvent(BaseModel):
     created_at: str | None = None  # ISO timestamp
     organization_id: str | None = None
     team_id: str | None = None
-

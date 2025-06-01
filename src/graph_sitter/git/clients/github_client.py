@@ -1,3 +1,4 @@
+
 from github import Consts
 from github.GithubException import UnknownObjectException
 from github.MainClass import Github
@@ -7,7 +8,6 @@ from github.Repository import Repository
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class GithubClient:
     """Manages interaction with GitHub"""

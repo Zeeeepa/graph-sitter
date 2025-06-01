@@ -1,12 +1,12 @@
+
+from dataclasses import dataclass
+from pathlib import Path
 import ast
 import dataclasses
 import importlib
 import importlib.util
-from dataclasses import dataclass
-from pathlib import Path
 
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
-
 
 @dataclass
 class DecoratedFunction:
@@ -81,7 +81,6 @@ class DecoratedFunction:
 
         msg = f"Could not find function '{self.name}' in {self.filepath}"
         raise ValueError(msg)
-
 
 class CodegenFunctionVisitor(ast.NodeVisitor):
     def __init__(self):
@@ -254,7 +253,6 @@ class CodegenFunctionVisitor(ast.NodeVisitor):
         self.source = self.file_content
         self.generic_visit(node)
 
-
 def _extract_arguments_type_schema(func: DecoratedFunction) -> dict | None:
     """Extracts the arguments type schema from a DecoratedFunction object."""
     try:
@@ -276,7 +274,6 @@ def _extract_arguments_type_schema(func: DecoratedFunction) -> dict | None:
         print(f"Error parsing {func.filepath}, could not introspect for arguments parameter")
         print(e)
         return None
-
 
 def find_codegen_functions(filepath: Path) -> list[DecoratedFunction]:
     """Find all codegen functions in a Python file.

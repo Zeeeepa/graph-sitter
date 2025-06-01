@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 
+from pydantic import BaseModel
 
 class PRPartContext(BaseModel):
     """Represents a GitHub pull request part parsed from a webhook payload"""

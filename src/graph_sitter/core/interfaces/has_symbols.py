@@ -1,28 +1,28 @@
+
 from collections.abc import Iterator
 from itertools import chain
 from typing import TYPE_CHECKING, Generic, ParamSpec, TypeVar
 
+from graph_sitter.core.assignment import Assignment
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.core.import_resolution import Import, ImportStatement
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.utils.cache_utils import cached_generator
 from graph_sitter.shared.decorators.docs import py_noapidoc
 from graph_sitter.shared.logging.get_logger import get_logger
+from graph_sitter.typescript.class_definition import TSClass
+from graph_sitter.typescript.export import TSExport
+from graph_sitter.typescript.file import TSFile
+from graph_sitter.typescript.function import TSFunction
+from graph_sitter.typescript.import_resolution import TSImport
+from graph_sitter.typescript.statements.import_statement import TSImportStatement
+from graph_sitter.typescript.symbol import TSSymbol
 
 if TYPE_CHECKING:
-    from graph_sitter.core.assignment import Assignment
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.import_resolution import Import, ImportStatement
-    from graph_sitter.core.symbol import Symbol
-    from graph_sitter.typescript.class_definition import TSClass
-    from graph_sitter.typescript.export import TSExport
-    from graph_sitter.typescript.file import TSFile
-    from graph_sitter.typescript.function import TSFunction
-    from graph_sitter.typescript.import_resolution import TSImport
-    from graph_sitter.typescript.statements.import_statement import TSImportStatement
-    from graph_sitter.typescript.symbol import TSSymbol
 
 logger = get_logger(__name__)
-
 
 TFile = TypeVar("TFile", bound="SourceFile")
 TSymbol = TypeVar("TSymbol", bound="Symbol")
@@ -34,7 +34,6 @@ TImport = TypeVar("TImport", bound="Import")
 FilesParam = ParamSpec("FilesParam")
 
 TSGlobalVar = TypeVar("TSGlobalVar", bound="Assignment")
-
 
 class HasSymbols(Generic[TFile, TSymbol, TImportStatement, TGlobalVar, TClass, TFunction, TImport]):
     """Abstract interface for files in a codebase.

@@ -1,26 +1,112 @@
 """Codebase - main interface for Codemods to interact with the codebase"""
 
+import asyncio
+import subprocess
+
+import contexten_sdk_pink
+
+from graph_sitter.ai.ai_client_factory import AIClientFactory
+from graph_sitter.ai.context_gatherer import ContextGatherer
+from graph_sitter.codebase.codebase_ai import generate_system_prompt, generate_tools
+from graph_sitter.codebase.factory.codebase_factory import CodebaseFactory
+from graph_sitter.codebase.factory.codebase_factory import CodebaseFactory
+from graph_sitter.shared.exceptions.control_flow import MaxAIRequestsError
+
+import asyncio
 import codecs
 import json
 import os
 import re
 import tempfile
+from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
-from typing import Generic, Literal, Unpack, overload, Optional, Union, Dict, Any, List
+from typing import Generic, Literal, Unpack, overload, Optional, Union, Dict, Any, List, TypeVar
 
-import plotly.graph_objects as go
-import rich.repr
-from git import Commit as GitCommit
-from git import Diff
-from git.remote import PushInfoList
-from github.PullRequest import PullRequest
-from networkx import Graph
-from openai import OpenAI
-from rich.console import Console
-from typing_extensions import TypeVar, deprecated
+# Handle deprecated import for different Python versions
+try:
+    from typing import deprecated
+except ImportError:
+    try:
+        from typing_extensions import deprecated
+    except ImportError:
+        def deprecated(reason):
+            def decorator(func):
+                return func
+            return decorator
+
+# Handle optional dependencies
+try:
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+    # Create a mock go module
+    class MockPlotly:
+        class Figure:
+            def __init__(self, *args, **kwargs):
+                pass
+            def show(self):
+                print("Plotly not available - install with: pip install plotly")
+        
+        class Scatter:
+            def __init__(self, *args, **kwargs):
+                pass
+    
+    go = MockPlotly()
+
+# Handle optional rich dependency
+try:
+    import rich.repr
+    RICH_AVAILABLE = True
+except ImportError:
+    RICH_AVAILABLE = False
+    class MockRich:
+        class repr:
+            Result = list
+    rich = MockRich()
+
+# Handle optional git dependencies
+try:
+    from git import Commit as GitCommit
+    from git import Diff
+    from git.remote import PushInfoList
+    GIT_AVAILABLE = True
+except ImportError:
+    GIT_AVAILABLE = False
+    class GitCommit:
+        pass
+    class Diff:
+        pass
+    class PushInfoList:
+        pass
+
+# Handle optional github dependency
+try:
+    from github.PullRequest import PullRequest
+    GITHUB_AVAILABLE = True
+except ImportError:
+    GITHUB_AVAILABLE = False
+    class PullRequest:
+        pass
+
+# Handle optional pandas/networkx dependencies
+try:
+    import networkx as nx
+    import pandas as pd
+    ANALYSIS_LIBS_AVAILABLE = True
+except ImportError:
+    ANALYSIS_LIBS_AVAILABLE = False
+    class MockNetworkX:
+        class Graph:
+            pass
+    class MockPandas:
+        class DataFrame:
+            pass
+    nx = MockNetworkX()
+    pd = MockPandas()
 
 from graph_sitter._proxy import proxy_property
 from graph_sitter.ai.client import get_openai_client
@@ -94,7 +180,6 @@ from graph_sitter.visualizations.visualization_manager import VisualizationManag
 logger = get_logger(__name__)
 MAX_LINES = 10000  # Maximum number of lines of text allowed to be logged
 
-
 TSourceFile = TypeVar("TSourceFile", bound="SourceFile", default=SourceFile)
 TDirectory = TypeVar("TDirectory", bound="Directory", default=Directory)
 TSymbol = TypeVar("TSymbol", bound="Symbol", default=Symbol)
@@ -111,7 +196,6 @@ TSGlobalVar = TypeVar("TSGlobalVar", bound="Assignment", default=Assignment)
 PyGlobalVar = TypeVar("PyGlobalVar", bound="Assignment", default=Assignment)
 TSDirectory = Directory[TSFile, TSSymbol, TSImportStatement, TSGlobalVar, TSClass, TSFunction, TSImport]
 PyDirectory = Directory[PyFile, PySymbol, PyImportStatement, PyGlobalVar, PyClass, PyFunction, PyImport]
-
 
 @apidoc
 class Codebase(
@@ -213,7 +297,6 @@ class Codebase(
         self.ctx = CodebaseContext(projects, config=config, secrets=secrets, io=io, progress=progress)
         self.console = Console(record=True, soft_wrap=True)
         if self.ctx.config.use_pink != PinkMode.OFF:
-            import contexten_sdk_pink
 
             self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
 
@@ -1266,9 +1349,6 @@ class Codebase(
                 }
             )
         """
-        from graph_sitter.ai.ai_client_factory import AIClientFactory
-        from graph_sitter.ai.context_gatherer import ContextGatherer
-        from graph_sitter.codebase.codebase_ai import generate_system_prompt, generate_tools
         
         # Increment AI request counter
         self._num_ai_requests += 1
@@ -1276,7 +1356,6 @@ class Codebase(
         # Check AI request limits
         if hasattr(self.ctx, 'session_options') and self.ctx.session_options.max_ai_requests:
             if self._num_ai_requests > self.ctx.session_options.max_ai_requests:
-                from graph_sitter.shared.exceptions.control_flow import MaxAIRequestsError
                 raise MaxAIRequestsError(f"Exceeded maximum AI requests ({self.ctx.session_options.max_ai_requests})")
         
         # Create AI client
@@ -1347,7 +1426,6 @@ class Codebase(
         Returns:
             str: AI-generated response
         """
-        import asyncio
         
         try:
             # Try to get the current event loop
@@ -1520,7 +1598,6 @@ class Codebase(
         filename = "test.ts" if prog_lang == ProgrammingLanguage.TYPESCRIPT else "test.py"
 
         # Create codebase using factory
-        from graph_sitter.codebase.factory.codebase_factory import CodebaseFactory
 
         files = {filename: code}
 
@@ -1562,7 +1639,6 @@ class Codebase(
             >>> codebase = Codebase.from_files(files)
         """
         # Create codebase using factory
-        from graph_sitter.codebase.factory.codebase_factory import CodebaseFactory
 
         if not files:
             msg = "No files provided"
@@ -1606,7 +1682,6 @@ class Codebase(
             logger.info(f"Using directory: {tmp_dir}")
 
             # Initialize git repo to avoid "not in a git repository" error
-            import subprocess
 
             subprocess.run(["git", "init"], cwd=tmp_dir, check=True, capture_output=True)
 
@@ -1651,7 +1726,6 @@ class Codebase(
             None
         """
         return self._op.create_pr_review_comment(pr_number, body, commit_sha, path, line, side, start_line)
-
 
 # The last 2 lines of code are added to the runner. See codegen-backend/cli/generate/utils.py
 # Type Aliases

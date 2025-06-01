@@ -1,19 +1,18 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from rustworkx import NoSuitableNeighbors
 
+from __future__ import annotations
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.export import Export
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.usable import Usable
 from graph_sitter.enums import EdgeType, ImportType, NodeType
 from graph_sitter.shared.decorators.docs import apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.export import Export
-    from graph_sitter.core.interfaces.editable import Editable
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Exportable(Usable[Parent], Generic[Parent]):

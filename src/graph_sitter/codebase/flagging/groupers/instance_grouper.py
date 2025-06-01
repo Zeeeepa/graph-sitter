@@ -1,9 +1,9 @@
+
 from graph_sitter.codebase.flagging.code_flag import CodeFlag
 from graph_sitter.codebase.flagging.group import Group
 from graph_sitter.codebase.flagging.groupers.base_grouper import BaseGrouper
 from graph_sitter.codebase.flagging.groupers.enums import GroupBy
 from graph_sitter.git.repo_operator.repo_operator import RepoOperator
-
 
 class InstanceGrouper(BaseGrouper):
     """Group flags by flags. haha

@@ -1,5 +1,17 @@
 """Lines of Code Calculator.
 
+from typing import TYPE_CHECKING, Optional, Dict, Any, Tuple
+import re
+
+from ..core.base_calculator import BaseMetricsCalculator
+
+from __future__ import annotations
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.metrics.models.metrics_data import (
+
 Calculates various lines of code metrics including:
 - Total Lines of Code (LOC)
 - Logical Lines of Code (LLOC) 
@@ -12,25 +24,12 @@ These metrics provide insights into code size, documentation quality,
 and overall code structure.
 """
 
-from __future__ import annotations
-
-import re
-from typing import TYPE_CHECKING, Optional, Dict, Any, Tuple
-
-from ..core.base_calculator import BaseMetricsCalculator
-
 if TYPE_CHECKING:
-    from graph_sitter.core.codebase import Codebase
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.metrics.models.metrics_data import (
         FunctionMetrics,
         ClassMetrics,
         FileMetrics,
         CodebaseMetrics,
     )
-
 
 class LinesOfCodeCalculator(BaseMetricsCalculator):
     """Calculator for various lines of code metrics."""
@@ -529,4 +528,3 @@ class LinesOfCodeCalculator(BaseMetricsCalculator):
             },
             "additionalProperties": False
         }
-

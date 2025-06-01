@@ -1,5 +1,6 @@
-import time
+
 from datetime import datetime
+import time
 
 from github.Branch import Branch
 from github.CheckRun import CheckRun
@@ -22,7 +23,6 @@ from graph_sitter.git.utils.format import format_comparison
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class GitRepoClient:
     """Wrapper around PyGithub's Remote Repository."""

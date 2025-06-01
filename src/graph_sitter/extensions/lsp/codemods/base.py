@@ -1,13 +1,13 @@
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, ClassVar
 
 from lsprotocol import types
 
 from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
 
 if TYPE_CHECKING:
-    from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
-
 
 class CodeAction(ABC):
     name: str

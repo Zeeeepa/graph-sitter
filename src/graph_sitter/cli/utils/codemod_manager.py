@@ -1,10 +1,10 @@
-import builtins
+
 from pathlib import Path
+import builtins
 
 import rich_click as click
 
 from graph_sitter.cli.utils.function_finder import DecoratedFunction, find_codegen_functions
-
 
 def _might_have_decorators(file_path: Path) -> bool:
     """Quick check if a file might contain codegen decorators.
@@ -18,7 +18,6 @@ def _might_have_decorators(file_path: Path) -> bool:
             return b"@graph_sitter" in f.read()
     except Exception:
         return False
-
 
 class CodemodManager:
     """Manages codemod operations in the local filesystem."""

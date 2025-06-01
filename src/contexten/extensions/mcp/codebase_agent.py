@@ -1,5 +1,6 @@
-import os
+
 from typing import Annotated
+import os
 
 from mcp.server.fastmcp import FastMCP
 
@@ -14,7 +15,6 @@ mcp = FastMCP(
     instructions="""Use this server to access any information from your codebase. This tool can provide information ranging from AST Symbol details and information from across the codebase.
     Use this tool for all questions, queries regarding your codebase.""",
 )
-
 
 @mcp.tool(name="query_codebase", description="Query your codebase for information about symbols, dependencies, files, anything")
 def query_codebase(
@@ -48,7 +48,6 @@ def query_codebase(
 
     except Exception as e:
         return {"error": f"An error occurred while processing the request: {e!s}"}
-
 
 if __name__ == "__main__":
     # Initialize and run the server

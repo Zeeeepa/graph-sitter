@@ -1,7 +1,7 @@
+
 from py_mini_racer import MiniRacer, init_mini_racer
 from py_mini_racer._context import Context
 from py_mini_racer._set_timeout import INSTALL_SET_TIMEOUT
-
 
 class MegaRacer(MiniRacer):
     """MegaRacer is a patch on MiniRacer that allows for more memory.

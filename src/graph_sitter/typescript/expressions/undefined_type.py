@@ -1,3 +1,4 @@
+
 from collections.abc import Generator
 from typing import Generic, Self, TypeVar, override
 
@@ -9,7 +10,6 @@ from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 
 Parent = TypeVar("Parent")
-
 
 @ts_apidoc
 class TSUndefinedType(Type[Parent], Generic[Parent]):

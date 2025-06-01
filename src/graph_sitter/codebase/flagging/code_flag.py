@@ -1,3 +1,4 @@
+
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
@@ -5,7 +6,6 @@ from graph_sitter.codebase.flagging.enums import MessageType
 from graph_sitter.core.interfaces.editable import Editable
 
 Symbol = TypeVar("Symbol", bound=Editable | None)
-
 
 @dataclass
 class CodeFlag(Generic[Symbol]):

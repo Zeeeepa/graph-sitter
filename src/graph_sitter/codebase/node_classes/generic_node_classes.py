@@ -1,3 +1,4 @@
+
 from graph_sitter.codebase.node_classes.node_classes import NodeClasses
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.detached_symbols.code_block import CodeBlock

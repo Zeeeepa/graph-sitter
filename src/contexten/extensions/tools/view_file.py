@@ -12,7 +12,6 @@ from .observation import Observation
 if TYPE_CHECKING:
     from .tool_output_types import ViewFileArtifacts
 
-
 class ViewFileObservation(Observation):
     """Response from viewing a file."""
 
@@ -90,7 +89,6 @@ class ViewFileObservation(Observation):
             artifact=success_artifacts,
         )
 
-
 def add_line_numbers(content: str) -> str:
     """Add line numbers to content.
 
@@ -103,7 +101,6 @@ def add_line_numbers(content: str) -> str:
     lines = content.split("\n")
     width = len(str(len(lines)))
     return "\n".join(f"{i + 1:>{width}}|{line}" for i, line in enumerate(lines))
-
 
 def view_file(
     codebase: Codebase,

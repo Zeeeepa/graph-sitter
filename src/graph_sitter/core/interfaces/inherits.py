@@ -1,22 +1,22 @@
-from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from __future__ import annotations
 from graph_sitter.core.autocommit import commiter, reader
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.class_definition import Class
 from graph_sitter.core.expressions import Type
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.interface import Interface
+from graph_sitter.core.interface import Interface
 from graph_sitter.core.interfaces.supports_generic import SupportsGenerics
 from graph_sitter.enums import EdgeType
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.external_module import ExternalModule
-    from graph_sitter.core.interface import Interface
 
 TType = TypeVar("TType", bound=Type)
-
 
 class Inherits(SupportsGenerics, Generic[TType]):
     """This symbol inherits from other symbols."""
@@ -29,8 +29,6 @@ class Inherits(SupportsGenerics, Generic[TType]):
     @reader
     def _get_superclasses(self, max_depth: int | None = None) -> list[Class | ExternalModule | Interface]:
         """Returns a list of all classes that this class extends, up to max_depth."""
-        from graph_sitter.core.class_definition import Class
-        from graph_sitter.core.interface import Interface
 
         # Implements the python MRO, IE: by level
         seen = set()

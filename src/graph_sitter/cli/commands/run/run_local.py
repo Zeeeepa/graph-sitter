@@ -1,9 +1,10 @@
+
 from pathlib import Path
 
-import rich
-import rich.progress
 from rich.panel import Panel
 from rich.status import Status
+import rich
+import rich.progress
 
 from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.utils.function_finder import DecoratedFunction
@@ -15,7 +16,6 @@ from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.git.utils.language import determine_project_language
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
-
 
 class RichTask(Task):
     _task: rich.progress.Task
@@ -33,7 +33,6 @@ class RichTask(Task):
     def end(self) -> None:
         self._progress.update(self._task, completed=self._total)
 
-
 class RichProgress(Progress[RichTask]):
     _progress: rich.progress.Progress
 
@@ -43,7 +42,6 @@ class RichProgress(Progress[RichTask]):
     def begin(self, message: str, count: int | None = None) -> RichTask:
         task = self._progress.add_task(description=message, total=count)
         return RichTask(task, progress=self._progress, total=count)
-
 
 def parse_codebase(
     repo_path: Path,
@@ -77,7 +75,6 @@ def parse_codebase(
             progress=RichProgress(progress),
         )
     return codebase
-
 
 def run_local(
     session: CliSession,
