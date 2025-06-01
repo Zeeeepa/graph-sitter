@@ -139,6 +139,10 @@ class CodeAnalysisDashboard {
                 case 'alerts':
                     this.updateAlertsSection(data);
                     break;
+                case 'autonomous':
+                    showSection('autonomous-section');
+                    loadAutonomousData();
+                    break;
             }
             
         } catch (error) {
@@ -864,6 +868,415 @@ class CodeAnalysisDashboard {
     }
 }
 
+// Autonomous Systems Functions
+
+async function loadAutonomousData() {
+    try {
+        // Load autonomous systems status
+        const statusResponse = await fetch('/api/autonomous/status');
+        const statusData = await statusResponse.json();
+        updateAutonomousStatus(statusData);
+        
+        // Load dependency data
+        const dependencyResponse = await fetch('/api/autonomous/dependencies');
+        const dependencyData = await dependencyResponse.json();
+        updateDependencyData(dependencyData);
+        
+        // Load failure analysis data
+        const failureResponse = await fetch('/api/autonomous/failures');
+        const failureData = await failureResponse.json();
+        updateFailureData(failureData);
+        
+    } catch (error) {
+        console.error('Error loading autonomous data:', error);
+        showNotification('Failed to load autonomous systems data', 'error');
+    }
+}
+
+function updateAutonomousStatus(data) {
+    // Update dependency manager status
+    const dependencyStatus = document.getElementById('dependency-status');
+    if (data.dependency_manager?.available) {
+        dependencyStatus.textContent = 'Active';
+        dependencyStatus.className = 'h5 mb-0 font-weight-bold text-success';
+    } else {
+        dependencyStatus.textContent = 'Unavailable';
+        dependencyStatus.className = 'h5 mb-0 font-weight-bold text-danger';
+    }
+    
+    // Update failure analyzer status
+    const failureStatus = document.getElementById('failure-analyzer-status');
+    if (data.failure_analyzer?.available) {
+        failureStatus.textContent = 'Active';
+        failureStatus.className = 'h5 mb-0 font-weight-bold text-success';
+    } else {
+        failureStatus.textContent = 'Unavailable';
+        failureStatus.className = 'h5 mb-0 font-weight-bold text-danger';
+    }
+    
+    // Update auto-fix success rate
+    const successRate = document.getElementById('autofix-success-rate');
+    if (data.failure_analyzer?.statistics) {
+        const rate = (data.failure_analyzer.statistics.fix_success_rate * 100).toFixed(1);
+        successRate.textContent = `${rate}%`;
+    } else {
+        successRate.textContent = 'N/A';
+    }
+}
+
+function updateDependencyData(data) {
+    if (data.error) {
+        console.error('Dependency data error:', data.error);
+        return;
+    }
+    
+    // Update summary counts
+    document.getElementById('total-dependencies').textContent = data.summary?.total_dependencies || 0;
+    document.getElementById('outdated-dependencies').textContent = data.summary?.outdated_dependencies || 0;
+    document.getElementById('security-vulnerabilities').textContent = data.summary?.security_vulnerabilities || 0;
+    
+    // Update last scan time
+    if (data.summary?.last_scan) {
+        const lastScan = new Date(data.summary.last_scan);
+        document.getElementById('last-dependency-scan').textContent = `Last scan: ${lastScan.toLocaleString()}`;
+    }
+    
+    // Update security vulnerabilities list
+    const vulnList = document.getElementById('security-vulnerabilities-list');
+    if (data.vulnerabilities && data.vulnerabilities.length > 0) {
+        vulnList.innerHTML = data.vulnerabilities.slice(0, 5).map(vuln => `
+            <div class="alert alert-${vuln.severity === 'critical' ? 'danger' : 'warning'} alert-sm">
+                <strong>${vuln.package_name}</strong><br>
+                <small>${vuln.description}</small>
+                ${vuln.cve_id ? `<br><code>${vuln.cve_id}</code>` : ''}
+            </div>
+        `).join('');
+    } else {
+        vulnList.innerHTML = '<p class="text-success">No security vulnerabilities detected</p>';
+    }
+}
+
+function updateFailureData(data) {
+    if (data.error) {
+        console.error('Failure data error:', data.error);
+        return;
+    }
+    
+    // Update auto-fix status
+    const autofixStatus = document.getElementById('autofix-status');
+    if (data.configuration?.auto_fix_enabled) {
+        autofixStatus.textContent = 'Enabled';
+        autofixStatus.className = 'text-success';
+    } else {
+        autofixStatus.textContent = 'Disabled';
+        autofixStatus.className = 'text-warning';
+    }
+    
+    // Update recent failures table
+    const failuresTable = document.getElementById('recent-failures-table').getElementsByTagName('tbody')[0];
+    if (data.recent_failures && data.recent_failures.length > 0) {
+        failuresTable.innerHTML = data.recent_failures.map(failure => `
+            <tr>
+                <td><code>${failure.workflow_run_id}</code></td>
+                <td><span class="badge bg-${getFailureTypeBadgeColor(failure.failure_type)}">${failure.failure_type}</span></td>
+                <td>${(failure.confidence_score * 100).toFixed(1)}%</td>
+                <td>${failure.auto_fixable ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'}</td>
+                <td>${failure.fix_applied ? '<span class="badge bg-success">Fixed</span>' : '<span class="badge bg-warning">Pending</span>'}</td>
+                <td>
+                    ${failure.auto_fixable && !failure.fix_applied ? 
+                        `<button class="btn btn-sm btn-primary" onclick="attemptAutoFix('${failure.id}')">
+                            <i class="fas fa-magic"></i> Auto-Fix
+                        </button>` : 
+                        `<button class="btn btn-sm btn-info" onclick="viewFailureDetails('${failure.id}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>`
+                    }
+                </td>
+            </tr>
+        `).join('');
+    } else {
+        failuresTable.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No recent failures</td></tr>';
+    }
+    
+    // Update auto-fix statistics
+    const statsDiv = document.getElementById('autofix-statistics');
+    if (data.statistics) {
+        const stats = data.statistics;
+        statsDiv.innerHTML = `
+            <div class="row">
+                <div class="col-6">
+                    <small class="text-muted">Total Failures</small>
+                    <div class="h6">${stats.total_failures}</div>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted">Auto-Fixed</small>
+                    <div class="h6">${stats.auto_fixed_failures}</div>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted">Success Rate</small>
+                    <div class="h6">${(stats.fix_success_rate * 100).toFixed(1)}%</div>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted">Avg Fix Time</small>
+                    <div class="h6">${Math.round(stats.avg_fix_time)}s</div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function getFailureTypeBadgeColor(type) {
+    const colors = {
+        'build': 'danger',
+        'test': 'warning',
+        'deploy': 'info',
+        'dependency': 'primary',
+        'network': 'secondary',
+        'resource': 'dark',
+        'other': 'light'
+    };
+    return colors[type] || 'secondary';
+}
+
+async function triggerDependencyScan() {
+    try {
+        showNotification('Starting dependency scan...', 'info');
+        
+        const response = await fetch('/api/autonomous/dependencies/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showNotification('Dependency scan completed successfully', 'success');
+            loadAutonomousData(); // Refresh data
+        } else {
+            showNotification(`Scan failed: ${result.detail}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error triggering dependency scan:', error);
+        showNotification('Failed to trigger dependency scan', 'error');
+    }
+}
+
+async function showDependencyUpdates() {
+    try {
+        const response = await fetch('/api/autonomous/dependencies');
+        const data = await response.json();
+        
+        if (data.updates && data.updates.length > 0) {
+            // Create modal with dependency updates
+            const modal = createDependencyUpdatesModal(data.updates);
+            document.body.appendChild(modal);
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        } else {
+            showNotification('No dependency updates available', 'info');
+        }
+    } catch (error) {
+        console.error('Error showing dependency updates:', error);
+        showNotification('Failed to load dependency updates', 'error');
+    }
+}
+
+function createDependencyUpdatesModal(updates) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Available Dependency Updates</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Package</th>
+                                    <th>Current</th>
+                                    <th>Latest</th>
+                                    <th>Type</th>
+                                    <th>Security</th>
+                                    <th>Risk</th>
+                                    <th>Action</th>
+                                    <th>Select</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${updates.map(update => `
+                                    <tr>
+                                        <td><strong>${update.name}</strong></td>
+                                        <td><code>${update.current_version}</code></td>
+                                        <td><code>${update.latest_version}</code></td>
+                                        <td><span class="badge bg-${getUpdateTypeBadgeColor(update.update_type)}">${update.update_type}</span></td>
+                                        <td><span class="badge bg-${getSecurityBadgeColor(update.security_impact)}">${update.security_impact}</span></td>
+                                        <td><span class="badge bg-${getRiskBadgeColor(update.compatibility_risk)}">${update.compatibility_risk}</span></td>
+                                        <td><span class="badge bg-info">${update.recommended_action}</span></td>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input update-checkbox" 
+                                                   value="${update.name}" ${update.auto_fixable ? 'checked' : ''}>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="applySelectedUpdates()">Apply Selected Updates</button>
+                </div>
+            </div>
+        </div>
+    `;
+    return modal;
+}
+
+function getUpdateTypeBadgeColor(type) {
+    const colors = { 'major': 'danger', 'minor': 'warning', 'patch': 'success' };
+    return colors[type] || 'secondary';
+}
+
+function getSecurityBadgeColor(impact) {
+    const colors = { 'critical': 'danger', 'high': 'warning', 'medium': 'info', 'low': 'secondary', 'none': 'light' };
+    return colors[impact] || 'secondary';
+}
+
+function getRiskBadgeColor(risk) {
+    const colors = { 'high': 'danger', 'medium': 'warning', 'low': 'success' };
+    return colors[risk] || 'secondary';
+}
+
+async function applySelectedUpdates() {
+    const checkboxes = document.querySelectorAll('.update-checkbox:checked');
+    const selectedUpdates = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedUpdates.length === 0) {
+        showNotification('No updates selected', 'warning');
+        return;
+    }
+    
+    try {
+        showNotification(`Applying ${selectedUpdates.length} updates...`, 'info');
+        
+        const response = await fetch('/api/autonomous/dependencies/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                updates: selectedUpdates,
+                strategy: 'smart'
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Updates applied successfully', 'success');
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.querySelector('.modal'));
+            modal.hide();
+            loadAutonomousData(); // Refresh data
+        } else {
+            showNotification(`Update failed: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error applying updates:', error);
+        showNotification('Failed to apply updates', 'error');
+    }
+}
+
+async function attemptAutoFix(analysisId) {
+    try {
+        showNotification('Attempting auto-fix...', 'info');
+        
+        const response = await fetch('/api/autonomous/failures/autofix', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                analysis_id: analysisId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.fix_result?.success) {
+            showNotification('Auto-fix completed successfully', 'success');
+            if (result.fix_result.pr_created) {
+                showNotification(`PR created: ${result.fix_result.pr_created}`, 'info');
+            }
+        } else {
+            showNotification(`Auto-fix failed: ${result.fix_result?.error_message || 'Unknown error'}`, 'error');
+        }
+        
+        loadAutonomousData(); // Refresh data
+    } catch (error) {
+        console.error('Error attempting auto-fix:', error);
+        showNotification('Failed to attempt auto-fix', 'error');
+    }
+}
+
+function viewFailureDetails(analysisId) {
+    // This would show a modal with detailed failure analysis
+    showNotification('Failure details view not implemented yet', 'info');
+}
+
+function showFailureAnalysisForm() {
+    // This would show a form to analyze a specific workflow failure
+    showNotification('Failure analysis form not implemented yet', 'info');
+}
+
+function showFailureHistory() {
+    // This would show a modal with failure history
+    showNotification('Failure history view not implemented yet', 'info');
+}
+
+async function refreshAutonomousData() {
+    showNotification('Refreshing autonomous systems data...', 'info');
+    await loadAutonomousData();
+    showNotification('Data refreshed successfully', 'success');
+}
+
+function showAutonomousSettings() {
+    // Scroll to configuration section
+    document.querySelector('#autonomous-section .card:last-child').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+function saveAutonomousConfiguration() {
+    // This would save the autonomous configuration
+    showNotification('Configuration saved successfully', 'success');
+}
+
+function resetAutonomousConfiguration() {
+    // This would reset configuration to defaults
+    if (confirm('Reset autonomous configuration to defaults?')) {
+        showNotification('Configuration reset to defaults', 'info');
+    }
+}
+
+// Update confidence threshold display
+document.addEventListener('DOMContentLoaded', function() {
+    const confidenceSlider = document.getElementById('confidence-threshold');
+    const confidenceValue = document.getElementById('confidence-value');
+    
+    if (confidenceSlider && confidenceValue) {
+        confidenceSlider.addEventListener('input', function() {
+            confidenceValue.textContent = this.value;
+        });
+    }
+});
+
 // Global functions
 function viewFileDetails(filePath) {
     // Implementation for viewing file details
@@ -877,4 +1290,3 @@ function acknowledgeAlert(alertId) {
 
 // Initialize dashboard when DOM is loaded
 console.log('Contexten Dashboard loaded');
-

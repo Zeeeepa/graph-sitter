@@ -47,6 +47,8 @@ from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConf
 from ...shared.logging.get_logger import get_logger
 from .chat_manager import ChatManager
 from .monitoring_integration import EnhancedDashboardMonitoring
+from .autonomous_dependency_manager import AutonomousDependencyManager
+from .autonomous_failure_analyzer import AutonomousFailureAnalyzer
 
 logger = get_logger(__name__)
 
@@ -803,6 +805,7 @@ enhanced_monitoring = None
 async def initialize_monitoring():
     """Initialize the real-time monitoring system"""
     global quality_monitor, real_time_analyzer, alert_system, dashboard_monitor, continuous_monitor, enhanced_monitoring
+    global autonomous_dependency_manager, autonomous_failure_analyzer
     
     if not config.monitoring_enabled:
         logger.info("Real-time monitoring is disabled")
@@ -811,6 +814,18 @@ async def initialize_monitoring():
     try:
         # Initialize enhanced monitoring integration
         enhanced_monitoring = EnhancedDashboardMonitoring(codebase_path=".")
+        
+        # Initialize autonomous systems
+        autonomous_dependency_manager = AutonomousDependencyManager(
+            codegen_org_id=config.codegen_org_id,
+            codegen_token=config.codegen_token,
+            project_path="."
+        )
+        
+        autonomous_failure_analyzer = AutonomousFailureAnalyzer(
+            codegen_org_id=config.codegen_org_id,
+            codegen_token=config.codegen_token
+        )
         
         # Initialize the monitoring system
         success = await enhanced_monitoring.initialize()
@@ -824,6 +839,15 @@ async def initialize_monitoring():
         enhanced_monitoring.add_metrics_callback(_on_metrics_websocket_update)
         enhanced_monitoring.add_alerts_callback(_on_alert_websocket_update)
         enhanced_monitoring.add_file_change_callback(_on_file_change_websocket_update)
+        
+        # Setup autonomous system callbacks
+        autonomous_dependency_manager.add_update_callback(_on_dependency_update)
+        autonomous_dependency_manager.add_vulnerability_callback(_on_security_vulnerability)
+        
+        autonomous_failure_analyzer.add_failure_callback(_on_failure_analysis)
+        autonomous_failure_analyzer.add_fix_callback(_on_auto_fix_result)
+        
+        logger.info("Autonomous systems initialized successfully")
         
     except Exception as e:
         logger.error(f"Failed to initialize enhanced monitoring: {e}")
@@ -843,6 +867,27 @@ async def _on_file_change_websocket_update(change):
     """Handle file change update for WebSocket broadcast"""
     # This would broadcast to connected WebSocket clients
     pass
+
+async def _on_dependency_update(analysis_result):
+    """Handle dependency analysis update for WebSocket broadcast"""
+    # This would broadcast dependency updates to connected WebSocket clients
+    logger.info(f"Dependency analysis update: {analysis_result.outdated_dependencies} updates available")
+
+async def _on_security_vulnerability(vulnerabilities):
+    """Handle security vulnerability detection for WebSocket broadcast"""
+    # This would broadcast security alerts to connected WebSocket clients
+    logger.warning(f"Security vulnerabilities detected: {len(vulnerabilities)} critical issues")
+
+async def _on_failure_analysis(analysis):
+    """Handle failure analysis result for WebSocket broadcast"""
+    # This would broadcast failure analysis to connected WebSocket clients
+    logger.info(f"Failure analysis complete: {analysis.failure_type} (confidence: {analysis.confidence_score})")
+
+async def _on_auto_fix_result(fix_result):
+    """Handle auto-fix result for WebSocket broadcast"""
+    # This would broadcast auto-fix results to connected WebSocket clients
+    status = "successful" if fix_result.success else "failed"
+    logger.info(f"Auto-fix {status}: {fix_result.fix_strategy}")
 
 @app.get("/api/dashboard/data")
 async def get_dashboard_data():
@@ -1291,6 +1336,203 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.info("WebSocket client disconnected")
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
+
+# Autonomous Systems API Endpoints
+
+@app.get("/api/autonomous/dependencies")
+async def get_dependency_analysis(
+    request: Request,
+    force_scan: bool = False,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get dependency analysis results"""
+    try:
+        if autonomous_dependency_manager:
+            if force_scan:
+                result = await autonomous_dependency_manager.analyze_dependencies(force_scan=True)
+            else:
+                result = autonomous_dependency_manager.get_last_scan_result()
+                if not result:
+                    result = await autonomous_dependency_manager.analyze_dependencies()
+            
+            return await autonomous_dependency_manager.get_dashboard_data()
+        else:
+            return {"error": "Autonomous dependency manager not available"}
+    except Exception as e:
+        logger.error(f"Failed to get dependency analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/autonomous/dependencies/scan")
+async def trigger_dependency_scan(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Trigger a new dependency scan"""
+    try:
+        if autonomous_dependency_manager:
+            result = await autonomous_dependency_manager.analyze_dependencies(force_scan=True)
+            return {
+                "message": "Dependency scan completed",
+                "summary": {
+                    "total_dependencies": result.total_dependencies,
+                    "outdated_dependencies": result.outdated_dependencies,
+                    "security_vulnerabilities": result.security_vulnerabilities
+                }
+            }
+        else:
+            raise HTTPException(status_code=503, detail="Autonomous dependency manager not available")
+    except Exception as e:
+        logger.error(f"Failed to trigger dependency scan: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/autonomous/dependencies/update")
+async def apply_dependency_updates(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Apply selected dependency updates"""
+    try:
+        body = await request.json()
+        update_names = body.get("updates", [])
+        strategy = body.get("strategy", "smart")
+        
+        if autonomous_dependency_manager:
+            result = await autonomous_dependency_manager.apply_updates(update_names, strategy)
+            return result
+        else:
+            raise HTTPException(status_code=503, detail="Autonomous dependency manager not available")
+    except Exception as e:
+        logger.error(f"Failed to apply dependency updates: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/autonomous/failures")
+async def get_failure_analysis(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get failure analysis results"""
+    try:
+        if autonomous_failure_analyzer:
+            return autonomous_failure_analyzer.get_dashboard_data()
+        else:
+            return {"error": "Autonomous failure analyzer not available"}
+    except Exception as e:
+        logger.error(f"Failed to get failure analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/autonomous/failures/analyze")
+async def analyze_workflow_failure(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Analyze a specific workflow failure"""
+    try:
+        body = await request.json()
+        workflow_run_id = body.get("workflow_run_id")
+        failure_logs = body.get("failure_logs", "")
+        context = body.get("context", {})
+        
+        if not workflow_run_id:
+            raise HTTPException(status_code=400, detail="workflow_run_id is required")
+        
+        if autonomous_failure_analyzer:
+            analysis = await autonomous_failure_analyzer.analyze_failure(
+                workflow_run_id=workflow_run_id,
+                failure_logs=failure_logs,
+                context=context
+            )
+            
+            return {
+                "analysis": {
+                    "id": analysis.id,
+                    "workflow_run_id": analysis.workflow_run_id,
+                    "failure_type": analysis.failure_type,
+                    "root_cause": analysis.root_cause,
+                    "suggested_fix": analysis.suggested_fix,
+                    "confidence_score": analysis.confidence_score,
+                    "auto_fixable": analysis.auto_fixable,
+                    "affected_files": analysis.affected_files,
+                    "estimated_fix_time": analysis.estimated_fix_time
+                }
+            }
+        else:
+            raise HTTPException(status_code=503, detail="Autonomous failure analyzer not available")
+    except Exception as e:
+        logger.error(f"Failed to analyze workflow failure: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/autonomous/failures/autofix")
+async def attempt_auto_fix(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Attempt to automatically fix a failure"""
+    try:
+        body = await request.json()
+        analysis_id = body.get("analysis_id")
+        
+        if not analysis_id:
+            raise HTTPException(status_code=400, detail="analysis_id is required")
+        
+        if autonomous_failure_analyzer:
+            # Find the analysis
+            analysis = None
+            for failure in autonomous_failure_analyzer.get_recent_failures(100):
+                if failure.id == analysis_id:
+                    analysis = failure
+                    break
+            
+            if not analysis:
+                raise HTTPException(status_code=404, detail="Analysis not found")
+            
+            fix_result = await autonomous_failure_analyzer.attempt_auto_fix(analysis)
+            
+            if fix_result:
+                return {
+                    "fix_result": {
+                        "fix_id": fix_result.fix_id,
+                        "success": fix_result.success,
+                        "fix_strategy": fix_result.fix_strategy,
+                        "changes_made": fix_result.changes_made,
+                        "pr_created": fix_result.pr_created,
+                        "execution_time": fix_result.execution_time,
+                        "error_message": fix_result.error_message
+                    }
+                }
+            else:
+                return {"message": "Auto-fix not attempted (conditions not met)"}
+        else:
+            raise HTTPException(status_code=503, detail="Autonomous failure analyzer not available")
+    except Exception as e:
+        logger.error(f"Failed to attempt auto-fix: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/autonomous/status")
+async def get_autonomous_systems_status(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get status of all autonomous systems"""
+    try:
+        status = {
+            "dependency_manager": {
+                "available": autonomous_dependency_manager is not None,
+                "status": autonomous_dependency_manager.get_scan_status() if autonomous_dependency_manager else None
+            },
+            "failure_analyzer": {
+                "available": autonomous_failure_analyzer is not None,
+                "statistics": autonomous_failure_analyzer.get_failure_statistics() if autonomous_failure_analyzer else None
+            },
+            "enhanced_monitoring": {
+                "available": enhanced_monitoring is not None,
+                "running": enhanced_monitoring.is_running if enhanced_monitoring else False
+            }
+        }
+        
+        return status
+    except Exception as e:
+        logger.error(f"Failed to get autonomous systems status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
