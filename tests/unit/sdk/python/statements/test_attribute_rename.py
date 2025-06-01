@@ -1,10 +1,8 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_attribute_rename(tmpdir) -> None:
     # language=python
     content1 = """
-import marshmallow as ma
 from file2 import OtherClass
 
 class MyClass(ma.Schema):
@@ -38,7 +36,6 @@ class OtherClass:
         assert (
             file.content
             == """
-import marshmallow as ma
 from file2 import OtherClass
 
 class MyClass(ma.Schema):

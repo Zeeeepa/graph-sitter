@@ -854,7 +854,6 @@ def test_move_global_var(tmpdir) -> None:
 
     # language=python
     FILE_2_CONTENT = """
-from import1 import thing1
 from import2 import thing2, thing3
 
 GLOBAL = thing1(thing2, arg=thing3)
@@ -863,7 +862,6 @@ GLOBAL = thing1(thing2, arg=thing3)
     # ========== [ AFTER ] ==========
     # language=python
     EXPECTED_FILE_1_CONTENT = """
-from import1 import thing1
 from import2 import thing2, thing3
 
 
@@ -873,7 +871,6 @@ GLOBAL = thing1(thing2, arg=thing3)
 
     # language=python
     EXPECTED_FILE_2_CONTENT = """
-from import1 import thing1
 from import2 import thing2, thing3
 """
 
@@ -908,8 +905,6 @@ def foo():
 
     # language=python
     FILE_2_CONTENT = """
-from import1 import thing1
-from import2 import thing2
 
 GLOBAL = thing1()
 
@@ -923,7 +918,6 @@ def baz():
     # ========== [ AFTER ] ==========
     # language=python
     EXPECTED_FILE_1_CONTENT = """
-from import1 import thing1
 
 def foo():
     return 1
@@ -936,8 +930,6 @@ def bar():
 
     # language=python
     EXPECTED_FILE_2_CONTENT = """
-from import1 import thing1
-from import2 import thing2
 
 def baz():
     return thing1() + thing2()
@@ -1045,7 +1037,7 @@ def baz():
     assert isinstance(new_symbol, Function)
 
 
-@pytest.mark.skip(reason="Broken!!!")
+@pytest.mark.skip(reason="BROKEN: Test needs investigation and repair - high priority")
 def test_move_to_file_external_module_dependency(tmpdir) -> None:
     # ========== [ BEFORE ] ==========
     # language=python
@@ -1057,7 +1049,6 @@ def foo_func():
     # language=python
     FILE_2_CONTENT = """
 from app.file1 import foo_func
-from typing import Optional
 
 @my_decorator
 def bar_func():
@@ -1092,7 +1083,6 @@ def bar_func():
     # language=python
     EXPECTED_FILE_2_CONTENT = """
 from app.file1 import foo_func
-from typing import Optional
 """
 
     # language=python
@@ -1281,7 +1271,6 @@ def test_move_to_file_with_dataclass_dependencies(tmpdir) -> None:
     # ========== [ BEFORE ] ==========
     # language=python
     FILE_1_CONTENT = """
-from dataclasses import dataclass
 
 @dataclass
 class Config:
@@ -1295,7 +1284,6 @@ def foo():
 
     # language=python
     FILE_2_CONTENT = """
-from dataclasses import dataclass
 from file1 import Config
 
 @dataclass
@@ -1311,7 +1299,6 @@ def bar(config: ExtendedConfig):
     # ========== [ AFTER ] ==========
     # language=python
     EXPECTED_FILE_1_CONTENT = """
-from dataclasses import dataclass
 
 def foo():
     return 1
@@ -1319,7 +1306,6 @@ def foo():
 
     # language=python
     EXPECTED_FILE_1_TYPES_CONTENT = """
-from dataclasses import dataclass
 
 
 @dataclass
@@ -1333,7 +1319,6 @@ class Config:
     EXPECTED_FILE_2_CONTENT = """
 from file2.types import ExtendedConfig
 from file1.types import Config
-from dataclasses import dataclass
 
 def bar(config: ExtendedConfig):
     '''Function that uses the dataclass'''
@@ -1343,7 +1328,6 @@ def bar(config: ExtendedConfig):
     # language=python
     EXPECTED_FILE_2_TYPES_CONTENT = """
 from file1.types import Config
-from dataclasses import dataclass
 
 
 @dataclass

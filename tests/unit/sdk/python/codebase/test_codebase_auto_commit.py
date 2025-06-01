@@ -1,10 +1,14 @@
+# DEPRECATED: Autocommit functionality has been disabled for performance reasons
+# These tests are kept for reference but are skipped in the test suite
+# Consider removing if autocommit is permanently disabled
+
 import pytest
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 
-@pytest.mark.skip(reason="We are disabling auto commit for performance reasons")
+@pytest.mark.skip(reason="Autocommit permanently disabled - candidate for removal")
 def test_auto_reparse(tmpdir) -> None:
     # language=python
     file0 = """

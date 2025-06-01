@@ -1,7 +1,5 @@
 import re
 
-from graph_sitter.codebase.factory.get_session import get_codebase_session
-from tests.unit.sdk.python.utils.test_file_contents import file1_content, file2_content
 
 
 def test_function_parameter_edit(tmpdir) -> None:

@@ -1,5 +1,3 @@
-from itertools import product
-from typing import TYPE_CHECKING
 
 import pytest
 

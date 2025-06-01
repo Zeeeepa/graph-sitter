@@ -1,5 +1,4 @@
 # TODO: this file needs to be broken up into API specific tests
-from typing import TYPE_CHECKING
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
 

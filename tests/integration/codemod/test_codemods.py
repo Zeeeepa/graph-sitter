@@ -1,11 +1,7 @@
-from pathlib import Path
-from typing import TypeVar
 
 import pytest
-from pytest_snapshot.plugin import Snapshot
 
 from codemods.codemod import Codemod
-from graph_sitter.core.codebase import Codebase
 from tests.shared.codemod.codebase_comparison_utils import compare_codebase_diff
 from tests.shared.codemod.models import BASE_PATH
 

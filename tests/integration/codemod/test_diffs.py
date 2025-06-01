@@ -1,7 +1,5 @@
 import ast
 import subprocess
-from pathlib import Path
-from typing import TypeVar
 
 from graph_sitter.codebase.diff_lite import DiffLite
 from graph_sitter.core.codebase import Codebase

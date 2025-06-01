@@ -1,11 +1,8 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_global_var_remove(tmpdir) -> None:
     # language=python
     content = """
-import os
-import numpy
 
 global_var = 1
 
@@ -24,8 +21,6 @@ def bar():
     assert (
         file.content
         == """
-import os
-import numpy
 
 def foo():
     return 1

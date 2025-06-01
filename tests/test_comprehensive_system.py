@@ -1,3 +1,4 @@
+import pytest
 """
 Comprehensive test suite for the integrated graph-sitter enhancement system.
 
@@ -8,7 +9,6 @@ task management, analytics engine, workflow orchestration, and system integratio
 import unittest
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
 from unittest.mock import Mock, patch
 
 # Import system components
@@ -108,7 +108,8 @@ class TestDatabaseSchema(unittest.TestCase):
     def setUp(self):
         self.db = MockDatabase()
     
-    def test_organization_creation(self):
+    @pytest.mark.timeout(30)
+def test_organization_creation(self):
         """Test organization creation and validation."""
         org_data = {
             "name": "Test Organization",

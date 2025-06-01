@@ -1,11 +1,8 @@
 import json
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
-from packaging.version import Version
-from rich.text import Text
 
 from graph_sitter.cli.commands.update import main
 
@@ -46,6 +43,7 @@ def mock_distribution():
         yield mock_distribution
 
 
+@pytest.mark.timeout(30)
 def test_conflicting_options():
     """Test that passing both --list and --version raises a click exception."""
     runner = CliRunner()

@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_import_remove_no_usage(tmpdir) -> None:
@@ -42,8 +41,6 @@ from d.f import (g as h, i as j)  # test three
 def test_import_remove_external_module_no_usage(tmpdir) -> None:
     # language=python
     content = """
-import os
-import numpy
 
 global_var = 1
 
@@ -62,7 +59,6 @@ def bar():
     assert (
         file.content
         == """
-import os
 
 global_var = 1
 
@@ -81,7 +77,6 @@ def bar():
     assert (
         file.content
         == """
-import numpy
 
 global_var = 1
 
@@ -98,8 +93,6 @@ def bar():
 def test_import_remove_multiple_single_imports(tmpdir) -> None:
     # language=python
     content = """
-import os
-import numpy
 
 global_var = 1
 

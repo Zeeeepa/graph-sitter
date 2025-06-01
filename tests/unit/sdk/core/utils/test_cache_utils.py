@@ -1,6 +1,4 @@
-from threading import Event
 
-from graph_sitter.core.utils.cache_utils import cached_generator
 
 
 def test_cached_generator():

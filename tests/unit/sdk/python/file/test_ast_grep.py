@@ -1,6 +1,5 @@
 import pytest
 
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 @pytest.mark.skip(reason="Not implementing AST Grep for now. Much better ways of doing this.")

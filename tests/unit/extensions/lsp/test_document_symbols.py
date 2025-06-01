@@ -1,7 +1,5 @@
-from typing import TYPE_CHECKING, cast
 
 import pytest
-from lsprotocol.types import (
     DocumentSymbol,
     DocumentSymbolParams,
     Position,
@@ -9,12 +7,9 @@ from lsprotocol.types import (
     SymbolKind,
     TextDocumentIdentifier,
 )
-from pytest_lsp import LanguageClient
 
-from graph_sitter.core.codebase import Codebase
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 
 @pytest.mark.parametrize(

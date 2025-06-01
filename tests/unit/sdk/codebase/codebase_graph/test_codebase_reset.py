@@ -1,6 +1,5 @@
 import pytest
 
-from graph_sitter.core.codebase import Codebase
 
 
 @pytest.mark.parametrize(
@@ -266,7 +265,7 @@ def test_codebase_reset_nested_external_changes(codebase: Codebase, assert_expec
     assert_expected(codebase)
 
 
-@pytest.mark.xfail(reason="Needs CG-10484")
+@pytest.mark.xfail(reason="Needs CG-10484 - dependency required for test completion")
 @pytest.mark.parametrize(
     "original, expected",
     [
@@ -291,7 +290,7 @@ def test_codebase_reset_multiple_programmatic_edits(codebase: Codebase, assert_e
     assert_expected(codebase)
 
 
-@pytest.mark.xfail(reason="Needs CG-10484")
+@pytest.mark.xfail(reason="Needs CG-10484 - dependency required for test completion")
 @pytest.mark.parametrize(
     "original, expected",
     [

@@ -1,6 +1,4 @@
-from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -211,7 +209,7 @@ async def test_find_flag_groups_with_group_by_app(executor: SandboxExecutor):
     assert count_by_segment == {"a/b/app1": 1, "a/b/app2": 2, "a/b/app3": 1}
 
 
-@pytest.mark.skip(reason="TODO: add max_prs as part of find_flag_groups")
+@pytest.mark.skip(reason="TODO: Implement max_prs parameter - feature enhancement needed")
 @pytest.mark.asyncio
 async def test_find_flag_groups_with_max_prs(executor: SandboxExecutor):
     groups = await executor.find_flag_groups(

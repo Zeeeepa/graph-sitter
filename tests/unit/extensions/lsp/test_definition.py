@@ -1,14 +1,11 @@
 import pytest
-from lsprotocol.types import (
     DefinitionParams,
     Location,
     Position,
     Range,
     TextDocumentIdentifier,
 )
-from pytest_lsp import LanguageClient
 
-from graph_sitter.core.codebase import Codebase
 
 
 @pytest.mark.parametrize(

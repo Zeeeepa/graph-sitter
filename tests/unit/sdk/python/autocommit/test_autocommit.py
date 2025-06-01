@@ -1,3 +1,7 @@
+# DEPRECATED: Autocommit functionality has been disabled for performance reasons
+# These tests are kept for reference but are skipped in the test suite
+# Consider removing if autocommit is permanently disabled
+
 import pytest
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
@@ -5,7 +9,7 @@ from graph_sitter.core.autocommit.constants import NodeNotFoundError, OutdatedNo
 from graph_sitter.core.statements.statement import StatementType
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 def test_autocommit_rename_move(tmpdir) -> None:
     file1_name = "file1.py"
     # language=python
@@ -60,7 +64,7 @@ def bar2():
     )
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 def test_autocommit_move_rename(tmpdir) -> None:
     file1_name = "file1.py"
     # language=python
@@ -115,7 +119,7 @@ def bar2():
     )
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 def test_autocommit_insert_remove(tmpdir) -> None:
     file1_name = "file1.py"
     content1 = ""
@@ -127,7 +131,7 @@ def test_autocommit_insert_remove(tmpdir) -> None:
     assert file1.content == "a"
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip(reason="wip")
 @pytest.mark.parametrize("edit_block", [True, False])
 def test_autocommit_file_edit(tmpdir, edit_block: bool) -> None:
@@ -156,7 +160,7 @@ def a():
     assert file1.content.strip() == "import os"
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip(reason="wip")
 @pytest.mark.parametrize("edit_block", [True, False])
 def test_autocommit_param_edit(tmpdir, edit_block: bool) -> None:
@@ -183,7 +187,7 @@ def a(a: int):
     assert file1.content.strip() == ""
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip(reason="wip")
 @pytest.mark.parametrize("edit_block", [True, False])
 def test_autocommit_param_edit_file(tmpdir, edit_block: bool) -> None:
@@ -211,7 +215,7 @@ def a(a: int):
     assert file1.content.strip() == "import os"
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip(reason="wip")
 def test_autocommit_param_edit_other(tmpdir) -> None:
     file1_name = "file1.py"
@@ -241,7 +245,7 @@ def b(a: int):
     assert file1.content.strip() == "import os"
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip("Log propagate is off")
 def test_autocommit_remove_edit(tmpdir, caplog) -> None:
     file1_name = "file1.py"
@@ -258,7 +262,7 @@ def a():
         assert "Editing a removed node" in caplog.text
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip(reason="wip")
 def test_autocommit_not_found(tmpdir) -> None:
     file1_name = "file1.py"
@@ -276,7 +280,7 @@ def a():
             fun.prepend_statements("a")
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 def test_autocommit_outdated(tmpdir) -> None:
     file1_name = "file1.py"
     # language=python
@@ -309,7 +313,7 @@ def test_autocommit_outdated(tmpdir) -> None:
             statement.remove()
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip("Log propagate is off")
 def test_autocommit_nocommit_edit(tmpdir, caplog) -> None:
     """Test ability to handle transaction errors and switch to autocommit."""
@@ -333,7 +337,7 @@ def a():
     assert "Committing" in caplog.text
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 def test_autocommit_repr(tmpdir) -> None:
     file1_name = "file1.py"
     # language=python
@@ -347,7 +351,7 @@ def a():
         repr(fun)
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 def test_autocommit_double_edit(tmpdir) -> None:
     file1_name = "file1.py"
     # language=python
@@ -364,7 +368,7 @@ def a():
             function.commit()
 
 
-@pytest.mark.skip("No Autocommit")
+@pytest.mark.skip(reason="Autocommit disabled for performance - consider removal")
 @pytest.mark.skip("Log propagate is off")
 def test_autocommit_ignore_removed(tmpdir, caplog) -> None:
     """Test ability for removes to not mess up ordering."""

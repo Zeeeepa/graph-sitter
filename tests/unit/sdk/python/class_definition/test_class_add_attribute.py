@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_class_definition_add_attribute_adds_source(tmpdir) -> None:
@@ -36,7 +35,6 @@ class Bar:
 def test_class_definition_add_attribute_include_deps(tmpdir) -> None:
     # language=python
     src_content = """
-from typing import List
 
 class Bar:
     bar: List[int] = []

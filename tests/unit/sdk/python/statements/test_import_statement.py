@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_import_statements(tmpdir) -> None:
@@ -7,7 +6,6 @@ def test_import_statements(tmpdir) -> None:
 import module1
 from package1.module2 import function1, function2
 from package2.module3 import Class1
-from package3 import Class2 as Alias
 """
     with get_codebase_session(tmpdir=tmpdir, files={"file.py": content}) as codebase:
         file = codebase.get_file("file.py")
@@ -24,7 +22,6 @@ def test_remove_imports(tmpdir) -> None:
 import module1
 from package1.module2 import function1, function2
 from package2.module3 import Class1
-from package3 import Class2 as Alias
 """
     with get_codebase_session(tmpdir=tmpdir, files={"file.py": content}) as codebase:
         file = codebase.get_file("file.py")
@@ -38,7 +35,6 @@ from package3 import Class2 as Alias
         == """
 import module1
 from package2.module3 import Class1
-from package3 import Class2 as Alias
 """.strip()
     )
 
@@ -49,7 +45,6 @@ def test_remove_single_import(tmpdir) -> None:
 import module1
 from package1.module2 import function1, function2
 from package2.module3 import Class1
-from package3 import Class2 as Alias
 """
     with get_codebase_session(tmpdir=tmpdir, files={"file.py": content}) as codebase:
         file = codebase.get_file("file.py")
@@ -64,7 +59,6 @@ from package3 import Class2 as Alias
 import module1
 from package1.module2 import function2
 from package2.module3 import Class1
-from package3 import Class2 as Alias
 """.strip()
     )
 

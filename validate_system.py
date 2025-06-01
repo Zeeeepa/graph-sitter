@@ -47,7 +47,17 @@ def main():
     
     print("\n" + "=" * 60 + "\n")
     
-    # 3. Database Schema Validation
+    # 3. Test Suite Validation
+    print("🧪 TEST SUITE VALIDATION")
+    print("-" * 30)
+    test_success = validate_test_suite()
+    
+    if not test_success:
+        overall_success = False
+    
+    print("\n" + "=" * 60 + "\n")
+    
+    # 4. Database Schema Validation
     print("🗄️  DATABASE SCHEMA VALIDATION")
     print("-" * 30)
     db_success = validate_database_schemas()
@@ -57,7 +67,7 @@ def main():
     
     print("\n" + "=" * 60 + "\n")
     
-    # 4. Integration Validation
+    # 5. Integration Validation
     print("🔗 INTEGRATION VALIDATION")
     print("-" * 30)
     integration_success = validate_integrations()
@@ -74,6 +84,7 @@ def main():
     components = [
         ("Configuration", config_success),
         ("Code Quality", code_success),
+        ("Test Suite", test_success),
         ("Database Schemas", db_success),
         ("Integrations", integration_success)
     ]
@@ -92,6 +103,95 @@ def main():
         print("⚠️  VALIDATION FAILURES DETECTED")
         print("Please fix the issues above before proceeding.")
         return 1
+
+
+def validate_test_suite():
+    """Validate test suite health and quality"""
+    success = True
+    
+    print("🔍 Analyzing test suite structure...")
+    
+    # Check test directory structure
+    test_dir = Path("tests")
+    if not test_dir.exists():
+        print("❌ Tests directory not found")
+        return False
+    
+    # Count test files
+    test_files = list(test_dir.rglob("test_*.py"))
+    total_test_files = len(test_files)
+    
+    if total_test_files == 0:
+        print("❌ No test files found")
+        return False
+    
+    print(f"✅ Found {total_test_files} test files")
+    
+    # Check for conftest.py
+    conftest_files = list(test_dir.rglob("conftest.py"))
+    if conftest_files:
+        print(f"✅ Found {len(conftest_files)} conftest.py files")
+    else:
+        print("⚠️  No conftest.py files found")
+    
+    # Analyze skipped tests
+    skipped_count = 0
+    xfail_count = 0
+    
+    for test_file in test_files:
+        try:
+            content = test_file.read_text(encoding='utf-8', errors='ignore')
+            skipped_count += content.count("@pytest.mark.skip")
+            xfail_count += content.count("@pytest.mark.xfail")
+        except Exception as e:
+            print(f"⚠️  Could not read {test_file}: {e}")
+    
+    print(f"📊 Test health metrics:")
+    print(f"  - Total test files: {total_test_files}")
+    print(f"  - Skipped tests: {skipped_count}")
+    print(f"  - XFail tests: {xfail_count}")
+    
+    # Quality thresholds
+    skip_ratio = skipped_count / max(total_test_files, 1)
+    if skip_ratio > 0.3:  # More than 30% skipped
+        print(f"⚠️  High skip ratio: {skip_ratio:.1%} of tests are skipped")
+        success = False
+    else:
+        print(f"✅ Acceptable skip ratio: {skip_ratio:.1%}")
+    
+    # Check for test configuration
+    pyproject_toml = Path("pyproject.toml")
+    if pyproject_toml.exists():
+        try:
+            content = pyproject_toml.read_text()
+            if "[tool.pytest.ini_options]" in content:
+                print("✅ Pytest configuration found in pyproject.toml")
+            else:
+                print("⚠️  No pytest configuration found")
+        except Exception as e:
+            print(f"⚠️  Could not read pyproject.toml: {e}")
+    
+    # Check for CI/CD test integration
+    github_workflows = Path(".github/workflows")
+    if github_workflows.exists():
+        workflow_files = list(github_workflows.glob("*.yml"))
+        test_workflows = [
+            f for f in workflow_files 
+            if any(keyword in f.read_text() for keyword in ["pytest", "test", "coverage"])
+        ]
+        
+        if test_workflows:
+            print(f"✅ Found {len(test_workflows)} CI/CD workflows with testing")
+        else:
+            print("⚠️  No CI/CD test workflows found")
+    
+    # Check for coverage configuration
+    if "[tool.coverage" in pyproject_toml.read_text() if pyproject_toml.exists() else False:
+        print("✅ Coverage configuration found")
+    else:
+        print("⚠️  No coverage configuration found")
+    
+    return success
 
 
 def validate_database_schemas():
@@ -224,4 +324,3 @@ def validate_integrations():
 
 if __name__ == "__main__":
     sys.exit(main())
-

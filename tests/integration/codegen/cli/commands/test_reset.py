@@ -1,11 +1,7 @@
 import subprocess
-from dataclasses import dataclass
-from pathlib import Path
 
 import pytest
-from click.testing import CliRunner
 
-from graph_sitter.cli.commands.reset.main import reset_command
 
 
 @dataclass
@@ -265,6 +261,7 @@ def create_test_case(
         ),
     ],
 )
+@pytest.mark.timeout(30)
 def test_reset(committed_repo: Path, committed_state: dict[str, str], test_case: ResetTestCase, runner: CliRunner):
     """Test reset command with various scenarios"""
     # Get test case from factory function if needed

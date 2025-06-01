@@ -4,7 +4,7 @@ from graph_sitter.shared.compilation.codeblock_validation import check_for_dange
 from graph_sitter.shared.exceptions.compilation import DangerousUserCodeException
 
 
-def test_no_dangerous_operations():
+def test_no_dangerous_operations(monkeypatch):
     codeblock = """
 print("not dangerous")
 """
@@ -14,7 +14,7 @@ print("not dangerous")
         pytest.fail("Unexpected DangerousPythonCodeError raised")
 
 
-def test_dangerous_operations():
+def test_dangerous_operations(monkeypatch):
     codeblock = """
 print(os.environ["ENV"])
 """

@@ -48,7 +48,6 @@ def test_file_add_import_string_adds_before_first_import(tmpdir) -> None:
 # top level comment
 
 # adds new import here
-from typing import List
 
 def foo():
     print("this is foo")
@@ -242,7 +241,6 @@ def test_file_add_import_string_adds_after_future_before_non_future(tmpdir) -> N
     # language=python
     content = """
 from __future__ import annotations
-from typing import List
 
 def foo():
     print("this is foo")

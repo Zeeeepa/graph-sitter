@@ -1,5 +1,4 @@
 import os
-from typing import TYPE_CHECKING
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage

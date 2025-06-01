@@ -1,6 +1,5 @@
 # TODO: break-up this file into one for each API
 
-from typing import TYPE_CHECKING
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
 
