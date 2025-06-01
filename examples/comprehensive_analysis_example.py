@@ -153,7 +153,7 @@ async def main():
     # Call patterns
     patterns = call_graph.analyze_call_patterns()
     print(f"\n   📊 Call Patterns:")
-    print(f"   ├── Total Functions: {patterns.get('total_functions', 0)}")
+    print(f"   �����── Total Functions: {patterns.get('total_functions', 0)}")
     print(f"   ├── Total Calls: {patterns.get('total_calls', 0)}")
     print(f"   ├── Average Calls/Function: {patterns.get('average_calls_per_function', 0):.1f}")
     print(f"   ├── Max Call Depth: {patterns.get('max_call_depth', 0)}")
@@ -367,7 +367,7 @@ async def main():
     print(f"├── Health Score: {full_report.health_score:.2f} ({analyzer._score_to_grade(full_report.health_score)})")
     print(f"├── Total Issues: {len(full_report.issues)}")
     print(f"├── Recommendations: {len(full_report.recommendations)}")
-    print(f"├── Dead Code Items: {len(dead_code_items)}")
+    print(f"├��─ Dead Code Items: {len(dead_code_items)}")
     print(f"├── Circular Dependencies: {len(circular_deps)}")
     print(f"├── Unused Functions: {len(unused_functions)}")
     print(f"└── Recursive Functions: {len(recursive_functions)}")
@@ -505,4 +505,3 @@ if __name__ == "__main__":
     
     # Demonstrate specific capabilities
     demonstrate_specific_capabilities()
-

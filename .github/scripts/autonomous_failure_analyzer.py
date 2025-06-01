@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 import requests
 from github import Github
 from codegen import Agent
+from .code_analysis_helper import CodeAnalysisHelper
 
 
 @dataclass
@@ -315,6 +316,30 @@ Create the PR with title: "🤖 Auto-fix: {analysis.failure_type}"
         )
         
         print(f"📋 Failure report created: {issue.html_url}")
+    
+    async def _analyze_codebase_context(self, failure: FailureAnalysis) -> Dict[str, Any]:
+        """Analyze codebase context for failure using standardized graph_sitter imports"""
+        
+        try:
+            # Use the code analysis helper with proper graph_sitter imports
+            analyzer = CodeAnalysisHelper(".")
+            
+            # Get comprehensive analysis to understand failure context
+            analysis_result = analyzer.generate_comprehensive_report()
+            
+            # Extract relevant context for the failure
+            context = {
+                "codebase_health": analysis_result.get("analysis_results", {}).get("code_quality", {}),
+                "potential_issues": analysis_result.get("analysis_results", {}).get("dead_code", {}),
+                "dependency_problems": analysis_result.get("analysis_results", {}).get("dependencies", {}),
+                "analysis_timestamp": analysis_result.get("timestamp")
+            }
+            
+            return context
+            
+        except Exception as e:
+            print(f"⚠️ Failed to analyze codebase context: {e}")
+            return {"error": str(e)}
 
 
 async def main():
@@ -358,4 +383,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-
