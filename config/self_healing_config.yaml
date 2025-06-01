@@ -1,0 +1,440 @@
+# Self-Healing Architecture Configuration
+# Configuration file for automated error detection and recovery system
+
+# Global settings
+global:
+  enabled: true
+  debug_mode: false
+  log_level: "INFO"
+  feature_flags:
+    error_detection: true
+    automated_recovery: true
+    ml_diagnosis: true
+    codegen_integration: true
+    pattern_analysis: true
+
+# Database configuration
+database:
+  connection_pool_size: 10
+  connection_timeout: 30
+  query_timeout: 60
+  batch_size: 100
+  retention_days:
+    error_events: 90
+    system_metrics: 30
+    recovery_executions: 180
+    audit_trail: 365
+
+# Error detection configuration
+error_detection:
+  enabled: true
+  sampling_rate: 1.0  # 100% sampling
+  batch_processing:
+    enabled: true
+    batch_size: 50
+    flush_interval_seconds: 30
+  
+  # Threshold-based detection
+  threshold_detector:
+    enabled: true
+    error_threshold: 5
+    time_window_minutes: 5
+    severity_weights:
+      CRITICAL: 5.0
+      HIGH: 3.0
+      MEDIUM: 1.0
+      LOW: 0.5
+      INFO: 0.1
+  
+  # Anomaly detection (ML-based)
+  anomaly_detector:
+    enabled: true
+    contamination: 0.1
+    min_training_samples: 100
+    retrain_interval_hours: 24
+    confidence_threshold: 0.7
+  
+  # Pattern detection
+  pattern_detector:
+    enabled: true
+    max_history_size: 1000
+    pattern_confidence_threshold: 0.8
+    sequence_analysis:
+      enabled: true
+      max_sequence_length: 10
+      min_sequence_occurrences: 3
+
+# Performance monitoring
+performance_monitoring:
+  enabled: true
+  collection_interval_seconds: 60
+  
+  # System metrics thresholds
+  thresholds:
+    cpu_usage:
+      warning: 80
+      critical: 90
+    memory_usage:
+      warning: 85
+      critical: 95
+    disk_usage:
+      warning: 80
+      critical: 90
+    response_time_ms:
+      warning: 2000
+      critical: 5000
+    error_rate_percent:
+      warning: 5
+      critical: 10
+  
+  # Baseline calculation
+  baseline_calculation:
+    enabled: true
+    calculation_period_days: 7
+    min_samples: 100
+    update_frequency_hours: 6
+
+# Recovery system configuration
+recovery:
+  enabled: true
+  max_concurrent_recoveries: 3
+  default_timeout_seconds: 300
+  auto_rollback_on_failure: true
+  
+  # Risk management
+  risk_management:
+    allow_high_risk_actions: false
+    require_approval_for_medium_risk: false
+    business_hours_penalty: 0.3
+    max_failed_attempts_before_escalation: 3
+  
+  # Recovery actions configuration
+  actions:
+    restart_service:
+      enabled: true
+      risk_level: "MEDIUM"
+      success_rate: 0.85
+      timeout_seconds: 120
+      applicable_categories:
+        - "API"
+        - "PERFORMANCE"
+        - "RESOURCE"
+      prerequisites: []
+    
+    clear_cache:
+      enabled: true
+      risk_level: "LOW"
+      success_rate: 0.95
+      timeout_seconds: 30
+      applicable_categories:
+        - "PERFORMANCE"
+        - "API"
+        - "DATABASE"
+      prerequisites: []
+    
+    scale_resources:
+      enabled: true
+      risk_level: "LOW"
+      success_rate: 0.90
+      timeout_seconds: 180
+      applicable_categories:
+        - "PERFORMANCE"
+        - "RESOURCE"
+      prerequisites:
+        - "resource_scaling_enabled"
+    
+    rollback_deployment:
+      enabled: false  # Disabled by default due to high risk
+      risk_level: "HIGH"
+      success_rate: 0.80
+      timeout_seconds: 600
+      applicable_categories:
+        - "API"
+        - "DATABASE"
+        - "CONFIGURATION"
+      prerequisites:
+        - "deployment_rollback_available"
+    
+    reset_connection_pool:
+      enabled: true
+      risk_level: "LOW"
+      success_rate: 0.92
+      timeout_seconds: 60
+      applicable_categories:
+        - "DATABASE"
+        - "NETWORK"
+      prerequisites: []
+
+# Escalation configuration
+escalation:
+  enabled: true
+  
+  # Notification channels
+  notification_channels:
+    slack:
+      enabled: true
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#alerts"
+      mention_users:
+        - "@oncall"
+    
+    email:
+      enabled: true
+      smtp_server: "${SMTP_SERVER}"
+      smtp_port: 587
+      from_address: "alerts@company.com"
+      to_addresses:
+        - "oncall@company.com"
+        - "devops@company.com"
+    
+    pagerduty:
+      enabled: false
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+  
+  # Escalation rules
+  rules:
+    critical_errors:
+      condition: "severity == 'CRITICAL'"
+      immediate_notification: true
+      timeout_minutes: 5
+      escalation_levels:
+        - level: 1
+          timeout_minutes: 5
+          notify: ["slack", "email"]
+        - level: 2
+          timeout_minutes: 15
+          notify: ["pagerduty"]
+    
+    failed_recoveries:
+      condition: "failed_recovery_attempts >= 3"
+      immediate_notification: false
+      timeout_minutes: 15
+      escalation_levels:
+        - level: 1
+          timeout_minutes: 15
+          notify: ["slack"]
+        - level: 2
+          timeout_minutes: 30
+          notify: ["email"]
+    
+    system_degradation:
+      condition: "system_availability < 0.99"
+      immediate_notification: true
+      timeout_minutes: 10
+      escalation_levels:
+        - level: 1
+          timeout_minutes: 10
+          notify: ["slack", "email"]
+
+# Machine Learning configuration
+machine_learning:
+  enabled: true
+  
+  # Model configuration
+  models:
+    error_classification:
+      enabled: true
+      algorithm: "random_forest"
+      retrain_interval_hours: 24
+      min_training_samples: 500
+      feature_selection: "auto"
+    
+    anomaly_detection:
+      enabled: true
+      algorithm: "isolation_forest"
+      contamination: 0.1
+      retrain_interval_hours: 12
+    
+    recovery_success_prediction:
+      enabled: true
+      algorithm: "gradient_boosting"
+      retrain_interval_hours: 48
+      min_training_samples: 200
+  
+  # Feature engineering
+  feature_engineering:
+    time_features: true
+    text_features: true
+    categorical_encoding: "target"
+    numerical_scaling: "standard"
+  
+  # Model validation
+  validation:
+    cross_validation_folds: 5
+    test_size: 0.2
+    min_accuracy_threshold: 0.8
+
+# Health checks configuration
+health_checks:
+  enabled: true
+  
+  # Global health check settings
+  global_settings:
+    default_interval_seconds: 60
+    default_timeout_seconds: 30
+    default_retry_count: 3
+  
+  # Component-specific health checks
+  components:
+    api_gateway:
+      checks:
+        - name: "http_endpoint"
+          type: "http"
+          url: "http://localhost:8080/health"
+          interval_seconds: 30
+          timeout_seconds: 10
+          expected_status: 200
+        - name: "response_time"
+          type: "performance"
+          metric: "response_time"
+          threshold_ms: 1000
+          interval_seconds: 60
+    
+    database:
+      checks:
+        - name: "connection_test"
+          type: "database"
+          query: "SELECT 1"
+          interval_seconds: 60
+          timeout_seconds: 5
+        - name: "query_performance"
+          type: "performance"
+          metric: "query_time"
+          threshold_ms: 500
+          interval_seconds: 120
+    
+    user_service:
+      checks:
+        - name: "service_health"
+          type: "http"
+          url: "http://user-service:8081/health"
+          interval_seconds: 45
+          timeout_seconds: 15
+        - name: "memory_usage"
+          type: "resource"
+          metric: "memory_usage"
+          threshold_percent: 85
+          interval_seconds: 60
+
+# Codegen SDK integration
+codegen_integration:
+  enabled: true
+  
+  # SDK configuration
+  sdk_config:
+    api_endpoint: "${CODEGEN_API_ENDPOINT}"
+    api_token: "${CODEGEN_API_TOKEN}"
+    organization_id: "${CODEGEN_ORG_ID}"
+    timeout_seconds: 300
+  
+  # Code fix generation
+  code_fix_generation:
+    enabled: true
+    max_concurrent_fixes: 2
+    confidence_threshold: 0.8
+    test_validation_required: true
+    
+    # Fix templates
+    templates:
+      database_connection_fix:
+        prompt_template: |
+          Fix the database connection issue in the following code:
+          Error: {error_message}
+          Stack trace: {stack_trace}
+          Affected files: {affected_files}
+          
+          Generate a minimal fix that addresses the connection issue.
+        applicable_categories: ["DATABASE"]
+      
+      api_error_fix:
+        prompt_template: |
+          Fix the API error in the following code:
+          Error: {error_message}
+          HTTP status: {http_status}
+          Endpoint: {endpoint}
+          
+          Generate a fix that handles the error gracefully.
+        applicable_categories: ["API"]
+
+# Audit and compliance
+audit:
+  enabled: true
+  
+  # Audit trail configuration
+  audit_trail:
+    log_all_actions: true
+    include_system_state: true
+    include_before_after_state: true
+    retention_days: 365
+  
+  # Compliance reporting
+  compliance_reporting:
+    enabled: true
+    report_frequency: "daily"
+    include_metrics:
+      - "system_availability"
+      - "recovery_success_rate"
+      - "escalation_rate"
+      - "manual_intervention_rate"
+
+# Metrics and monitoring
+metrics:
+  enabled: true
+  
+  # Metrics collection
+  collection:
+    interval_seconds: 30
+    batch_size: 100
+    retention_days: 30
+  
+  # Metrics export
+  export:
+    prometheus:
+      enabled: true
+      port: 9090
+      path: "/metrics"
+    
+    grafana:
+      enabled: true
+      dashboard_url: "${GRAFANA_DASHBOARD_URL}"
+    
+    custom_webhook:
+      enabled: false
+      url: "${CUSTOM_METRICS_WEBHOOK}"
+
+# Development and testing
+development:
+  # Test mode settings
+  test_mode:
+    enabled: false
+    simulate_errors: false
+    mock_recovery_actions: false
+    accelerated_timers: false
+  
+  # Debug settings
+  debug:
+    verbose_logging: false
+    trace_execution: false
+    save_debug_artifacts: false
+    debug_output_path: "/tmp/self_healing_debug"
+
+# Security configuration
+security:
+  # Authentication and authorization
+  auth:
+    require_authentication: true
+    api_key_required: true
+    role_based_access: true
+  
+  # Encryption
+  encryption:
+    encrypt_sensitive_data: true
+    encryption_algorithm: "AES-256"
+    key_rotation_days: 90
+  
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    max_requests_per_minute: 100
+    max_recovery_actions_per_hour: 20
+
