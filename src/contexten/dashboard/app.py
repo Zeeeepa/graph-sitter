@@ -35,13 +35,12 @@ from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentC
 from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
 from ...shared.logging.get_logger import get_logger
 from .chat_manager import ChatManager
-from .multi_project_manager import (
-    MultiProjectManager, ProjectConfig, ProjectRequirement, CICDFlow, 
-    ProjectType, FlowStatus, FlowExecution
+from .core_multi_project_manager import (
+    CoreMultiProjectManager, ProjectConfig, QualityGate, FlowExecution,
+    ProjectType, FlowStatus, handle_chat_command
 )
-from .cicd_orchestrator import (
-    CICDOrchestrator, WorkflowTemplate, OrchestrationRule,
-    WorkflowType, TriggerType
+from .enhanced_ui import (
+    WebSocketManager, EventStreamProcessor, generate_enhanced_dashboard_html
 )
 
 logger = get_logger(__name__)
@@ -148,15 +147,18 @@ app.mount("/static", StaticFiles(directory="src/contexten/dashboard/static"), na
 integration_agents: Dict[str, Any] = {}
 user_sessions: Dict[str, Dict[str, Any]] = {}
 chat_manager = ChatManager()
-multi_project_manager = MultiProjectManager(
+multi_project_manager = CoreMultiProjectManager(
     codegen_org_id=config.codegen_org_id,
     codegen_token=config.codegen_token
 )
-cicd_orchestrator = CICDOrchestrator(
-    multi_project_manager=multi_project_manager,
+lightweight_orchestrator = LightweightOrchestrator(
     codegen_org_id=config.codegen_org_id,
     codegen_token=config.codegen_token
 )
+
+# WebSocket and Event Streaming
+websocket_manager = WebSocketManager()
+event_stream_processor = EventStreamProcessor(websocket_manager)
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -595,7 +597,7 @@ async def get_workflow_templates(
 ):
     """Get all workflow templates"""
     try:
-        templates = cicd_orchestrator.get_workflow_templates()
+        templates = lightweight_orchestrator.get_workflow_templates()
         return {
             "templates": [
                 {
@@ -622,7 +624,7 @@ async def create_workflow_from_template(
 ):
     """Create a workflow from a template"""
     try:
-        flow_id = await cicd_orchestrator.create_workflow_from_template(
+        flow_id = await lightweight_orchestrator.create_workflow_from_template(
             project_id=workflow_data["project_id"],
             template_id=workflow_data["template_id"],
             name=workflow_data["name"],
@@ -647,7 +649,7 @@ async def trigger_workflows(
 ):
     """Trigger workflows based on events"""
     try:
-        executions = await cicd_orchestrator.trigger_workflow(
+        executions = await lightweight_orchestrator.trigger_workflow(
             project_id=trigger_data["project_id"],
             trigger_type=TriggerType(trigger_data["trigger_type"]),
             trigger_data=trigger_data.get("data", {})
@@ -668,7 +670,7 @@ async def get_orchestration_analytics(
 ):
     """Get CI/CD orchestration analytics"""
     try:
-        analytics = await cicd_orchestrator.get_orchestration_analytics()
+        analytics = await lightweight_orchestrator.get_orchestration_analytics()
         return analytics
     except Exception as e:
         logger.error(f"Failed to get orchestration analytics: {e}")
@@ -682,7 +684,7 @@ async def get_workflow_recommendations(
 ):
     """Get workflow recommendations for a project"""
     try:
-        recommendations = await cicd_orchestrator.get_workflow_recommendations(project_id)
+        recommendations = await lightweight_orchestrator.get_workflow_recommendations(project_id)
         return {"recommendations": recommendations}
     except Exception as e:
         logger.error(f"Failed to get workflow recommendations: {e}")
@@ -706,7 +708,7 @@ async def create_orchestration_rule(
             enabled=rule_data.get("enabled", True)
         )
         
-        success = cicd_orchestrator.add_orchestration_rule(rule)
+        success = lightweight_orchestrator.add_orchestration_rule(rule)
         
         if success:
             return {"message": "Orchestration rule created successfully", "rule_id": rule.id}
@@ -724,7 +726,7 @@ async def get_orchestration_rules(
 ):
     """Get all orchestration rules"""
     try:
-        rules = cicd_orchestrator.get_orchestration_rules()
+        rules = lightweight_orchestrator.get_orchestration_rules()
         return {
             "rules": [
                 {
@@ -753,7 +755,7 @@ async def toggle_orchestration_rule(
     """Enable or disable an orchestration rule"""
     try:
         # Get current rule state
-        rules = cicd_orchestrator.get_orchestration_rules()
+        rules = lightweight_orchestrator.get_orchestration_rules()
         rule = next((r for r in rules if r.id == rule_id), None)
         
         if not rule:
@@ -761,10 +763,10 @@ async def toggle_orchestration_rule(
         
         # Toggle the rule
         if rule.enabled:
-            success = cicd_orchestrator.disable_rule(rule_id)
+            success = lightweight_orchestrator.disable_rule(rule_id)
             action = "disabled"
         else:
-            success = cicd_orchestrator.enable_rule(rule_id)
+            success = lightweight_orchestrator.enable_rule(rule_id)
             action = "enabled"
         
         if success:
@@ -776,6 +778,205 @@ async def toggle_orchestration_rule(
         logger.error(f"Failed to toggle orchestration rule: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Lightweight Orchestration API Endpoints
+
+@app.get("/api/orchestrator/workflows")
+async def get_workflows(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get all workflows"""
+    try:
+        workflows = lightweight_orchestrator.get_workflows()
+        return {
+            "workflows": [
+                {
+                    "id": w.id,
+                    "name": w.name,
+                    "type": w.type.value,
+                    "project_path": w.project_path,
+                    "auto_trigger": w.auto_trigger,
+                    "created_at": w.created_at.isoformat()
+                }
+                for w in workflows
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get workflows: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/orchestrator/workflows")
+async def create_simple_workflow(
+    request: Request,
+    workflow_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Create a simple workflow"""
+    try:
+        workflow_id = f"workflow_{int(datetime.now().timestamp())}"
+        
+        success = lightweight_orchestrator.create_workflow(
+            workflow_id=workflow_id,
+            name=workflow_data["name"],
+            workflow_type=WorkflowType(workflow_data["type"]),
+            project_path=workflow_data["project_path"],
+            codegen_prompt=workflow_data["codegen_prompt"],
+            auto_trigger=workflow_data.get("auto_trigger", False)
+        )
+        
+        if success:
+            return {"message": "Workflow created successfully", "workflow_id": workflow_id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to create workflow")
+            
+    except Exception as e:
+        logger.error(f"Failed to create workflow: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/orchestrator/workflows/{workflow_id}/execute")
+async def execute_workflow(
+    workflow_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Execute a workflow"""
+    try:
+        execution_id = await lightweight_orchestrator.execute_workflow(workflow_id)
+        
+        if execution_id:
+            return {"message": "Workflow execution started", "execution_id": execution_id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to start workflow execution")
+            
+    except Exception as e:
+        logger.error(f"Failed to execute workflow: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/orchestrator/executions")
+async def get_executions(
+    request: Request,
+    workflow_id: Optional[str] = None,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get workflow executions"""
+    try:
+        executions = lightweight_orchestrator.get_executions(workflow_id)
+        return {
+            "executions": [
+                {
+                    "id": e.id,
+                    "workflow_id": e.workflow_id,
+                    "status": e.status,
+                    "started_at": e.started_at.isoformat(),
+                    "completed_at": e.completed_at.isoformat() if e.completed_at else None,
+                    "result": e.result,
+                    "error": e.error
+                }
+                for e in executions
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get executions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/orchestrator/projects")
+async def add_project_to_orchestrator(
+    request: Request,
+    project_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Add a project to the orchestrator"""
+    try:
+        success = lightweight_orchestrator.add_project(
+            project_id=project_data["project_id"],
+            project_path=project_data["project_path"]
+        )
+        
+        if success:
+            return {"message": "Project added successfully"}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to add project")
+            
+    except Exception as e:
+        logger.error(f"Failed to add project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/orchestrator/projects/{project_id}/analysis")
+async def get_project_analysis(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get analysis for a project"""
+    try:
+        analysis = await lightweight_orchestrator.get_project_analysis(project_id)
+        
+        if analysis:
+            return analysis
+        else:
+            raise HTTPException(status_code=404, detail="Project not found or analysis failed")
+            
+    except Exception as e:
+        logger.error(f"Failed to get project analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/orchestrator/projects/{project_id}/analyze")
+async def trigger_project_analysis(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Trigger analysis for a project"""
+    try:
+        execution_id = await lightweight_orchestrator.trigger_analysis_for_project(project_id)
+        
+        if execution_id:
+            return {"message": "Analysis started", "execution_id": execution_id}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found")
+            
+    except Exception as e:
+        logger.error(f"Failed to trigger analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/orchestrator/status")
+async def get_orchestrator_status(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get orchestrator system status"""
+    try:
+        status = lightweight_orchestrator.get_system_status()
+        return status
+    except Exception as e:
+        logger.error(f"Failed to get orchestrator status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Simplified Chat Interface
+
+@app.post("/api/chat/orchestrator")
+async def chat_orchestrator_command(
+    request: Request,
+    chat_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Handle orchestrator chat commands"""
+    try:
+        message = chat_data.get("message", "")
+        project_id = chat_data.get("project_id")
+        
+        response = await handle_chat_command(
+            lightweight_orchestrator,
+            message,
+            project_id
+        )
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Failed to process orchestrator chat command: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Webhook endpoints for external integrations
 @app.post("/api/webhooks/github")
 async def github_webhook(request: Request):
@@ -784,7 +985,7 @@ async def github_webhook(request: Request):
         payload = await request.json()
         event_type = request.headers.get("X-GitHub-Event", "unknown")
         
-        await cicd_orchestrator.handle_github_event(event_type, payload)
+        await lightweight_orchestrator.handle_github_event(event_type, payload)
         
         return {"message": "GitHub event processed successfully"}
     except Exception as e:
@@ -798,7 +999,7 @@ async def linear_webhook(request: Request):
         payload = await request.json()
         event_type = payload.get("type", "unknown")
         
-        await cicd_orchestrator.handle_linear_event(event_type, payload)
+        await lightweight_orchestrator.handle_linear_event(event_type, payload)
         
         return {"message": "Linear event processed successfully"}
     except Exception as e:
@@ -832,8 +1033,8 @@ async def chat_cicd_command(
             response = await _handle_recommendations_command(message, project_id, user)
         else:
             # Use Codegen SDK for general queries
-            if cicd_orchestrator.codegen_agent:
-                task = cicd_orchestrator.codegen_agent.run(
+            if lightweight_orchestrator.codegen_agent:
+                task = lightweight_orchestrator.codegen_agent.run(
                     prompt=f"Help with CI/CD question: {message}"
                 )
                 # Wait for completion (with timeout)
@@ -883,7 +1084,7 @@ async def _handle_create_workflow_command(message: str, project_id: str, user: D
     # Create workflow with auto-generated name
     workflow_name = f"Auto-created {template_id.replace('_', ' ').title()}"
     
-    flow_id = await cicd_orchestrator.create_workflow_from_template(
+    flow_id = await lightweight_orchestrator.create_workflow_from_template(
         project_id=project_id,
         template_id=template_id,
         name=workflow_name
@@ -904,7 +1105,7 @@ async def _handle_create_workflow_command(message: str, project_id: str, user: D
 async def _handle_trigger_workflow_command(message: str, project_id: str, user: Dict[str, Any]) -> Dict[str, Any]:
     """Handle workflow triggering from chat"""
     # Trigger all workflows for the project (manual trigger)
-    executions = await cicd_orchestrator.trigger_workflow(
+    executions = await lightweight_orchestrator.trigger_workflow(
         project_id=project_id,
         trigger_type=TriggerType.MANUAL,
         trigger_data={"triggered_by": user.get("email", "chat_user")}
@@ -945,7 +1146,7 @@ async def _handle_status_command(message: str, project_id: str, user: Dict[str, 
     else:
         # Get system-wide status
         system_status = await multi_project_manager.get_system_status()
-        analytics = await cicd_orchestrator.get_orchestration_analytics()
+        analytics = await lightweight_orchestrator.get_orchestration_analytics()
         
         status_msg = "📊 **System Status**\n"
         status_msg += f"• Projects: {system_status['projects']['total']} ({system_status['projects']['active']} active)\n"
@@ -962,7 +1163,7 @@ async def _handle_recommendations_command(message: str, project_id: str, user: D
             "type": "clarification"
         }
     
-    recommendations = await cicd_orchestrator.get_workflow_recommendations(project_id)
+    recommendations = await lightweight_orchestrator.get_workflow_recommendations(project_id)
     
     if not recommendations:
         return {
@@ -1138,17 +1339,14 @@ Sub-issues will be created for each major component and feature implementation.
 
 @app.on_event("startup")
 async def startup_event():
-    """Application startup"""
-    logger.info("Contexten Management Dashboard starting up...")
-    
-    # Initialize chat manager
-    await chat_manager.start()
+    """Initialize the dashboard on startup"""
+    logger.info("Starting dashboard...")
     
     # Initialize multi-project manager
     await multi_project_manager.start()
     
-    # Initialize CI/CD orchestrator
-    await cicd_orchestrator.start()
+    # Initialize event stream processor
+    await event_stream_processor.start(multi_project_manager)
     
     # Validate configuration
     missing_config = []
@@ -1159,22 +1357,20 @@ async def startup_event():
     
     if missing_config:
         logger.warning(f"Missing configuration: {', '.join(missing_config)}")
+        logger.warning("Some features may not be available")
     
     logger.info("Dashboard startup complete")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Application shutdown"""
-    logger.info("Contexten Management Dashboard shutting down...")
+    """Cleanup on shutdown"""
+    logger.info("Shutting down dashboard...")
     
-    # Stop chat manager
-    await chat_manager.stop()
+    # Stop event stream processor
+    await event_stream_processor.stop(multi_project_manager)
     
     # Stop multi-project manager
     await multi_project_manager.stop()
-    
-    # Stop CI/CD orchestrator
-    await cicd_orchestrator.stop()
     
     logger.info("Dashboard shutdown complete")
     
@@ -1185,6 +1381,325 @@ async def shutdown_event():
                 await agent.stop()
         except Exception as e:
             logger.error(f"Error stopping agent: {e}")
+
+# Core Multi-Project Management API
+
+@app.get("/api/core-projects")
+async def get_core_projects(
+    request: Request,
+    active_only: bool = False,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get all projects"""
+    try:
+        projects = await multi_project_manager.get_projects(active_only=active_only)
+        return [
+            {
+                "id": p.id,
+                "name": p.name,
+                "type": p.type.value,
+                "path": p.path,
+                "source_url": p.source_url,
+                "branch": p.branch,
+                "description": p.description,
+                "tags": p.tags,
+                "created_at": p.created_at.isoformat(),
+                "updated_at": p.updated_at.isoformat()
+            }
+            for p in projects
+        ]
+    except Exception as e:
+        logger.error(f"Failed to get projects: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/core-projects")
+async def add_core_project(
+    request: Request,
+    project_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Add a new project"""
+    try:
+        project = ProjectConfig(
+            id=project_data["id"],
+            name=project_data["name"],
+            type=ProjectType(project_data["type"]),
+            path=project_data["path"],
+            source_url=project_data.get("source_url"),
+            branch=project_data.get("branch", "main"),
+            description=project_data.get("description", ""),
+            tags=project_data.get("tags", [])
+        )
+        
+        success = await multi_project_manager.add_project(project)
+        
+        if success:
+            return {"message": "Project added successfully", "project_id": project.id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to add project")
+            
+    except Exception as e:
+        logger.error(f"Failed to add project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/core-projects/{project_id}")
+async def get_core_project(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get a specific project"""
+    try:
+        project = await multi_project_manager.get_project(project_id)
+        
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        return {
+            "id": project.id,
+            "name": project.name,
+            "type": project.type.value,
+            "path": project.path,
+            "source_url": project.source_url,
+            "branch": project.branch,
+            "description": project.description,
+            "tags": project.tags,
+            "created_at": project.created_at.isoformat(),
+            "updated_at": project.updated_at.isoformat()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/core-projects/{project_id}")
+async def remove_core_project(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Remove a project"""
+    try:
+        success = await multi_project_manager.remove_project(project_id)
+        
+        if success:
+            return {"message": "Project removed successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to remove project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/core-projects/{project_id}/analyze")
+async def analyze_core_project(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Trigger analysis for a project"""
+    try:
+        result = await multi_project_manager.analyze_project(project_id)
+        
+        if result:
+            return {"message": "Analysis completed", "result": result}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found or analysis failed")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to analyze project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/core-projects/{project_id}/executions")
+async def get_project_executions(
+    project_id: str,
+    request: Request,
+    limit: int = 20,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get execution history for a project"""
+    try:
+        executions = await multi_project_manager.get_executions(project_id=project_id, limit=limit)
+        
+        return [
+            {
+                "id": e.id,
+                "project_id": e.project_id,
+                "flow_type": e.flow_type,
+                "status": e.status.value,
+                "started_at": e.started_at.isoformat(),
+                "completed_at": e.completed_at.isoformat() if e.completed_at else None,
+                "result": e.result,
+                "error": e.error,
+                "triggered_by": e.triggered_by
+            }
+            for e in executions
+        ]
+    except Exception as e:
+        logger.error(f"Failed to get project executions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/core-projects/status")
+async def get_core_system_status(
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get system status"""
+    try:
+        status = await multi_project_manager.get_system_status()
+        return status
+    except Exception as e:
+        logger.error(f"Failed to get system status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Quality Gates API
+
+@app.post("/api/core-projects/{project_id}/quality-gates")
+async def add_quality_gate(
+    project_id: str,
+    request: Request,
+    gate_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Add a quality gate for a project"""
+    try:
+        gate = QualityGate(
+            id=f"gate_{project_id}_{int(datetime.now().timestamp())}",
+            name=gate_data["name"],
+            project_id=project_id,
+            conditions=gate_data["conditions"],
+            actions=gate_data["actions"],
+            enabled=gate_data.get("enabled", True)
+        )
+        
+        success = await multi_project_manager.add_quality_gate(gate)
+        
+        if success:
+            return {"message": "Quality gate added successfully", "gate_id": gate.id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to add quality gate")
+            
+    except Exception as e:
+        logger.error(f"Failed to add quality gate: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/core-projects/{project_id}/quality-gates")
+async def get_quality_gates(
+    project_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Get quality gates for a project"""
+    try:
+        gates = await multi_project_manager.get_quality_gates(project_id=project_id)
+        
+        return [
+            {
+                "id": g.id,
+                "name": g.name,
+                "project_id": g.project_id,
+                "conditions": g.conditions,
+                "actions": g.actions,
+                "enabled": g.enabled,
+                "created_at": g.created_at.isoformat()
+            }
+            for g in gates
+        ]
+    except Exception as e:
+        logger.error(f"Failed to get quality gates: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Chat Integration API
+
+@app.post("/api/chat/core-projects")
+async def chat_core_projects(
+    request: Request,
+    chat_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Handle chat commands for core projects"""
+    try:
+        message = chat_data.get("message", "")
+        project_id = chat_data.get("project_id")
+        user_email = user.get("email")
+        
+        response = await handle_chat_command(
+            multi_project_manager,
+            message,
+            project_id,
+            user_email
+        )
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Failed to process chat command: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/core-projects/{project_id}/codegen-task")
+async def execute_codegen_task(
+    project_id: str,
+    request: Request,
+    task_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(require_auth)
+):
+    """Execute a Codegen task for a project"""
+    try:
+        prompt = task_data.get("prompt", "")
+        triggered_by = user.get("email", "user")
+        
+        execution_id = await multi_project_manager.execute_codegen_task(
+            project_id=project_id,
+            prompt=prompt,
+            triggered_by=triggered_by
+        )
+        
+        if execution_id:
+            return {"message": "Codegen task started", "execution_id": execution_id}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to start Codegen task")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to execute Codegen task: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# WebSocket for Real-time Events
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for real-time events"""
+    await websocket_manager.connect(websocket)
+    try:
+        while True:
+            # Keep connection alive
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        websocket_manager.disconnect(websocket)
+
+@app.websocket("/ws/project/{project_id}")
+async def websocket_project_endpoint(websocket: WebSocket, project_id: str):
+    """WebSocket endpoint for project-specific events"""
+    await websocket_manager.connect(websocket, project_id)
+    try:
+        while True:
+            # Keep connection alive
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        websocket_manager.disconnect(websocket, project_id)
+
+# Enhanced Dashboard UI
+
+@app.get("/dashboard/enhanced", response_class=HTMLResponse)
+async def enhanced_dashboard():
+    """Serve the enhanced dashboard UI"""
+    return generate_enhanced_dashboard_html()
 
 if __name__ == "__main__":
     import uvicorn
