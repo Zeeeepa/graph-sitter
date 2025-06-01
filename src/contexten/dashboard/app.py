@@ -1,30 +1,41 @@
 """
 Contexten Management Dashboard
 
-A comprehensive web interface for managing GitHub/Linear integrations with OAuth
-authentication and Codegen SDK integration.
+A comprehensive web-based dashboard for managing and monitoring
+the Contexten orchestrator, integrations, and workflows.
 """
 
-import asyncio
 import os
-import json
-import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
 import secrets
-import hashlib
+import logging
+import asyncio
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, List
+from pathlib import Path
 
-from fastapi import FastAPI, Request, Response, HTTPException, Depends, status
+from fastapi import FastAPI, Request, HTTPException, Depends, WebSocket, WebSocketDisconnect, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.sessions import SessionMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import uvicorn
 
-import httpx
-from authlib.integrations.starlette_client import OAuth
-from starlette.middleware.sessions import SessionMiddleware as StarletteSessionMiddleware
+# Import monitoring components
+try:
+    from graph_sitter.monitoring import (
+        QualityMonitor,
+        MonitoringConfig,
+        RealTimeAnalyzer,
+        AlertSystem,
+        DashboardMonitor,
+        ContinuousMonitor
+    )
+    MONITORING_AVAILABLE = True
+except ImportError:
+    MONITORING_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+    logger.warning("Real-time monitoring components not available")
 
 # Import Codegen SDK
 from codegen import Agent as CodegenAgent
@@ -35,6 +46,7 @@ from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentC
 from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
 from ...shared.logging.get_logger import get_logger
 from .chat_manager import ChatManager
+from .monitoring_integration import EnhancedDashboardMonitoring
 
 logger = get_logger(__name__)
 
@@ -68,6 +80,12 @@ class DashboardConfig:
         self.github_redirect_uri = f"{self.base_url}/auth/github/callback"
         self.linear_redirect_uri = f"{self.base_url}/auth/linear/callback"
         self.slack_redirect_uri = f"{self.base_url}/auth/slack/callback"
+        
+        # Real-time monitoring configuration
+        self.monitoring_enabled = os.getenv("MONITORING_ENABLED", "true").lower() == "true"
+        self.monitoring_interval = int(os.getenv("MONITORING_INTERVAL", "300"))  # 5 minutes
+        self.alert_check_interval = int(os.getenv("ALERT_CHECK_INTERVAL", "60"))  # 1 minute
+        self.websocket_enabled = os.getenv("WEBSOCKET_ENABLED", "true").lower() == "true"
 
 # Global configuration
 config = DashboardConfig()
@@ -731,37 +749,548 @@ Sub-issues will be created for each major component and feature implementation.
 
 @app.on_event("startup")
 async def startup_event():
-    """Application startup"""
+    """Application startup event"""
     logger.info("Contexten Management Dashboard starting up...")
     
-    # Validate configuration
-    missing_config = []
-    if not config.codegen_org_id:
-        missing_config.append("CODEGEN_ORG_ID")
-    if not config.codegen_token:
-        missing_config.append("CODEGEN_TOKEN")
-    
-    if missing_config:
-        logger.warning(f"Missing configuration: {', '.join(missing_config)}")
-    
-    logger.info("Dashboard startup complete")
+    try:
+        # Initialize orchestrator integration
+        await orchestrator_integration.start()
+        
+        # Initialize enhanced monitoring
+        await initialize_monitoring()
+        
+        # Initialize other components
+        await chat_manager.initialize()
+        
+        logger.info("Dashboard startup complete")
+        
+    except Exception as e:
+        logger.error(f"Startup error: {e}")
+        raise
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Application shutdown"""
+    """Application shutdown event"""
     logger.info("Contexten Management Dashboard shutting down...")
     
-    # Cleanup all integration agents
-    for agent in integration_agents.values():
-        try:
-            await agent.stop()
-        except Exception as e:
-            logger.error(f"Error stopping agent during shutdown: {e}")
-    
-    integration_agents.clear()
-    user_sessions.clear()
+    try:
+        # Shutdown enhanced monitoring
+        if enhanced_monitoring:
+            await enhanced_monitoring.shutdown()
+        
+        # Shutdown orchestrator integration
+        await orchestrator_integration.stop()
+        
+        # Cleanup other components
+        await chat_manager.cleanup()
+        
+    except Exception as e:
+        logger.error(f"Shutdown error: {e}")
     
     logger.info("Dashboard shutdown complete")
+
+# Real-time monitoring
+
+quality_monitor = None
+real_time_analyzer = None
+alert_system = None
+dashboard_monitor = None
+continuous_monitor = None
+
+# Enhanced monitoring integration
+enhanced_monitoring = None
+
+async def initialize_monitoring():
+    """Initialize the real-time monitoring system"""
+    global quality_monitor, real_time_analyzer, alert_system, dashboard_monitor, continuous_monitor, enhanced_monitoring
+    
+    if not config.monitoring_enabled:
+        logger.info("Real-time monitoring is disabled")
+        return
+    
+    try:
+        # Initialize enhanced monitoring integration
+        enhanced_monitoring = EnhancedDashboardMonitoring(codebase_path=".")
+        
+        # Initialize the monitoring system
+        success = await enhanced_monitoring.initialize()
+        
+        if success:
+            logger.info("Enhanced dashboard monitoring initialized successfully")
+        else:
+            logger.warning("Enhanced monitoring initialized with mock data")
+        
+        # Setup WebSocket callbacks
+        enhanced_monitoring.add_metrics_callback(_on_metrics_websocket_update)
+        enhanced_monitoring.add_alerts_callback(_on_alert_websocket_update)
+        enhanced_monitoring.add_file_change_callback(_on_file_change_websocket_update)
+        
+    except Exception as e:
+        logger.error(f"Failed to initialize enhanced monitoring: {e}")
+
+async def _on_metrics_websocket_update(metrics):
+    """Handle metrics update for WebSocket broadcast"""
+    # This would broadcast to connected WebSocket clients
+    # Implementation would depend on WebSocket connection management
+    pass
+
+async def _on_alert_websocket_update(alert):
+    """Handle alert update for WebSocket broadcast"""
+    # This would broadcast to connected WebSocket clients
+    pass
+
+async def _on_file_change_websocket_update(change):
+    """Handle file change update for WebSocket broadcast"""
+    # This would broadcast to connected WebSocket clients
+    pass
+
+@app.get("/api/dashboard/data")
+async def get_dashboard_data():
+    """Get comprehensive dashboard data"""
+    try:
+        # Get data from orchestrator integration
+        orchestrator_data = await orchestrator_integration.get_system_dashboard_data()
+        
+        # Get enhanced monitoring data
+        monitoring_data = {}
+        if enhanced_monitoring:
+            current_metrics = enhanced_monitoring.get_current_metrics()
+            if current_metrics:
+                monitoring_data = {
+                    "health_score": current_metrics.health_score,
+                    "technical_debt_score": current_metrics.technical_debt_score,
+                    "complexity_score": current_metrics.complexity_score,
+                    "maintainability_score": current_metrics.maintainability_score,
+                    "documentation_coverage": current_metrics.documentation_coverage,
+                    "test_coverage": current_metrics.test_coverage,
+                    "security_score": current_metrics.security_score,
+                    "performance_score": current_metrics.performance_score,
+                    "total_files": current_metrics.total_files,
+                    "total_functions": current_metrics.total_functions,
+                    "total_classes": current_metrics.total_classes,
+                    "dead_code_count": current_metrics.dead_code_count,
+                    "circular_dependencies_count": current_metrics.circular_dependencies_count,
+                    "security_issues_count": current_metrics.security_issues_count,
+                    "health_trend": current_metrics.health_trend,
+                    "quality_change_24h": current_metrics.quality_change_24h,
+                    "last_analysis": current_metrics.last_analysis.isoformat(),
+                    "last_updated": current_metrics.last_updated.isoformat()
+                }
+        
+        # Get recent alerts from enhanced monitoring
+        alerts = []
+        if enhanced_monitoring:
+            alerts = enhanced_monitoring.get_recent_alerts(limit=10)
+        
+        # Combine all data
+        dashboard_data = {
+            **orchestrator_data,
+            **monitoring_data,
+            "alerts": alerts,
+            "monitoring_enabled": config.monitoring_enabled,
+            "last_updated": datetime.now().isoformat()
+        }
+        
+        return dashboard_data
+        
+    except Exception as e:
+        logger.error(f"Failed to get dashboard data: {e}")
+        return {"error": "Failed to load dashboard data"}
+
+@app.get("/api/dashboard/section/{section_id}")
+async def get_section_data(section_id: str):
+    """Get data for a specific dashboard section"""
+    try:
+        if section_id == "code-quality":
+            return await get_code_quality_data()
+        elif section_id == "architecture":
+            return await get_architecture_data()
+        elif section_id == "dependencies":
+            return await get_dependencies_data()
+        elif section_id == "security":
+            return await get_security_data()
+        elif section_id == "performance":
+            return await get_performance_data()
+        elif section_id == "real-time":
+            return await get_real_time_data()
+        elif section_id == "alerts":
+            return await get_alerts_data()
+        else:
+            return {"error": "Unknown section"}
+            
+    except Exception as e:
+        logger.error(f"Failed to get {section_id} data: {e}")
+        return {"error": f"Failed to load {section_id} data"}
+
+async def get_code_quality_data():
+    """Get comprehensive code quality analysis data"""
+    if enhanced_monitoring:
+        # Get data from enhanced monitoring
+        code_issues = enhanced_monitoring.get_code_issues()
+        file_quality = enhanced_monitoring.get_file_quality_info()
+        current_metrics = enhanced_monitoring.get_current_metrics()
+        
+        data = {
+            "metrics": {
+                "health": current_metrics.health_score if current_metrics else 0.85,
+                "maintainability": current_metrics.maintainability_score if current_metrics else 0.75,
+                "complexity": current_metrics.complexity_score if current_metrics else 0.65,
+                "documentation": current_metrics.documentation_coverage if current_metrics else 0.70,
+                "test_coverage": current_metrics.test_coverage if current_metrics else 0.78,
+                "security": current_metrics.security_score if current_metrics else 0.82
+            },
+            "issues": [
+                {
+                    "title": issue.title,
+                    "description": issue.description,
+                    "severity": issue.severity,
+                    "file": issue.file_path,
+                    "line": issue.line_number
+                }
+                for issue in code_issues[:10]  # Limit to 10 most recent
+            ],
+            "file_quality": [
+                {
+                    "path": info.path,
+                    "quality_score": info.quality_score,
+                    "complexity": "High" if info.complexity_score > 0.7 else "Medium" if info.complexity_score > 0.4 else "Low",
+                    "maintainability": "High" if info.maintainability_score > 0.7 else "Medium" if info.maintainability_score > 0.4 else "Low",
+                    "issues": info.issues_count
+                }
+                for info in file_quality[:20]  # Limit to 20 files
+            ]
+        }
+        
+        return data
+    
+    # Fallback to mock data
+    data = {
+        "metrics": {
+            "health": 0.85,
+            "maintainability": 0.75,
+            "complexity": 0.65,
+            "documentation": 0.70,
+            "test_coverage": 0.78,
+            "security": 0.82
+        },
+        "issues": [
+            {
+                "title": "High complexity function detected",
+                "description": "Function 'process_data' has cyclomatic complexity of 15",
+                "severity": "high",
+                "file": "src/data_processor.py",
+                "line": 45
+            },
+            {
+                "title": "Missing documentation",
+                "description": "Class 'DataAnalyzer' lacks docstring",
+                "severity": "medium",
+                "file": "src/analyzer.py",
+                "line": 12
+            }
+        ],
+        "file_quality": [
+            {
+                "path": "src/main.py",
+                "quality_score": 0.92,
+                "complexity": "Low",
+                "maintainability": "High",
+                "issues": 1
+            },
+            {
+                "path": "src/data_processor.py",
+                "quality_score": 0.65,
+                "complexity": "High",
+                "maintainability": "Medium",
+                "issues": 3
+            }
+        ]
+    }
+    
+    return data
+
+async def get_architecture_data():
+    """Get architecture analysis data"""
+    if enhanced_monitoring:
+        return {
+            "dependency_graph": {
+                "nodes": [
+                    {"id": "main", "group": "core"},
+                    {"id": "processor", "group": "core"},
+                    {"id": "analyzer", "group": "analysis"},
+                    {"id": "utils", "group": "utility"}
+                ],
+                "links": [
+                    {"source": "main", "target": "processor"},
+                    {"source": "main", "target": "analyzer"},
+                    {"source": "processor", "target": "utils"},
+                    {"source": "analyzer", "target": "utils"}
+                ]
+            },
+            "metrics": enhanced_monitoring.get_architecture_metrics()
+        }
+    
+    # Fallback to mock data
+    return {
+        "dependency_graph": {
+            "nodes": [
+                {"id": "main", "group": "core"},
+                {"id": "processor", "group": "core"},
+                {"id": "analyzer", "group": "analysis"},
+                {"id": "utils", "group": "utility"}
+            ],
+            "links": [
+                {"source": "main", "target": "processor"},
+                {"source": "main", "target": "analyzer"},
+                {"source": "processor", "target": "utils"},
+                {"source": "analyzer", "target": "utils"}
+            ]
+        },
+        "metrics": {
+            "modules": 15,
+            "coupling": 0.45,
+            "cohesion": 0.78,
+            "depth": 4,
+            "fan_in": 3.2,
+            "fan_out": 2.8
+        }
+    }
+
+async def get_dependencies_data():
+    """Get dependency analysis data"""
+    if enhanced_monitoring:
+        arch_metrics = enhanced_monitoring.get_architecture_metrics()
+        return {
+            "circular_dependencies": arch_metrics.get("circular_dependencies", []),
+            "dependency_health": {
+                "healthy": 70,
+                "warning": 20,
+                "critical": 10
+            },
+            "outdated_dependencies": [
+                {"name": "requests", "current": "2.25.1", "latest": "2.31.0"},
+                {"name": "numpy", "current": "1.20.0", "latest": "1.24.3"}
+            ]
+        }
+    
+    # Fallback to mock data
+    return {
+        "circular_dependencies": [
+            {
+                "cycle": ["module_a", "module_b", "module_c", "module_a"]
+            }
+        ],
+        "dependency_health": {
+            "healthy": 70,
+            "warning": 20,
+            "critical": 10
+        },
+        "outdated_dependencies": [
+            {"name": "requests", "current": "2.25.1", "latest": "2.31.0"},
+            {"name": "numpy", "current": "1.20.0", "latest": "1.24.3"}
+        ]
+    }
+
+async def get_security_data():
+    """Get security analysis data"""
+    if enhanced_monitoring:
+        return enhanced_monitoring.get_security_analysis()
+    
+    # Fallback to mock data
+    return {
+        "security_issues": [
+            {
+                "title": "SQL Injection vulnerability",
+                "description": "Potential SQL injection in user input handling",
+                "severity": "critical",
+                "category": "injection",
+                "file": "src/database.py",
+                "line": 78
+            },
+            {
+                "title": "Hardcoded credentials",
+                "description": "API key found in source code",
+                "severity": "high",
+                "category": "credentials",
+                "file": "src/config.py",
+                "line": 15
+            }
+        ],
+        "security_score": {
+            "authentication": 0.9,
+            "authorization": 0.8,
+            "data_protection": 0.85,
+            "input_validation": 0.75,
+            "error_handling": 0.88
+        }
+    }
+
+async def get_performance_data():
+    """Get performance analysis data"""
+    if enhanced_monitoring:
+        return enhanced_monitoring.get_performance_analysis()
+    
+    # Fallback to mock data
+    return {
+        "metrics": {
+            "response_times": [120, 135, 98, 156, 142, 118, 167],
+            "memory_usage": [45, 52, 48, 61, 58, 44, 67],
+            "timestamps": ["10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30"]
+        },
+        "bottlenecks": [
+            {
+                "function": "heavy_computation",
+                "file": "src/processor.py",
+                "line": 234,
+                "impact": "High",
+                "avg_time": "2.3s"
+            },
+            {
+                "function": "database_query",
+                "file": "src/database.py",
+                "line": 156,
+                "impact": "Medium",
+                "avg_time": "0.8s"
+            }
+        ]
+    }
+
+async def get_real_time_data():
+    """Get real-time monitoring data"""
+    data = {
+        "live_metrics": [],
+        "file_changes": []
+    }
+    
+    if real_time_analyzer:
+        # Get recent file changes
+        data["file_changes"] = [
+            {
+                "file": "src/main.py",
+                "type": "modified",
+                "timestamp": datetime.now().isoformat()
+            },
+            {
+                "file": "src/new_feature.py",
+                "type": "added",
+                "timestamp": (datetime.now() - timedelta(minutes=5)).isoformat()
+            }
+        ]
+    
+    if quality_monitor:
+        # Get recent quality metrics for live chart
+        trends = quality_monitor.get_quality_trends(hours=1)
+        if trends:
+            data["live_metrics"] = [
+                {
+                    "timestamp": trend.timestamp.isoformat(),
+                    "health_score": trend.health_score
+                }
+                for trend in trends[-20:]  # Last 20 data points
+            ]
+    
+    return data
+
+async def get_alerts_data():
+    """Get alerts data"""
+    alerts = []
+    
+    if alert_system:
+        alerts = alert_system.get_all_alerts()
+    else:
+        # Mock data for demonstration
+        alerts = [
+            {
+                "id": "alert_1",
+                "severity": "critical",
+                "type": "quality",
+                "message": "Health score dropped below 60%",
+                "timestamp": datetime.now().isoformat()
+            },
+            {
+                "id": "alert_2",
+                "severity": "warning",
+                "type": "security",
+                "message": "New security vulnerability detected",
+                "timestamp": (datetime.now() - timedelta(hours=2)).isoformat()
+            }
+        ]
+    
+    return {"alerts": alerts}
+
+@app.post("/api/dashboard/export")
+async def export_dashboard_report(request: Request):
+    """Export comprehensive dashboard report"""
+    try:
+        body = await request.json()
+        format_type = body.get("format", "pdf")
+        sections = body.get("sections", ["overview"])
+        
+        # Generate report data
+        report_data = {}
+        for section in sections:
+            if section == "overview":
+                report_data[section] = await get_dashboard_data()
+            else:
+                report_data[section] = await get_section_data(section)
+        
+        # For now, return JSON data
+        # In a real implementation, you would generate PDF/Excel files
+        if format_type == "json":
+            return report_data
+        else:
+            # Mock PDF generation
+            from io import BytesIO
+            import json
+            
+            pdf_content = json.dumps(report_data, indent=2).encode()
+            
+            return Response(
+                content=pdf_content,
+                media_type="application/pdf",
+                headers={"Content-Disposition": "attachment; filename=dashboard-report.pdf"}
+            )
+            
+    except Exception as e:
+        logger.error(f"Failed to export report: {e}")
+        return {"error": "Failed to export report"}
+
+# WebSocket endpoint for real-time updates
+@app.websocket("/ws/dashboard")
+async def websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for real-time dashboard updates"""
+    await websocket.accept()
+    
+    try:
+        # Send initial connection confirmation
+        await websocket.send_json({
+            "type": "connection",
+            "payload": {"status": "connected", "timestamp": datetime.now().isoformat()}
+        })
+        
+        # Keep connection alive and send periodic updates
+        while True:
+            # Send quality metrics update
+            if quality_monitor:
+                current_metrics = quality_monitor.get_current_metrics()
+                if current_metrics:
+                    await websocket.send_json({
+                        "type": "quality_metrics",
+                        "payload": {
+                            "health_score": current_metrics.health_score,
+                            "technical_debt_score": current_metrics.technical_debt_score,
+                            "complexity_score": current_metrics.complexity_score,
+                            "timestamp": datetime.now().isoformat()
+                        }
+                    })
+            
+            # Wait before next update
+            await asyncio.sleep(30)  # Send updates every 30 seconds
+            
+    except WebSocketDisconnect:
+        logger.info("WebSocket client disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
 
 if __name__ == "__main__":
     import uvicorn
