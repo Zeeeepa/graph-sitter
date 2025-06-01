@@ -139,6 +139,9 @@ class DeadCodeDetector:
             unused_classes = []
             
             for class_def in self.codebase.classes:
+                # Check if class is used
+                class_name = getattr(class_def, 'name', None) or 'unknown_class'
+                
                 # Check if class has any usages
                 usages = getattr(class_def, 'usages', [])
                 
@@ -447,7 +450,7 @@ class DeadCodeDetector:
                         return True
             
             # Check class name patterns
-            class_name = class_def.name
+            class_name = getattr(class_def, 'name', None) or 'unknown_class'
             base_patterns = ['Base', 'Abstract', 'Interface', 'Mixin', 'Protocol']
             if any(pattern in class_name for pattern in base_patterns):
                 return True
@@ -590,4 +593,3 @@ def get_removal_plan(codebase: Codebase, items: List[DeadCodeItem]) -> CleanupPl
     """Generate safe removal plan."""
     detector = DeadCodeDetector(codebase)
     return detector.get_removal_plan(items)
-

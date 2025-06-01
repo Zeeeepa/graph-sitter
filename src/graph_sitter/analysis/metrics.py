@@ -333,7 +333,7 @@ class MetricsCalculator:
             return shared_pairs / total_pairs
             
         except Exception as e:
-            logger.warning(f"Error calculating cohesion for {class_def.name}: {e}")
+            logger.warning(f"Error calculating cohesion for {getattr(class_def, 'name', None) or 'unknown_class'}: {e}")
             return 0.5
     
     def analyze_class_coupling(self, class_def: Class) -> float:
@@ -351,47 +351,57 @@ class MetricsCalculator:
             return max(0.0, min(1.0, 1.0 - coupling_score))
             
         except Exception as e:
-            logger.warning(f"Error calculating coupling for {class_def.name}: {e}")
+            logger.warning(f"Error calculating coupling for {getattr(class_def, 'name', None) or 'unknown_class'}: {e}")
             return 0.5
     
     def analyze_class_metrics(self, class_def: Class) -> ClassMetrics:
         """Comprehensive class analysis."""
-        if class_def.name in self._class_metrics_cache:
-            return self._class_metrics_cache[class_def.name]
+        # Safe name handling for cache operations
+        class_name = getattr(class_def, 'name', None) or 'unknown_class'
+        
+        if class_name in self._class_metrics_cache:
+            return self._class_metrics_cache[class_name]
         
         try:
             methods = getattr(class_def, 'methods', [])
             attributes = getattr(class_def, 'attributes', [])
             superclasses = getattr(class_def, 'superclasses', [])
-            subclasses = getattr(class_def, 'subclasses', [])
             
-            # Method categorization
-            public_methods = [m for m in methods if not m.name.startswith('_')]
-            private_methods = [m for m in methods if m.name.startswith('_') and not m.name.startswith('__')]
-            magic_methods = [m for m in methods if m.name.startswith('__') and m.name.endswith('__')]
-            abstract_methods = [m for m in methods if self._is_abstract_method(m)]
+            # Calculate inheritance depth
+            inheritance_depth = len(superclasses)
             
-            # Constructor detection
-            has_constructor = any(m.name == '__init__' for m in methods)
+            # Categorize methods
+            public_methods = []
+            private_methods = []
+            magic_methods = []
+            abstract_methods = []
             
-            # Calculate metrics
-            cohesion_score = self.analyze_class_cohesion(class_def)
-            coupling_score = self.analyze_class_coupling(class_def)
-            documentation_coverage = self.calculate_documentation_coverage(class_def)
-            test_coverage = self.estimate_test_coverage(class_def)
+            for method in methods:
+                method_name = getattr(method, 'name', None) or ''
+                if method_name.startswith('__') and method_name.endswith('__'):
+                    magic_methods.append(method)
+                elif method_name.startswith('_'):
+                    private_methods.append(method)
+                else:
+                    public_methods.append(method)
+                
+                if self._is_abstract_method(method):
+                    abstract_methods.append(method)
+            
+            # Calculate cohesion (LCOM)
+            cohesion_score = self._calculate_lcom_cohesion(methods, attributes)
+            
+            # Calculate coupling
+            coupling_score = self._calculate_class_coupling(class_def)
             
             metrics = ClassMetrics(
-                name=class_def.name,
+                name=class_name,
                 filepath=getattr(class_def, 'filepath', 'unknown'),
                 method_count=len(methods),
                 attribute_count=len(attributes),
-                inheritance_depth=len(superclasses),
-                subclass_count=len(subclasses),
+                inheritance_depth=inheritance_depth,
                 cohesion_score=cohesion_score,
                 coupling_score=coupling_score,
-                documentation_coverage=documentation_coverage,
-                test_coverage_estimate=test_coverage,
-                has_constructor=has_constructor,
                 has_docstring=bool(getattr(class_def, 'docstring', None)),
                 abstract_method_count=len(abstract_methods),
                 public_method_count=len(public_methods),
@@ -399,18 +409,16 @@ class MetricsCalculator:
                 magic_method_count=len(magic_methods)
             )
             
-            self._class_metrics_cache[class_def.name] = metrics
+            self._class_metrics_cache[class_name] = metrics
             return metrics
             
         except Exception as e:
-            logger.error(f"Error analyzing class {class_def.name}: {e}")
+            logger.error(f"Error analyzing class {class_name}: {e}")
             return ClassMetrics(
-                name=class_def.name,
+                name=class_name,
                 filepath=getattr(class_def, 'filepath', 'unknown'),
                 method_count=0, attribute_count=0, inheritance_depth=0,
-                subclass_count=0, cohesion_score=0.0, coupling_score=0.0,
-                documentation_coverage=0.0, test_coverage_estimate=0.0,
-                has_constructor=False, has_docstring=False,
+                cohesion_score=0.0, coupling_score=0.0, has_docstring=False,
                 abstract_method_count=0, public_method_count=0,
                 private_method_count=0, magic_method_count=0
             )
@@ -609,6 +617,50 @@ class MetricsCalculator:
             return 0.2  # Low coverage if no test file found
         except Exception:
             return 0.0
+    
+    def _calculate_lcom_cohesion(self, methods, attributes):
+        """Calculate LCOM (Lack of Cohesion of Methods) for a class."""
+        if not methods:
+            return 1.0
+        
+        # Count method pairs that share attributes
+        shared_pairs = 0
+        total_pairs = 0
+        
+        for i, method1 in enumerate(methods):
+            for method2 in methods[i+1:]:
+                total_pairs += 1
+                
+                # Check if methods share attributes
+                method1_attrs = self._get_method_attributes(method1)
+                method2_attrs = self._get_method_attributes(method2)
+                
+                if method1_attrs & method2_attrs:  # Intersection
+                    shared_pairs += 1
+        
+        if total_pairs == 0:
+            return 1.0
+        
+        # Cohesion = shared pairs / total pairs
+        return shared_pairs / total_pairs
+    
+    def _calculate_class_coupling(self, class_def: Class) -> float:
+        """Calculate class coupling based on dependencies."""
+        try:
+            dependencies = getattr(class_def, 'dependencies', [])
+            usages = getattr(class_def, 'usages', [])
+            
+            # Count external dependencies (coupling)
+            external_deps = len([d for d in dependencies if not self._is_internal_dependency(d)])
+            external_usages = len([u for u in usages if not self._is_internal_dependency(u)])
+            
+            # Normalize coupling score (lower is better)
+            coupling_score = (external_deps + external_usages) / 10.0
+            return max(0.0, min(1.0, 1.0 - coupling_score))
+            
+        except Exception as e:
+            logger.warning(f"Error calculating coupling for {getattr(class_def, 'name', None) or 'unknown_class'}: {e}")
+            return 0.5
 
 
 # Convenience functions
@@ -646,4 +698,3 @@ def get_codebase_summary(codebase: Codebase) -> CodebaseMetrics:
     """Overall codebase metrics."""
     calculator = MetricsCalculator(codebase)
     return calculator.get_codebase_summary()
-

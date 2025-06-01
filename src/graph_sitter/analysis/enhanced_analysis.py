@@ -363,7 +363,7 @@ class EnhancedCodebaseAnalyzer:
                     metrics = self.metrics_calculator.analyze_class_metrics(class_def)
                     class_analyses.append(asdict(metrics))
                 except Exception as e:
-                    logger.warning(f"Error analyzing class {class_def.name}: {e}")
+                    logger.warning(f"Error analyzing class {getattr(class_def, 'name', None) or 'unknown_class'}: {e}")
             
             return class_analyses
         except Exception as e:
@@ -660,4 +660,3 @@ def generate_analysis_report(codebase: Codebase, format: str = 'json') -> str:
     """Generate analysis report."""
     analyzer = EnhancedCodebaseAnalyzer(codebase)
     return analyzer.generate_analysis_report(format)
-
