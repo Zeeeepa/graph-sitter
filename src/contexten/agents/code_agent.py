@@ -38,11 +38,11 @@ class CodeAgent:
         self,
         codebase: "Codebase",
         model_provider: str = "anthropic",
-        model_name: str = "claude-3-7-sonnet-latest",
+        model_name: str = "claude-3-5-sonnet-latest",
         memory: bool = True,
         tools: Optional[list[BaseTool]] = None,
-        tags: Optional[list[str]] = [],
-        metadata: Optional[dict] = {},
+        tags: Optional[list[str]] = None,
+        metadata: Optional[dict] = None,
         agent_config: Optional[AgentConfig] = None,
         thread_id: Optional[str] = None,
         logger: Optional[ExternalLogger] = None,
@@ -64,6 +64,16 @@ class CodeAgent:
                 - top_k: Top-k sampling parameter (>= 1)
                 - max_tokens: Maximum number of tokens to generate
         """
+        # Parameter validation
+        if codebase is None:
+            raise ValueError("codebase parameter is required and cannot be None")
+        
+        # Initialize mutable defaults safely
+        if tags is None:
+            tags = []
+        if metadata is None:
+            metadata = {}
+        
         self.codebase = codebase
         self.agent = create_codebase_agent(
             self.codebase,
@@ -117,6 +127,13 @@ class CodeAgent:
         Returns:
             The agent's response
         """
+        # Parameter validation
+        if not prompt or not prompt.strip():
+            raise ValueError("prompt parameter is required and cannot be empty")
+        
+        if image_urls is not None and not isinstance(image_urls, list):
+            raise ValueError("image_urls must be a list of strings or None")
+        
         self.config = {
             "configurable": {
                 "thread_id": self.thread_id,
@@ -169,6 +186,16 @@ class CodeAgent:
         try:
             # Find and print the LangSmith run URL
             find_and_print_langsmith_run_url(self.langsmith_client, self.project_name)
+        except ConnectionError as e:
+            separator = "=" * 60
+            print(f"\n{separator}\nLangSmith connection error: {e}")
+            print("Check your LANGCHAIN_API_KEY and network connection.")
+            print(separator)
+        except ValueError as e:
+            separator = "=" * 60
+            print(f"\n{separator}\nLangSmith configuration error: {e}")
+            print("Check your LANGCHAIN_PROJECT setting.")
+            print(separator)
         except Exception as e:
             separator = "=" * 60
             print(f"\n{separator}\nCould not retrieve LangSmith URL: {e}")
@@ -188,6 +215,18 @@ class CodeAgent:
         try:
             # TODO - this is definitely not correct, we should be able to get the URL directly...
             return find_and_print_langsmith_run_url(client=self.langsmith_client, project_name=self.project_name)
+        except ConnectionError as e:
+            separator = "=" * 60
+            print(f"\n{separator}\nLangSmith connection error: {e}")
+            print("Check your LANGCHAIN_API_KEY and network connection.")
+            print(separator)
+            return None
+        except ValueError as e:
+            separator = "=" * 60
+            print(f"\n{separator}\nLangSmith configuration error: {e}")
+            print("Check your LANGCHAIN_PROJECT setting.")
+            print(separator)
+            return None
         except Exception as e:
             separator = "=" * 60
             print(f"\n{separator}\nCould not retrieve LangSmith URL: {e}")

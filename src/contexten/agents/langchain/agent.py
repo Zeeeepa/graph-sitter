@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 def create_codebase_agent(
     codebase: "Codebase",
     model_provider: str = "anthropic",
-    model_name: str = "claude-3-7-sonnet-latest",
+    model_name: str = "claude-3-5-sonnet-latest",
     system_message: SystemMessage = SystemMessage(REASONER_SYSTEM_MESSAGE),
     memory: bool = True,
     debug: bool = False,
@@ -61,6 +61,10 @@ def create_codebase_agent(
     Returns:
         Initialized agent with message history
     """
+    # Parameter validation
+    if codebase is None:
+        raise ValueError("codebase parameter is required and cannot be None")
+    
     llm = LLM(model_provider=model_provider, model_name=model_name, **kwargs)
 
     # Initialize default tools
