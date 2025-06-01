@@ -12,7 +12,7 @@ import lox
 
 from graph_sitter.configs.models.codebase import CodebaseConfig
 from graph_sitter.core.codebase import Codebase
-from graph_sitter.extensions.swebench.utils import (
+from contexten.extensions.swebench.utils import (
     SweBenchExample,
     get_swe_bench_examples,
     load_predictions,

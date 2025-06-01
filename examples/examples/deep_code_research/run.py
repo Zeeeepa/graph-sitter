@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Optional
 
 import rich_click as click
-from codegen import Codebase
-from codegen.extensions.langchain.agent import create_agent_with_tools
-from codegen.extensions.langchain.tools import (
+from graph_sitter import Codebase
+from contexten.extensions.langchain.agent import create_agent_with_tools
+from contexten.extensions.langchain.tools import (
     ListDirectoryTool,
     RevealSymbolTool,
     RipGrepTool,

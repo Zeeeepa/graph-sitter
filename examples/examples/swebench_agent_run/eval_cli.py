@@ -8,13 +8,13 @@ from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
 import click
 import modal
-from codegen.extensions.swebench.harness import run_agent_on_entry
-from codegen.extensions.swebench.utils import (
+from contexten.extensions.swebench.harness import run_agent_on_entry
+from contexten.extensions.swebench.utils import (
     SWEBenchDataset,
     SweBenchExample,
     get_swe_bench_examples,
 )
-from codegen.sdk.core.codebase import Codebase
+from graph_sitter import Codebase
 
 from swebench_agent_run.constants import DATASET_DICT
 from swebench_agent_run.report import generate_report

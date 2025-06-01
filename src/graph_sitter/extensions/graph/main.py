@@ -1,6 +1,6 @@
 from graph_sitter.core.codebase import Codebase
-from graph_sitter.extensions.graph.create_graph import create_codebase_graph
-from graph_sitter.extensions.graph.neo4j_exporter import Neo4jExporter
+from contexten.extensions.graph.create_graph import create_codebase_graph
+from contexten.extensions.graph.neo4j_exporter import Neo4jExporter
 
 
 def visualize_codebase(codebase, neo4j_uri: str, username: str, password: str):

@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from graph_sitter.core.function import Function
 from graph_sitter.core.interfaces.editable import Editable
-from graph_sitter.extensions.lsp.codemods.base import CodeAction
+from contexten.extensions.lsp.codemods.base import CodeAction
 
 if TYPE_CHECKING:
     from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer

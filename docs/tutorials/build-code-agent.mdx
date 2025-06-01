@@ -8,7 +8,7 @@ iconType: "solid"
 This guide demonstrates how to build an intelligent code agent that can analyze and manipulate codebases.
 
 ```python
-from codegen import CodeAgent
+from contexten import CodeAgent
 from graph-sitter import Codebase
 
 # Grab a repo from Github
@@ -43,7 +43,7 @@ The agent has access to powerful code viewing and manipulation tools powered by 
 The following example shows how to create and run a `CodeAgent`:
 
 ```python
-from codegen import CodeAgent
+from contexten import CodeAgent
 from graph-sitter import Codebase
 
 
@@ -77,7 +77,7 @@ agent = CodeAgent(
 The agent comes with a comprehensive set of tools for code analysis and manipulation. Here are some key tools:
 
 ```python
-from codegen.extensions.langchain.tools import (
+from contexten.extensions.langchain.tools import (
     CreateFileTool,
     DeleteFileTool,
     EditFileTool,
@@ -109,7 +109,7 @@ CODEGEN_SECRETS__GITHUB_TOKEN="..."
 Import the GitHub tools:
 
 ```python
-from codegen.extensions.langchain.tools import (
+from contexten.extensions.langchain.tools import (
     GithubCreatePRTool,
     GithubViewPRTool,
     GithubCreatePRCommentTool,
@@ -139,7 +139,7 @@ LINEAR_SIGNING_SECRET="..."
 Import and use the Linear tools:
 
 ```python
-from codegen.extensions.langchain.tools import (
+from contexten.extensions.langchain.tools import (
     LinearGetIssueTool,
     LinearGetIssueCommentsTool,
     LinearCommentOnIssueTool,
@@ -165,7 +165,7 @@ You can extend the agent with custom tools:
 ```python
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
-from codegen import CodeAgent
+from contexten import CodeAgent
 
 class CustomToolInput(BaseModel):
     """Input schema for custom tool."""

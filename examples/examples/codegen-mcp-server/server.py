@@ -8,7 +8,7 @@ from typing import Annotated, Any, Dict, List, Optional
 
 from graph_sitter import Codebase
 from graph_sitter.cli.utils.default_code import DEFAULT_CODEMOD
-from graph_sitter.extensions.tools.reveal_symbol import reveal_symbol
+from contexten.extensions.tools.reveal_symbol import reveal_symbol
 from mcp.server.fastmcp import FastMCP
 
 logger = getLogger(__name__)
