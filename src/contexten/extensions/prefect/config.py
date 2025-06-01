@@ -14,41 +14,41 @@ class PrefectConfig(BaseSettings):
     """Configuration for Prefect integration"""
     
     # Prefect API Configuration
-    api_key: Optional[str] = Field(default=None, env="PREFECT_API_KEY")
-    api_url: str = Field(default="https://api.prefect.cloud/api/accounts", env="PREFECT_API_URL")
-    workspace: Optional[str] = Field(default=None, env="PREFECT_WORKSPACE")
+    api_key: Optional[str] = None
+    api_url: str = "https://api.prefect.cloud/api/accounts"
+    workspace: Optional[str] = None
     
     # Autonomous CI/CD Settings
-    auto_fix_confidence_threshold: float = Field(default=0.75, env="AUTO_FIX_CONFIDENCE_THRESHOLD")
-    max_auto_fixes_per_day: int = Field(default=10, env="MAX_AUTO_FIXES_PER_DAY")
-    performance_regression_threshold: float = Field(default=20.0, env="PERFORMANCE_REGRESSION_THRESHOLD")
+    auto_fix_confidence_threshold: float = 0.75
+    max_auto_fixes_per_day: int = 10
+    performance_regression_threshold: float = 20.0
     
     # Workflow Scheduling
-    maintenance_schedule: str = Field(default="0 2 * * *", env="MAINTENANCE_SCHEDULE")  # Daily at 2 AM
-    security_scan_schedule: str = Field(default="0 */6 * * *", env="SECURITY_SCAN_SCHEDULE")  # Every 6 hours
-    performance_check_schedule: str = Field(default="*/30 * * * *", env="PERFORMANCE_CHECK_SCHEDULE")  # Every 30 min
+    maintenance_schedule: str = "0 2 * * *"  # Daily at 2 AM
+    security_scan_schedule: str = "0 */6 * * *"  # Every 6 hours
+    performance_check_schedule: str = "*/30 * * * *"  # Every 30 min
     
     # Integration Settings
-    codegen_org_id: Optional[str] = Field(default=None, env="CODEGEN_ORG_ID")
-    codegen_token: Optional[str] = Field(default=None, env="CODEGEN_TOKEN")
-    github_token: Optional[str] = Field(default=None, env="GITHUB_TOKEN")
-    linear_api_key: Optional[str] = Field(default=None, env="LINEAR_API_KEY")
-    slack_webhook_url: Optional[str] = Field(default=None, env="SLACK_WEBHOOK_URL")
+    codegen_org_id: Optional[str] = None
+    codegen_token: Optional[str] = None
+    github_token: Optional[str] = None
+    linear_api_key: Optional[str] = None
+    slack_webhook_url: Optional[str] = None
     
     # Monitoring and Alerting
-    enable_slack_notifications: bool = Field(default=True, env="ENABLE_SLACK_NOTIFICATIONS")
-    enable_email_notifications: bool = Field(default=False, env="ENABLE_EMAIL_NOTIFICATIONS")
-    notification_email: Optional[str] = Field(default=None, env="NOTIFICATION_EMAIL")
+    enable_slack_notifications: bool = True
+    enable_email_notifications: bool = False
+    notification_email: Optional[str] = None
     
     # Safety Settings
-    enable_auto_fixes: bool = Field(default=True, env="ENABLE_AUTO_FIXES")
-    enable_auto_deployments: bool = Field(default=False, env="ENABLE_AUTO_DEPLOYMENTS")
-    require_human_approval: bool = Field(default=True, env="REQUIRE_HUMAN_APPROVAL")
+    enable_auto_fixes: bool = True
+    enable_auto_deployments: bool = False
+    require_human_approval: bool = True
     
     # Performance Settings
-    max_concurrent_workflows: int = Field(default=5, env="MAX_CONCURRENT_WORKFLOWS")
-    workflow_timeout_minutes: int = Field(default=60, env="WORKFLOW_TIMEOUT_MINUTES")
-    task_retry_attempts: int = Field(default=3, env="TASK_RETRY_ATTEMPTS")
+    max_concurrent_workflows: int = 5
+    workflow_timeout_minutes: int = 60
+    task_retry_attempts: int = 3
     
     class Config:
         env_file = ".env"
@@ -179,4 +179,3 @@ def get_workflow_configs() -> Dict[str, WorkflowConfig]:
         "dependency_update": DEPENDENCY_UPDATE_CONFIG,
         "performance_optimization": PERFORMANCE_OPTIMIZATION_CONFIG,
     }
-
