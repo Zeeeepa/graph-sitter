@@ -66,6 +66,21 @@ from .database import (
     export_analysis_data
 )
 
+# OpenEvolve Integration
+from .open_evolve_integration import (
+    AnalysisContext,
+    EvolutionTask,
+    EvolutionResult,
+    AnalysisContextManager,
+    EvolutionTaskGenerator,
+    EvolutionaryPatternLearner,
+    AutonomousImprovementOrchestrator,
+    create_analysis_context,
+    generate_improvement_tasks,
+    run_autonomous_improvement,
+    format_context_for_prompt
+)
+
 __all__ = [
     # Call Graph Analysis
     'CallGraphAnalyzer',
@@ -125,11 +140,23 @@ __all__ = [
     'store_analysis_report',
     'query_codebase_metrics',
     'query_complex_functions',
-    'export_analysis_data'
+    'export_analysis_data',
+    
+    # OpenEvolve Integration
+    'AnalysisContext',
+    'EvolutionTask', 
+    'EvolutionResult',
+    'AnalysisContextManager',
+    'EvolutionTaskGenerator',
+    'EvolutionaryPatternLearner',
+    'AutonomousImprovementOrchestrator',
+    'create_analysis_context',
+    'generate_improvement_tasks',
+    'run_autonomous_improvement',
+    'format_context_for_prompt'
 ]
 
 # Version info
 __version__ = "1.0.0"
 __author__ = "Graph-sitter Analysis Team"
 __description__ = "Comprehensive codebase analysis following graph-sitter.com patterns"
-
