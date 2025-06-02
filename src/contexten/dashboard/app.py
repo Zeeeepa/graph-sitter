@@ -67,6 +67,9 @@ from .linear_integration import (
     create_linear_router
 )
 
+# Import comprehensive analysis dashboard
+from .comprehensive_analysis_dashboard import comprehensive_dashboard
+
 logger = get_logger(__name__)
 
 # Pydantic models for API requests
@@ -160,6 +163,10 @@ async def initialize_enhanced_dashboard():
     global prefect_dashboard_manager
     
     try:
+        # Initialize comprehensive analysis dashboard
+        await comprehensive_dashboard.initialize()
+        logger.info("Comprehensive Analysis Dashboard initialized")
+        
         # Initialize Prefect Dashboard Manager
         orchestration_config = OrchestrationConfig(
             codegen_org_id=config.codegen_org_id,
@@ -1110,19 +1117,33 @@ async def create_linear_main_issue(
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize dashboard components on startup"""
+    """Initialize dashboard on startup"""
+    logger.info("Contexten Management Dashboard starting up...")
+    
     try:
-        # Initialize Linear Dashboard Manager
-        if config.linear_manager:
-            await config.linear_manager.start()
-            logger.info("Linear Dashboard Manager started")
+        global prefect_dashboard_manager
         
-        # Initialize enhanced dashboard components
-        await initialize_enhanced_dashboard()
+        # Initialize comprehensive analysis dashboard
+        await comprehensive_dashboard.initialize()
+        logger.info("Comprehensive Analysis Dashboard initialized")
         
-        logger.info("Dashboard startup completed successfully")
+        # Initialize Prefect Dashboard Manager
+        orchestration_config = OrchestrationConfig()
+        
+        if orchestration_config.prefect_api_url and orchestration_config.prefect_workspace:
+            prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
+            await prefect_dashboard_manager.initialize()
+            
+            # Include Prefect dashboard routes
+            app.include_router(prefect_dashboard_manager.router)
+            
+            logger.info("Prefect Dashboard Manager initialized successfully")
+        else:
+            logger.warning("Prefect configuration not found, skipping Prefect dashboard initialization")
+            
     except Exception as e:
-        logger.error(f"Error during dashboard startup: {e}")
+        logger.error(f"Failed to initialize Prefect Dashboard Manager: {e}")
+        # Continue without Prefect dashboard if initialization fails
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -1966,3 +1987,11 @@ if __name__ == "__main__":
         reload=config.debug,
         log_level="debug" if config.debug else "info"
     )
+
+# Include comprehensive analysis routes
+from .comprehensive_analysis_routes import analysis_router, integrations_router
+
+# Add routers to the app
+app.include_router(analysis_router)
+app.include_router(integrations_router)
+

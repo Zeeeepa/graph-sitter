@@ -14,6 +14,9 @@ This serves as the main entry point for the contexten system, providing:
 - Autonomous CI/CD pipeline management
 - Error healing and system recovery
 - Notification and alerting system
+- Comprehensive code analysis (dead code, quality, security)
+- Multi-platform integration (Linear, GitHub, Prefect, Graph-sitter)
+- AI-powered insights and recommendations
 
 Usage:
     python -m src.contexten.dashboard
@@ -26,6 +29,7 @@ import os
 import sys
 import logging
 import signal
+import argparse
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
@@ -41,6 +45,9 @@ from src.contexten.dashboard.prefect_dashboard import PrefectDashboardManager
 from src.contexten.dashboard.flow_manager import flow_manager, FlowStatus, FlowPriority
 from src.contexten.dashboard.project_manager import project_manager, ProjectStatus, ProjectHealth
 from src.contexten.dashboard.enhanced_routes import setup_enhanced_routes
+from src.contexten.dashboard.comprehensive_analysis_dashboard import comprehensive_dashboard
+
+# Import orchestration components
 from src.contexten.orchestration.autonomous_orchestrator import AutonomousOrchestrator
 from src.contexten.orchestration.config import OrchestrationConfig
 from src.contexten.orchestration.monitoring import SystemMonitor
@@ -48,14 +55,15 @@ from src.contexten.orchestration.workflow_types import AutonomousWorkflowType
 
 # Import agents and extensions
 try:
-    from .extensions.linear.enhanced_agent import EnhancedLinearAgent
-    from .extensions.github.enhanced_agent import EnhancedGitHubAgent
-    from .extensions.slack.enhanced_agent import EnhancedSlackAgent
+    from src.contexten.agents.chat_agent import ChatAgent
+    from src.contexten.agents.code_agent import CodeAgent
+    from src.contexten.extensions.github.enhanced_agent import GitHubEnhancedAgent
+    from src.contexten.extensions.linear.enhanced_agent import LinearEnhancedAgent
+    from src.contexten.extensions.prefect.client import PrefectOrchestrator
+    AGENTS_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"Failed to import enhanced agents: {e}")
-    EnhancedLinearAgent = None
-    EnhancedGitHubAgent = None
-    EnhancedSlackAgent = None
+    logging.warning(f"Some agents not available: {e}")
+    AGENTS_AVAILABLE = False
 
 # Import Codegen SDK
 try:
@@ -174,17 +182,25 @@ class ContextenDashboard:
             
             # Initialize Linear agent if configured
             if self.config.linear_api_key:
-                self.agents['linear'] = EnhancedLinearAgent(
+                self.agents['linear'] = LinearEnhancedAgent(
                     api_key=self.config.linear_api_key
                 )
                 logger.info("✅ Linear agent initialized")
             
             # Initialize GitHub agent if configured
             if self.config.github_token:
-                self.agents['github'] = EnhancedGitHubAgent(
+                self.agents['github'] = GitHubEnhancedAgent(
                     token=self.config.github_token
                 )
                 logger.info("✅ GitHub agent initialized")
+            
+            # Initialize Prefect agent if configured
+            if self.config.prefect_api_url and self.config.prefect_workspace:
+                self.agents['prefect'] = PrefectOrchestrator(
+                    api_url=self.config.prefect_api_url,
+                    workspace=self.config.prefect_workspace
+                )
+                logger.info("✅ Prefect agent initialized")
             
             # Initialize Slack agent if configured
             if self.config.slack_webhook_url:
