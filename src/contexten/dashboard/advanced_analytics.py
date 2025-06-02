@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 from enum import Enum
+import json
 
 from graph_sitter import Codebase
 from ..agents.chat_agent import ChatAgent

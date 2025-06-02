@@ -10,6 +10,7 @@ import logging
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
 from datetime import datetime
+import json
 
 from .enhanced_client import EnhancedGitHubClient
 from .webhook.processor import GitHubWebhookProcessor

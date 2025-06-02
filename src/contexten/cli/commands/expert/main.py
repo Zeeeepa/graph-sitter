@@ -1,4 +1,5 @@
 import rich
+import rich_click as click
 from rich.status import Status
 
 from contexten.cli.api.client import RestAPI

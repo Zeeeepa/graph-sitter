@@ -1,238 +1,227 @@
-"""
-Linear API Type Definitions
-
-Shared type definitions for Linear integration components.
-"""
-
-from typing import Dict, List, Optional, Any, Union
-from dataclasses import dataclass, field
+from pydantic import BaseModel
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from dataclasses import dataclass
 
 
-class LinearIssueState(Enum):
-    """Linear issue states"""
-    BACKLOG = "backlog"
-    UNSTARTED = "unstarted"
-    STARTED = "started"
-    COMPLETED = "completed"
-    CANCELED = "canceled"
-
-
-class LinearIssuePriority(Enum):
-    """Linear issue priorities"""
-    NO_PRIORITY = 0
-    URGENT = 1
-    HIGH = 2
-    MEDIUM = 3
-    LOW = 4
-
-
-class LinearProjectState(Enum):
-    """Linear project states"""
-    PLANNED = "planned"
-    STARTED = "started"
-    COMPLETED = "completed"
-    CANCELED = "canceled"
-    PAUSED = "paused"
-
-
-@dataclass
-class LinearUser:
-    """Linear user representation"""
+class LinearUser(BaseModel):
     id: str
     name: str
-    email: str
-    display_name: Optional[str] = None
+    email: Optional[str] = None
     avatar_url: Optional[str] = None
     active: bool = True
-    admin: bool = False
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
 
-@dataclass
-class LinearTeam:
-    """Linear team representation"""
+class LinearTeam(BaseModel):
     id: str
     name: str
     key: str
     description: Optional[str] = None
-    color: Optional[str] = None
-    icon: Optional[str] = None
     private: bool = False
-    archived: bool = False
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
 
-@dataclass
-class LinearLabel:
-    """Linear label representation"""
+class LinearLabel(BaseModel):
     id: str
     name: str
     color: str
     description: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
 
-@dataclass
-class LinearProject:
-    """Linear project representation"""
+class LinearProject(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
-    state: LinearProjectState = LinearProjectState.PLANNED
-    progress: float = 0.0
-    start_date: Optional[datetime] = None
-    target_date: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    url: Optional[str] = None
+
+
+class LinearState(BaseModel):
+    id: str
+    name: str
+    type: str
+    color: str
+    position: float
+
+
+class LinearComment(BaseModel):
+    id: str
+    body: str
+    user: Optional[LinearUser] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-    creator: Optional[LinearUser] = None
-    lead: Optional[LinearUser] = None
-    members: List[LinearUser] = field(default_factory=list)
-    teams: List[LinearTeam] = field(default_factory=list)
+    url: Optional[str] = None
 
 
-@dataclass
-class LinearIssue:
-    """Linear issue representation"""
+class LinearIssue(BaseModel):
     id: str
-    identifier: str  # e.g., "ENG-123"
     title: str
     description: Optional[str] = None
-    state: LinearIssueState = LinearIssueState.BACKLOG
-    priority: LinearIssuePriority = LinearIssuePriority.NO_PRIORITY
-    estimate: Optional[float] = None
+    number: Optional[int] = None
     url: Optional[str] = None
+    assignee: Optional[LinearUser] = None
+    assignee_id: Optional[str] = None
+    creator: Optional[LinearUser] = None
+    team: Optional[LinearTeam] = None
+    state: Optional[LinearState] = None
+    labels: List[LinearLabel] = []
+    project: Optional[LinearProject] = None
+    priority: Optional[int] = None
+    estimate: Optional[float] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    canceled_at: Optional[datetime] = None
     due_date: Optional[datetime] = None
-    
-    # Relationships
-    creator: Optional[LinearUser] = None
-    assignee: Optional[LinearUser] = None
-    team: Optional[LinearTeam] = None
-    project: Optional[LinearProject] = None
-    labels: List[LinearLabel] = field(default_factory=list)
-    
-    # Additional metadata
-    cycle_id: Optional[str] = None
-    parent_id: Optional[str] = None
-    sub_issue_ids: List[str] = field(default_factory=list)
-    
-    @property
-    def is_completed(self) -> bool:
-        """Check if issue is completed"""
-        return self.state == LinearIssueState.COMPLETED
-    
-    @property
-    def is_active(self) -> bool:
-        """Check if issue is active (not completed or canceled)"""
-        return self.state not in [LinearIssueState.COMPLETED, LinearIssueState.CANCELED]
+
+
+class LinearEventType(str, Enum):
+    """Linear webhook event types"""
+    ISSUE_CREATE = "Issue"
+    ISSUE_UPDATE = "IssueUpdate"
+    ISSUE_REMOVE = "IssueRemove"
+    COMMENT_CREATE = "Comment"
+    COMMENT_UPDATE = "CommentUpdate"
+    COMMENT_REMOVE = "CommentRemove"
+    PROJECT_UPDATE = "ProjectUpdate"
+    CYCLE_UPDATE = "CycleUpdate"
+
+
+class LinearEventAction(str, Enum):
+    """Linear event actions"""
+    CREATE = "create"
+    UPDATE = "update"
+    REMOVE = "remove"
+
+
+class AssignmentAction(str, Enum):
+    """Assignment actions"""
+    ASSIGNED = "assigned"
+    UNASSIGNED = "unassigned"
+    REASSIGNED = "reassigned"
+
+
+class AssignmentEvent(BaseModel):
+    """Assignment event for tracking bot assignments"""
+    issue_id: str
+    action: AssignmentAction
+    assignee_id: Optional[str] = None
+    previous_assignee_id: Optional[str] = None
+    timestamp: datetime
+    metadata: Dict[str, Any] = {}
+
+
+class TaskStatus(str, Enum):
+    """Task execution status"""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class TaskProgress(BaseModel):
+    """Task progress information"""
+    status: TaskStatus
+    progress_percentage: float = 0.0
+    current_step: Optional[str] = None
+    steps_completed: int = 0
+    total_steps: int = 0
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    error_message: Optional[str] = None
+    metadata: Dict[str, Any] = {}
+
+
+class WorkflowTask(BaseModel):
+    """Workflow task representation"""
+    id: str
+    issue_id: str
+    title: str
+    description: Optional[str] = None
+    status: TaskStatus = TaskStatus.PENDING
+    progress: TaskProgress
+    created_at: datetime
+    updated_at: datetime
+    assigned_to: Optional[str] = None
+    metadata: Dict[str, Any] = {}
+
+
+class WebhookEvent(BaseModel):
+    """Webhook event wrapper"""
+    event_id: str
+    event_type: LinearEventType
+    payload: Dict[str, Any]
+    signature: Optional[str] = None
+    timestamp: datetime
+    processed: bool = False
+    retry_count: int = 0
+    error_message: Optional[str] = None
+
+
+class IntegrationStatus(BaseModel):
+    """Integration status information"""
+    initialized: bool = False
+    monitoring_active: bool = False
+    last_sync: Optional[datetime] = None
+    webhook_processor_status: str = "stopped"
+    assignment_detector_status: str = "stopped"
+    workflow_automation_status: str = "stopped"
+    event_manager_status: str = "stopped"
+    active_tasks: int = 0
+    processed_events: int = 0
+    failed_events: int = 0
+    last_error: Optional[str] = None
+
+
+class ComponentStats(BaseModel):
+    """Component statistics"""
+    requests_made: int = 0
+    requests_successful: int = 0
+    requests_failed: int = 0
+    cache_hits: int = 0
+    cache_misses: int = 0
+    last_request: Optional[datetime] = None
+    last_error: Optional[str] = None
+    uptime_seconds: float = 0.0
+
+
+class LinearIntegrationMetrics(BaseModel):
+    """Comprehensive integration metrics"""
+    status: IntegrationStatus
+    client_stats: ComponentStats
+    webhook_stats: ComponentStats
+    assignment_stats: ComponentStats
+    workflow_stats: ComponentStats
+    event_stats: ComponentStats
+    collected_at: datetime
+
+
+class LinearEvent(BaseModel):
+    """Represents a Linear webhook event."""
+    type: str
+    action: str
+    data: Dict[str, Any]
+    timestamp: datetime
+    webhook_id: Optional[str] = None
+    organization_id: Optional[str] = None
 
 
 @dataclass
 class LinearComment:
-    """Linear comment representation"""
+    """Linear comment"""
     id: str
     body: str
     created_at: datetime
-    updated_at: Optional[datetime] = None
-    user: Optional[LinearUser] = None
-    issue_id: str = ""
-
-
-@dataclass
-class LinearWebhookEvent:
-    """Linear webhook event representation"""
-    type: str
-    action: str
-    data: Dict[str, Any]
-    created_at: datetime
-    webhook_id: str
-    organization_id: str
-    
-    @property
-    def is_issue_event(self) -> bool:
-        """Check if this is an issue-related event"""
-        return self.type == "Issue"
-    
-    @property
-    def is_comment_event(self) -> bool:
-        """Check if this is a comment-related event"""
-        return self.type == "Comment"
-    
-    @property
-    def is_project_event(self) -> bool:
-        """Check if this is a project-related event"""
-        return self.type == "Project"
-
-
-@dataclass
-class LinearAPIResponse:
-    """Linear API response wrapper"""
-    success: bool
-    data: Optional[Any] = None
-    errors: List[str] = field(default_factory=list)
-    rate_limit_remaining: Optional[int] = None
-    rate_limit_reset: Optional[datetime] = None
+    updated_at: datetime
+    user_id: str
+    issue_id: str
     
     @classmethod
-    def success_response(cls, data: Any) -> "LinearAPIResponse":
-        """Create a successful response"""
-        return cls(success=True, data=data)
-    
-    @classmethod
-    def error_response(cls, errors: Union[str, List[str]]) -> "LinearAPIResponse":
-        """Create an error response"""
-        if isinstance(errors, str):
-            errors = [errors]
-        return cls(success=False, errors=errors)
-
-
-@dataclass
-class LinearIntegrationConfig:
-    """Configuration for Linear integration"""
-    api_key: str
-    team_id: Optional[str] = None
-    webhook_secret: Optional[str] = None
-    auto_create_issues: bool = True
-    auto_assign_issues: bool = False
-    sync_with_github: bool = False
-    default_project_id: Optional[str] = None
-    rate_limit_requests: int = 100
-    rate_limit_window: int = 60  # seconds
-    
-    def validate(self) -> List[str]:
-        """Validate configuration and return any errors"""
-        errors = []
-        
-        if not self.api_key:
-            errors.append("Linear API key is required")
-        
-        if self.rate_limit_requests <= 0:
-            errors.append("Rate limit requests must be positive")
-        
-        if self.rate_limit_window <= 0:
-            errors.append("Rate limit window must be positive")
-        
-        return errors
-
-
-# Type aliases for convenience
-LinearIssueDict = Dict[str, Any]
-LinearProjectDict = Dict[str, Any]
-LinearUserDict = Dict[str, Any]
-LinearTeamDict = Dict[str, Any]
-
-# API response types
-IssueListResponse = List[LinearIssue]
-ProjectListResponse = List[LinearProject]
-UserListResponse = List[LinearUser]
-TeamListResponse = List[LinearTeam]
-
+    def from_dict(cls, data: Dict[str, Any]) -> 'LinearComment':
+        return cls(
+            id=data['id'],
+            body=data['body'],
+            created_at=datetime.fromisoformat(data['createdAt'].replace('Z', '+00:00')),
+            updated_at=datetime.fromisoformat(data['updatedAt'].replace('Z', '+00:00')),
+            user_id=data['user']['id'],
+            issue_id=data['issue']['id']
+        )

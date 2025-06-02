@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import rich
+import rich_click as click
 import uvicorn
 from rich.logging import RichHandler
 from rich.panel import Panel

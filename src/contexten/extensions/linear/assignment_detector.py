@@ -338,7 +338,7 @@ class AssignmentDetector:
         self.assignment_history.append(record)
         
         # Clean up old history
-        self._cleanup_old_records()
+        self._cleanup_old_records()\n        
         self.assignment_stats.assignments_processed += 1
         logger.info(f"Marked assignment for issue {issue_id} as processed")
     

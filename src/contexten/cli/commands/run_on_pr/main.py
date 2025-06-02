@@ -1,4 +1,5 @@
 import rich
+import rich_click as click
 
 from contexten.cli.api.client import RestAPI
 from contexten.cli.auth.decorators import requires_auth

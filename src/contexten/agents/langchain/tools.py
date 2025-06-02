@@ -14,7 +14,6 @@ from contexten.extensions.linear.linear_client import LinearClient
 from contexten.agents.tools.bash import run_bash_command
 from contexten.agents.tools.github.checkout_pr import checkout_pr
 from contexten.agents.tools.github.view_pr_checks import view_pr_checks
-from contexten.agents.tools.github.search import search as github_search
 from contexten.agents.tools.global_replacement_edit import replacement_edit_global
 from contexten.agents.tools.linear.linear import (
     linear_comment_on_issue_tool,
@@ -38,26 +37,19 @@ from graph_sitter import Codebase
 from ..tools import (
     commit,
     create_file,
+    create_pr,
+    create_pr_comment,
+    create_pr_review_comment,
     delete_file,
     edit_file,
     list_directory,
     move_symbol,
     rename_file,
     view_file,
-)
-from ..tools.github import (
-    create_pr,
-    create_pr_comment,
-    create_pr_review_comment,
     view_pr,
 )
 from ..tools.relace_edit_prompts import RELACE_EDIT_PROMPT
 from ..tools.semantic_edit_prompts import FILE_EDIT_PROMPT
-
-# Add GitHub extension imports
-from ...extensions.github.enhanced_agent import EnhancedGitHubAgent
-from ...extensions.github.github import GitHubClient
-from ...extensions.github.enhanced_client import EnhancedGitHubClient
 
 
 class ViewFileInput(BaseModel):

@@ -10,6 +10,7 @@ import logging
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
 from datetime import datetime
+import json
 
 from .enhanced_client import EnhancedLinearClient
 from .webhook.processor import WebhookProcessor
@@ -375,3 +376,4 @@ class EnhancedLinearAgent:
         except Exception as e:
             logger.error(f"Error creating Codegen task: {e}")
             raise
+

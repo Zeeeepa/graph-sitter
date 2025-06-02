@@ -5,6 +5,7 @@ This module provides a high-level client for managing Prefect workflows
 and autonomous CI/CD operations.
 """
 
+import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Union

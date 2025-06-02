@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import rich
+import rich_click as click
 
 from contexten.cli.api.client import RestAPI
 from graph_sitter.cli.auth.constants import PROMPTS_DIR
