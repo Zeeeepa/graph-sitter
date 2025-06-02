@@ -5,7 +5,7 @@ from typing import ClassVar, Optional
 
 from pydantic import Field
 
-from contexten.extensions.tools.observation import Observation
+from contexten.agents.tools.observation import Observation
 from graph_sitter import Codebase
 from graph_sitter.shared.logging.get_logger import get_logger
 

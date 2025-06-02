@@ -11,11 +11,11 @@ from langgraph.prebuilt import InjectedStore
 from pydantic import BaseModel, Field
 
 from contexten.extensions.linear.linear_client import LinearClient
-from contexten.extensions.tools.bash import run_bash_command
-from contexten.extensions.tools.github.checkout_pr import checkout_pr
-from contexten.extensions.tools.github.view_pr_checks import view_pr_checks
-from contexten.extensions.tools.global_replacement_edit import replacement_edit_global
-from contexten.extensions.tools.linear.linear import (
+from contexten.agents.tools.bash import run_bash_command
+from contexten.agents.tools.github.checkout_pr import checkout_pr
+from contexten.agents.tools.github.view_pr_checks import view_pr_checks
+from contexten.agents.tools.global_replacement_edit import replacement_edit_global
+from contexten.agents.tools.linear.linear import (
     linear_comment_on_issue_tool,
     linear_create_issue_tool,
     linear_get_issue_comments_tool,
@@ -23,15 +23,15 @@ from contexten.extensions.tools.linear.linear import (
     linear_get_teams_tool,
     linear_search_issues_tool,
 )
-from contexten.extensions.tools.link_annotation import add_links_to_message
-from contexten.extensions.tools.reflection import perform_reflection
-from contexten.extensions.tools.relace_edit import relace_edit
-from contexten.extensions.tools.replacement_edit import replacement_edit
-from contexten.extensions.tools.reveal_symbol import reveal_symbol
-from contexten.extensions.tools.search import search
-from contexten.extensions.tools.search_files_by_name import search_files_by_name
-from contexten.extensions.tools.semantic_edit import semantic_edit
-from contexten.extensions.tools.semantic_search import semantic_search
+from contexten.agents.tools.link_annotation import add_links_to_message
+from contexten.agents.tools.reflection import perform_reflection
+from contexten.agents.tools.relace_edit import relace_edit
+from contexten.agents.tools.replacement_edit import replacement_edit
+from contexten.agents.tools.reveal_symbol import reveal_symbol
+from contexten.agents.tools.search import search
+from contexten.agents.tools.search_files_by_name import search_files_by_name
+from contexten.agents.tools.semantic_edit import semantic_edit
+from contexten.agents.tools.semantic_search import semantic_search
 from graph_sitter import Codebase
 
 from ..tools import (
@@ -222,7 +222,7 @@ Create a new file in the codebase.
 1. filepath: The path where to create the file (as a string)
 2. content: The content for the new file (as a STRING, NOT as a dictionary or JSON object)
 
-✅ CORRECT usage:
+��� CORRECT usage:
 create_file(filepath="path/to/file.py", content="print('Hello world')")
 If you receive a validation error about
 missing content, you are likely trying to pass a dictionary instead of a string.
