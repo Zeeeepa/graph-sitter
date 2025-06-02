@@ -9,17 +9,17 @@ Main orchestrator for comprehensive Linear integration that coordinates:
 - Real-time monitoring and health checks
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
 from pathlib import Path
+from typing import Dict, Any, Optional, List
+import asyncio
 
+from .assignment_detector import AssignmentDetector
 from .config import LinearIntegrationConfig, get_linear_config
 from .enhanced_client import EnhancedLinearClient
-from .webhook_processor import WebhookProcessor
-from .assignment_detector import AssignmentDetector
-from .workflow_automation import WorkflowAutomation
 from .types import (
+from .webhook_processor import WebhookProcessor
+from .workflow_automation import WorkflowAutomation
     LinearIntegrationMetrics, IntegrationStatus, ComponentStats
 )
 from graph_sitter.shared.logging.get_logger import get_logger

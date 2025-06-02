@@ -5,42 +5,36 @@ A comprehensive web interface for managing GitHub/Linear integrations with OAuth
 authentication and Codegen SDK integration.
 """
 
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
 import asyncio
-import os
+import hashlib
 import json
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+import os
 import secrets
-import hashlib
 import uuid
 
+from authlib.integrations.starlette_client import OAuth
+from codegen import Agent as CodegenAgent
 from fastapi import FastAPI, Request, Response, HTTPException, Depends, status
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.sessions import SessionMiddleware
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-
-import httpx
-from authlib.integrations.starlette_client import OAuth
 from starlette.middleware.sessions import SessionMiddleware as StarletteSessionMiddleware
+import httpx
 
-# Import Codegen SDK
-from codegen import Agent as CodegenAgent
-
-# Import contexten components
-from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentConfig
-from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentConfig
-from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
 from ...shared.logging.get_logger import get_logger
-from .chat_manager import ChatManager
-
-# Import Prefect Dashboard
-from .prefect_dashboard import PrefectDashboardManager
+from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentConfig
+from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentConfig
+from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
 from ..orchestration import OrchestrationConfig
+from .chat_manager import ChatManager
+from .prefect_dashboard import PrefectDashboardManager
 
 logger = get_logger(__name__)
 

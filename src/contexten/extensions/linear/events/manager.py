@@ -4,10 +4,10 @@ Linear Event Manager
 This module provides event management and processing for Linear integration.
 """
 
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Callable
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime
 
 from ....shared.logging.get_logger import get_logger
 

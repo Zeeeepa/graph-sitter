@@ -4,9 +4,8 @@ from typing import ClassVar, Optional
 
 from pydantic import Field
 
-from graph_sitter import Codebase
-
 from ..observation import Observation
+from graph_sitter import Codebase
 
 
 class PRReviewCommentObservation(Observation):

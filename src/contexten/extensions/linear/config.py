@@ -5,10 +5,10 @@ Comprehensive configuration system for Linear integration with support for
 environment variables, validation, and default values.
 """
 
-import os
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Dict, Any, List, Optional
+import os
 
 from graph_sitter.shared.logging.get_logger import get_logger
 

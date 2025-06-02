@@ -5,20 +5,20 @@ This module provides a comprehensive Linear integration agent based on the
 OpenAlpha_Evolve reference implementation, adapted for the contexten framework.
 """
 
-import asyncio
-import logging
-from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Dict, List, Optional, Any, Union
+import asyncio
 import json
+import logging
 
-from .enhanced_client import EnhancedLinearClient
-from .webhook.processor import WebhookProcessor
-from .workflow.automation import WorkflowAutomation
+from ...shared.logging.get_logger import get_logger
 from .assignment.detector import AssignmentDetector
+from .enhanced_client import EnhancedLinearClient
 from .events.manager import EventManager
 from .types import LinearIssue, LinearProject, LinearTeam, LinearUser
-from ...shared.logging.get_logger import get_logger
+from .webhook.processor import WebhookProcessor
+from .workflow.automation import WorkflowAutomation
 
 logger = get_logger(__name__)
 

@@ -5,10 +5,10 @@ This module provides configuration classes and utilities for managing
 the autonomous CI/CD orchestration system settings.
 """
 
-import os
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, List
 from pathlib import Path
+from typing import Optional, Dict, Any, List
+import os
 
 
 @dataclass

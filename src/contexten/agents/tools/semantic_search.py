@@ -4,10 +4,9 @@ from typing import ClassVar, Optional
 
 from pydantic import Field
 
+from .observation import Observation
 from contexten.extensions.index.file_index import FileIndex
 from graph_sitter import Codebase
-
-from .observation import Observation
 
 
 class SearchResult(Observation):

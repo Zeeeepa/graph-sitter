@@ -42,7 +42,6 @@ function calculateDiscount(price, discountPercent) {
 
 Another example (Python):
 ```
-# ... existing imports ...
 
 # Add new helper function
 def validate_input(data):

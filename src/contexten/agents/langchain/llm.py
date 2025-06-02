@@ -1,8 +1,8 @@
 """LLM implementation supporting both OpenAI and Anthropic models."""
 
-import os
 from collections.abc import Sequence
 from typing import Any, Optional
+import os
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.callbacks import CallbackManagerForLLMRun

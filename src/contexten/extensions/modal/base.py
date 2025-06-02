@@ -1,9 +1,9 @@
+from typing import Literal
 import logging
 import os
-from typing import Literal
 
-import modal
 from fastapi import Request
+import modal
 
 from contexten.extensions.events.codegen_app import CodegenApp
 from contexten.extensions.events.modal.request_util import fastapi_request_adapter

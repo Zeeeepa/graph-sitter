@@ -1,15 +1,14 @@
 """Tool for making regex-based replacements in files."""
 
+from typing import ClassVar, Optional
 import difflib
 import re
-from typing import ClassVar, Optional
 
 from pydantic import Field
 
-from graph_sitter import Codebase
-
 from .observation import Observation
 from .view_file import add_line_numbers
+from graph_sitter import Codebase
 
 
 class ReplacementEditObservation(Observation):

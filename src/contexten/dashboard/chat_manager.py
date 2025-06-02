@@ -5,19 +5,19 @@ This module manages chat interactions with the ChatAgent and coordinates
 with Linear Agents for monitoring and task execution.
 """
 
-import asyncio
-import logging
+from datetime import datetime
 from typing import Dict, List, Optional, Any
 from uuid import uuid4
-from datetime import datetime
+import asyncio
+import logging
 
-from graph_sitter import Codebase
+from ...shared.logging.get_logger import get_logger
 from ..agents.chat_agent import ChatAgent
 from ..agents.langchain.agent import create_agent_with_tools
 from ..agents.tools.linear.linear import LinearIssueTool, LinearCommentTool, LinearWebhookTool
-from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentConfig
 from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentConfig
-from ...shared.logging.get_logger import get_logger
+from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentConfig
+from graph_sitter import Codebase
 
 logger = get_logger(__name__)
 

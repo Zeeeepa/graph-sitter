@@ -2,12 +2,11 @@
 
 from typing import ClassVar
 
-import requests
 from pydantic import Field
-
-from contexten.extensions.linear.linear_client import LinearClient
+import requests
 
 from ..observation import Observation
+from contexten.extensions.linear.linear_client import LinearClient
 
 
 class LinearIssueObservation(Observation):

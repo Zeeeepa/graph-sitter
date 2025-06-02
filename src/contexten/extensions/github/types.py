@@ -5,8 +5,8 @@ This module defines data types for GitHub integration.
 """
 
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any
 from datetime import datetime
+from typing import Optional, List, Dict, Any
 
 @dataclass
 class GitHubUser:

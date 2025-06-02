@@ -1,19 +1,15 @@
 # Linear integration module exports
 
 # Legacy components (backward compatibility)
-from .linear_client import LinearClient
-from .types import LinearUser, LinearTeam, LinearComment, LinearIssue, LinearEvent
-
-# Comprehensive integration components
+from .assignment_detector import AssignmentDetector
 from .config import LinearIntegrationConfig, get_linear_config, create_config_template
 from .enhanced_client import EnhancedLinearClient
-from .webhook_processor import WebhookProcessor
-from .assignment_detector import AssignmentDetector
-from .workflow_automation import WorkflowAutomation
 from .integration_agent import LinearIntegrationAgent, create_linear_integration_agent
-
-# Additional types for comprehensive integration
+from .linear_client import LinearClient
 from .types import (
+from .types import LinearUser, LinearTeam, LinearComment, LinearIssue, LinearEvent
+from .webhook_processor import WebhookProcessor
+from .workflow_automation import WorkflowAutomation
     LinearEventType, LinearEventAction, AssignmentAction, AssignmentEvent,
     TaskStatus, TaskProgress, WorkflowTask, WebhookEvent, IntegrationStatus,
     ComponentStats, LinearIntegrationMetrics

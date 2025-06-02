@@ -5,20 +5,20 @@ This module handles processing of incoming Linear webhooks with validation,
 routing, and event handling capabilities.
 """
 
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Callable, Awaitable
 import asyncio
 import hashlib
 import hmac
 import json
 import logging
-from typing import Dict, List, Optional, Any, Callable, Awaitable
-from dataclasses import dataclass
-from datetime import datetime
 import time
 
+from ....shared.logging.get_logger import get_logger
+from ..types import LinearEvent, LinearIssue, LinearProject, LinearComment
 from .handlers import WebhookHandlers
 from .validator import WebhookValidator
-from ..types import LinearEvent, LinearIssue, LinearProject, LinearComment
-from ....shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -1,9 +1,9 @@
-import json
 from typing import ClassVar, TypeVar
+import json
 
-import requests
 from pydantic import BaseModel
 from rich import print as rprint
+import requests
 
 from contexten.cli.api.endpoints import (
     CREATE_ENDPOINT,

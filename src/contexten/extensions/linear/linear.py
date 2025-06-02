@@ -5,10 +5,10 @@ This module provides comprehensive Linear integration with advanced features
 including automated issue management, team coordination, and repository analysis.
 """
 
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
 import os
 
 try:

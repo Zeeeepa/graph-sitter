@@ -4,13 +4,13 @@ Linear Workflow Automation
 This module provides automated workflow capabilities for Linear integration.
 """
 
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Callable
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime
 
-from ..types import LinearIssue, LinearProject
 from ....shared.logging.get_logger import get_logger
+from ..types import LinearIssue, LinearProject
 
 logger = get_logger(__name__)
 

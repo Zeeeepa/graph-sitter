@@ -4,8 +4,8 @@ GitHub Webhook Processor
 This module handles processing of incoming GitHub webhooks.
 """
 
-import logging
 from typing import Dict, Optional, Any
+import logging
 
 from ....shared.logging.get_logger import get_logger
 

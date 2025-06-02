@@ -1,14 +1,13 @@
 """Tool for creating pull requests."""
 
-import uuid
 from typing import ClassVar
+import uuid
 
 from github import GithubException
 from pydantic import Field
 
-from graph_sitter import Codebase
-
 from ..observation import Observation
+from graph_sitter import Codebase
 
 
 class CreatePRObservation(Observation):

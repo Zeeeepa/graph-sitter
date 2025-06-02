@@ -5,19 +5,19 @@ This module provides a comprehensive GitHub integration agent with advanced
 features for repository management, webhook processing, and automation.
 """
 
-import asyncio
-import logging
-from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Dict, List, Optional, Any, Union
+import asyncio
 import json
+import logging
 
+from ...shared.logging.get_logger import get_logger
 from .enhanced_client import EnhancedGitHubClient
-from .webhook.processor import GitHubWebhookProcessor
-from .workflow.automation import GitHubWorkflowAutomation
 from .events.manager import GitHubEventManager
 from .types import GitHubRepository, GitHubPullRequest, GitHubIssue, GitHubUser
-from ...shared.logging.get_logger import get_logger
+from .webhook.processor import GitHubWebhookProcessor
+from .workflow.automation import GitHubWorkflowAutomation
 
 logger = get_logger(__name__)
 

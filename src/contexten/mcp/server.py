@@ -4,9 +4,9 @@ from mcp.server.fastmcp import Context, FastMCP
 
 from contexten.cli.api.client import RestAPI
 from contexten.cli.mcp.agent.docs_expert import create_sdk_expert_agent
+from graph_sitter import Codebase
 from graph_sitter.cli.mcp.resources.system_prompt import SYSTEM_PROMPT
 from graph_sitter.cli.mcp.resources.system_setup_instructions import SETUP_INSTRUCTIONS
-from graph_sitter import Codebase
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 # Initialize FastMCP server

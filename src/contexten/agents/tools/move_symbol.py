@@ -4,10 +4,9 @@ from typing import ClassVar, Literal
 
 from pydantic import Field
 
-from graph_sitter import Codebase
-
 from .observation import Observation
 from .view_file import ViewFileObservation, view_file
+from graph_sitter import Codebase
 
 
 class MoveSymbolObservation(Observation):

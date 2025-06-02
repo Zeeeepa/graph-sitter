@@ -4,9 +4,9 @@ Enhanced Slack Integration Agent
 This module provides a basic Slack integration agent.
 """
 
-import logging
 from dataclasses import dataclass
 from typing import Dict, Any
+import logging
 
 from ...shared.logging.get_logger import get_logger
 

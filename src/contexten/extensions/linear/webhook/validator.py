@@ -4,11 +4,11 @@ Linear Webhook Validator
 This module provides webhook signature validation for Linear webhooks.
 """
 
+from typing import Dict, Optional, Any
 import hashlib
 import hmac
 import json
 import logging
-from typing import Dict, Optional, Any
 
 from ....shared.logging.get_logger import get_logger
 

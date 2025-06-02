@@ -1,17 +1,16 @@
 """Tool for making edits to files using the Relace Instant Apply API."""
 
+from typing import TYPE_CHECKING, ClassVar
 import difflib
 import os
-from typing import TYPE_CHECKING, ClassVar
 
-import requests
 from langchain_core.messages import ToolMessage
 from pydantic import Field
-
-from graph_sitter import Codebase
+import requests
 
 from .observation import Observation
 from .view_file import add_line_numbers
+from graph_sitter import Codebase
 
 if TYPE_CHECKING:
     from contexten.extensions.tools.tool_output_types import RelaceEditArtifacts

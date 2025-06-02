@@ -5,20 +5,21 @@ This module provides a comprehensive GraphQL client for Linear API with
 advanced features like connection pooling, retry logic, and caching.
 """
 
-import asyncio
-import aiohttp
-import json
-import logging
-from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any, Union
+import asyncio
 import hashlib
+import json
+import logging
 import time
 
-from .types import LinearIssue, LinearProject, LinearTeam, LinearUser, LinearComment
-from .queries import LINEAR_QUERIES
-from .mutations import LINEAR_MUTATIONS
+import aiohttp
+
 from ...shared.logging.get_logger import get_logger
+from .mutations import LINEAR_MUTATIONS
+from .queries import LINEAR_QUERIES
+from .types import LinearIssue, LinearProject, LinearTeam, LinearUser, LinearComment
 
 logger = get_logger(__name__)
 

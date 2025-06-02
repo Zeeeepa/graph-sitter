@@ -6,19 +6,19 @@ integrating with the Contexten Orchestrator, Linear, GitHub, and Slack
 to create fully automated development workflows.
 """
 
-import asyncio
-import logging
-from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Dict, List, Optional, Any, Callable
+import asyncio
 import json
+import logging
 import uuid
 
-from ..extensions.contexten_app import ContextenOrchestrator, TaskRequest
-from .orchestrator_integration import OrchestratorDashboardIntegration
-from .enhanced_codebase_ai import EnhancedCodebaseAI, AIAnalysisRequest, AITaskType
 from ...shared.logging.get_logger import get_logger
+from ..extensions.contexten_app import ContextenOrchestrator, TaskRequest
+from .enhanced_codebase_ai import EnhancedCodebaseAI, AIAnalysisRequest, AITaskType
+from .orchestrator_integration import OrchestratorDashboardIntegration
 
 logger = get_logger(__name__)
 

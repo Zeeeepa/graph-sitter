@@ -1,6 +1,6 @@
+from typing import Annotated
 import json
 import os
-from typing import Annotated
 
 from mcp.server.fastmcp import FastMCP
 

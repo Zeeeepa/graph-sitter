@@ -2,12 +2,13 @@
 Main entry point for the AlphaEvolve Pro application.
 Orchestrates the different agents and manages the evolutionary loop.
 """
+import argparse
 import asyncio
 import logging
-import sys
 import os
+import sys
+
 import yaml
-import argparse
                                                
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 if project_root not in sys.path:

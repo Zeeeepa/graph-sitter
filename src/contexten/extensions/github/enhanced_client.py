@@ -5,18 +5,19 @@ This module provides a comprehensive REST API client for GitHub with
 advanced features like connection pooling, retry logic, and caching.
 """
 
-import asyncio
-import aiohttp
-import json
-import logging
-from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any, Union
+import asyncio
 import base64
+import json
+import logging
 import time
 
-from .types import GitHubRepository, GitHubIssue, GitHubPullRequest, GitHubUser
+import aiohttp
+
 from ...shared.logging.get_logger import get_logger
+from .types import GitHubRepository, GitHubIssue, GitHubPullRequest, GitHubUser
 
 logger = get_logger(__name__)
 

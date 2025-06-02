@@ -5,17 +5,17 @@ This module provides sophisticated analytics and insights for development workfl
 code quality metrics, and team productivity analysis.
 """
 
-import asyncio
-import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Dict, List, Optional, Any, Tuple
+import asyncio
 import json
+import logging
 
-from graph_sitter import Codebase
-from ..agents.chat_agent import ChatAgent
 from ...shared.logging.get_logger import get_logger
+from ..agents.chat_agent import ChatAgent
+from graph_sitter import Codebase
 
 logger = get_logger(__name__)
 

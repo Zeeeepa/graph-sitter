@@ -1,8 +1,9 @@
-from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
+from typing import Optional, List, Dict, Any
+
+from pydantic import BaseModel
 
 
 class LinearUser(BaseModel):

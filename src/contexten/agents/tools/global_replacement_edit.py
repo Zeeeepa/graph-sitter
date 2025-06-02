@@ -1,17 +1,16 @@
 """Tool for making regex-based replacements in files."""
 
+from typing import ClassVar
 import difflib
 import logging
 import math
 import re
-from typing import ClassVar
 
 from pydantic import Field
 
+from .observation import Observation
 from contexten.extensions.tools.search_files_by_name import search_files_by_name
 from graph_sitter import Codebase
-
-from .observation import Observation
 
 logger = logging.getLogger(__name__)
 

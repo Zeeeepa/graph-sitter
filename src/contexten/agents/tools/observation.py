@@ -1,7 +1,7 @@
 """Base class for tool observations/responses."""
 
-import json
 from typing import Any, ClassVar, Optional
+import json
 
 from langchain_core.messages import ToolMessage
 from pydantic import BaseModel, Field

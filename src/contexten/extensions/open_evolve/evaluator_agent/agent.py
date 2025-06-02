@@ -1,4 +1,5 @@
                   
+from typing import Optional, Dict, Any, Tuple, List
 import asyncio
 import json
 import logging
@@ -7,7 +8,6 @@ import os
 import sys
 import tempfile
 import time
-from typing import Optional, Dict, Any, Tuple, List
 
 from config import settings
 from core.interfaces import EvaluatorAgentInterface, Program, TaskDefinition, BaseAgent

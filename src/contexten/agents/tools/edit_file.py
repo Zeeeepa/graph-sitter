@@ -5,10 +5,9 @@ from typing import TYPE_CHECKING, ClassVar, Optional
 from langchain_core.messages import ToolMessage
 from pydantic import Field
 
-from graph_sitter import Codebase
-
 from .observation import Observation
 from .replacement_edit import generate_diff
+from graph_sitter import Codebase
 
 if TYPE_CHECKING:
     from .tool_output_types import EditFileArtifacts

@@ -1,9 +1,9 @@
-import random
-import logging
 from typing import List, Dict, Any, Optional
+import logging
+import random
 
-from core.interfaces import SelectionControllerInterface, Program, BaseAgent
 from config import settings
+from core.interfaces import SelectionControllerInterface, Program, BaseAgent
 
 logger = logging.getLogger(__name__)
 

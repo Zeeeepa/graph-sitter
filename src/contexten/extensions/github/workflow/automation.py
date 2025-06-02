@@ -4,11 +4,11 @@ GitHub Workflow Automation
 This module provides automated workflow capabilities for GitHub integration.
 """
 
-import logging
 from typing import Dict, Any
+import logging
 
-from ..types import GitHubRepository, GitHubIssue, GitHubPullRequest
 from ....shared.logging.get_logger import get_logger
+from ..types import GitHubRepository, GitHubIssue, GitHubPullRequest
 
 logger = get_logger(__name__)
 

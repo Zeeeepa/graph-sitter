@@ -8,11 +8,11 @@ Intelligent assignment detection system that:
 - Provides assignment analytics and monitoring
 """
 
-import asyncio
-import re
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List, Set
-from dataclasses import dataclass, field
+import asyncio
+import re
 
 from .config import LinearIntegrationConfig
 from .types import (

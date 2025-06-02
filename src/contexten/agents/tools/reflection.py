@@ -7,10 +7,9 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import Field
 
+from .observation import Observation
 from contexten.extensions.langchain.llm import LLM
 from graph_sitter import Codebase
-
-from .observation import Observation
 
 
 class ReflectionSection(Observation):

@@ -1,18 +1,18 @@
 import webbrowser
 
-import rich
-import rich_click as click
 from pygit2._pygit2 import Repository
 from rich.panel import Panel
+import rich
+import rich_click as click
 
 from contexten.cli.api.client import RestAPI
-from graph_sitter.cli.auth.session import CodegenSession
 from contexten.cli.auth.token_manager import get_current_token
+from contexten.cli.utils.url import generate_webapp_url
+from graph_sitter.cli.auth.session import CodegenSession
 from graph_sitter.cli.errors import ServerError
 from graph_sitter.cli.git.patch import apply_patch
 from graph_sitter.cli.rich.codeblocks import format_command
 from graph_sitter.cli.rich.spinners import create_spinner
-from contexten.cli.utils.url import generate_webapp_url
 
 
 def run_cloud(session: CodegenSession, function, apply_local: bool = False, diff_preview: int | None = None):

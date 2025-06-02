@@ -4,11 +4,11 @@ Linear Webhook Handlers
 This module provides event handlers for Linear webhooks.
 """
 
-import logging
 from typing import Dict, Any
+import logging
 
-from ..types import LinearEvent
 from ....shared.logging.get_logger import get_logger
+from ..types import LinearEvent
 
 logger = get_logger(__name__)
 

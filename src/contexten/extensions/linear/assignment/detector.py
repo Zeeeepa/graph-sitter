@@ -4,10 +4,10 @@ Linear Assignment Detector
 This module provides intelligent assignment detection for Linear issues.
 """
 
-import re
-import logging
-from typing import Dict, List, Optional, Any
 from datetime import datetime
+from typing import Dict, List, Optional, Any
+import logging
+import re
 
 from ....shared.logging.get_logger import get_logger
 

@@ -1,7 +1,7 @@
 import json
 
-import requests
 from pydantic import BaseModel
+import requests
 
 from graph_sitter.shared.logging.get_logger import get_logger
 

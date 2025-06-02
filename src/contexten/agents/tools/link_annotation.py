@@ -1,8 +1,8 @@
 """Tool for viewing PR contents and modified symbols."""
 
-import re
 from enum import StrEnum
 from typing import Callable
+import re
 
 from graph_sitter import Codebase
 

@@ -1,12 +1,12 @@
 """Demo implementation of an agent with Codegen tools."""
 
-import uuid
 from typing import Annotated, Any, Literal, Optional, Union
+import uuid
 
-import anthropic
-import openai
 from langchain.tools import BaseTool
 from langchain_core.messages import (
+import anthropic
+import openai
     AIMessage,
     AnyMessage,
     HumanMessage,

@@ -5,20 +5,19 @@ Each matching line will be returned with its line number.
 Results are paginated with a default of 10 files per page.
 """
 
+from typing import ClassVar
 import logging
 import os
 import re
 import subprocess
-from typing import ClassVar
 
 from langchain_core.messages import ToolMessage
 from pydantic import Field
 
+from .observation import Observation
 from contexten.extensions.tools.tool_output_types import SearchArtifacts
 from contexten.extensions.tools.tool_output_types import SearchMatch as SearchMatchDict
 from graph_sitter import Codebase
-
-from .observation import Observation
 
 logger = logging.getLogger(__name__)
 

@@ -9,11 +9,11 @@ Comprehensive workflow automation system that:
 - Manages task lifecycle
 """
 
-import asyncio
-import uuid
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List, Callable, Awaitable
-from dataclasses import dataclass, field
+import asyncio
+import uuid
 
 from .config import LinearIntegrationConfig
 from .types import (

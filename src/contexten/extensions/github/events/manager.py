@@ -4,8 +4,8 @@ GitHub Event Manager
 This module provides event management and processing for GitHub integration.
 """
 
-import logging
 from typing import Dict, List, Any
+import logging
 
 from ....shared.logging.get_logger import get_logger
 

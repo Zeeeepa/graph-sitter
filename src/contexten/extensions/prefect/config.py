@@ -4,8 +4,9 @@ Prefect Configuration for Autonomous CI/CD
 Provides configuration management for Prefect workflows and autonomous operations.
 """
 
-import os
 from typing import Optional, Dict, Any
+import os
+
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 

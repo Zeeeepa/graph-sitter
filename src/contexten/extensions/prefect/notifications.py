@@ -5,15 +5,15 @@ This module handles notifications for various workflow events including
 Slack, email, and Linear integrations.
 """
 
-import asyncio
-import json
-import logging
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Any, Union
+import asyncio
+import json
+import logging
 
-import aiohttp
 from prefect import get_run_logger
+import aiohttp
 
 from .config import get_config
 

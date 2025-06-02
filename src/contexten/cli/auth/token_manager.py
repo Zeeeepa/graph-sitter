@@ -1,6 +1,6 @@
+from pathlib import Path
 import json
 import os
-from pathlib import Path
 
 from contexten.cli.api.client import RestAPI
 from graph_sitter.cli.auth.constants import AUTH_FILE, CONFIG_DIR

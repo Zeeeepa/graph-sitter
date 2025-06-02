@@ -8,29 +8,24 @@ and enhanced platform integrations.
 Renamed from codegen_app.py to contexten_app.py as part of system integration.
 """
 
-import asyncio
-import logging
-import time
-from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Dict, List, Optional, Any, Callable
+import asyncio
 import json
+import logging
+import time
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 
-# Import existing graph_sitter capabilities
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.codebase.codebase_analysis import get_codebase_summary
-from graph_sitter.shared.logging.get_logger import get_logger
-
-# Import enhanced autogenlib
 from ..autogenlib import AutogenClient, AutogenConfig
-
-# Import platform extensions
+from .extensions.github import EnhancedGitHubExtension
 from .extensions.linear import EnhancedLinearExtension
-from .extensions.github import EnhancedGitHubExtension  
 from .extensions.slack import EnhancedSlackExtension
+from graph_sitter.codebase.codebase_analysis import get_codebase_summary
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 

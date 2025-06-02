@@ -1,9 +1,9 @@
 """Tools for running bash commands."""
 
+from typing import ClassVar, Optional
 import re
 import shlex
 import subprocess
-from typing import ClassVar, Optional
 
 from pydantic import Field
 

@@ -6,19 +6,19 @@ capabilities, integrating with the Contexten Orchestrator and enhanced autogenli
 for context-aware code generation and analysis.
 """
 
-import asyncio
-import logging
-from typing import Dict, List, Optional, Any, Tuple, Union
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Dict, List, Optional, Any, Tuple, Union
+import asyncio
 import json
+import logging
 
+from ...shared.logging.get_logger import get_logger
+from ..autogenlib import AutogenClient, AutogenConfig, GenerationRequest, GenerationResult
+from ..extensions.contexten_app import ContextenOrchestrator, ContextenConfig
 from graph_sitter import Codebase
 from graph_sitter.codebase.codebase_ai import codebase_ai, set_ai_key, set_codegen_credentials
-from ..extensions.contexten_app import ContextenOrchestrator, ContextenConfig
-from ..autogenlib import AutogenClient, AutogenConfig, GenerationRequest, GenerationResult
-from ...shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 

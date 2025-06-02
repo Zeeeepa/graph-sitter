@@ -1,20 +1,19 @@
 """Tool for making semantic edits to files using a small, fast LLM."""
 
+from typing import TYPE_CHECKING, ClassVar, Optional
 import difflib
 import re
-from typing import TYPE_CHECKING, ClassVar, Optional
 
 from langchain_core.messages import ToolMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import Field
 
-from contexten.extensions.langchain.llm import LLM
-from graph_sitter import Codebase
-
 from .observation import Observation
 from .semantic_edit_prompts import _HUMAN_PROMPT_DRAFT_EDITOR, COMMANDER_SYSTEM_PROMPT
 from .view_file import add_line_numbers
+from contexten.extensions.langchain.llm import LLM
+from graph_sitter import Codebase
 
 if TYPE_CHECKING:
     from .tool_output_types import SemanticEditArtifacts

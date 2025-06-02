@@ -5,22 +5,22 @@ This module defines individual tasks that can be composed into workflows
 for autonomous CI/CD operations.
 """
 
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Tuple
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
 
+from codegen import Agent as CodegenAgent
 from prefect import task, get_run_logger
 from prefect.artifacts import create_markdown_artifact
 from prefect.blocks.system import Secret
 
-from codegen import Agent as CodegenAgent
-from graph_sitter import Codebase
+from .config import get_config, TaskConfig
 from contexten.extensions.github.enhanced_client import EnhancedGitHubClient
 from contexten.extensions.linear.enhanced_client import EnhancedLinearClient
-from .config import get_config, TaskConfig
+from graph_sitter import Codebase
 
 
 @task(

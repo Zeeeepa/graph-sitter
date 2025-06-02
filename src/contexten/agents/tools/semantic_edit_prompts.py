@@ -238,7 +238,6 @@ class Mixin:
     def mixin_method(self):
         return "mixin"
 
-# Important configuration
 SETTINGS = {
     "timeout": 30,
     "retries": 3
