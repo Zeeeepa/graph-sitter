@@ -768,51 +768,45 @@ Sub-issues will be created for each major component and feature implementation.
 # Startup and shutdown events
 
 @app.on_event("startup")
+async def startup_event():
     global prefect_dashboard_manager
 
-# Initialize Prefect Dashboard Manager
-try:
-    orchestration_config = OrchestrationConfig(
-        codegen_org_id=config.codegen_org_id,
-        codegen_token=config.codegen_token,
-        github_token=config.github_token,
-        linear_api_key=config.linear_api_key,
-        slack_webhook_url=config.slack_webhook_url
-    )
-    
-    prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
-    await prefect_dashboard_manager.initialize()
-    
-    # Include Prefect dashboard routes
-    app.include_router(prefect_dashboard_manager.router)
-    
-    logger.info("Prefect Dashboard Manager initialized successfully")
-except Exception as e:
-    logger.error(f"Failed to initialize Prefect Dashboard Manager: {e}")
-    # Continue without Prefect dashboard if initialization fails
-
-async def startup_event():
-    """Application startup"""
-    logger.info("Contexten Management Dashboard starting up...")
-    
-    # Validate configuration
-    missing_config = []
-    if not config.codegen_org_id:
-        missing_config.append("CODEGEN_ORG_ID")
-    if not config.codegen_token:
-        missing_config.append("CODEGEN_TOKEN")
-    
-    if missing_config:
-        logger.warning(f"Missing configuration: {', '.join(missing_config)}")
-    
-    logger.info("Dashboard startup complete")
+    # Initialize Prefect Dashboard Manager
+    try:
+        orchestration_config = OrchestrationConfig(
+            codegen_org_id=config.codegen_org_id,
+            codegen_token=config.codegen_token,
+            github_token=config.github_token,
+            linear_api_key=config.linear_api_key,
+            slack_webhook_url=config.slack_webhook_url
+        )
+        
+        prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
+        await prefect_dashboard_manager.initialize()
+        
+        # Include Prefect dashboard routes
+        app.include_router(prefect_dashboard_manager.router)
+        
+        logger.info("Prefect Dashboard Manager initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize Prefect Dashboard Manager: {e}")
+        # Continue without Prefect dashboard if initialization fails
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Application shutdown"""
     logger.info("Contexten Management Dashboard shutting down...")
     
-    global prefect_dashboard_manager\n    \n    # Shutdown Prefect Dashboard Manager\n    if prefect_dashboard_manager:\n        try:\n            await prefect_dashboard_manager.shutdown()\n            logger.info("Prefect Dashboard Manager shutdown complete")\n        except Exception as e:\n            logger.error(f"Error shutting down Prefect Dashboard Manager: {e}")\n
+    global prefect_dashboard_manager
+    
+    # Shutdown Prefect Dashboard Manager
+    if prefect_dashboard_manager:
+        try:
+            await prefect_dashboard_manager.shutdown()
+            logger.info("Prefect Dashboard Manager shutdown complete")
+        except Exception as e:
+            logger.error(f"Error shutting down Prefect Dashboard Manager: {e}")
+    
     # Cleanup all integration agents
     for agent in integration_agents.values():
         try:
