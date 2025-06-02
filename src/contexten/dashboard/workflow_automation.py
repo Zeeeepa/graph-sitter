@@ -2,7 +2,7 @@
 Advanced Workflow Automation System
 
 This module provides sophisticated workflow automation capabilities,
-integrating with the Contexten Orchestrator, Linear, GitHub, and Slack
+integrating with the Contexten Orchestrator, Linear, GitHub, Slack, and Prefect
 to create fully automated development workflows.
 """
 
@@ -20,6 +20,11 @@ from .enhanced_codebase_ai import EnhancedCodebaseAI, AIAnalysisRequest, AITaskT
 from ...shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
+
+# Add Prefect extension imports
+from ..extensions.prefect.client import PrefectOrchestrator
+from ..extensions.prefect.workflows import WorkflowManager
+from ..extensions.prefect.notifications import notify_critical_alert
 
 class WorkflowType(Enum):
     """Types of automated workflows"""
@@ -683,4 +688,3 @@ class WorkflowEngine:
             "active_workflows": len(self.active_executions),
             "workflow_definitions": len(self.workflow_definitions)
         }
-

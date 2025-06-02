@@ -43,6 +43,11 @@ from . import relace_edit_prompts
 from . import semantic_edit_prompts
 from . import tool_output_types
 
+# Add GitHub extension imports
+from ...extensions.github import *
+from ...extensions.github.enhanced_agent import EnhancedGitHubAgent
+from ...extensions.github.github import GitHubClient
+
 __all__ = [
     # Bash operations
     "run_bash_command",

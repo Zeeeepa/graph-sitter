@@ -54,6 +54,11 @@ from ..tools.github import (
 from ..tools.relace_edit_prompts import RELACE_EDIT_PROMPT
 from ..tools.semantic_edit_prompts import FILE_EDIT_PROMPT
 
+# Add GitHub extension imports
+from ...extensions.github.enhanced_agent import EnhancedGitHubAgent
+from ...extensions.github.github import GitHubClient
+from ...extensions.github.enhanced_client import EnhancedGitHubClient
+
 
 class ViewFileInput(BaseModel):
     """Input for viewing a file."""

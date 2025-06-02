@@ -46,6 +46,18 @@ from .flow_manager import flow_manager, FlowStatus, FlowPriority, FlowTemplate, 
 from .project_manager import project_manager, ProjectStatus, ProjectHealth, RequirementStatus
 from .enhanced_routes import setup_enhanced_routes
 
+# Add more Linear extension imports
+from ..extensions.linear.workflow.automation import LinearWorkflowAutomation
+from ..extensions.linear.webhook.processor import LinearWebhookProcessor
+from ..extensions.linear.linearclient import LinearClient as ExtendedLinearClient
+from ..extensions.linear.workflow_automation import WorkflowAutomation
+
+# Add Prefect extension imports
+from ..extensions.prefect.client import PrefectOrchestrator
+from ..extensions.prefect.workflows import WorkflowManager
+from ..extensions.prefect.config import get_config as get_prefect_config
+from ..extensions.prefect.tasks import TaskManager
+
 logger = get_logger(__name__)
 
 # Pydantic models for API requests

@@ -15,6 +15,11 @@ from .project_manager import project_manager, ProjectStatus, ProjectHealth, Requ
 
 logger = logging.getLogger(__name__)
 
+# Add Linear extension imports
+from ..extensions.linear.webhook.processor import LinearWebhookProcessor
+from ..extensions.linear.events.manager import LinearEventManager
+from ..extensions.linear.queries import LinearQueries
+
 
 def setup_enhanced_routes(app, agents=None, monitor=None, orchestrator=None):
     """Setup enhanced dashboard routes."""
@@ -645,4 +650,3 @@ def setup_enhanced_routes(app, agents=None, monitor=None, orchestrator=None):
             raise HTTPException(status_code=500, detail=str(e))
     
     logger.info("Enhanced dashboard routes configured successfully")
-

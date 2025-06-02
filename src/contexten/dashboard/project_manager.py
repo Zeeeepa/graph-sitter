@@ -137,6 +137,11 @@ class PinnedProject:
     })
 
 
+# Add Linear extension imports  
+from ..extensions.linear.assignment.detector import AssignmentDetector
+from ..extensions.linear.mutations import LinearMutations
+
+
 class RequirementsManager:
     """Manages project requirements and their lifecycle."""
     
@@ -693,4 +698,3 @@ class ProjectManager:
 
 # Global project manager instance
 project_manager = ProjectManager()
-
