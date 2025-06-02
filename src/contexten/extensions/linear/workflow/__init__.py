@@ -1,8 +1,4 @@
-"""
-Linear Workflow Automation Module
-
-This module provides workflow automation capabilities for Linear integration.
-"""
+"""Linear workflow automation components"""
 
 from .automation import WorkflowAutomation
 

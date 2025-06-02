@@ -1,8 +1,4 @@
-"""
-Linear Assignment Detection Module
-
-This module provides assignment detection capabilities for Linear integration.
-"""
+"""Linear assignment detection components"""
 
 from .detector import AssignmentDetector
 

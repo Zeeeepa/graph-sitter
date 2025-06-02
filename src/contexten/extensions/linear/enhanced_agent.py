@@ -375,4 +375,3 @@ class EnhancedLinearAgent:
         except Exception as e:
             logger.error(f"Error creating Codegen task: {e}")
             raise
-

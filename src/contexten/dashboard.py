@@ -47,11 +47,15 @@ from src.contexten.orchestration.monitoring import SystemMonitor
 from src.contexten.orchestration.workflow_types import AutonomousWorkflowType
 
 # Import agents and extensions
-from src.contexten.agents.chat_agent import ChatAgent
-from src.contexten.agents.code_agent import CodeAgent
-from src.contexten.extensions.linear.enhanced_agent import EnhancedLinearAgent
-from src.contexten.extensions.github.enhanced_agent import EnhancedGitHubAgent
-from src.contexten.extensions.slack.enhanced_agent import EnhancedSlackAgent
+try:
+    from .extensions.linear.enhanced_agent import EnhancedLinearAgent
+    from .extensions.github.enhanced_agent import EnhancedGitHubAgent
+    from .extensions.slack.enhanced_agent import EnhancedSlackAgent
+except ImportError as e:
+    logger.warning(f"Failed to import enhanced agents: {e}")
+    EnhancedLinearAgent = None
+    EnhancedGitHubAgent = None
+    EnhancedSlackAgent = None
 
 # Import Codegen SDK
 try:
