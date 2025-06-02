@@ -1,0 +1,146 @@
+{
+  "component_tests": {
+    "imports": {
+      "src.contexten.dashboard.app": {
+        "status": "failed",
+        "error": "No module named 'uvicorn'"
+      },
+      "src.contexten.orchestration": {
+        "status": "failed",
+        "error": "No module named 'prefect'"
+      },
+      "src.contexten.agents": {
+        "status": "success",
+        "attributes": 0,
+        "has_classes": false,
+        "has_functions": false
+      },
+      "src.contexten.extensions.linear.enhanced_agent": {
+        "status": "failed",
+        "error": "No module named 'src.contexten.extensions.extensions'"
+      },
+      "src.contexten.extensions.github.enhanced_agent": {
+        "status": "failed",
+        "error": "No module named 'src.contexten.extensions.extensions'"
+      },
+      "src.contexten.extensions.slack.enhanced_agent": {
+        "status": "failed",
+        "error": "No module named 'src.contexten.extensions.extensions'"
+      }
+    }
+  },
+  "integration_tests": {
+    "dashboard": {
+      "app_creation": {
+        "status": "failed",
+        "error": "No module named 'uvicorn'"
+      },
+      "routes_test": {
+        "status": "success",
+        "expected_routes": [
+          "/api/flows",
+          "/api/projects",
+          "/api/system/health",
+          "/ws/flows",
+          "/ws/projects"
+        ],
+        "note": "Mock test - would test actual routes in real implementation"
+      }
+    },
+    "agents": {
+      "linear_agent": {
+        "status": "failed",
+        "error": "No module named 'src.contexten.extensions.extensions'"
+      },
+      "github_agent": {
+        "status": "failed",
+        "error": "No module named 'src.contexten.extensions.extensions'"
+      }
+    },
+    "orchestration": {
+      "orchestrator": {
+        "status": "failed",
+        "error": "No module named 'prefect'"
+      }
+    },
+    "websocket": {
+      "websocket_manager": {
+        "status": "success",
+        "manager_active": true,
+        "has_connections": true,
+        "has_broadcast": true
+      }
+    },
+    "error_handling": {
+      "error_handler": {
+        "status": "success",
+        "retry_logic_works": true,
+        "stats": {
+          "total_errors": 1,
+          "retry_attempts": 1,
+          "successful_retries": 1
+        },
+        "has_retry_attempts": true
+      }
+    },
+    "rate_limiting": {
+      "rate_limiter": {
+        "status": "success",
+        "first_request_allowed": true,
+        "second_request_allowed": true,
+        "third_request_blocked": true,
+        "rate_limiting_works": true
+      }
+    },
+    "authentication": {
+      "authentication": {
+        "status": "success",
+        "session_created": true,
+        "session_validated": true,
+        "invalid_session_rejected": true,
+        "has_permissions": true
+      }
+    },
+    "webhook_validation": {
+      "webhook_validation": {
+        "status": "success",
+        "has_github_validation": true,
+        "has_linear_validation": true,
+        "has_slack_validation": true,
+        "note": "Mock test - would test actual signature validation in real implementation"
+      }
+    }
+  },
+  "performance_tests": {
+    "performance": {
+      "status": "failed",
+      "error": "No module named 'uvicorn'"
+    }
+  },
+  "security_tests": {
+    "security": {
+      "status": "success",
+      "has_authentication": true,
+      "has_rate_limiting": true,
+      "has_webhook_validation": true,
+      "has_session_management": true,
+      "security_score": "good"
+    }
+  },
+  "total_tests": 18,
+  "passed_tests": 8,
+  "failed_tests": 10,
+  "errors": [
+    "Import failed for src.contexten.dashboard.app: No module named 'uvicorn'",
+    "Import failed for src.contexten.orchestration: No module named 'prefect'",
+    "Import failed for src.contexten.extensions.linear.enhanced_agent: No module named 'src.contexten.extensions.extensions'",
+    "Import failed for src.contexten.extensions.github.enhanced_agent: No module named 'src.contexten.extensions.extensions'",
+    "Import failed for src.contexten.extensions.slack.enhanced_agent: No module named 'src.contexten.extensions.extensions'",
+    "Dashboard app creation failed: No module named 'uvicorn'",
+    "Linear agent test failed: No module named 'src.contexten.extensions.extensions'",
+    "GitHub agent test failed: No module named 'src.contexten.extensions.extensions'",
+    "Orchestrator test failed: No module named 'prefect'",
+    "Performance test failed: No module named 'uvicorn'"
+  ],
+  "success_rate": 44.44
+}

@@ -118,4 +118,3 @@ Always explain what you're planning to do before taking actions."""
                     say(result)
             except Exception as e:
                 console.print(f"[bold red]Error during agent execution:[/bold red] {e}")
-                break
