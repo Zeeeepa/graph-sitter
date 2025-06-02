@@ -17,8 +17,8 @@ except ImportError:
 
 from contexten.agents.loggers import ExternalLogger
 from contexten.agents.tracer import MessageStreamTracer
-from contexten.extensions.langchain.agent import create_codebase_agent
-from contexten.extensions.langchain.utils.get_langsmith_url import (
+from contexten.agents.langchain.agent import create_codebase_agent
+from contexten.agents.langchain.utils.get_langsmith_url import (
     find_and_print_langsmith_run_url,
 )
 

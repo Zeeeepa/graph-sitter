@@ -14,8 +14,8 @@ from typing import ClassVar
 from langchain_core.messages import ToolMessage
 from pydantic import Field
 
-from contexten.extensions.tools.tool_output_types import SearchArtifacts
-from contexten.extensions.tools.tool_output_types import SearchMatch as SearchMatchDict
+from contexten.agents.tools.tool_output_types import SearchArtifacts
+from contexten.agents.tools.tool_output_types import SearchMatch as SearchMatchDict
 from graph_sitter import Codebase
 
 from .observation import Observation

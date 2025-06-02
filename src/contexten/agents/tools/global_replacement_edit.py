@@ -8,7 +8,7 @@ from typing import ClassVar
 
 from pydantic import Field
 
-from contexten.extensions.tools.search_files_by_name import search_files_by_name
+from contexten.agents.tools.search_files_by_name import search_files_by_name
 from graph_sitter import Codebase
 
 from .observation import Observation

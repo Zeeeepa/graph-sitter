@@ -8,9 +8,9 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.graph import CompiledGraph
 
 from contexten.agents.utils import AgentConfig
-from contexten.extensions.langchain.llm import LLM
-from contexten.extensions.langchain.prompts import REASONER_SYSTEM_MESSAGE
-from contexten.extensions.langchain.tools import (
+from contexten.agents.langchain.llm import LLM
+from contexten.agents.langchain.prompts import REASONER_SYSTEM_MESSAGE
+from contexten.agents.langchain.tools import (
     CreateFileTool,
     DeleteFileTool,
     GlobalReplacementEditTool,
