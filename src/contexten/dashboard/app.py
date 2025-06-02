@@ -42,6 +42,10 @@ from .chat_manager import ChatManager
 from .prefect_dashboard import PrefectDashboardManager
 from ..orchestration import OrchestrationConfig
 
+# Import enhanced features
+from .enhanced_routes import enhanced_router, initialize_enhanced_integrations
+from .graph_sitter_integration import GraphSitterAnalyzer
+
 logger = get_logger(__name__)
 
 # Pydantic models for API requests
@@ -108,6 +112,9 @@ app = FastAPI(
 
 # Initialize Prefect Dashboard Manager
 prefect_dashboard_manager = None
+
+# Initialize enhanced integrations
+graph_sitter_analyzer = None
 
 # Middleware
 app.add_middleware(
@@ -607,6 +614,83 @@ async def get_integration_status(
     
     return {"integrations": status}
 
+# Enhanced API endpoints for comprehensive analysis
+@app.post("/api/analysis/project")
+async def analyze_project_endpoint(request: dict):
+    """Analyze project using graph-sitter and other tools"""
+    try:
+        project_path = request.get("project_path")
+        if not project_path:
+            raise HTTPException(status_code=400, detail="project_path is required")
+        
+        if graph_sitter_analyzer:
+            analysis_result = await graph_sitter_analyzer.analyze_project(project_path)
+            return JSONResponse(content=analysis_result)
+        else:
+            raise HTTPException(status_code=503, detail="Graph-sitter analyzer not available")
+            
+    except Exception as e:
+        logger.error(f"Error analyzing project: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/analysis/dead-code")
+async def analyze_dead_code_endpoint(request: dict):
+    """Analyze dead code in project"""
+    try:
+        project_path = request.get("project_path")
+        if not project_path:
+            raise HTTPException(status_code=400, detail="project_path is required")
+        
+        if graph_sitter_analyzer:
+            dead_code_result = await graph_sitter_analyzer.analyze_dead_code(project_path)
+            return JSONResponse(content=dead_code_result)
+        else:
+            raise HTTPException(status_code=503, detail="Graph-sitter analyzer not available")
+            
+    except Exception as e:
+        logger.error(f"Error analyzing dead code: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/analysis/code-quality")
+async def analyze_code_quality_endpoint(request: dict):
+    """Analyze code quality for specific file"""
+    try:
+        file_path = request.get("file_path")
+        if not file_path:
+            raise HTTPException(status_code=400, detail="file_path is required")
+        
+        if graph_sitter_analyzer:
+            quality_result = await graph_sitter_analyzer.analyze_code_quality(file_path)
+            return JSONResponse(content=quality_result)
+        else:
+            raise HTTPException(status_code=503, detail="Graph-sitter analyzer not available")
+            
+    except Exception as e:
+        logger.error(f"Error analyzing code quality: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/integrations/status")
+async def get_integrations_status():
+    """Get status of all integrations"""
+    try:
+        status = {
+            "timestamp": datetime.now().isoformat(),
+            "integrations": {
+                "prefect": prefect_dashboard_manager is not None,
+                "graph_sitter": graph_sitter_analyzer is not None,
+                "linear": False,  # Would check actual Linear client
+                "github": False,  # Would check actual GitHub client
+                "slack": False    # Would check actual Slack client
+            },
+            "system_health": "healthy"
+        }
+        
+        return JSONResponse(content=status)
+        
+    except Exception as e:
+        logger.error(f"Error getting integrations status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Helper Functions
 
 async def get_github_user_info(token: str) -> Dict[str, Any]:
@@ -769,28 +853,45 @@ Sub-issues will be created for each major component and feature implementation.
 
 @app.on_event("startup")
 async def startup_event():
+    """Initialize dashboard components on startup"""
+    logger.info("Contexten Management Dashboard starting up...")
+    
     global prefect_dashboard_manager
-
-    # Initialize Prefect Dashboard Manager
+    global graph_sitter_analyzer
+    
     try:
-        orchestration_config = OrchestrationConfig(
-            codegen_org_id=config.codegen_org_id,
-            codegen_token=config.codegen_token,
-            github_token=config.github_token,
-            linear_api_key=config.linear_api_key,
-            slack_webhook_url=config.slack_webhook_url
+        # Initialize Prefect Dashboard Manager
+        orchestration_config = OrchestrationConfig()
+        
+        if orchestration_config.prefect_enabled:
+            from .prefect_dashboard import PrefectDashboardManager
+            
+            prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
+            await prefect_dashboard_manager.initialize()
+            
+            # Include Prefect dashboard routes
+            app.include_router(prefect_dashboard_manager.router)
+            
+            logger.info("Prefect Dashboard Manager initialized successfully")
+        else:
+            logger.warning("Prefect Dashboard Manager not enabled")
+        
+        # Initialize Graph-Sitter Analyzer
+        graph_sitter_analyzer = GraphSitterAnalyzer()
+        logger.info("Graph-Sitter Analyzer initialized successfully")
+        
+        # Include enhanced routes
+        app.include_router(enhanced_router)
+        logger.info("Enhanced routes included successfully")
+        
+        # Initialize enhanced integrations
+        await initialize_enhanced_integrations(
+            graph_sitter_instance=graph_sitter_analyzer
         )
+        logger.info("Enhanced integrations initialized successfully")
         
-        prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
-        await prefect_dashboard_manager.initialize()
-        
-        # Include Prefect dashboard routes
-        app.include_router(prefect_dashboard_manager.router)
-        
-        logger.info("Prefect Dashboard Manager initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize Prefect Dashboard Manager: {e}")
-        # Continue without Prefect dashboard if initialization fails
+        logger.error(f"Error during startup: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -1087,19 +1188,19 @@ async def export_dashboard_data():
     """Export dashboard data"""
     try:
         export_data = {
-            "flows": active_flows,
+            "timestamp": datetime.now().isoformat(),
             "stats": dashboard_stats,
-            "exported_at": datetime.now().isoformat()
+            "flows": list(active_flows.values()),
+            "projects": []  # Would be populated from actual data
         }
         
         return JSONResponse(
             content=export_data,
             headers={"Content-Disposition": "attachment; filename=dashboard-export.json"}
         )
-        
     except Exception as e:
-        logger.error(f"Error exporting data: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to export data: {str(e)}")
+        logger.error(f"Error exporting dashboard data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Helper functions
 async def execute_flow_with_codegen(flow: dict):
