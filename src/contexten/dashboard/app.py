@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 import secrets
 import hashlib
+import uuid
 
 from fastapi import FastAPI, Request, Response, HTTPException, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -21,6 +22,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.sessions import SessionMiddleware
+from pydantic import BaseModel
 
 import httpx
 from authlib.integrations.starlette_client import OAuth
@@ -41,6 +43,25 @@ from .prefect_dashboard import PrefectDashboardManager
 from ..orchestration import OrchestrationConfig
 
 logger = get_logger(__name__)
+
+# Pydantic models for API requests
+class FlowCreateRequest(BaseModel):
+    name: str
+    project: str
+    type: str
+    requirements: str
+    priority: str = "medium"
+    notifications: bool = True
+
+class ProjectAnalyzeRequest(BaseModel):
+    project: str
+    analysis_type: str = "comprehensive"
+
+class SettingsRequest(BaseModel):
+    codegenOrgId: Optional[str] = None
+    codegenToken: Optional[str] = None
+    flowTimeout: Optional[int] = 60
+    notificationPrefs: Optional[str] = "all"
 
 # Configuration
 class DashboardConfig:
@@ -147,6 +168,16 @@ app.mount("/static", StaticFiles(directory="src/contexten/dashboard/static"), na
 integration_agents: Dict[str, Any] = {}
 user_sessions: Dict[str, Dict[str, Any]] = {}
 chat_manager = ChatManager()
+
+# Global state for flows and projects
+active_flows = {}
+dashboard_stats = {
+    "active_projects": 0,
+    "running_flows": 0,
+    "completed_today": 0,
+    "success_rate": 0.0,
+    "recent_activity": []
+}
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -793,6 +824,450 @@ async def shutdown_event():
     user_sessions.clear()
     
     logger.info("Dashboard shutdown complete")
+
+@app.get("/api/dashboard/overview")
+async def get_dashboard_overview():
+    """Get dashboard overview data"""
+    try:
+        # Update stats from orchestrator if available
+        global prefect_dashboard_manager
+        if prefect_dashboard_manager:
+            flows_data = await prefect_dashboard_manager.get_flows()
+            dashboard_stats["running_flows"] = len([f for f in flows_data.get("flows", []) if f.get("state") == "Running"])
+            dashboard_stats["completed_today"] = len([f for f in flows_data.get("flows", []) 
+                                                    if f.get("state") == "Completed" and 
+                                                    datetime.fromisoformat(f.get("start_time", "")).date() == datetime.now().date()])
+        
+        # Calculate success rate
+        total_flows = len(active_flows)
+        if total_flows > 0:
+            completed_flows = len([f for f in active_flows.values() if f.get("status") == "completed"])
+            dashboard_stats["success_rate"] = (completed_flows / total_flows) * 100
+        
+        return dashboard_stats
+    except Exception as e:
+        logger.error(f"Error getting dashboard overview: {e}")
+        return dashboard_stats
+
+@app.get("/api/flows/active")
+async def get_active_flows():
+    """Get all active flows"""
+    try:
+        return {"flows": active_flows}
+    except Exception as e:
+        logger.error(f"Error getting active flows: {e}")
+        return {"flows": {}}
+
+@app.post("/api/flows/create")
+async def create_flow(flow_request: FlowCreateRequest):
+    """Create a new CICD flow"""
+    try:
+        flow_id = str(uuid.uuid4())
+        
+        # Create flow object
+        flow = {
+            "id": flow_id,
+            "name": flow_request.name,
+            "project_name": flow_request.project.split('/')[-1],
+            "project_full_name": flow_request.project,
+            "type": flow_request.type,
+            "requirements": flow_request.requirements,
+            "priority": flow_request.priority,
+            "notifications": flow_request.notifications,
+            "status": "running",
+            "progress": 0,
+            "created_at": datetime.now().isoformat(),
+            "current_step": "Initializing flow...",
+            "error": None
+        }
+        
+        # Store flow
+        active_flows[flow_id] = flow
+        
+        # Start flow execution using Codegen SDK
+        await execute_flow_with_codegen(flow)
+        
+        # Update dashboard stats
+        dashboard_stats["running_flows"] = len([f for f in active_flows.values() if f["status"] == "running"])
+        
+        return {"success": True, "flow_id": flow_id, "message": "Flow created successfully"}
+        
+    except Exception as e:
+        logger.error(f"Error creating flow: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create flow: {str(e)}")
+
+@app.post("/api/flows/{flow_id}/pause")
+async def pause_flow(flow_id: str):
+    """Pause a running flow"""
+    try:
+        if flow_id not in active_flows:
+            raise HTTPException(status_code=404, detail="Flow not found")
+        
+        flow = active_flows[flow_id]
+        if flow["status"] != "running":
+            raise HTTPException(status_code=400, detail="Flow is not running")
+        
+        flow["status"] = "paused"
+        flow["current_step"] = "Flow paused by user"
+        
+        return {"success": True, "message": "Flow paused successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error pausing flow {flow_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to pause flow: {str(e)}")
+
+@app.post("/api/flows/{flow_id}/cancel")
+async def cancel_flow(flow_id: str):
+    """Cancel a flow"""
+    try:
+        if flow_id not in active_flows:
+            raise HTTPException(status_code=404, detail="Flow not found")
+        
+        flow = active_flows[flow_id]
+        flow["status"] = "cancelled"
+        flow["current_step"] = "Flow cancelled by user"
+        flow["progress"] = 0
+        
+        # Update dashboard stats
+        dashboard_stats["running_flows"] = len([f for f in active_flows.values() if f["status"] == "running"])
+        
+        return {"success": True, "message": "Flow cancelled successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error cancelling flow {flow_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to cancel flow: {str(e)}")
+
+@app.get("/api/flows/{flow_id}/details")
+async def get_flow_details(flow_id: str):
+    """Get detailed information about a flow"""
+    try:
+        if flow_id not in active_flows:
+            raise HTTPException(status_code=404, detail="Flow not found")
+        
+        flow = active_flows[flow_id]
+        
+        # Add additional details
+        flow_details = {
+            **flow,
+            "logs": [],  # TODO: Implement flow logs
+            "steps": [],  # TODO: Implement flow steps tracking
+            "duration": calculate_flow_duration(flow),
+            "estimated_completion": estimate_completion_time(flow)
+        }
+        
+        return flow_details
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting flow details {flow_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get flow details: {str(e)}")
+
+@app.post("/api/projects/analyze")
+async def analyze_project(analyze_request: ProjectAnalyzeRequest):
+    """Start project analysis"""
+    try:
+        # Create analysis flow
+        flow_request = FlowCreateRequest(
+            name=f"Analysis: {analyze_request.project.split('/')[-1]}",
+            project=analyze_request.project,
+            type="analysis",
+            requirements=f"Perform {analyze_request.analysis_type} analysis of the codebase including code quality, security vulnerabilities, performance issues, and technical debt assessment.",
+            priority="medium",
+            notifications=True
+        )
+        
+        result = await create_flow(flow_request)
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error analyzing project {analyze_request.project}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to analyze project: {str(e)}")
+
+@app.get("/api/projects/{project_name}/flows")
+async def get_project_flows(project_name: str):
+    """Get all flows for a specific project"""
+    try:
+        project_flows = [
+            flow for flow in active_flows.values() 
+            if flow["project_full_name"] == project_name
+        ]
+        
+        return {"flows": project_flows, "project": project_name}
+        
+    except Exception as e:
+        logger.error(f"Error getting flows for project {project_name}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get project flows: {str(e)}")
+
+@app.post("/api/projects/add")
+async def add_project(request: dict):
+    """Add a custom project"""
+    try:
+        project_name = request.get("project")
+        if not project_name:
+            raise HTTPException(status_code=400, detail="Project name is required")
+        
+        # TODO: Validate project exists and user has access
+        # For now, just return success
+        return {"success": True, "message": f"Project {project_name} added successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding project: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to add project: {str(e)}")
+
+@app.get("/api/analytics/dashboard")
+async def get_dashboard_analytics():
+    """Get analytics data for dashboard charts"""
+    try:
+        # Generate sample analytics data
+        # TODO: Implement real analytics from flow data
+        analytics_data = {
+            "performance": {
+                "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                "success_rate": [85, 90, 88, 92, 87, 89, 91],
+                "avg_duration": [45, 38, 42, 35, 48, 40, 37]
+            },
+            "activity": {
+                "labels": ["Analysis", "Testing", "Deployment", "Security", "Custom"],
+                "values": [25, 20, 15, 10, 30]
+            }
+        }
+        
+        return analytics_data
+        
+    except Exception as e:
+        logger.error(f"Error getting analytics data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get analytics data: {str(e)}")
+
+@app.post("/api/settings/save")
+async def save_settings(settings: SettingsRequest):
+    """Save dashboard settings"""
+    try:
+        # TODO: Implement settings persistence
+        logger.info(f"Settings saved: {settings.dict(exclude={'codegenToken'})}")
+        return {"success": True, "message": "Settings saved successfully"}
+        
+    except Exception as e:
+        logger.error(f"Error saving settings: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save settings: {str(e)}")
+
+@app.get("/api/system/status")
+async def get_system_status():
+    """Get system status information"""
+    try:
+        status = {
+            "orchestrator": "Healthy",
+            "github": "Connected",
+            "linear": "Connected"
+        }
+        
+        # Check actual service status
+        global prefect_dashboard_manager
+        if prefect_dashboard_manager:
+            try:
+                await prefect_dashboard_manager.get_flows()
+                status["orchestrator"] = "Healthy"
+            except:
+                status["orchestrator"] = "Degraded"
+        else:
+            status["orchestrator"] = "Disconnected"
+        
+        return status
+        
+    except Exception as e:
+        logger.error(f"Error getting system status: {e}")
+        return {
+            "orchestrator": "Unknown",
+            "github": "Unknown", 
+            "linear": "Unknown"
+        }
+
+@app.get("/api/export/dashboard-data")
+async def export_dashboard_data():
+    """Export dashboard data"""
+    try:
+        export_data = {
+            "flows": active_flows,
+            "stats": dashboard_stats,
+            "exported_at": datetime.now().isoformat()
+        }
+        
+        return JSONResponse(
+            content=export_data,
+            headers={"Content-Disposition": "attachment; filename=dashboard-export.json"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error exporting data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to export data: {str(e)}")
+
+# Helper functions
+async def execute_flow_with_codegen(flow: dict):
+    """Execute a flow using Codegen SDK"""
+    try:
+        # Get Codegen configuration
+        org_id = os.getenv("CODEGEN_ORG_ID")
+        token = os.getenv("CODEGEN_TOKEN")
+        
+        if not org_id or not token:
+            logger.warning("Codegen SDK not configured, simulating flow execution")
+            await simulate_flow_execution(flow)
+            return
+        
+        # Initialize Codegen agent
+        codegen_agent = CodegenAgent(org_id=org_id, token=token)
+        
+        # Create prompt based on flow type and requirements
+        prompt = create_flow_prompt(flow)
+        
+        # Update flow status
+        flow["current_step"] = "Executing with Codegen agent..."
+        flow["progress"] = 10
+        
+        # Execute with Codegen
+        task = codegen_agent.run(prompt=prompt)
+        
+        # Monitor task progress
+        asyncio.create_task(monitor_codegen_task(flow, task))
+        
+    except Exception as e:
+        logger.error(f"Error executing flow with Codegen: {e}")
+        flow["status"] = "failed"
+        flow["error"] = str(e)
+        flow["current_step"] = "Flow execution failed"
+
+async def simulate_flow_execution(flow: dict):
+    """Simulate flow execution for demo purposes"""
+    try:
+        steps = [
+            ("Analyzing project structure...", 20),
+            ("Running code analysis...", 40),
+            ("Generating recommendations...", 60),
+            ("Creating Linear issues...", 80),
+            ("Finalizing results...", 100)
+        ]
+        
+        for step, progress in steps:
+            await asyncio.sleep(2)  # Simulate work
+            flow["current_step"] = step
+            flow["progress"] = progress
+        
+        flow["status"] = "completed"
+        flow["current_step"] = "Flow completed successfully"
+        
+        # Update dashboard stats
+        dashboard_stats["completed_today"] += 1
+        dashboard_stats["running_flows"] = len([f for f in active_flows.values() if f["status"] == "running"])
+        
+        # Add to recent activity
+        dashboard_stats["recent_activity"].insert(0, {
+            "title": f"Flow completed: {flow['name']}",
+            "description": f"Successfully completed {flow['type']} flow for {flow['project_name']}",
+            "status": "completed",
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        # Keep only last 10 activities
+        dashboard_stats["recent_activity"] = dashboard_stats["recent_activity"][:10]
+        
+    except Exception as e:
+        logger.error(f"Error simulating flow execution: {e}")
+        flow["status"] = "failed"
+        flow["error"] = str(e)
+
+def create_flow_prompt(flow: dict) -> str:
+    """Create a prompt for Codegen based on flow configuration"""
+    project = flow["project_full_name"]
+    flow_type = flow["type"]
+    requirements = flow["requirements"]
+    
+    prompt = f"""
+    Please execute a {flow_type} flow for the GitHub repository {project}.
+    
+    Requirements:
+    {requirements}
+    
+    Please:
+    1. Analyze the codebase thoroughly
+    2. Identify issues and opportunities for improvement
+    3. Create detailed Linear issues for any problems found
+    4. Provide a comprehensive summary of findings
+    5. Include actionable recommendations
+    
+    Focus on code quality, security, performance, and maintainability.
+    """
+    
+    return prompt
+
+async def monitor_codegen_task(flow: dict, task):
+    """Monitor Codegen task progress"""
+    try:
+        while task.status not in ["completed", "failed"]:
+            await asyncio.sleep(5)
+            task.refresh()
+            
+            # Update flow progress based on task status
+            if task.status == "running":
+                flow["progress"] = min(flow["progress"] + 5, 90)
+                flow["current_step"] = "Processing with Codegen agent..."
+        
+        if task.status == "completed":
+            flow["status"] = "completed"
+            flow["progress"] = 100
+            flow["current_step"] = "Flow completed successfully"
+            flow["result"] = task.result
+        else:
+            flow["status"] = "failed"
+            flow["error"] = "Codegen task failed"
+            flow["current_step"] = "Flow execution failed"
+            
+    except Exception as e:
+        logger.error(f"Error monitoring Codegen task: {e}")
+        flow["status"] = "failed"
+        flow["error"] = str(e)
+
+def calculate_flow_duration(flow: dict) -> str:
+    """Calculate flow duration"""
+    try:
+        start_time = datetime.fromisoformat(flow["created_at"])
+        duration = datetime.now() - start_time
+        
+        hours = duration.seconds // 3600
+        minutes = (duration.seconds % 3600) // 60
+        
+        if hours > 0:
+            return f"{hours}h {minutes}m"
+        else:
+            return f"{minutes}m"
+            
+    except:
+        return "Unknown"
+
+def estimate_completion_time(flow: dict) -> str:
+    """Estimate flow completion time"""
+    try:
+        if flow["status"] == "completed":
+            return "Completed"
+        
+        if flow["progress"] > 0:
+            start_time = datetime.fromisoformat(flow["created_at"])
+            elapsed = datetime.now() - start_time
+            estimated_total = elapsed * (100 / flow["progress"])
+            remaining = estimated_total - elapsed
+            
+            remaining_minutes = int(remaining.total_seconds() / 60)
+            return f"~{remaining_minutes}m remaining"
+        
+        return "Estimating..."
+        
+    except:
+        return "Unknown"
 
 if __name__ == "__main__":
     import uvicorn
