@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import secrets
 import uuid
 
-from fastapi import FastAPI, Request, Response, HTTPException, Depends, status
+from fastapi import FastAPI, Request, Response, HTTPException, Depends, status, BackgroundTasks, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -57,6 +57,15 @@ from ..extensions.prefect.client import PrefectOrchestrator
 from ..extensions.prefect.workflows import WorkflowManager
 from ..extensions.prefect.config import get_config as get_prefect_config
 from ..extensions.prefect.tasks import TaskManager
+
+# Add comprehensive Linear integration
+from .linear_integration import (
+    LinearDashboardManager, 
+    LinearDashboardConfig,
+    initialize_linear_dashboard,
+    get_linear_dashboard_manager,
+    create_linear_router
+)
 
 logger = get_logger(__name__)
 
@@ -109,11 +118,31 @@ class DashboardConfig:
         self.github_redirect_uri = f"{self.base_url}/auth/github/callback"
         self.linear_redirect_uri = f"{self.base_url}/auth/linear/callback"
         self.slack_redirect_uri = f"{self.base_url}/auth/slack/callback"
+        
+        # Initialize Linear Dashboard Manager if API key is available
+        linear_api_key = os.getenv("LINEAR_API_KEY")
+        linear_webhook_secret = os.getenv("LINEAR_WEBHOOK_SECRET")
+        if linear_api_key:
+            try:
+                self.linear_manager = initialize_linear_dashboard(
+                    api_key=linear_api_key,
+                    webhook_secret=linear_webhook_secret
+                )
+                logger.info("Linear Dashboard Manager initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize Linear Dashboard Manager: {e}")
+                self.linear_manager = None
+        else:
+            logger.warning("LINEAR_API_KEY not found, Linear integration disabled")
+            self.linear_manager = None
 
 # Global configuration
 config = DashboardConfig()
 
-# FastAPI app
+# Templates
+templates = Jinja2Templates(directory="src/contexten/dashboard/templates")
+
+# Static files
 app = FastAPI(
     title="Contexten Management Dashboard",
     description="Management interface for GitHub/Linear integrations with Codegen SDK",
@@ -153,7 +182,13 @@ async def initialize_enhanced_dashboard():
         await project_manager.initialize()
         
         # Setup enhanced routes
-        setup_enhanced_routes(app)
+        setup_enhanced_routes(app, agents, monitor, orchestrator)
+        
+        # Add Linear router if Linear manager is available
+        if config.linear_manager:
+            linear_router = create_linear_router()
+            app.include_router(linear_router)
+            logger.info("Linear API routes added to dashboard")
         
         logger.info("Enhanced dashboard components initialized successfully")
     except Exception as e:
@@ -209,12 +244,6 @@ oauth.register(
     }
 )
 
-# Templates
-templates = Jinja2Templates(directory="src/contexten/dashboard/templates")
-
-# Static files
-app.mount("/static", StaticFiles(directory="src/contexten/dashboard/static"), name="static")
-
 # Global state
 integration_agents: Dict[str, Any] = {}
 user_sessions: Dict[str, Dict[str, Any]] = {}
@@ -253,29 +282,27 @@ async def require_auth(request: Request) -> Dict[str, Any]:
 # Routes
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard_home(request: Request):
-    """Dashboard home page"""
-    user = await get_current_user(request)
-    
-    if not user:
-        return templates.TemplateResponse("login.html", {
-            "request": request,
-            "github_auth_url": "/auth/github",
-            "linear_auth_url": "/auth/linear",
-            "slack_auth_url": "/auth/slack"
-        })
-    
-    # Get user's connected integrations
-    integrations = {
-        "github": user.get("github_token") is not None,
-        "linear": user.get("linear_token") is not None,
-        "slack": user.get("slack_token") is not None
-    }
-    
+async def dashboard_home(request: Request, user: Dict[str, Any] = Depends(require_auth)):
+    """Main dashboard page"""
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
         "user": user,
-        "integrations": integrations
+        "integrations": {
+            "github": user.get("github_token") is not None,
+            "linear": user.get("linear_token") is not None,
+            "slack": user.get("slack_token") is not None,
+        }
+    })
+
+@app.get("/linear", response_class=HTMLResponse)
+async def linear_dashboard_page(request: Request, user: Dict[str, Any] = Depends(require_auth)):
+    """Linear dashboard page"""
+    if not user.get("linear_token"):
+        raise HTTPException(status_code=403, detail="Linear integration required")
+    
+    return templates.TemplateResponse("linear_dashboard.html", {
+        "request": request,
+        "user": user
     })
 
 # Authentication Routes
@@ -1083,35 +1110,32 @@ async def create_linear_main_issue(
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize enhanced dashboard on startup"""
-    await initialize_enhanced_dashboard()
+    """Initialize dashboard components on startup"""
+    try:
+        # Initialize Linear Dashboard Manager
+        if config.linear_manager:
+            await config.linear_manager.start()
+            logger.info("Linear Dashboard Manager started")
+        
+        # Initialize enhanced dashboard components
+        await initialize_enhanced_dashboard()
+        
+        logger.info("Dashboard startup completed successfully")
+    except Exception as e:
+        logger.error(f"Error during dashboard startup: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Application shutdown"""
-    logger.info("Contexten Management Dashboard shutting down...")
-    
-    global prefect_dashboard_manager
-    
-    # Shutdown Prefect Dashboard Manager
-    if prefect_dashboard_manager:
-        try:
-            await prefect_dashboard_manager.shutdown()
-            logger.info("Prefect Dashboard Manager shutdown complete")
-        except Exception as e:
-            logger.error(f"Error shutting down Prefect Dashboard Manager: {e}")
-    
-    # Cleanup all integration agents
-    for agent in integration_agents.values():
-        try:
-            await agent.stop()
-        except Exception as e:
-            logger.error(f"Error stopping agent during shutdown: {e}")
-    
-    integration_agents.clear()
-    user_sessions.clear()
-    
-    logger.info("Dashboard shutdown complete")
+    """Cleanup dashboard components on shutdown"""
+    try:
+        # Stop Linear Dashboard Manager
+        if config.linear_manager:
+            await config.linear_manager.stop()
+            logger.info("Linear Dashboard Manager stopped")
+        
+        logger.info("Dashboard shutdown completed successfully")
+    except Exception as e:
+        logger.error(f"Error during dashboard shutdown: {e}")
 
 @app.get("/api/dashboard/overview")
 async def get_dashboard_overview():

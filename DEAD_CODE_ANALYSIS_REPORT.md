@@ -3,7 +3,7 @@
 ## 📊 Summary
 
 - **Total Files Analyzed**: 189
-- **Potentially Dead Files**: 63
+- **Potentially Dead Files**: 48
 - **Entry Points**: 36
 - **Core Feature Categories**: 16
 - **Potential Duplicates**: 161
@@ -15,48 +15,48 @@ These files are definitely NOT dead code as they serve as entry points:
 
 - `dashboard.py`
 - `dashboard.py`
-- `cli/cli.py`
-- `agents/codegen_config.py`
 - `extensions/contexten_app.py`
+- `mcp/server.py`
+- `mcp/server.py`
+- `mcp/server.py`
+- `dashboard/chat_manager.py`
 - `dashboard/project_manager.py`
-- `dashboard/app.py`
-- `dashboard/app.py`
 - `dashboard/flow_manager.py`
-- `dashboard/enhanced_routes.py`
-- `dashboard/advanced_analytics.py`
+- `dashboard/app.py`
+- `dashboard/app.py`
 - `dashboard/prefect_dashboard.py`
 - `dashboard/enhanced_codebase_ai.py`
-- `dashboard/workflow_automation.py`
 - `dashboard/orchestrator_integration.py`
-- `dashboard/chat_manager.py`
-- `mcp/server.py`
-- `mcp/server.py`
-- `mcp/server.py`
-- `mcp/codebase/codebase_tools.py`
+- `dashboard/workflow_automation.py`
+- `dashboard/advanced_analytics.py`
+- `dashboard/enhanced_routes.py`
+- `agents/codegen_config.py`
+- `cli/cli.py`
+- `cli/commands/profile/main.py`
+- `cli/commands/serve/main.py`
+- `cli/commands/serve/main.py`
+- `cli/commands/run/main.py`
+- `cli/commands/create/main.py`
+- `cli/commands/deploy/main.py`
+- `cli/commands/run_on_pr/main.py`
+- `cli/commands/login/main.py`
+- `cli/commands/agent/main.py`
+- `cli/commands/expert/main.py`
 - `mcp/codebase/codebase_mods.py`
 - `mcp/codebase/codebase_agent.py`
-- `extensions/open_evolve/app.py`
-- `extensions/open_evolve/app.py`
+- `mcp/codebase/codebase_tools.py`
 - `extensions/open_evolve/main.py`
+- `extensions/open_evolve/app.py`
+- `extensions/open_evolve/app.py`
 - `extensions/open_evolve/database_agent/agent.py`
-- `cli/commands/serve/main.py`
-- `cli/commands/serve/main.py`
-- `cli/commands/expert/main.py`
-- `cli/commands/run_on_pr/main.py`
-- `cli/commands/agent/main.py`
-- `cli/commands/create/main.py`
-- `cli/commands/profile/main.py`
-- `cli/commands/run/main.py`
-- `cli/commands/login/main.py`
-- `cli/commands/deploy/main.py`
 
 
-## 💀 Potentially Dead Code (63 files)
+## 💀 Potentially Dead Code (48 files)
 
 These files are not imported by any other files and may be dead code:
 
 
-### Agents (17 files)
+### Agents (16 files)
 
 - `agents/data.py`
 - `agents/langchain/graph.py`
@@ -67,7 +67,6 @@ These files are not imported by any other files and may be dead code:
 - `agents/tools/github/create_pr.py`
 - `agents/tools/github/create_pr_comment.py`
 - `agents/tools/github/create_pr_review_comment.py`
-- `agents/tools/github/search.py`
 - `agents/tools/list_directory.py`
 - `agents/tools/move_symbol.py`
 - `agents/tools/relace_edit_prompts.py`
@@ -84,11 +83,10 @@ These files are not imported by any other files and may be dead code:
 - `cli/sdk/pull_request.py`
 - `cli/workspace/initialize_workspace.py`
 
-### Extensions (40 files)
+### Extensions (26 files)
 
 - `extensions/client.py`
 - `extensions/github/events/manager.py`
-- `extensions/github/github.py`
 - `extensions/github/github_types.py`
 - `extensions/github/types/commit.py`
 - `extensions/github/types/enterprise.py`
@@ -99,19 +97,11 @@ These files are not imported by any other files and may be dead code:
 - `extensions/github/types/push.py`
 - `extensions/github/webhook/processor.py`
 - `extensions/github/workflow/automation.py`
-- `extensions/linear/assignment/detector.py`
 - `extensions/linear/assignment_detector.py`
-- `extensions/linear/events/manager.py`
-- `extensions/linear/linearclient.py`
 - `extensions/linear/linearevents.py`
-- `extensions/linear/mutations.py`
-- `extensions/linear/queries.py`
 - `extensions/linear/webhook/handlers.py`
-- `extensions/linear/webhook/processor.py`
 - `extensions/linear/webhook/validator.py`
 - `extensions/linear/webhook_processor.py`
-- `extensions/linear/workflow/automation.py`
-- `extensions/linear/workflow_automation.py`
 - `extensions/modal/base.py`
 - `extensions/modal/request_util.py`
 - `extensions/open_evolve/code_generator/agent.py`
@@ -120,11 +110,6 @@ These files are not imported by any other files and may be dead code:
 - `extensions/open_evolve/prompt_designer/agent.py`
 - `extensions/open_evolve/selection_controller/agent.py`
 - `extensions/open_evolve/task_manager/agent.py`
-- `extensions/prefect/client.py`
-- `extensions/prefect/config.py`
-- `extensions/prefect/notifications.py`
-- `extensions/prefect/tasks.py`
-- `extensions/prefect/workflows.py`
 - `extensions/slack/slack.py`
 
 ### Orchestration (1 files)
@@ -177,7 +162,7 @@ These files are not imported by any other files and may be dead code:
 - `dashboard.py`
 - ... and 47 more files
 
-### Extensions (108 files)
+### Extensions (110 files)
 
 - `agents/chat_agent.py`
 - `agents/code_agent.py`
@@ -185,11 +170,11 @@ These files are not imported by any other files and may be dead code:
 - `agents/langchain/graph.py`
 - `agents/langchain/prompts.py`
 - `agents/langchain/tools.py`
+- `agents/tools/__init__.py`
 - `agents/tools/linear/linear.py`
 - `agents/tools/link_annotation.py`
 - `agents/tools/relace_edit_prompts.py`
-- `agents/tools/search.py`
-- ... and 98 more files
+- ... and 100 more files
 
 ### Linear (76 files)
 
@@ -233,7 +218,7 @@ These files are not imported by any other files and may be dead code:
 - `extensions/contexten_app.py`
 - ... and 13 more files
 
-### Cli (111 files)
+### Cli (112 files)
 
 - `agents/chat_agent.py`
 - `agents/code_agent.py`
@@ -242,10 +227,10 @@ These files are not imported by any other files and may be dead code:
 - `agents/langchain/prompts.py`
 - `agents/langchain/tools.py`
 - `agents/langchain/utils/get_langsmith_url.py`
+- `agents/tools/__init__.py`
 - `agents/tools/bash.py`
 - `agents/tools/github/create_pr.py`
-- `agents/tools/linear/linear.py`
-- ... and 101 more files
+- ... and 102 more files
 
 ### Mcp (23 files)
 
@@ -261,7 +246,7 @@ These files are not imported by any other files and may be dead code:
 - `dashboard/app.py`
 - ... and 13 more files
 
-### Shared (144 files)
+### Shared (145 files)
 
 - `agents/chat_agent.py`
 - `agents/code_agent.py`
@@ -273,7 +258,7 @@ These files are not imported by any other files and may be dead code:
 - `agents/langchain/llm.py`
 - `agents/langchain/prompts.py`
 - `agents/langchain/tools.py`
-- ... and 134 more files
+- ... and 135 more files
 
 ### Logging (83 files)
 
@@ -317,7 +302,7 @@ These files are not imported by any other files and may be dead code:
 - `agents/tools/bash.py`
 - ... and 67 more files
 
-### Api (98 files)
+### Api (99 files)
 
 - `agents/chat_agent.py`
 - `agents/code_agent.py`
@@ -327,9 +312,9 @@ These files are not imported by any other files and may be dead code:
 - `agents/langchain/prompts.py`
 - `agents/langchain/tools.py`
 - `agents/langchain/utils/get_langsmith_url.py`
+- `agents/tools/__init__.py`
 - `agents/tools/github/create_pr.py`
-- `agents/tools/github/create_pr_comment.py`
-- ... and 88 more files
+- ... and 89 more files
 
 ### Database (60 files)
 
@@ -372,65 +357,33 @@ These files are not imported by any other files and may be dead code:
 ### __Init__
 
 - `dashboard.py`
-- `agents/tracer.py`
-- `agents/chat_agent.py`
-- `agents/code_agent.py`
-- `extensions/contexten_app.py`
-- `extensions/contexten_app.py`
-- `extensions/client.py`
-- `dashboard/project_manager.py`
-- `dashboard/project_manager.py`
-- `dashboard/project_manager.py`
-- `dashboard/app.py`
-- `dashboard/flow_manager.py`
-- `dashboard/flow_manager.py`
-- `dashboard/flow_manager.py`
-- `dashboard/advanced_analytics.py`
-- `dashboard/prefect_dashboard.py`
-- `dashboard/enhanced_codebase_ai.py`
-- `dashboard/workflow_automation.py`
-- `dashboard/orchestrator_integration.py`
-- `dashboard/chat_manager.py`
-- `dashboard/chat_manager.py`
 - `orchestration/prefect_client.py`
 - `orchestration/autonomous_orchestrator.py`
 - `orchestration/monitoring.py`
-- `extensions/prefect/client.py`
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-- `extensions/github/github.py`
-- `extensions/open_evolve/app.py`
-- `extensions/open_evolve/app.py`
-- `extensions/slack/enhanced_agent.py`
-- `extensions/slack/slack.py`
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/enhanced_agent.py`
-- `extensions/linear/linearclient.py`
-- `extensions/linear/workflow_automation.py`
-- `extensions/linear/integration_agent.py`
-- `extensions/linear/linearevents.py`
-- `extensions/linear/linear_client.py`
-- `extensions/linear/enhanced_client.py`
-- `extensions/linear/enhanced_client.py`
-- `extensions/linear/enhanced_client.py`
-- `extensions/linear/assignment_detector.py`
-- `extensions/linear/events/manager.py`
-- `extensions/linear/assignment/detector.py`
-- `extensions/linear/workflow/automation.py`
-- `extensions/linear/webhook/processor.py`
-- `extensions/linear/webhook/handlers.py`
-- `extensions/linear/webhook/validator.py`
-- `extensions/open_evolve/database_agent/agent.py`
-- `extensions/open_evolve/selection_controller/agent.py`
-- `extensions/open_evolve/selection_controller/agent.py`
-- `extensions/open_evolve/prompt_designer/agent.py`
-- `extensions/open_evolve/task_manager/agent.py`
-- `extensions/open_evolve/evaluator_agent/agent.py`
-- `extensions/open_evolve/code_generator/agent.py`
-- `extensions/github/events/manager.py`
-- `extensions/github/workflow/automation.py`
-- `extensions/github/webhook/processor.py`
-- `agents/langchain/llm.py`
+- `extensions/client.py`
+- `extensions/contexten_app.py`
+- `extensions/contexten_app.py`
+- `dashboard/chat_manager.py`
+- `dashboard/chat_manager.py`
+- `dashboard/project_manager.py`
+- `dashboard/project_manager.py`
+- `dashboard/project_manager.py`
+- `dashboard/flow_manager.py`
+- `dashboard/flow_manager.py`
+- `dashboard/flow_manager.py`
+- `dashboard/app.py`
+- `dashboard/prefect_dashboard.py`
+- `dashboard/enhanced_codebase_ai.py`
+- `dashboard/orchestrator_integration.py`
+- `dashboard/workflow_automation.py`
+- `dashboard/advanced_analytics.py`
+- `agents/tracer.py`
+- `agents/code_agent.py`
+- `agents/chat_agent.py`
+- `cli/env/global_env.py`
+- `cli/sdk/pull_request.py`
+- `cli/api/client.py`
+- `cli/auth/token_manager.py`
 - `agents/langchain/graph.py`
 - `agents/langchain/tools.py`
 - `agents/langchain/tools.py`
@@ -463,60 +416,152 @@ These files are not imported by any other files and may be dead code:
 - `agents/langchain/tools.py`
 - `agents/langchain/tools.py`
 - `agents/langchain/tools.py`
-- `cli/api/client.py`
-- `cli/env/global_env.py`
-- `cli/auth/token_manager.py`
-- `cli/sdk/pull_request.py`
+- `agents/langchain/llm.py`
+- `extensions/open_evolve/app.py`
+- `extensions/open_evolve/app.py`
+- `extensions/slack/slack.py`
+- `extensions/slack/enhanced_agent.py`
+- `extensions/github/github.py`
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+- `extensions/linear/enhanced_agent.py`
+- `extensions/linear/linearclient.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/linear_client.py`
+- `extensions/linear/integration_agent.py`
+- `extensions/linear/workflow_automation.py`
+- `extensions/linear/enhanced_client.py`
+- `extensions/linear/enhanced_client.py`
+- `extensions/linear/enhanced_client.py`
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/assignment_detector.py`
+- `extensions/prefect/client.py`
+- `extensions/linear/webhook/handlers.py`
+- `extensions/linear/webhook/processor.py`
+- `extensions/linear/webhook/validator.py`
+- `extensions/linear/assignment/detector.py`
+- `extensions/linear/events/manager.py`
+- `extensions/linear/workflow/automation.py`
+- `extensions/github/workflow/automation.py`
+- `extensions/github/webhook/processor.py`
+- `extensions/github/events/manager.py`
+- `extensions/open_evolve/task_manager/agent.py`
+- `extensions/open_evolve/database_agent/agent.py`
+- `extensions/open_evolve/prompt_designer/agent.py`
+- `extensions/open_evolve/evaluator_agent/agent.py`
+- `extensions/open_evolve/selection_controller/agent.py`
+- `extensions/open_evolve/selection_controller/agent.py`
+- `extensions/open_evolve/code_generator/agent.py`
 
 ### Shutdown
 
 - `dashboard.py`
-- `dashboard/prefect_dashboard.py`
 - `orchestration/prefect_client.py`
 - `orchestration/autonomous_orchestrator.py`
 - `orchestration/monitoring.py`
+- `dashboard/prefect_dashboard.py`
 - `extensions/prefect/client.py`
 
-### Chat
+### _Validate_Configuration
 
-- `agents/chat_agent.py`
-- `agents/chat_agent.py`
-- `dashboard/chat_manager.py`
-- `dashboard/chat_manager.py`
+- `orchestration/config.py`
+- `orchestration/autonomous_orchestrator.py`
 
-### _Should_Use_Codegen_Sdk
+### To_Dict
 
-- `agents/chat_agent.py`
-- `agents/code_agent.py`
-
-### Run
-
-- `agents/chat_agent.py`
-- `agents/code_agent.py`
-- `cli/api/client.py`
-- `cli/sdk/function.py`
-- `cli/sdk/functions.py`
-
-### Get_Chat_History
-
-- `agents/chat_agent.py`
-- `dashboard/app.py`
-
-### Get_Codegen_Status
-
-- `agents/codegen_config.py`
-- `dashboard/app.py`
-
-### From_Env
-
-- `agents/codegen_config.py`
+- `orchestration/config.py`
+- `agents/tools/search.py`
 - `extensions/linear/config.py`
 
-### Validate
+### From_Dict
 
-- `agents/codegen_config.py`
-- `extensions/linear/config.py`
-- `extensions/linear/types.py`
+- `orchestration/config.py`
+- `extensions/github/types.py`
+- `extensions/github/types.py`
+- `extensions/github/types.py`
+- `extensions/github/types.py`
+
+### Prefectorchestrator
+
+- `orchestration/prefect_client.py`
+- `extensions/prefect/client.py`
+
+### Sync_With_Linear
+
+- `orchestration/prefect_client.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/integration_agent.py`
+
+### Initialize
+
+- `orchestration/prefect_client.py`
+- `orchestration/autonomous_orchestrator.py`
+- `orchestration/monitoring.py`
+- `dashboard/prefect_dashboard.py`
+- `extensions/github/enhanced_client.py`
+- `extensions/linear/integration_agent.py`
+- `extensions/prefect/client.py`
+- `extensions/linear/assignment/detector.py`
+
+### Trigger_Workflow
+
+- `orchestration/prefect_client.py`
+- `dashboard/prefect_dashboard.py`
+- `extensions/github/enhanced_agent.py`
+- `extensions/linear/enhanced_agent.py`
+- `extensions/linear/workflow/automation.py`
+- `extensions/github/workflow/automation.py`
+
+### Get_Workflow_Status
+
+- `orchestration/prefect_client.py`
+- `dashboard/prefect_dashboard.py`
+- `dashboard/workflow_automation.py`
+- `extensions/prefect/client.py`
+
+### Cancel_Workflow
+
+- `orchestration/prefect_client.py`
+- `dashboard/prefect_dashboard.py`
+- `dashboard/workflow_automation.py`
+- `extensions/prefect/client.py`
+
+### List_Active_Workflows
+
+- `orchestration/prefect_client.py`
+- `extensions/prefect/client.py`
+
+### Get_Workflow_History
+
+- `orchestration/prefect_client.py`
+- `dashboard/prefect_dashboard.py`
+- `extensions/prefect/client.py`
+
+### Get_Metrics
+
+- `orchestration/prefect_client.py`
+- `extensions/contexten_app.py`
+- `dashboard/prefect_dashboard.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/integration_agent.py`
+
+### Trigger_Component_Analysis
+
+- `orchestration/prefect_client.py`
+- `dashboard/prefect_dashboard.py`
+
+### Get_System_Metrics
+
+- `orchestration/autonomous_orchestrator.py`
+- `extensions/contexten_app.py`
+- `dashboard/enhanced_routes.py`
+- `extensions/prefect/client.py`
+
+### Close
+
+- `extensions/client.py`
+- `extensions/github/enhanced_client.py`
+- `extensions/linear/enhanced_client.py`
 
 ### _Setup_Routes
 
@@ -527,61 +572,67 @@ These files are not imported by any other files and may be dead code:
 
 - `extensions/contexten_app.py`
 - `dashboard/orchestrator_integration.py`
-- `extensions/github/enhanced_agent.py`
 - `extensions/slack/enhanced_agent.py`
+- `extensions/github/enhanced_agent.py`
 - `extensions/linear/enhanced_agent.py`
 - `extensions/linear/enhanced_client.py`
-- `extensions/linear/events/manager.py`
 - `extensions/linear/webhook/processor.py`
-- `extensions/github/events/manager.py`
+- `extensions/linear/events/manager.py`
 - `extensions/github/workflow/automation.py`
+- `extensions/github/events/manager.py`
 
 ### Stop
 
 - `extensions/contexten_app.py`
 - `dashboard/orchestrator_integration.py`
-- `extensions/github/enhanced_agent.py`
 - `extensions/slack/enhanced_agent.py`
+- `extensions/github/enhanced_agent.py`
 - `extensions/linear/enhanced_agent.py`
-- `extensions/linear/events/manager.py`
 - `extensions/linear/webhook/processor.py`
-- `extensions/github/events/manager.py`
+- `extensions/linear/events/manager.py`
 - `extensions/github/workflow/automation.py`
+- `extensions/github/events/manager.py`
 
 ### _Health_Check_Loop
 
 - `extensions/contexten_app.py`
 - `extensions/linear/integration_agent.py`
 
-### Get_System_Metrics
-
-- `extensions/contexten_app.py`
-- `dashboard/enhanced_routes.py`
-- `orchestration/autonomous_orchestrator.py`
-- `extensions/prefect/client.py`
-
 ### Health_Check
 
 - `extensions/contexten_app.py`
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
 - `extensions/slack/enhanced_agent.py`
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
 - `extensions/linear/enhanced_agent.py`
 - `extensions/linear/enhanced_client.py`
 
-### Get_Metrics
+### Get_Docs
 
-- `extensions/contexten_app.py`
-- `dashboard/prefect_dashboard.py`
-- `orchestration/prefect_client.py`
-- `extensions/linear/integration_agent.py`
-- `extensions/linear/linearevents.py`
+- `mcp/server.py`
+- `cli/api/client.py`
 
-### Close
+### Improve_Codemod
 
-- `extensions/client.py`
-- `extensions/github/enhanced_client.py`
-- `extensions/linear/enhanced_client.py`
+- `mcp/server.py`
+- `cli/api/client.py`
+
+### Chat
+
+- `dashboard/chat_manager.py`
+- `dashboard/chat_manager.py`
+- `agents/chat_agent.py`
+- `agents/chat_agent.py`
+
+### Stop_
+
+- `dashboard/chat_manager.py`
+- `dashboard/app.py`
+
+### Get_Monitoring_Status
+
+- `dashboard/chat_manager.py`
+- `dashboard/app.py`
 
 ### Add_Requirement
 
@@ -623,11 +674,46 @@ These files are not imported by any other files and may be dead code:
 - `dashboard/project_manager.py`
 - `dashboard/enhanced_routes.py`
 
+### Flowtemplate
+
+- `dashboard/flow_manager.py`
+- `dashboard/flow_manager.py`
+
+### Start_Flow
+
+- `dashboard/flow_manager.py`
+- `dashboard/flow_manager.py`
+- `dashboard/app.py`
+- `dashboard/enhanced_routes.py`
+
+### Complete_Flow
+
+- `dashboard/flow_manager.py`
+- `dashboard/flow_manager.py`
+
+### Create_Flow
+
+- `dashboard/flow_manager.py`
+- `dashboard/app.py`
+- `dashboard/app.py`
+- `dashboard/enhanced_routes.py`
+
+### Stop_Flow
+
+- `dashboard/flow_manager.py`
+- `dashboard/app.py`
+- `dashboard/enhanced_routes.py`
+
+### Get_Flow
+
+- `dashboard/flow_manager.py`
+- `dashboard/app.py`
+
 ### Get_Current_User
 
 - `dashboard/app.py`
-- `extensions/github/enhanced_agent.py`
 - `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
 
 ### Dashboard_Home
 
@@ -640,50 +726,25 @@ These files are not imported by any other files and may be dead code:
 - `extensions/linear/enhanced_agent.py`
 - `extensions/linear/enhanced_client.py`
 
-### Stop_
+### Get_Codegen_Status
 
 - `dashboard/app.py`
-- `dashboard/chat_manager.py`
+- `agents/codegen_config.py`
 
-### Get_Monitoring_Status
+### Get_Chat_History
 
 - `dashboard/app.py`
-- `dashboard/chat_manager.py`
+- `agents/chat_agent.py`
 
 ### Get_Integration_Status
 
 - `dashboard/app.py`
-- `extensions/linear/integration_agent.py`
 - `extensions/linear/linearevents.py`
+- `extensions/linear/integration_agent.py`
 
 ### Get_Flows
 
 - `dashboard/app.py`
-- `dashboard/enhanced_routes.py`
-
-### Create_Flow
-
-- `dashboard/app.py`
-- `dashboard/app.py`
-- `dashboard/flow_manager.py`
-- `dashboard/enhanced_routes.py`
-
-### Get_Flow
-
-- `dashboard/app.py`
-- `dashboard/flow_manager.py`
-
-### Start_Flow
-
-- `dashboard/app.py`
-- `dashboard/flow_manager.py`
-- `dashboard/flow_manager.py`
-- `dashboard/enhanced_routes.py`
-
-### Stop_Flow
-
-- `dashboard/app.py`
-- `dashboard/flow_manager.py`
 - `dashboard/enhanced_routes.py`
 
 ### Get_Flow_Templates
@@ -721,81 +782,16 @@ These files are not imported by any other files and may be dead code:
 - `dashboard/app.py`
 - `dashboard/prefect_dashboard.py`
 
-### Flowtemplate
-
-- `dashboard/flow_manager.py`
-- `dashboard/flow_manager.py`
-
-### Complete_Flow
-
-- `dashboard/flow_manager.py`
-- `dashboard/flow_manager.py`
-
 ### _Analyze_Code_Quality
 
-- `dashboard/advanced_analytics.py`
 - `dashboard/enhanced_codebase_ai.py`
-- `extensions/prefect/tasks.py`
-
-### _Analyze_Security
-
-- `dashboard/advanced_analytics.py`
-- `extensions/prefect/tasks.py`
-
-### _Analyze_Performance
-
 - `dashboard/advanced_analytics.py`
 - `extensions/prefect/tasks.py`
 
 ### _Generate_Recommendations
 
-- `dashboard/advanced_analytics.py`
 - `dashboard/orchestrator_integration.py`
-
-### Initialize
-
-- `dashboard/prefect_dashboard.py`
-- `orchestration/prefect_client.py`
-- `orchestration/autonomous_orchestrator.py`
-- `orchestration/monitoring.py`
-- `extensions/prefect/client.py`
-- `extensions/github/enhanced_client.py`
-- `extensions/linear/integration_agent.py`
-- `extensions/linear/assignment/detector.py`
-
-### Trigger_Workflow
-
-- `dashboard/prefect_dashboard.py`
-- `orchestration/prefect_client.py`
-- `extensions/github/enhanced_agent.py`
-- `extensions/linear/enhanced_agent.py`
-- `extensions/linear/workflow/automation.py`
-- `extensions/github/workflow/automation.py`
-
-### Get_Workflow_Status
-
-- `dashboard/prefect_dashboard.py`
-- `dashboard/workflow_automation.py`
-- `orchestration/prefect_client.py`
-- `extensions/prefect/client.py`
-
-### Cancel_Workflow
-
-- `dashboard/prefect_dashboard.py`
-- `dashboard/workflow_automation.py`
-- `orchestration/prefect_client.py`
-- `extensions/prefect/client.py`
-
-### Get_Workflow_History
-
-- `dashboard/prefect_dashboard.py`
-- `orchestration/prefect_client.py`
-- `extensions/prefect/client.py`
-
-### Trigger_Component_Analysis
-
-- `dashboard/prefect_dashboard.py`
-- `orchestration/prefect_client.py`
+- `dashboard/advanced_analytics.py`
 
 ### Workflowtrigger
 
@@ -812,55 +808,363 @@ These files are not imported by any other files and may be dead code:
 - `dashboard/workflow_automation.py`
 - `extensions/linear/workflow/automation.py`
 
-### _Validate_Configuration
+### _Analyze_Security
 
-- `orchestration/config.py`
-- `orchestration/autonomous_orchestrator.py`
+- `dashboard/advanced_analytics.py`
+- `extensions/prefect/tasks.py`
 
-### To_Dict
+### _Analyze_Performance
 
-- `orchestration/config.py`
+- `dashboard/advanced_analytics.py`
+- `extensions/prefect/tasks.py`
+
+### From_Env
+
+- `agents/codegen_config.py`
 - `extensions/linear/config.py`
+
+### Validate
+
+- `agents/codegen_config.py`
+- `extensions/linear/config.py`
+- `extensions/linear/types.py`
+
+### _Should_Use_Codegen_Sdk
+
+- `agents/code_agent.py`
+- `agents/chat_agent.py`
+
+### Run
+
+- `agents/code_agent.py`
+- `agents/chat_agent.py`
+- `cli/sdk/function.py`
+- `cli/sdk/functions.py`
+- `cli/api/client.py`
+
+### __Repr__
+
+- `cli/env/global_env.py`
+- `agents/tools/observation.py`
+
+### Pretty_Print_Output
+
+- `cli/rich/pretty_print.py`
+- `cli/commands/run/render.py`
+
+### Pretty_Print_Logs
+
+- `cli/rich/pretty_print.py`
+- `cli/commands/run/render.py`
+
+### Pretty_Print_Error
+
+- `cli/rich/pretty_print.py`
+- `cli/commands/run/render.py`
+
+### Pretty_Print_Diff
+
+- `cli/rich/pretty_print.py`
+- `cli/commands/run/render.py`
+
+### Lookup
+
+- `cli/sdk/pull_request.py`
+- `cli/sdk/function.py`
+- `cli/sdk/functions.py`
+- `cli/api/client.py`
+
+### __Str__
+
+- `cli/sdk/pull_request.py`
+- `agents/tools/observation.py`
+
+### Pullrequest
+
+- `cli/sdk/function.py`
+- `extensions/github/types/pull_request.py`
+
+### Function
+
+- `cli/sdk/function.py`
+- `cli/sdk/functions.py`
+
+### _Make_Request
+
+- `cli/api/client.py`
+- `extensions/linear/enhanced_client.py`
+
+### Create
+
+- `cli/api/client.py`
+- `agents/langchain/graph.py`
+
+### Run_On_Pr
+
+- `cli/api/client.py`
+- `cli/commands/run_on_pr/main.py`
+
+### User
+
+- `cli/api/schemas.py`
+- `extensions/github/types/events/pull_request.py`
+
+### Get_Workspace_Tools
+
+- `agents/langchain/__init__.py`
+- `agents/langchain/tools.py`
+
+### _Run
+
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+- `agents/langchain/tools.py`
+
+### Generate_Diff
+
+- `agents/tools/replacement_edit.py`
+- `agents/tools/global_replacement_edit.py`
+- `agents/tools/semantic_edit.py`
+- `agents/tools/relace_edit.py`
+
+### Searchmatch
+
 - `agents/tools/search.py`
+- `agents/tools/tool_output_types.py`
 
-### From_Dict
+### Search
 
-- `orchestration/config.py`
-- `extensions/github/types.py`
-- `extensions/github/types.py`
-- `extensions/github/types.py`
-- `extensions/github/types.py`
+- `agents/tools/search.py`
+- `agents/tools/github/search.py`
 
-### Prefectorchestrator
+### Render_As_String
 
-- `orchestration/prefect_client.py`
-- `extensions/prefect/client.py`
+- `agents/tools/search.py`
+- `agents/tools/search.py`
+- `agents/tools/list_directory.py`
+- `agents/tools/observation.py`
 
-### Sync_With_Linear
+### _Get_Details
 
-- `orchestration/prefect_client.py`
-- `extensions/linear/integration_agent.py`
+- `agents/tools/search.py`
+- `agents/tools/reflection.py`
+- `agents/tools/list_directory.py`
+- `agents/tools/reveal_symbol.py`
+- `agents/tools/observation.py`
+- `agents/tools/semantic_search.py`
+- `agents/tools/linear/linear.py`
+- `agents/tools/linear/linear.py`
+- `agents/tools/linear/linear.py`
+
+### Render
+
+- `agents/tools/search.py`
+- `agents/tools/reflection.py`
+- `agents/tools/list_directory.py`
+- `agents/tools/view_file.py`
+- `agents/tools/semantic_edit.py`
+- `agents/tools/observation.py`
+- `agents/tools/relace_edit.py`
+- `agents/tools/edit_file.py`
+
+### Total
+
+- `agents/tools/search_files_by_name.py`
+- `agents/tools/github/search.py`
+
+### Create_Pr_Comment
+
+- `agents/tools/github/create_pr_comment.py`
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Handle_Event
+
+- `extensions/modal/base.py`
+- `extensions/linear/webhook/handlers.py`
+
+### Unsubscribe_All_Handlers
+
+- `extensions/modal/interface.py`
+- `extensions/slack/slack.py`
+- `extensions/github/github.py`
 - `extensions/linear/linearevents.py`
 
-### List_Active_Workflows
+### Emit
 
-- `orchestration/prefect_client.py`
-- `extensions/prefect/client.py`
+- `extensions/open_evolve/app.py`
+- `extensions/open_evolve/app.py`
 
-### Get_Docs
+### Handle
 
-- `mcp/server.py`
-- `cli/api/client.py`
+- `extensions/slack/slack.py`
+- `extensions/github/github.py`
+- `extensions/linear/linearevents.py`
 
-### Improve_Codemod
+### Event
 
-- `mcp/server.py`
-- `cli/api/client.py`
+- `extensions/slack/slack.py`
+- `extensions/github/github.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/events/manager.py`
+
+### Register_
+
+- `extensions/slack/slack.py`
+- `extensions/github/github.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/webhook/processor.py`
+
+### New_Func
+
+- `extensions/slack/slack.py`
+- `extensions/github/github.py`
+- `extensions/linear/linearevents.py`
 
 ### Enhancedgithub
 
-- `extensions/github/enhanced_agent.py`
 - `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_Repositories
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_Repository
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Create_Repository
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_Issues
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+- `extensions/linear/enhanced_client.py`
+
+### Create_Issue
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+- `extensions/linear/enhanced_agent.py`
+- `extensions/linear/linear_client.py`
+- `extensions/linear/enhanced_client.py`
+
+### Update_Issue
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+- `extensions/linear/enhanced_agent.py`
+- `extensions/linear/enhanced_client.py`
+
+### Get_Pull_Requests
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Create_Pull_Request
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Update_Pull_Request
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Create_Issue_Comment
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_User
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_Organizations
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_Organization_Repositories
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_Branches
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Create_Branch
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Get_File_Content
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Create_Or_Update_File
+
+- `extensions/github/enhanced_client.py`
+- `extensions/github/enhanced_agent.py`
+
+### Githubrepository
+
+- `extensions/github/github_types.py`
+- `extensions/github/types.py`
+- `extensions/github/types/base.py`
+
+### Githubinstallation
+
+- `extensions/github/github_types.py`
+- `extensions/github/types/base.py`
+- `extensions/github/types/installation.py`
+
+### Githubuser
+
+- `extensions/github/github_types.py`
+- `extensions/github/types.py`
+- `extensions/github/types/base.py`
 
 ### _Periodic_Sync
 
@@ -872,125 +1176,16 @@ These files are not imported by any other files and may be dead code:
 - `extensions/github/enhanced_agent.py`
 - `extensions/linear/enhanced_agent.py`
 
-### Get_Repositories
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Get_Repository
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Create_Repository
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Get_Issues
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-- `extensions/linear/enhanced_client.py`
-
-### Create_Issue
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-- `extensions/linear/enhanced_agent.py`
-- `extensions/linear/linear_client.py`
-- `extensions/linear/enhanced_client.py`
-
-### Update_Issue
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-- `extensions/linear/enhanced_agent.py`
-- `extensions/linear/enhanced_client.py`
-
-### Get_Pull_Requests
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Create_Pull_Request
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Update_Pull_Request
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Create_Issue_Comment
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Create_Pr_Comment
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-- `agents/tools/github/create_pr_comment.py`
-
 ### Process_Webhook
 
 - `extensions/github/enhanced_agent.py`
-- `extensions/linear/webhook_processor.py`
 - `extensions/linear/enhanced_agent.py`
-
-### Get_User
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Get_Organizations
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Get_Organization_Repositories
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Get_Branches
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Create_Branch
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Get_File_Content
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
-
-### Create_Or_Update_File
-
-- `extensions/github/enhanced_agent.py`
-- `extensions/github/enhanced_client.py`
+- `extensions/linear/webhook_processor.py`
 
 ### Create_Codegen_Task
 
 - `extensions/github/enhanced_agent.py`
 - `extensions/linear/enhanced_agent.py`
-
-### Githubuser
-
-- `extensions/github/types.py`
-- `extensions/github/github_types.py`
-- `extensions/github/types/base.py`
-
-### Githubrepository
-
-- `extensions/github/types.py`
-- `extensions/github/github_types.py`
-- `extensions/github/types/base.py`
 
 ### Githubissue
 
@@ -1001,90 +1196,6 @@ These files are not imported by any other files and may be dead code:
 
 - `extensions/github/types.py`
 - `extensions/github/types/base.py`
-
-### Githubinstallation
-
-- `extensions/github/github_types.py`
-- `extensions/github/types/base.py`
-- `extensions/github/types/installation.py`
-
-### Unsubscribe_All_Handlers
-
-- `extensions/github/github.py`
-- `extensions/slack/slack.py`
-- `extensions/modal/interface.py`
-- `extensions/linear/linearevents.py`
-
-### Event
-
-- `extensions/github/github.py`
-- `extensions/slack/slack.py`
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/linearevents.py`
-- `extensions/linear/events/manager.py`
-
-### Handle
-
-- `extensions/github/github.py`
-- `extensions/slack/slack.py`
-- `extensions/linear/linearevents.py`
-
-### Register_
-
-- `extensions/github/github.py`
-- `extensions/slack/slack.py`
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/linearevents.py`
-- `extensions/linear/webhook/processor.py`
-
-### New_Func
-
-- `extensions/github/github.py`
-- `extensions/slack/slack.py`
-- `extensions/linear/linearevents.py`
-
-### Emit
-
-- `extensions/open_evolve/app.py`
-- `extensions/open_evolve/app.py`
-
-### Handle_Event
-
-- `extensions/modal/base.py`
-- `extensions/linear/webhook/handlers.py`
-
-### Webhook
-
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/webhook/processor.py`
-
-### Unregister_
-
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/webhook/processor.py`
-
-### _Process_Event
-
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/events/manager.py`
-
-### Process_Event_Directly
-
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/integration_agent.py`
-
-### Get_Stats
-
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/workflow_automation.py`
-- `extensions/linear/assignment_detector.py`
-- `extensions/linear/webhook/processor.py`
-
-### Cleanup
-
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/integration_agent.py`
-- `extensions/linear/linearevents.py`
 
 ### Enhancedlinear
 
@@ -1107,11 +1218,6 @@ These files are not imported by any other files and may be dead code:
 - `extensions/linear/enhanced_agent.py`
 - `extensions/linear/linear_client.py`
 - `extensions/linear/enhanced_client.py`
-
-### Linearintegrationconfig
-
-- `extensions/linear/config.py`
-- `extensions/linear/types.py`
 
 ### Linearuser
 
@@ -1149,20 +1255,31 @@ These files are not imported by any other files and may be dead code:
 - `extensions/linear/linearclient.py`
 - `extensions/linear/linear_client.py`
 
-### Workflowautomation
+### Cleanup
 
-- `extensions/linear/workflow_automation.py`
-- `extensions/linear/workflow/automation.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/integration_agent.py`
+- `extensions/linear/webhook_processor.py`
 
 ### Get_Active_Tasks
 
-- `extensions/linear/workflow_automation.py`
 - `extensions/linear/linearevents.py`
+- `extensions/linear/workflow_automation.py`
 
 ### Handle_Webhook
 
-- `extensions/linear/integration_agent.py`
 - `extensions/linear/linearevents.py`
+- `extensions/linear/integration_agent.py`
+
+### Linearintegrationconfig
+
+- `extensions/linear/config.py`
+- `extensions/linear/types.py`
+
+### Process_Event_Directly
+
+- `extensions/linear/integration_agent.py`
+- `extensions/linear/webhook_processor.py`
 
 ### __Aenter__
 
@@ -1174,15 +1291,37 @@ These files are not imported by any other files and may be dead code:
 - `extensions/linear/integration_agent.py`
 - `extensions/linear/enhanced_client.py`
 
+### Workflowautomation
+
+- `extensions/linear/workflow_automation.py`
+- `extensions/linear/workflow/automation.py`
+
+### Get_Stats
+
+- `extensions/linear/workflow_automation.py`
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/assignment_detector.py`
+- `extensions/linear/webhook/processor.py`
+
+### Webhook
+
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/webhook/processor.py`
+
+### Unregister_
+
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/webhook/processor.py`
+
+### _Process_Event
+
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/events/manager.py`
+
 ### Is_Completed
 
 - `extensions/linear/types.py`
 - `extensions/linear/workflow/automation.py`
-
-### _Make_Request
-
-- `extensions/linear/enhanced_client.py`
-- `cli/api/client.py`
 
 ### Assignmentdetector
 
@@ -1193,34 +1332,6 @@ These files are not imported by any other files and may be dead code:
 
 - `extensions/linear/assignment_detector.py`
 - `extensions/linear/assignment/detector.py`
-
-### Emit_Event
-
-- `extensions/linear/events/manager.py`
-- `extensions/github/events/manager.py`
-
-### Process_Pending_Events
-
-- `extensions/linear/events/manager.py`
-- `extensions/github/events/manager.py`
-
-### Is_Healthy
-
-- `extensions/linear/events/manager.py`
-- `extensions/linear/webhook/processor.py`
-- `extensions/github/events/manager.py`
-- `extensions/github/workflow/automation.py`
-- `extensions/github/webhook/processor.py`
-
-### _Evaluate_Condition
-
-- `extensions/linear/assignment/detector.py`
-- `extensions/linear/workflow/automation.py`
-
-### _Get_Nested_Value
-
-- `extensions/linear/workflow/automation.py`
-- `extensions/linear/workflow/automation.py`
 
 ### Validate_Signature
 
@@ -1233,14 +1344,33 @@ These files are not imported by any other files and may be dead code:
 - `extensions/linear/webhook/processor.py`
 - `extensions/github/webhook/processor.py`
 
-### Execute
+### Is_Healthy
 
-- `extensions/open_evolve/database_agent/agent.py`
-- `extensions/open_evolve/selection_controller/agent.py`
-- `extensions/open_evolve/prompt_designer/agent.py`
-- `extensions/open_evolve/task_manager/agent.py`
-- `extensions/open_evolve/evaluator_agent/agent.py`
-- `extensions/open_evolve/code_generator/agent.py`
+- `extensions/linear/webhook/processor.py`
+- `extensions/linear/events/manager.py`
+- `extensions/github/workflow/automation.py`
+- `extensions/github/webhook/processor.py`
+- `extensions/github/events/manager.py`
+
+### _Evaluate_Condition
+
+- `extensions/linear/assignment/detector.py`
+- `extensions/linear/workflow/automation.py`
+
+### Emit_Event
+
+- `extensions/linear/events/manager.py`
+- `extensions/github/events/manager.py`
+
+### Process_Pending_Events
+
+- `extensions/linear/events/manager.py`
+- `extensions/github/events/manager.py`
+
+### _Get_Nested_Value
+
+- `extensions/linear/workflow/automation.py`
+- `extensions/linear/workflow/automation.py`
 
 ### Githubevent
 
@@ -1252,11 +1382,6 @@ These files are not imported by any other files and may be dead code:
 - `extensions/github/types/pull_request.py`
 - `extensions/github/types/events/pull_request.py`
 
-### Pullrequest
-
-- `extensions/github/types/pull_request.py`
-- `cli/sdk/function.py`
-
 ### Pullrequestlabeledevent
 
 - `extensions/github/types/pull_request.py`
@@ -1267,154 +1392,14 @@ These files are not imported by any other files and may be dead code:
 - `extensions/github/types/push.py`
 - `extensions/github/types/events/push.py`
 
-### User
+### Execute
 
-- `extensions/github/types/events/pull_request.py`
-- `cli/api/schemas.py`
-
-### Searchmatch
-
-- `agents/tools/search.py`
-- `agents/tools/tool_output_types.py`
-
-### Search
-
-- `agents/tools/search.py`
-- `agents/tools/github/search.py`
-
-### Render_As_String
-
-- `agents/tools/search.py`
-- `agents/tools/search.py`
-- `agents/tools/observation.py`
-- `agents/tools/list_directory.py`
-
-### _Get_Details
-
-- `agents/tools/search.py`
-- `agents/tools/observation.py`
-- `agents/tools/reveal_symbol.py`
-- `agents/tools/reflection.py`
-- `agents/tools/list_directory.py`
-- `agents/tools/semantic_search.py`
-- `agents/tools/linear/linear.py`
-- `agents/tools/linear/linear.py`
-- `agents/tools/linear/linear.py`
-
-### Render
-
-- `agents/tools/search.py`
-- `agents/tools/edit_file.py`
-- `agents/tools/semantic_edit.py`
-- `agents/tools/observation.py`
-- `agents/tools/view_file.py`
-- `agents/tools/reflection.py`
-- `agents/tools/relace_edit.py`
-- `agents/tools/list_directory.py`
-
-### Total
-
-- `agents/tools/search_files_by_name.py`
-- `agents/tools/github/search.py`
-
-### Generate_Diff
-
-- `agents/tools/semantic_edit.py`
-- `agents/tools/relace_edit.py`
-- `agents/tools/replacement_edit.py`
-- `agents/tools/global_replacement_edit.py`
-
-### __Str__
-
-- `agents/tools/observation.py`
-- `cli/sdk/pull_request.py`
-
-### __Repr__
-
-- `agents/tools/observation.py`
-- `cli/env/global_env.py`
-
-### Create
-
-- `agents/langchain/graph.py`
-- `cli/api/client.py`
-
-### Get_Workspace_Tools
-
-- `agents/langchain/tools.py`
-- `agents/langchain/__init__.py`
-
-### _Run
-
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-- `agents/langchain/tools.py`
-
-### Lookup
-
-- `cli/api/client.py`
-- `cli/sdk/pull_request.py`
-- `cli/sdk/function.py`
-- `cli/sdk/functions.py`
-
-### Run_On_Pr
-
-- `cli/api/client.py`
-- `cli/commands/run_on_pr/main.py`
-
-### Pretty_Print_Output
-
-- `cli/rich/pretty_print.py`
-- `cli/commands/run/render.py`
-
-### Pretty_Print_Logs
-
-- `cli/rich/pretty_print.py`
-- `cli/commands/run/render.py`
-
-### Pretty_Print_Error
-
-- `cli/rich/pretty_print.py`
-- `cli/commands/run/render.py`
-
-### Pretty_Print_Diff
-
-- `cli/rich/pretty_print.py`
-- `cli/commands/run/render.py`
-
-### Function
-
-- `cli/sdk/function.py`
-- `cli/sdk/functions.py`
+- `extensions/open_evolve/task_manager/agent.py`
+- `extensions/open_evolve/database_agent/agent.py`
+- `extensions/open_evolve/prompt_designer/agent.py`
+- `extensions/open_evolve/evaluator_agent/agent.py`
+- `extensions/open_evolve/selection_controller/agent.py`
+- `extensions/open_evolve/code_generator/agent.py`
 
 
 ## ❓ Missing Features
@@ -1429,148 +1414,113 @@ These files are not imported by any other files and may be dead code:
 ## 🔍 Detailed Analysis by Category
 
 ### Dashboard Files
-Found 128 dashboard-related files. 47 appear to be dead code:
-- `extensions/client.py`
+Found 128 dashboard-related files. 32 appear to be dead code:
 - `orchestration/prefect_client.py`
-- `extensions/prefect/config.py`
-- `extensions/prefect/client.py`
-- `extensions/prefect/tasks.py`
-- `extensions/prefect/notifications.py`
-- `extensions/prefect/workflows.py`
-- `extensions/github/github_types.py`
-- `extensions/github/github.py`
-- `extensions/slack/slack.py`
-- `extensions/modal/base.py`
-- `extensions/modal/request_util.py`
-- `extensions/linear/queries.py`
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/linearclient.py`
-- `extensions/linear/workflow_automation.py`
-- `extensions/linear/linearevents.py`
-- `extensions/linear/mutations.py`
-- `extensions/linear/assignment_detector.py`
-- `extensions/linear/events/manager.py`
-- `extensions/linear/assignment/detector.py`
-- `extensions/linear/workflow/automation.py`
-- `extensions/linear/webhook/processor.py`
-- `extensions/linear/webhook/handlers.py`
-- `extensions/linear/webhook/validator.py`
-- `extensions/open_evolve/selection_controller/agent.py`
-- `extensions/open_evolve/prompt_designer/agent.py`
-- `extensions/open_evolve/task_manager/agent.py`
-- `extensions/open_evolve/evaluator_agent/agent.py`
-- `extensions/open_evolve/config/settings.py`
-- `extensions/open_evolve/code_generator/agent.py`
-- `extensions/github/events/manager.py`
-- `extensions/github/types/enterprise.py`
-- `extensions/github/webhook/processor.py`
-- `agents/tools/edit_file.py`
-- `agents/tools/semantic_edit_prompts.py`
-- `agents/tools/create_file.py`
-- `agents/tools/view_file.py`
-- `agents/tools/relace_edit_prompts.py`
-- `agents/tools/list_directory.py`
-- `agents/langchain/graph.py`
-- `agents/tools/github/create_pr.py`
-- `agents/tools/github/search.py`
-- `cli/workspace/initialize_workspace.py`
+- `extensions/client.py`
 - `cli/sdk/function.py`
 - `cli/sdk/functions.py`
+- `cli/workspace/initialize_workspace.py`
 - `cli/commands/run/render.py`
+- `agents/langchain/graph.py`
+- `agents/tools/list_directory.py`
+- `agents/tools/relace_edit_prompts.py`
+- `agents/tools/view_file.py`
+- `agents/tools/create_file.py`
+- `agents/tools/semantic_edit_prompts.py`
+- `agents/tools/edit_file.py`
+- `agents/tools/github/create_pr.py`
+- `extensions/modal/base.py`
+- `extensions/modal/request_util.py`
+- `extensions/slack/slack.py`
+- `extensions/github/github_types.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/assignment_detector.py`
+- `extensions/linear/webhook/handlers.py`
+- `extensions/linear/webhook/validator.py`
+- `extensions/github/webhook/processor.py`
+- `extensions/github/events/manager.py`
+- `extensions/github/types/enterprise.py`
+- `extensions/open_evolve/task_manager/agent.py`
+- `extensions/open_evolve/config/settings.py`
+- `extensions/open_evolve/prompt_designer/agent.py`
+- `extensions/open_evolve/evaluator_agent/agent.py`
+- `extensions/open_evolve/selection_controller/agent.py`
+- `extensions/open_evolve/code_generator/agent.py`
 
 
 ### Agent Files
-Found 139 agent-related files. 42 appear to be dead code:
-- `agents/data.py`
-- `extensions/client.py`
+Found 139 agent-related files. 34 appear to be dead code:
 - `orchestration/prefect_client.py`
-- `extensions/prefect/config.py`
-- `extensions/prefect/tasks.py`
-- `extensions/prefect/workflows.py`
-- `extensions/github/github.py`
-- `extensions/modal/base.py`
-- `extensions/modal/request_util.py`
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/linearclient.py`
-- `extensions/linear/workflow_automation.py`
-- `extensions/linear/linearevents.py`
-- `extensions/linear/workflow/automation.py`
-- `extensions/linear/webhook/validator.py`
-- `extensions/open_evolve/selection_controller/agent.py`
-- `extensions/open_evolve/prompt_designer/agent.py`
-- `extensions/open_evolve/task_manager/agent.py`
-- `extensions/open_evolve/evaluator_agent/agent.py`
-- `extensions/open_evolve/config/settings.py`
-- `extensions/open_evolve/code_generator/agent.py`
-- `agents/tools/rename_file.py`
-- `agents/tools/edit_file.py`
-- `agents/tools/delete_file.py`
-- `agents/tools/semantic_edit_prompts.py`
-- `agents/tools/create_file.py`
-- `agents/tools/view_file.py`
-- `agents/tools/relace_edit_prompts.py`
-- `agents/tools/commit.py`
-- `agents/tools/move_symbol.py`
-- `agents/tools/run_codemod.py`
-- `agents/tools/list_directory.py`
-- `agents/langchain/graph.py`
-- `agents/tools/github/create_pr_review_comment.py`
-- `agents/tools/github/create_pr.py`
-- `agents/tools/github/search.py`
-- `agents/tools/github/create_pr_comment.py`
-- `cli/workspace/initialize_workspace.py`
+- `extensions/client.py`
+- `agents/data.py`
 - `cli/sdk/pull_request.py`
 - `cli/sdk/function.py`
 - `cli/sdk/functions.py`
+- `cli/workspace/initialize_workspace.py`
 - `cli/commands/run/render.py`
+- `agents/langchain/graph.py`
+- `agents/tools/list_directory.py`
+- `agents/tools/rename_file.py`
+- `agents/tools/delete_file.py`
+- `agents/tools/relace_edit_prompts.py`
+- `agents/tools/view_file.py`
+- `agents/tools/run_codemod.py`
+- `agents/tools/create_file.py`
+- `agents/tools/move_symbol.py`
+- `agents/tools/semantic_edit_prompts.py`
+- `agents/tools/commit.py`
+- `agents/tools/edit_file.py`
+- `agents/tools/github/create_pr.py`
+- `agents/tools/github/create_pr_review_comment.py`
+- `agents/tools/github/create_pr_comment.py`
+- `extensions/modal/base.py`
+- `extensions/modal/request_util.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/webhook/validator.py`
+- `extensions/open_evolve/task_manager/agent.py`
+- `extensions/open_evolve/config/settings.py`
+- `extensions/open_evolve/prompt_designer/agent.py`
+- `extensions/open_evolve/evaluator_agent/agent.py`
+- `extensions/open_evolve/selection_controller/agent.py`
+- `extensions/open_evolve/code_generator/agent.py`
 
 
 ### CLI Files
-Found 111 CLI-related files. 37 appear to be dead code:
-- `extensions/client.py`
+Found 112 CLI-related files. 25 appear to be dead code:
 - `orchestration/prefect_client.py`
-- `extensions/prefect/config.py`
-- `extensions/prefect/client.py`
-- `extensions/prefect/tasks.py`
-- `extensions/prefect/notifications.py`
-- `extensions/prefect/workflows.py`
-- `extensions/github/github_types.py`
-- `extensions/github/github.py`
-- `extensions/slack/slack.py`
-- `extensions/modal/base.py`
-- `extensions/modal/request_util.py`
-- `extensions/linear/queries.py`
-- `extensions/linear/webhook_processor.py`
-- `extensions/linear/linearclient.py`
-- `extensions/linear/workflow_automation.py`
-- `extensions/linear/linearevents.py`
-- `extensions/linear/mutations.py`
-- `extensions/linear/assignment_detector.py`
-- `extensions/linear/assignment/detector.py`
-- `extensions/linear/workflow/automation.py`
-- `extensions/open_evolve/selection_controller/agent.py`
-- `extensions/open_evolve/prompt_designer/agent.py`
-- `extensions/open_evolve/task_manager/agent.py`
-- `extensions/open_evolve/evaluator_agent/agent.py`
-- `extensions/open_evolve/code_generator/agent.py`
-- `extensions/github/types/pull_request.py`
-- `extensions/github/workflow/automation.py`
-- `agents/tools/semantic_edit_prompts.py`
-- `agents/tools/relace_edit_prompts.py`
-- `agents/langchain/graph.py`
-- `agents/tools/github/create_pr.py`
-- `cli/workspace/initialize_workspace.py`
+- `extensions/client.py`
 - `cli/sdk/pull_request.py`
 - `cli/sdk/function.py`
 - `cli/sdk/functions.py`
+- `cli/workspace/initialize_workspace.py`
 - `cli/commands/run/render.py`
+- `agents/langchain/graph.py`
+- `agents/tools/relace_edit_prompts.py`
+- `agents/tools/semantic_edit_prompts.py`
+- `agents/tools/github/create_pr.py`
+- `extensions/modal/base.py`
+- `extensions/modal/request_util.py`
+- `extensions/slack/slack.py`
+- `extensions/github/github_types.py`
+- `extensions/linear/linearevents.py`
+- `extensions/linear/webhook_processor.py`
+- `extensions/linear/assignment_detector.py`
+- `extensions/github/workflow/automation.py`
+- `extensions/github/types/pull_request.py`
+- `extensions/open_evolve/task_manager/agent.py`
+- `extensions/open_evolve/prompt_designer/agent.py`
+- `extensions/open_evolve/evaluator_agent/agent.py`
+- `extensions/open_evolve/selection_controller/agent.py`
+- `extensions/open_evolve/code_generator/agent.py`
 
 
 ## 🎯 Recommendations
 
 ### High Priority Actions
 1. **Review Entry Points**: Ensure all 36 entry points are necessary
-2. **Investigate Dead Code**: Manually review 63 potentially dead files
+2. **Investigate Dead Code**: Manually review 48 potentially dead files
 3. **Consolidate Duplicates**: Review 161 potential duplicate implementations
 
 ### Dead Code Removal Strategy
