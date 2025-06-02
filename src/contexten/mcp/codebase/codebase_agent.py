@@ -3,7 +3,7 @@ from typing import Annotated
 
 from mcp.server.fastmcp import FastMCP
 
-from contexten.extensions.langchain.agent import create_codebase_inspector_agent
+from contexten.agents.langchain.agent import create_codebase_inspector_agent
 from graph_sitter import Codebase
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
