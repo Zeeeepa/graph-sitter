@@ -1,5 +1,4 @@
 import rich
-import rich_click as click
 from rich import box
 from rich.panel import Panel
 

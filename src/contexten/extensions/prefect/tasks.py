@@ -6,8 +6,6 @@ for autonomous CI/CD operations.
 """
 
 import asyncio
-import json
-import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path

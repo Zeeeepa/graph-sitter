@@ -1,7 +1,6 @@
 """
 Gradio web interface for OpenAlpha_Evolve.
 """
-import gradio as gr
 import asyncio
 import json
 import os

@@ -6,7 +6,6 @@ monitoring system health, and controlling autonomous CI/CD operations through
 the contexten dashboard.
 """
 
-import asyncio
 import json
 import logging
 from datetime import datetime, timedelta

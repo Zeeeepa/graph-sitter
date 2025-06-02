@@ -1,7 +1,6 @@
 import webbrowser
 
 import rich
-import rich_click as click
 
 from contexten.cli.api.webapp_routes import USER_SECRETS_ROUTE
 from contexten.cli.auth.token_manager import TokenManager

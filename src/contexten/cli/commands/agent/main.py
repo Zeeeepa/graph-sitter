@@ -1,7 +1,6 @@
 import uuid
 import warnings
 
-import rich_click as click
 from langchain_core.messages import SystemMessage
 from rich.console import Console
 from rich.markdown import Markdown

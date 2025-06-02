@@ -1,4 +1,3 @@
-import rich_click as click
 
 from contexten.cli.auth.login import login_routine
 from contexten.cli.auth.token_manager import get_current_token

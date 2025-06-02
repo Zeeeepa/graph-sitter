@@ -1,0 +1,563 @@
+{
+  "src/contexten/dashboard.py": [
+    "Remove unused import: typing.Dict",
+    "Remove unused import: typing.List",
+    "Remove unused import: typing.Any",
+    "Remove unused import: src.contexten.dashboard.flow_manager.FlowStatus",
+    "Remove unused import: src.contexten.dashboard.flow_manager.FlowPriority",
+    "Remove unused import: src.contexten.dashboard.project_manager.ProjectStatus",
+    "Remove unused import: src.contexten.dashboard.project_manager.ProjectHealth",
+    "Remove unused import: src.contexten.orchestration.workflow_types.AutonomousWorkflowType",
+    "Implement: Add WebSocket endpoints for real-time functionality",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/extensions/contexten_app.py": [
+    "Remove unused import: typing.List",
+    "Remove unused import: typing.Callable",
+    "Remove unused import: dataclasses.field",
+    "Remove unused import: json",
+    "Remove unused import: fastapi.responses.JSONResponse"
+  ],
+  "src/contexten/dashboard/prefect_dashboard.py": [
+    "Remove unused import: asyncio",
+    "Remove unused import: typing.Union",
+    "Remove unused import: dataclasses.asdict",
+    "Remove unused import: fastapi.BackgroundTasks",
+    "Remove unused import: orchestration.get_workflows_by_category",
+    "Implement: Add WebSocket endpoints for real-time functionality",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/app.py": [
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: hashlib",
+    "Remove unused import: fastapi.security.HTTPAuthorizationCredentials",
+    "Remove unused import: flow_manager.FlowTemplate",
+    "Remove unused import: flow_manager.FlowParameter",
+    "Remove unused import: project_manager.ProjectStatus",
+    "Remove unused import: project_manager.ProjectHealth",
+    "Remove unused import: project_manager.RequirementStatus"
+  ],
+  "src/contexten/dashboard/orchestrator_integration.py": [
+    "Remove unused import: typing.Tuple",
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: json",
+    "Remove unused import: extensions.contexten_app.TaskResult",
+    "Remove unused import: extensions.contexten_app.HealthMonitor",
+    "Remove unused import: advanced_analytics.AnalyticsReport",
+    "Implement: Add WebSocket endpoints for real-time functionality",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/flow_manager.py": [
+    "Remove unused import: asyncio",
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: typing.Callable",
+    "Remove unused import: typing.Union",
+    "Remove unused import: dataclasses.asdict",
+    "Remove unused import: pydantic.BaseModel",
+    "Remove unused import: pydantic.Field",
+    "Remove unused import: pydantic.validator",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/workflow_automation.py": [
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: json",
+    "Remove unused import: extensions.contexten_app.ContextenOrchestrator",
+    "Remove unused import: extensions.contexten_app.TaskRequest",
+    "Remove unused import: enhanced_codebase_ai.AIAnalysisRequest",
+    "Remove unused import: enhanced_codebase_ai.AITaskType",
+    "Implement: Add WebSocket endpoints for real-time functionality",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/project_manager.py": [
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: pydantic.BaseModel",
+    "Remove unused import: pydantic.Field",
+    "Implement: Add WebSocket endpoints for real-time functionality",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/chat_manager.py": [
+    "Remove unused import: graph_sitter.Codebase",
+    "Remove unused import: agents.langchain.agent.create_agent_with_tools",
+    "Remove unused import: agents.tools.linear.linear.LinearIssueTool",
+    "Remove unused import: agents.tools.linear.linear.LinearCommentTool",
+    "Remove unused import: agents.tools.linear.linear.LinearWebhookTool",
+    "Implement: Add WebSocket endpoints for real-time functionality",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/enhanced_routes.py": [
+    "Remove unused import: typing.Optional",
+    "Remove unused import: fastapi.responses.JSONResponse",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/advanced_analytics.py": [
+    "Remove unused import: typing.Optional",
+    "Remove unused import: typing.Tuple",
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: json",
+    "Remove unused import: agents.chat_agent.ChatAgent",
+    "Implement: Add WebSocket endpoints for real-time functionality",
+    "Implement: Implement authentication and authorization"
+  ],
+  "src/contexten/dashboard/enhanced_codebase_ai.py": [
+    "Remove unused import: typing.Tuple",
+    "Remove unused import: graph_sitter.codebase.codebase_ai.set_ai_key",
+    "Remove unused import: graph_sitter.codebase.codebase_ai.set_codegen_credentials",
+    "Remove unused import: extensions.contexten_app.ContextenConfig",
+    "Remove unused import: autogenlib.AutogenConfig",
+    "Remove unused import: autogenlib.GenerationResult",
+    "Implement: Add WebSocket endpoints for real-time functionality"
+  ],
+  "src/contexten/orchestration/autonomous_orchestrator.py": [
+    "Remove unused import: typing.Union",
+    "Remove unused import: prefect.get_run_logger",
+    "Remove unused import: prefect.blocks.system.Secret",
+    "Remove unused import: agents.chat_agent.ChatAgent",
+    "Remove unused import: agents.code_agent.CodeAgent"
+  ],
+  "src/contexten/orchestration/prefect_client.py": [
+    "Remove unused import: typing.Union",
+    "Remove unused import: uuid.uuid4",
+    "Remove unused import: monitoring.SystemMonitor"
+  ],
+  "src/contexten/agents/data.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/loggers.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tracer.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/codegen_config.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/chat_agent.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/code_agent.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/utils.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/link_annotation.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/create_file.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/move_symbol.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/list_directory.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/relace_edit_prompts.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/tool_output_types.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/observation.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/commit.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/reveal_symbol.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/reflection.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/relace_edit.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/delete_file.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/rename_file.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/semantic_edit_prompts.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/view_file.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/global_replacement_edit.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/run_codemod.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/search_files_by_name.py": [
+    "Remove unused import: typing.Optional",
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/semantic_edit.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/replacement_edit.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/semantic_search.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/bash.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/edit_file.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/search.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/langchain/prompts.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/langchain/agent.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/langchain/llm.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/langchain/tools.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/langchain/graph.py": [
+    "Implement: Consider adding asyncio imports for async operations"
+  ],
+  "src/contexten/agents/langchain/utils/get_langsmith_url.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/langchain/utils/utils.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/langchain/utils/custom_tool_node.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/github/create_pr.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/github/create_pr_comment.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/github/checkout_pr.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/github/create_pr_review_comment.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/github/view_pr_checks.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/github/view_pr.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/github/search.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/agents/tools/linear/linear.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/cli/auth/login.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/deploy/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/expert/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/profile/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/logout/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/run/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/run/run_cloud.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/create/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/agent/main.py": [
+    "Remove unused import: rich_click",
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/cli/commands/serve/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/login/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/cli/commands/run_on_pr/main.py": [
+    "Remove unused import: rich_click"
+  ],
+  "src/contexten/mcp/agent/docs_expert.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/mcp/codebase/codebase_agent.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/extensions/linear/webhook_processor.py": [
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: dataclasses.field"
+  ],
+  "src/contexten/extensions/linear/queries.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/linear/enhanced_agent.py": [
+    "Remove unused import: typing.Union",
+    "Remove unused import: dataclasses.field",
+    "Remove unused import: json"
+  ],
+  "src/contexten/extensions/linear/integration_agent.py": [
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: typing.List",
+    "Remove unused import: pathlib.Path",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/extensions/linear/config.py": [
+    "Remove unused import: pathlib.Path"
+  ],
+  "src/contexten/extensions/linear/workflow_automation.py": [
+    "Remove unused import: datetime.timedelta"
+  ],
+  "src/contexten/extensions/linear/enhanced_client.py": [
+    "Remove unused import: typing.Union"
+  ],
+  "src/contexten/extensions/linear/linearclient.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/linear/mutations.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/linear/linearevents.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/linear/types.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/slack/slack.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/slack/enhanced_agent.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add comprehensive error handling and recovery",
+    "Implement: Add retry logic for resilient operations",
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/slack/types.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/prefect/client.py": [
+    "Remove unused import: asyncio",
+    "Remove unused import: typing.Union",
+    "Remove unused import: prefect.client.schemas.FlowRun",
+    "Remove unused import: prefect.client.schemas.TaskRun",
+    "Remove unused import: config.WorkflowConfig"
+  ],
+  "src/contexten/extensions/prefect/notifications.py": [
+    "Remove unused import: typing.Union"
+  ],
+  "src/contexten/extensions/prefect/tasks.py": [
+    "Remove unused import: json",
+    "Remove unused import: logging",
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: typing.Optional",
+    "Remove unused import: typing.Tuple",
+    "Remove unused import: pathlib.Path",
+    "Remove unused import: prefect.blocks.system.Secret",
+    "Remove unused import: contexten.extensions.linear.enhanced_client.EnhancedLinearClient",
+    "Remove unused import: config.TaskConfig"
+  ],
+  "src/contexten/extensions/prefect/workflows.py": [
+    "Remove unused import: asyncio",
+    "Remove unused import: datetime.timedelta",
+    "Remove unused import: typing.List",
+    "Remove unused import: typing.Optional",
+    "Remove unused import: config.get_workflow_configs"
+  ],
+  "src/contexten/extensions/open_evolve/app.py": [
+    "Remove unused import: gradio",
+    "Remove unused import: core.interfaces.Program"
+  ],
+  "src/contexten/extensions/github/enhanced_agent.py": [
+    "Remove unused import: typing.Union",
+    "Remove unused import: dataclasses.field",
+    "Remove unused import: json",
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/github.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/github_types.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/enhanced_client.py": [
+    "Remove unused import: typing.Union",
+    "Remove unused import: datetime.timedelta"
+  ],
+  "src/contexten/extensions/github/workflow/automation.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/webhook/processor.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/events/manager.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/organization.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/pull_request.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/installation.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/label.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/base.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/enterprise.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/commit.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/pusher.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/author.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/push.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/events/push.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/github/types/events/pull_request.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/open_evolve/selection_controller/agent.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/extensions/open_evolve/core/interfaces.py": [
+    "Remove unused import: typing.Union"
+  ],
+  "src/contexten/extensions/open_evolve/database_agent/agent.py": [
+    "Remove unused import: uuid",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/extensions/open_evolve/task_manager/agent.py": [
+    "Remove unused import: uuid",
+    "Remove unused import: core.interfaces.BaseAgent",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/extensions/open_evolve/prompt_designer/agent.py": [
+    "Implement: Consider adding asyncio imports for async operations",
+    "Implement: Add retry logic for resilient operations"
+  ],
+  "src/contexten/extensions/linear/events/manager.py": [
+    "Remove unused import: asyncio",
+    "Remove unused import: typing.Optional",
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/linear/webhook/validator.py": [
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/linear/webhook/processor.py": [
+    "Remove unused import: hashlib",
+    "Remove unused import: hmac",
+    "Remove unused import: json",
+    "Remove unused import: types.LinearIssue",
+    "Remove unused import: types.LinearProject",
+    "Remove unused import: types.LinearComment"
+  ],
+  "src/contexten/extensions/linear/webhook/handlers.py": [
+    "Remove unused import: typing.Dict",
+    "Remove unused import: typing.Any",
+    "Implement: Implement rate limiting for API calls",
+    "Implement: Add webhook signature validation for security"
+  ],
+  "src/contexten/extensions/linear/workflow/automation.py": [
+    "Remove unused import: asyncio",
+    "Remove unused import: typing.List",
+    "Remove unused import: typing.Optional",
+    "Remove unused import: types.LinearProject",
+    "Implement: Implement rate limiting for API calls"
+  ],
+  "src/contexten/extensions/linear/assignment/detector.py": [
+    "Remove unused import: typing.Optional",
+    "Implement: Implement rate limiting for API calls"
+  ]
+}

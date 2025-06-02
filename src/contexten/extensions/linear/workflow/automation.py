@@ -4,7 +4,6 @@ Linear Workflow Automation
 This module provides automated workflow capabilities for Linear integration.
 """
 
-import asyncio
 import logging
 from typing import Dict, List, Optional, Any, Callable
 from datetime import datetime

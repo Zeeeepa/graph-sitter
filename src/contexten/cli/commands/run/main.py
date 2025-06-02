@@ -1,7 +1,6 @@
 import json
 import os
 
-import rich_click as click
 
 from graph_sitter.cli.auth.session import CodegenSession
 from graph_sitter.cli.utils.codemod_manager import CodemodManager

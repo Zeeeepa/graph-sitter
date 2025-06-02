@@ -12,7 +12,6 @@ import logging
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 import secrets
-import hashlib
 import uuid
 
 from fastapi import FastAPI, Request, Response, HTTPException, Depends, status

@@ -12,7 +12,6 @@ from typing import Dict, List, Optional, Any, Callable
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 from enum import Enum
-import json
 import uuid
 
 from ..extensions.contexten_app import ContextenOrchestrator, TaskRequest

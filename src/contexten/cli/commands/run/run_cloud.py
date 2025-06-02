@@ -1,7 +1,6 @@
 import webbrowser
 
 import rich
-import rich_click as click
 from pygit2._pygit2 import Repository
 from rich.panel import Panel
 
