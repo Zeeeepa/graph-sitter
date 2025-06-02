@@ -121,6 +121,7 @@ class CodeAgent:
         print(f"Using LangSmith project: {self.project_name}")
 
         # Store SWEBench metadata if provided
+        metadata = metadata or {}
         self.run_id = metadata.get("run_id")
         self.instance_id = metadata.get("instance_id")
         # Extract difficulty value from "difficulty_X" format
@@ -128,7 +129,7 @@ class CodeAgent:
         self.difficulty = int(difficulty_str.split("_")[1]) if difficulty_str and "_" in difficulty_str else None
 
         # Initialize tags for agent trace
-        self.tags = [*tags, self.model_name]
+        self.tags = list(tags) + [self.model_name]
 
         # set logger if provided
         self.logger = logger
@@ -165,7 +166,7 @@ class CodeAgent:
                 
                 # For code tasks, we can enhance the prompt with codebase context
                 enhanced_prompt = f"""
-Codebase Context: {self.codebase.root_path}
+Codebase Context: {self.codebase.repo_path}
 
 Task: {prompt}
 

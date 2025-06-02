@@ -69,7 +69,7 @@ def get_codegen_status() -> Dict[str, Any]:
     Returns:
         Dictionary with status information
     """
-    status = {
+    status: Dict[str, Any] = {
         "sdk_available": CODEGEN_AVAILABLE,
         "config_present": False,
         "config_valid": False,
@@ -102,7 +102,7 @@ def print_codegen_status():
     """Print a formatted status report of Codegen SDK integration."""
     status = get_codegen_status()
     
-    print("🤖 Codegen SDK Integration Status")
+    print("�� Codegen SDK Integration Status")
     print("=" * 40)
     
     if status["sdk_available"]:
@@ -153,4 +153,3 @@ def setup_codegen_env(org_id: str, token: str, base_url: Optional[str] = None):
 
 if __name__ == "__main__":
     print_codegen_status()
-
