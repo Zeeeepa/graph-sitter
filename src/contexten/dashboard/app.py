@@ -65,6 +65,9 @@ except ImportError:
         return logging.getLogger(name)
     print("Warning: Could not import contexten logger. Using standard logging.")
 
+# Initialize logger after get_logger is available
+logger = get_logger(__name__)
+
 try:
     from .chat_manager import ChatManager
 except ImportError:
@@ -122,6 +125,11 @@ class DashboardConfig:
         self.linear_client_secret = os.getenv("LINEAR_CLIENT_SECRET")
         self.slack_client_id = os.getenv("SLACK_CLIENT_ID")
         self.slack_client_secret = os.getenv("SLACK_CLIENT_SECRET")
+        
+        # API Tokens (for direct API access)
+        self.github_token = os.getenv("GITHUB_TOKEN")
+        self.linear_api_key = os.getenv("LINEAR_API_KEY")
+        self.slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
         
         # Codegen SDK
         self.codegen_org_id = os.getenv("CODEGEN_ORG_ID")
