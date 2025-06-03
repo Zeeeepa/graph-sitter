@@ -1,0 +1,21 @@
+# Core Dependencies
+codegen>=0.22.2
+fastapi[standard]
+uvicorn
+pydantic>=2.0.0
+httpx
+python-dotenv
+modal
+
+# Development Dependencies
+pytest
+pytest-asyncio
+black
+flake8
+mypy
+
+# Optional Dependencies
+openai>=1.1.0
+anthropic
+slack-sdk
+
