@@ -32,6 +32,69 @@ from graph_sitter.codebase.codebase_analysis import (
 )
 
 
+def _convert_rset_to_dicts(cursor, results) -> List[Dict[str, Any]]:
+    """
+    Convert database result set to list of dictionaries.
+    
+    This function handles different database drivers that return result sets
+    in various formats (tuples, Row objects, etc.) and converts them to
+    a standardized dictionary format.
+    
+    Args:
+        cursor: Database cursor object with column description
+        results: Result set from cursor.fetchall()
+        
+    Returns:
+        List of dictionaries with column names as keys
+    """
+    if not results:
+        return []
+    
+    # Try to convert directly if rows support dict conversion (e.g., sqlite3.Row)
+    try:
+        first_row = results[0]
+        if hasattr(first_row, 'keys'):
+            # Row object with dict-like interface (e.g., sqlite3.Row)
+            return [dict(row) for row in results]
+        elif hasattr(first_row, '_asdict'):
+            # Named tuple with _asdict method
+            return [row._asdict() for row in results]
+    except (TypeError, AttributeError):
+        pass
+    
+    # Fallback: use cursor.description to map column names to values
+    try:
+        if hasattr(cursor, 'description') and cursor.description:
+            column_names = [desc[0] for desc in cursor.description]
+            return [dict(zip(column_names, row)) for row in results]
+    except (TypeError, AttributeError):
+        pass
+    
+    # Last resort: return as-is if conversion fails
+    # This maintains backward compatibility but may not be ideal
+    return results
+
+
+def _execute_query_with_rset_conversion(cursor, query: str, params: tuple = ()) -> List[Dict[str, Any]]:
+    """
+    Execute a query and return results as a list of dictionaries.
+    
+    This is a convenience function that combines query execution with
+    result set conversion for better database compatibility.
+    
+    Args:
+        cursor: Database cursor object
+        query: SQL query string
+        params: Query parameters tuple
+        
+    Returns:
+        List of dictionaries with query results
+    """
+    cursor.execute(query, params)
+    results = cursor.fetchall()
+    return _convert_rset_to_dicts(cursor, results)
+
+
 @dataclass
 class AnalysisResult:
     """Enhanced analysis result with database integration"""
@@ -185,10 +248,7 @@ class CodebaseDBAdapter:
         """
         
         with self.db.cursor() as cursor:
-            cursor.execute(query, (codebase_id, days_back))
-            results = cursor.fetchall()
-            
-        return [dict(row) for row in results]
+            return _execute_query_with_rset_conversion(cursor, query, (codebase_id, days_back))
     
     def get_quality_trends(self, repository_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -734,4 +794,3 @@ def get_codebase_summary_enhanced(codebase: Codebase,
             return original_summary
     
     return original_summary
-
