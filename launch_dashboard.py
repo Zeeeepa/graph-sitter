@@ -23,13 +23,29 @@ import argparse
 import logging
 import webbrowser
 from pathlib import Path
+import uvicorn
 
 # Add the project root to Python path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / "src"))  # Add src directory to path
 
-import uvicorn
-from contexten.dashboard.app import app, config
+# Try importing with graceful error handling
+try:
+    from contexten.dashboard.app import app, config
+    CONTEXTEN_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import contexten modules: {e}")
+    print("Some features may be limited. Ensure the package is properly installed.")
+    app = None
+    config = None
+    CONTEXTEN_AVAILABLE = False
+
+# Only proceed if contexten is available
+if not CONTEXTEN_AVAILABLE:
+    print("Error: Contexten dashboard modules are not available.")
+    print("Please ensure the contexten package is properly installed.")
+    sys.exit(1)
 
 # Setup logging
 logging.basicConfig(
@@ -84,7 +100,7 @@ def check_environment():
 def print_banner():
     """Print the dashboard banner"""
     banner = """
-╔══════════════════════════════════════════════════════════════════════════════╗
+╔════�����════�������════════════════════════════════════════════════════════════════════╗
 ║                        Contexten Enhanced Dashboard                          ║
 ║                                                                              ║
 ║  🚀 Comprehensive Flow Management & CI/CD Automation                        ║
@@ -93,7 +109,7 @@ def print_banner():
 ║  🤖 Autonomous Error Healing & Recovery                                     ║
 ║  ⚡ WebSocket Real-time Updates                                             ║
 ║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+╚═════════════════════���═���══════���═���═���═══════════════════════════════════════════╝
 """
     print(banner)
 
