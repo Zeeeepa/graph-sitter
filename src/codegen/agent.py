@@ -45,7 +45,7 @@ class Agent:
         self, 
         org_id: str, 
         token: str, 
-        base_url: str = "https://codegen-sh-rest-api.modal.run",
+        base_url: str = "https://api.codegen.com",
         timeout: int = 30,
         max_retries: int = 3,
         retry_backoff_factor: float = 2.0,
@@ -83,14 +83,14 @@ class Agent:
         if max_retries < 0:
             raise ValidationError("max_retries must be non-negative", field="max_retries")
         
+        # Configuration
         self.org_id = org_id
         self.token = token
-        self.base_url = base_url.rstrip('/')
+        self.base_url = (base_url or "https://api.codegen.com").rstrip('/')
         self.timeout = timeout
         self.max_retries = max_retries
         self.retry_backoff_factor = retry_backoff_factor
         self.rate_limit_buffer = rate_limit_buffer
-        self.enable_logging = enable_logging
         
         # Set up enhanced session with connection pooling
         self.session = requests.Session()
