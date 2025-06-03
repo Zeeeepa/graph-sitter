@@ -54,7 +54,7 @@ class VisualizationNode:
     type: str
     color: str
     size: int = 10
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
     
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -66,7 +66,7 @@ class VisualizationEdge:
     target: str
     label: str = ""
     type: str = "default"
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
     
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -101,11 +101,11 @@ class ReactVisualizationGenerator:
     def __init__(self, max_depth: int = 10, ignore_external_modules: bool = True):
         self.max_depth = max_depth
         self.ignore_external_modules = ignore_external_modules
-        self.visited = set()
+        self.visited: set[Any] = set()
         
     def generate_comprehensive_visualization(self, codebase: Codebase, 
                                            target_element: Optional[Union[Class, Function, Symbol]] = None,
-                                           visualization_types: List[str] = None) -> Dict[str, VisualizationData]:
+                                           visualization_types: Optional[List[str]] = None) -> Dict[str, VisualizationData]:
         """
         Generate comprehensive visualizations for all analysis types.
         
@@ -134,11 +134,20 @@ class ReactVisualizationGenerator:
         for viz_type in visualization_types:
             try:
                 if viz_type == 'class_method_relationships':
-                    visualizations[viz_type] = self.generate_class_method_visualization(codebase, target_element)
+                    if isinstance(target_element, Class):
+                        visualizations[viz_type] = self.generate_class_method_visualization(codebase, target_element)
+                    else:
+                        visualizations[viz_type] = self.generate_class_method_visualization(codebase, None)
                 elif viz_type == 'function_blast_radius':
-                    visualizations[viz_type] = self.generate_blast_radius_visualization(codebase, target_element)
+                    if isinstance(target_element, Function):
+                        visualizations[viz_type] = self.generate_blast_radius_visualization(codebase, target_element)
+                    else:
+                        visualizations[viz_type] = self.generate_blast_radius_visualization(codebase, None)
                 elif viz_type == 'symbol_dependencies':
-                    visualizations[viz_type] = self.generate_symbol_dependencies_visualization(codebase, target_element)
+                    if isinstance(target_element, Symbol):
+                        visualizations[viz_type] = self.generate_symbol_dependencies_visualization(codebase, target_element)
+                    else:
+                        visualizations[viz_type] = self.generate_symbol_dependencies_visualization(codebase, None)
                 elif viz_type == 'call_graph':
                     visualizations[viz_type] = self.generate_call_graph_visualization(codebase)
                 elif viz_type == 'dependency_graph':
@@ -176,15 +185,15 @@ class ReactVisualizationGenerator:
         class_id = f"class_{target_class.name}_{id(target_class)}"
         nodes.append(VisualizationNode(
             id=class_id,
-            label=target_class.name,
+            label=target_class.name or "UnnamedClass",
             type="StartClass",
             color=COLOR_PALETTE["StartClass"],
             size=20,
-            metadata={"type": "class", "methods_count": len(target_class.methods)}
+            metadata={"type": "class", "methods_count": len(list(target_class.methods))}
         ))
         
         # Add method nodes and edges
-        for method in target_class.methods:
+        for method in list(target_class.methods):
             method_id = f"method_{method.name}_{id(method)}"
             method_name = f"{target_class.name}.{method.name}"
             
@@ -196,8 +205,8 @@ class ReactVisualizationGenerator:
                 size=15,
                 metadata={
                     "type": "method",
-                    "function_calls": len(method.function_calls),
-                    "parameters": len(method.parameters)
+                    "function_calls": len(list(method.function_calls)),
+                    "parameters": len(list(method.parameters))
                 }
             ))
             
@@ -219,7 +228,7 @@ class ReactVisualizationGenerator:
             metadata={
                 "visualization_type": "class_method_relationships",
                 "target_class": target_class.name,
-                "total_methods": len(target_class.methods),
+                "total_methods": len(list(target_class.methods)),
                 "generated_at": datetime.utcnow().isoformat()
             },
             layout_config={
@@ -350,15 +359,65 @@ class ReactVisualizationGenerator:
             
             # Add edges for function calls
             for call in func.function_calls:
-                if call.function_definition:
+                if hasattr(call, "function_definition") and call.function_definition:
                     target_id = f"func_{call.function_definition.name}_{id(call.function_definition)}"
                     edges.append(VisualizationEdge(
                         source=func_id,
                         target=target_id,
                         label="calls",
                         type="function_call",
-                        metadata={"call_name": call.name}
+                        metadata={"call_name": getattr(call, "name", "unknown")}
                     ))
+                if not func:
+                    continue
+                
+                if isinstance(func, ExternalModule) and self.ignore_external_modules:
+                    continue
+                
+                # Determine function name and type
+                if isinstance(func, (Class, ExternalModule)):
+                    func_name = func.name
+                    func_type = func.__class__.__name__
+                elif isinstance(func, Function):
+                    func_name = f"{func.parent_class.name}.{func.name}" if func.is_method else func.name
+                    func_type = "PyFunction"
+                else:
+                    continue
+                
+                func_id = f"func_{func_name}_{id(func)}"
+                
+                # Add node if not already visited
+                if func not in self.visited:
+                    nodes.append(VisualizationNode(
+                        id=func_id,
+                        label=func_name,
+                        type=func_type,
+                        color=COLOR_PALETTE.get(func_type, COLOR_PALETTE["PyFunction"]),
+                        size=12,
+                        metadata={
+                            "type": "function",
+                            "file_path": getattr(call, 'filepath', 'unknown'),
+                            "start_point": getattr(call, 'start_point', None),
+                            "end_point": getattr(call, 'end_point', None)
+                        }
+                    ))
+                    self.visited.add(func)
+                
+                # Add edge
+                edges.append(VisualizationEdge(
+                    source=func_id,
+                    target=func_id,
+                    label=call.name,
+                    type="function_call",
+                    metadata={
+                        "call_name": call.name,
+                        "file_path": getattr(call, 'filepath', 'unknown')
+                    }
+                ))
+                
+                # Recurse for further calls
+                if isinstance(func, Function):
+                    self._add_downstream_calls(func, func_id, nodes, edges, 0)
         
         return VisualizationData(
             nodes=nodes,
@@ -962,7 +1021,7 @@ export default CodebaseDashboard;
 # Factory function for easy usage
 def create_react_visualizations(codebase: Codebase, 
                                target_element: Optional[Union[Class, Function, Symbol]] = None,
-                               visualization_types: List[str] = None) -> Dict[str, Any]:
+                               visualization_types: Optional[List[str]] = None) -> Dict[str, Any]:
     """
     Factory function to create comprehensive React visualizations.
     
