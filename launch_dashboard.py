@@ -29,7 +29,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 import uvicorn
-from src.contexten.dashboard.app import app, config
+from contexten.dashboard.app import app, config
 
 # Setup logging
 logging.basicConfig(
@@ -239,4 +239,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
