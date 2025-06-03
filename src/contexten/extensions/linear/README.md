@@ -141,15 +141,15 @@ agent = await create_linear_integration_agent()
 # The agent is now running and monitoring for assignments
 ```
 
-### Integration with CodegenApp
+### Integration with ContextenApp
 
-The enhanced Linear integration is automatically integrated with the existing `CodegenApp` through the enhanced `Linear` event handler:
+The enhanced Linear integration is automatically integrated with the existing `ContextenApp` through the enhanced `Linear` event handler:
 
 ```python
-from contexten.extensions.events.codegen_app import CodegenApp
+from contexten.extensions.events.contexten_app import ContextenApp
 
 # Create app - Linear integration is automatically initialized
-app = CodegenApp(name="my-app")
+app = ContextenApp(name="my-app")
 
 # Initialize the Linear agent
 await app.linear.initialize_agent()
@@ -402,3 +402,12 @@ For issues, questions, or contributions:
 
 **Note**: This integration requires valid Linear API credentials and proper webhook configuration. The comprehensive features are designed to work alongside the existing basic integration, providing a smooth upgrade path.
 
+## 🔥 Backward Incompatibilities
+
+### Changes to Event Handling
+
+- **Event Handler Changes**: The event handling mechanism has been updated to use the `ContextenApp` event handler instead of the `Linear` event handler. This change ensures better integration with the existing `ContextenApp` framework.
+
+---
+
+**Note**: This integration requires valid Linear API credentials and proper webhook configuration. The comprehensive features are designed to work alongside the existing basic integration, providing a smooth upgrade path.
