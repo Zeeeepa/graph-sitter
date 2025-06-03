@@ -4,7 +4,7 @@ from uuid import uuid4
 from langchain.tools import BaseTool
 from langchain_core.messages import AIMessage
 
-from contexten.extensions.langchain.agent import create_chat_agent
+from contexten.agents.langchain.agent import create_chat_agent
 
 if TYPE_CHECKING:
     from graph_sitter import Codebase

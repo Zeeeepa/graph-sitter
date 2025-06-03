@@ -10,7 +10,7 @@ from contexten.extensions.github.types.events.pull_request import PullRequestLab
 from graph_sitter.configs.models.secrets import SecretsConfig
 from contexten import CodeAgent
 
-from contexten.extensions.langchain.tools import (
+from contexten.agents.langchain.tools import (
     # Github
     GithubViewPRTool,
     GithubCreatePRCommentTool,

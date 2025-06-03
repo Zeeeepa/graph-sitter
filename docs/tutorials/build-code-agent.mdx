@@ -77,7 +77,7 @@ agent = CodeAgent(
 The agent comes with a comprehensive set of tools for code analysis and manipulation. Here are some key tools:
 
 ```python
-from contexten.extensions.langchain.tools import (
+from contexten.agents.langchain.tools import (
     CreateFileTool,
     DeleteFileTool,
     EditFileTool,
@@ -109,7 +109,7 @@ CODEGEN_SECRETS__GITHUB_TOKEN="..."
 Import the GitHub tools:
 
 ```python
-from contexten.extensions.langchain.tools import (
+from contexten.agents.langchain.tools import (
     GithubCreatePRTool,
     GithubViewPRTool,
     GithubCreatePRCommentTool,
@@ -139,7 +139,7 @@ LINEAR_SIGNING_SECRET="..."
 Import and use the Linear tools:
 
 ```python
-from contexten.extensions.langchain.tools import (
+from contexten.agents.langchain.tools import (
     LinearGetIssueTool,
     LinearGetIssueCommentsTool,
     LinearCommentOnIssueTool,
