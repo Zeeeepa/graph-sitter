@@ -1,6 +1,6 @@
 # graph_sitter.cli
 
-A codegen module that handles all `codegen` CLI commands.
+A graph_sitter module that handles all `graph_sitter` CLI commands.
 
 ### Dependencies
 
@@ -13,3 +13,4 @@ A codegen module that handles all `codegen` CLI commands.
 - The command group folder should have a file called `commands.py` where the CLI group (i.e. function decorated with `@click.group()`) and CLI commands are defined (i.e. functions decorated with ex: `@task.command()`) and if necessary a folder called `utils` (or a single `utils.py`) that holds any additional files with helpers/utilities that are specific to the command group.
 - Store utils specific to a CLI command group within its folder.
 - Store utils that can be shared across command groups in an appropriate file in cli/utils. If none exists, create a new appropriately named one!
+
