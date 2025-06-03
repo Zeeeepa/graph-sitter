@@ -63,35 +63,18 @@ if task.status == "completed":
 
 Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
 
-## Installation and Usage
+## Installation
 
-We support
+Install both `graph_sitter` and `contexten` packages from the project root:
 
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
-
+```bash
+pip install -e .
 ```
-# Install inside existing project
-uv pip install graph-sitter
 
-# Install global CLI
-uv tool install graph-sitter --python 3.13
-
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
-```
+This will install both packages with all their dependencies and CLI tools:
+- `gs` - Graph Sitter CLI for code analysis
+- `contexten` - Contexten agent CLI
+- `contexten-dashboard` - Contexten dashboard interface
 
 ## Separate Package Installation
 
@@ -136,7 +119,7 @@ from contexten import FlowManager
 flow_manager = FlowManager()
 ```
 
-### 🚀 Install Both Packages
+### ��� Install Both Packages
 To install both packages at once:
 
 ```bash
