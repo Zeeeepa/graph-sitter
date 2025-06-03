@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contexten Enhanced Dashboard</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 1.2em;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #7f8c8d;
+            white-space: nowrap;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-tab:hover:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .tab-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status-card h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .status-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .status-card .label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .integration-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .integration-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .integration-item.disconnected {
+            border-left-color: #dc3545;
+        }
+        
+        .integration-item .icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+        
+        .integration-item.disconnected .icon {
+            background: #dc3545;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Contexten Enhanced Dashboard</h1>
+            <p>Comprehensive Flow Management & CI/CD Automation Platform</p>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="showTab('projects')">📁 Projects</button>
+            <button class="nav-tab" onclick="showTab('flows')">🔄 Flows</button>
+            <button class="nav-tab" onclick="showTab('analysis')">🔍 Analysis</button>
+            <button class="nav-tab" onclick="showTab('integrations')">🔗 Integrations</button>
+            <button class="nav-tab" onclick="showTab('monitoring')">📈 Monitoring</button>
+            <button class="nav-tab" onclick="showTab('settings')">⚙️ Settings</button>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-pane active">
+                <h2>System Overview</h2>
+                
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h3>Active Flows</h3>
+                        <div class="value" id="active-flows">-</div>
+                        <div class="label">Currently Running</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Projects</h3>
+                        <div class="value" id="total-projects">-</div>
+                        <div class="label">Total Managed</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Success Rate</h3>
+                        <div class="value" id="success-rate">-</div>
+                        <div class="label">Last 24 Hours</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>System Health</h3>
+                        <div class="value" id="system-health">-</div>
+                        <div class="label">Overall Status</div>
+                    </div>
+                </div>
+                
+                <h3>Integration Status</h3>
+                <div class="integration-status">
+                    <div class="integration-item" id="github-status">
+                        <div class="icon"></div>
+                        <div>
+                            <strong>GitHub</strong><br>
+                            <small id="github-status-text">Checking...</small>
+                        </div>
+                    </div>
+                    <div class="integration-item" id="linear-status">
+                        <div class="icon"></div>
+                        <div>
+                            <strong>Linear</strong><br>
+                            <small id="linear-status-text">Checking...</small>
+                        </div>
+                    </div>
+                    <div class="integration-item" id="slack-status">
+                        <div class="icon"></div>
+                        <div>
+                            <strong>Slack</strong><br>
+                            <small id="slack-status-text">Checking...</small>
+                        </div>
+                    </div>
+                    <div class="integration-item" id="prefect-status">
+                        <div class="icon"></div>
+                        <div>
+                            <strong>Prefect</strong><br>
+                            <small id="prefect-status-text">Checking...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Projects Tab -->
+            <div id="projects" class="tab-pane">
+                <h2>Project Management</h2>
+                <div id="projects-content" class="loading">Loading projects...</div>
+            </div>
+            
+            <!-- Flows Tab -->
+            <div id="flows" class="tab-pane">
+                <h2>CI/CD Flow Management</h2>
+                <div id="flows-content" class="loading">Loading flows...</div>
+            </div>
+            
+            <!-- Analysis Tab -->
+            <div id="analysis" class="tab-pane">
+                <h2>Code Analysis & Quality</h2>
+                <div id="analysis-content" class="loading">Loading analysis tools...</div>
+            </div>
+            
+            <!-- Integrations Tab -->
+            <div id="integrations" class="tab-pane">
+                <h2>Integration Management</h2>
+                <div id="integrations-content" class="loading">Loading integrations...</div>
+            </div>
+            
+            <!-- Monitoring Tab -->
+            <div id="monitoring" class="tab-pane">
+                <h2>Real-time Monitoring</h2>
+                <div id="monitoring-content" class="loading">Loading monitoring data...</div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-pane">
+                <h2>Configuration & Settings</h2>
+                <div id="settings-content">
+                    <h3>Environment Configuration</h3>
+                    <p><strong>GitHub Token:</strong> {{ "✅ Configured" if github_token else "❌ Missing" }}</p>
+                    <p><strong>Linear API Key:</strong> {{ "✅ Configured" if linear_api_key else "❌ Missing" }}</p>
+                    <p><strong>Slack Webhook:</strong> {{ "✅ Configured" if slack_webhook_url else "❌ Missing" }}</p>
+                    <p><strong>Prefect API URL:</strong> {{ "✅ Configured" if prefect_api_url else "❌ Missing" }}</p>
+                    
+                    <h3>Quick Actions</h3>
+                    <button class="btn" onclick="refreshDashboard()">🔄 Refresh Dashboard</button>
+                    <button class="btn btn-secondary" onclick="exportConfig()">📥 Export Config</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include JavaScript -->
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/comprehensive-analysis.js"></script>
+    
+    <script>
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab panes
+            const panes = document.querySelectorAll('.tab-pane');
+            panes.forEach(pane => pane.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab pane
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load tab content if needed
+            loadTabContent(tabName);
+        }
+        
+        // Load tab content dynamically
+        function loadTabContent(tabName) {
+            const contentDiv = document.getElementById(tabName + '-content');
+            if (!contentDiv || !contentDiv.classList.contains('loading')) return;
+            
+            switch(tabName) {
+                case 'projects':
+                    loadProjects();
+                    break;
+                case 'flows':
+                    loadFlows();
+                    break;
+                case 'analysis':
+                    loadAnalysis();
+                    break;
+                case 'integrations':
+                    loadIntegrations();
+                    break;
+                case 'monitoring':
+                    loadMonitoring();
+                    break;
+            }
+        }
+        
+        // Load dashboard data
+        function loadDashboardData() {
+            // Load system overview
+            fetch('/api/system/overview')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('active-flows').textContent = data.active_flows || '0';
+                    document.getElementById('total-projects').textContent = data.total_projects || '0';
+                    document.getElementById('success-rate').textContent = (data.success_rate || 0) + '%';
+                    document.getElementById('system-health').textContent = data.system_health || 'Unknown';
+                })
+                .catch(error => {
+                    console.error('Error loading dashboard data:', error);
+                });
+            
+            // Load integration status
+            loadIntegrationStatus();
+        }
+        
+        // Load integration status
+        function loadIntegrationStatus() {
+            const integrations = ['github', 'linear', 'slack', 'prefect'];
+            
+            integrations.forEach(integration => {
+                fetch(`/api/integrations/${integration}/status`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusElement = document.getElementById(integration + '-status');
+                        const textElement = document.getElementById(integration + '-status-text');
+                        
+                        if (data.connected) {
+                            statusElement.classList.remove('disconnected');
+                            textElement.textContent = 'Connected';
+                        } else {
+                            statusElement.classList.add('disconnected');
+                            textElement.textContent = 'Disconnected';
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error loading ${integration} status:`, error);
+                        const statusElement = document.getElementById(integration + '-status');
+                        const textElement = document.getElementById(integration + '-status-text');
+                        statusElement.classList.add('disconnected');
+                        textElement.textContent = 'Error';
+                    });
+            });
+        }
+        
+        // Utility functions
+        function refreshDashboard() {
+            location.reload();
+        }
+        
+        function exportConfig() {
+            alert('Config export functionality coming soon!');
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            
+            // Refresh data every 30 seconds
+            setInterval(loadDashboardData, 30000);
+        });
+    </script>
+</body>
+</html>
+
