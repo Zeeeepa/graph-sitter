@@ -90,9 +90,9 @@ class ContextenIntegrationTester:
         
         results = {}
         
+        # Test dashboard app import
         try:
-            # Test if dashboard app can be created
-            from src.contexten.dashboard.app import app
+            from contexten.dashboard.app import app
             
             results['app_creation'] = {
                 'status': 'success',
@@ -148,7 +148,7 @@ class ContextenIntegrationTester:
         
         # Test Linear agent
         try:
-            from src.contexten.extensions.linear.enhanced_agent import EnhancedLinearAgent
+            from contexten.extensions.linear.enhanced_agent import EnhancedLinearAgent
             
             # Test agent creation
             agent = EnhancedLinearAgent()
@@ -174,7 +174,7 @@ class ContextenIntegrationTester:
         
         # Test GitHub agent
         try:
-            from src.contexten.extensions.github.enhanced_agent import EnhancedGitHubAgent
+            from contexten.extensions.github.enhanced_agent import EnhancedGitHubAgent
             
             agent = EnhancedGitHubAgent()
             
@@ -205,7 +205,7 @@ class ContextenIntegrationTester:
         results = {}
         
         try:
-            from src.contexten.orchestration import AutonomousOrchestrator
+            from contexten.orchestration import AutonomousOrchestrator
             
             # Test orchestrator creation
             orchestrator = AutonomousOrchestrator()
@@ -662,4 +662,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
