@@ -92,6 +92,7 @@ class ContextenIntegrationTester:
         
         # Test dashboard app import
         try:
+
             from contexten.dashboard.app import app
             
             results['app_creation'] = {
