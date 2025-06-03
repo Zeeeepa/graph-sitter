@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contexten Dashboard - Login</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 2em;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .github-btn {
+            background: #24292e;
+            color: white;
+        }
+        
+        .github-btn:hover {
+            background: #1a1e22;
+        }
+        
+        .linear-btn {
+            background: #5e6ad2;
+            color: white;
+        }
+        
+        .linear-btn:hover {
+            background: #4c5bc7;
+        }
+        
+        .slack-btn {
+            background: #4a154b;
+            color: white;
+        }
+        
+        .slack-btn:hover {
+            background: #3a1139;
+        }
+        
+        .env-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .env-btn:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+        }
+        
+        .divider {
+            margin: 20px 0;
+            position: relative;
+            text-align: center;
+            color: #7f8c8d;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #dee2e6;
+        }
+        
+        .divider span {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0 15px;
+        }
+        
+        .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .env-info {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.9em;
+            color: #155724;
+        }
+        
+        .env-info h4 {
+            margin: 0 0 10px 0;
+            color: #0f5132;
+        }
+        
+        .env-info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .env-info li {
+            margin: 5px 0;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #856404;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🚀</div>
+        <h1>Contexten Dashboard</h1>
+        <p class="subtitle">Comprehensive Flow Management & CI/CD Automation</p>
+        
+        <div class="auth-buttons">
+            {% if github_token %}
+            <form action="/auth/environment" method="post" style="margin: 0;">
+                <button type="submit" class="auth-btn env-btn">
+                    <span class="icon">🔑</span>
+                    Use Environment Tokens
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>or authenticate with</span>
+            </div>
+            {% endif %}
+            
+            <a href="{{ github_auth_url }}" class="auth-btn github-btn">
+                <span class="icon">🐙</span>
+                Continue with GitHub
+            </a>
+            
+            <a href="{{ linear_auth_url }}" class="auth-btn linear-btn">
+                <span class="icon">📐</span>
+                Continue with Linear
+            </a>
+            
+            <a href="{{ slack_auth_url }}" class="auth-btn slack-btn">
+                <span class="icon">💬</span>
+                Continue with Slack
+            </a>
+        </div>
+        
+        {% if github_token %}
+        <div class="env-info">
+            <h4>🔑 Environment Tokens Detected</h4>
+            <p>The following tokens are available in your environment:</p>
+            <ul>
+                {% if github_token %}<li>✅ GitHub Token</li>{% endif %}
+                {% if linear_api_key %}<li>✅ Linear API Key</li>{% endif %}
+                {% if slack_webhook_url %}<li>✅ Slack Webhook URL</li>{% endif %}
+                {% if prefect_api_url %}<li>✅ Prefect API URL</li>{% endif %}
+            </ul>
+            <p><strong>Recommended:</strong> Use "Environment Tokens" for faster access.</p>
+        </div>
+        {% else %}
+        <div class="warning">
+            <strong>⚠️ No Environment Tokens Found</strong><br>
+            To use environment token authentication, set up your tokens in a <code>.env</code> file:
+            <br><br>
+            <code>
+                GITHUB_TOKEN=your_github_token<br>
+                LINEAR_API_KEY=your_linear_key<br>
+                SLACK_WEBHOOK_URL=your_slack_webhook<br>
+                PREFECT_API_URL=your_prefect_url
+            </code>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
