@@ -22,6 +22,7 @@ import sys
 import argparse
 import logging
 import webbrowser
+import socket
 from pathlib import Path
 import uvicorn
 
@@ -53,6 +54,18 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+def find_available_port(start_port=8000, max_attempts=10):
+    """Find an available port starting from start_port"""
+    for port in range(start_port, start_port + max_attempts):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', port))
+                return port
+        except OSError:
+            continue
+    return None
 
 
 def check_environment():
@@ -114,7 +127,7 @@ def check_environment():
 def print_banner():
     """Print the dashboard banner"""
     banner = """
-╔════�������════�������════════════════════════════════════════════════════════════════════╗
+╔════�������════�������══════════════════════════════════════════════════════════════════════╗
 ║                        Contexten Enhanced Dashboard                          ║
 ║                                                                              ║
 ║  🚀 Comprehensive Flow Management & CI/CD Automation                        ║
@@ -210,6 +223,18 @@ async def main():
     
     args = parser.parse_args()
     
+    # Find available port if the requested port is in use
+    requested_port = args.port
+    available_port = find_available_port(requested_port, 10)
+    
+    if available_port is None:
+        print(f"❌ Could not find an available port starting from {requested_port}")
+        return
+    
+    if available_port != requested_port:
+        print(f"⚠️  Port {requested_port} is in use, using port {available_port} instead")
+        args.port = available_port
+    
     # Print banner
     print_banner()
     
@@ -259,6 +284,24 @@ async def main():
     
     try:
         print("🎉 Dashboard is ready! Press Ctrl+C to stop.")
+        
+        # Check if nginx might be intercepting traffic
+        if not args.no_browser:
+            import time
+            import requests
+            
+            # Give server a moment to start
+            time.sleep(1)
+            
+            try:
+                response = requests.get(f"http://localhost:{args.port}/", timeout=2)
+                if "Web Preview Error" in response.text:
+                    print("⚠️  Nginx proxy detected - dashboard may not be accessible")
+                    print("💡 Try accessing directly: http://localhost:{args.port}")
+                    print("💡 Or configure nginx to exclude dashboard ports")
+            except:
+                pass  # Ignore connection errors during startup
+        
         await server.serve()
     except KeyboardInterrupt:
         print("\n👋 Dashboard stopped by user")
