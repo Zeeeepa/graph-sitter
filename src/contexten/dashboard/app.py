@@ -138,10 +138,9 @@ class DashboardConfig:
         self.codegen_org_id = os.getenv("CODEGEN_ORG_ID")
         self.codegen_token = os.getenv("CODEGEN_TOKEN")
         
-        # API tokens and webhooks
-        self.github_token = os.getenv("GITHUB_TOKEN")
-        self.linear_api_key = os.getenv("LINEAR_API_KEY")
-        self.slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+        # Prefect Configuration
+        self.prefect_api_url = os.getenv("PREFECT_API_URL")
+        self.prefect_workspace = os.getenv("PREFECT_WORKSPACE")
         
         # Redirect URIs
         self.base_url = os.getenv("DASHBOARD_BASE_URL", f"http://localhost:{self.port}")
@@ -872,7 +871,9 @@ async def startup_event():
             codegen_token=config.codegen_token,
             github_token=config.github_token,
             linear_api_key=config.linear_api_key,
-            slack_webhook_url=config.slack_webhook_url
+            slack_webhook_url=config.slack_webhook_url,
+            prefect_api_url=config.prefect_api_url,
+            prefect_workspace=config.prefect_workspace
         )
         
         prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
