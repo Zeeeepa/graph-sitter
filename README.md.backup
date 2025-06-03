@@ -93,56 +93,6 @@ gs run test-function
 gs notebook
 ```
 
-## Separate Package Installation
-
-This project contains two main packages that can be installed separately:
-
-### 🔧 Graph Sitter (Code Analysis SDK)
-Core code analysis and manipulation toolkit built on Tree-sitter.
-
-```bash
-cd graph_sitter_package
-pip install -e .
-```
-
-**CLI Usage:**
-```bash
-gs --help
-```
-
-**Python Usage:**
-```python
-from graph_sitter import Codebase
-codebase = Codebase.from_path("/path/to/your/project")
-```
-
-### 🤖 Contexten (Agentic Orchestrator)
-Intelligent agent orchestration framework with chat capabilities and integrations.
-
-```bash
-cd contexten_package
-pip install -e .
-```
-
-**CLI Usage:**
-```bash
-contexten --help
-contexten-dashboard  # Launch interactive dashboard
-```
-
-**Python Usage:**
-```python
-from contexten import FlowManager
-flow_manager = FlowManager()
-```
-
-### 🚀 Install Both Packages
-To install both packages at once:
-
-```bash
-./install_packages.sh
-```
-
 ## Usage
 
 See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
