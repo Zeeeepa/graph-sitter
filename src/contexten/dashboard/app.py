@@ -21,26 +21,69 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
 
 import httpx
 from authlib.integrations.starlette_client import OAuth
-from starlette.middleware.sessions import SessionMiddleware as StarletteSessionMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 # Import Codegen SDK
-from codegen import Agent as CodegenAgent
+try:
+    from codegen import Agent as CodegenAgent
+    CODEGEN_AVAILABLE = True
+except ImportError:
+    CodegenAgent = None
+    CODEGEN_AVAILABLE = False
+    print("Warning: Codegen SDK not available. Some features may be limited.")
 
 # Import contexten components
-from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentConfig
-from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentConfig
-from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
-from ...shared.logging.get_logger import get_logger
-from .chat_manager import ChatManager
+try:
+    from ..extensions.linear.enhanced_agent import EnhancedLinearAgent, LinearAgentConfig
+except ImportError:
+    EnhancedLinearAgent = None
+    LinearAgentConfig = None
+    print("Warning: Could not import Linear agent. Linear features may be limited.")
+
+try:
+    from ..extensions.github.enhanced_agent import EnhancedGitHubAgent, GitHubAgentConfig
+except ImportError:
+    EnhancedGitHubAgent = None
+    GitHubAgentConfig = None
+    print("Warning: Could not import GitHub agent. GitHub features may be be limited.")
+
+try:
+    from ..extensions.slack.enhanced_agent import EnhancedSlackAgent, SlackAgentConfig
+except ImportError:
+    EnhancedSlackAgent = None
+    SlackAgentConfig = None
+    print("Warning: Could not import Slack agent. Slack features may be limited.")
+
+try:
+    from ...shared.logging.get_logger import get_logger
+except ImportError:
+    import logging
+    def get_logger(name):
+        return logging.getLogger(name)
+    print("Warning: Could not import contexten logger. Using standard logging.")
+
+try:
+    from .chat_manager import ChatManager
+except ImportError:
+    ChatManager = None
+    print("Warning: Could not import ChatManager. Chat features may be limited.")
 
 # Import Prefect Dashboard
-from .prefect_dashboard import PrefectDashboardManager
-from ..orchestration import OrchestrationConfig
+try:
+    from .prefect_dashboard import PrefectDashboardManager
+except ImportError:
+    PrefectDashboardManager = None
+    print("Warning: Could not import Prefect dashboard. Prefect features may be limited.")
+
+try:
+    from ..orchestration import OrchestrationConfig
+except ImportError:
+    OrchestrationConfig = None
+    print("Warning: Could not import OrchestrationConfig. Orchestration features may be limited.")
 
 logger = get_logger(__name__)
 
@@ -119,7 +162,7 @@ app.add_middleware(
 )
 
 app.add_middleware(
-    StarletteSessionMiddleware,
+    SessionMiddleware,
     secret_key=config.secret_key,
     max_age=86400  # 24 hours
 )
@@ -167,7 +210,7 @@ app.mount("/static", StaticFiles(directory="src/contexten/dashboard/static"), na
 # Global state
 integration_agents: Dict[str, Any] = {}
 user_sessions: Dict[str, Dict[str, Any]] = {}
-chat_manager = ChatManager()
+chat_manager = ChatManager() if ChatManager is not None else None
 
 # Global state for flows and projects
 active_flows = {}
