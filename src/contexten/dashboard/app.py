@@ -26,6 +26,9 @@ import httpx
 from authlib.integrations.starlette_client import OAuth
 from starlette.middleware.sessions import SessionMiddleware
 
+# Setup logging
+logger = logging.getLogger(__name__)
+
 # Import Codegen SDK with graceful error handling
 try:
     from codegen import Agent as CodegenAgent
@@ -126,6 +129,11 @@ class DashboardConfig:
         # Codegen SDK
         self.codegen_org_id = os.getenv("CODEGEN_ORG_ID")
         self.codegen_token = os.getenv("CODEGEN_TOKEN")
+        
+        # API tokens and webhooks
+        self.github_token = os.getenv("GITHUB_TOKEN")
+        self.linear_api_key = os.getenv("LINEAR_API_KEY")
+        self.slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
         
         # Redirect URIs
         self.base_url = os.getenv("DASHBOARD_BASE_URL", f"http://localhost:{self.port}")
