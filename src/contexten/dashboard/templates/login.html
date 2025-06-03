@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contexten Dashboard - Login</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .auth-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .github-btn {
+            background: #24292e;
+            color: white;
+        }
+        .github-btn:hover {
+            background: #1a1e22;
+            transform: translateY(-2px);
+        }
+        .linear-btn {
+            background: #5e6ad2;
+            color: white;
+        }
+        .linear-btn:hover {
+            background: #4c5bc7;
+            transform: translateY(-2px);
+        }
+        .slack-btn {
+            background: #4a154b;
+            color: white;
+        }
+        .slack-btn:hover {
+            background: #3a0f3a;
+            transform: translateY(-2px);
+        }
+        .features {
+            margin-top: 30px;
+            text-align: left;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        .features li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🚀</div>
+        <h1>Contexten Dashboard</h1>
+        <p>Comprehensive Flow Management & CI/CD Automation</p>
+        
+        <div class="auth-buttons">
+            <a href="{{ github_auth_url }}" class="auth-btn github-btn">
+                📱 Login with GitHub
+            </a>
+            <a href="{{ linear_auth_url }}" class="auth-btn linear-btn">
+                📋 Login with Linear
+            </a>
+            <a href="{{ slack_auth_url }}" class="auth-btn slack-btn">
+                💬 Login with Slack
+            </a>
+        </div>
+        
+        <div class="features">
+            <h3>Features:</h3>
+            <ul>
+                <li>Real-time Project Monitoring</li>
+                <li>Linear/GitHub Integration</li>
+                <li>Autonomous Error Healing</li>
+                <li>WebSocket Real-time Updates</li>
+                <li>Flow Management & Monitoring</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
