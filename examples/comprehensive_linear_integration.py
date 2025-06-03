@@ -18,7 +18,7 @@ from contexten.extensions.linear import (
     get_linear_config,
     create_linear_integration_agent
 )
-from contexten.extensions.events.codegen_app import CodegenApp
+from contexten.extensions.events.contexten_app import ContextenApp
 
 
 async def basic_usage_example():
@@ -54,41 +54,39 @@ async def basic_usage_example():
 
 
 async def codegen_app_integration_example():
-    """Example of integration with CodegenApp"""
-    print("\n🏗️ CodegenApp Integration Example")
-    print("=" * 50)
+    """Example of integration with ContextenApp"""
+    print("\n🏗️ ContextenApp Integration Example")
     
-    try:
-        # Create CodegenApp with Linear integration
-        app = CodegenApp(name="linear-integration-example")
-        
-        # Initialize the Linear agent
-        success = await app.linear.initialize_agent()
-        if success:
-            print("✅ Linear agent initialized within CodegenApp")
-            
-            # Get integration status through CodegenApp
-            status = await app.linear.get_integration_status()
-            print(f"📊 Integration Status: {status.get('status', 'unknown')}")
-            print(f"   Comprehensive Integration: {status.get('comprehensive_integration', False)}")
-            print(f"   Active Tasks: {status.get('active_tasks', 0)}")
-            
-            # Get metrics through CodegenApp
-            metrics = await app.linear.get_metrics()
-            if "error" not in metrics:
-                print(f"📈 Metrics Available: ✅")
-                print(f"   Client Uptime: {metrics['client_stats']['uptime_seconds']:.1f}s")
-            else:
-                print(f"❌ Metrics Error: {metrics['error']}")
-            
-            # Cleanup
-            await app.linear.cleanup()
-            print("✅ CodegenApp Linear integration cleanup completed")
-        else:
-            print("❌ Failed to initialize Linear agent")
-            
-    except Exception as e:
-        print(f"❌ Error: {e}")
+    # Initialize Linear configuration
+    config = get_linear_config()
+    
+    # Create ContextenApp with Linear integration
+    app = ContextenApp(name="linear-integration-example")
+    
+    # Get the Linear integration agent from the app
+    linear_agent = app.linear.integration_agent
+    
+    print("✅ Linear agent initialized within ContextenApp")
+    
+    # Get integration status through ContextenApp
+    status = await linear_agent.get_status()
+    print(f"📊 Integration Status: {status.status}")
+    print(f"   Monitoring Active: {status.monitoring_active}")
+    print(f"   Last Health Check: {status.last_health_check}")
+    
+    # Get metrics through ContextenApp
+    metrics = await linear_agent.get_metrics()
+    print(f"📈 Metrics:")
+    print(f"   Total Assignments: {metrics.total_assignments}")
+    print(f"   Successful Assignments: {metrics.successful_assignments}")
+    print(f"   Failed Assignments: {metrics.failed_assignments}")
+    print(f"   Average Response Time: {metrics.average_response_time:.2f}s")
+    
+    # Cleanup
+    if linear_agent.monitoring_active:
+        await linear_agent.stop_monitoring()
+    
+    print("✅ ContextenApp Linear integration cleanup completed")
 
 
 async def webhook_handling_example():
@@ -444,4 +442,3 @@ if __name__ == "__main__":
     
     # Run examples
     asyncio.run(main())
-
