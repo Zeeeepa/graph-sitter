@@ -15,6 +15,9 @@ import secrets
 import hashlib
 import uuid
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 from fastapi import FastAPI, Request, Response, HTTPException, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -122,6 +125,11 @@ class DashboardConfig:
         self.linear_client_secret = os.getenv("LINEAR_CLIENT_SECRET")
         self.slack_client_id = os.getenv("SLACK_CLIENT_ID")
         self.slack_client_secret = os.getenv("SLACK_CLIENT_SECRET")
+        
+        # API Tokens and Webhooks
+        self.github_token = os.getenv("GITHUB_TOKEN")
+        self.linear_api_key = os.getenv("LINEAR_API_KEY")
+        self.slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
         
         # Codegen SDK
         self.codegen_org_id = os.getenv("CODEGEN_ORG_ID")

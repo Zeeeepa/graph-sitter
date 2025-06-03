@@ -92,7 +92,7 @@ class ContextenIntegrationTester:
         
         try:
             # Test if dashboard app can be created
-            from src.contexten.dashboard.app import app
+            from contexten.dashboard.app import app
             
             results['app_creation'] = {
                 'status': 'success',
@@ -662,4 +662,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
