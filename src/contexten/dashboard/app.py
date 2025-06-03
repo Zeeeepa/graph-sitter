@@ -138,10 +138,9 @@ class DashboardConfig:
         self.codegen_org_id = os.getenv("CODEGEN_ORG_ID")
         self.codegen_token = os.getenv("CODEGEN_TOKEN")
         
-        # API tokens and webhooks
-        self.github_token = os.getenv("GITHUB_TOKEN")
-        self.linear_api_key = os.getenv("LINEAR_API_KEY")
-        self.slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+        # Prefect Configuration
+        self.prefect_api_url = os.getenv("PREFECT_API_URL")
+        self.prefect_workspace = os.getenv("PREFECT_WORKSPACE")
         
         # Redirect URIs
         self.base_url = os.getenv("DASHBOARD_BASE_URL", f"http://localhost:{self.port}")
@@ -866,25 +865,31 @@ async def startup_event():
     global prefect_dashboard_manager
 
     # Initialize Prefect Dashboard Manager
-    try:
-        orchestration_config = OrchestrationConfig(
-            codegen_org_id=config.codegen_org_id,
-            codegen_token=config.codegen_token,
-            github_token=config.github_token,
-            linear_api_key=config.linear_api_key,
-            slack_webhook_url=config.slack_webhook_url
-        )
-        
-        prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
-        await prefect_dashboard_manager.initialize()
-        
-        # Include Prefect dashboard routes
-        app.include_router(prefect_dashboard_manager.router)
-        
-        logger.info("Prefect Dashboard Manager initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize Prefect Dashboard Manager: {e}")
-        # Continue without Prefect dashboard if initialization fails
+    prefect_dashboard_manager = None
+
+    # Initialize Prefect Dashboard Manager if available
+    if PrefectDashboardManager is not None:
+        try:
+            orchestration_config = OrchestrationConfig(
+                codegen_org_id=config.codegen_org_id,
+                codegen_token=config.codegen_token,
+                github_token=config.github_token,
+                linear_api_key=config.linear_api_key,
+                slack_webhook_url=config.slack_webhook_url,
+                prefect_api_url=config.prefect_api_url,
+                prefect_workspace=config.prefect_workspace
+            )
+            
+            prefect_dashboard_manager = PrefectDashboardManager(orchestration_config)
+            await prefect_dashboard_manager.initialize()
+            
+            # Include Prefect dashboard routes
+            app.include_router(prefect_dashboard_manager.router)
+            logger.info("Prefect Dashboard Manager initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Prefect Dashboard Manager: {e}")
+    else:
+        logger.info("Prefect Dashboard Manager not available - skipping initialization")
 
 @app.on_event("shutdown")
 async def shutdown_event():
