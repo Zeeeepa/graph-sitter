@@ -230,10 +230,40 @@ dashboard_stats = {
 security = HTTPBearer(auto_error=False)
 
 async def get_current_user(request: Request) -> Optional[Dict[str, Any]]:
-    """Get current authenticated user from session"""
+    """Get current authenticated user from session or environment tokens"""
+    # First check session-based authentication
     session_id = request.session.get("session_id")
     if session_id and session_id in user_sessions:
         return user_sessions[session_id]
+    
+    # If no session, check for environment-based authentication
+    env_user = get_env_user()
+    if env_user:
+        # Create a temporary session for environment-based auth
+        temp_session_id = f"env_user_{hashlib.md5(str(env_user).encode()).hexdigest()[:8]}"
+        request.session["session_id"] = temp_session_id
+        user_sessions[temp_session_id] = env_user
+        return env_user
+    
+    return None
+
+def get_env_user() -> Optional[Dict[str, Any]]:
+    """Create user object from environment variables"""
+    github_token = config.github_token
+    linear_api_key = config.linear_api_key
+    slack_webhook_url = config.slack_webhook_url
+    
+    # Only create env user if at least one token is available
+    if github_token or linear_api_key or slack_webhook_url:
+        return {
+            "id": "env_user",
+            "name": "Environment User",
+            "email": "user@localhost",
+            "github_token": github_token,
+            "linear_token": linear_api_key,
+            "slack_token": slack_webhook_url,
+            "auth_method": "environment"
+        }
     return None
 
 async def require_auth(request: Request) -> Dict[str, Any]:
@@ -258,7 +288,9 @@ async def dashboard_home(request: Request):
             "request": request,
             "github_auth_url": "/auth/github",
             "linear_auth_url": "/auth/linear",
-            "slack_auth_url": "/auth/slack"
+            "slack_auth_url": "/auth/slack",
+            "show_env_option": True,
+            "env_tokens_available": bool(config.github_token or config.linear_api_key or config.slack_webhook_url)
         })
     
     # Get user's connected integrations
@@ -271,7 +303,8 @@ async def dashboard_home(request: Request):
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
         "user": user,
-        "integrations": integrations
+        "integrations": integrations,
+        "auth_method": user.get("auth_method", "oauth")
     })
 
 # Authentication Routes
@@ -1309,6 +1342,37 @@ def estimate_completion_time(flow: dict) -> str:
         
     except:
         return "Unknown"
+
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    """Settings page for manual token configuration"""
+    user = await get_current_user(request)
+    
+    return templates.TemplateResponse("settings.html", {
+        "request": request,
+        "user": user,
+        "github_token": config.github_token,
+        "linear_api_key": config.linear_api_key,
+        "slack_webhook_url": config.slack_webhook_url,
+        "env_file_path": ".env"
+    })
+
+@app.post("/api/use-env-tokens")
+async def use_env_tokens(request: Request):
+    """Use environment tokens for authentication"""
+    env_user = get_env_user()
+    if not env_user:
+        raise HTTPException(
+            status_code=400,
+            detail="No environment tokens found. Please set GITHUB_TOKEN, LINEAR_API_KEY, or SLACK_WEBHOOK_URL in your .env file."
+        )
+    
+    # Create session for environment user
+    session_id = f"env_user_{hashlib.md5(str(env_user).encode()).hexdigest()[:8]}"
+    request.session["session_id"] = session_id
+    user_sessions[session_id] = env_user
+    
+    return {"status": "success", "message": "Environment tokens activated", "user": env_user}
 
 if __name__ == "__main__":
     import uvicorn
