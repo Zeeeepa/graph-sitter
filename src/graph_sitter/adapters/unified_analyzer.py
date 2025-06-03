@@ -21,7 +21,8 @@ from .function_context import (
 from .codebase_visualization import (
     CodebaseVisualizer,
     InteractiveReport,
-    create_comprehensive_visualization
+    create_comprehensive_visualization,
+    create_interactive_report
 )
 from .metrics import MetricsCalculator
 from .dependency_analyzer import DependencyAnalyzer
@@ -29,6 +30,11 @@ from .dead_code import DeadCodeDetector
 from .call_graph import CallGraphAnalyzer
 from .database import AnalysisDatabase
 from .codebase_db_adapter import CodebaseDbAdapter
+from .react_visualizations import (
+    create_react_visualizations,
+    ReactVisualizationGenerator,
+    ReactComponentGenerator
+)
 
 logger = logging.getLogger(__name__)
 
@@ -527,6 +533,104 @@ class UnifiedCodebaseAnalyzer:
             f.write(markdown_content)
         
         return output_file
+    
+    def generate_interactive_report(self, output_path: str = "analysis_report.html") -> str:
+        """
+        Generate an interactive HTML report with all analysis results.
+        
+        Args:
+            output_path: Path where the HTML report will be saved
+            
+        Returns:
+            Path to the generated HTML report
+        """
+        # Generate interactive report
+        report_path = self.output_dir / "visualizations" / "interactive_report.html"
+        if not report_path.exists():
+            report_path = create_interactive_report(
+                codebase=self.codebase,
+                output_path=output_path
+            )
+        
+        return str(report_path)
+    
+    def generate_react_visualizations(self, output_dir: str = "react_visualizations",
+                                    visualization_types: List[str] = None) -> Dict[str, Any]:
+        """
+        Generate comprehensive React visualizations for the analyzed codebase.
+        
+        Args:
+            output_dir: Directory to save React components and data
+            visualization_types: List of visualization types to generate
+            
+        Returns:
+            Dictionary containing visualization data and component information
+        """
+        if not self.codebase:
+            raise ValueError("No codebase loaded. Call analyze_codebase() first.")
+        
+        # Generate React visualizations
+        result = create_react_visualizations(
+            codebase=self.codebase,
+            visualization_types=visualization_types
+        )
+        
+        # Create output directory
+        output_path = Path(output_dir)
+        output_path.mkdir(exist_ok=True)
+        
+        # Save visualization data and components
+        for viz_type, component_data in result['components'].items():
+            # Save JSON data
+            json_file = output_path / f"{viz_type}_data.json"
+            with open(json_file, 'w') as f:
+                json.dump(component_data['data'], f, indent=2, default=str)
+            
+            # Save React component
+            component_file = output_path / f"{viz_type.title().replace('_', '')}Visualization.jsx"
+            with open(component_file, 'w') as f:
+                f.write(component_data['component_code'])
+        
+        # Save dashboard component
+        dashboard_file = output_path / "CodebaseDashboard.jsx"
+        with open(dashboard_file, 'w') as f:
+            f.write(result['dashboard_component'])
+        
+        # Save metadata
+        metadata_file = output_path / "metadata.json"
+        with open(metadata_file, 'w') as f:
+            json.dump(result['metadata'], f, indent=2, default=str)
+        
+        # Generate package.json for easy setup
+        package_json = {
+            "name": "codebase-visualizations",
+            "version": "1.0.0",
+            "description": "React visualizations for codebase analysis",
+            "main": "CodebaseDashboard.jsx",
+            "dependencies": {
+                "react": "^18.0.0",
+                "react-dom": "^18.0.0",
+                "vis-network": "^9.0.0"
+            },
+            "scripts": {
+                "start": "react-scripts start",
+                "build": "react-scripts build"
+            }
+        }
+        
+        package_file = output_path / "package.json"
+        with open(package_file, 'w') as f:
+            json.dump(package_json, f, indent=2)
+        
+        logger.info(f"Generated React visualizations in {output_path}")
+        
+        return {
+            **result,
+            'output_path': str(output_path),
+            'files_generated': [
+                str(f.relative_to(output_path)) for f in output_path.iterdir()
+            ]
+        }
 
 
 # Convenience functions for external use
@@ -573,4 +677,3 @@ if __name__ == "__main__":
     print("- Training data generation for ML applications")
     print("- Database storage and querying")
     print("\nUse analyze_codebase_comprehensive() for full analysis.")
-
