@@ -9,7 +9,8 @@ class SecretsConfig(BaseConfig):
     """
 
     def __init__(self, prefix: str = "", *args, **kwargs) -> None:
-        super().__init__(prefix=prefix, *args, **kwargs)
+        # Pass prefix directly to BaseConfig
+        super().__init__(prefix, *args, **kwargs)
 
     github_token: str | None = None
     openai_api_key: str | None = None

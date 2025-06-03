@@ -51,7 +51,8 @@ class Agent:
         retry_backoff_factor: float = 2.0,
         rate_limit_buffer: float = 0.1,
         enable_logging: bool = True,
-        connection_pool_size: int = 10
+        connection_pool_size: int = 10,
+        validate_on_init: bool = False
     ):
         """
         Initialize the enhanced Codegen Agent.
@@ -66,6 +67,7 @@ class Agent:
             rate_limit_buffer: Buffer time to add to rate limit waits
             enable_logging: Enable detailed request/response logging
             connection_pool_size: Size of the connection pool
+            validate_on_init: Validate credentials during initialization (optional)
             
         Raises:
             ValidationError: If parameters are invalid
@@ -107,12 +109,12 @@ class Agent:
             "X-Client-Version": "1.1.0"
         })
         
-        # Monitoring and metrics
+        # Enhanced monitoring
         self._request_count = 0
         self._error_count = 0
         self._rate_limit_count = 0
-        self._last_request_time = None
-        self._rate_limit_reset_time = None
+        self._last_request_time: Optional[float] = None
+        self._rate_limit_reset_time: Optional[float] = None
         self._start_time = time.time()
         
         # Webhooks
@@ -124,17 +126,18 @@ class Agent:
         
         logger.info(f"Enhanced Codegen Agent initialized for org {org_id}")
         
-        # Validate credentials on initialization
-        try:
-            self._validate_credentials()
-        except Exception as e:
-            logger.error(f"Credential validation failed: {e}")
-            raise AuthenticationError(f"Failed to validate credentials: {str(e)}")
+        # Validate credentials during initialization (optional)
+        if validate_on_init:
+            try:
+                self._validate_credentials()
+            except Exception as e:
+                logger.error(f"Credential validation failed: {e}")
+                raise AuthenticationError(f"Failed to validate credentials: {str(e)}")
     
     def _validate_credentials(self) -> None:
         """Validate the provided credentials with enhanced error handling."""
         try:
-            response = self._make_request("GET", "/v1/auth/validate", skip_auth_check=True)
+            response = self._make_request("GET", "/v1/auth/validate")
             if response.status_code == 200:
                 logger.info("Credentials validated successfully")
             else:
@@ -148,51 +151,51 @@ class Agent:
         endpoint: str, 
         data: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, Any]] = None,
-        retry_count: int = 0,
-        skip_auth_check: bool = False
+        timeout: Optional[int] = None
     ) -> requests.Response:
         """
-        Make an HTTP request to the Codegen API with enhanced error handling.
+        Make HTTP request with enhanced error handling and monitoring.
         
         Args:
             method: HTTP method (GET, POST, etc.)
             endpoint: API endpoint
-            data: Request body data
+            data: Request data
             params: Query parameters
-            retry_count: Current retry attempt
-            skip_auth_check: Skip authentication validation
+            timeout: Request timeout (uses instance timeout if None)
             
         Returns:
             Response object
             
         Raises:
-            APIError: If the request fails
-            RateLimitError: If rate limit is exceeded
-            NetworkError: If network issues occur
-            TimeoutError: If request times out
+            CodegenAPIError: For API-related errors
+            CodegenTimeoutError: For timeout errors
+            CodegenRateLimitError: For rate limiting
         """
+        if timeout is None:
+            timeout = self.timeout or 30  # Default to 30 if self.timeout is None
+        
         url = urljoin(self.base_url, endpoint)
         
         # Check rate limiting
         if self._is_rate_limited():
-            wait_time = self._rate_limit_reset_time - time.time()
+            wait_time = (self._rate_limit_reset_time or 0) - time.time()
             logger.warning(f"Rate limited, waiting {wait_time:.1f} seconds")
             time.sleep(wait_time + self.rate_limit_buffer)
         
         # Prepare request
-        request_id = f"req_{int(time.time() * 1000)}_{retry_count}"
+        request_id = f"req_{int(time.time() * 1000)}"
         start_time = time.time()
         
         try:
             if self.enable_logging:
-                logger.debug(f"[{request_id}] {method} {url} (attempt {retry_count + 1})")
+                logger.debug(f"[{request_id}] {method} {url}")
             
             response = self.session.request(
                 method=method,
                 url=url,
                 json=data,
                 params=params,
-                timeout=self.timeout
+                timeout=timeout
             )
             
             response_time = time.time() - start_time
@@ -206,20 +209,14 @@ class Agent:
             if response.status_code == 429:
                 self._rate_limit_count += 1
                 retry_after = int(response.headers.get("Retry-After", 60))
-                
-                if retry_count < self.max_retries:
-                    self._rate_limit_reset_time = time.time() + retry_after
-                    logger.warning(f"Rate limited, retrying after {retry_after} seconds")
-                    time.sleep(retry_after + self.rate_limit_buffer)
-                    return self._make_request(method, endpoint, data, params, retry_count + 1, skip_auth_check)
-                else:
-                    raise RateLimitError(
-                        "Rate limit exceeded and max retries reached",
-                        retry_after=retry_after
-                    )
+                self._rate_limit_reset_time = time.time() + retry_after
+                raise RateLimitError(
+                    "Rate limit exceeded",
+                    retry_after=retry_after
+                )
             
             # Handle authentication errors
-            if response.status_code == 401 and not skip_auth_check:
+            if response.status_code == 401:
                 raise AuthenticationError("Authentication failed - invalid token")
             
             # Handle other client/server errors
@@ -231,39 +228,18 @@ class Agent:
                     pass
                 
                 error_message = error_data.get("error", f"HTTP {response.status_code}")
-                
-                if response.status_code >= 500:
-                    # Server error - retry if possible
-                    if retry_count < self.max_retries:
-                        wait_time = self.retry_backoff_factor ** retry_count
-                        logger.warning(f"Server error, retrying in {wait_time} seconds")
-                        time.sleep(wait_time)
-                        return self._make_request(method, endpoint, data, params, retry_count + 1, skip_auth_check)
-                
                 self._error_count += 1
                 raise APIError(error_message, response.status_code, error_data)
             
             return response
             
         except requests.exceptions.Timeout:
-            if retry_count < self.max_retries:
-                wait_time = self.retry_backoff_factor ** retry_count
-                logger.warning(f"Request timeout, retrying in {wait_time} seconds")
-                time.sleep(wait_time)
-                return self._make_request(method, endpoint, data, params, retry_count + 1, skip_auth_check)
-            else:
-                self._error_count += 1
-                raise TimeoutError(f"Request timed out after {self.timeout} seconds")
+            self._error_count += 1
+            raise TimeoutError(f"Request timed out after {timeout} seconds")
         
         except requests.exceptions.ConnectionError as e:
-            if retry_count < self.max_retries:
-                wait_time = self.retry_backoff_factor ** retry_count
-                logger.warning(f"Connection error, retrying in {wait_time} seconds")
-                time.sleep(wait_time)
-                return self._make_request(method, endpoint, data, params, retry_count + 1, skip_auth_check)
-            else:
-                self._error_count += 1
-                raise NetworkError(f"Connection failed: {str(e)}", original_error=e)
+            self._error_count += 1
+            raise NetworkError(f"Connection failed: {str(e)}", original_error=e)
         
         except requests.RequestException as e:
             self._error_count += 1
@@ -312,7 +288,7 @@ class Agent:
         if priority not in ["low", "normal", "high", "urgent"]:
             raise ValidationError("priority must be 'low', 'normal', 'high', or 'urgent'", field="priority")
         
-        task_data = {
+        task_data: Dict[str, Any] = {
             "org_id": self.org_id,
             "prompt": prompt,
             "priority": priority,

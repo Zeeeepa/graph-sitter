@@ -357,4 +357,3 @@ def get_provider_comparison() -> Dict[str, Any]:
         }
     
     return comparison
-

@@ -22,25 +22,25 @@ class Task:
     Includes comprehensive monitoring, artifact management, and event handling.
     """
     
-    def __init__(self, task_id: str, agent: "Agent", task_data: Dict[str, Any]):
+    def __init__(self, task_id: str, agent: 'Agent', task_info: Optional[Dict[str, Any]] = None):
         """
         Initialize a Task.
         
         Args:
             task_id: Unique task identifier
             agent: The agent instance that created this task
-            task_data: Initial task data from the API
+            task_info: Initial task data from the API
         """
         self.task_id = task_id
         self.agent = agent
-        self._data = task_data
-        self._artifacts_cache = None
-        self._logs_cache = None
+        self._task_info = task_info or {}
+        self._last_refresh_time: Optional[float] = None
+        self._artifacts_cache: Optional[List[Dict[str, Any]]] = None
+        self._logs_cache: Optional[List[str]] = None
         self._status_callbacks: List[Callable[[str, str], None]] = []
         
         # Monitoring
         self._refresh_count = 0
-        self._last_refresh_time = None
         self._creation_time = time.time()
         
         logger.info(f"Task {task_id} initialized with status: {self.status}")
@@ -48,49 +48,49 @@ class Task:
     @property
     def status(self) -> str:
         """Current task status."""
-        return self._data.get("status", "unknown")
+        return self._task_info.get("status", "unknown")
     
     @property
     def result(self) -> Optional[str]:
         """Task result (if completed)."""
-        return self._data.get("result")
+        return self._task_info.get("result")
     
     @property
     def error(self) -> Optional[str]:
         """Error message (if failed)."""
-        return self._data.get("error")
+        return self._task_info.get("error")
     
     @property
     def progress(self) -> Optional[Dict[str, Any]]:
         """Progress information."""
-        return self._data.get("progress", {})
+        return self._task_info.get("progress", {})
     
     @property
     def created_at(self) -> Optional[str]:
         """Creation timestamp."""
-        return self._data.get("created_at")
+        return self._task_info.get("created_at")
     
     @property
     def updated_at(self) -> Optional[str]:
         """Last update timestamp."""
-        return self._data.get("updated_at")
+        return self._task_info.get("updated_at")
     
     @property
     def prompt(self) -> Optional[str]:
         """Original prompt."""
-        return self._data.get("prompt")
+        return self._task_info.get("prompt")
     
     @property
     def metadata(self) -> Dict[str, Any]:
         """Additional metadata."""
-        return self._data.get("metadata", {})
+        return self._task_info.get("metadata", {})
     
     @property
     def logs(self) -> List[str]:
         """Execution logs."""
         if self._logs_cache is None:
-            self._logs_cache = self._data.get("logs", [])
-        return self._logs_cache
+            self._logs_cache = self._task_info.get("logs", [])
+        return self._logs_cache or []  # Return empty list if None
     
     @property
     def is_terminal(self) -> bool:
@@ -127,7 +127,7 @@ class Task:
         """Refresh task data from the API with enhanced error handling."""
         try:
             old_status = self.status
-            self._data = self.agent._get_task(self.task_id)
+            self._task_info = self.agent._get_task(self.task_id)
             new_status = self.status
             
             # Clear caches
@@ -180,7 +180,8 @@ class Task:
             # Call progress callback if progress changed
             if progress_callback and self.progress != last_progress:
                 try:
-                    progress_callback(self.progress)
+                    progress_data = self.progress or {}  # Ensure we have a dict
+                    progress_callback(progress_data)
                     last_progress = self.progress.copy() if self.progress else None
                 except Exception as e:
                     logger.warning(f"Progress callback failed: {e}")
@@ -215,7 +216,7 @@ class Task:
         try:
             logger.info(f"Cancelling task {self.task_id}")
             result = self.agent._cancel_task(self.task_id)
-            self._data.update(result)
+            self._task_info.update(result)
             logger.info(f"Task {self.task_id} cancelled successfully")
         except Exception as e:
             logger.error(f"Failed to cancel task {self.task_id}: {e}")
@@ -239,7 +240,7 @@ class Task:
                 logger.warning(f"Failed to get artifacts for task {self.task_id}: {e}")
                 self._artifacts_cache = []
         
-        return self._artifacts_cache
+        return self._artifacts_cache or []  # Return empty list if None
     
     def get_logs(self, force_refresh: bool = False) -> List[str]:
         """
@@ -260,7 +261,7 @@ class Task:
                 logger.warning(f"Failed to get logs for task {self.task_id}: {e}")
                 self._logs_cache = []
         
-        return self._logs_cache
+        return self._logs_cache or []  # Return empty list if None
     
     def get_monitoring_info(self) -> Dict[str, Any]:
         """Get comprehensive monitoring information."""
@@ -285,4 +286,3 @@ class Task:
     def __repr__(self) -> str:
         """Detailed string representation of the task."""
         return f"Task(id={self.task_id}, status={self.status}, refreshes={self._refresh_count})"
-

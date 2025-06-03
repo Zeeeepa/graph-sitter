@@ -53,8 +53,9 @@ class CodegenProvider(AIProvider):
         self.timeout = timeout
         self.max_retries = max_retries
         self._agent = None
-        self._last_validation_time = None
+        self._last_validation_time: Optional[float] = None
         self._validation_cache_duration = 300  # 5 minutes
+        self._credentials_validated: Optional[bool] = None
         
         # Enhanced monitoring
         self._task_count = 0
@@ -99,12 +100,16 @@ class CodegenProvider(AIProvider):
     
     @property
     def agent(self) -> Agent:
-        """Get the Codegen agent with lazy initialization."""
+        """Get the Codegen agent instance."""
         if not self._agent:
             if not self.org_id or not self.token:
                 raise ProviderUnavailableError("Codegen org_id and token not provided")
             self._initialize_agent()
-        return self._agent
+        
+        if not self._agent:
+            raise ProviderUnavailableError("Failed to initialize Codegen agent")
+            
+        return self._agent  # Return Agent instance instead of None
     
     def validate_credentials(self) -> bool:
         """

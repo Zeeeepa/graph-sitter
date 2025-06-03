@@ -31,7 +31,9 @@ class OpenAIProvider(AIProvider):
     def __init__(
         self, 
         api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        model: Optional[str] = None,
+        temperature: float = 0.0,
+        max_tokens: Optional[int] = None,
         timeout: int = 30,
         max_retries: int = 3,
         **kwargs
@@ -41,24 +43,31 @@ class OpenAIProvider(AIProvider):
         
         Args:
             api_key: OpenAI API key (if not provided, will use OPENAI_API_KEY env var)
-            base_url: Custom base URL for OpenAI API
+            model: Default model for OpenAI
+            temperature: Temperature for OpenAI API
+            max_tokens: Maximum tokens for OpenAI API
             timeout: Request timeout in seconds
             max_retries: Maximum number of retries
             **kwargs: Additional configuration
         """
         super().__init__(**kwargs)
         
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
-        self.base_url = base_url
+        self.api_key = api_key
+        self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
         self.timeout = timeout
         self.max_retries = max_retries
-        self._client = None
-        self._last_validation_time = None
+        self._client: Optional[OpenAI] = None
+        self._last_validation_time: Optional[float] = None
         self._validation_cache_duration = 300  # 5 minutes
         
         # Enhanced monitoring
-        self._token_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-        self._model_usage = {}
+        self._request_count = 0
+        self._error_count = 0
+        self._total_tokens = 0
+        self._model_usage: Dict[str, Any] = {}  # Add type annotation
+        self._last_request_time = None
         
         if self.api_key:
             try:
@@ -101,6 +110,10 @@ class OpenAIProvider(AIProvider):
             if not self.api_key:
                 raise ProviderUnavailableError("OpenAI API key not provided")
             self._initialize_client()
+        
+        if not self._client:
+            raise ProviderUnavailableError("Failed to initialize OpenAI client")
+            
         return self._client
     
     def validate_credentials(self) -> bool:
@@ -153,7 +166,7 @@ class OpenAIProvider(AIProvider):
         
         # Use default model if not specified
         if not model:
-            model = "gpt-4o"
+            model = self.model
         
         try:
             self._record_request()
@@ -346,4 +359,3 @@ class OpenAIProvider(AIProvider):
         completion_cost = (completion_tokens / 1000) * pricing[model]["completion"]
         
         return prompt_cost + completion_cost
-
