@@ -56,37 +56,142 @@ function setupTabNavigation() {
             this.classList.add('active');
             
             // Show corresponding tab
-            const tabId = this.getAttribute('data-tab') + '-tab';
-            const tabElement = document.getElementById(tabId);
-            if (tabElement) {
-                tabElement.classList.add('active');
-                currentTab = this.getAttribute('data-tab');
+            const tabId = this.getAttribute('data-tab');
+            const tabContent = document.getElementById(tabId);
+            if (tabContent) {
+                tabContent.classList.add('active');
+                currentTab = tabId;
                 
                 // Load tab-specific data
-                loadTabData(currentTab);
+                loadTabData(tabId);
             }
         });
     });
 }
 
 // Load tab-specific data
-function loadTabData(tab) {
-    switch(tab) {
+function loadTabData(tabId) {
+    switch(tabId) {
         case 'dashboard':
-            loadDashboardData();
-            break;
-        case 'projects':
-            loadProjects();
-            break;
-        case 'flows':
+            loadSystemStatus();
+            loadQuickStats();
             loadActiveFlows();
             break;
-        case 'analytics':
-            loadAnalytics();
+        case 'projects':
+            loadProjectsList();
+            loadPinnedProjects();
+            break;
+        case 'flows':
+            loadFlowsList();
+            loadFlowAnalytics();
+            break;
+        case 'analysis':
+            loadAnalysisHistory();
+            break;
+        case 'integrations':
+            loadIntegrationsStatus();
+            break;
+        case 'monitoring':
+            loadMonitoringData();
+            loadSystemHealth();
             break;
         case 'settings':
-            loadSettings();
+            loadSettingsForm();
             break;
+    }
+}
+
+// API helper functions
+async function apiCall(endpoint, options = {}) {
+    try {
+        const response = await fetch(endpoint, {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            ...options
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('API call error:', error);
+        throw error;
+    }
+}
+
+// System status functions
+async function loadSystemStatus() {
+    try {
+        const statusElement = document.getElementById('system-status');
+        if (!statusElement) return;
+        
+        statusElement.innerHTML = '<div class="loading">Loading system status...</div>';
+        
+        const health = await apiCall('/api/comprehensive/system/health');
+        
+        statusElement.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="status-card">
+                    <h4>Overall Status</h4>
+                    <div class="status-indicator status-${health.overall_status === 'healthy' ? 'online' : 'offline'}"></div>
+                    <span>${health.overall_status}</span>
+                </div>
+                <div class="status-card">
+                    <h4>API Response</h4>
+                    <span>${health.services.api.response_time}</span>
+                </div>
+                <div class="status-card">
+                    <h4>Active Flows</h4>
+                    <span>${health.metrics.active_flows}</span>
+                </div>
+                <div class="status-card">
+                    <h4>Memory Usage</h4>
+                    <span>${health.metrics.memory_usage}</span>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Failed to load system status:', error);
+        document.getElementById('system-status').innerHTML = '<div class="error">Failed to load system status</div>';
+    }
+}
+
+async function loadQuickStats() {
+    try {
+        const statsElement = document.getElementById('quick-stats');
+        if (!statsElement) return;
+        
+        statsElement.innerHTML = '<div class="loading">Loading statistics...</div>';
+        
+        const analytics = await apiCall('/api/comprehensive/analytics/overview');
+        
+        statsElement.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div class="stat-card">
+                    <h4>Projects</h4>
+                    <div class="stat-value">${analytics.summary.total_projects}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Active Flows</h4>
+                    <div class="stat-value">${analytics.summary.active_flows}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Success Rate</h4>
+                    <div class="stat-value">${analytics.trends.flow_success_rate}%</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Avg Time</h4>
+                    <div class="stat-value">${analytics.trends.average_completion_time}</div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Failed to load quick stats:', error);
+        document.getElementById('quick-stats').innerHTML = '<div class="error">Failed to load statistics</div>';
     }
 }
 

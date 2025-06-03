@@ -53,37 +53,248 @@ function setupAnalysisButtons() {
         securityBtn.addEventListener('click', () => runAnalysis('security'));
     }
     
-    // Performance Analysis
-    const performanceBtn = document.getElementById('run-performance-analysis');
-    if (performanceBtn) {
-        performanceBtn.addEventListener('click', () => runAnalysis('performance'));
-    }
-    
-    // Comprehensive Analysis
-    const comprehensiveBtn = document.getElementById('run-comprehensive-analysis');
-    if (comprehensiveBtn) {
-        comprehensiveBtn.addEventListener('click', runComprehensiveAnalysis);
+    // Dependencies Analysis
+    const dependenciesBtn = document.getElementById('run-dependencies-analysis');
+    if (dependenciesBtn) {
+        dependenciesBtn.addEventListener('click', () => runAnalysis('dependencies'));
     }
 }
 
+// Run comprehensive analysis
+async function runAnalysis(analysisType) {
+    try {
+        console.log(`Starting ${analysisType} analysis...`);
+        
+        // Update UI to show analysis is running
+        const resultsElement = document.getElementById('analysis-results');
+        if (resultsElement) {
+            resultsElement.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Running ${analysisType.replace('_', ' ')} analysis...</p>
+                </div>
+            `;
+        }
+        
+        // Call the API
+        const result = await apiCall(`/api/comprehensive/analysis/run/${analysisType}`);
+        
+        // Update state
+        comprehensiveAnalysisState.activeAnalyses[result.id] = result;
+        comprehensiveAnalysisState.analysisHistory.unshift(result);
+        
+        // Display results
+        displayAnalysisResults(result);
+        
+        // Update analysis history
+        updateAnalysisHistory();
+        
+        console.log(`${analysisType} analysis completed:`, result);
+        
+    } catch (error) {
+        console.error(`Analysis ${analysisType} failed:`, error);
+        
+        const resultsElement = document.getElementById('analysis-results');
+        if (resultsElement) {
+            resultsElement.innerHTML = `
+                <div class="error">
+                    <h4>Analysis Failed</h4>
+                    <p>Failed to run ${analysisType.replace('_', ' ')} analysis: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Display analysis results
+function displayAnalysisResults(result) {
+    const resultsElement = document.getElementById('analysis-results');
+    if (!resultsElement) return;
+    
+    let resultHtml = `
+        <div class="analysis-result">
+            <div class="analysis-header">
+                <h3>${result.type.replace('_', ' ').toUpperCase()} Analysis Results</h3>
+                <span class="status-badge status-${result.status}">${result.status}</span>
+            </div>
+            <div class="analysis-summary">
+                <p><strong>Summary:</strong> ${result.results.summary}</p>
+                <p><strong>Issues Found:</strong> ${result.results.issues_found}</p>
+                <p><strong>Completed:</strong> ${new Date(result.completed_at).toLocaleString()}</p>
+            </div>
+    `;
+    
+    // Add type-specific results
+    if (result.type === 'dead_code') {
+        resultHtml += `
+            <div class="analysis-details">
+                <h4>Dead Code Details</h4>
+                <p>Dead Functions: ${result.results.dead_functions?.length || 0}</p>
+                <p>Unused Imports: ${result.results.unused_imports?.length || 0}</p>
+                <p>Unreachable Code: ${result.results.unreachable_code?.length || 0}</p>
+            </div>
+        `;
+    } else if (result.type === 'code_quality') {
+        resultHtml += `
+            <div class="analysis-details">
+                <h4>Quality Metrics</h4>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <span class="metric-label">Complexity Score</span>
+                        <span class="metric-value">${result.results.complexity_score}/100</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Maintainability</span>
+                        <span class="metric-value">${result.results.maintainability_index}/100</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Code Coverage</span>
+                        <span class="metric-value">${result.results.code_coverage}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (result.type === 'security') {
+        resultHtml += `
+            <div class="analysis-details">
+                <h4>Security Assessment</h4>
+                <p><strong>Security Score:</strong> ${result.results.security_score}/100</p>
+                <div class="recommendations">
+                    <h5>Recommendations:</h5>
+                    <ul>
+                        ${result.results.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    
+    resultHtml += '</div>';
+    resultsElement.innerHTML = resultHtml;
+}
+
 function setupIntegrationButtons() {
-    // Linear Integration
-    const linearSyncBtn = document.getElementById('sync-linear-integration');
-    if (linearSyncBtn) {
-        linearSyncBtn.addEventListener('click', () => syncIntegration('linear'));
+    // GitHub sync
+    const githubBtn = document.getElementById('sync-github');
+    if (githubBtn) {
+        githubBtn.addEventListener('click', () => syncIntegration('github'));
     }
     
-    // GitHub Integration
-    const githubSyncBtn = document.getElementById('sync-github-integration');
-    if (githubSyncBtn) {
-        githubSyncBtn.addEventListener('click', () => syncIntegration('github'));
+    // Linear sync
+    const linearBtn = document.getElementById('sync-linear');
+    if (linearBtn) {
+        linearBtn.addEventListener('click', () => syncIntegration('linear'));
     }
     
-    // Prefect Integration
-    const prefectSyncBtn = document.getElementById('sync-prefect-integration');
-    if (prefectSyncBtn) {
-        prefectSyncBtn.addEventListener('click', () => syncIntegration('prefect'));
+    // Slack sync
+    const slackBtn = document.getElementById('sync-slack');
+    if (slackBtn) {
+        slackBtn.addEventListener('click', () => syncIntegration('slack'));
     }
+    
+    // Prefect sync
+    const prefectBtn = document.getElementById('sync-prefect');
+    if (prefectBtn) {
+        prefectBtn.addEventListener('click', () => syncIntegration('prefect'));
+    }
+}
+
+// Sync with external integrations
+async function syncIntegration(integration) {
+    try {
+        console.log(`Syncing ${integration} integration...`);
+        
+        // Update UI to show sync is running
+        const syncElement = document.getElementById('sync-results');
+        if (syncElement) {
+            syncElement.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Syncing ${integration}...</p>
+                </div>
+            `;
+        }
+        
+        // Call the API
+        const result = await apiCall(`/api/comprehensive/integrations/sync/${integration}`);
+        
+        // Update state
+        comprehensiveAnalysisState.integrationStatus[integration] = result;
+        
+        // Display sync results
+        displaySyncResults(result);
+        
+        console.log(`${integration} sync completed:`, result);
+        
+    } catch (error) {
+        console.error(`Integration sync ${integration} failed:`, error);
+        
+        const syncElement = document.getElementById('sync-results');
+        if (syncElement) {
+            syncElement.innerHTML = `
+                <div class="error">
+                    <h4>Sync Failed</h4>
+                    <p>Failed to sync ${integration}: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Display sync results
+function displaySyncResults(result) {
+    const syncElement = document.getElementById('sync-results');
+    if (!syncElement) return;
+    
+    let syncHtml = `
+        <div class="sync-result">
+            <div class="sync-header">
+                <h3>${result.integration.toUpperCase()} Sync Results</h3>
+                <span class="status-badge status-${result.status}">${result.status}</span>
+            </div>
+            <div class="sync-summary">
+                <p><strong>Synced at:</strong> ${new Date(result.synced_at).toLocaleString()}</p>
+                <p><strong>Items synced:</strong> ${result.items_synced}</p>
+                <p><strong>Errors:</strong> ${result.errors.length}</p>
+            </div>
+    `;
+    
+    // Add integration-specific details
+    if (result.integration === 'github') {
+        syncHtml += `
+            <div class="sync-details">
+                <p>Repositories: ${result.repositories}</p>
+                <p>Pull Requests: ${result.pull_requests}</p>
+                <p>Issues: ${result.issues}</p>
+            </div>
+        `;
+    } else if (result.integration === 'linear') {
+        syncHtml += `
+            <div class="sync-details">
+                <p>Teams: ${result.teams}</p>
+                <p>Projects: ${result.projects}</p>
+                <p>Issues: ${result.issues}</p>
+            </div>
+        `;
+    } else if (result.integration === 'slack') {
+        syncHtml += `
+            <div class="sync-details">
+                <p>Channels: ${result.channels}</p>
+                <p>Messages: ${result.messages}</p>
+            </div>
+        `;
+    } else if (result.integration === 'prefect') {
+        syncHtml += `
+            <div class="sync-details">
+                <p>Flows: ${result.flows}</p>
+                <p>Deployments: ${result.deployments}</p>
+                <p>Runs: ${result.runs}</p>
+            </div>
+        `;
+    }
+    
+    syncHtml += '</div>';
+    syncElement.innerHTML = syncHtml;
 }
 
 function setupRealTimeUpdates() {
@@ -638,21 +849,39 @@ function getCurrentProjectPath() {
 function getAnalysisOptions(analysisType) {
     // Return analysis-specific options
     const options = {
-        dead_code: {
+        'dead_code': {
             include_tests: true,
             exclude_patterns: ['__pycache__', '*.pyc', '.git']
         },
-        code_quality: {
+        'code_quality': {
             include_metrics: ['complexity', 'maintainability', 'duplication'],
             threshold: 'medium'
         },
-        security: {
+        'security': {
             include_dependencies: true,
             severity_threshold: 'medium'
         },
-        performance: {
+        'performance': {
             include_profiling: false,
             analyze_imports: true
+        },
+        'dependencies': {
+            include_dependencies: true,
+            exclude_patterns: ['__pycache__', '*.pyc', '.git']
+        },
+        'linear_integration': {
+            include_teams: true,
+            include_projects: true
+        },
+        'github_integration': {
+            include_repositories: true,
+            include_pull_requests: true,
+            include_issues: true
+        },
+        'prefect_workflows': {
+            include_flows: true,
+            include_deployments: true,
+            include_runs: true
         }
     };
     
@@ -764,4 +993,3 @@ window.comprehensiveAnalysis = {
     viewAnalysisResults,
     cancelAnalysis
 };
-
