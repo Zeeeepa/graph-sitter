@@ -73,6 +73,19 @@ def check_environment():
     missing_required = []
     missing_optional = []
     
+    # Check if we have any environment tokens available
+    env_tokens_available = any([
+        os.getenv("GITHUB_TOKEN"),
+        os.getenv("LINEAR_API_KEY"),
+        os.getenv("SLACK_WEBHOOK_URL")
+    ])
+    
+    # If environment tokens are available, make Codegen tokens optional
+    if env_tokens_available:
+        # Move Codegen vars to optional when env tokens are present
+        optional_vars.update(required_vars)
+        required_vars = {}
+    
     for var, description in required_vars.items():
         if not os.getenv(var):
             missing_required.append(f"  {var}: {description}")
@@ -94,13 +107,14 @@ def check_environment():
             print(var)
         print()
     
+    print("✅ Environment check passed!")
     return True
 
 
 def print_banner():
     """Print the dashboard banner"""
     banner = """
-╔════�����════�������════════════════════════════════════════════════════════════════════╗
+╔════�������════�������════════════════════════════════════════════════════════════════════╗
 ║                        Contexten Enhanced Dashboard                          ║
 ║                                                                              ║
 ║  🚀 Comprehensive Flow Management & CI/CD Automation                        ║
@@ -109,7 +123,7 @@ def print_banner():
 ║  🤖 Autonomous Error Healing & Recovery                                     ║
 ║  ⚡ WebSocket Real-time Updates                                             ║
 ║                                                                              ║
-╚═════════════════════���═���══════���═���═���═══════════════════════════════════════════╝
+╚═══════════════════���═���═���══════���═���═���═══════════════════════════════════════════╝
 """
     print(banner)
 
