@@ -72,6 +72,11 @@ dependencies = [
   "codegen-sdk-pink>=0.1.0",
   "prefect>=3.0.0",
   "prefect[kubernetes]>=3.0.0",
+  # Contexten agent dependencies
+  "langchain>=0.3.0",
+  "langchain-community>=0.3.0",
+  "langchain-openai>=0.2.0",
+  "slack-sdk>=3.33.0",
 ]
 
 # renovate: datasource=python-version depName=python

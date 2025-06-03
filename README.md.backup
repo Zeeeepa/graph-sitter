@@ -63,67 +63,34 @@ if task.status == "completed":
 
 Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
 
-## Installation
+## Installation and Usage
 
-Install both `graph_sitter` and `contexten` packages from the project root:
+We support
 
-```bash
-pip install -e .
+- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
+- macOS and Linux
+  - macOS is supported
+  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
+  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
+- Python, Typescript, Javascript and React codebases
+
 ```
+# Install inside existing project
+uv pip install graph-sitter
 
-This will install both packages with all their dependencies and CLI tools:
-- `gs` - Graph Sitter CLI for code analysis
-- `contexten` - Contexten agent CLI
-- `contexten-dashboard` - Contexten dashboard interface
+# Install global CLI
+uv tool install graph-sitter --python 3.13
 
-## Separate Package Installation
+# Create a codemod for a given repo
+cd path/to/repo
+gs init
+gs create test-function
 
-This project contains two main packages that can be installed separately:
+# Run the codemod
+gs run test-function
 
-### 🔧 Graph Sitter (Code Analysis SDK)
-Core code analysis and manipulation toolkit built on Tree-sitter.
-
-```bash
-cd graph_sitter_package
-pip install -e .
-```
-
-**CLI Usage:**
-```bash
-gs --help
-```
-
-**Python Usage:**
-```python
-from graph_sitter import Codebase
-codebase = Codebase.from_path("/path/to/your/project")
-```
-
-### 🤖 Contexten (Agentic Orchestrator)
-Intelligent agent orchestration framework with chat capabilities and integrations.
-
-```bash
-cd contexten_package
-pip install -e .
-```
-
-**CLI Usage:**
-```bash
-contexten --help
-contexten-dashboard  # Launch interactive dashboard
-```
-
-**Python Usage:**
-```python
-from contexten import FlowManager
-flow_manager = FlowManager()
-```
-
-### ��� Install Both Packages
-To install both packages at once:
-
-```bash
-./install_packages.sh
+# Create an isolated venv with codegen => open jupyter
+gs notebook
 ```
 
 ## Usage
