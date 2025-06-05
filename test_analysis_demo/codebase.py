@@ -1569,24 +1569,20 @@ class Codebase(
         """
         return self._op.create_pr_review_comment(pr_number, body, commit_sha, path, line, side, start_line)
 
-    def Analysis(self, output_dir: str = "analysis_output") -> 'ComprehensiveAnalysisResult':
+    def Analysis(self, output_dir: str = "analysis_output") -> "ComprehensiveAnalysisResult":
         """
-        Run comprehensive analysis on the codebase.
-        
-        This method triggers full-context analysis when "Analysis" is included in codebase initialization.
-        It generates HTML reports with issue listings and errors, and provides visualization capabilities.
+        Perform comprehensive analysis of the codebase.
         
         Args:
-            output_dir: Directory to save analysis results
+            output_dir: Directory to save analysis outputs
             
         Returns:
-            ComprehensiveAnalysisResult containing all analysis data
+            ComprehensiveAnalysisResult with all analysis components
         """
-        from ..analysis.unified_analyzer import UnifiedCodebaseAnalyzer
+        from graph_sitter.analysis.unified_analyzer import UnifiedCodebaseAnalyzer
         
         analyzer = UnifiedCodebaseAnalyzer(self, output_dir=output_dir)
-        # Disable visualizations and training data by default to avoid tree-sitter serialization issues
-        return analyzer.run_comprehensive_analysis(create_visualizations=False, generate_training_data=False)
+        return analyzer.analyze_comprehensive()
 
     @classmethod
     def AnalysisFromPath(cls, repo_path: str, output_dir: str = "analysis_output") -> "ComprehensiveAnalysisResult":

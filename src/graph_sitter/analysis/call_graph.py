@@ -7,7 +7,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.function import Function
-from graph_sitter.core.function_call import FunctionCall
+from graph_sitter.core.symbol import Symbol
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
 
 logger = logging.getLogger(__name__)
 
@@ -555,4 +556,3 @@ def traverse_call_graph(codebase: Codebase, start_function: str) -> Dict[str, An
     
     traverse(start_function)
     return result
-

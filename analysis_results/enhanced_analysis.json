@@ -1,0 +1,262 @@
+{
+  "codebase_id": "codebase_20250605_140219",
+  "timestamp": "2025-06-05T14:02:19.939496",
+  "summary": {
+    "total_files": 1,
+    "total_functions": 2,
+    "total_classes": 1,
+    "total_symbols": 3,
+    "total_imports": 0,
+    "total_lines": 36,
+    "average_complexity": 5.0,
+    "average_maintainability": 100.0,
+    "documentation_coverage": 0.5,
+    "test_coverage_estimate": 0.0,
+    "dead_code_percentage": 0.5,
+    "technical_debt_score": 0.0,
+    "health_score": 0.625
+  },
+  "metrics": {
+    "codebase": {
+      "total_files": 1,
+      "total_functions": 2,
+      "total_classes": 1,
+      "total_symbols": 3,
+      "total_imports": 0,
+      "total_lines": 36,
+      "average_complexity": 5.0,
+      "average_maintainability": 100.0,
+      "documentation_coverage": 0.5,
+      "test_coverage_estimate": 0.0,
+      "dead_code_percentage": 0.5,
+      "technical_debt_score": 0.0,
+      "health_score": 0.625
+    },
+    "call_graph": {
+      "patterns": {
+        "total_functions": 2,
+        "total_calls": 0,
+        "average_calls_per_function": 0.0,
+        "max_call_depth": 0,
+        "strongly_connected_components": 2,
+        "entry_points": 0,
+        "leaf_functions": 2,
+        "hub_functions": 0,
+        "call_distribution": {
+          "min": 0,
+          "max": 0,
+          "median": 0,
+          "functions_with_no_calls": 2,
+          "functions_with_many_calls": 0
+        }
+      },
+      "most_called_function": null,
+      "most_calling_function": null,
+      "unused_functions": [
+        "calculate_total",
+        "process_order"
+      ],
+      "recursive_functions": [],
+      "call_chains": {
+        "total_chains": 0,
+        "average_chain_length": 0,
+        "longest_chain": null,
+        "chains": []
+      }
+    },
+    "dependencies": {
+      "import_analysis": {
+        "total_imports": 0,
+        "external_imports": 0,
+        "internal_imports": 0,
+        "unused_imports": 0,
+        "circular_imports": 0,
+        "import_depth_avg": 0,
+        "most_imported_modules": [],
+        "import_complexity_score": 0.0
+      },
+      "circular_dependencies": [],
+      "optimization_suggestions": {
+        "unused_imports": [],
+        "circular_imports": [],
+        "redundant_imports": [],
+        "missing_imports": [
+          "calculate_total"
+        ],
+        "optimization_score": 0.0
+      }
+    },
+    "dead_code": {
+      "dead_code_items": [],
+      "cleanup_impact": {
+        "estimated_lines_saved": 0,
+        "files_affected": 0,
+        "risk_level": "low",
+        "risk_factors": [],
+        "items_by_type": {
+          "functions": 0,
+          "classes": 0,
+          "imports": 0,
+          "variables": 0,
+          "unreachable": 0
+        }
+      },
+      "removal_plan": {
+        "items_count": 0,
+        "estimated_lines_saved": 0,
+        "risk_assessment": "low",
+        "warnings": []
+      }
+    }
+  },
+  "call_graph_analysis": {
+    "patterns": {
+      "total_functions": 2,
+      "total_calls": 0,
+      "average_calls_per_function": 0.0,
+      "max_call_depth": 0,
+      "strongly_connected_components": 2,
+      "entry_points": 0,
+      "leaf_functions": 2,
+      "hub_functions": 0,
+      "call_distribution": {
+        "min": 0,
+        "max": 0,
+        "median": 0,
+        "functions_with_no_calls": 2,
+        "functions_with_many_calls": 0
+      }
+    },
+    "most_called_function": null,
+    "most_calling_function": null,
+    "unused_functions": [
+      "calculate_total",
+      "process_order"
+    ],
+    "recursive_functions": [],
+    "call_chains": {
+      "total_chains": 0,
+      "average_chain_length": 0,
+      "longest_chain": null,
+      "chains": []
+    }
+  },
+  "dependency_analysis": {
+    "import_analysis": {
+      "total_imports": 0,
+      "external_imports": 0,
+      "internal_imports": 0,
+      "unused_imports": 0,
+      "circular_imports": 0,
+      "import_depth_avg": 0,
+      "most_imported_modules": [],
+      "import_complexity_score": 0.0
+    },
+    "circular_dependencies": [],
+    "optimization_suggestions": {
+      "unused_imports": [],
+      "circular_imports": [],
+      "redundant_imports": [],
+      "missing_imports": [
+        "calculate_total"
+      ],
+      "optimization_score": 0.0
+    }
+  },
+  "dead_code_analysis": {
+    "dead_code_items": [],
+    "cleanup_impact": {
+      "estimated_lines_saved": 0,
+      "files_affected": 0,
+      "risk_level": "low",
+      "risk_factors": [],
+      "items_by_type": {
+        "functions": 0,
+        "classes": 0,
+        "imports": 0,
+        "variables": 0,
+        "unreachable": 0
+      }
+    },
+    "removal_plan": {
+      "items_count": 0,
+      "estimated_lines_saved": 0,
+      "risk_assessment": "low",
+      "warnings": []
+    }
+  },
+  "function_analysis": [
+    {
+      "name": "calculate_total",
+      "filepath": "example_codebase/sample.py",
+      "line_count": 9,
+      "parameter_count": 1,
+      "return_statement_count": 1,
+      "call_site_count": 1,
+      "function_call_count": 2,
+      "cyclomatic_complexity": 5,
+      "maintainability_index": 100.0,
+      "documentation_coverage": 0.5,
+      "test_coverage_estimate": 0.0,
+      "is_async": false,
+      "has_decorators": false,
+      "has_docstring": true,
+      "has_type_annotations": false,
+      "dependency_count": 0,
+      "usage_count": 1,
+      "impact_score": 1.5
+    },
+    {
+      "name": "process_order",
+      "filepath": "example_codebase/sample.py",
+      "line_count": 12,
+      "parameter_count": 1,
+      "return_statement_count": 1,
+      "call_site_count": 0,
+      "function_call_count": 4,
+      "cyclomatic_complexity": 5,
+      "maintainability_index": 100.0,
+      "documentation_coverage": 0.5,
+      "test_coverage_estimate": 0.0,
+      "is_async": false,
+      "has_decorators": false,
+      "has_docstring": true,
+      "has_type_annotations": false,
+      "dependency_count": 0,
+      "usage_count": 0,
+      "impact_score": 0.0
+    }
+  ],
+  "class_analysis": [],
+  "file_analysis": [
+    {
+      "filepath": "example_codebase/sample.py",
+      "line_count": 36,
+      "function_count": 2,
+      "class_count": 1,
+      "import_count": 0,
+      "symbol_count": 3,
+      "complexity_score": 5.0,
+      "maintainability_index": 100.0,
+      "documentation_coverage": 0.6666666666666666,
+      "test_coverage_estimate": 0.2,
+      "is_test_file": false,
+      "language": "python"
+    }
+  ],
+  "issues": [
+    {
+      "type": "dead_code",
+      "severity": "low",
+      "symbol": "codebase",
+      "description": "High dead code percentage: 50.0%",
+      "suggestion": "Remove unused functions and classes"
+    }
+  ],
+  "recommendations": [
+    "Increase documentation coverage by adding docstrings to functions and classes",
+    "Improve test coverage by adding unit tests for critical functions"
+  ],
+  "health_score": 0.525,
+  "visualization_data": null
+}

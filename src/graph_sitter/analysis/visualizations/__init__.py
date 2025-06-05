@@ -1,52 +1,40 @@
 """
-Visualization adapters for graph-sitter codebase analysis.
+Visualization components for graph-sitter analysis.
 
-This module contains all visualization-related functionality including:
-- React-based interactive visualizations
-- HTML report generation
-- Codebase visualization components
-- Blast radius and dependency visualizations
+This module provides visualization capabilities for analysis results,
+including React-based interactive visualizations and static reports.
 """
 
 from .react_visualizations import (
+    VisualizationNode,
+    VisualizationEdge,
+    VisualizationData,
     ReactVisualizationGenerator,
-    create_react_visualizations,
-    generate_function_blast_radius,
-    generate_issue_dashboard,
-    generate_complexity_heatmap,
-    generate_call_graph_visualization,
-    generate_dependency_graph_visualization,
-    generate_class_methods_visualization,
-    generate_metrics_dashboard,
-    generate_issues_visualization
+    ReactComponentGenerator,
+    create_react_visualizations
 )
 
 from .codebase_visualization import (
+    VisualizationData,
+    InteractiveReport,
     CodebaseVisualizer,
     create_comprehensive_visualization,
-    create_interactive_html_report,
-    generate_visualization_data,
-    create_visualization_components
+    analyze_function_with_context
 )
 
 __all__ = [
     # React visualizations
+    'VisualizationNode',
+    'VisualizationEdge',
+    'VisualizationData',
     'ReactVisualizationGenerator',
+    'ReactComponentGenerator',
     'create_react_visualizations',
-    'generate_function_blast_radius',
-    'generate_issue_dashboard',
-    'generate_complexity_heatmap',
-    'generate_call_graph_visualization',
-    'generate_dependency_graph_visualization',
-    'generate_class_methods_visualization',
-    'generate_metrics_dashboard',
-    'generate_issues_visualization',
     
     # Codebase visualizations
+    'InteractiveReport',
     'CodebaseVisualizer',
     'create_comprehensive_visualization',
-    'create_interactive_html_report',
-    'generate_visualization_data',
-    'create_visualization_components'
+    'analyze_function_with_context'
 ]
 

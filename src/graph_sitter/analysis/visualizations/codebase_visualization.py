@@ -12,9 +12,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.function import Function
 from graph_sitter.core.class_definition import Class
+from graph_sitter.core.file import SourceFile
 
-from .function_context import get_enhanced_function_context, FunctionContext
-from .enhanced_analysis import EnhancedCodebaseAnalyzer, AnalysisReport
+from ..function_context import get_enhanced_function_context, FunctionContext
+from ..enhanced_analysis import EnhancedCodebaseAnalyzer, AnalysisReport
 
 logger = logging.getLogger(__name__)
 
@@ -584,4 +585,3 @@ if __name__ == "__main__":
     print("- Issue dashboards")
     print("- Function context analysis")
     print("- Export capabilities")
-

@@ -18,6 +18,8 @@ from .call_graph import CallGraphAnalyzer
 from .dead_code import DeadCodeDetector
 from .function_context import FunctionContext, get_function_context, TrainingData
 from .visualizations.react_visualizations import create_react_visualizations
+from .database import AnalysisDatabase
+from .codebase_db_adapter import CodebaseDBAdapter
 from .visualizations.codebase_visualization import create_comprehensive_visualization, InteractiveReport, CodebaseVisualizer
 
 logger = logging.getLogger(__name__)
@@ -93,11 +95,15 @@ class UnifiedCodebaseAnalyzer:
         
         # Database components
         self.analysis_db = AnalysisDatabase(db_path)
-        self.db_adapter = CodebaseDbAdapter(self.analysis_db)
+        self.db_adapter = CodebaseDBAdapter(self.analysis_db, organization_id="default")
         
         # Results storage
         self.analysis_results: Optional[ComprehensiveAnalysisResult] = None
     
+    def analyze_comprehensive(self) -> ComprehensiveAnalysisResult:
+        """Run comprehensive analysis and return results."""
+        return self.run_comprehensive_analysis()
+
     def run_comprehensive_analysis(self, 
                                  save_to_db: bool = True,
                                  generate_training_data: bool = True,
@@ -206,7 +212,7 @@ class UnifiedCodebaseAnalyzer:
     
     def _generate_training_data(self) -> TrainingData:
         """Generate training data for ML applications."""
-        from .analysis.function_context import run
+        from .function_context import run
         return run(self.codebase)
     
     def _get_metrics_summary(self) -> Dict[str, Any]:
@@ -276,16 +282,18 @@ class UnifiedCodebaseAnalyzer:
                 return base_score
             
             # Calculate issue penalty
-            total_issues = sum(len(fc.issues) for fc in function_contexts)
+            total_issues = sum(len(fc.get("issues", [])) if isinstance(fc, dict) else len(getattr(fc, "issues", [])) for fc in function_contexts)
             issue_penalty = min(total_issues / total_functions * 0.1, 0.3)
             
             # Calculate risk penalty
-            high_risk_functions = len([fc for fc in function_contexts if fc.risk_level == "high"])
+            high_risk_functions = len([fc for fc in function_contexts 
+                                     if (fc.get("risk_level") if isinstance(fc, dict) else getattr(fc, "risk_level", "minimal")) == "high"])
             risk_penalty = min(high_risk_functions / total_functions * 0.2, 0.4)
             
             # Calculate complexity penalty
             high_complexity_functions = len([fc for fc in function_contexts 
-                                           if fc.complexity_metrics.get("complexity_estimate", 0) > 15])
+                                           if (fc.get("complexity_metrics", {}).get("complexity_estimate", 0) if isinstance(fc, dict) 
+                                               else getattr(fc, "complexity_metrics", {}).get("complexity_estimate", 0)) > 15])
             complexity_penalty = min(high_complexity_functions / total_functions * 0.15, 0.25)
             
             # Apply penalties
@@ -306,11 +314,20 @@ class UnifiedCodebaseAnalyzer:
         risk_factors = []
         
         for fc in function_contexts:
-            risk_counts[fc.risk_level] += 1
-        
+            # Handle both FunctionContext objects and dictionaries
+            if isinstance(fc, dict):
+                risk_level = fc.get("risk_level", "minimal")
+            else:
+                risk_level = getattr(fc, "risk_level", "minimal")
+            
+            if risk_level in risk_counts:
+                risk_counts[risk_level] += 1
+            else:
+                risk_counts["minimal"] += 1
+
         total_functions = len(function_contexts)
-        high_risk_ratio = risk_counts["high"] / total_functions
-        medium_risk_ratio = risk_counts["medium"] / total_functions
+        high_risk_ratio = risk_counts["high"] / total_functions if total_functions > 0 else 0
+        medium_risk_ratio = risk_counts["medium"] / total_functions if total_functions > 0 else 0
         
         # Determine overall risk level
         if high_risk_ratio > 0.2:
@@ -326,7 +343,7 @@ class UnifiedCodebaseAnalyzer:
             overall_risk = "minimal"
         
         # Add specific risk factors
-        total_issues = sum(len(fc.issues) for fc in function_contexts)
+        total_issues = sum(len(fc.get("issues", [])) if isinstance(fc, dict) else len(getattr(fc, "issues", [])) for fc in function_contexts)
         if total_issues > total_functions * 2:
             risk_factors.append(f"High issue density: {total_issues} issues across {total_functions} functions")
         
@@ -338,7 +355,7 @@ class UnifiedCodebaseAnalyzer:
                 "high_risk_ratio": high_risk_ratio,
                 "medium_risk_ratio": medium_risk_ratio,
                 "total_issues": total_issues,
-                "avg_issues_per_function": total_issues / total_functions
+                "avg_issues_per_function": total_issues / total_functions if total_functions > 0 else 0
             }
         }
     
@@ -356,7 +373,13 @@ class UnifiedCodebaseAnalyzer:
         
         # Add function-specific recommendations
         for fc in function_contexts:
-            recommendations.update(fc.recommendations)
+            fc_recommendations = fc.get("recommendations", []) if isinstance(fc, dict) else getattr(fc, "recommendations", [])
+            if isinstance(fc_recommendations, list):
+                recommendations.update(fc_recommendations)
+            elif isinstance(fc_recommendations, set):
+                recommendations.update(fc_recommendations)
+            elif isinstance(fc_recommendations, dict):
+                recommendations.update(fc_recommendations.values())
         
         # Add dependency-based recommendations
         if dependency_analysis.get("circular_dependencies"):
@@ -369,7 +392,8 @@ class UnifiedCodebaseAnalyzer:
         
         # Add system-level recommendations
         high_complexity_functions = [fc for fc in function_contexts 
-                                   if fc.complexity_metrics.get("complexity_estimate", 0) > 15]
+                                   if (fc.get("complexity_metrics", {}).get("complexity_estimate", 0) if isinstance(fc, dict) 
+                                       else getattr(fc, "complexity_metrics", {}).get("complexity_estimate", 0)) > 15]
         if len(high_complexity_functions) > 3:
             recommendations.add("Implement complexity monitoring and refactoring for high-complexity functions")
         
@@ -400,7 +424,18 @@ class UnifiedCodebaseAnalyzer:
         # Save function contexts
         contexts_path = self.output_dir / "function_contexts.json"
         with open(contexts_path, "w") as f:
-            json.dump([asdict(fc) for fc in function_contexts], f, indent=2, default=str)
+            # Handle both dictionaries and dataclass objects
+            contexts_data = []
+            for fc in function_contexts:
+                if isinstance(fc, dict):
+                    contexts_data.append(fc)
+                else:
+                    try:
+                        contexts_data.append(asdict(fc))
+                    except TypeError:
+                        # If asdict fails, convert to dict manually
+                        contexts_data.append(fc.__dict__ if hasattr(fc, '__dict__') else str(fc))
+            json.dump(contexts_data, f, indent=2, default=str)
         export_paths["function_contexts"] = str(contexts_path)
         
         # Save training data
@@ -490,7 +525,7 @@ class UnifiedCodebaseAnalyzer:
 **Risk Factors:**
 {chr(10).join(f"- {factor}" for factor in result.risk_assessment['factors'])}
 
-## 🎯 Top Recommendations
+## ���� Top Recommendations
 
 {chr(10).join(f"{i+1}. {rec}" for i, rec in enumerate(result.actionable_recommendations[:10]))}
 
@@ -505,7 +540,7 @@ class UnifiedCodebaseAnalyzer:
 - **Functions with High Complexity (>10):** {len([fc for fc in result.function_contexts if fc.complexity_metrics.get('complexity_estimate', 0) > 10])}
 - **Unused Functions:** {len([fc for fc in result.function_contexts if fc.complexity_metrics.get('usage_count', 0) == 0])}
 
-## 📁 Export Files
+## �� Export Files
 
 {chr(10).join(f"- **{name.replace('_', ' ').title()}:** `{path}`" for name, path in result.export_paths.items())}
 

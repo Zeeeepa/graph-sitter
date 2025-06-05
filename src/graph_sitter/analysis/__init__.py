@@ -1,54 +1,71 @@
 """
-Analysis adapters for graph-sitter codebase analysis.
+Graph-sitter analysis module.
 
-This module contains all analysis-related functionality including:
-- Enhanced code analysis
-- Metrics calculation
-- Dependency analysis
-- Call graph generation
+This module provides comprehensive analysis capabilities for codebases,
+including:
+- Enhanced analysis with issue detection
+- Metrics calculation (complexity, maintainability, etc.)
+- Dependency analysis and circular dependency detection
+- Call graph generation and analysis
 - Dead code detection
 - Function context analysis
-- Code modification tools (codemods)
+- Unified analysis orchestration
 """
 
 from .enhanced_analysis import (
-    EnhancedAnalyzer,
-    analyze_codebase_enhanced,
-    analyze_function_enhanced,
-    get_enhanced_analysis_report
+    EnhancedCodebaseAnalyzer,
+    AnalysisReport,
+    run_full_analysis,
+    get_function_context_analysis,
+    get_codebase_health_score,
+    generate_analysis_report
 )
 
 from .metrics import (
     CodebaseMetrics,
-    calculate_codebase_metrics,
-    calculate_function_metrics,
-    calculate_class_metrics,
-    calculate_complexity_metrics,
-    calculate_maintainability_index
+    FunctionMetrics,
+    ClassMetrics,
+    FileMetrics,
+    MetricsCalculator,
+    calculate_cyclomatic_complexity,
+    calculate_maintainability_index,
+    analyze_function_metrics,
+    analyze_class_metrics,
+    analyze_file_metrics,
+    get_codebase_summary
 )
 
 from .dependency_analyzer import (
     DependencyAnalyzer,
-    analyze_dependencies,
-    get_dependency_graph,
+    DependencyPath,
+    CircularDependency,
+    ImportAnalysis,
+    hop_through_imports,
+    find_dependency_paths,
+    analyze_symbol_dependencies,
     find_circular_dependencies,
-    analyze_import_patterns
+    build_dependency_graph,
+    analyze_imports
 )
 
 from .call_graph import (
     CallGraphAnalyzer,
-    generate_call_graph,
-    analyze_function_calls,
-    find_call_chains,
-    detect_recursive_calls
+    CallGraphNode,
+    CallGraphEdge,
+    CallPath,
+    build_call_graph,
+    traverse_call_graph
 )
 
 from .dead_code import (
-    DeadCodeAnalyzer,
+    DeadCodeDetector,
+    DeadCodeItem,
+    CleanupPlan,
     find_dead_code,
-    analyze_unused_functions,
-    analyze_unused_imports,
-    get_dead_code_report
+    find_unused_imports,
+    find_unused_variables,
+    estimate_cleanup_impact,
+    get_removal_plan
 )
 
 from .function_context import (
@@ -67,43 +84,66 @@ from .unified_analyzer import (
 )
 
 from .codebase_db_adapter import CodebaseDBAdapter
-from .database import Database
+from .database import (
+    AnalysisDatabase,
+    create_analysis_database,
+    store_analysis_report,
+    query_codebase_metrics,
+    query_complex_functions,
+    export_analysis_data
+)
 
 __all__ = [
     # Enhanced analysis
-    'EnhancedAnalyzer',
-    'analyze_codebase_enhanced',
-    'analyze_function_enhanced',
-    'get_enhanced_analysis_report',
+    'EnhancedCodebaseAnalyzer',
+    'AnalysisReport',
+    'run_full_analysis',
+    'get_function_context_analysis',
+    'get_codebase_health_score',
+    'generate_analysis_report',
     
     # Metrics
     'CodebaseMetrics',
-    'calculate_codebase_metrics',
-    'calculate_function_metrics',
-    'calculate_class_metrics',
-    'calculate_complexity_metrics',
+    'FunctionMetrics',
+    'ClassMetrics',
+    'FileMetrics',
+    'MetricsCalculator',
+    'calculate_cyclomatic_complexity',
     'calculate_maintainability_index',
+    'analyze_function_metrics',
+    'analyze_class_metrics',
+    'analyze_file_metrics',
+    'get_codebase_summary',
     
     # Dependency analysis
     'DependencyAnalyzer',
-    'analyze_dependencies',
-    'get_dependency_graph',
+    'DependencyPath',
+    'CircularDependency',
+    'ImportAnalysis',
+    'hop_through_imports',
+    'find_dependency_paths',
+    'analyze_symbol_dependencies',
     'find_circular_dependencies',
-    'analyze_import_patterns',
+    'build_dependency_graph',
+    'analyze_imports',
     
     # Call graph
     'CallGraphAnalyzer',
-    'generate_call_graph',
-    'analyze_function_calls',
-    'find_call_chains',
-    'detect_recursive_calls',
+    'CallGraphNode',
+    'CallGraphEdge',
+    'CallPath',
+    'build_call_graph',
+    'traverse_call_graph',
     
     # Dead code
-    'DeadCodeAnalyzer',
+    'DeadCodeDetector',
+    'DeadCodeItem',
+    'CleanupPlan',
     'find_dead_code',
-    'analyze_unused_functions',
-    'analyze_unused_imports',
-    'get_dead_code_report',
+    'find_unused_imports',
+    'find_unused_variables',
+    'estimate_cleanup_impact',
+    'get_removal_plan',
     
     # Function context
     'FunctionContext',
@@ -120,5 +160,10 @@ __all__ = [
     
     # Database components
     'CodebaseDBAdapter',
-    'Database'
+    'AnalysisDatabase',
+    'create_analysis_database',
+    'store_analysis_report',
+    'query_codebase_metrics',
+    'query_complex_functions',
+    'export_analysis_data'
 ]

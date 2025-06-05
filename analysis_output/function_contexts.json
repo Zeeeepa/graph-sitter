@@ -1,0 +1,27 @@
+[
+  {
+    "implementation": {
+      "source": "def hello_world():\n    \"\"\"A simple greeting function.\"\"\"\n    print(\"Hello, World!\")\n    return \"success\"",
+      "filepath": "test_repo/main.py",
+      "line_start": null,
+      "line_end": null,
+      "name": "hello_world",
+      "parameters": [],
+      "return_type": "PyReturnTypePlaceholder",
+      "is_async": false,
+      "has_decorators": false,
+      "docstring": "\"\"\"A simple greeting function.\"\"\""
+    },
+    "dependencies": [],
+    "usages": [],
+    "call_sites": [],
+    "metrics": {
+      "line_count": 4,
+      "parameter_count": 0,
+      "dependency_count": 0,
+      "usage_count": 0,
+      "call_site_count": 0,
+      "complexity_estimate": 1
+    }
+  }
+]
