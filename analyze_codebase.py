@@ -53,10 +53,22 @@ try:
     from graph_sitter.core.expressions.binary_expression import BinaryExpression
     from graph_sitter.core.expressions.unary_expression import UnaryExpression
     from graph_sitter.core.expressions.comparison_expression import ComparisonExpression
+    from graph_sitter.codebase.codebase_analysis import (
+        get_codebase_summary, get_file_summary, get_class_summary, 
+        get_function_summary, get_symbol_summary
+    )
     GRAPH_SITTER_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"Graph-sitter not available: {e}. Using fallback analysis.")
+    logger.warning(f"Graph-sitter not available: {e}")
     GRAPH_SITTER_AVAILABLE = False
+    # Fallback imports for basic functionality
+    ForLoopStatement = None
+    IfBlockStatement = None
+    TryCatchStatement = None
+    WhileStatement = None
+    BinaryExpression = None
+    UnaryExpression = None
+    ComparisonExpression = None
 
 
 # ============================================================================
@@ -103,20 +115,32 @@ class FunctionMetrics:
     dependencies: List[str] = field(default_factory=list)
     usages: List[str] = field(default_factory=list)
     call_sites: List[str] = field(default_factory=list)
+    complexity_rank: str = "A"
+    loc: int = 0
+    lloc: int = 0
+    sloc: int = 0
+    comments: int = 0
+    halstead_n1: int = 0
+    halstead_n2: int = 0
+    halstead_N1: int = 0
+    halstead_N2: int = 0
+    docstring: str = ""
+    function_calls: int = 0
+    parameters: int = 0
+    returns: int = 0
 
 @dataclass
 class ClassMetrics:
-    """Comprehensive class metrics."""
+    """Metrics for a class."""
     name: str
     file_path: str
     line_start: int
     line_end: int
     depth_of_inheritance: int
-    methods_count: int
-    attributes_count: int
+    method_count: int  # Changed from methods_count to method_count for consistency
+    attribute_count: int  # Changed from attributes_count to attribute_count for consistency
     lines_of_code: int
     parent_classes: List[str] = field(default_factory=list)
-    child_classes: List[str] = field(default_factory=list)
 
 @dataclass
 class FileAnalysis:
@@ -179,11 +203,11 @@ class ComprehensiveAnalysisResult:
 
 
 # ============================================================================
-# CORE METRICS IMPLEMENTATIONS (from repo_analytics/run.py)
+# CORE ANALYSIS FUNCTIONS - Enhanced with Graph-Sitter Integration
 # ============================================================================
 
 def calculate_cyclomatic_complexity(node: ast.AST) -> int:
-    """Calculate cyclomatic complexity for an AST node."""
+    """Calculate cyclomatic complexity for AST node (fallback method)."""
     complexity = 1  # Base complexity
     
     for child in ast.walk(node):
@@ -191,21 +215,55 @@ def calculate_cyclomatic_complexity(node: ast.AST) -> int:
             complexity += 1
         elif isinstance(child, ast.Try):
             complexity += len(child.handlers)
-        elif isinstance(child, (ast.BoolOp,)):
-            if isinstance(child.op, (ast.And, ast.Or)):
-                complexity += len(child.values) - 1
+        elif isinstance(child, (ast.And, ast.Or)):
+            complexity += 1
         elif isinstance(child, ast.comprehension):
             complexity += 1
-            for if_clause in child.ifs:
-                complexity += 1
     
     return complexity
 
-def cc_rank(complexity: int) -> str:
-    """Get complexity rank based on cyclomatic complexity."""
+
+def calculate_cyclomatic_complexity_graph_sitter(function):
+    """Enhanced cyclomatic complexity calculation using Graph-Sitter (from repo_analytics)."""
+    if not GRAPH_SITTER_AVAILABLE or not hasattr(function, 'code_block'):
+        return 1
+    
+    def analyze_statement(statement):
+        complexity = 0
+
+        if isinstance(statement, IfBlockStatement):
+            complexity += 1
+            if hasattr(statement, "elif_statements"):
+                complexity += len(statement.elif_statements)
+
+        elif isinstance(statement, (ForLoopStatement, WhileStatement)):
+            complexity += 1
+
+        elif isinstance(statement, TryCatchStatement):
+            complexity += len(getattr(statement, "except_blocks", []))
+
+        if hasattr(statement, "condition") and isinstance(statement.condition, str):
+            complexity += statement.condition.count(" and ") + statement.condition.count(" or ")
+
+        if hasattr(statement, "nested_code_blocks"):
+            for block in statement.nested_code_blocks:
+                complexity += analyze_block(block)
+
+        return complexity
+
+    def analyze_block(block):
+        if not block or not hasattr(block, "statements"):
+            return 0
+        return sum(analyze_statement(stmt) for stmt in block.statements)
+
+    return 1 + analyze_block(function.code_block)
+
+
+def cc_rank(complexity):
+    """Rank cyclomatic complexity (from repo_analytics)."""
     if complexity < 0:
         raise ValueError("Complexity must be a non-negative value")
-    
+
     ranks = [
         (1, 5, "A"),
         (6, 10, "B"),
@@ -219,103 +277,156 @@ def cc_rank(complexity: int) -> str:
             return rank
     return "F"
 
-def calculate_halstead_volume(operators: List[str], operands: List[str]) -> Tuple[float, int, int, int, int]:
-    """Calculate Halstead volume metrics."""
-    n1 = len(set(operators))  # Unique operators
-    n2 = len(set(operands))   # Unique operands
-    N1 = len(operators)       # Total operators
-    N2 = len(operands)        # Total operands
-    
-    N = N1 + N2  # Program length
-    n = n1 + n2  # Program vocabulary
-    
+
+def calculate_doi(cls):
+    """Calculate the depth of inheritance for a given class (from repo_analytics)."""
+    if GRAPH_SITTER_AVAILABLE and hasattr(cls, 'superclasses'):
+        return len(cls.superclasses)
+    elif hasattr(cls, 'bases'):
+        return len(cls.bases)
+    return 0
+
+
+def get_operators_and_operands(function):
+    """Extract operators and operands from function (from repo_analytics)."""
+    operators = []
+    operands = []
+
+    if not GRAPH_SITTER_AVAILABLE or not hasattr(function, 'code_block'):
+        return operators, operands
+
+    try:
+        for statement in function.code_block.statements:
+            for call in statement.function_calls:
+                operators.append(call.name)
+                for arg in call.args:
+                    operands.append(arg.source)
+
+            if hasattr(statement, "expressions"):
+                for expr in statement.expressions:
+                    if isinstance(expr, BinaryExpression):
+                        operators.extend([op.source for op in expr.operators])
+                        operands.extend([elem.source for elem in expr.elements])
+                    elif isinstance(expr, UnaryExpression):
+                        operators.append(expr.ts_node.type)
+                        operands.append(expr.argument.source)
+                    elif isinstance(expr, ComparisonExpression):
+                        operators.extend([op.source for op in expr.operators])
+                        operands.extend([elem.source for elem in expr.elements])
+
+            if hasattr(statement, "expression"):
+                expr = statement.expression
+                if isinstance(expr, BinaryExpression):
+                    operators.extend([op.source for op in expr.operators])
+                    operands.extend([elem.source for elem in expr.elements])
+                elif isinstance(expr, UnaryExpression):
+                    operators.append(expr.ts_node.type)
+                    operands.append(expr.argument.source)
+                elif isinstance(expr, ComparisonExpression):
+                    operators.extend([op.source for op in expr.operators])
+                    operands.extend([elem.source for elem in expr.elements])
+    except Exception as e:
+        logger.debug(f"Error extracting operators/operands: {e}")
+
+    return operators, operands
+
+
+def calculate_halstead_volume(operators, operands):
+    """Calculate Halstead volume metrics (from repo_analytics)."""
+    n1 = len(set(operators))
+    n2 = len(set(operands))
+
+    N1 = len(operators)
+    N2 = len(operands)
+
+    N = N1 + N2
+    n = n1 + n2
+
     if n > 0:
         volume = N * math.log2(n)
         return volume, N1, N2, n1, n2
     return 0, N1, N2, n1, n2
 
-def count_lines(source: str) -> Tuple[int, int, int, int]:
-    """Count different types of lines in source code."""
+
+def count_lines(source: str):
+    """Count different types of lines in source code (from repo_analytics)."""
     if not source.strip():
         return 0, 0, 0, 0
-    
-    lines = source.splitlines()
-    loc = len(lines)  # Lines of code
-    sloc = len([line for line in lines if line.strip()])  # Source lines
-    
-    # Count comments and logical lines
+
+    lines = [line.strip() for line in source.splitlines()]
+    loc = len(lines)
+    sloc = len([line for line in lines if line])
+
     in_multiline = False
     comments = 0
     code_lines = []
-    
-    for line in lines:
-        stripped = line.strip()
-        code_part = stripped
-        
-        # Handle single-line comments
-        if not in_multiline and "#" in stripped:
-            comment_start = stripped.find("#")
-            # Check if # is inside a string
-            if not re.search(r'["\'].*#.*["\']', stripped[:comment_start]):
-                code_part = stripped[:comment_start].strip()
-                if stripped[comment_start:].strip():
+
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        code_part = line
+        if not in_multiline and "#" in line:
+            comment_start = line.find("#")
+            if not re.search(r'["\'].*#.*["\']', line[:comment_start]):
+                code_part = line[:comment_start].strip()
+                if line[comment_start:].strip():
                     comments += 1
-        
-        # Handle multi-line strings/comments
-        if ('"""' in stripped or "'''" in stripped):
-            quote_count = stripped.count('"""') + stripped.count("'''")
-            if quote_count % 2 == 1:  # Odd number means start or end
-                if in_multiline:
-                    in_multiline = False
-                    comments += 1
-                else:
-                    in_multiline = True
-                    comments += 1
-                    if stripped.startswith('"""') or stripped.startswith("'''"):
-                        code_part = ""
+
+        if ('"""' in line or "'''" in line) and not (line.count('"""') % 2 == 0 or line.count("'''") % 2 == 0):
+            if in_multiline:
+                in_multiline = False
+                comments += 1
+            else:
+                in_multiline = True
+                comments += 1
+                if line.strip().startswith('"""') or line.strip().startswith("'''"):
+                    code_part = ""
         elif in_multiline:
             comments += 1
             code_part = ""
-        elif stripped.startswith("#"):
+        elif line.strip().startswith("#"):
             comments += 1
             code_part = ""
-        
-        if code_part:
+
+        if code_part.strip():
             code_lines.append(code_part)
-    
-    # Calculate logical lines (statements)
+
+        i += 1
+
     lloc = 0
+    continued_line = False
     for line in code_lines:
-        # Count statements separated by semicolons
-        statements = [stmt.strip() for stmt in line.split(";") if stmt.strip()]
-        lloc += len(statements)
-    
+        if continued_line:
+            if not any(line.rstrip().endswith(c) for c in ("\\", ",", "{", "[", "(")):
+                continued_line = False
+            continue
+
+        lloc += len([stmt for stmt in line.split(";") if stmt.strip()])
+
+        if any(line.rstrip().endswith(c) for c in ("\\", ",", "{", "[", "(")):
+            continued_line = True
+
     return loc, lloc, sloc, comments
 
+
 def calculate_maintainability_index(halstead_volume: float, cyclomatic_complexity: float, loc: int) -> int:
-    """Calculate the normalized maintainability index."""
+    """Calculate the normalized maintainability index (from repo_analytics)."""
     if loc <= 0:
         return 100
-    
+
     try:
-        # Microsoft's maintainability index formula
         raw_mi = 171 - 5.2 * math.log(max(1, halstead_volume)) - 0.23 * cyclomatic_complexity - 16.2 * math.log(max(1, loc))
-        # Normalize to 0-100 scale
         normalized_mi = max(0, min(100, raw_mi * 100 / 171))
         return int(normalized_mi)
-    except (ValueError, TypeError, ZeroDivisionError):
+    except (ValueError, TypeError):
         return 0
-
-def calculate_doi(class_node: ast.ClassDef) -> int:
-    """Calculate depth of inheritance for a class."""
-    return len(class_node.bases)
 
 
 # ============================================================================
 # AST ANALYSIS UTILITIES
 # ============================================================================
 
-def extract_operators_operands(node: ast.AST) -> Tuple[List[str], List[str]]:
+def extract_operators_operands_ast(node: ast.AST) -> Tuple[List[str], List[str]]:
     """Extract operators and operands from AST node for Halstead metrics."""
     operators = []
     operands = []
@@ -352,98 +463,194 @@ def extract_operators_operands(node: ast.AST) -> Tuple[List[str], List[str]]:
     return operators, operands
 
 def analyze_function_ast(func_node: ast.FunctionDef, file_path: str, source_lines: List[str]) -> FunctionMetrics:
-    """Analyze a function AST node and return comprehensive metrics."""
+    """Analyze a function using AST (fallback method)."""
     try:
-        # Basic info
-        name = func_node.name
-        line_start = func_node.lineno
-        line_end = func_node.end_lineno or line_start
+        # Calculate basic metrics
+        complexity = calculate_cyclomatic_complexity(func_node)
         
         # Extract function source
-        func_source = '\n'.join(source_lines[line_start-1:line_end])
+        start_line = func_node.lineno - 1
+        end_line = func_node.end_lineno if hasattr(func_node, 'end_lineno') else start_line + 10
+        func_source = '\n'.join(source_lines[start_line:end_line])
         
-        # Calculate metrics
-        complexity = calculate_cyclomatic_complexity(func_node)
-        operators, operands = extract_operators_operands(func_node)
-        halstead_volume, _, _, _, _ = calculate_halstead_volume(operators, operands)
-        loc, _, _, _ = count_lines(func_source)
-        mi = calculate_maintainability_index(halstead_volume, complexity, loc)
+        # Calculate line metrics
+        loc, lloc, sloc, comments = count_lines(func_source)
         
-        # Count parameters and return statements
-        params_count = len(func_node.args.args)
-        return_count = len([n for n in ast.walk(func_node) if isinstance(n, ast.Return)])
+        # Extract operators and operands (basic AST-based)
+        operators, operands = extract_operators_operands_ast(func_node)
         
-        # Extract dependencies (function calls)
-        dependencies = []
-        for node in ast.walk(func_node):
-            if isinstance(node, ast.Call):
-                if isinstance(node.func, ast.Name):
-                    dependencies.append(node.func.id)
-                elif isinstance(node.func, ast.Attribute):
-                    dependencies.append(node.func.attr)
+        # Calculate Halstead metrics
+        volume, n1, n2, N1, N2 = calculate_halstead_volume(operators, operands)
         
-        return FunctionMetrics(
-            name=name,
-            file_path=file_path,
-            line_start=line_start,
-            line_end=line_end,
-            cyclomatic_complexity=complexity,
-            halstead_volume=halstead_volume,
-            maintainability_index=mi,
-            lines_of_code=loc,
-            parameters_count=params_count,
-            return_statements=return_count,
-            dependencies=list(set(dependencies))
-        )
-    except Exception as e:
-        logger.warning(f"Error analyzing function {func_node.name}: {e}")
+        # Calculate maintainability index
+        maintainability = calculate_maintainability_index(volume, complexity, loc)
+        
         return FunctionMetrics(
             name=func_node.name,
             file_path=file_path,
             line_start=func_node.lineno,
-            line_end=func_node.end_lineno or func_node.lineno,
+            line_end=end_line,
+            cyclomatic_complexity=complexity,
+            halstead_volume=volume,  # Required field
+            maintainability_index=maintainability,  # Required field
+            lines_of_code=loc,  # Required field
+            parameters_count=len(func_node.args.args),  # Required field
+            return_statements=len([node for node in ast.walk(func_node) if isinstance(node, ast.Return)]),  # Required field
+            # Optional enhanced fields
+            complexity_rank=cc_rank(complexity),
+            loc=loc,
+            lloc=lloc,
+            sloc=sloc,
+            comments=comments,
+            halstead_n1=n1,
+            halstead_n2=n2,
+            halstead_N1=N1,
+            halstead_N2=N2,
+            parameters=len(func_node.args.args),
+            returns=len([node for node in ast.walk(func_node) if isinstance(node, ast.Return)]),
+            docstring=ast.get_docstring(func_node) or ""
+        )
+    except Exception as e:
+        logger.debug(f"Error analyzing function {func_node.name}: {e}")
+        return FunctionMetrics(
+            name=func_node.name,
+            file_path=file_path,
+            line_start=func_node.lineno,
+            line_end=func_node.lineno,
             cyclomatic_complexity=1,
-            halstead_volume=0,
-            maintainability_index=0,
-            lines_of_code=0,
-            parameters_count=0,
-            return_statements=0
+            halstead_volume=0,  # Required field
+            maintainability_index=100,  # Required field
+            lines_of_code=1,  # Required field
+            parameters_count=0,  # Required field
+            return_statements=0,  # Required field
+            # Optional enhanced fields
+            complexity_rank="A",
+            loc=1,
+            lloc=1,
+            sloc=1,
+            comments=0,
+            halstead_n1=0,
+            halstead_n2=0,
+            halstead_N1=0,
+            halstead_N2=0,
+            parameters=0,
+            returns=0,
+            docstring=""
+        )
+
+
+def analyze_function_graph_sitter(function, file_path: str) -> FunctionMetrics:
+    """Analyze a function using Graph-Sitter (enhanced method)."""
+    try:
+        # Use enhanced graph-sitter complexity calculation
+        complexity = calculate_cyclomatic_complexity_graph_sitter(function)
+        
+        # Get function source
+        func_source = function.code_block.source if hasattr(function, 'code_block') else ""
+        
+        # Calculate line metrics
+        loc, lloc, sloc, comments = count_lines(func_source)
+        
+        # Extract operators and operands using graph-sitter
+        operators, operands = get_operators_and_operands(function)
+        
+        # Calculate Halstead metrics
+        volume, n1, n2, N1, N2 = calculate_halstead_volume(operators, operands)
+        
+        # Calculate maintainability index
+        maintainability = calculate_maintainability_index(volume, complexity, loc)
+        
+        # Get additional graph-sitter specific metrics
+        parameters = len(function.parameters) if hasattr(function, 'parameters') else 0
+        returns = len(function.return_statements) if hasattr(function, 'return_statements') else 0
+        function_calls = len(function.function_calls) if hasattr(function, 'function_calls') else 0
+        call_sites = len(function.call_sites) if hasattr(function, 'call_sites') else 0
+        dependencies = len(function.dependencies) if hasattr(function, 'dependencies') else 0
+        
+        return FunctionMetrics(
+            name=function.name,
+            file_path=file_path,
+            line_start=function.line_start if hasattr(function, 'line_start') else 0,
+            line_end=function.line_end if hasattr(function, 'line_end') else 0,
+            cyclomatic_complexity=complexity,
+            halstead_volume=volume,  # Required field
+            maintainability_index=maintainability,  # Required field
+            lines_of_code=loc,  # Required field
+            parameters_count=parameters,  # Required field
+            return_statements=returns,  # Required field
+            # Optional enhanced fields
+            complexity_rank=cc_rank(complexity),
+            loc=loc,
+            lloc=lloc,
+            sloc=sloc,
+            comments=comments,
+            halstead_n1=n1,
+            halstead_n2=n2,
+            halstead_N1=N1,
+            halstead_N2=N2,
+            parameters=parameters,
+            returns=returns,
+            docstring=function.docstring if hasattr(function, 'docstring') else "",
+            # Additional graph-sitter metrics
+            function_calls=function_calls,
+            call_sites=call_sites,
+            dependencies=dependencies
+        )
+    except Exception as e:
+        logger.debug(f"Error analyzing function {function.name}: {e}")
+        # Fallback to basic metrics
+        return FunctionMetrics(
+            name=function.name,
+            file_path=file_path,
+            line_start=0,
+            line_end=0,
+            cyclomatic_complexity=1,
+            halstead_volume=0,  # Required field
+            maintainability_index=100,  # Required field
+            lines_of_code=1,  # Required field
+            parameters_count=0,  # Required field
+            return_statements=0,  # Required field
+            # Optional enhanced fields
+            complexity_rank="A",
+            loc=1,
+            lloc=1,
+            sloc=1,
+            comments=0,
+            halstead_n1=0,
+            halstead_n2=0,
+            halstead_N1=0,
+            halstead_N2=0,
+            parameters=0,
+            returns=0,
+            docstring=""
         )
 
 def analyze_class_ast(class_node: ast.ClassDef, file_path: str, source_lines: List[str]) -> ClassMetrics:
     """Analyze a class AST node and return comprehensive metrics."""
     try:
+        # Basic info
         name = class_node.name
         line_start = class_node.lineno
         line_end = class_node.end_lineno or line_start
         
-        # Extract class source
-        class_source = '\n'.join(source_lines[line_start-1:line_end])
-        loc, _, _, _ = count_lines(class_source)
-        
         # Calculate depth of inheritance
         doi = calculate_doi(class_node)
         
-        # Count methods and attributes
-        methods = [n for n in class_node.body if isinstance(n, ast.FunctionDef)]
-        attributes = []
+        # Count methods
+        methods = [node for node in class_node.body if isinstance(node, ast.FunctionDef)]
+        method_count = len(methods)
         
-        # Find attributes in __init__ and class body
-        for node in ast.walk(class_node):
+        # Count attributes (assignments in class body)
+        attributes = []
+        for node in class_node.body:
             if isinstance(node, ast.Assign):
                 for target in node.targets:
-                    if isinstance(target, ast.Attribute):
-                        attributes.append(target.attr)
-                    elif isinstance(target, ast.Name):
+                    if isinstance(target, ast.Name):
                         attributes.append(target.id)
         
-        # Extract parent class names
-        parent_classes = []
-        for base in class_node.bases:
-            if isinstance(base, ast.Name):
-                parent_classes.append(base.id)
-            elif isinstance(base, ast.Attribute):
-                parent_classes.append(base.attr)
+        # Extract class source
+        class_source = '\n'.join(source_lines[line_start-1:line_end])
+        loc, _, _, _ = count_lines(class_source)
         
         return ClassMetrics(
             name=name,
@@ -451,10 +658,10 @@ def analyze_class_ast(class_node: ast.ClassDef, file_path: str, source_lines: Li
             line_start=line_start,
             line_end=line_end,
             depth_of_inheritance=doi,
-            methods_count=len(methods),
-            attributes_count=len(set(attributes)),
+            method_count=method_count,
+            attribute_count=len(attributes),
             lines_of_code=loc,
-            parent_classes=parent_classes
+            parent_classes=[base.id for base in class_node.bases if isinstance(base, ast.Name)]
         )
     except Exception as e:
         logger.warning(f"Error analyzing class {class_node.name}: {e}")
@@ -464,8 +671,50 @@ def analyze_class_ast(class_node: ast.ClassDef, file_path: str, source_lines: Li
             line_start=class_node.lineno,
             line_end=class_node.end_lineno or class_node.lineno,
             depth_of_inheritance=0,
-            methods_count=0,
-            attributes_count=0,
+            method_count=0,
+            attribute_count=0,
+            lines_of_code=0
+        )
+
+
+def analyze_class_graph_sitter(cls, file_path: str) -> ClassMetrics:
+    """Analyze a class using Graph-Sitter (enhanced method)."""
+    try:
+        # Use enhanced graph-sitter DOI calculation
+        doi = calculate_doi(cls)
+        
+        # Get class metrics
+        method_count = len(cls.methods) if hasattr(cls, 'methods') else 0
+        attribute_count = len(cls.attributes) if hasattr(cls, 'attributes') else 0
+        
+        # Get class source for line counting
+        class_source = cls.source if hasattr(cls, 'source') else ""
+        loc, _, _, _ = count_lines(class_source)
+        
+        # Get parent classes
+        parent_classes = cls.parent_class_names if hasattr(cls, 'parent_class_names') else []
+        
+        return ClassMetrics(
+            name=cls.name,
+            file_path=file_path,
+            line_start=cls.line_start if hasattr(cls, 'line_start') else 0,
+            line_end=cls.line_end if hasattr(cls, 'line_end') else 0,
+            depth_of_inheritance=doi,
+            method_count=method_count,
+            attribute_count=attribute_count,
+            lines_of_code=loc,
+            parent_classes=parent_classes
+        )
+    except Exception as e:
+        logger.debug(f"Error analyzing class {cls.name}: {e}")
+        return ClassMetrics(
+            name=cls.name,
+            file_path=file_path,
+            line_start=0,
+            line_end=0,
+            depth_of_inheritance=0,
+            method_count=0,
+            attribute_count=0,
             lines_of_code=0
         )
 
@@ -817,7 +1066,7 @@ class ComprehensiveCodebaseAnalyzer:
         func_complexity = sum(f.cyclomatic_complexity for f in functions) / len(functions) if functions else 0
         
         # Class complexity (based on methods and inheritance)
-        class_complexity = sum(c.methods_count + c.depth_of_inheritance for c in classes) / len(classes) if classes else 0
+        class_complexity = sum(c.method_count + c.depth_of_inheritance for c in classes) / len(classes) if classes else 0
         
         # Issue penalty
         issue_penalty = len([i for i in issues if i.severity in ['critical', 'major']]) * 0.5
@@ -855,92 +1104,145 @@ class ComprehensiveCodebaseAnalyzer:
         functions = list(codebase.functions)
         classes = list(codebase.classes)
         
-        # Analyze each file
-        file_analyses = []
+        logger.info(f"Graph-sitter loaded: {len(files)} files, {len(functions)} functions, {len(classes)} classes")
+        
+        # Enhanced analysis using graph-sitter capabilities
+        function_metrics = []
+        class_metrics = []
         all_issues = []
         all_dead_code = []
         
-        for file in files:
-            if file.name.endswith('.py'):
-                file_analysis = self.analyze_file(file.path)
-                file_analyses.append(file_analysis)
-                all_issues.extend(file_analysis.issues)
+        # Analyze functions using enhanced graph-sitter analysis
+        for function in functions:
+            try:
+                metrics = analyze_function_graph_sitter(function, function.filepath)
+                function_metrics.append(metrics)
+                
+                # Add issues based on metrics
+                if metrics.cyclomatic_complexity > 10:
+                    all_issues.append(CodeIssue(
+                        type="high_complexity",
+                        severity="major",
+                        message=f"High cyclomatic complexity ({metrics.cyclomatic_complexity})",
+                        file_path=metrics.file_path,
+                        line_start=metrics.line_start,
+                        line_end=metrics.line_end,
+                        suggestion=f"Consider breaking down this function (complexity: {metrics.cyclomatic_complexity}, rank: {metrics.complexity_rank})"
+                    ))
+                
+                if metrics.maintainability_index < 20:
+                    all_issues.append(CodeIssue(
+                        type="low_maintainability",
+                        severity="major",
+                        message=f"Low maintainability index ({metrics.maintainability_index})",
+                        file_path=metrics.file_path,
+                        line_start=metrics.line_start,
+                        line_end=metrics.line_end,
+                        suggestion="Improve code structure and reduce complexity"
+                    ))
+                    
+            except Exception as e:
+                logger.debug(f"Error analyzing function {function.name}: {e}")
         
-        # Detect dead code across all files
-        for file_analysis in file_analyses:
-            if file_analysis.file_path.endswith('.py'):
-                try:
-                    with open(file_analysis.file_path, 'r') as f:
-                        source = f.read()
-                    tree = ast.parse(source)
-                    dead_code = detect_dead_code(tree, file_analysis.file_path, 
-                                               self.all_functions, self.all_classes)
-                    all_dead_code.extend(dead_code)
-                except:
-                    continue
+        # Analyze classes using enhanced graph-sitter analysis
+        for cls in classes:
+            try:
+                metrics = analyze_class_graph_sitter(cls, cls.filepath)
+                class_metrics.append(metrics)
+                
+                # Add issues based on metrics
+                if metrics.depth_of_inheritance > 5:
+                    all_issues.append(CodeIssue(
+                        type="deep_inheritance",
+                        severity="minor",
+                        message=f"Deep inheritance hierarchy (depth: {metrics.depth_of_inheritance})",
+                        file_path=metrics.file_path,
+                        line_start=metrics.line_start,
+                        line_end=metrics.line_end,
+                        suggestion="Consider composition over inheritance"
+                    ))
+                    
+            except Exception as e:
+                logger.debug(f"Error analyzing class {cls.name}: {e}")
+        
+        # Use graph-sitter's codebase analysis for additional insights
+        try:
+            codebase_summary = get_codebase_summary(codebase)
+            logger.info(f"Codebase summary: {codebase_summary}")
+        except Exception as e:
+            logger.debug(f"Error getting codebase summary: {e}")
+        
+        # Detect dead code using graph-sitter symbol usage
+        for function in functions:
+            try:
+                # Check if function has no usages (potential dead code)
+                if hasattr(function, 'symbol_usages') and len(function.symbol_usages) == 0:
+                    all_dead_code.append(DeadCodeItem(
+                        type="function",
+                        name=function.name,
+                        file_path=function.filepath,
+                        line_start=function.line_start if hasattr(function, 'line_start') else 0,
+                        line_end=function.line_end if hasattr(function, 'line_end') else 0,
+                        reason="Function is defined but never called",
+                        confidence=0.8
+                    ))
+            except Exception as e:
+                logger.debug(f"Error checking dead code for {function.name}: {e}")
         
         # Calculate aggregate metrics
-        total_files = len(file_analyses)
-        total_functions = sum(len(f.functions) for f in file_analyses)
-        total_classes = sum(len(f.classes) for f in file_analyses)
-        total_lines = sum(f.lines_of_code for f in file_analyses)
-        total_logical_lines = sum(f.logical_lines for f in file_analyses)
-        total_source_lines = sum(f.source_lines for f in file_analyses)
-        total_comment_lines = sum(f.comment_lines for f in file_analyses)
+        total_files = len(files)
+        total_functions = len(function_metrics)
+        total_classes = len(class_metrics)
         
-        # Calculate quality metrics
-        all_function_metrics = [f for fa in file_analyses for f in fa.functions]
-        all_class_metrics = [c for fa in file_analyses for c in fa.classes]
+        # Calculate averages
+        avg_complexity = sum(f.cyclomatic_complexity for f in function_metrics) / len(function_metrics) if function_metrics else 0
+        avg_maintainability = sum(f.maintainability_index for f in function_metrics) / len(function_metrics) if function_metrics else 100
+        avg_doi = sum(c.depth_of_inheritance for c in class_metrics) / len(class_metrics) if class_metrics else 0
         
-        avg_maintainability = (sum(f.maintainability_index for f in all_function_metrics) / 
-                             len(all_function_metrics)) if all_function_metrics else 0
-        avg_complexity = (sum(f.cyclomatic_complexity for f in all_function_metrics) / 
-                         len(all_function_metrics)) if all_function_metrics else 0
-        avg_halstead = (sum(f.halstead_volume for f in all_function_metrics) / 
-                       len(all_function_metrics)) if all_function_metrics else 0
-        avg_doi = (sum(c.depth_of_inheritance for c in all_class_metrics) / 
-                  len(all_class_metrics)) if all_class_metrics else 0
+        # Calculate technical debt ratio
+        high_complexity_functions = len([f for f in function_metrics if f.cyclomatic_complexity > 10])
+        technical_debt_ratio = high_complexity_functions / total_functions if total_functions > 0 else 0
         
-        comment_density = (total_comment_lines / total_lines * 100) if total_lines > 0 else 0
+        # Create file analyses from graph-sitter data
+        file_analyses = []
+        for file in files:
+            if file.name.endswith('.py'):
+                file_functions = [f for f in function_metrics if f.file_path == file.path]
+                file_classes = [c for c in class_metrics if c.file_path == file.path]
+                file_issues = [i for i in all_issues if i.file_path == file.path]
+                
+                # Calculate file metrics
+                total_loc = sum(f.loc for f in file_functions) + sum(c.lines_of_code for c in file_classes)
+                
+                file_analysis = FileAnalysis(
+                    file_path=file.path,
+                    lines_of_code=total_loc,
+                    functions=file_functions,
+                    classes=file_classes,
+                    issues=file_issues,
+                    imports=[],  # Could be enhanced with graph-sitter import analysis
+                    exports=[]   # Could be enhanced with graph-sitter export analysis
+                )
+                file_analyses.append(file_analysis)
         
-        # Calculate technical debt ratio (based on issues)
-        critical_issues = len([i for i in all_issues if i.severity == 'critical'])
-        major_issues = len([i for i in all_issues if i.severity == 'major'])
-        technical_debt_ratio = (critical_issues * 0.3 + major_issues * 0.1) / total_files if total_files > 0 else 0
-        
-        # Build inheritance hierarchy
-        inheritance_hierarchy = self._build_inheritance_hierarchy(all_class_metrics)
-        
-        # Performance metrics
-        analysis_time = time.time() - start_time
-        files_per_second = total_files / analysis_time if analysis_time > 0 else 0
+        processing_time = time.time() - start_time
         
         return ComprehensiveAnalysisResult(
             total_files=total_files,
             total_functions=total_functions,
             total_classes=total_classes,
-            total_lines=total_lines,
-            total_logical_lines=total_logical_lines,
-            total_source_lines=total_source_lines,
-            total_comment_lines=total_comment_lines,
-            average_maintainability_index=avg_maintainability,
-            average_cyclomatic_complexity=avg_complexity,
-            average_halstead_volume=avg_halstead,
-            average_depth_of_inheritance=avg_doi,
-            comment_density=comment_density,
-            technical_debt_ratio=technical_debt_ratio,
-            files=file_analyses,
+            function_metrics=function_metrics,
+            class_metrics=class_metrics,
             issues=all_issues,
             dead_code_items=all_dead_code,
-            function_metrics=all_function_metrics,
-            class_metrics=all_class_metrics,
-            top_level_functions=[f.name for f in all_function_metrics],
-            top_level_classes=[c.name for c in all_class_metrics],
-            inheritance_hierarchy=inheritance_hierarchy,
-            dependency_graph=dict(self.dependency_graph),
-            usage_patterns=dict(self.usage_patterns),
-            analysis_time=analysis_time,
-            files_per_second=files_per_second
+            file_analyses=file_analyses,
+            average_complexity=avg_complexity,
+            average_maintainability=avg_maintainability,
+            average_doi=avg_doi,
+            technical_debt_ratio=technical_debt_ratio,
+            test_coverage_estimate=0.0,  # Could be enhanced with test detection
+            processing_time=processing_time,
+            analysis_method="graph-sitter-enhanced"
         )
 
 
@@ -1055,8 +1357,8 @@ class ComprehensiveCodebaseAnalyzer:
                 'line_start': class_metric.line_start,
                 'parent_classes': class_metric.parent_classes,
                 'depth': class_metric.depth_of_inheritance,
-                'methods_count': class_metric.methods_count,
-                'attributes_count': class_metric.attributes_count
+                'method_count': class_metric.method_count,
+                'attribute_count': class_metric.attribute_count
             }
         
         # Add child relationships
@@ -1112,7 +1414,7 @@ def format_analysis_results(result: ComprehensiveAnalysisResult, format_type: st
     
     # Top-level symbols
     if result.top_level_functions:
-        output.append("🔧 TOP-LEVEL FUNCTIONS:")
+        output.append("������ TOP-LEVEL FUNCTIONS:")
         for i, func in enumerate(result.top_level_functions[:10], 1):
             output.append(f"  {i:2d}. {func}")
         if len(result.top_level_functions) > 10:
@@ -1165,7 +1467,7 @@ def format_analysis_results(result: ComprehensiveAnalysisResult, format_type: st
         output.append(f"  • Total Dead Code Items: {len(result.dead_code_items)}")
         
         for i, item in enumerate(result.dead_code_items[:5], 1):
-            confidence_emoji = "🔴" if item.confidence > 0.8 else "🟡" if item.confidence > 0.6 else "🔵"
+            confidence_emoji = "���" if item.confidence > 0.8 else "🟡" if item.confidence > 0.6 else "🔵"
             output.append(f"  {i}. {confidence_emoji} {item.type.title()}: {item.name}")
             output.append(f"     📍 {item.file_path}:{item.line_start}-{item.line_end}")
             output.append(f"     📝 {item.reason} (confidence: {item.confidence:.0%})")
@@ -1279,6 +1581,12 @@ Examples:
         help="Analyze remote repository (format: owner/repo)"
     )
     
+    parser.add_argument(
+        "--repo-analytics",
+        action="store_true",
+        help="Run repository analytics mode (requires --repo, from repo_analytics example)"
+    )
+    
     # Analysis options
     parser.add_argument(
         "--comprehensive",
@@ -1340,6 +1648,47 @@ def main():
         logging.getLogger().setLevel(logging.INFO)
     
     try:
+        # Handle repo analytics mode (from repo_analytics example)
+        if args.repo and hasattr(args, 'repo_analytics') and args.repo_analytics:
+            if not GRAPH_SITTER_AVAILABLE:
+                logger.error("Graph-sitter is required for repository analytics")
+                sys.exit(1)
+            
+            logger.info(f"Running repository analytics for: {args.repo}")
+            results = analyze_repo(args.repo)
+            
+            # Format repo analytics output (from repo_analytics example)
+            print("\n📊 Repository Analysis Report 📊")
+            print("=" * 50)
+            print(f"📁 Repository: {results['repo_url']}")
+            print(f"📝 Description: {results['description']}")
+            print("\n📈 Basic Metrics:")
+            print(f"  • Files: {results['num_files']}")
+            print(f"  • Functions: {results['num_functions']}")
+            print(f"  • Classes: {results['num_classes']}")
+
+            print("\n📏 Line Metrics:")
+            line_metrics = results["line_metrics"]["total"]
+            print(f"  ��� Lines of Code: {line_metrics['loc']:,}")
+            print(f"  • Logical Lines: {line_metrics['lloc']:,}")
+            print(f"  • Source Lines: {line_metrics['sloc']:,}")
+            print(f"  • Comments: {line_metrics['comments']:,}")
+            print(f"  • Comment Density: {line_metrics['comment_density']:.1f}%")
+
+            print("\n🔄 Complexity Metrics:")
+            print(f"  • Average Cyclomatic Complexity: {results['cyclomatic_complexity']['average']:.1f}")
+            print(f"  • Average Maintainability Index: {results['maintainability_index']['average']}")
+            print(f"  • Average Depth of Inheritance: {results['depth_of_inheritance']['average']:.1f}")
+            print(f"  • Total Halstead Volume: {results['halstead_metrics']['total_volume']:,}")
+            print(f"  • Average Halstead Volume: {results['halstead_metrics']['average_volume']:,}")
+            
+            if args.output:
+                with open(args.output, 'w') as f:
+                    json.dump(results, f, indent=2)
+                print(f"\n💾 Results saved to: {args.output}")
+            
+            return
+        
         # Determine analysis path
         if args.repo:
             if GRAPH_SITTER_AVAILABLE:
@@ -1421,10 +1770,113 @@ def analyze_from_repo(repo_url: str) -> ComprehensiveAnalysisResult:
     analyzer = ComprehensiveCodebaseAnalyzer(use_graph_sitter=True)
     return analyzer.analyze_codebase(codebase.path)
 
+
+def analyze_repo(repo_url: str) -> Dict[str, Any]:
+    """Analyze a repository and return comprehensive metrics (from repo_analytics)."""
+    if not GRAPH_SITTER_AVAILABLE:
+        raise ImportError("Graph-sitter is required for repository analysis")
+    
+    codebase = Codebase.from_repo(repo_url)
+
+    num_files = len(codebase.files(extensions="*"))
+    num_functions = len(codebase.functions)
+    num_classes = len(codebase.classes)
+
+    total_loc = total_lloc = total_sloc = total_comments = 0
+    total_complexity = 0
+    total_volume = 0
+    total_mi = 0
+    total_doi = 0
+
+    # Analyze all files for line metrics
+    for file in codebase.files:
+        try:
+            loc, lloc, sloc, comments = count_lines(file.source)
+            total_loc += loc
+            total_lloc += lloc
+            total_sloc += sloc
+            total_comments += comments
+        except Exception as e:
+            logger.debug(f"Error analyzing file {file.name}: {e}")
+
+    # Analyze functions and methods
+    callables = list(codebase.functions) + [m for c in codebase.classes for m in c.methods]
+
+    num_callables = 0
+    for func in callables:
+        try:
+            if not hasattr(func, "code_block"):
+                continue
+
+            complexity = calculate_cyclomatic_complexity_graph_sitter(func)
+            operators, operands = get_operators_and_operands(func)
+            volume, _, _, _, _ = calculate_halstead_volume(operators, operands)
+            loc = len(func.code_block.source.splitlines()) if hasattr(func.code_block, 'source') else 0
+            mi_score = calculate_maintainability_index(volume, complexity, loc)
+
+            total_complexity += complexity
+            total_volume += volume
+            total_mi += mi_score
+            num_callables += 1
+        except Exception as e:
+            logger.debug(f"Error analyzing callable {func.name}: {e}")
+
+    # Analyze classes for depth of inheritance
+    for cls in codebase.classes:
+        try:
+            doi = calculate_doi(cls)
+            total_doi += doi
+        except Exception as e:
+            logger.debug(f"Error analyzing class {cls.name}: {e}")
+
+    # Get repository description (if available)
+    try:
+        import requests
+        api_url = f"https://api.github.com/repos/{repo_url}"
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            repo_data = response.json()
+            desc = repo_data.get("description", "No description available")
+        else:
+            desc = ""
+    except Exception:
+        desc = ""
+
+    results = {
+        "repo_url": repo_url,
+        "line_metrics": {
+            "total": {
+                "loc": total_loc,
+                "lloc": total_lloc,
+                "sloc": total_sloc,
+                "comments": total_comments,
+                "comment_density": (total_comments / total_loc * 100) if total_loc > 0 else 0,
+            },
+        },
+        "cyclomatic_complexity": {
+            "average": total_complexity / num_callables if num_callables > 0 else 0,
+        },
+        "depth_of_inheritance": {
+            "average": total_doi / len(codebase.classes) if codebase.classes else 0,
+        },
+        "halstead_metrics": {
+            "total_volume": int(total_volume),
+            "average_volume": int(total_volume / num_callables) if num_callables > 0 else 0,
+        },
+        "maintainability_index": {
+            "average": int(total_mi / num_callables) if num_callables > 0 else 0,
+        },
+        "description": desc,
+        "num_files": num_files,
+        "num_functions": num_functions,
+        "num_classes": num_classes,
+    }
+
+    return results
+
 # ============================================================================
 # ENTRY POINT
 # ============================================================================
 
 if __name__ == "__main__":
     main()
-
