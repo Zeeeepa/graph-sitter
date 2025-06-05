@@ -29,7 +29,7 @@ POSTGRES_ADMIN_USER=${POSTGRES_ADMIN_USER:-postgres}
 POSTGRES_ADMIN_PASSWORD=${POSTGRES_ADMIN_PASSWORD:-postgres}
 
 # Database names
-DATABASES=("task_db" "projects_db" "prompts_db" "codebase_db" "analytics_db" "events_db" "learning_db")
+DATABASES=("task_db" "projects_db" "prompts_db" "codebase_db" "analytics_db" "events_db" "learning_db" "workflows_db")
 
 # Function to print colored output
 print_status() {
@@ -119,7 +119,7 @@ main() {
     echo "============================================================================="
     echo "                    GRAPH-SITTER DATABASE SETUP"
     echo "============================================================================="
-    echo "Setting up 7 specialized databases for the graph-sitter system"
+    echo "Setting up 8 specialized databases for the graph-sitter system"
     echo "Host: $POSTGRES_HOST:$POSTGRES_PORT"
     echo "Admin User: $POSTGRES_ADMIN_USER"
     echo "============================================================================="
@@ -156,10 +156,11 @@ main() {
         ["05_analytics_db.sql"]="Analytics Database (Performance analytics)"
         ["06_events_db.sql"]="Events Database (Event tracking)"
         ["07_learning_db.sql"]="Learning Database (Pattern recognition)"
+        ["08_workflows_db.sql"]="Workflows Database (Workflow orchestration)"
     )
 
     # Execute each schema file
-    for schema_file in "01_task_db.sql" "02_projects_db.sql" "03_prompts_db.sql" "04_codebase_db.sql" "05_analytics_db.sql" "06_events_db.sql" "07_learning_db.sql"; do
+    for schema_file in "01_task_db.sql" "02_projects_db.sql" "03_prompts_db.sql" "04_codebase_db.sql" "05_analytics_db.sql" "06_events_db.sql" "07_learning_db.sql" "08_workflows_db.sql"; do
         description="${SCHEMA_FILES[$schema_file]}"
         if execute_sql_file "database/schemas/$schema_file" "$description"; then
             print_success "$description initialized"
@@ -183,7 +184,7 @@ main() {
     done
 
     # Check users
-    USERS=("task_user" "projects_user" "prompts_user" "codebase_user" "analytics_user" "events_user" "learning_user" "analytics_readonly" "graph_sitter_admin")
+    USERS=("task_user" "projects_user" "prompts_user" "codebase_user" "analytics_user" "events_user" "learning_user" "workflows_user" "analytics_readonly" "graph_sitter_admin")
     for user in "${USERS[@]}"; do
         if user_exists "$user"; then
             print_success "User '$user' exists"
@@ -209,6 +210,7 @@ main() {
     echo "- Analytics DB: analytics_db (user: analytics_user, password: analytics_secure_2024!)"
     echo "- Events DB: events_db (user: events_user, password: events_secure_2024!)"
     echo "- Learning DB: learning_db (user: learning_user, password: learning_secure_2024!)"
+    echo "- Workflows DB: workflows_db (user: workflows_user, password: workflows_secure_2024!)"
     echo
     echo "Special Users:"
     echo "- Read-only Analytics: analytics_readonly (password: analytics_readonly_2024!)"
@@ -219,7 +221,7 @@ main() {
     echo "============================================================================="
     print_success "GRAPH-SITTER DATABASE SETUP COMPLETED"
     echo "============================================================================="
-    echo "All 7 specialized databases have been initialized:"
+    echo "All 8 specialized databases have been initialized:"
     echo "✅ Task DB - Task management and workflow orchestration"
     echo "✅ Projects DB - Project management and repository tracking"
     echo "✅ Prompts DB - Template management and A/B testing"
@@ -227,6 +229,7 @@ main() {
     echo "✅ Analytics DB - OpenEvolve integration and performance analytics"
     echo "✅ Events DB - Multi-source event tracking and aggregation"
     echo "✅ Learning DB - Pattern recognition and continuous improvement"
+    echo "✅ Workflows DB - Complete workflow orchestration"
     echo
     if [ "$TIMESCALEDB_AVAILABLE" = true ]; then
         echo "🚀 TimescaleDB optimization enabled for time-series data"
@@ -240,4 +243,3 @@ main() {
 
 # Run main function
 main "$@"
-

@@ -1,20 +1,41 @@
-# Graph-Sitter Database Architecture
+# Enhanced Graph-Sitter Database Architecture
 
-This directory contains the database schemas and initialization scripts for the graph-sitter system's 7 specialized databases.
+This directory contains the enhanced database schemas and initialization scripts for the graph-sitter system's **8 specialized databases**, specifically designed to support the complete GitHub project workflow orchestration.
 
 ## Overview
 
-The graph-sitter system uses a **multi-database architecture** with 7 specialized databases, each optimized for specific domains:
+The enhanced graph-sitter system uses a **multi-database architecture** with 8 specialized databases, each optimized for specific domains and workflow stages:
 
-| Database | Purpose | Key Features |
-|----------|---------|--------------|
-| **Task DB** | Task management and workflow orchestration | Task definitions, dependencies, workflows, resource monitoring |
-| **Projects DB** | Project management and repository tracking | Projects, repositories, team management, cross-project analytics |
-| **Prompts DB** | Template management and conditional prompts | Prompt templates, A/B testing, effectiveness tracking |
-| **Codebase DB** | Code analysis results and metadata | Code elements, relationships, analysis runs, integration with adapters |
-| **Analytics DB** | OpenEvolve integration and step analysis | Real-time analytics, performance data, quality scoring |
-| **Events DB** | Multi-source event tracking | GitHub, Linear, Notion, Slack event ingestion and aggregation |
-| **Learning DB** | Pattern recognition and improvement tracking | Learning models, training sessions, adaptations, evolution |
+| Database | Purpose | Key Features | Workflow Integration |
+|----------|---------|--------------|---------------------|
+| **Task DB** | Task management and workflow orchestration | Enhanced GitHub project workflow, requirements decomposition, Linear integration | ✅ Core workflow engine |
+| **Projects DB** | Project management and repository tracking | Projects, repositories, team management, cross-project analytics | ✅ Project context |
+| **Prompts DB** | Enhanced template management with Codegen SDK | Workflow-specific templates, prompt enhancement, accuracy boosting | ✅ Codegen SDK integration |
+| **Codebase DB** | Code analysis results and metadata | Code elements, relationships, analysis runs, integration with adapters | ✅ Code analysis context |
+| **Analytics DB** | OpenEvolve integration and step analysis | Real-time analytics, performance data, quality scoring | ✅ Performance monitoring |
+| **Events DB** | Multi-source event tracking | GitHub, Linear, Notion, Slack event ingestion and aggregation | ✅ Event-driven workflow |
+| **Learning DB** | Pattern recognition and improvement tracking | Learning models, training sessions, adaptations, evolution | ✅ Continuous improvement |
+| **Workflows DB** | Complete workflow orchestration | End-to-end workflow management, stage tracking, integration coordination | ✅ **NEW** - Workflow orchestration |
+
+## Complete Workflow Support
+
+The enhanced architecture specifically supports your **GitHub Project Workflow**:
+
+```
+Project Selection → Requirements Input → Requirements Decomposition → 
+Linear Issue Creation → Task Execution → PR Validation → Dev Branch Management → Completion
+```
+
+### Workflow Stages
+
+1. **Project Selection**: GitHub project pinning and dashboard integration
+2. **Requirements Input**: User requirements text input and saving
+3. **Requirements Decomposition**: Codegen SDK-powered step breakdown
+4. **Linear Integration**: Main issue and sub-issue creation
+5. **Task Execution**: Step-by-step implementation with Codegen SDK
+6. **PR Validation**: Code quality and requirements compliance checking
+7. **Dev Branch Management**: Branch creation and merge coordination
+8. **Completion**: Workflow finalization and cleanup
 
 ## Quick Start
 
@@ -24,13 +45,13 @@ The graph-sitter system uses a **multi-database architecture** with 7 specialize
 - TimescaleDB extension (optional, for time-series optimization)
 - Sufficient permissions to create databases and users
 
-### Setup All Databases
+### Setup All Enhanced Databases
 
-Run the setup script to initialize all databases:
+Run the enhanced setup script to initialize all databases:
 
 ```bash
 cd database
-./setup_all_databases.sh
+./setup_all_databases_enhanced.sh
 ```
 
 ### Environment Variables
@@ -43,253 +64,223 @@ export POSTGRES_PORT=5432
 export POSTGRES_ADMIN_USER=postgres
 export POSTGRES_ADMIN_PASSWORD=your_password
 
-./setup_all_databases.sh
+./setup_all_databases_enhanced.sh
 ```
 
-## Database Details
+## Enhanced Database Details
 
-### 1. Task DB (`task_db`)
+### 1. Enhanced Task DB (`task_db`)
 
-**Purpose**: Comprehensive task management with workflow orchestration and resource monitoring.
+**Purpose**: Comprehensive task management with **GitHub project workflow integration**.
+
+**Enhanced Features**:
+- **GitHub Projects Management**: Project pinning, dashboard integration
+- **Requirements Decomposition**: Step-by-step breakdown with dependencies
+- **Linear Integration**: Main issue and sub-issue tracking
+- **PR Validation**: Code quality and compliance checking
+- **Codegen SDK Integration**: Enhanced prompting and response tracking
 
 **Key Tables**:
-- `task_definitions` - Reusable task templates
-- `tasks` - Main tasks with hierarchy support
-- `dependencies` - Task dependency management
-- `workflows` - Workflow definitions and orchestration
+- `github_projects` - Dashboard project management
+- `requirement_decompositions` - Requirements breakdown results
+- `decomposed_steps` - Individual implementation steps
+- `tasks` - Enhanced with workflow context
+- `prompt_enhancements` - Prompt accuracy improvements
 
 **User**: `task_user` / `task_secure_2024!`
 
-**Features**:
-- Hierarchical task structure
-- Circular dependency detection
-- Resource usage tracking
-- Workflow execution monitoring
+### 2. Enhanced Prompts DB (`prompts_db`)
 
-### 2. Projects DB (`projects_db`)
+**Purpose**: **Codegen SDK-focused** template management with workflow-specific enhancements.
 
-**Purpose**: Project management, repository tracking, and team management.
-
-**Key Tables**:
-- `projects` - Project definitions and tracking
-- `repositories` - Repository metadata and statistics
-- `project_repositories` - Many-to-many project-repository relationships
-- `project_teams` - Team member management
-
-**User**: `projects_user` / `projects_secure_2024!`
-
-**Features**:
-- Cross-project analytics
-- Repository integration (GitHub, GitLab, etc.)
-- Team collaboration tracking
-- Project milestone management
-
-### 3. Prompts DB (`prompts_db`)
-
-**Purpose**: Template management, conditional prompts, and A/B testing.
+**Enhanced Features**:
+- **Workflow-Specific Templates**: Templates for each workflow stage
+- **Prompt Enhancement System**: Accuracy boosting, context injection
+- **Codegen SDK Integration**: API token management, response tracking
+- **Quality Metrics**: Factual accuracy, response quality scoring
 
 **Key Tables**:
-- `prompt_templates` - Template definitions with versioning
-- `executions` - Prompt execution tracking
-- `context_sources` - Context data for prompt enrichment
-- `ab_experiments` - A/B testing experiments
+- `prompt_templates` - Enhanced with workflow stages and use cases
+- `prompt_enhancements` - Accuracy and quality improvement rules
+- `executions` - Codegen SDK execution tracking
+- `prompt_collections` - Workflow-specific prompt sequences
 
 **User**: `prompts_user` / `prompts_secure_2024!`
 
+**Default Templates**:
+- GitHub Project Analysis
+- Requirements Decomposition
+- PR Validation
+
+### 3. **NEW** Workflows DB (`workflows_db`)
+
+**Purpose**: **Complete workflow orchestration** and integration coordination.
+
 **Features**:
-- Template versioning and management
-- A/B testing framework
-- Effectiveness tracking
-- Context-aware prompting
-
-### 4. Codebase DB (`codebase_db`)
-
-**Purpose**: Code analysis results, metadata, and relationships. Integrates with existing `codebase_analysis.py`.
+- **End-to-End Workflow Management**: Complete GitHub project workflow
+- **Stage Tracking**: Detailed progress through each workflow stage
+- **Integration Coordination**: GitHub, Linear, Codegen SDK operations
+- **Validation Checkpoints**: Quality control at each stage
+- **Performance Monitoring**: Workflow metrics and analytics
 
 **Key Tables**:
-- `codebases` - Codebase metadata and statistics
-- `file_analysis` - File-level analysis results
-- `code_elements` - Functions, classes, variables, etc.
-- `relationships` - Code element relationships and dependencies
+- `workflow_executions` - Main workflow tracking
+- `workflow_stage_executions` - Individual stage progress
+- `codegen_operations` - Codegen SDK operation tracking
+- `linear_operations` - Linear integration operations
+- `github_operations` - GitHub integration operations
+- `workflow_validations` - Quality control checkpoints
 
-**User**: `codebase_user` / `codebase_secure_2024!`
+**User**: `workflows_user` / `workflows_secure_2024!`
 
-**Features**:
-- Integration with existing adapters
-- Symbol tracking and relationship mapping
-- Complexity analysis
-- Dependency management
+### 4-7. Other Enhanced Databases
 
-### 5. Analytics DB (`analytics_db`)
+All other databases (Projects, Codebase, Analytics, Events, Learning) remain as previously designed but with enhanced integration points for the workflow system.
 
-**Purpose**: OpenEvolve integration, step analysis, and real-time analytics.
+## Codegen SDK Integration
 
-**Key Tables**:
-- `analysis_runs` - Analysis execution tracking
-- `metrics` - Time-series metrics data (TimescaleDB optimized)
-- `performance_data` - Detailed performance tracking
-- `dashboards` - Real-time dashboard configurations
+### Enhanced Prompting System
 
-**User**: `analytics_user` / `analytics_secure_2024!`
+The enhanced architecture provides **accurate and factual prompting** through:
 
-**Features**:
-- OpenEvolve integration
-- Time-series optimization with TimescaleDB
-- Real-time analytics and alerting
-- Performance trend analysis
+1. **Context Injection**: Automatic context enhancement based on workflow stage
+2. **Accuracy Boosters**: Validation instructions for factual accuracy
+3. **Format Optimization**: Structured output for automated processing
+4. **Workflow-Specific Templates**: Optimized prompts for each workflow stage
 
-### 6. Events DB (`events_db`)
+### API Token Management
 
-**Purpose**: Multi-source event ingestion and aggregation.
+- Secure encrypted storage of Codegen API tokens
+- Organization-level token management
+- Automatic token rotation support
 
-**Key Tables**:
-- `event_sources` - Source configurations (GitHub, Linear, etc.)
-- `events` - Time-series event data (TimescaleDB optimized)
-- `event_aggregations` - Pre-computed event summaries
-- `subscriptions` - Real-time event subscriptions
+### Response Tracking
 
-**User**: `events_user` / `events_secure_2024!`
-
-**Features**:
-- Multi-source event ingestion (GitHub, Linear, Notion, Slack)
-- Real-time event processing
-- Event pattern detection
-- Subscription-based notifications
-
-### 7. Learning DB (`learning_db`)
-
-**Purpose**: Pattern recognition, continuous learning, and evolution integration.
-
-**Key Tables**:
-- `learning_models` - ML model registry and metadata
-- `training_sessions` - Training execution tracking
-- `adaptations` - Continuous improvement tracking
-- `evolution_sessions` - OpenEvolve integration
-
-**User**: `learning_user` / `learning_secure_2024!`
-
-**Features**:
-- ML model lifecycle management
-- Training metrics tracking (TimescaleDB optimized)
-- Continuous adaptation and improvement
-- Evolution integration
-
-## Special Users
-
-### Analytics Read-Only User
-- **User**: `analytics_readonly` / `analytics_readonly_2024!`
-- **Purpose**: Cross-database analytics and reporting
-- **Access**: Read-only access to all databases
-
-### Admin User
-- **User**: `graph_sitter_admin` / `admin_secure_2024!`
-- **Purpose**: Database administration and maintenance
-- **Access**: Superuser privileges
+- Complete execution tracking with quality metrics
+- Accuracy verification and scoring
+- Performance monitoring and optimization
 
 ## File Structure
 
 ```
 database/
-├── README.md                    # This documentation
-├── init_databases.sql          # Database and user creation
-├── setup_all_databases.sh      # Complete setup script
+├── README_enhanced.md           # This enhanced documentation
+├── init_databases_enhanced.sql  # Enhanced database and user creation
+├── setup_all_databases_enhanced.sh  # Enhanced setup script
 └── schemas/
-    ├── 01_task_db.sql          # Task database schema
-    ├── 02_projects_db.sql      # Projects database schema
-    ├── 03_prompts_db.sql       # Prompts database schema
-    ├── 04_codebase_db.sql      # Codebase database schema
-    ├── 05_analytics_db.sql     # Analytics database schema
-    ├── 06_events_db.sql        # Events database schema
-    └── 07_learning_db.sql      # Learning database schema
+    ├── 01_task_db_enhanced.sql      # Enhanced task database schema
+    ├── 02_projects_db.sql           # Projects database schema
+    ├── 03_prompts_db_enhanced.sql   # Enhanced prompts database schema
+    ├── 04_codebase_db.sql           # Codebase database schema
+    ├── 05_analytics_db.sql          # Analytics database schema
+    ├── 06_events_db.sql             # Events database schema
+    ├── 07_learning_db.sql           # Learning database schema
+    └── 08_workflows_db.sql          # NEW - Workflows database schema
 ```
 
-## Integration Points
+## Workflow Integration Points
 
-### Existing Codebase Integration
+### Dashboard Integration
 
-The **Codebase DB** is designed to integrate seamlessly with existing components:
+The **Task DB** provides complete dashboard support:
+- Project pinning and ordering
+- Requirements input and saving
+- Progress tracking and visualization
+- Workflow stage monitoring
 
-- `src/graph_sitter/adapters/codebase_db_adapter.py` - Database adapter
-- `src/graph_sitter/adapters/database.py` - General database utilities
-- `src/graph_sitter/codebase/codebase_analysis.py` - Analysis functions
+### Codegen SDK Integration
 
-### Cross-Database Analytics
+The **Prompts DB** provides enhanced Codegen SDK support:
+- Workflow-specific prompt templates
+- Automatic prompt enhancement
+- Response quality tracking
+- Accuracy verification
 
-The `analytics_readonly` user enables cross-database queries for:
-- Comprehensive system analytics
-- Cross-domain insights
-- Performance correlation analysis
-- System-wide reporting
+### Linear Integration
 
-## Time-Series Optimization
+The **Workflows DB** coordinates Linear operations:
+- Main issue creation from requirements
+- Sub-issue creation from decomposed steps
+- Issue status tracking and updates
+- Cross-reference management
 
-Several databases use **TimescaleDB** for time-series optimization:
+### GitHub Integration
 
-- **Analytics DB**: `metrics` and `performance_data` tables
-- **Events DB**: `events` and `event_aggregations` tables  
-- **Learning DB**: `training_metrics` table
+The **Workflows DB** manages GitHub operations:
+- Repository analysis and structure detection
+- Development branch creation and management
+- Pull request creation and validation
+- Code quality assessment
 
-If TimescaleDB is not available, the system will function normally without time-series optimization.
+## Database Connections (Enhanced)
 
-## Security Considerations
+| Database | User | Password | Purpose |
+|----------|------|----------|---------|
+| `task_db` | `task_user` | `task_secure_2024!` | Enhanced task management with workflow |
+| `projects_db` | `projects_user` | `projects_secure_2024!` | Project tracking |
+| `prompts_db` | `prompts_user` | `prompts_secure_2024!` | Enhanced template management |
+| `codebase_db` | `codebase_user` | `codebase_secure_2024!` | Code analysis |
+| `analytics_db` | `analytics_user` | `analytics_secure_2024!` | Analytics |
+| `events_db` | `events_user` | `events_secure_2024!` | Event tracking |
+| `learning_db` | `learning_user` | `learning_secure_2024!` | Learning/Evolution |
+| `workflows_db` | `workflows_user` | `workflows_secure_2024!` | **NEW** - Workflow orchestration |
 
-- Each database has a dedicated user with minimal required privileges
-- Passwords follow a secure pattern (change in production)
-- Cross-database access is limited to the analytics read-only user
-- All connections should use SSL in production environments
+**Special Users:**
+- `analytics_readonly` / `analytics_readonly_2024!` - Cross-database read access
+- `graph_sitter_admin` / `admin_secure_2024!` - Database administration
 
-## Maintenance
+## Workflow Monitoring
 
-### Backup Strategy
+### Dashboard Views
 
-```bash
-# Backup all databases
-for db in task_db projects_db prompts_db codebase_db analytics_db events_db learning_db; do
-    pg_dump -h localhost -U postgres $db > backup_${db}_$(date +%Y%m%d).sql
-done
-```
+- **Active Workflows**: Real-time workflow progress
+- **Project Status**: GitHub project workflow stages
+- **Step Execution**: Decomposed step progress
+- **Integration Operations**: Codegen, Linear, GitHub operations
 
-### Monitoring
+### Performance Metrics
 
-Key metrics to monitor:
-- Database sizes and growth rates
-- Query performance and slow queries
-- Connection counts and user activity
-- Time-series data retention (for TimescaleDB tables)
+- Workflow completion times
+- Stage success rates
+- Codegen SDK response quality
+- Integration operation success rates
 
-### Updates
+## Security Considerations (Enhanced)
 
-When updating schemas:
-1. Test changes on a development environment
-2. Create database backups before applying changes
-3. Use migration scripts for data preservation
-4. Update adapter code if schema changes affect integration points
+- **API Token Security**: Encrypted storage of Codegen SDK tokens
+- **Workflow Isolation**: Organization-level workflow separation
+- **Integration Security**: Secure handling of GitHub and Linear credentials
+- **Audit Logging**: Complete workflow operation tracking
 
-## Troubleshooting
+## Troubleshooting (Enhanced)
 
-### Common Issues
+### Common Workflow Issues
 
-1. **TimescaleDB not available**: System will work without time-series optimization
-2. **Permission errors**: Ensure PostgreSQL user has sufficient privileges
-3. **Connection failures**: Check PostgreSQL service status and network connectivity
-4. **Schema conflicts**: Drop and recreate databases if needed (development only)
+1. **Codegen SDK Integration**: Check API token configuration and organization ID
+2. **Linear Integration**: Verify Linear API credentials and project access
+3. **GitHub Integration**: Ensure repository access and webhook configuration
+4. **Workflow Stalling**: Check stage validation requirements and dependencies
 
-### Logs and Debugging
+### Monitoring and Debugging
 
-- PostgreSQL logs: Check for connection and query errors
-- Application logs: Monitor adapter integration points
-- Performance: Use `pg_stat_statements` for query analysis
+- **Workflow Execution Logs**: Detailed stage-by-stage execution tracking
+- **Integration Operation Logs**: Specific operation success/failure tracking
+- **Quality Metrics**: Prompt effectiveness and response quality monitoring
+- **Performance Analytics**: Workflow timing and resource usage analysis
 
-## Contributing
+## Migration from Original Architecture
 
-When adding new features:
-1. Follow the established naming conventions
-2. Add appropriate indexes for performance
-3. Include JSONB fields for extensibility
-4. Update this documentation
-5. Test with the existing adapter integration
+If migrating from the original 7-database architecture:
+
+1. **Backup existing databases**
+2. **Run enhanced initialization script**
+3. **Migrate workflow-related data to new Workflows DB**
+4. **Update application configuration for new database connections**
+5. **Test workflow integration points**
 
 ---
+
+This enhanced architecture provides complete support for your GitHub project workflow with robust Codegen SDK integration, accurate prompting, and comprehensive workflow orchestration. The system is designed to handle the complete lifecycle from project selection to completion with full automation and quality control.
 
 For questions or issues, please refer to the main graph-sitter documentation or create an issue in the repository.
 
