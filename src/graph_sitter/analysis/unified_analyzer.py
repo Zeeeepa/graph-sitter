@@ -11,14 +11,14 @@ from typing import Any, Dict, List, Optional, Set
 from graph_sitter.core.codebase import Codebase
 
 # Import all analysis components
-from .analysis.enhanced_analysis import EnhancedAnalyzer
-from .analysis.metrics import CodebaseMetrics, calculate_codebase_metrics
-from .analysis.dependency_analyzer import DependencyAnalyzer
-from .analysis.call_graph import CallGraphAnalyzer
-from .analysis.dead_code import DeadCodeAnalyzer
-from .analysis.function_context import FunctionContext, get_function_context
+from .enhanced_analysis import EnhancedCodebaseAnalyzer, AnalysisReport
+from .metrics import MetricsCalculator
+from .dependency_analyzer import DependencyAnalyzer
+from .call_graph import CallGraphAnalyzer
+from .dead_code import DeadCodeDetector
+from .function_context import FunctionContext, get_function_context, TrainingData
 from .visualizations.react_visualizations import create_react_visualizations
-from .visualizations.codebase_visualization import create_comprehensive_visualization
+from .visualizations.codebase_visualization import create_comprehensive_visualization, InteractiveReport, CodebaseVisualizer
 
 logger = logging.getLogger(__name__)
 
@@ -84,10 +84,10 @@ class UnifiedCodebaseAnalyzer:
         self.output_dir.mkdir(exist_ok=True)
         
         # Initialize all analyzers
-        self.enhanced_analyzer = EnhancedAnalyzer(codebase, self.codebase_id)
-        self.metrics_calculator = CodebaseMetrics(codebase)
+        self.enhanced_analyzer = EnhancedCodebaseAnalyzer(codebase, self.codebase_id)
+        self.metrics_calculator = MetricsCalculator(codebase)
         self.dependency_analyzer = DependencyAnalyzer(codebase)
-        self.dead_code_detector = DeadCodeAnalyzer(codebase)
+        self.dead_code_detector = DeadCodeDetector(codebase)
         self.call_graph_analyzer = CallGraphAnalyzer(codebase)
         self.visualizer = CodebaseVisualizer(codebase, str(self.output_dir / "visualizations"))
         

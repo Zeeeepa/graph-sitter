@@ -1569,6 +1569,36 @@ class Codebase(
         """
         return self._op.create_pr_review_comment(pr_number, body, commit_sha, path, line, side, start_line)
 
+    def Analysis(self, output_dir: str = "analysis_output") -> "ComprehensiveAnalysisResult":
+        """
+        Perform comprehensive analysis of the codebase.
+        
+        Args:
+            output_dir: Directory to save analysis outputs
+            
+        Returns:
+            ComprehensiveAnalysisResult with all analysis components
+        """
+        from graph_sitter.analysis.unified_analyzer import UnifiedCodebaseAnalyzer
+        
+        analyzer = UnifiedCodebaseAnalyzer(self, output_dir=output_dir)
+        return analyzer.analyze_comprehensive()
+
+    @classmethod
+    def AnalysisFromPath(cls, repo_path: str, output_dir: str = "analysis_output") -> "ComprehensiveAnalysisResult":
+        """
+        Create codebase from path and perform comprehensive analysis.
+        
+        Args:
+            repo_path: Path to the repository
+            output_dir: Directory to save analysis outputs
+            
+        Returns:
+            ComprehensiveAnalysisResult with all analysis components
+        """
+        codebase = cls.from_files(repo_path)
+        return codebase.Analysis(output_dir)
+
 
 # The last 2 lines of code are added to the runner. See codegen-backend/cli/generate/utils.py
 # Type Aliases
