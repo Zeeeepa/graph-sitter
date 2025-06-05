@@ -35,6 +35,8 @@ class AnalysisReport:
     issues: List[Dict[str, Any]]
     recommendations: List[str]
     health_score: float
+    # Optional visualization data for dashboard rendering
+    visualization_data: Optional[Dict[str, Any]] = None
 
 
 class EnhancedCodebaseAnalyzer:
@@ -107,7 +109,8 @@ class EnhancedCodebaseAnalyzer:
                 file_analysis=file_analysis,
                 issues=issues,
                 recommendations=recommendations,
-                health_score=health_score
+                health_score=health_score,
+                visualization_data=None
             )
             
             logger.info(f"Analysis completed. Health score: {health_score:.2f}")

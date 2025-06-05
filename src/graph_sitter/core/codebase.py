@@ -9,7 +9,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
-from typing import Generic, Literal, Unpack, overload
+from typing import Generic, Literal, Unpack, overload, Optional, Dict, Any
 
 import plotly.graph_objects as go
 import rich.repr
