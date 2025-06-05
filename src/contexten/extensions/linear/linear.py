@@ -228,7 +228,7 @@ class Linear(EventHandlerManagerProtocol):
             return self.integration_agent.workflow_automation.get_active_tasks()
         return {}
 
-    async def handle_webhook(self, payload: bytes, signature: str, headers: dict = None) -> bool:
+    async def handle_webhook(self, payload: bytes, signature: str, headers: Optional[dict] = None) -> bool:
         """Handle webhook (backward compatibility)"""
         if self.integration_agent:
             return await self.integration_agent.handle_webhook(payload, signature, headers)

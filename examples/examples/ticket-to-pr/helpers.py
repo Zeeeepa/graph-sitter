@@ -1,5 +1,6 @@
-from graph_sitter import Codebase, ProgrammingLanguage
-from typing import List, Dict, Any
+from graph_sitter import Codebase
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from typing import List, Dict, Any, Optional
 from graph_sitter.configs.models.codebase import CodebaseConfig
 from data import LinearLabels, LinearIssueUpdateEvent
 import os
@@ -17,14 +18,18 @@ def process_update_event(event_data: dict[str, Any]):
     actor = event_data.get("actor")
     created_at = event_data.get("createdAt")
     issue_url = event_data.get("url")
-    data: Dict[str, Any] = event_data.get("data")
+    data: Optional[Dict[str, Any]] = event_data.get("data")
+    
+    if not data:
+        return None
+        
     issue_id = data.get("id")
     title = data.get("title")
     description = data.get("description")
     identifier = data.get("identifier")
 
-    labels: List[LinearLabels] = data.get("labels")
-    updated_from: Dict[str, Any] = event_data.get("updatedFrom")
+    labels: Optional[List[LinearLabels]] = data.get("labels")
+    updated_from: Optional[Dict[str, Any]] = event_data.get("updatedFrom")
 
     update_event = LinearIssueUpdateEvent(
         issue_id=issue_id,
