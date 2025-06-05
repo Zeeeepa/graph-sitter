@@ -45,11 +45,22 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
         if not condition:
             return False
             
-        # Get the operator without any whitespace
-        if not hasattr(condition, 'operator') or not condition.operator:
+        # Get the operator - check if condition has operator attribute or children with operators
+        operator = None
+        if hasattr(condition, 'operator') and condition.operator:
+            if hasattr(condition.operator, '__iter__') and len(condition.operator) > 0:
+                operator = condition.operator[-1].source
+            else:
+                operator = condition.operator.source if hasattr(condition.operator, 'source') else str(condition.operator)
+        elif hasattr(condition, 'children'):
+            # Look for operator in children
+            for child in condition.children:
+                if hasattr(child, 'source') and child.source in (false_operators + true_operators):
+                    operator = child.source
+                    break
+        
+        if not operator:
             return False
-            
-        operator = condition.operator[-1].source
 
         # Check for non-production conditions
         if operator in false_operators and condition.source == f"process.env.NODE_ENV {operator} 'production'":
@@ -76,11 +87,27 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
             return False
 
         condition = main_if.condition
-        operator = condition.operator[-1].source
+        # Fix the operator access similar to above
+        operator = None
+        if hasattr(condition, 'operator') and condition.operator:
+            if hasattr(condition.operator, '__iter__') and len(condition.operator) > 0:
+                operator = condition.operator[-1].source
+            else:
+                operator = condition.operator.source if hasattr(condition.operator, 'source') else str(condition.operator)
+        elif hasattr(condition, 'children'):
+            # Look for operator in children
+            for child in condition.children:
+                if hasattr(child, 'source') and child.source in (false_operators + true_operators):
+                    operator = child.source
+                    break
+        
+        if not operator:
+            return False
 
         # Valid if the main if block checks for production
         return operator in true_operators and condition.source == f"process.env.NODE_ENV {operator} 'production'"
 
+    # Fix: Call files() as a method
     for file in directory.files(extensions=["*"], recursive=True):
         for imp in file.inbound_imports:
             if imp.file.filepath not in modified_files:
@@ -88,7 +115,6 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
                 continue
             # Skip if the import is from within the target directory
             if directory.dirpath in imp.file.filepath:
-                # "✅ Valid import" if the import is within the target directory
                 continue
 
             parent_if_block = imp.parent_of_type(IfBlockStatement)

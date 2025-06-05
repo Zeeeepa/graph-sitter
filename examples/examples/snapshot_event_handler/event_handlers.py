@@ -73,28 +73,20 @@ class CustomEventHandlersAPI(CodebaseEventsApp):
 
             return {"message": "Mentioned", "received_text": event.text, "response": response}
 
-        @cg.github.event("pull_request:labeled")
+        @cg.github.event("PullRequestLabeledEvent")
         def handle_pr(event: PullRequestLabeledEvent):
-            logger.info("PR labeled")
-            logger.info(f"PR head sha: {event.pull_request.head.sha}")
-
+            logger.info(f"PR labeled: {event.pull_request.title}")
             codebase = cg.get_codebase()
-            logger.info(f"Codebase: {codebase.name} codebase.repo: {codebase.repo_path}")
-
-            # =====[ Check out commit ]=====
-            # Might require fetch?
-            logger.info("> Checking out commit")
-            codebase.checkout(commit=event.pull_request.head.sha)
-
-            # LINT CODEMOD
             lint_for_dev_import_violations(codebase, event)
 
+            # Fix: Call files() and functions() as methods
             return {"message": "PR event handled", "num_files": len(codebase.files()), "num_functions": len(codebase.functions())}
 
         @cg.linear.event("Issue")
         def handle_issue(event: LinearEvent):
             logger.info(f"Issue created: {event}")
             codebase = cg.get_codebase()
+            # Fix: Call files() and functions() as methods
             return {"message": "Linear Issue event", "num_files": len(codebase.files()), "num_functions": len(codebase.functions())}
 
 
