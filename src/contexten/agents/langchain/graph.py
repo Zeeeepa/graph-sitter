@@ -21,10 +21,10 @@ from langgraph.graph.state import CompiledGraph, StateGraph
 from langgraph.pregel import RetryPolicy
 
 from contexten.agents.utils import AgentConfig
-from contexten.extensions.langchain.llm import LLM
-from contexten.extensions.langchain.prompts import SUMMARIZE_CONVERSATION_PROMPT
-from contexten.extensions.langchain.utils.custom_tool_node import CustomToolNode
-from contexten.extensions.langchain.utils.utils import get_max_model_input_tokens
+from contexten.agents.langchain.llm import LLM
+from contexten.agents.langchain.prompts import SUMMARIZE_CONVERSATION_PROMPT
+from contexten.agents.langchain.utils.custom_tool_node import CustomToolNode
+from contexten.agents.langchain.utils.utils import get_max_model_input_tokens
 
 
 def manage_messages(existing: list[AnyMessage], updates: Union[list[AnyMessage], dict]) -> list[AnyMessage]:

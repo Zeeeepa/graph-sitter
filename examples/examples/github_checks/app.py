@@ -8,7 +8,7 @@ import logging
 import modal
 from graph_sitter import Codebase
 from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
-from contexten.extensions.tools.github.create_pr_comment import create_pr_comment
+from contexten.agents.tools.github.create_pr_comment import create_pr_comment
 from dotenv import load_dotenv
 import networkx as nx
 

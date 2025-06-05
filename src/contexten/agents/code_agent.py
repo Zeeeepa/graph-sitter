@@ -10,8 +10,9 @@ from langsmith import Client
 
 from contexten.agents.loggers import ExternalLogger
 from contexten.agents.tracer import MessageStreamTracer
-from contexten.extensions.langchain.agent import create_codebase_agent
-from contexten.extensions.langchain.utils.get_langsmith_url import (
+# Updated import path after folder move
+from contexten.agents.langchain.agent import create_codebase_agent
+from contexten.agents.langchain.utils.get_langsmith_url import (
     find_and_print_langsmith_run_url,
 )
 
@@ -46,6 +47,8 @@ class CodeAgent:
         agent_config: Optional[AgentConfig] = None,
         thread_id: Optional[str] = None,
         logger: Optional[ExternalLogger] = None,
+        org_id: Optional[str] = None,
+        token: Optional[str] = None,
         **kwargs,
     ):
         """Initialize a CodeAgent.
@@ -58,6 +61,8 @@ class CodeAgent:
             tools: Additional tools to use
             tags: Tags to add to the agent trace. Must be of the same type.
             metadata: Metadata to use for the agent. Must be a dictionary.
+            org_id: Optional Codegen organization ID (if provided, uses Codegen SDK)
+            token: Optional Codegen API token (required if org_id is provided)
             **kwargs: Additional LLM configuration options. Supported options:
                 - temperature: Temperature parameter (0-1)
                 - top_p: Top-p sampling parameter (0-1)
@@ -65,17 +70,29 @@ class CodeAgent:
                 - max_tokens: Maximum number of tokens to generate
         """
         self.codebase = codebase
-        self.agent = create_codebase_agent(
-            self.codebase,
-            model_provider=model_provider,
-            model_name=model_name,
-            memory=memory,
-            additional_tools=tools,
-            config=agent_config,
-            **kwargs,
-        )
+        self.use_codegen_sdk = org_id is not None and token is not None
+        
+        if self.use_codegen_sdk:
+            # Use Codegen SDK
+            from codegen import Agent
+            self.codegen_agent = Agent(org_id=org_id, token=token)
+            self.agent = None
+            self.langsmith_client = None
+        else:
+            # Use existing langchain implementation
+            self.agent = create_codebase_agent(
+                self.codebase,
+                model_provider=model_provider,
+                model_name=model_name,
+                memory=memory,
+                additional_tools=tools,
+                config=agent_config,
+                **kwargs,
+            )
+            self.langsmith_client = Client()
+            self.codegen_agent = None
+        
         self.model_name = model_name
-        self.langsmith_client = Client()
 
         if thread_id is None:
             self.thread_id = str(uuid4())
@@ -84,7 +101,8 @@ class CodeAgent:
 
         # Get project name from environment variable or use a default
         self.project_name = os.environ.get("LANGCHAIN_PROJECT", "RELACE")
-        print(f"Using LangSmith project: {self.project_name}")
+        if not self.use_codegen_sdk:
+            print(f"Using LangSmith project: {self.project_name}")
 
         # Store SWEBench metadata if provided
         self.run_id = metadata.get("run_id")
@@ -112,72 +130,83 @@ class CodeAgent:
         Args:
             prompt: The prompt to run
             image_urls: Optional list of base64-encoded image strings. Example: ["data:image/png;base64,<base64_str>"]
-            thread_id: Optional thread ID for message history
 
         Returns:
             The agent's response
         """
-        self.config = {
-            "configurable": {
-                "thread_id": self.thread_id,
-                "metadata": {"project": self.project_name},
-            },
-            "recursion_limit": 100,
-        }
+        if self.use_codegen_sdk:
+            # Use Codegen SDK
+            # Note: Codegen SDK doesn't support images yet, so we'll ignore image_urls for now
+            task = self.codegen_agent.run(prompt=prompt)
+            # Wait for task completion and return result
+            while task.status not in ["completed", "failed", "cancelled"]:
+                task.refresh()
+                if task.status == "failed":
+                    raise Exception(f"Codegen task failed: {task.error}")
+            return task.result if task.result else "Task completed successfully"
+        else:
+            # Use existing langchain implementation
+            self.config = {
+                "configurable": {
+                    "thread_id": self.thread_id,
+                    "metadata": {"project": self.project_name},
+                },
+                "recursion_limit": 100,
+            }
 
-        # Prepare content with prompt and images if provided
-        content = [{"type": "text", "text": prompt}]
-        if image_urls:
-            content += [{"type": "image_url", "image_url": {"url": image_url}} for image_url in image_urls]
+            # Prepare content with prompt and images if provided
+            content = [{"type": "text", "text": prompt}]
+            if image_urls:
+                content += [{"type": "image_url", "image_url": {"url": image_url}} for image_url in image_urls]
 
-        config = RunnableConfig(configurable={"thread_id": self.thread_id}, tags=self.tags, metadata=self.metadata, recursion_limit=200)
-        # we stream the steps instead of invoke because it allows us to access intermediate nodes
+            config = RunnableConfig(configurable={"thread_id": self.thread_id}, tags=self.tags, metadata=self.metadata, recursion_limit=200)
+            # we stream the steps instead of invoke because it allows us to access intermediate nodes
 
-        stream = self.agent.stream({"messages": [HumanMessage(content=content)]}, config=config, stream_mode="values")
+            stream = self.agent.stream({"messages": [HumanMessage(content=content)]}, config=config, stream_mode="values")
 
-        _tracer = MessageStreamTracer(logger=self.logger)
+            _tracer = MessageStreamTracer(logger=self.logger)
 
-        # Process the stream with the tracer
-        traced_stream = _tracer.process_stream(stream)
+            # Process the stream with the tracer
+            traced_stream = _tracer.process_stream(stream)
 
-        # Keep track of run IDs from the stream
-        run_ids = []
+            # Keep track of run IDs from the stream
+            run_ids = []
 
-        for s in traced_stream:
-            if len(s["messages"]) == 0 or isinstance(s["messages"][-1], HumanMessage):
-                message = HumanMessage(content=content)
-            else:
-                message = s["messages"][-1]
-
-            if isinstance(message, tuple):
-                # print(message)
-                pass
-            else:
-                if isinstance(message, AIMessage) and isinstance(message.content, list) and len(message.content) > 0 and "text" in message.content[0]:
-                    AIMessage(message.content[0]["text"]).pretty_print()
+            for s in traced_stream:
+                if len(s["messages"]) == 0 or isinstance(s["messages"][-1], HumanMessage):
+                    message = HumanMessage(content=content)
                 else:
-                    message.pretty_print()
+                    message = s["messages"][-1]
 
-                # Try to extract run ID if available in metadata
-                if hasattr(message, "additional_kwargs") and "run_id" in message.additional_kwargs:
-                    run_ids.append(message.additional_kwargs["run_id"])
+                if isinstance(message, tuple):
+                    # print(message)
+                    pass
+                else:
+                    if isinstance(message, AIMessage) and isinstance(message.content, list) and len(message.content) > 0 and "text" in message.content[0]:
+                        AIMessage(message.content[0]["text"]).pretty_print()
+                    else:
+                        message.pretty_print()
 
-        # Get the last message content
-        result = s["final_answer"]
+                    # Try to extract run ID if available in metadata
+                    if hasattr(message, "additional_kwargs") and "run_id" in message.additional_kwargs:
+                        run_ids.append(message.additional_kwargs["run_id"])
 
-        # # Try to find run IDs in the LangSmith client's recent runs
-        try:
-            # Find and print the LangSmith run URL
-            find_and_print_langsmith_run_url(self.langsmith_client, self.project_name)
-        except Exception as e:
-            separator = "=" * 60
-            print(f"\n{separator}\nCould not retrieve LangSmith URL: {e}")
-            import traceback
+            # Get the last message content
+            result = s["final_answer"]
 
-            print(traceback.format_exc())
-            print(separator)
+            # # Try to find run IDs in the LangSmith client's recent runs
+            try:
+                # Find and print the LangSmith run URL
+                find_and_print_langsmith_run_url(self.langsmith_client, self.project_name)
+            except Exception as e:
+                separator = "=" * 60
+                print(f"\n{separator}\nCould not retrieve LangSmith URL: {e}")
+                import traceback
 
-        return result
+                print(traceback.format_exc())
+                print(separator)
+
+            return result
 
     def get_agent_trace_url(self) -> str | None:
         """Get the URL for the most recent agent run in LangSmith.
@@ -185,6 +214,10 @@ class CodeAgent:
         Returns:
             The URL for the run in LangSmith if found, None otherwise
         """
+        if self.use_codegen_sdk:
+            # Codegen SDK doesn't have LangSmith integration
+            return None
+        
         try:
             # TODO - this is definitely not correct, we should be able to get the URL directly...
             return find_and_print_langsmith_run_url(client=self.langsmith_client, project_name=self.project_name)
@@ -198,9 +231,15 @@ class CodeAgent:
             return None
 
     def get_tools(self) -> list[BaseTool]:
+        if self.use_codegen_sdk:
+            # Codegen SDK doesn't expose tools directly
+            return []
         return list(self.agent.get_graph().nodes["tools"].data.tools_by_name.values())
 
     def get_state(self) -> dict:
+        if self.use_codegen_sdk:
+            # Codegen SDK doesn't have state management like langchain
+            return {}
         return self.agent.get_state(self.config)
 
     def get_tags_metadata(self) -> tuple[list[str], dict]:
@@ -220,3 +259,4 @@ class CodeAgent:
             tags.append(f"difficulty_{self.difficulty}")
 
         return tags, metadata
+
