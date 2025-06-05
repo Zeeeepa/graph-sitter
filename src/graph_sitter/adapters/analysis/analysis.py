@@ -2,8 +2,15 @@
 Comprehensive Code Analysis Module for Graph-sitter
 
 This module provides advanced code analysis capabilities following the patterns
-from https://graph-sitter.com/tutorials/at-a-glance with enhanced issue detection
-and comprehensive reporting.
+from https://graph-sitter.com/tutorials/at-a-glance with enhanced issue detection,
+visualization, and interactive analysis features.
+
+Features:
+- Tree-sitter query pattern analysis
+- Interactive syntax tree visualization
+- Advanced code structure analysis
+- Pattern-based code search
+- Visualization export (JSON, DOT, HTML)
 
 Usage:
     from graph_sitter import Codebase
@@ -15,25 +22,34 @@ Usage:
     # Analyze remote repository  
     codebase = Codebase.from_repo("fastapi/fastapi")
     result = codebase.Analysis()
+    
+    # Advanced analysis with visualization
+    result = codebase.Analysis(enable_visualization=True, export_format="html")
 """
 
 import ast
 import os
 import re
 import sys
+import json
+import html
 from collections import defaultdict, Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional, Any, Union
-import json
+import tempfile
+import webbrowser
 
 try:
-    from tree_sitter import Language, Parser, Node
+    from tree_sitter import Language, Parser, Node, Query
+    TREE_SITTER_AVAILABLE = True
 except ImportError:
     # Fallback for environments without tree-sitter
     Language = type(None)  # type: ignore
     Parser = type(None)    # type: ignore
     Node = type(None)      # type: ignore
+    Query = type(None)     # type: ignore
+    TREE_SITTER_AVAILABLE = False
 
 
 @dataclass
@@ -241,70 +257,634 @@ class AnalysisResult:
         }
 
 
+@dataclass
+class TreeVisualization:
+    """Tree visualization data structure."""
+    nodes: List[Dict[str, Any]] = field(default_factory=list)
+    edges: List[Dict[str, Any]] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class QueryResult:
+    """Result from tree-sitter query pattern matching."""
+    pattern: str
+    matches: List[Dict[str, Any]] = field(default_factory=list)
+    captures: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)
+
+
+@dataclass
+class VisualizationConfig:
+    """Configuration for visualization features."""
+    enable_syntax_tree: bool = False
+    enable_call_graph: bool = False
+    enable_dependency_graph: bool = False
+    export_format: str = "json"  # json, dot, html, svg
+    interactive: bool = False
+    max_depth: int = 10
+    highlight_patterns: List[str] = field(default_factory=list)
+
+
+# Tree-sitter Query Patterns for Advanced Analysis
+ANALYSIS_QUERIES = {
+    "python": {
+        "functions": """
+        (function_definition
+          name: (identifier) @function.name
+          parameters: (parameters) @function.params
+          body: (block) @function.body) @function.def
+        """,
+        "classes": """
+        (class_definition
+          name: (identifier) @class.name
+          superclasses: (argument_list)? @class.bases
+          body: (block) @class.body) @class.def
+        """,
+        "imports": """
+        (import_statement
+          name: (dotted_name) @import.module) @import.stmt
+        (import_from_statement
+          module_name: (dotted_name) @import.from_module
+          name: (dotted_name) @import.name) @import.from_stmt
+        """,
+        "function_calls": """
+        (call
+          function: (identifier) @call.function
+          arguments: (argument_list) @call.args) @call.expr
+        """,
+        "complexity_patterns": """
+        (if_statement) @complexity.if
+        (while_statement) @complexity.while
+        (for_statement) @complexity.for
+        (try_statement) @complexity.try
+        (with_statement) @complexity.with
+        """,
+        "security_patterns": """
+        (call
+          function: (attribute
+            object: (identifier) @security.object
+            attribute: (identifier) @security.method)
+          arguments: (argument_list) @security.args) @security.call
+        (#match? @security.method "^(eval|exec|compile|__import__)$")
+        """,
+        "dead_code_patterns": """
+        (function_definition
+          name: (identifier) @dead.function.name) @dead.function
+        (class_definition
+          name: (identifier) @dead.class.name) @dead.class
+        """
+    },
+    "javascript": {
+        "functions": """
+        (function_declaration
+          name: (identifier) @function.name
+          parameters: (formal_parameters) @function.params
+          body: (statement_block) @function.body) @function.def
+        """,
+        "classes": """
+        (class_declaration
+          name: (identifier) @class.name
+          superclass: (class_heritage)? @class.extends
+          body: (class_body) @class.body) @class.def
+        """,
+        "imports": """
+        (import_statement
+          source: (string) @import.source) @import.stmt
+        """,
+        "complexity_patterns": """
+        (if_statement) @complexity.if
+        (while_statement) @complexity.while
+        (for_statement) @complexity.for
+        (try_statement) @complexity.try
+        """
+    }
+}
+
 class CodeAnalyzer:
     """Comprehensive code analyzer using AST and pattern matching."""
     
-    def __init__(self, repo_path: Union[str, Path]):
-        self.repo_path = Path(repo_path)
-        self.result = AnalysisResult()
-        self.file_contents: Dict[str, str] = {}
-        self.function_calls: Dict[str, Set[str]] = defaultdict(set)
+    def __init__(self, enable_tree_sitter: bool = True, visualization_config: Optional[VisualizationConfig] = None):
+        self.issues: List[CodeIssue] = []
+        self.metrics: Dict[str, Any] = {}
+        self.symbol_usage: Dict[str, int] = defaultdict(int)
         self.function_definitions: Dict[str, Tuple[str, int, int]] = {}
         self.class_definitions: Dict[str, Tuple[str, int, int]] = {}
         self.import_graph: Dict[str, Set[str]] = defaultdict(set)
+        self.query_results: Dict[str, QueryResult] = {}
+        self.tree_visualizations: Dict[str, TreeVisualization] = {}
+        self.visualization_config = visualization_config or VisualizationConfig()
         
-    def analyze(self) -> AnalysisResult:
+        # Tree-sitter setup
+        self.enable_tree_sitter = enable_tree_sitter and TREE_SITTER_AVAILABLE
+        self.tree_sitter_parser: Optional[Parser] = None
+        self.tree_sitter_language: Optional[Language] = None
+        self.tree_sitter_queries: Dict[str, Query] = {}
+        
+        if self.enable_tree_sitter:
+            self._setup_tree_sitter()
+    
+    def _setup_tree_sitter(self):
+        """Initialize tree-sitter parser and queries."""
+        try:
+            # Try to load Python language (most common)
+            import tree_sitter_python as tspython
+            self.tree_sitter_language = Language(tspython.language())
+            self.tree_sitter_parser = Parser(self.tree_sitter_language)
+            
+            # Load query patterns
+            for pattern_name, pattern_query in ANALYSIS_QUERIES.get("python", {}).items():
+                try:
+                    self.tree_sitter_queries[pattern_name] = self.tree_sitter_language.query(pattern_query)
+                except Exception as e:
+                    print(f"⚠️ Failed to load query pattern '{pattern_name}': {e}")
+                    
+        except ImportError:
+            print("⚠️ tree-sitter-python not available, falling back to AST analysis")
+            self.enable_tree_sitter = False
+    
+    def analyze_with_tree_sitter(self, file_path: str, content: str) -> Dict[str, Any]:
+        """Analyze file using tree-sitter queries."""
+        if not self.enable_tree_sitter or not self.tree_sitter_parser:
+            return {}
+            
+        try:
+            # Parse the content
+            tree = self.tree_sitter_parser.parse(content.encode('utf-8'))
+            root_node = tree.root_node
+            
+            results = {}
+            
+            # Run all query patterns
+            for pattern_name, query in self.tree_sitter_queries.items():
+                try:
+                    captures = query.captures(root_node)
+                    query_result = QueryResult(pattern=pattern_name)
+                    
+                    for node, capture_name in captures:
+                        capture_data = {
+                            'name': capture_name,
+                            'text': node.text.decode('utf-8') if node.text else '',
+                            'start_point': node.start_point,
+                            'end_point': node.end_point,
+                            'start_byte': node.start_byte,
+                            'end_byte': node.end_byte,
+                            'type': node.type
+                        }
+                        
+                        if capture_name not in query_result.captures:
+                            query_result.captures[capture_name] = []
+                        query_result.captures[capture_name].append(capture_data)
+                        query_result.matches.append(capture_data)
+                    
+                    results[pattern_name] = query_result
+                    self.query_results[f"{file_path}:{pattern_name}"] = query_result
+                    
+                except Exception as e:
+                    print(f"⚠️ Query pattern '{pattern_name}' failed: {e}")
+            
+            # Generate syntax tree visualization if enabled
+            if self.visualization_config.enable_syntax_tree:
+                tree_viz = self._generate_tree_visualization(root_node, file_path)
+                self.tree_visualizations[file_path] = tree_viz
+            
+            return results
+            
+        except Exception as e:
+            print(f"⚠️ Tree-sitter analysis failed for {file_path}: {e}")
+            return {}
+    
+    def _generate_tree_visualization(self, node: Node, file_path: str) -> TreeVisualization:
+        """Generate tree visualization data from syntax tree."""
+        viz = TreeVisualization()
+        viz.metadata = {
+            'file_path': file_path,
+            'language': 'python',  # TODO: detect language
+            'total_nodes': 0
+        }
+        
+        def traverse_node(current_node: Node, parent_id: Optional[str] = None, depth: int = 0):
+            if depth > self.visualization_config.max_depth:
+                return
+                
+            node_id = f"node_{len(viz.nodes)}"
+            viz.metadata['total_nodes'] += 1
+            
+            # Create node data
+            node_data = {
+                'id': node_id,
+                'type': current_node.type,
+                'text': current_node.text.decode('utf-8')[:100] if current_node.text else '',
+                'start_point': current_node.start_point,
+                'end_point': current_node.end_point,
+                'depth': depth,
+                'child_count': current_node.child_count,
+                'is_named': current_node.is_named
+            }
+            viz.nodes.append(node_data)
+            
+            # Create edge to parent
+            if parent_id:
+                edge_data = {
+                    'source': parent_id,
+                    'target': node_id,
+                    'type': 'child'
+                }
+                viz.edges.append(edge_data)
+            
+            # Traverse children
+            for child in current_node.children:
+                traverse_node(child, node_id, depth + 1)
+        
+        traverse_node(node)
+        return viz
+    
+    def export_visualization(self, output_path: str, format_type: str = "html"):
+        """Export visualization data in specified format."""
+        if format_type == "json":
+            self._export_json(output_path)
+        elif format_type == "html":
+            self._export_html(output_path)
+        elif format_type == "dot":
+            self._export_dot(output_path)
+        else:
+            raise ValueError(f"Unsupported export format: {format_type}")
+    
+    def _export_json(self, output_path: str):
+        """Export visualization data as JSON."""
+        export_data = {
+            'query_results': {k: {
+                'pattern': v.pattern,
+                'matches': v.matches,
+                'captures': v.captures
+            } for k, v in self.query_results.items()},
+            'tree_visualizations': {k: {
+                'nodes': v.nodes,
+                'edges': v.edges,
+                'metadata': v.metadata
+            } for k, v in self.tree_visualizations.items()},
+            'analysis_metadata': {
+                'total_files': len(self.tree_visualizations),
+                'total_queries': len(self.query_results),
+                'export_timestamp': str(os.path.getmtime(__file__))
+            }
+        }
+        
+        with open(output_path, 'w') as f:
+            json.dump(export_data, f, indent=2)
+    
+    def _export_html(self, output_path: str):
+        """Export interactive HTML visualization."""
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graph-sitter Analysis Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; }}
+        .node {{ fill: #69b3a2; stroke: #333; stroke-width: 2px; }}
+        .link {{ stroke: #999; stroke-opacity: 0.6; }}
+        .tooltip {{ position: absolute; padding: 10px; background: rgba(0,0,0,0.8); color: white; border-radius: 5px; pointer-events: none; }}
+        .query-section {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
+        .file-section {{ margin: 10px 0; padding: 10px; background: #f9f9f9; border-radius: 3px; }}
+    </style>
+</head>
+<body>
+    <h1>🔍 Graph-sitter Analysis Results</h1>
+    
+    <div id="summary">
+        <h2>📊 Analysis Summary</h2>
+        <p><strong>Total Files Analyzed:</strong> {len(self.tree_visualizations)}</p>
+        <p><strong>Total Query Patterns:</strong> {len(set(qr.pattern for qr in self.query_results.values()))}</p>
+        <p><strong>Total Matches:</strong> {sum(len(qr.matches) for qr in self.query_results.values())}</p>
+    </div>
+    
+    <div id="query-results">
+        <h2>🔍 Query Pattern Results</h2>
+        {self._generate_query_results_html()}
+    </div>
+    
+    <div id="visualization">
+        <h2>🌳 Syntax Tree Visualization</h2>
+        <svg id="tree-svg" width="800" height="600"></svg>
+    </div>
+    
+    <script>
+        // Visualization data
+        const queryData = {json.dumps({k: {'pattern': v.pattern, 'matches': v.matches, 'captures': v.captures} for k, v in self.query_results.items()})};
+        const treeData = {json.dumps({k: {'nodes': v.nodes, 'edges': v.edges, 'metadata': v.metadata} for k, v in self.tree_visualizations.items()})};
+        
+        // Simple tree visualization
+        if (Object.keys(treeData).length > 0) {{
+            const firstFile = Object.keys(treeData)[0];
+            const nodes = treeData[firstFile].nodes.slice(0, 50); // Limit for performance
+            const links = treeData[firstFile].edges.slice(0, 50);
+            
+            const svg = d3.select("#tree-svg");
+            const width = 800, height = 600;
+            
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id))
+                .force("charge", d3.forceManyBody().strength(-300))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+            
+            const link = svg.append("g")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("class", "link");
+            
+            const node = svg.append("g")
+                .selectAll("circle")
+                .data(nodes)
+                .enter().append("circle")
+                .attr("class", "node")
+                .attr("r", 5)
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+            
+            node.append("title")
+                .text(d => `${{d.type}}: ${{d.text.substring(0, 50)}}`);
+            
+            simulation.on("tick", () => {{
+                link.attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+                
+                node.attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+            }});
+            
+            function dragstarted(event, d) {{
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }}
+            
+            function dragged(event, d) {{
+                d.fx = event.x;
+                d.fy = event.y;
+            }}
+            
+            function dragended(event, d) {{
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }}
+        }}
+    </script>
+</body>
+</html>
+        """
+        
+        with open(output_path, 'w') as f:
+            f.write(html_content)
+    
+    def _generate_query_results_html(self) -> str:
+        """Generate HTML for query results."""
+        html_parts = []
+        
+        # Group results by pattern
+        pattern_groups = defaultdict(list)
+        for key, result in self.query_results.items():
+            pattern_groups[result.pattern].append((key, result))
+        
+        for pattern, results in pattern_groups.items():
+            html_parts.append(f'<div class="query-section">')
+            html_parts.append(f'<h3>🔍 Pattern: {html.escape(pattern)}</h3>')
+            
+            for key, result in results:
+                file_path = key.split(':')[0]
+                html_parts.append(f'<div class="file-section">')
+                html_parts.append(f'<h4>📁 {html.escape(file_path)}</h4>')
+                html_parts.append(f'<p><strong>Matches:</strong> {len(result.matches)}</p>')
+                
+                if result.captures:
+                    html_parts.append('<ul>')
+                    for capture_name, captures in result.captures.items():
+                        html_parts.append(f'<li><strong>{html.escape(capture_name)}:</strong> {len(captures)} matches</li>')
+                    html_parts.append('</ul>')
+                
+                html_parts.append('</div>')
+            
+            html_parts.append('</div>')
+        
+        return '\n'.join(html_parts)
+    
+    def _export_dot(self, output_path: str):
+        """Export visualization as DOT format for Graphviz."""
+        dot_content = ["digraph G {"]
+        dot_content.append("  rankdir=TB;")
+        dot_content.append("  node [shape=box, style=rounded];")
+        
+        for file_path, viz in self.tree_visualizations.items():
+            # Add file as subgraph
+            safe_name = file_path.replace('/', '_').replace('.', '_')
+            dot_content.append(f'  subgraph cluster_{safe_name} {{')
+            dot_content.append(f'    label="{file_path}";')
+            
+            # Add nodes
+            for node in viz.nodes[:20]:  # Limit for readability
+                node_label = f"{node['type']}\\n{node['text'][:20]}"
+                dot_content.append(f'    {node["id"]} [label="{node_label}"];')
+            
+            # Add edges
+            for edge in viz.edges[:20]:
+                dot_content.append(f'    {edge["source"]} -> {edge["target"]};')
+            
+            dot_content.append("  }")
+        
+        dot_content.append("}")
+        
+        with open(output_path, 'w') as f:
+            f.write('\n'.join(dot_content))
+    
+    def analyze(self, repo_path: Union[str, Path]) -> AnalysisResult:
         """Perform comprehensive code analysis."""
         print("🔍 Starting comprehensive code analysis...")
         
-        # Discover and analyze files
-        python_files = self._discover_python_files()
-        self.result.total_files = len(python_files)
+        repo_path = Path(repo_path)
+        result = AnalysisResult()
+        file_contents: Dict[str, str] = {}
+        function_calls: Dict[str, Set[str]] = defaultdict(set)
         
-        print(f"📁 Found {len(python_files)} Python files to analyze")
+        # Collect all Python files
+        python_files = list(repo_path.rglob("*.py"))
+        if not python_files:
+            print("⚠️ No Python files found in the repository")
+            return result
+        
+        print(f"📁 Found {len(python_files)} Python files")
         
         # Analyze each file
         for file_path in python_files:
-            self._analyze_file(file_path)
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    file_contents[str(file_path)] = content
+                
+                # Enhanced analysis with tree-sitter
+                tree_sitter_results = self.analyze_with_tree_sitter(str(file_path), content)
+                
+                # Traditional AST analysis (fallback and complement)
+                self._analyze_with_ast(file_path, content, result, function_calls)
+                
+                # Enhanced analysis with tree-sitter results
+                if tree_sitter_results:
+                    self._analyze_with_graph_sitter(file_path, content, result, tree_sitter_results)
+                
+            except Exception as e:
+                issue = CodeIssue(
+                    type="parse_error",
+                    severity="critical",
+                    message=f"Failed to parse file: {e}",
+                    file_path=str(file_path),
+                    line_start=1,
+                    line_end=1,
+                    suggestion="Check file encoding and syntax"
+                )
+                result.issues.append(issue)
+                print(f"⚠️ Error analyzing {file_path}: {e}")
         
-        # Perform cross-file analysis
-        self._analyze_dependencies()
-        self._detect_dead_code()
-        self._calculate_quality_metrics()
-        self._detect_code_issues()
+        # Detect dead code using symbol usage analysis
+        self._detect_dead_code(result, function_calls, file_contents)
         
-        # Enhanced analysis
-        self._analyze_files_with_issues()
-        self._analyze_inheritance_hierarchy()
-        self._identify_top_level_symbols()
+        # Calculate summary metrics
+        result.total_files = len(python_files)
+        result.total_functions = len([issue for issue in result.issues if issue.type == "function_definition"])
+        result.total_classes = len([issue for issue in result.issues if issue.type == "class_definition"])
         
-        print("✅ Analysis complete!")
-        return self.result
+        # Enhanced metrics from tree-sitter analysis
+        if self.query_results:
+            self._calculate_enhanced_metrics(result)
+        
+        print(f"✅ Analysis complete: {result.total_files} files, {len(result.issues)} issues found")
+        return result
     
-    def _discover_python_files(self) -> List[Path]:
-        """Discover all Python files in the repository."""
-        python_files = []
+    def _analyze_with_graph_sitter(self, file_path: Path, content: str, result: AnalysisResult, tree_sitter_results: Dict[str, Any]):
+        """Enhanced analysis using tree-sitter query results."""
         
-        # Common directories to skip
-        skip_dirs = {
-            '.git', '__pycache__', '.pytest_cache', 'node_modules',
-            '.venv', 'venv', 'env', '.env', 'build', 'dist',
-            '.mypy_cache', '.coverage', 'htmlcov'
-        }
+        # Process function analysis
+        if "functions" in tree_sitter_results:
+            functions_result = tree_sitter_results["functions"]
+            for match in functions_result.matches:
+                if match['name'] == 'function.name':
+                    func_name = match['text']
+                    start_line = match['start_point'][0] + 1
+                    end_line = match['end_point'][0] + 1
+                    
+                    # Store function definition
+                    self.function_definitions[func_name] = (str(file_path), start_line, end_line)
+                    
+                    # Add as info issue for tracking
+                    issue = CodeIssue(
+                        type="function_definition",
+                        severity="info",
+                        message=f"Function '{func_name}' defined",
+                        file_path=str(file_path),
+                        line_start=start_line,
+                        line_end=end_line
+                    )
+                    result.issues.append(issue)
         
-        for root, dirs, files in os.walk(self.repo_path):
-            # Skip unwanted directories
-            dirs[:] = [d for d in dirs if d not in skip_dirs]
+        # Process class analysis
+        if "classes" in tree_sitter_results:
+            classes_result = tree_sitter_results["classes"]
+            for match in classes_result.matches:
+                if match['name'] == 'class.name':
+                    class_name = match['text']
+                    start_line = match['start_point'][0] + 1
+                    end_line = match['end_point'][0] + 1
+                    
+                    # Store class definition
+                    self.class_definitions[class_name] = (str(file_path), start_line, end_line)
+                    
+                    # Add as info issue for tracking
+                    issue = CodeIssue(
+                        type="class_definition",
+                        severity="info",
+                        message=f"Class '{class_name}' defined",
+                        file_path=str(file_path),
+                        line_start=start_line,
+                        line_end=end_line
+                    )
+                    result.issues.append(issue)
+        
+        # Process complexity patterns
+        if "complexity_patterns" in tree_sitter_results:
+            complexity_result = tree_sitter_results["complexity_patterns"]
+            complexity_count = len(complexity_result.matches)
             
-            for file in files:
-                if file.endswith('.py'):
-                    file_path = Path(root) / file
-                    python_files.append(file_path)
+            if complexity_count > 10:  # High complexity threshold
+                issue = CodeIssue(
+                    type="high_complexity",
+                    severity="major",
+                    message=f"High complexity detected: {complexity_count} control flow statements",
+                    file_path=str(file_path),
+                    line_start=1,
+                    line_end=len(content.split('\n')),
+                    suggestion="Consider breaking down complex functions"
+                )
+                result.issues.append(issue)
         
-        return python_files
+        # Process security patterns
+        if "security_patterns" in tree_sitter_results:
+            security_result = tree_sitter_results["security_patterns"]
+            for match in security_result.matches:
+                if match['name'] == 'security.method':
+                    method_name = match['text']
+                    start_line = match['start_point'][0] + 1
+                    
+                    issue = CodeIssue(
+                        type="security_risk",
+                        severity="critical",
+                        message=f"Potentially dangerous function call: {method_name}",
+                        file_path=str(file_path),
+                        line_start=start_line,
+                        line_end=start_line,
+                        suggestion=f"Review usage of {method_name} for security implications"
+                    )
+                    result.issues.append(issue)
+        
+        # Process function calls for usage tracking
+        if "function_calls" in tree_sitter_results:
+            calls_result = tree_sitter_results["function_calls"]
+            for match in calls_result.matches:
+                if match['name'] == 'call.function':
+                    func_name = match['text']
+                    self.symbol_usage[func_name] += 1
     
-    def _analyze_file(self, file_path: Path) -> None:
-        """Analyze a single Python file."""
+    def _calculate_enhanced_metrics(self, result: AnalysisResult):
+        """Calculate enhanced metrics from tree-sitter analysis."""
+        
+        # Query pattern statistics
+        total_patterns = len(set(qr.pattern for qr in self.query_results.values()))
+        total_matches = sum(len(qr.matches) for qr in self.query_results.values())
+        
+        # Function and class counts from tree-sitter
+        function_count = len(self.function_definitions)
+        class_count = len(self.class_definitions)
+        
+        # Update result with enhanced metrics
+        result.total_functions = max(result.total_functions, function_count)
+        result.total_classes = max(result.total_classes, class_count)
+        
+        # Add enhanced metrics as info
+        enhanced_info = CodeIssue(
+            type="enhanced_metrics",
+            severity="info",
+            message=f"Enhanced analysis: {total_patterns} patterns, {total_matches} matches, {len(self.tree_visualizations)} visualizations",
+            file_path="<analysis_summary>",
+            line_start=1,
+            line_end=1
+        )
+        result.issues.append(enhanced_info)
+    
+    def _analyze_with_ast(self, file_path: Path, content: str, result: AnalysisResult, function_calls: Dict[str, Set[str]]):
+        """Traditional AST analysis."""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -357,45 +937,7 @@ class CodeAnalyzer:
                 rule_id="F999"
             ))
     
-    def _analyze_dependencies(self) -> None:
-        """Analyze dependencies between modules."""
-        # Build dependency graph
-        for file_path, imports in self.import_graph.items():
-            self.result.dependencies[file_path] = list(imports)
-        
-        # Detect circular dependencies
-        self._detect_circular_dependencies()
-    
-    def _detect_circular_dependencies(self) -> None:
-        """Detect circular dependencies using DFS."""
-        visited = set()
-        rec_stack = set()
-        
-        def dfs(node: str, path: List[str]) -> None:
-            if node in rec_stack:
-                # Found a cycle
-                cycle_start = path.index(node)
-                cycle = path[cycle_start:] + [node]
-                if cycle not in self.result.circular_dependencies:
-                    self.result.circular_dependencies.append(cycle)
-                return
-            
-            if node in visited:
-                return
-            
-            visited.add(node)
-            rec_stack.add(node)
-            
-            for neighbor in self.import_graph.get(node, []):
-                dfs(neighbor, path + [node])
-            
-            rec_stack.remove(node)
-        
-        for node in self.import_graph:
-            if node not in visited:
-                dfs(node, [])
-    
-    def _detect_dead_code(self) -> None:
+    def _detect_dead_code(self, result: AnalysisResult, function_calls: Dict[str, Set[str]], file_contents: Dict[str, str]):
         """Detect potentially dead code."""
         # Find unused functions
         defined_functions = set(self.function_definitions.keys())
@@ -415,7 +957,7 @@ class CodeAnalyzer:
                 func_name.startswith('__') and func_name.endswith('__')):
                 continue
             
-            self.result.dead_code_items.append(DeadCodeItem(
+            result.dead_code_items.append(DeadCodeItem(
                 type="function",
                 name=func_name,
                 file_path=file_path,
