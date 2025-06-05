@@ -4,7 +4,8 @@ import logging
 import math
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.codebase import Codebase
@@ -92,6 +93,96 @@ class CodebaseMetrics:
     dead_code_percentage: float
     technical_debt_score: float
     health_score: float
+    # Enhanced database-specific fields
+    complexity_score: Optional[float] = None
+    maintainability_index: Optional[float] = None
+    technical_debt_ratio: Optional[float] = None
+    test_coverage: Optional[float] = None
+    languages: Optional[Dict[str, int]] = None
+    created_at: Optional[datetime] = None
+
+
+@dataclass
+class EnhancedCodebaseMetrics:
+    """Enhanced codebase metrics with database integration support."""
+    # Core metrics
+    total_files: int
+    total_functions: int
+    total_classes: int
+    total_lines: int
+    complexity_score: float
+    maintainability_index: float
+    technical_debt_ratio: float
+    test_coverage: float
+    languages: Dict[str, int]
+    
+    # Additional analysis metrics
+    total_symbols: Optional[int] = None
+    total_imports: Optional[int] = None
+    average_complexity: Optional[float] = None
+    average_maintainability: Optional[float] = None
+    documentation_coverage: Optional[float] = None
+    test_coverage_estimate: Optional[float] = None
+    dead_code_percentage: Optional[float] = None
+    technical_debt_score: Optional[float] = None
+    health_score: Optional[float] = None
+    created_at: Optional[datetime] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert metrics to dictionary format for database storage."""
+        return {
+            'total_files': self.total_files,
+            'total_functions': self.total_functions,
+            'total_classes': self.total_classes,
+            'total_lines': self.total_lines,
+            'complexity_score': self.complexity_score,
+            'maintainability_index': self.maintainability_index,
+            'technical_debt_ratio': self.technical_debt_ratio,
+            'test_coverage': self.test_coverage,
+            'languages': self.languages,
+            'total_symbols': self.total_symbols,
+            'total_imports': self.total_imports,
+            'average_complexity': self.average_complexity,
+            'average_maintainability': self.average_maintainability,
+            'documentation_coverage': self.documentation_coverage,
+            'test_coverage_estimate': self.test_coverage_estimate,
+            'dead_code_percentage': self.dead_code_percentage,
+            'technical_debt_score': self.technical_debt_score,
+            'health_score': self.health_score,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'EnhancedCodebaseMetrics':
+        """Create metrics from dictionary format (e.g., from database)."""
+        created_at = None
+        if data.get('created_at'):
+            if isinstance(data['created_at'], str):
+                created_at = datetime.fromisoformat(data['created_at'])
+            else:
+                created_at = data['created_at']
+        
+        return cls(
+            total_files=data['total_files'],
+            total_functions=data['total_functions'],
+            total_classes=data['total_classes'],
+            total_lines=data['total_lines'],
+            complexity_score=data['complexity_score'],
+            maintainability_index=data['maintainability_index'],
+            technical_debt_ratio=data['technical_debt_ratio'],
+            test_coverage=data['test_coverage'],
+            languages=data.get('languages', {}),
+            total_symbols=data.get('total_symbols'),
+            total_imports=data.get('total_imports'),
+            average_complexity=data.get('average_complexity'),
+            average_maintainability=data.get('average_maintainability'),
+            documentation_coverage=data.get('documentation_coverage'),
+            test_coverage_estimate=data.get('test_coverage_estimate'),
+            dead_code_percentage=data.get('dead_code_percentage'),
+            technical_debt_score=data.get('technical_debt_score'),
+            health_score=data.get('health_score'),
+            created_at=created_at
+        )
 
 
 class MetricsCalculator:
