@@ -86,17 +86,16 @@ class CustomEventHandlersAPI(CodebaseEventsApp):
             logger.info("> Checking out commit")
             codebase.checkout(commit=event.pull_request.head.sha)
 
-            logger.info("> Running PR Lints")
             # LINT CODEMOD
             lint_for_dev_import_violations(codebase, event)
 
-            return {"message": "PR event handled", "num_files": len(codebase.files), "num_functions": len(codebase.functions)}
+            return {"message": "PR event handled", "num_files": len(codebase.files()), "num_functions": len(codebase.functions())}
 
         @cg.linear.event("Issue")
         def handle_issue(event: LinearEvent):
             logger.info(f"Issue created: {event}")
             codebase = cg.get_codebase()
-            return {"message": "Linear Issue event", "num_files": len(codebase.files), "num_functions": len(codebase.functions)}
+            return {"message": "Linear Issue event", "num_files": len(codebase.files()), "num_functions": len(codebase.functions())}
 
 
 @codegen_events_app.cls(image=base_image, secrets=[modal.Secret.from_dotenv(".env")])
