@@ -63,13 +63,13 @@ class GitHub(EventHandlerManagerProtocol):
                 if event_type and issubclass(event_type, BaseModel):
                     try:
                         parsed_event = event_type.model_validate(raw_event)
-                        return func(parsed_event)  # type: ignore
+                        return func(parsed_event)
                     except Exception as e:
                         logger.exception(f"Error parsing event: {e}")
                         raise
                 else:
                     # Pass through raw dict if no type validation needed
-                    return func(raw_event)  # type: ignore
+                    return func(raw_event)
 
             self.registered_handlers[event_name] = new_func
             return new_func

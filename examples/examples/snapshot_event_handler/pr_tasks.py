@@ -10,12 +10,16 @@ logger = logging.getLogger(__name__)
 def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeledEvent):
     # Next.js codemod to detect imports of the react-dev-overlay module in production code
 
-    patch, commit_shas, modified_symbols = codebase.get_modified_symbols_in_pr(event.pull_request.number)
+    patch, commit_shas, modified_symbols, pr_url = codebase.get_modified_symbols_in_pr(event.pull_request.number)
     modified_files = set(commit_shas.keys())
     from graph_sitter.core.statements.if_block_statement import IfBlockStatement
 
     DIR_NAME = "packages/next/src/client/components/react-dev-overlay"
     directory = codebase.get_directory(DIR_NAME)
+    
+    if not directory:
+        logger.warning(f"Directory {DIR_NAME} not found in codebase")
+        return violations
 
     violations = []
 
@@ -35,7 +39,13 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
             return False
 
         condition = if_block.condition
+        if not condition:
+            return False
+            
         # Get the operator without any whitespace
+        if not hasattr(condition, 'operator') or not condition.operator:
+            return False
+            
         operator = condition.operator[-1].source
 
         # Check for non-production conditions
@@ -68,7 +78,7 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
         # Valid if the main if block checks for production
         return operator in true_operators and condition.source == f"process.env.NODE_ENV {operator} 'production'"
 
-    for file in directory.files(recursive=True):
+    for file in directory.files(extensions="*", recursive=True):
         for imp in file.inbound_imports:
             if imp.file.filepath not in modified_files:
                 # skip if the import is not in the pull request's modified files
