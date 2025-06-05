@@ -7,7 +7,7 @@ from github import Github
 from pydantic import BaseModel
 
 from contexten.extensions.events.interface import EventHandlerManagerProtocol
-from contexten.extensions.github.types.base import GitHubInstallation, GitHubWebhookPayload
+from contexten.extensions.Github.types.base import GitHubInstallation, GitHubWebhookPayload
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)

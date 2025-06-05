@@ -13,7 +13,7 @@ with all its comprehensive features including:
 import asyncio
 import os
 from datetime import datetime
-from contexten.extensions.linear import (
+from contexten.extensions.Linear import (
     LinearIntegrationAgent,
     get_linear_config,
     create_linear_integration_agent
@@ -236,7 +236,7 @@ async def workflow_automation_example():
                     print(f"     Current Step: {task_info['current_step']}")
             
             # Simulate creating a task from an issue
-            from contexten.extensions.linear.types import LinearIssue, LinearLabel
+            from contexten.extensions.Linear.types import LinearIssue, LinearLabel
             
             test_issue = LinearIssue(
                 id="test-issue-123",

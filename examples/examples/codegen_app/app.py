@@ -5,9 +5,9 @@ import logging
 
 import modal
 from contexten import CodeAgent, ContextenApp
-from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
-from contexten.extensions.linear.types import LinearEvent
-from contexten.extensions.slack.types import SlackEvent
+from contexten.extensions.Github.types.events.pull_request import PullRequestLabeledEvent
+from contexten.extensions.Linear.types import LinearEvent
+from contexten.extensions.Slack.types import SlackEvent
 from contexten.agents.tools.github.create_pr_comment import create_pr_comment
 
 # Set up logging

@@ -4,7 +4,7 @@ import os
 from slack_sdk import WebClient
 
 from contexten.extensions.events.interface import EventHandlerManagerProtocol
-from contexten.extensions.slack.types import SlackWebhookPayload
+from contexten.extensions.Slack.types import SlackWebhookPayload
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)

@@ -61,7 +61,7 @@ Make sure to configure your GitHub repository's webhook settings to point to you
 Next, we set up event handlers for PR label events:
 
 ```python
-from contexten.extensions.github.types.events.pull_request import (
+from contexten.extensions.Github.types.events.pull_request import (
     PullRequestLabeledEvent,
     PullRequestUnlabeledEvent
 )

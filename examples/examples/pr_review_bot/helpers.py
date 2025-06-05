@@ -1,12 +1,12 @@
 from github import Github
-from contexten.extensions.github.types.events.pull_request import PullRequestUnlabeledEvent, PullRequestLabeledEvent
+from contexten.extensions.Github.types.events.pull_request import PullRequestUnlabeledEvent, PullRequestLabeledEvent
 from logging import getLogger
 
 import os
 
 from graph_sitter import Codebase
 
-from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
+from contexten.extensions.Github.types.events.pull_request import PullRequestLabeledEvent
 from graph_sitter.configs.models.secrets import SecretsConfig
 from contexten import CodeAgent
 

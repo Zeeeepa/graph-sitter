@@ -119,7 +119,7 @@ LINEAR_HEALTH_CHECK_INTERVAL=300
 ### Configuration Loading
 
 ```python
-from contexten.extensions.linear import get_linear_config, LinearIntegrationAgent
+from contexten.extensions.Linear import get_linear_config, LinearIntegrationAgent
 
 # Load configuration from environment
 config = get_linear_config()
@@ -133,7 +133,7 @@ agent = LinearIntegrationAgent(config)
 ### Basic Setup
 
 ```python
-from contexten.extensions.linear import create_linear_integration_agent
+from contexten.extensions.Linear import create_linear_integration_agent
 
 # Create and initialize the comprehensive integration
 agent = await create_linear_integration_agent()
@@ -166,7 +166,7 @@ print(f"Active tasks: {metrics['status']['active_tasks']}")
 ### Manual Task Creation
 
 ```python
-from contexten.extensions.linear.types import LinearIssue
+from contexten.extensions.Linear.types import LinearIssue
 
 # Create issue object
 issue = LinearIssue(
@@ -297,7 +297,7 @@ Each task type has a customized prompt template optimized for that specific type
 - **Error Handling**: Secure error message handling without information leakage
 - **Input Validation**: Comprehensive input validation throughout
 
-## 🚨 Error Handling and Recovery
+## ��� Error Handling and Recovery
 
 ### Retry Mechanisms
 - **Webhook Processing**: Automatic retry for failed webhook events with exponential backoff
@@ -317,13 +317,13 @@ Each task type has a customized prompt template optimized for that specific type
 
 ```bash
 # Run comprehensive integration tests
-python -m pytest src/contexten/extensions/linear/tests/ -v
+python -m pytest src/contexten/extensions/Linear/tests/ -v
 
 # Run specific component tests
-python -m pytest src/contexten/extensions/linear/tests/test_enhanced_client.py -v
-python -m pytest src/contexten/extensions/linear/tests/test_webhook_processor.py -v
-python -m pytest src/contexten/extensions/linear/tests/test_assignment_detector.py -v
-python -m pytest src/contexten/extensions/linear/tests/test_workflow_automation.py -v
+python -m pytest src/contexten/extensions/Linear/tests/test_enhanced_client.py -v
+python -m pytest src/contexten/extensions/Linear/tests/test_webhook_processor.py -v
+python -m pytest src/contexten/extensions/Linear/tests/test_assignment_detector.py -v
+python -m pytest src/contexten/extensions/Linear/tests/test_workflow_automation.py -v
 ```
 
 ### Configuration Template
@@ -331,7 +331,7 @@ python -m pytest src/contexten/extensions/linear/tests/test_workflow_automation.
 Generate a complete configuration template:
 
 ```python
-from contexten.extensions.linear import create_config_template
+from contexten.extensions.Linear import create_config_template
 
 template = create_config_template()
 print(template)
@@ -343,7 +343,7 @@ Enable debug logging for detailed information:
 
 ```python
 import logging
-logging.getLogger("contexten.extensions.linear").setLevel(logging.DEBUG)
+logging.getLogger("contexten.extensions.Linear").setLevel(logging.DEBUG)
 ```
 
 ## 🤝 Backward Compatibility

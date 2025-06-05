@@ -4,9 +4,9 @@ from typing import Any, Callable, TypeVar, Optional
 from pydantic import BaseModel
 
 from contexten.extensions.events.interface import EventHandlerManagerProtocol
-from contexten.extensions.linear.types import LinearEvent
-from contexten.extensions.linear.config import get_linear_config
-from contexten.extensions.linear.integration_agent import LinearIntegrationAgent
+from contexten.extensions.Linear.types import LinearEvent
+from contexten.extensions.Linear.config import get_linear_config
+from contexten.extensions.Linear.integration_agent import LinearIntegrationAgent
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
