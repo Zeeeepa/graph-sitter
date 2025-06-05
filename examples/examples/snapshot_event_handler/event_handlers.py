@@ -1,8 +1,8 @@
 from contexten.agents.code_agent import CodeAgent
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.contexten_app import ContextenApp
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.slack.types import SlackEvent
-from contexten.extensions.events.modal.base import CodebaseEventsApp, EventRouterMixin
+from contexten.extensions.modal.base import CodebaseEventsApp, EventRouterMixin
 from contexten.extensions.github.types.pull_request import PullRequestLabeledEvent
 from pr_tasks import lint_for_dev_import_violations
 from typing import Literal
