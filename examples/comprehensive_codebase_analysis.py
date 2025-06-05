@@ -23,18 +23,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.adapters.unified_analyzer import (
     UnifiedCodebaseAnalyzer,
-    analyze_codebase_comprehensive,
-    quick_function_analysis
+    analyze_codebase_comprehensive
 )
-from graph_sitter.adapters.function_context import (
-    get_function_context,
-    get_enhanced_function_context,
+from graph_sitter.adapters.analysis.function_context import (
     analyze_codebase_functions,
-    create_training_example
+    get_enhanced_function_context,
+    FunctionContext
 )
-from graph_sitter.adapters.codebase_visualization import (
+from graph_sitter.adapters.visualizations.codebase_visualization import (
     create_comprehensive_visualization,
-    analyze_function_with_context
+    create_interactive_report
 )
 
 
@@ -199,7 +197,7 @@ def demonstrate_interactive_visualization(codebase: Codebase):
     print("🎨 Creating interactive visualizations...")
     
     # Create comprehensive visualization
-    interactive_report = create_comprehensive_visualization(
+    interactive_report = create_interactive_report(
         codebase, 
         output_dir="demo_visualizations"
     )
@@ -331,4 +329,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

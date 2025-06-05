@@ -23,7 +23,7 @@ repos:
       - id: biome-check
         language: node
         additional_dependencies: ["@biomejs/biome@1.9.4"]
-        exclude: (src/codemods/eval)|(tests/unit/skills/snapshots)|(tests/unit/sdk/output)|(tests/integration/verified_codemods)|(docs/samples)|(examples/examples/ai_impact_analysis)
+        exclude: (src/graph_sitter/adapters/analysis/codemods/eval)|(tests/unit/skills/snapshots)|(tests/unit/sdk/output)|(tests/integration/verified_codemods)|(docs/samples)|(examples/examples/ai_impact_analysis)
   - repo: https://github.com/MarcoGorelli/cython-lint
     rev: v0.16.6
     hooks:
@@ -43,7 +43,7 @@ repos:
         exclude_types: [mdx, pyi]
       - id: check-yaml
       - id: end-of-file-fixer
-        exclude: (src/codemods/eval)|(tests/unit/skills/snapshots)|(tests/unit/codegen/sdk/output)|(tests/integration/verified_codemods)|(docs/)
+        exclude: (src/graph_sitter/adapters/analysis/codemods/eval)|(tests/unit/skills/snapshots)|(tests/unit/codegen/sdk/output)|(tests/integration/verified_codemods)|(docs/)
       - id: check-merge-conflict
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
