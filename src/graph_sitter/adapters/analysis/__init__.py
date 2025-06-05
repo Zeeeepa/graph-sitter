@@ -9,8 +9,33 @@ This module contains all analysis-related functionality including:
 - Dead code detection
 - Function context analysis
 - Code modification tools (codemods)
+- Unified analysis framework with standardized interfaces
 """
 
+# Import new unified analysis framework
+from .base import (
+    BaseAnalyzer,
+    StructuralAnalyzer,
+    QualityAnalyzer,
+    SecurityAnalyzer,
+    PerformanceAnalyzer,
+    AnalysisType,
+    IssueSeverity,
+    AnalysisIssue,
+    AnalysisMetric,
+    AnalysisResult,
+)
+
+from .registry import (
+    AnalysisRegistry,
+    AnalyzerInfo,
+    get_registry,
+    register_analyzer,
+    list_analyzers,
+    run_analysis,
+)
+
+# Import existing analyzers
 from .enhanced_analysis import (
     EnhancedAnalyzer,
     analyze_codebase_enhanced,
@@ -61,6 +86,26 @@ from .function_context import (
 )
 
 __all__ = [
+    # Unified analysis framework
+    'BaseAnalyzer',
+    'StructuralAnalyzer',
+    'QualityAnalyzer',
+    'SecurityAnalyzer',
+    'PerformanceAnalyzer',
+    'AnalysisType',
+    'IssueSeverity',
+    'AnalysisIssue',
+    'AnalysisMetric',
+    'AnalysisResult',
+    
+    # Analysis registry
+    'AnalysisRegistry',
+    'AnalyzerInfo',
+    'get_registry',
+    'register_analyzer',
+    'list_analyzers',
+    'run_analysis',
+    
     # Enhanced analysis
     'EnhancedAnalyzer',
     'analyze_codebase_enhanced',
@@ -104,4 +149,3 @@ __all__ = [
     'analyze_codebase_functions',
     'create_training_example'
 ]
-
