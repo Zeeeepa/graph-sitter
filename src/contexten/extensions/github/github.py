@@ -69,7 +69,7 @@ class GitHub(EventHandlerManagerProtocol):
                         raise
                 else:
                     # Pass through raw dict if no type validation needed
-                    return func(raw_event)
+                    return func(raw_event)  # type: ignore[arg-type]
 
             self.registered_handlers[event_name] = new_func
             return new_func

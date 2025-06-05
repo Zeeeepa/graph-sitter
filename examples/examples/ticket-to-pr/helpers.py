@@ -2,6 +2,7 @@ from graph_sitter import Codebase
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from typing import List, Dict, Any, Optional
 from graph_sitter.configs.models.codebase import CodebaseConfig
+from graph_sitter.configs.models.secrets import SecretsConfig
 from data import LinearLabels, LinearIssueUpdateEvent
 import os
 import logging
@@ -83,7 +84,5 @@ def has_codegen_label(*args, **kwargs):
 
 
 def create_codebase(repo_name: str, language: ProgrammingLanguage):
-    config = CodebaseConfig()
-    config.secrets.github_token = os.environ["GITHUB_TOKEN"]
-
-    return Codebase.from_repo(repo_name, language=language, tmp_dir="/root", config=config)
+    secrets = SecretsConfig(github_token=os.environ["GITHUB_TOKEN"])
+    return Codebase.from_repo(repo_name, language=language, tmp_dir="/root", secrets=secrets)

@@ -2,8 +2,9 @@
 
 import asyncio
 from contexten import ContextenApp
+from contexten import CodeAgent
 
-from graph_sitter import Codebase, CodeAgent
+from graph_sitter import Codebase
 from contexten.extensions.modal.linear_client import LinearClient
 from contexten.agents.tools.github.create_pr import create_pr
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
@@ -21,8 +22,7 @@ logger = logging.getLogger(__name__)
 
 image = modal.Image.debian_slim(python_version="3.13").apt_install("git").pip_install("fastapi[standard]", "codegen==v0.26.3")
 
-app = ContextenApp("linear-bot", image=image, modal_api_key="")
-
+app = ContextenApp("linear-bot")
 
 @app.cls(secrets=[modal.Secret.from_dotenv()], keep_warm=1)
 class LinearApp:
