@@ -18,7 +18,8 @@ from contexten.extensions.linear import (
     get_linear_config,
     create_linear_integration_agent
 )
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.extensions.Contexten.contexten_app import ContextenApp
+from contexten.extensions.Linear.types import LinearIssue, LinearLabel
 
 
 async def basic_usage_example():
@@ -236,8 +237,6 @@ async def workflow_automation_example():
                     print(f"     Current Step: {task_info['current_step']}")
             
             # Simulate creating a task from an issue
-            from contexten.extensions.linear.types import LinearIssue, LinearLabel
-            
             test_issue = LinearIssue(
                 id="test-issue-123",
                 title="Implement user authentication",
@@ -347,7 +346,7 @@ async def monitoring_and_health_example():
 
 async def configuration_example():
     """Example of configuration management"""
-    print("\n⚙️ Configuration Example")
+    print("\n⚙��� Configuration Example")
     print("=" * 50)
     
     try:

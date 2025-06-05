@@ -31,7 +31,7 @@ from contexten.agents.tools.search import search
 from contexten.agents.tools.search_files_by_name import search_files_by_name
 from contexten.agents.tools.semantic_edit import semantic_edit
 from contexten.agents.tools.semantic_search import semantic_search
-from contexten.extensions.linear.linear_client import LinearClient
+from contexten.extensions.Linear.linear_client import LinearClient
 from graph_sitter import Codebase
 
 from ..tools import (

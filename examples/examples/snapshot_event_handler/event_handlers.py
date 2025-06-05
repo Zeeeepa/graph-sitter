@@ -1,9 +1,9 @@
 from contexten.agents.code_agent import CodeAgent
-from contexten.extensions.events.contexten_app import ContextenApp
-from contexten.extensions.linear.types import LinearEvent
-from contexten.extensions.slack.types import SlackEvent
-from contexten.extensions.events.modal.base import CodebaseEventsApp, EventRouterMixin
-from contexten.extensions.github.types.pull_request import PullRequestLabeledEvent
+from contexten.extensions.Contexten.contexten_app import ContextenApp
+from contexten.extensions.Linear.types import LinearEvent
+from contexten.extensions.Slack.types import SlackEvent
+from contexten.extensions.Contexten.modal.base import CodebaseEventsApp, EventRouterMixin
+from contexten.extensions.Github.types.pull_request import PullRequestLabeledEvent
 from pr_tasks import lint_for_dev_import_violations
 from typing import Literal
 from dotenv import load_dotenv
@@ -11,6 +11,7 @@ from fastapi import FastAPI, Request
 from classy_fastapi import Routable, post
 import modal
 import logging
+import asyncio
 
 load_dotenv(".env")
 
