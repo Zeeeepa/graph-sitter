@@ -210,18 +210,22 @@ class MetricsCalculator:
     def estimate_test_coverage(self, symbol: Symbol) -> float:
         """Estimate test coverage for a symbol."""
         try:
-            symbol_name = symbol.name.lower()
+            # Safe handling of potentially None symbol name
+            symbol_name = symbol.name
+            if not symbol_name:
+                return 0.0
+            symbol_name = symbol_name.lower()
             
             # Look for test functions that might test this symbol
             test_functions = [
                 f for f in self.codebase.functions
-                if f.name.startswith('test_') and symbol_name in f.name.lower()
+                if f.name and f.name.startswith('test_') and symbol_name in f.name.lower()
             ]
             
             # Look for test classes
             test_classes = [
                 c for c in self.codebase.classes
-                if c.name.startswith('Test') and symbol_name in c.name.lower()
+                if c.name and c.name.startswith('Test') and symbol_name in c.name.lower()
             ]
             
             # Simple heuristic: if there are tests mentioning this symbol
@@ -238,8 +242,11 @@ class MetricsCalculator:
     
     def analyze_function_metrics(self, function: Function) -> FunctionMetrics:
         """Comprehensive function analysis."""
-        if function.name in self._function_metrics_cache:
-            return self._function_metrics_cache[function.name]
+        # Safe handling of potentially None function name
+        function_name = function.name or 'unknown_function'
+        
+        if function_name in self._function_metrics_cache:
+            return self._function_metrics_cache[function_name]
         
         try:
             source = getattr(function, 'source', '')
@@ -266,7 +273,7 @@ class MetricsCalculator:
             impact_score = len(call_sites) + len(usages) * 0.5
             
             metrics = FunctionMetrics(
-                name=function.name,
+                name=function_name,  # Use safe function name
                 filepath=getattr(function, 'filepath', 'unknown'),
                 line_count=line_count,
                 parameter_count=len(parameters),
@@ -286,17 +293,17 @@ class MetricsCalculator:
                 impact_score=impact_score
             )
             
-            self._function_metrics_cache[function.name] = metrics
+            self._function_metrics_cache[function_name] = metrics  # Use safe function name
             return metrics
             
         except Exception as e:
-            logger.error(f"Error analyzing function {function.name}: {e}")
+            logger.error(f"Error analyzing function {function_name}: {e}")
             return FunctionMetrics(
-                name=function.name,
+                name=function_name,  # Use safe function name
                 filepath=getattr(function, 'filepath', 'unknown'),
                 line_count=0, parameter_count=0, return_statement_count=0,
                 call_site_count=0, function_call_count=0, cyclomatic_complexity=1,
-                maintainability_index=50.0, documentation_coverage=0.0,
+                maintainability_index=0.0, documentation_coverage=0.0,
                 test_coverage_estimate=0.0, is_async=False, has_decorators=False,
                 has_docstring=False, has_type_annotations=False,
                 dependency_count=0, usage_count=0, impact_score=0.0
@@ -394,14 +401,24 @@ class MetricsCalculator:
             # Calculate coupling
             coupling_score = self._calculate_class_coupling(class_def)
             
+            # Calculate additional metrics
+            subclass_count = len(getattr(class_def, 'subclasses', []))
+            documentation_coverage = self.calculate_documentation_coverage(class_def)
+            test_coverage_estimate = self.estimate_test_coverage(class_def)
+            has_constructor = any(method.name == '__init__' for method in methods if hasattr(method, 'name') and method.name)
+            
             metrics = ClassMetrics(
                 name=class_name,
                 filepath=getattr(class_def, 'filepath', 'unknown'),
                 method_count=len(methods),
                 attribute_count=len(attributes),
                 inheritance_depth=inheritance_depth,
+                subclass_count=subclass_count,
                 cohesion_score=cohesion_score,
                 coupling_score=coupling_score,
+                documentation_coverage=documentation_coverage,
+                test_coverage_estimate=test_coverage_estimate,
+                has_constructor=has_constructor,
                 has_docstring=bool(getattr(class_def, 'docstring', None)),
                 abstract_method_count=len(abstract_methods),
                 public_method_count=len(public_methods),
@@ -418,7 +435,12 @@ class MetricsCalculator:
                 name=class_name,
                 filepath=getattr(class_def, 'filepath', 'unknown'),
                 method_count=0, attribute_count=0, inheritance_depth=0,
-                cohesion_score=0.0, coupling_score=0.0, has_docstring=False,
+                subclass_count=0,
+                cohesion_score=0.0, coupling_score=0.0, 
+                documentation_coverage=0.0,
+                test_coverage_estimate=0.0,
+                has_constructor=False,
+                has_docstring=False,
                 abstract_method_count=0, public_method_count=0,
                 private_method_count=0, magic_method_count=0
             )
