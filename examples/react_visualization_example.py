@@ -15,10 +15,11 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from graph_sitter import Codebase
-from graph_sitter.adapters.react_visualizations import (
-    create_react_visualizations,
+from graph_sitter.adapters.visualizations.react_visualizations import (
     ReactVisualizationGenerator,
-    ReactComponentGenerator
+    create_react_visualizations,
+    generate_function_blast_radius,
+    generate_issue_dashboard
 )
 
 def main():

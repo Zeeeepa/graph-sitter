@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from graph_sitter import Codebase
 from graph_sitter.adapters.unified_analyzer import UnifiedAnalyzer
-from graph_sitter.adapters.react_visualizations import create_react_visualizations
+from graph_sitter.adapters.visualizations.react_visualizations import create_react_visualizations
 from graph_sitter.adapters.codebase_db_adapter import CodebaseDBAdapter
 
 def main():

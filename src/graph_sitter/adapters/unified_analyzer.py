@@ -11,30 +11,14 @@ from typing import Any, Dict, List, Optional, Set
 from graph_sitter.core.codebase import Codebase
 
 # Import all analysis components
-from .enhanced_analysis import EnhancedCodebaseAnalyzer, AnalysisReport
-from .function_context import (
-    analyze_codebase_functions, 
-    get_enhanced_function_context,
-    FunctionContext,
-    TrainingData
-)
-from .codebase_visualization import (
-    CodebaseVisualizer,
-    InteractiveReport,
-    create_comprehensive_visualization,
-    create_interactive_report
-)
-from .metrics import MetricsCalculator
-from .dependency_analyzer import DependencyAnalyzer
-from .dead_code import DeadCodeDetector
-from .call_graph import CallGraphAnalyzer
-from .database import AnalysisDatabase
-from .codebase_db_adapter import CodebaseDbAdapter
-from .react_visualizations import (
-    create_react_visualizations,
-    ReactVisualizationGenerator,
-    ReactComponentGenerator
-)
+from .analysis.enhanced_analysis import EnhancedAnalyzer
+from .analysis.metrics import CodebaseMetrics, calculate_codebase_metrics
+from .analysis.dependency_analyzer import DependencyAnalyzer
+from .analysis.call_graph import CallGraphAnalyzer
+from .analysis.dead_code import DeadCodeAnalyzer
+from .analysis.function_context import FunctionContext, get_function_context
+from .visualizations.react_visualizations import create_react_visualizations
+from .visualizations.codebase_visualization import create_comprehensive_visualization
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +84,10 @@ class UnifiedCodebaseAnalyzer:
         self.output_dir.mkdir(exist_ok=True)
         
         # Initialize all analyzers
-        self.enhanced_analyzer = EnhancedCodebaseAnalyzer(codebase, self.codebase_id)
-        self.metrics_calculator = MetricsCalculator(codebase)
+        self.enhanced_analyzer = EnhancedAnalyzer(codebase, self.codebase_id)
+        self.metrics_calculator = CodebaseMetrics(codebase)
         self.dependency_analyzer = DependencyAnalyzer(codebase)
-        self.dead_code_detector = DeadCodeDetector(codebase)
+        self.dead_code_detector = DeadCodeAnalyzer(codebase)
         self.call_graph_analyzer = CallGraphAnalyzer(codebase)
         self.visualizer = CodebaseVisualizer(codebase, str(self.output_dir / "visualizations"))
         
@@ -213,7 +197,7 @@ class UnifiedCodebaseAnalyzer:
         
         for function in self.codebase.functions:
             try:
-                context = get_enhanced_function_context(function)
+                context = get_function_context(function)
                 function_contexts.append(context)
             except Exception as e:
                 logger.warning(f"Error analyzing function {function.name}: {e}")
@@ -222,13 +206,13 @@ class UnifiedCodebaseAnalyzer:
     
     def _generate_training_data(self) -> TrainingData:
         """Generate training data for ML applications."""
-        from .function_context import run
+        from .analysis.function_context import run
         return run(self.codebase)
     
     def _get_metrics_summary(self) -> Dict[str, Any]:
         """Get comprehensive metrics summary."""
         try:
-            return self.metrics_calculator.get_codebase_summary()
+            return calculate_codebase_metrics(self.codebase)
         except Exception as e:
             logger.warning(f"Error getting metrics summary: {e}")
             return {}
