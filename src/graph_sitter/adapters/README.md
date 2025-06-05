@@ -12,11 +12,11 @@ adapters/
 │   ├── dependency_analyzer.py # Dependency analysis
 │   ├── call_graph.py         # Call graph generation
 │   ├── dead_code.py          # Dead code detection
-│   ├── function_context.py   # Function context analysis
-│   └── codemods/             # Code modification tools
+│   └── function_context.py   # Function context analysis
 ├── visualizations/     # Visualization functionality
 │   ├── react_visualizations.py    # React-based visualizations
 │   └── codebase_visualization.py  # HTML report generation
+├── codemods/          # Code modification tools
 ├── unified_analyzer.py # Main orchestrator
 ├── database.py        # Database storage
 └── codebase_db_adapter.py # Enhanced database adapter

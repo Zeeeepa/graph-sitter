@@ -2,7 +2,7 @@
 
 This directory contains code modification tools (codemods) for automated refactoring.
 
-`{codemod_folder} = src/graph_sitter/adapters/analysis/codemods/{type}/{name}`
+`{codemod_folder} = src/graph_sitter/adapters/codemods/{type}/{name}`
 
 ## Repos
 

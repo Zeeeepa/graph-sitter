@@ -2,7 +2,7 @@
 Graph-sitter adapters for enhanced codebase analysis and visualization.
 
 This package provides comprehensive adapters for analyzing codebases using tree-sitter,
-with specialized modules for analysis and visualization functionality.
+with specialized modules for analysis, visualization, and code modification functionality.
 """
 
 # Analysis adapters
@@ -71,6 +71,11 @@ from .visualizations import (
     create_interactive_html_report,
     generate_visualization_data,
     create_visualization_components
+)
+
+# Code modification tools
+from .codemods import (
+    Codemod
 )
 
 # Core adapters (remaining in main directory)
