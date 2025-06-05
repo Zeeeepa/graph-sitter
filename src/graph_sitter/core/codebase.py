@@ -9,7 +9,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
-from typing import Generic, Literal, Unpack, overload
+from typing import Generic, Literal, Unpack, overload, Union, Optional
 
 import plotly.graph_objects as go
 import rich.repr
@@ -48,6 +48,7 @@ from graph_sitter.core.detached_symbols.code_block import CodeBlock
 from graph_sitter.core.detached_symbols.parameter import Parameter
 from graph_sitter.core.directory import Directory
 from graph_sitter.core.export import Export
+from graph_sitter.core.repository_analyzer import RepositoryAnalyzer
 from graph_sitter.core.external_module import ExternalModule
 from graph_sitter.core.file import File, SourceFile
 from graph_sitter.core.function import Function
@@ -1338,8 +1339,8 @@ class Codebase(
         config: CodebaseConfig | None = None,
         secrets: SecretsConfig | None = None,
         full_history: bool = False,
-    ) -> "Codebase":
-        """Fetches a codebase from GitHub and returns a Codebase instance.
+    ) -> Union["Codebase", "RepositoryAnalyzer"]:
+        """Fetches a codebase from GitHub and returns a Codebase instance or RepositoryAnalyzer.
 
         Args:
             repo_name (str): The name of the repository in format "owner/repo"
@@ -1351,8 +1352,26 @@ class Codebase(
             secrets (SecretsConfig): Configuration for the secrets. Defaults to empty values if None.
 
         Returns:
-            Codebase: A Codebase instance initialized with the cloned repository
+            Union[Codebase, RepositoryAnalyzer]: A Codebase instance or RepositoryAnalyzer for analysis
         """
+        # Check if this is an Analysis request (repo name contains 'Analysis' or ends with '.Analysis')
+        if 'Analysis' in repo_full_name or repo_full_name.endswith('.Analysis'):
+            # Clean the repo name by removing 'Analysis' suffix
+            clean_repo_name = repo_full_name.replace('.Analysis', '').replace('Analysis', '')
+            if clean_repo_name.endswith('/'):
+                clean_repo_name = clean_repo_name[:-1]
+            
+            # Return RepositoryAnalyzer for chained Analysis calls
+            return RepositoryAnalyzer(
+                repo_full_name=clean_repo_name,
+                tmp_dir=tmp_dir,
+                commit=commit,
+                language=language,
+                config=config,
+                secrets=secrets,
+                full_history=full_history,
+            )
+        
         logger.info(f"Fetching codebase for {repo_full_name}")
 
         # Parse repo name
@@ -1400,6 +1419,52 @@ class Codebase(
         except Exception as e:
             logger.exception(f"Failed to initialize codebase: {e}")
             raise
+
+    @classmethod
+    def Analysis(
+        cls,
+        path: Union[str, Path],
+        *,
+        config: Optional[CodebaseConfig] = None,
+        secrets: Optional[SecretsConfig] = None,
+        auto_run: bool = True,
+        **analysis_kwargs
+    ):
+        """
+        Create Analysis instance from a local repository path.
+        
+        This method provides the Codebase.Analysis("path") syntax for local analysis.
+        
+        Args:
+            path: Path to the local repository
+            config: Configuration for the codebase
+            secrets: Configuration for secrets
+            auto_run: Whether to automatically run comprehensive analysis
+            **analysis_kwargs: Additional arguments for Analysis configuration
+            
+        Returns:
+            Analysis instance with results (if auto_run=True) or ready for analysis
+        """
+        # Import here to avoid circular imports
+        from graph_sitter.core.analysis import Analysis, AnalysisConfig
+        
+        # Create analysis configuration
+        analysis_config = AnalysisConfig(**analysis_kwargs)
+        
+        # Create Analysis instance from local path
+        analysis = Analysis.from_path(
+            path=path,
+            config=analysis_config,
+            codebase_config=config,
+            secrets=secrets,
+        )
+        
+        # Auto-run comprehensive analysis if requested
+        if auto_run:
+            print(f"🔍 Auto-running comprehensive analysis for {path}...")
+            analysis.run_comprehensive_analysis()
+        
+        return analysis
 
     @classmethod
     def from_string(

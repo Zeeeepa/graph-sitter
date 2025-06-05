@@ -1,0 +1,11 @@
+Codebase Analysis Preview URL:
+file:///tmp/Zeeeepa/graph-sitter/codebase_analysis_preview.html
+
+Features:
+- Complete issue list with 11,241 issues
+- Severity filtering (High: 1,264, Medium: 481, Low: 9,496)
+- File path filtering
+- Pagination for easy browsing
+- Visualization dashboard (click 'Visualize Codebase')
+- Export capabilities
+- Responsive design
