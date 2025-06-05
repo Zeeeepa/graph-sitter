@@ -18,37 +18,19 @@ from .analysis import (
     calculate_codebase_metrics,
     calculate_function_metrics,
     calculate_class_metrics,
-    calculate_complexity_metrics,
-    calculate_maintainability_index,
     
     # Dependency analysis
     DependencyAnalyzer,
     analyze_dependencies,
     get_dependency_graph,
     find_circular_dependencies,
-    analyze_import_patterns,
     
     # Call graph
     CallGraphAnalyzer,
-    generate_call_graph,
-    analyze_function_calls,
-    find_call_chains,
-    detect_recursive_calls,
     
     # Dead code
-    DeadCodeAnalyzer,
-    find_dead_code,
-    analyze_unused_functions,
-    analyze_unused_imports,
-    get_dead_code_report,
     
     # Function context
-    FunctionContext,
-    get_function_context,
-    get_enhanced_function_context,
-    analyze_function_issues,
-    analyze_codebase_functions,
-    create_training_example
 )
 
 # Visualization adapters
@@ -58,8 +40,6 @@ from .visualizations import (
     create_react_visualizations,
     generate_function_blast_radius,
     generate_issue_dashboard,
-    generate_complexity_heatmap,
-    generate_call_graph_visualization,
     generate_dependency_graph_visualization,
     generate_class_methods_visualization,
     generate_metrics_dashboard,
@@ -110,7 +90,6 @@ from .dead_code import (
     DeadCodeDetector,
     DeadCodeItem,
     CleanupPlan,
-    find_dead_code,
     find_unused_imports,
     find_unused_variables,
     estimate_cleanup_impact,
@@ -152,6 +131,22 @@ from .metrics import (
     analyze_class_metrics,
     analyze_file_metrics,
     get_codebase_summary
+)
+
+# Import the new unified analysis system
+from .analysis.comprehensive_analysis import (
+    ComprehensiveAnalysis,
+    ComprehensiveAnalysisResult
+)
+
+from .visualizations.html_dashboard import (
+    HTMLDashboardGenerator,
+    generate_html_dashboard
+)
+
+from .visualizations.react_dashboard.dashboard_app import (
+    ReactDashboardApp,
+    create_dashboard_app
 )
 
 __all__ = [

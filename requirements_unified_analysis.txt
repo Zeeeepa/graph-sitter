@@ -1,0 +1,22 @@
+# Requirements for the unified analysis system
+flask>=2.0.0
+flask-cors>=3.0.0
+plotly>=5.0.0
+GitPython
+PyGithub
+networkx
+tree-sitter
+tree-sitter-python
+tree-sitter-typescript
+rustworkx
+python-dotenv
+pydantic-settings
+codeowners
+colorlog
+lazy-object-proxy
+openai
+giturlparse
+sentry-sdk
+humanize
+watchfiles
+
