@@ -10,6 +10,8 @@ This module contains all analysis-related functionality including:
 - Function context analysis
 - Code modification tools (codemods)
 - Unified analysis framework with standardized interfaces
+- Database integration for analysis results
+- Legacy compatibility layer
 """
 
 # Import new unified analysis framework
@@ -33,6 +35,23 @@ from .registry import (
     register_analyzer,
     list_analyzers,
     run_analysis,
+)
+
+# Import refactored components
+from .legacy_unified_analyzer import (
+    LegacyUnifiedAnalyzer,
+    LegacyAnalysisResult,
+    run_comprehensive_analysis,
+)
+
+from .database_adapter import (
+    UnifiedAnalysisDatabase,
+    AnalysisDatabase,  # For backward compatibility
+)
+
+from .codebase_database_adapter import (
+    CodebaseDatabaseAnalyzer,
+    CodebaseAnalysisConfig,
 )
 
 # Import existing analyzers
@@ -106,6 +125,15 @@ __all__ = [
     'list_analyzers',
     'run_analysis',
     
+    # Refactored components
+    'LegacyUnifiedAnalyzer',
+    'LegacyAnalysisResult',
+    'run_comprehensive_analysis',
+    'UnifiedAnalysisDatabase',
+    'AnalysisDatabase',
+    'CodebaseDatabaseAnalyzer',
+    'CodebaseAnalysisConfig',
+    
     # Enhanced analysis
     'EnhancedAnalyzer',
     'analyze_codebase_enhanced',
@@ -149,3 +177,4 @@ __all__ = [
     'analyze_codebase_functions',
     'create_training_example'
 ]
+
