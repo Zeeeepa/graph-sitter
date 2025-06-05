@@ -16,8 +16,8 @@ from contexten.agents.langchain.utils.get_langsmith_url import (
     find_and_print_langsmith_run_url,
 )
 
-if TYPE_CHECKING:
-    from graph_sitter import Codebase
+
+from graph_sitter import Codebase
 
 from contexten.agents.utils import AgentConfig
 

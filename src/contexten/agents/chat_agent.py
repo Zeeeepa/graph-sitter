@@ -7,8 +7,8 @@ from langchain_core.messages import AIMessage
 # Updated import path after folder move
 from contexten.agents.langchain.agent import create_chat_agent
 
-if TYPE_CHECKING:
-    from graph_sitter import Codebase
+
+from graph_sitter import Codebase
 
 
 class ChatAgent:
