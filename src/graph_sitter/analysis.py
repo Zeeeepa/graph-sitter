@@ -49,34 +49,61 @@ try:
         calculate_complexity_metrics,
         calculate_maintainability_index,
         
-        # Dependency analysis
+        # Dependencies
         DependencyAnalyzer,
         analyze_dependencies,
-        get_dependency_graph,
         find_circular_dependencies,
-        analyze_import_patterns,
+        calculate_coupling_metrics,
         
-        # Call graph
-        CallGraphAnalyzer,
-        generate_call_graph,
-        analyze_function_calls,
-        find_call_chains,
-        detect_recursive_calls,
-        
-        # Dead code
+        # Dead code detection
         DeadCodeAnalyzer,
         find_dead_code,
-        analyze_unused_functions,
-        analyze_unused_imports,
-        get_dead_code_report,
+        find_unused_imports,
+        find_unreachable_code,
+        
+        # Call graph analysis
+        CallGraphAnalyzer,
+        build_call_graph,
+        analyze_call_patterns,
+        find_call_chains,
         
         # Function context
-        FunctionContext,
         get_function_context,
         get_enhanced_function_context,
-        analyze_function_issues,
-        analyze_codebase_functions,
-        create_training_example
+        FunctionContext
+    )
+    
+    # Import unified analysis system
+    from .unified_analysis import (
+        UnifiedAnalysis,
+        UnifiedAnalysisResult,
+        analyze_comprehensive,
+        from_repo_analysis,
+        ANALYSIS_CONFIG,
+        ANALYSIS_TYPES
+    )
+    
+    # Import error detection and blast radius
+    from .adapters.analysis.error_detection import (
+        ErrorDetector,
+        ErrorInstance,
+        ErrorAnalysisResult
+    )
+    
+    from .adapters.analysis.blast_radius import (
+        BlastRadiusAnalyzer,
+        BlastRadiusResult,
+        BlastRadiusNode
+    )
+    
+    # Import configuration
+    from .adapters.config.analysis_config import (
+        AnalysisType,
+        TargetType,
+        SeverityLevel,
+        get_analysis_config,
+        get_target_config,
+        ANALYSIS_PRESETS
     )
 except ImportError as e:
     # Provide fallback implementations or informative errors
@@ -98,25 +125,19 @@ except ImportError as e:
     calculate_maintainability_index = analyze_codebase_enhanced
     DependencyAnalyzer = EnhancedAnalyzer
     analyze_dependencies = analyze_codebase_enhanced
-    get_dependency_graph = analyze_codebase_enhanced
     find_circular_dependencies = analyze_codebase_enhanced
-    analyze_import_patterns = analyze_codebase_enhanced
-    CallGraphAnalyzer = EnhancedAnalyzer
-    generate_call_graph = analyze_codebase_enhanced
-    analyze_function_calls = analyze_codebase_enhanced
-    find_call_chains = analyze_codebase_enhanced
-    detect_recursive_calls = analyze_codebase_enhanced
+    calculate_coupling_metrics = analyze_codebase_enhanced
     DeadCodeAnalyzer = EnhancedAnalyzer
     find_dead_code = analyze_codebase_enhanced
-    analyze_unused_functions = analyze_codebase_enhanced
-    analyze_unused_imports = analyze_codebase_enhanced
-    get_dead_code_report = analyze_codebase_enhanced
+    find_unused_imports = analyze_codebase_enhanced
+    find_unreachable_code = analyze_codebase_enhanced
+    CallGraphAnalyzer = EnhancedAnalyzer
+    build_call_graph = analyze_codebase_enhanced
+    analyze_call_patterns = analyze_codebase_enhanced
+    find_call_chains = analyze_codebase_enhanced
     FunctionContext = EnhancedAnalyzer
     get_function_context = analyze_codebase_enhanced
     get_enhanced_function_context = analyze_codebase_enhanced
-    analyze_function_issues = analyze_codebase_enhanced
-    analyze_codebase_functions = analyze_codebase_enhanced
-    create_training_example = analyze_codebase_enhanced
 
 # Import visualization functionality
 try:
