@@ -1,29 +1,24 @@
-# Graph-sitter Analysis Module
+# Enhanced Code Analysis Module
 
-Comprehensive code analysis module following the patterns from [graph-sitter.com/tutorials/at-a-glance](https://graph-sitter.com/tutorials/at-a-glance) with enhanced issue detection and comprehensive reporting.
+This module provides comprehensive code analysis capabilities following the patterns from [graph-sitter.com/tutorials/at-a-glance](https://graph-sitter.com/tutorials/at-a-glance) with enhanced issue detection and comprehensive reporting.
 
 ## Features
 
 ### 🔍 Comprehensive Analysis
-- **Dead Code Detection**: Identifies unused functions, classes, and variables
-- **Code Quality Issues**: Detects various code quality problems with severity levels
-- **Metrics Calculation**: Cyclomatic complexity, maintainability index, technical debt ratio
-- **Dependency Analysis**: Import graph analysis and circular dependency detection
-- **Function & Class Metrics**: Detailed metrics for all functions and classes
+- **File Analysis**: Analyzes all Python files in a codebase
+- **Issue Detection**: Identifies code issues with severity levels
+- **Dead Code Detection**: Finds unused functions and classes
+- **Metrics Calculation**: Computes complexity and maintainability metrics
 
-### 📊 Analysis Results
-The analysis provides detailed information including:
-- Total files, functions, classes, and lines of code
-- Dead code items with location and confidence levels
-- Code issues categorized by severity (critical, major, minor, info)
-- Function metrics (complexity, parameters, nesting depth)
-- Class metrics (methods, attributes, inheritance depth)
-- Dependency graph and circular dependencies
-- Quality metrics (maintainability index, technical debt ratio)
+### 🏗️ Enhanced Capabilities
+- **Top-Level Symbol Identification**: Finds top-level functions and classes
+- **Inheritance Hierarchy Analysis**: Maps class inheritance relationships
+- **Files with Issues Tracking**: Numbered list of problematic files
+- **Comprehensive Reporting**: Enhanced output formatting
 
 ## Usage
 
-### Basic Usage with Codebase Class
+### Basic Usage
 
 ```python
 from graph_sitter import Codebase
@@ -35,27 +30,22 @@ result = codebase.Analysis()
 # Analyze remote repository  
 codebase = Codebase.from_repo("fastapi/fastapi")
 result = codebase.Analysis()
-
-# Print formatted results
-from graph_sitter.adapters.analysis import format_analysis_results
-print(format_analysis_results(result))
 ```
 
-### Direct Usage
+### Direct Import Usage
 
 ```python
 from graph_sitter.adapters.analysis import analyze_codebase, format_analysis_results
 
-# Analyze a repository
-result = analyze_codebase("path/to/repo")
+# Analyze a codebase
+result = analyze_codebase("path/to/code")
 
-# Print results
-print(format_analysis_results(result))
+# Format results for display
+formatted_output = format_analysis_results(result)
+print(formatted_output)
 
-# Access specific data
-print(f"Total functions: {result.total_functions}")
-print(f"Dead code items: {len(result.dead_code_items)}")
-print(f"Issues found: {len(result.issues)}")
+# Get JSON output
+json_data = result.to_dict()
 ```
 
 ### Command Line Usage
@@ -64,155 +54,209 @@ print(f"Issues found: {len(result.issues)}")
 # Analyze current directory
 python -m graph_sitter.adapters.analysis.analysis .
 
-# Analyze specific repository with JSON output
-python -m graph_sitter.adapters.analysis.analysis /path/to/repo --format json --output results.json
+# Analyze specific directory with JSON output
+python -m graph_sitter.adapters.analysis.analysis /path/to/code --format json
+
+# Save results to file
+python -m graph_sitter.adapters.analysis.analysis /path/to/code --output results.txt
 ```
 
-## Analysis Results Structure
+## Analysis Results
 
-### Summary Information
+### Summary Metrics
+- **Total Files**: Number of Python files analyzed
+- **Total Functions**: Count of all functions found
+- **Total Classes**: Count of all classes found
+- **Maintainability Index**: Code maintainability score
+- **Technical Debt Ratio**: Estimated technical debt
+- **Test Coverage Estimate**: Estimated test coverage percentage
+
+### Enhanced Features
+
+#### 📁 Files with Issues (Numbered List)
 ```
-Analysis Results:
-  • Total Files: 100
-  • Total Functions: 250
-  • Total Classes: 45
-  • Total Lines: 15000
-  • Maintainability Index: 85.2/100
-  • Technical Debt Ratio: 0.15
-  • Test Coverage Estimate: 75.0%
+Files with Issues (3):
+  1. src/module/core.py
+     Issues: 5
+     Top-Level Functions: process_data, validate_input
+     Top-Level Classes: DataProcessor, Validator
+     Inheritance: 2 classes with inheritance
+
+  2. src/module/utils.py
+     Issues: 2
+     Top-Level Functions: helper_function
+     Top-Level Classes: UtilityClass
 ```
 
-### Dead Code Detection
+#### 🔝 Top-Level Symbols
+```
+Top-Level Functions (10):
+  1. main_function
+  2. process_data
+  3. validate_input
+  ...
+
+Top-Level Classes (5):
+  1. BaseProcessor
+  2. DataValidator
+  3. ConfigManager
+  ...
+```
+
+#### 🏗️ Inheritance Hierarchy
+```
+Inheritance Hierarchy (8 classes):
+  1. BaseClass
+     File: src/base.py:15
+     Depth: 0
+
+  2.   ChildClass
+     File: src/child.py:20
+     Parents: BaseClass
+     Depth: 1
+```
+
+#### 💀 Dead Code Detection
 ```
 Dead Code Items: 5
-  • Function: unused_helper_function
-    Location: src/utils/helpers.py:45-60
-    Reason: Function is defined but never called
-    Confidence: 80.0%
+  1. Function: unused_helper
+     Location: src/utils.py:45-60
+     Reason: Function is defined but never called
+     Confidence: 80.0%
 ```
 
-### Issue Detection
-Issues are categorized by severity:
-- **Critical**: Syntax errors, import errors
-- **Major**: Complex functions, potential bugs
-- **Minor**: Style issues, long lines
-- **Info**: TODO comments, documentation issues
+#### ⚠️ Issue Detection
+```
+Issues: 12
+  Critical: 1
+    • Security vulnerability detected
+      Location: src/auth.py:25
+      Suggestion: Use secure password hashing
 
-### Function Metrics
-For each function, the analysis provides:
-- Cyclomatic complexity
-- Lines of code
-- Number of parameters
-- Return statements count
-- Nesting depth
-- Cognitive complexity
+  Major: 3
+    • High cyclomatic complexity (15)
+      Location: src/complex.py:100
+      Suggestion: Consider breaking into smaller functions
 
-### Class Metrics
-For each class, the analysis provides:
-- Number of methods
-- Number of attributes
-- Inheritance depth
-- Coupling metrics
-- Cohesion metrics
-
-## Advanced Features
-
-### Dead Code Detection
-The analyzer identifies:
-- Unused functions (with confidence levels)
-- Unused imports
-- Unused variables
-- Unreachable code
-
-### Dependency Analysis
-- Import graph construction
-- Circular dependency detection
-- Module coupling analysis
-- Dependency path analysis
-
-### Quality Metrics
-- **Maintainability Index**: Based on complexity and lines of code
-- **Technical Debt Ratio**: Based on issue severity and frequency
-- **Test Coverage Estimate**: Heuristic based on test file presence
-
-## Configuration
-
-The analyzer can be configured for different analysis depths:
-
-```python
-from graph_sitter.adapters.analysis import CodeAnalyzer
-
-analyzer = CodeAnalyzer("path/to/repo")
-# Analyzer automatically discovers Python files and performs comprehensive analysis
-result = analyzer.analyze()
+  Minor: 8
+    • Line too long (150 > 120 characters)
+      Location: src/long_line.py:42
+      Suggestion: Break line into multiple lines
 ```
 
-## Integration with Graph-sitter
+## Data Classes
 
-This module integrates seamlessly with the graph-sitter ecosystem:
-- Uses AST parsing for accurate code analysis
-- Follows graph-sitter patterns and conventions
-- Provides tree-sitter compatible analysis results
-- Supports multiple programming languages (Python focus)
+### Core Classes
+
+#### `AnalysisResult`
+Main result container with all analysis data:
+- `total_files`, `total_functions`, `total_classes`
+- `files_with_issues`: List of `FileIssueInfo` objects
+- `inheritance_hierarchy`: List of `InheritanceInfo` objects
+- `top_level_functions`, `top_level_classes`: Lists of symbol names
+- `issues`, `dead_code_items`: Detected problems
+- `function_metrics`, `class_metrics`: Complexity metrics
+
+#### `FileIssueInfo`
+Information about files containing issues:
+- `file_path`: Path to the file
+- `issue_count`: Number of issues found
+- `top_level_functions`, `top_level_classes`: Symbols in this file
+- `inheritance_info`: Class inheritance data for this file
+
+#### `InheritanceInfo`
+Class inheritance relationship data:
+- `class_name`: Name of the class
+- `file_path`, `line_start`: Location information
+- `parent_classes`, `child_classes`: Inheritance relationships
+- `inheritance_depth`: Depth in inheritance hierarchy
+- `is_top_level`: Whether this is a base class
+
+#### `CodeIssue`
+Individual code issue:
+- `type`, `severity`: Issue classification
+- `message`: Description of the issue
+- `file_path`, `line_start`, `line_end`: Location
+- `suggestion`: Recommended fix
+- `rule_id`: Identifier for the rule that detected this issue
 
 ## Output Formats
 
-### Text Format (Default)
-Human-readable formatted output with emojis and clear structure.
+### Text Format
+Human-readable formatted output with:
+- Summary statistics
+- Numbered lists of files with issues
+- Top-level symbols with numbering
+- Inheritance hierarchy with visual indentation
+- Issue details grouped by severity
 
 ### JSON Format
-Machine-readable JSON output for integration with other tools:
-
-```json
-{
-  "summary": {
-    "total_files": 100,
-    "total_functions": 250,
-    "total_classes": 45,
-    "maintainability_index": 85.2
-  },
-  "dead_code_items": [...],
-  "issues": [...],
-  "function_metrics": [...],
-  "class_metrics": [...]
-}
-```
+Structured data output including:
+- `summary`: Key metrics and counts
+- `top_level_symbols`: Functions and classes
+- `files_with_issues`: Detailed file information
+- `inheritance_hierarchy`: Class relationship data
+- `issues`, `dead_code_items`: Problem details
+- `function_metrics`, `class_metrics`: Complexity data
 
 ## Examples
 
-### Example 1: Basic Analysis
-```python
-from graph_sitter import Codebase
+### Example Output
 
-codebase = Codebase(".")
-result = codebase.Analysis()
-print(f"Found {len(result.issues)} issues in {result.total_files} files")
+```
+📊 Analysis Results:
+  • Total Files: 25
+  • Total Functions: 150
+  • Total Classes: 45
+  • Maintainability Index: 75.2/100
+  • Technical Debt Ratio: 0.15
+
+🔝 Top-Level Symbols:
+  • Top-Level Functions (12):
+    1. main
+    2. process_data
+    3. validate_input
+    ...
+
+📁 Files with Issues (3):
+  1. src/core/processor.py
+     Issues: 8
+     Top-Level Functions: process, validate
+     Top-Level Classes: DataProcessor
+     Inheritance: 1 classes with inheritance
+
+🏗️ Inheritance Hierarchy (15 classes):
+  1. BaseProcessor
+     File: src/base.py:20
+     Depth: 0
+
+  2.   DataProcessor
+     File: src/core.py:15
+     Parents: BaseProcessor
+     Children: AdvancedProcessor
+     Depth: 1
 ```
 
-### Example 2: Dead Code Report
-```python
-from graph_sitter.adapters.analysis import analyze_codebase
+## Integration
 
-result = analyze_codebase("my_project")
-for item in result.dead_code_items:
-    print(f"Dead {item.type}: {item.name} in {item.file_path}")
-```
+The analysis module integrates with the main graph-sitter framework and can be used:
 
-### Example 3: Quality Metrics
-```python
-result = analyze_codebase("my_project")
-print(f"Maintainability Index: {result.maintainability_index:.1f}")
-print(f"Technical Debt Ratio: {result.technical_debt_ratio:.2f}")
-```
+1. **As part of Codebase class**: `codebase.Analysis()`
+2. **Direct function calls**: `analyze_codebase(path)`
+3. **Command line tool**: `python -m graph_sitter.adapters.analysis.analysis`
+4. **JSON API**: Export results as structured data
 
 ## Requirements
 
 - Python 3.7+
-- AST module (built-in)
-- pathlib (built-in)
-- Optional: tree-sitter for enhanced parsing
+- AST parsing capabilities (built-in)
+- File system access for code analysis
+- Optional: graph-sitter library for enhanced parsing
 
-## Contributing
+## Performance
 
-This module follows the graph-sitter contribution guidelines and patterns established in the main repository.
+- Optimized for large codebases
+- Efficient AST parsing and analysis
+- Memory-conscious processing
+- Parallel analysis capabilities (future enhancement)
 

@@ -25,6 +25,8 @@ from .analysis import (
     DeadCodeItem,
     FunctionMetrics,
     ClassMetrics,
+    FileIssueInfo,
+    InheritanceInfo,
     
     # Main functions
     analyze_codebase,
@@ -41,6 +43,8 @@ __all__ = [
     "DeadCodeItem",
     "FunctionMetrics",
     "ClassMetrics",
+    "FileIssueInfo",
+    "InheritanceInfo",
     
     # Main functions
     "analyze_codebase",
@@ -48,4 +52,3 @@ __all__ = [
     "format_analysis_results",
     "add_analysis_method",
 ]
-

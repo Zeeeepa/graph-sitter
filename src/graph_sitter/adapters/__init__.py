@@ -14,18 +14,16 @@ from .analysis import (
     DeadCodeItem,
     FunctionMetrics,
     ClassMetrics,
+    FileIssueInfo,
+    InheritanceInfo,
     
     # Main analysis functions
     analyze_codebase,
     analyze_and_print,
-    format_analysis_results,
-    add_analysis_method,
     
     # Enhanced analysis
-    EnhancedAnalyzer,
-    analyze_codebase_enhanced,
-    analyze_function_enhanced,
-    get_enhanced_analysis_report,
+    format_analysis_results,
+    add_analysis_method,
     
     # Metrics
     CodebaseMetrics,
@@ -176,10 +174,10 @@ __all__ = [
     'DeadCodeItem',
     'FunctionMetrics',
     'ClassMetrics',
+    'FileIssueInfo',
+    'InheritanceInfo',
     'analyze_codebase',
     'analyze_and_print',
-    'format_analysis_results',
-    'add_analysis_method',
     
     # Call Graph Analysis
     'CallGraphAnalyzer',

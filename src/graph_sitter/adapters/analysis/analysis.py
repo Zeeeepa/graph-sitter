@@ -93,6 +93,31 @@ class ClassMetrics:
 
 
 @dataclass
+class FileIssueInfo:
+    """Information about a file with issues."""
+    file_path: str
+    issue_count: int
+    issues: List[CodeIssue]
+    functions: List[str]
+    classes: List[str]
+    top_level_functions: List[str]
+    top_level_classes: List[str]
+    inheritance_info: Dict[str, List[str]]  # class_name -> parent_classes
+
+
+@dataclass
+class InheritanceInfo:
+    """Information about class inheritance hierarchy."""
+    class_name: str
+    file_path: str
+    line_start: int
+    parent_classes: List[str]
+    child_classes: List[str]
+    inheritance_depth: int
+    is_top_level: bool
+
+
+@dataclass
 class AnalysisResult:
     """Comprehensive analysis result."""
     total_files: int = 0
@@ -111,7 +136,11 @@ class AnalysisResult:
     class_metrics: List[ClassMetrics] = field(default_factory=list)
     
     # File analysis
-    file_analysis: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    files_with_issues: List[FileIssueInfo] = field(default_factory=list)
+    inheritance_hierarchy: List[InheritanceInfo] = field(default_factory=list)
+    top_level_functions: List[str] = field(default_factory=list)
+    top_level_classes: List[str] = field(default_factory=list)
+    file_analysis: Dict[str, Any] = field(default_factory=dict)
     
     # Dependencies
     dependencies: Dict[str, List[str]] = field(default_factory=dict)
@@ -134,6 +163,32 @@ class AnalysisResult:
                 'technical_debt_ratio': self.technical_debt_ratio,
                 'test_coverage_estimate': self.test_coverage_estimate
             },
+            'top_level_symbols': {
+                'functions': self.top_level_functions,
+                'classes': self.top_level_classes
+            },
+            'files_with_issues': [
+                {
+                    'file_path': file_info.file_path,
+                    'issue_count': file_info.issue_count,
+                    'top_level_functions': file_info.top_level_functions,
+                    'top_level_classes': file_info.top_level_classes,
+                    'inheritance_info': file_info.inheritance_info
+                }
+                for file_info in self.files_with_issues
+            ],
+            'inheritance_hierarchy': [
+                {
+                    'class_name': info.class_name,
+                    'file_path': info.file_path,
+                    'line_start': info.line_start,
+                    'parent_classes': info.parent_classes,
+                    'child_classes': info.child_classes,
+                    'inheritance_depth': info.inheritance_depth,
+                    'is_top_level': info.is_top_level
+                }
+                for info in self.inheritance_hierarchy
+            ],
             'dead_code_items': [
                 {
                     'type': item.type,
@@ -217,6 +272,11 @@ class CodeAnalyzer:
         self._detect_dead_code()
         self._calculate_quality_metrics()
         self._detect_code_issues()
+        
+        # Enhanced analysis
+        self._analyze_files_with_issues()
+        self._analyze_inheritance_hierarchy()
+        self._identify_top_level_symbols()
         
         print("✅ Analysis complete!")
         return self.result
@@ -434,6 +494,183 @@ class CodeAnalyzer:
                         suggestion="Consider using logging instead of print",
                         rule_id="T201"
                     ))
+    
+    def _analyze_files_with_issues(self) -> None:
+        """Analyze files with issues and create FileIssueInfo objects."""
+        files_by_path = defaultdict(list)
+        
+        # Group issues by file
+        for issue in self.result.issues:
+            files_by_path[issue.file_path].append(issue)
+        
+        # Create FileIssueInfo for each file with issues
+        for file_path, issues in files_by_path.items():
+            functions = []
+            classes = []
+            top_level_functions = []
+            top_level_classes = []
+            inheritance_info = {}
+            
+            # Extract functions and classes from this file
+            for func_name, (func_file, line_start, line_end) in self.function_definitions.items():
+                if func_file == file_path:
+                    functions.append(func_name)
+                    # Check if it's top-level (not nested)
+                    if self._is_top_level_function(func_name, file_path):
+                        top_level_functions.append(func_name)
+            
+            for class_name, (class_file, line_start, line_end) in self.class_definitions.items():
+                if class_file == file_path:
+                    classes.append(class_name)
+                    # Check if it's top-level (no inheritance)
+                    if self._is_top_level_class(class_name, file_path):
+                        top_level_classes.append(class_name)
+                    
+                    # Get inheritance info
+                    inheritance_info[class_name] = self._get_class_parents(class_name, file_path)
+            
+            file_issue_info = FileIssueInfo(
+                file_path=file_path,
+                issue_count=len(issues),
+                issues=issues,
+                functions=functions,
+                classes=classes,
+                top_level_functions=top_level_functions,
+                top_level_classes=top_level_classes,
+                inheritance_info=inheritance_info
+            )
+            
+            self.result.files_with_issues.append(file_issue_info)
+    
+    def _analyze_inheritance_hierarchy(self) -> None:
+        """Analyze inheritance hierarchy for all classes."""
+        inheritance_map = {}
+        
+        # First pass: collect all classes and their basic info
+        for class_name, (file_path, line_start, line_end) in self.class_definitions.items():
+            inheritance_map[class_name] = {
+                'file_path': file_path,
+                'line_start': line_start,
+                'parent_classes': [],
+                'child_classes': [],
+                'inheritance_depth': 0
+            }
+        
+        # Second pass: analyze inheritance relationships using AST
+        for file_path in set(info[0] for info in self.class_definitions.values()):
+            if file_path in self.file_contents:
+                try:
+                    tree = ast.parse(self.file_contents[file_path])
+                    for node in ast.walk(tree):
+                        if isinstance(node, ast.ClassDef):
+                            class_name = node.name
+                            if class_name in inheritance_map:
+                                # Extract parent classes
+                                for base in node.bases:
+                                    if isinstance(base, ast.Name):
+                                        parent_name = base.id
+                                        inheritance_map[class_name]['parent_classes'].append(parent_name)
+                                        if parent_name in inheritance_map:
+                                            inheritance_map[parent_name]['child_classes'].append(class_name)
+                except:
+                    pass  # Skip files with syntax errors
+        
+        # Third pass: calculate inheritance depth
+        def calculate_depth(class_name, visited=None):
+            if visited is None:
+                visited = set()
+            if class_name in visited:
+                return 0  # Circular inheritance
+            visited.add(class_name)
+            
+            if class_name not in inheritance_map:
+                return 0
+            
+            parents = inheritance_map[class_name]['parent_classes']
+            if not parents:
+                return 0
+            
+            max_depth = 0
+            for parent in parents:
+                depth = calculate_depth(parent, visited.copy())
+                max_depth = max(max_depth, depth + 1)
+            
+            return max_depth
+        
+        # Create InheritanceInfo objects
+        for class_name, info in inheritance_map.items():
+            depth = calculate_depth(class_name)
+            inheritance_info = InheritanceInfo(
+                class_name=class_name,
+                file_path=info['file_path'],
+                line_start=info['line_start'],
+                parent_classes=info['parent_classes'],
+                child_classes=info['child_classes'],
+                inheritance_depth=depth,
+                is_top_level=(depth == 0)
+            )
+            self.result.inheritance_hierarchy.append(inheritance_info)
+    
+    def _identify_top_level_symbols(self) -> None:
+        """Identify top-level functions and classes."""
+        # Top-level functions (not nested in classes or other functions)
+        for func_name, (file_path, line_start, line_end) in self.function_definitions.items():
+            if self._is_top_level_function(func_name, file_path):
+                self.result.top_level_functions.append(func_name)
+        
+        # Top-level classes (no inheritance or base classes)
+        for inheritance_info in self.result.inheritance_hierarchy:
+            if inheritance_info.is_top_level:
+                self.result.top_level_classes.append(inheritance_info.class_name)
+    
+    def _is_top_level_function(self, func_name: str, file_path: str) -> bool:
+        """Check if a function is top-level (not nested)."""
+        if file_path not in self.file_contents:
+            return False
+        
+        try:
+            tree = ast.parse(self.file_contents[file_path])
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == func_name:
+                    # Check if the function is at module level
+                    for parent in ast.walk(tree):
+                        if hasattr(parent, 'body') and node in parent.body:
+                            return isinstance(parent, ast.Module)
+            return False
+        except:
+            return False
+    
+    def _is_top_level_class(self, class_name: str, file_path: str) -> bool:
+        """Check if a class is top-level (no inheritance)."""
+        if file_path not in self.file_contents:
+            return False
+        
+        try:
+            tree = ast.parse(self.file_contents[file_path])
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name == class_name:
+                    return len(node.bases) == 0
+            return False
+        except:
+            return False
+    
+    def _get_class_parents(self, class_name: str, file_path: str) -> List[str]:
+        """Get parent classes for a given class."""
+        if file_path not in self.file_contents:
+            return []
+        
+        try:
+            tree = ast.parse(self.file_contents[file_path])
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name == class_name:
+                    parents = []
+                    for base in node.bases:
+                        if isinstance(base, ast.Name):
+                            parents.append(base.id)
+                    return parents
+            return []
+        except:
+            return []
 
 
 class ASTAnalysisVisitor(ast.NodeVisitor):
@@ -622,7 +859,7 @@ def format_analysis_results(result: AnalysisResult) -> str:
     output = []
     
     # Summary
-    output.append("🔍 Analysis Results:")
+    output.append("��� Analysis Results:")
     output.append(f"  • Total Files: {result.total_files}")
     output.append(f"  • Total Functions: {result.total_functions}")
     output.append(f"  • Total Classes: {result.total_classes}")
@@ -631,6 +868,64 @@ def format_analysis_results(result: AnalysisResult) -> str:
     output.append(f"  • Technical Debt Ratio: {result.technical_debt_ratio:.2f}")
     output.append(f"  • Test Coverage Estimate: {result.test_coverage_estimate:.1f}%")
     output.append("")
+    
+    # Top-Level Symbols
+    if result.top_level_functions or result.top_level_classes:
+        output.append("🔝 Top-Level Symbols:")
+        if result.top_level_functions:
+            output.append(f"  • Top-Level Functions ({len(result.top_level_functions)}):")
+            for i, func in enumerate(result.top_level_functions[:10], 1):
+                output.append(f"    {i}. {func}")
+            if len(result.top_level_functions) > 10:
+                output.append(f"    ... and {len(result.top_level_functions) - 10} more functions")
+        
+        if result.top_level_classes:
+            output.append(f"  • Top-Level Classes ({len(result.top_level_classes)}):")
+            for i, cls in enumerate(result.top_level_classes[:10], 1):
+                output.append(f"    {i}. {cls}")
+            if len(result.top_level_classes) > 10:
+                output.append(f"    ... and {len(result.top_level_classes) - 10} more classes")
+        output.append("")
+    
+    # Files with Issues (Numbered List)
+    if result.files_with_issues:
+        output.append(f"📁 Files with Issues ({len(result.files_with_issues)}):")
+        for i, file_info in enumerate(result.files_with_issues, 1):
+            output.append(f"  {i}. {file_info.file_path}")
+            output.append(f"     Issues: {file_info.issue_count}")
+            if file_info.top_level_functions:
+                output.append(f"     Top-Level Functions: {', '.join(file_info.top_level_functions[:5])}")
+                if len(file_info.top_level_functions) > 5:
+                    output.append(f"       ... and {len(file_info.top_level_functions) - 5} more")
+            if file_info.top_level_classes:
+                output.append(f"     Top-Level Classes: {', '.join(file_info.top_level_classes[:5])}")
+                if len(file_info.top_level_classes) > 5:
+                    output.append(f"       ... and {len(file_info.top_level_classes) - 5} more")
+            if file_info.inheritance_info:
+                output.append(f"     Inheritance: {len(file_info.inheritance_info)} classes with inheritance")
+            output.append("")
+    
+    # Inheritance Hierarchy
+    if result.inheritance_hierarchy:
+        output.append(f"🏗️  Inheritance Hierarchy ({len(result.inheritance_hierarchy)} classes):")
+        # Sort by inheritance depth (top-level first)
+        sorted_hierarchy = sorted(result.inheritance_hierarchy, key=lambda x: x.inheritance_depth)
+        for i, inheritance_info in enumerate(sorted_hierarchy[:15], 1):
+            depth_indicator = "  " * inheritance_info.inheritance_depth
+            output.append(f"  {i}. {depth_indicator}{inheritance_info.class_name}")
+            output.append(f"     File: {inheritance_info.file_path}:{inheritance_info.line_start}")
+            if inheritance_info.parent_classes:
+                output.append(f"     Parents: {', '.join(inheritance_info.parent_classes)}")
+            if inheritance_info.child_classes:
+                output.append(f"     Children: {', '.join(inheritance_info.child_classes[:3])}")
+                if len(inheritance_info.child_classes) > 3:
+                    output.append(f"       ... and {len(inheritance_info.child_classes) - 3} more")
+            output.append(f"     Depth: {inheritance_info.inheritance_depth}")
+            output.append("")
+        
+        if len(result.inheritance_hierarchy) > 15:
+            output.append(f"  ... and {len(result.inheritance_hierarchy) - 15} more classes")
+            output.append("")
     
     # Dead Code
     if result.dead_code_items:
