@@ -3,8 +3,8 @@ Enhanced Codebase Analysis System
 Based on graph-sitter documentation analysis and comprehensive issue detection
 """
 
-from graph_sitter import Codebase
-from codegen.configs import CodebaseConfig
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.configs.models.codebase import CodebaseConfig
 from collections import Counter
 from typing import List, Dict, Any, Optional
 import json
@@ -475,4 +475,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
