@@ -3,7 +3,7 @@ from typing import Any, Callable, TypeVar, Optional
 
 from pydantic import BaseModel
 
-from contexten.extensions.events.interface import EventHandlerManagerProtocol
+from contexten.extensions.contexten_app.interface import EventHandlerManagerProtocol
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.linear.config import get_linear_config
 from contexten.extensions.linear.integration_agent import LinearIntegrationAgent
