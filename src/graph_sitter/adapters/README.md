@@ -26,9 +26,16 @@ adapters/
 
 The `analysis/` module contains all code analysis functionality:
 
+## 🎨 Visualizations Module
+
+The `visualizations/` module contains visualization and reporting functionality:
+
+## 🔧 Codemods Module
+
+The `codemods/` module contains code modification tools for automated refactoring:
+
 ### Enhanced Analysis
 ```python
 from graph_sitter.adapters.analysis.enhanced_analysis import analyze_codebase_enhanced
 
 # ... rest of examples ...
-```
