@@ -12,7 +12,7 @@ import uvicorn
 from rich.logging import RichHandler
 from rich.panel import Panel
 
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.extensions.Contexten.contexten_app import ContextenApp
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)

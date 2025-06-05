@@ -13,12 +13,13 @@ with all its comprehensive features including:
 import asyncio
 import os
 from datetime import datetime
-from contexten.extensions.linear import (
+from contexten.extensions.Linear import (
+    LinearClient,
     LinearIntegrationAgent,
-    get_linear_config,
-    create_linear_integration_agent
+    LinearWebhookProcessor,
+    WorkflowAutomation,
 )
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.extensions.Contexten.contexten_app import ContextenApp
 
 
 async def basic_usage_example():
@@ -347,7 +348,7 @@ async def monitoring_and_health_example():
 
 async def configuration_example():
     """Example of configuration management"""
-    print("\n⚙️ Configuration Example")
+    print("\n⚙��� Configuration Example")
     print("=" * 50)
     
     try:

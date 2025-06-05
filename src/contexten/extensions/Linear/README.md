@@ -146,7 +146,7 @@ agent = await create_linear_integration_agent()
 The enhanced Linear integration is automatically integrated with the existing `ContextenApp` through the enhanced `Linear` event handler:
 
 ```python
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.extensions.Contexten.contexten_app import ContextenApp
 
 # Create app - Linear integration is automatically initialized
 app = ContextenApp(name="my-app")
@@ -297,7 +297,7 @@ Each task type has a customized prompt template optimized for that specific type
 - **Error Handling**: Secure error message handling without information leakage
 - **Input Validation**: Comprehensive input validation throughout
 
-## 🚨 Error Handling and Recovery
+## ��� Error Handling and Recovery
 
 ### Retry Mechanisms
 - **Webhook Processing**: Automatic retry for failed webhook events with exponential backoff

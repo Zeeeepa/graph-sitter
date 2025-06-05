@@ -5,7 +5,7 @@ from typing import Literal
 import modal
 from fastapi import Request
 
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.extensions.Contexten.contexten_app import ContextenApp
 from contexten.extensions.events.modal.request_util import fastapi_request_adapter
 from graph_sitter.git.clients.git_repo_client import GitRepoClient
 from graph_sitter.git.schemas.repo_config import RepoConfig

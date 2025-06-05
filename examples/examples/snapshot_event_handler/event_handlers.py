@@ -1,5 +1,5 @@
 from contexten.agents.code_agent import CodeAgent
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.extensions.Contexten.contexten_app import ContextenApp
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.slack.types import SlackEvent
 from contexten.extensions.events.modal.base import CodebaseEventsApp, EventRouterMixin
