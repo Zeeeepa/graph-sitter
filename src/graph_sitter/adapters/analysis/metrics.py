@@ -301,20 +301,24 @@ class MetricsCalculator:
     def estimate_test_coverage(self, symbol: Symbol) -> float:
         """Estimate test coverage for a symbol."""
         try:
+            # Handle None symbol names
+            if symbol.name is None:
+                return 0.0
+            
             symbol_name = symbol.name.lower()
             
             # Look for test functions that might test this symbol
             test_functions = [
                 f for f in self.codebase.functions
-                if f.name.startswith('test_') and symbol_name in f.name.lower()
+                if f.name is not None and f.name.startswith('test_') and symbol_name in f.name.lower()
             ]
-            
+
             # Look for test classes
             test_classes = [
                 c for c in self.codebase.classes
-                if c.name.startswith('Test') and symbol_name in c.name.lower()
+                if c.name is not None and c.name.startswith('Test') and symbol_name in c.name.lower()
             ]
-            
+
             # Simple heuristic: if there are tests mentioning this symbol
             test_score = 0.0
             if test_functions:
@@ -344,9 +348,9 @@ class MetricsCalculator:
             
             # Calculate metrics
             line_count = len(source.split('\n')) if source else 0
-            cyclomatic_complexity = self.calculate_cyclomatic_complexity(function)
-            maintainability_index = self.calculate_maintainability_index(function)
-            documentation_coverage = self.calculate_documentation_coverage(function)
+            complexity = self.calculate_cyclomatic_complexity(function)
+            maintainability = self.calculate_maintainability_index(function)
+            doc_coverage = self.calculate_documentation_coverage(function)
             test_coverage = self.estimate_test_coverage(function)
             
             # Type annotation coverage
@@ -356,17 +360,20 @@ class MetricsCalculator:
             # Impact score based on usage
             impact_score = len(call_sites) + len(usages) * 0.5
             
+            # Handle None function names
+            function_name = function.name if function.name is not None else "unknown"
+            
             metrics = FunctionMetrics(
-                name=function.name,
+                name=function_name,
                 filepath=getattr(function, 'filepath', 'unknown'),
                 line_count=line_count,
                 parameter_count=len(parameters),
-                return_statement_count=len(return_statements),
+                return_statement_count=len(function.return_statements),
                 call_site_count=len(call_sites),
                 function_call_count=len(function_calls),
-                cyclomatic_complexity=cyclomatic_complexity,
-                maintainability_index=maintainability_index,
-                documentation_coverage=documentation_coverage,
+                cyclomatic_complexity=complexity,
+                maintainability_index=maintainability,
+                documentation_coverage=doc_coverage,
                 test_coverage_estimate=test_coverage,
                 is_async=getattr(function, 'is_async', False),
                 has_decorators=len(decorators) > 0,
@@ -377,17 +384,19 @@ class MetricsCalculator:
                 impact_score=impact_score
             )
             
-            self._function_metrics_cache[function.name] = metrics
+            self._function_metrics_cache[function_name] = metrics
             return metrics
             
         except Exception as e:
-            logger.error(f"Error analyzing function {function.name}: {e}")
+            # Handle None function names in error case
+            function_name = function.name if function.name is not None else "unknown"
+            logger.error(f"Error analyzing function {function_name}: {e}")
             return FunctionMetrics(
-                name=function.name,
+                name=function_name,
                 filepath=getattr(function, 'filepath', 'unknown'),
                 line_count=0, parameter_count=0, return_statement_count=0,
                 call_site_count=0, function_call_count=0, cyclomatic_complexity=1,
-                maintainability_index=50.0, documentation_coverage=0.0,
+                maintainability_index=0.0, documentation_coverage=0.0,
                 test_coverage_estimate=0.0, is_async=False, has_decorators=False,
                 has_docstring=False, has_type_annotations=False,
                 dependency_count=0, usage_count=0, impact_score=0.0
@@ -491,13 +500,17 @@ class MetricsCalculator:
                 method_count=len(methods),
                 attribute_count=len(attributes),
                 inheritance_depth=inheritance_depth,
+                subclass_count=0,  # Add missing required field
                 cohesion_score=cohesion_score,
                 coupling_score=coupling_score,
-                has_docstring=bool(getattr(class_def, 'docstring', None)),
-                abstract_method_count=len(abstract_methods),
-                public_method_count=len(public_methods),
-                private_method_count=len(private_methods),
-                magic_method_count=len(magic_methods)
+                documentation_coverage=doc_coverage,
+                test_coverage_estimate=test_coverage,
+                has_constructor=has_constructor,
+                has_docstring=has_docstring,
+                abstract_method_count=abstract_method_count,
+                public_method_count=public_method_count,
+                private_method_count=private_method_count,
+                magic_method_count=magic_method_count
             )
             
             self._class_metrics_cache[class_name] = metrics
@@ -509,9 +522,14 @@ class MetricsCalculator:
                 name=class_name,
                 filepath=getattr(class_def, 'filepath', 'unknown'),
                 method_count=0, attribute_count=0, inheritance_depth=0,
-                cohesion_score=0.0, coupling_score=0.0, has_docstring=False,
-                abstract_method_count=0, public_method_count=0,
-                private_method_count=0, magic_method_count=0
+                subclass_count=0,  # Add missing required field
+                cohesion_score=0.0, coupling_score=0.0,
+                documentation_coverage=0.0,  # Add missing required field
+                test_coverage_estimate=0.0,  # Add missing required field
+                has_constructor=False,  # Add missing required field
+                has_docstring=False, abstract_method_count=0,
+                public_method_count=0, private_method_count=0,
+                magic_method_count=0
             )
     
     def analyze_file_metrics(self, file: SourceFile) -> FileMetrics:
