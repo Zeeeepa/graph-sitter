@@ -8,7 +8,8 @@ This module contains all analysis-related functionality including:
 - Call graph generation
 - Dead code detection
 - Function context analysis
-- Code modification tools (codemods)
+- Database-integrated analysis
+- Backward compatibility functions
 """
 
 from .enhanced_analysis import (
@@ -20,6 +21,7 @@ from .enhanced_analysis import (
 
 from .metrics import (
     CodebaseMetrics,
+    EnhancedCodebaseMetrics,
     calculate_codebase_metrics,
     calculate_function_metrics,
     calculate_class_metrics,
@@ -60,6 +62,29 @@ from .function_context import (
     create_training_example
 )
 
+# New database-integrated analysis functionality
+from .db_integrated_analysis import (
+    CodebaseDBAdapter,
+    create_enhanced_analyzer
+)
+
+from .database_utils import (
+    AnalysisResult,
+    DatabaseMetrics,
+    DatabaseConnection,
+    convert_rset_to_dicts,
+    execute_query_with_rset_conversion
+)
+
+from .compatibility import (
+    get_codebase_summary,
+    get_file_summary,
+    get_class_summary,
+    get_function_summary,
+    get_symbol_summary,
+    get_codebase_summary_enhanced
+)
+
 __all__ = [
     # Enhanced analysis
     'EnhancedAnalyzer',
@@ -69,6 +94,7 @@ __all__ = [
     
     # Metrics
     'CodebaseMetrics',
+    'EnhancedCodebaseMetrics',
     'calculate_codebase_metrics',
     'calculate_function_metrics',
     'calculate_class_metrics',
@@ -102,6 +128,23 @@ __all__ = [
     'get_enhanced_function_context',
     'analyze_function_issues',
     'analyze_codebase_functions',
-    'create_training_example'
+    'create_training_example',
+    
+    # Database-integrated analysis
+    'CodebaseDBAdapter',
+    'create_enhanced_analyzer',
+    'AnalysisResult',
+    'DatabaseMetrics',
+    'DatabaseConnection',
+    'convert_rset_to_dicts',
+    'execute_query_with_rset_conversion',
+    
+    # Backward compatibility
+    'get_codebase_summary',
+    'get_file_summary',
+    'get_class_summary',
+    'get_function_summary',
+    'get_symbol_summary',
+    'get_codebase_summary_enhanced'
 ]
 

@@ -4,7 +4,8 @@ import logging
 import math
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.codebase import Codebase
@@ -92,6 +93,96 @@ class CodebaseMetrics:
     dead_code_percentage: float
     technical_debt_score: float
     health_score: float
+    # Enhanced database-specific fields
+    complexity_score: Optional[float] = None
+    maintainability_index: Optional[float] = None
+    technical_debt_ratio: Optional[float] = None
+    test_coverage: Optional[float] = None
+    languages: Optional[Dict[str, int]] = None
+    created_at: Optional[datetime] = None
+
+
+@dataclass
+class EnhancedCodebaseMetrics:
+    """Enhanced codebase metrics with database integration support."""
+    # Core metrics
+    total_files: int
+    total_functions: int
+    total_classes: int
+    total_lines: int
+    complexity_score: float
+    maintainability_index: float
+    technical_debt_ratio: float
+    test_coverage: float
+    languages: Dict[str, int]
+    
+    # Additional analysis metrics
+    total_symbols: Optional[int] = None
+    total_imports: Optional[int] = None
+    average_complexity: Optional[float] = None
+    average_maintainability: Optional[float] = None
+    documentation_coverage: Optional[float] = None
+    test_coverage_estimate: Optional[float] = None
+    dead_code_percentage: Optional[float] = None
+    technical_debt_score: Optional[float] = None
+    health_score: Optional[float] = None
+    created_at: Optional[datetime] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert metrics to dictionary format for database storage."""
+        return {
+            'total_files': self.total_files,
+            'total_functions': self.total_functions,
+            'total_classes': self.total_classes,
+            'total_lines': self.total_lines,
+            'complexity_score': self.complexity_score,
+            'maintainability_index': self.maintainability_index,
+            'technical_debt_ratio': self.technical_debt_ratio,
+            'test_coverage': self.test_coverage,
+            'languages': self.languages,
+            'total_symbols': self.total_symbols,
+            'total_imports': self.total_imports,
+            'average_complexity': self.average_complexity,
+            'average_maintainability': self.average_maintainability,
+            'documentation_coverage': self.documentation_coverage,
+            'test_coverage_estimate': self.test_coverage_estimate,
+            'dead_code_percentage': self.dead_code_percentage,
+            'technical_debt_score': self.technical_debt_score,
+            'health_score': self.health_score,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'EnhancedCodebaseMetrics':
+        """Create metrics from dictionary format (e.g., from database)."""
+        created_at = None
+        if data.get('created_at'):
+            if isinstance(data['created_at'], str):
+                created_at = datetime.fromisoformat(data['created_at'])
+            else:
+                created_at = data['created_at']
+        
+        return cls(
+            total_files=data['total_files'],
+            total_functions=data['total_functions'],
+            total_classes=data['total_classes'],
+            total_lines=data['total_lines'],
+            complexity_score=data['complexity_score'],
+            maintainability_index=data['maintainability_index'],
+            technical_debt_ratio=data['technical_debt_ratio'],
+            test_coverage=data['test_coverage'],
+            languages=data.get('languages', {}),
+            total_symbols=data.get('total_symbols'),
+            total_imports=data.get('total_imports'),
+            average_complexity=data.get('average_complexity'),
+            average_maintainability=data.get('average_maintainability'),
+            documentation_coverage=data.get('documentation_coverage'),
+            test_coverage_estimate=data.get('test_coverage_estimate'),
+            dead_code_percentage=data.get('dead_code_percentage'),
+            technical_debt_score=data.get('technical_debt_score'),
+            health_score=data.get('health_score'),
+            created_at=created_at
+        )
 
 
 class MetricsCalculator:
@@ -210,20 +301,24 @@ class MetricsCalculator:
     def estimate_test_coverage(self, symbol: Symbol) -> float:
         """Estimate test coverage for a symbol."""
         try:
+            # Handle None symbol names
+            if symbol.name is None:
+                return 0.0
+            
             symbol_name = symbol.name.lower()
             
             # Look for test functions that might test this symbol
             test_functions = [
                 f for f in self.codebase.functions
-                if f.name.startswith('test_') and symbol_name in f.name.lower()
+                if f.name is not None and f.name.startswith('test_') and symbol_name in f.name.lower()
             ]
-            
+
             # Look for test classes
             test_classes = [
                 c for c in self.codebase.classes
-                if c.name.startswith('Test') and symbol_name in c.name.lower()
+                if c.name is not None and c.name.startswith('Test') and symbol_name in c.name.lower()
             ]
-            
+
             # Simple heuristic: if there are tests mentioning this symbol
             test_score = 0.0
             if test_functions:
@@ -253,9 +348,9 @@ class MetricsCalculator:
             
             # Calculate metrics
             line_count = len(source.split('\n')) if source else 0
-            cyclomatic_complexity = self.calculate_cyclomatic_complexity(function)
-            maintainability_index = self.calculate_maintainability_index(function)
-            documentation_coverage = self.calculate_documentation_coverage(function)
+            complexity = self.calculate_cyclomatic_complexity(function)
+            maintainability = self.calculate_maintainability_index(function)
+            doc_coverage = self.calculate_documentation_coverage(function)
             test_coverage = self.estimate_test_coverage(function)
             
             # Type annotation coverage
@@ -265,17 +360,20 @@ class MetricsCalculator:
             # Impact score based on usage
             impact_score = len(call_sites) + len(usages) * 0.5
             
+            # Handle None function names
+            function_name = function.name if function.name is not None else "unknown"
+            
             metrics = FunctionMetrics(
-                name=function.name,
+                name=function_name,
                 filepath=getattr(function, 'filepath', 'unknown'),
                 line_count=line_count,
                 parameter_count=len(parameters),
-                return_statement_count=len(return_statements),
+                return_statement_count=len(function.return_statements),
                 call_site_count=len(call_sites),
                 function_call_count=len(function_calls),
-                cyclomatic_complexity=cyclomatic_complexity,
-                maintainability_index=maintainability_index,
-                documentation_coverage=documentation_coverage,
+                cyclomatic_complexity=complexity,
+                maintainability_index=maintainability,
+                documentation_coverage=doc_coverage,
                 test_coverage_estimate=test_coverage,
                 is_async=getattr(function, 'is_async', False),
                 has_decorators=len(decorators) > 0,
@@ -286,17 +384,19 @@ class MetricsCalculator:
                 impact_score=impact_score
             )
             
-            self._function_metrics_cache[function.name] = metrics
+            self._function_metrics_cache[function_name] = metrics
             return metrics
             
         except Exception as e:
-            logger.error(f"Error analyzing function {function.name}: {e}")
+            # Handle None function names in error case
+            function_name = function.name if function.name is not None else "unknown"
+            logger.error(f"Error analyzing function {function_name}: {e}")
             return FunctionMetrics(
-                name=function.name,
+                name=function_name,
                 filepath=getattr(function, 'filepath', 'unknown'),
                 line_count=0, parameter_count=0, return_statement_count=0,
                 call_site_count=0, function_call_count=0, cyclomatic_complexity=1,
-                maintainability_index=50.0, documentation_coverage=0.0,
+                maintainability_index=0.0, documentation_coverage=0.0,
                 test_coverage_estimate=0.0, is_async=False, has_decorators=False,
                 has_docstring=False, has_type_annotations=False,
                 dependency_count=0, usage_count=0, impact_score=0.0
@@ -400,13 +500,17 @@ class MetricsCalculator:
                 method_count=len(methods),
                 attribute_count=len(attributes),
                 inheritance_depth=inheritance_depth,
+                subclass_count=0,  # Add missing required field
                 cohesion_score=cohesion_score,
                 coupling_score=coupling_score,
-                has_docstring=bool(getattr(class_def, 'docstring', None)),
-                abstract_method_count=len(abstract_methods),
-                public_method_count=len(public_methods),
-                private_method_count=len(private_methods),
-                magic_method_count=len(magic_methods)
+                documentation_coverage=doc_coverage,
+                test_coverage_estimate=test_coverage,
+                has_constructor=has_constructor,
+                has_docstring=has_docstring,
+                abstract_method_count=abstract_method_count,
+                public_method_count=public_method_count,
+                private_method_count=private_method_count,
+                magic_method_count=magic_method_count
             )
             
             self._class_metrics_cache[class_name] = metrics
@@ -418,9 +522,14 @@ class MetricsCalculator:
                 name=class_name,
                 filepath=getattr(class_def, 'filepath', 'unknown'),
                 method_count=0, attribute_count=0, inheritance_depth=0,
-                cohesion_score=0.0, coupling_score=0.0, has_docstring=False,
-                abstract_method_count=0, public_method_count=0,
-                private_method_count=0, magic_method_count=0
+                subclass_count=0,  # Add missing required field
+                cohesion_score=0.0, coupling_score=0.0,
+                documentation_coverage=0.0,  # Add missing required field
+                test_coverage_estimate=0.0,  # Add missing required field
+                has_constructor=False,  # Add missing required field
+                has_docstring=False, abstract_method_count=0,
+                public_method_count=0, private_method_count=0,
+                magic_method_count=0
             )
     
     def analyze_file_metrics(self, file: SourceFile) -> FileMetrics:
