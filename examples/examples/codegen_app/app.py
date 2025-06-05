@@ -8,7 +8,7 @@ from contexten import CodeAgent, ContextenApp
 from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.slack.types import SlackEvent
-from contexten.extensions.tools.github.create_pr_comment import create_pr_comment
+from contexten.agents.tools.github.create_pr_comment import create_pr_comment
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

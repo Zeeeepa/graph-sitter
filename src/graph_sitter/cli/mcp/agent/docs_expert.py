@@ -4,7 +4,7 @@ from langchain_core.messages import SystemMessage
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langgraph.checkpoint.memory import MemorySaver
 
-from contexten.extensions.langchain.agent import create_codebase_agent
+from contexten.agents.langchain.agent import create_codebase_agent
 from graph_sitter import Codebase
 
 AGENT_INSTRUCTIONS = """
@@ -63,3 +63,4 @@ def create_sdk_expert_agent(
     agent = create_codebase_agent(codebase=codebase, model_provider=model_provider, model_name=model_name, memory=memory, system_message=system_message, debug=debug)
 
     return agent
+
