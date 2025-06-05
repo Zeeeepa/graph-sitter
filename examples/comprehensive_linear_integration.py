@@ -18,7 +18,7 @@ from contexten.extensions.linear import (
     get_linear_config,
     create_linear_integration_agent
 )
-from contexten.extensions.events.contexten_app import ContextenApp
+from contexten.contexten_app import ContextenApp
 
 
 async def basic_usage_example():
