@@ -7,11 +7,23 @@ with specialized modules for analysis, visualization, and code modification func
 
 # Analysis adapters
 from .analysis import (
+    # Core analysis classes
+    CodeAnalyzer,
+    AnalysisResult,
+    CodeIssue,
+    DeadCodeItem,
+    FunctionMetrics,
+    ClassMetrics,
+    FileIssueInfo,
+    InheritanceInfo,
+    
+    # Main analysis functions
+    analyze_codebase,
+    analyze_and_print,
+    
     # Enhanced analysis
-    EnhancedAnalyzer,
-    analyze_codebase_enhanced,
-    analyze_function_enhanced,
-    get_enhanced_analysis_report,
+    format_analysis_results,
+    add_analysis_method,
     
     # Metrics
     CodebaseMetrics,
@@ -155,6 +167,18 @@ from .metrics import (
 )
 
 __all__ = [
+    # Core Analysis
+    'CodeAnalyzer',
+    'AnalysisResult',
+    'CodeIssue',
+    'DeadCodeItem',
+    'FunctionMetrics',
+    'ClassMetrics',
+    'FileIssueInfo',
+    'InheritanceInfo',
+    'analyze_codebase',
+    'analyze_and_print',
+    
     # Call Graph Analysis
     'CallGraphAnalyzer',
     'CallGraphNode', 
