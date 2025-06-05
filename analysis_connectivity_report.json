@@ -1,0 +1,114 @@
+{
+  "validation_timestamp": "2025-06-05T13:40:17.846736",
+  "repository": "https://github.com/Zeeeepa/graph-sitter",
+  "analysis_api_version": "1.0.0",
+  "components": {
+    "core_analysis": {
+      "files": [
+        "analysis.py",
+        "repository_analyzer.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "AnalysisConfig",
+        "Analysis class",
+        "auto-run capability"
+      ]
+    },
+    "unified_framework": {
+      "files": [
+        "base.py",
+        "registry.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "BaseAnalyzer",
+        "AnalysisRegistry",
+        "standardized interfaces"
+      ]
+    },
+    "database_integration": {
+      "files": [
+        "database_adapter.py",
+        "codebase_database_adapter.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "unified schema",
+        "session management",
+        "result storage"
+      ]
+    },
+    "legacy_compatibility": {
+      "files": [
+        "legacy_unified_analyzer.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "backward compatibility",
+        "result conversion",
+        "registry integration"
+      ]
+    },
+    "reporting_system": {
+      "files": [
+        "html_generator.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "HTML reports",
+        "issue categorization",
+        "metrics visualization"
+      ]
+    },
+    "visualization_system": {
+      "files": [
+        "dashboard.py",
+        "interactive.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "Vue.js dashboard",
+        "Plotly charts",
+        "interactive controls"
+      ]
+    },
+    "unified_adapter": {
+      "files": [
+        "adapter.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "single entry point",
+        "component orchestration",
+        "contexten integration"
+      ]
+    },
+    "examples": {
+      "files": [
+        "analysis_api_example.py",
+        "comprehensive_analysis_with_reports.py"
+      ],
+      "status": "implemented",
+      "features": [
+        "API demonstrations",
+        "full feature showcase",
+        "integration patterns"
+      ]
+    }
+  },
+  "api_syntax": {
+    "codebase_from_repo_analysis": "Codebase.from_repo.Analysis(\"repo/name\")",
+    "codebase_local_analysis": "Codebase.Analysis(\"path/to/repo\")",
+    "manual_analysis": "Analysis.from_path(\"path\", config)",
+    "report_generation": "generate_analysis_report(codebase, output_dir)"
+  },
+  "integration_ready": {
+    "contexten": true,
+    "database_storage": true,
+    "html_reports": true,
+    "interactive_dashboards": true,
+    "csv_exports": true,
+    "json_exports": true
+  }
+}
