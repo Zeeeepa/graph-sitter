@@ -1569,39 +1569,37 @@ class Codebase(
         """
         return self._op.create_pr_review_comment(pr_number, body, commit_sha, path, line, side, start_line)
 
-    def Analysis(self, output_dir: str = "analysis_output") -> 'ComprehensiveAnalysisResult':
+    def Analysis(self, output_dir: str = "analysis_output") -> 'AnalysisResult':
         """
-        Run comprehensive analysis on the codebase.
+        Run comprehensive analysis on the codebase using Graph-Sitter's built-in capabilities.
         
-        This method triggers full-context analysis when "Analysis" is included in codebase initialization.
-        It generates HTML reports with issue listings and errors, and provides visualization capabilities.
+        This method leverages Graph-Sitter's pre-computed relationships and indexes
+        for fast, reliable analysis without complex processing pipelines.
         
         Args:
             output_dir: Directory to save analysis results
             
         Returns:
-            ComprehensiveAnalysisResult containing all analysis data
+            AnalysisResult containing all analysis data
         """
-        from ..analysis.unified_analyzer import UnifiedCodebaseAnalyzer
-        
-        analyzer = UnifiedCodebaseAnalyzer(self, output_dir=output_dir)
-        # Disable visualizations and training data by default to avoid tree-sitter serialization issues
-        return analyzer.run_comprehensive_analysis(create_visualizations=False, generate_training_data=False)
+        from ..analysis import analyze_codebase
+        return analyze_codebase(self, output_dir)
 
     @classmethod
-    def AnalysisFromPath(cls, repo_path: str, output_dir: str = "analysis_output") -> "ComprehensiveAnalysisResult":
+    def AnalysisFromPath(cls, repo_path: str, output_dir: str = "analysis_output") -> "AnalysisResult":
         """
-        Create codebase from path and perform comprehensive analysis.
+        Create a codebase from a path and run analysis using Graph-Sitter's built-in capabilities.
         
         Args:
             repo_path: Path to the repository
             output_dir: Directory to save analysis outputs
             
         Returns:
-            ComprehensiveAnalysisResult with all analysis components
+            AnalysisResult with comprehensive analysis data
         """
-        codebase = cls.from_files(repo_path)
-        return codebase.Analysis(output_dir)
+        from ..analysis import analyze_codebase
+        codebase = cls(repo_path)
+        return analyze_codebase(codebase, output_dir)
 
 
 # The last 2 lines of code are added to the runner. See codegen-backend/cli/generate/utils.py
