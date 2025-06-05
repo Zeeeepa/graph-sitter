@@ -31,9 +31,9 @@ try:
     from tree_sitter import Language, Parser, Node
 except ImportError:
     # Fallback for environments without tree-sitter
-    Language = None
-    Parser = None
-    Node = None
+    Language = type(None)  # type: ignore
+    Parser = type(None)    # type: ignore
+    Node = type(None)      # type: ignore
 
 
 @dataclass
@@ -544,8 +544,8 @@ class CodeAnalyzer:
     
     def _analyze_inheritance_hierarchy(self) -> None:
         """Analyze inheritance hierarchy for all classes."""
-        inheritance_map = {}
-        
+        inheritance_map: Dict[str, Dict[str, Any]] = {}
+
         # First pass: collect all classes and their basic info
         for class_name, (file_path, line_start, line_end) in self.class_definitions.items():
             inheritance_map[class_name] = {
@@ -555,7 +555,7 @@ class CodeAnalyzer:
                 'child_classes': [],
                 'inheritance_depth': 0
             }
-        
+
         # Second pass: analyze inheritance relationships using AST
         for file_path in set(info[0] for info in self.class_definitions.values()):
             if file_path in self.file_contents:
@@ -569,10 +569,14 @@ class CodeAnalyzer:
                                 for base in node.bases:
                                     if isinstance(base, ast.Name):
                                         parent_name = base.id
-                                        inheritance_map[class_name]['parent_classes'].append(parent_name)
+                                        parent_classes = inheritance_map[class_name]['parent_classes']
+                                        if isinstance(parent_classes, list):
+                                            parent_classes.append(parent_name)
                                         if parent_name in inheritance_map:
-                                            inheritance_map[parent_name]['child_classes'].append(class_name)
-                except:
+                                            child_classes = inheritance_map[parent_name]['child_classes']
+                                            if isinstance(child_classes, list):
+                                                child_classes.append(class_name)
+                except Exception:
                     pass  # Skip files with syntax errors
         
         # Third pass: calculate inheritance depth
@@ -602,10 +606,10 @@ class CodeAnalyzer:
             depth = calculate_depth(class_name)
             inheritance_info = InheritanceInfo(
                 class_name=class_name,
-                file_path=info['file_path'],
-                line_start=info['line_start'],
-                parent_classes=info['parent_classes'],
-                child_classes=info['child_classes'],
+                file_path=str(info['file_path']),
+                line_start=int(info['line_start']),
+                parent_classes=list(info['parent_classes']),
+                child_classes=list(info['child_classes']),
                 inheritance_depth=depth,
                 is_top_level=(depth == 0)
             )
@@ -637,7 +641,7 @@ class CodeAnalyzer:
                         if hasattr(parent, 'body') and node in parent.body:
                             return isinstance(parent, ast.Module)
             return False
-        except:
+        except Exception:
             return False
     
     def _is_top_level_class(self, class_name: str, file_path: str) -> bool:
@@ -651,7 +655,7 @@ class CodeAnalyzer:
                 if isinstance(node, ast.ClassDef) and node.name == class_name:
                     return len(node.bases) == 0
             return False
-        except:
+        except Exception:
             return False
     
     def _get_class_parents(self, class_name: str, file_path: str) -> List[str]:
@@ -669,7 +673,7 @@ class CodeAnalyzer:
                             parents.append(base.id)
                     return parents
             return []
-        except:
+        except Exception:
             return []
 
 
@@ -864,7 +868,7 @@ def format_analysis_results(result: AnalysisResult) -> str:
     output.append(f"  • Total Functions: {result.total_functions}")
     output.append(f"  • Total Classes: {result.total_classes}")
     output.append(f"  • Total Lines: {result.total_lines}")
-    output.append(f"  • Maintainability Index: {result.maintainability_index:.1f}/100")
+    output.append(f"  ��� Maintainability Index: {result.maintainability_index:.1f}/100")
     output.append(f"  • Technical Debt Ratio: {result.technical_debt_ratio:.2f}")
     output.append(f"  • Test Coverage Estimate: {result.test_coverage_estimate:.1f}%")
     output.append("")
