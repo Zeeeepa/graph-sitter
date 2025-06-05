@@ -18,6 +18,24 @@ except ImportError:
     # Fallback to simplified analysis if core Analysis doesn't exist
     Analysis = None
 
+# Import simplified analysis functions
+from .analysis import (
+    analyze_codebase,
+    get_dead_code,
+    remove_dead_code,
+    get_call_graph,
+    get_inheritance_hierarchy,
+    get_dependencies,
+    get_usages,
+    find_recursive_functions,
+    analyze_test_coverage,
+    get_codebase_stats,
+    visualize_call_graph,
+    visualize_inheritance,
+    visualize_dependencies,
+    create_interactive_dashboard
+)
+
 # Essential visualization (keep only simple dashboard)
 try:
     from .visualizations.dashboard import InteractiveDashboard
@@ -31,6 +49,20 @@ __all__ = [
     'Class',
     'Symbol',
     'Analysis',
+    'analyze_codebase',
+    'get_dead_code',
+    'remove_dead_code',
+    'get_call_graph',
+    'get_inheritance_hierarchy',
+    'get_dependencies',
+    'get_usages',
+    'find_recursive_functions',
+    'analyze_test_coverage',
+    'get_codebase_stats',
+    'visualize_call_graph',
+    'visualize_inheritance',
+    'visualize_dependencies',
+    'create_interactive_dashboard',
     'InteractiveDashboard'
 ]
 
@@ -127,4 +159,3 @@ if hasattr(Codebase, 'from_repo'):
 
 # This enables: Codebase.Analysis('path/to/repo')  
 Codebase.Analysis = CodebaseAnalysisAPI.local_analysis
-
