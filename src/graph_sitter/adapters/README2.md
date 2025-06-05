@@ -4182,3 +4182,402 @@ const MyComponent: React.FC = () => {
   );
 };
 System prompt (if using AI)
+
+""""""""""""""""""""""""""""""""""""""""" EXAMPLES TO ADD TO OPENEVOLVE DATABASE """"""""""""""""
+ import codebase (Most important)
+****
+AND very important too
+**** Finding Functions and Their Context
+First, we will do a “graph expansion” for each function - grab the function’s source, as well as the full source of all usages of the function and all dependencies.
+
+See dependencies and usages to learn more about navigating the code graph
+First, let’s import the types we need from Codegen:
+
+
+Copy
+import graph_sitter
+from graph_sitter import Codebase
+from codegen.sdk.core.external_module import ExternalModule
+from codegen.sdk.core.import_resolution import Import
+from codegen.sdk.core.symbol import Symbol
+Here’s how we get the full context for each function:
+
+
+Copy
+def get_function_context(function) -> dict:
+    """Get the implementation, dependencies, and usages of a function."""
+    context = {
+        "implementation": {"source": function.source, "filepath": function.filepath},
+        "dependencies": [],
+        "usages": [],
+    }
+
+    # Add dependencies
+    for dep in function.dependencies:
+        # Hop through imports to find the root symbol source
+        if isinstance(dep, Import):
+            dep = hop_through_imports(dep)
+
+        context["dependencies"].append({"source": dep.source, "filepath": dep.filepath})
+
+    # Add usages
+    for usage in function.usages:
+        context["usages"].append({
+            "source": usage.usage_symbol.source,
+            "filepath": usage.usage_symbol.filepath,
+        })
+
+    return context
+Notice how we use hop_through_imports to resolve dependencies. When working with imports, symbols can be re-exported multiple times. For example, a helper function might be imported and re-exported through several files before being used. We need to follow this chain to find the actual implementation:
+
+
+Copy
+def hop_through_imports(imp: Import) -> Symbol | ExternalModule:
+    """Finds the root symbol for an import."""
+    if isinstance(imp.imported_symbol, Import):
+        return hop_through_imports(imp.imported_symbol)
+    return imp.imported_symbol
+This creates a structured representation of each function’s context:
+
+
+Copy
+{
+  "implementation": {
+    "source": "def process_data(input: str) -> dict: ...",
+    "filepath": "src/data_processor.py"
+  },
+  "dependencies": [
+    {
+      "source": "def validate_input(data: str) -> bool: ...",
+      "filepath": "src/validators.py"
+    }
+  ],
+  "usages": [
+    {
+      "source": "result = process_data(user_input)",
+      "filepath": "src/api.py"
+    }
+  ]
+}
+​
+
+***************************
+# Print overall stats
+print("🔍 Codebase Analysis")
+print("=" * 50)
+print(f"📚 Total Classes: {len(codebase.classes)}")
+print(f"⚡ Total Functions: {len(codebase.functions)}")
+print(f"🔄 Total Imports: {len(codebase.imports)}")
+
+# Find class with most inheritance
+if codebase.classes:
+    deepest_class = max(codebase.classes, key=lambda x: len(x.superclasses))
+    print(f"\n🌳 Class with most inheritance: {deepest_class.name}")
+    print(f"   📊 Chain Depth: {len(deepest_class.superclasses)}")
+    print(f"   ⛓️ Chain: {' -> '.join(s.name for s in deepest_class.superclasses)}")
+
+# Find first 5 recursive functions
+recursive = [f for f in codebase.functions
+            if any(call.name == f.name for call in f.function_calls)][:5]
+if recursive:
+    print(f"\n🔄 Recursive functions:")
+    for func in recursive:
+        print(f"  - {func.name}")
+
+***************************
+
+
+Analyzing Tests
+Let’s specifically drill into large test files, which can be cumbersome to manage.
+
+
+Copy
+from collections import Counter
+
+# Filter to all test functions and classes
+test_functions = [x for x in codebase.functions if x.name.startswith('test_')]
+test_classes = [x for x in codebase.classes if x.name.startswith('Test')]
+
+print("🧪 Test Analysis")
+print("=" * 50)
+print(f"📝 Total Test Functions: {len(test_functions)}")
+print(f"🔬 Total Test Classes: {len(test_classes)}")
+print(f"📊 Tests per File: {len(test_functions) / len(codebase.files):.1f}")
+
+# Find files with the most tests
+print("\n📚 Top Test Files by Class Count")
+print("-" * 50)
+file_test_counts = Counter([x.file for x in test_classes])
+for file, num_tests in file_test_counts.most_common()[:5]:
+    print(f"🔍 {num_tests} test classes: {file.filepath}")
+    print(f"   📏 File Length: {len(file.source)} lines")
+    print(f"   💡 Functions: {len(file.functions)}")
+**********************************************************************
+# Find dead code
+for func in codebase.functions:
+    if len(func.usages) == 0:
+        print(f'🗑️ Dead code: {func.name}')
+        func.remove()
+
+# Analyze import relationships
+file = codebase.get_file('api/endpoints.py')
+print("\nFiles that import endpoints.py:")
+for import_stmt in file.inbound_imports:
+    print(f"  {import_stmt.file.path}")
+
+print("\nFiles that endpoints.py imports:")
+for import_stmt in file.imports:
+    if import_stmt.resolved_symbol:
+        print(f"  {import_stmt.resolved_symbol.file.path}")
+
+# Explore class hierarchies
+base_class = codebase.get_class('BaseModel')
+if base_class:
+    print(f"\nClasses that inherit from {base_class.name}:")
+    for subclass in base_class.subclasses:
+        print(f"  {subclass.name}")
+        # We can go deeper in the inheritance tree
+        for sub_subclass in subclass.subclasses:
+            print(f"    └─ {sub_subclass.name}")
+**************************************************************
+Using GraphSitter’s static analysis to gather information:
+
+Copy
+function = codebase.get_function("process_data")
+context = {
+    "call_sites": function.call_sites,      # Where the function is called
+    "dependencies": function.dependencies,   # What the function depends on
+    "parent": function.parent,              # Class/module containing the function
+    "docstring": function.docstring,        # Existing documentation
+}
+***************************************************************
+Consider the following source code:
+
+
+Copy
+const userId = 123;
+const [userName, userAge] = ["Eve", 25];
+In Codegen, you can access assignments with the get_local_var_assignment method.
+
+You can then manipulate the assignment with the set_value method.
+
+
+Copy
+id_assignment = file.code_block.get_local_var_assignment("userId")
+id_assignment.set_value("456")
+
+name_assignment = file.code_block.get_local_var_assignment("name")
+name_assignment.rename("userName")
+Assignments inherit both HasName and HasValue behaviors. See Inheritable Behaviors for more details.
+
+​
+Type Annotations
+Similarly, you can set type annotations with the set_type_annotation method.
+
+For example, consider the following source code:
+
+
+Copy
+let status;
+const data = fetchData();
+You can manipulate the assignments as follows:
+
+
+Copy
+status_assignment = file.code_block.get_local_var_assignment("status")
+status_assignment.set_type_annotation("Status")
+status_assignment.set_value("Status.ACTIVE")
+
+data_assignment = file.code_block.get_local_var_assignment("data")
+data_assignment.set_type_annotation("ResponseData<T>")
+
+# Result:
+let status: Status = Status.ACTIVE;
+const data: ResponseData<T> = fetchData();
+​
+Tracking Usages and Dependencies
+Like other symbols, Assignments support usages and dependencies.
+
+
+Copy
+assignment = file.code_block.get_local_var_assignment("userId")
+
+# Get all usages of the assignment
+usages = assignment.usages
+
+# Get all dependencies of the assignment
+dependencies = assignment.dependencies
+*****************************************************************************
+# Find the most called function
+most_called = max(codebase.functions, key=lambda f: len(f.call_sites))
+print(f"\nMost called function: {most_called.name}")
+print(f"Called {len(most_called.call_sites)} times from:")
+for call in most_called.call_sites:
+    print(f"  - {call.parent_function.name} at line {call.start_point[0]}")
+
+# Find function that makes the most calls
+most_calls = max(codebase.functions, key=lambda f: len(f.function_calls))
+print(f"\nFunction making most calls: {most_calls.name}")
+print(f"Makes {len(most_calls.function_calls)} calls to:")
+for call in most_calls.function_calls:
+    print(f"  - {call.name}")
+
+# Find functions with no callers (potential dead code)
+unused = [f for f in codebase.functions if len(f.call_sites) == 0]
+print(f"\nUnused functions:")
+for func in unused:
+    print(f"  - {func.name} in {func.filepath}")
+
+# Find recursive functions
+recursive = [f for f in codebase.functions
+            if any(call.name == f.name for call in f.function_calls)]
+print(f"\nRecursive functions:")
+for func in recursive:
+    print(f"  - {func.name}")
+**********************************************************************************
+or# Access pre-computed relationships
+function = codebase.get_symbol("process_data")
+print(f"Dependencies: {function.dependencies}")  # Instant lookup
+print(f"Usages: {function.usages}")  # No parsing needed
+num_files = len(codebase.files(extensions="*"))
+num_functions = len(codebase.functions)
+num_classes = len(codebase.classes)
+Lines of Code
+Lines of Code refers to the total number of lines in the source code, including blank lines and comments. This is accomplished with a simple count of all lines in the source file.
+
+​
+Logical Lines of Code (LLOC)
+LLOC is the amount of lines of code which contain actual functional statements. It excludes comments, blank lines, and other lines which do not contribute to the utility of the codebase. A high LLOC relative to total lines of code suggests dense, potentially complex code that may benefit from breaking into smaller functions or modules with more documentation.
+
+​
+Source Lines of Code (SLOC)
+SLOC refers to the number of lines containing actual code, excluding blank lines. This includes programming language keywords and comments. While a higher SLOC indicates a larger codebase, it should be evaluated alongside other metrics like cyclomatic complexity and maintainability index to assess if the size is justified by the functionality provided.
+
+Cyclomatic Complexity
+Cyclomatic Complexity measures the number of linearly independent paths through the codebase, making it a valuable indicator of how difficult code will be to test and maintain.
+
+Calculation Method:
+
+Base complexity of 1
++1 for each:
+if statement
+elif statement
+for loop
+while loop
++1 for each boolean operator (and, or) in conditions
++1 for each except block in try-catch statements
+The calculate_cyclomatic_complexity() function traverses the Codgen codebase object and uses the above rules to find statement objects within each function and calculate the overall cyclomatic complexity of the codebase.
+
+
+Copy
+def calculate_cyclomatic_complexity(function):
+    def analyze_statement(statement):
+        complexity = 0
+
+        if isinstance(statement, IfBlockStatement):
+            complexity += 1
+            if hasattr(statement, "elif_statements"):
+                complexity += len(statement.elif_statements)
+
+        elif isinstance(statement, (ForLoopStatement, WhileStatement)):
+            complexity += 1
+
+        return complexity
+​
+Halstead Volume
+Halstead Volume is a software metric which measures the complexity of a codebase by counting the number of unique operators and operands. It is calculated by multiplying the sum of unique operators and operands by the logarithm base 2 of the sum of unique operators and operands.
+
+Halstead Volume: V = (N1 + N2) * log2(n1 + n2)
+
+This calculation uses codegen’s expression types to make this calculation very efficient - these include BinaryExpression, UnaryExpression and ComparisonExpression. The function extracts operators and operands from the codebase object and calculated in calculate_halstead_volume() function.
+
+
+Copy
+def calculate_halstead_volume(operators, operands):
+    n1 = len(set(operators))
+    n2 = len(set(operands))
+
+    N1 = len(operators)
+    N2 = len(operands)
+
+    N = N1 + N2
+    n = n1 + n2
+
+    if n > 0:
+        volume = N * math.log2(n)
+        return volume, N1, N2, n1, n2
+    return 0, N1, N2, n1, n2
+​
+Depth of Inheritance (DOI)
+Depth of Inheritance measures the length of inheritance chain for each class. It is calculated by counting the length of the superclasses list for each class in the codebase. The implementation is handled through a simple calculation using codegen’s class information in the calculate_doi() function.
+
+
+Copy
+def calculate_doi(cls):
+    return len(cls.superclasses)
+​
+Maintainability Index
+Maintainability Index is a software metric which measures how maintainable a codebase is. Maintainability is described as ease to support and change the code. This index is calculated as a factored formula consisting of SLOC (Source Lines Of Code), Cyclomatic Complexity and Halstead volume.
+
+Maintainability Index: M = 171 - 5.2 * ln(HV) - 0.23 * CC - 16.2 * ln(SLOC)
+
+This formula is then normalized to a scale of 0-100, where 100 is the maximum maintainability.
+
+The implementation is handled through the calculate_maintainability_index() function. The codegen codebase object is used to efficiently extract the Cyclomatic Complexity and Halstead Volume for each function and class in the codebase, which are then used to calculate the maintainability index.
+
+
+Copy
+def calculate_maintainability_index(
+    halstead_volume: float, cyclomatic_complexity: float, loc: int
+) -> int:
+    """Calculate the normalized maintainability index for a given function."""
+    if loc <= 0:
+        return 100
+
+    try:
+        raw_mi = (
+            171
+            - 5.2 * math.log(max(1, halstead_volume))
+            - 0.23 * cyclomatic_complexity
+            - 16.2 * math.log(max(1, loc))
+        )
+        normalized_mi = max(0, min(100, raw_mi * 100 / 171))
+        return int(normalized_mi)
+    except (ValueError, TypeError):
+        return 0
+
+*******************************# Document current usage
+for call in api.call_sites:
+    print(f"Called from: {call.parent_function.name}")
+    print(f"With args: {[arg.source for arg in call.args]}")
+Make Atomic Changes: Update one aspect at a time
+
+
+Copy
+# First update parameter names
+param.rename("new_name")
+
+# Then update types
+param.type = "new_type"
+
+# Finally update call sites
+for call in api.call_sites:
+    # ... update calls
+Maintain Backwards Compatibility:
+
+
+Copy
+# Add new parameter with default
+api.add_parameter("new_param: str = None")
+
+# Later make it required
+api.get_parameter("new_param").remove_default()
+Document Changes:
+
+
+Copy
+# Add clear deprecation messages
+old_api.add_decorator('''@deprecated(
+    "Use new_api() instead. Migration guide: docs/migrations/v2.md"
+)''')
+
