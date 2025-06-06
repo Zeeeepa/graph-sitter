@@ -19,8 +19,13 @@ def check_dependencies():
         print("✅ Python dependencies available")
     except ImportError as e:
         print(f"❌ Missing Python dependency: {e}")
-        print("Install with: pip install fastapi uvicorn")
-        return False
+        print("Installing dependencies...")
+        try:
+            subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
+            print("✅ Dependencies installed successfully")
+        except subprocess.CalledProcessError:
+            print("❌ Failed to install dependencies")
+            return False
     
     # Check if npm is available
     try:
@@ -59,13 +64,9 @@ def start_backend():
     print("🚀 Starting backend server...")
     backend_dir = Path(__file__).parent
     
-    # Start uvicorn server
+    # Use the simple main.py to avoid import issues
     cmd = [
-        sys.executable, "-m", "uvicorn", 
-        "api:app", 
-        "--host", "0.0.0.0", 
-        "--port", "8000", 
-        "--reload"
+        sys.executable, "main.py"
     ]
     
     return subprocess.Popen(cmd, cwd=backend_dir)
@@ -153,4 +154,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
