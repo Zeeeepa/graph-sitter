@@ -9,9 +9,9 @@ from graph_sitter.configs.models.secrets import SecretsConfig
 from graph_sitter import Codebase
 from graph_sitter.shared.logging.get_logger import get_logger
 
-from .github import GitHub
-from .linear import Linear
-from .slack import Slack
+from ..github.github import GitHub
+from ..linear.linear import Linear
+from ..slack.slack import Slack
 from ..dashboard.dashboard import setup_dashboard
 
 logger = get_logger(__name__)
