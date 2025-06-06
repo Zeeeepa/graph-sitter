@@ -65,6 +65,32 @@ from .analysis import (
 
 # Visualization adapters
 from .visualizations import (
+    # Configuration
+    VisualizationConfig,
+    VisualizationType,
+    OutputFormat,
+    CallTraceConfig,
+    DependencyTraceConfig,
+    BlastRadiusConfig,
+    MethodRelationshipsConfig,
+    create_config,
+    get_default_config,
+    DEFAULT_COLOR_PALETTE,
+    
+    # Base classes
+    BaseVisualizationAdapter,
+    VisualizationResult,
+    FunctionCallMixin,
+    DependencyMixin,
+    UsageMixin,
+    
+    # Specific visualizers
+    CallTraceVisualizer,
+    DependencyTraceVisualizer,
+    BlastRadiusVisualizer,
+    MethodRelationshipsVisualizer,
+    UnifiedVisualizationManager,
+    
     # React visualizations
     ReactVisualizationGenerator,
     create_react_visualizations,
