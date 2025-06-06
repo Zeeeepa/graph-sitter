@@ -757,6 +757,351 @@ def analyze_graph_structure(codebase) -> Optional[GraphAnalysisResult]:
         logger.warning(f"Error analyzing graph structure: {e}")
         return None
 
+# ============================================================================
+# ENHANCED ANALYSIS CAPABILITIES - Based on Successful PR Patterns
+# ============================================================================
+
+class AdvancedMetricsCalculator:
+    """Advanced metrics calculation based on successful PR patterns."""
+    
+    @staticmethod
+    def calculate_cyclomatic_complexity_enhanced(node: ast.AST) -> Tuple[int, str]:
+        """Enhanced cyclomatic complexity with ranking (from PR #205/#207)."""
+        complexity = 1  # Base complexity
+        
+        for child in ast.walk(node):
+            if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor)):
+                complexity += 1
+            elif isinstance(child, ast.ExceptHandler):
+                complexity += 1
+            elif isinstance(child, (ast.And, ast.Or)):
+                complexity += 1
+            elif isinstance(child, ast.BoolOp):
+                complexity += len(child.values) - 1
+            elif isinstance(child, ast.comprehension):
+                complexity += 1
+        
+        # Rank complexity (A-F scale from successful PRs)
+        rank = AdvancedMetricsCalculator.cc_rank(complexity)
+        return complexity, rank
+    
+    @staticmethod
+    def cc_rank(complexity: int) -> str:
+        """Rank cyclomatic complexity (from successful PRs)."""
+        if complexity < 0:
+            return "F"
+        
+        ranks = [
+            (1, 5, "A"),
+            (6, 10, "B"),
+            (11, 20, "C"),
+            (21, 30, "D"),
+            (31, 40, "E"),
+            (41, float("inf"), "F"),
+        ]
+        for low, high, rank in ranks:
+            if low <= complexity <= high:
+                return rank
+        return "F"
+    
+    @staticmethod
+    def calculate_halstead_metrics_enhanced(node: ast.AST) -> Dict[str, Any]:
+        """Enhanced Halstead metrics calculation (from successful PRs)."""
+        operators = []
+        operands = []
+        
+        for child in ast.walk(node):
+            # Operators
+            if isinstance(child, ast.BinOp):
+                operators.append(type(child.op).__name__)
+            elif isinstance(child, ast.UnaryOp):
+                operators.append(type(child.op).__name__)
+            elif isinstance(child, ast.Compare):
+                operators.extend([type(op).__name__ for op in child.ops])
+            elif isinstance(child, ast.BoolOp):
+                operators.append(type(child.op).__name__)
+            elif isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor)):
+                operators.append(type(child).__name__)
+            elif isinstance(child, ast.FunctionDef):
+                operators.append('FunctionDef')
+            elif isinstance(child, ast.Return):
+                operators.append('Return')
+            elif isinstance(child, ast.Assign):
+                operators.append('Assign')
+            
+            # Operands
+            elif isinstance(child, ast.Name):
+                operands.append(child.id)
+            elif isinstance(child, ast.Constant):
+                operands.append(str(child.value))
+            elif isinstance(child, ast.Attribute):
+                operands.append(child.attr)
+        
+        # Calculate Halstead metrics
+        n1 = len(set(operators))  # Number of distinct operators
+        n2 = len(set(operands))   # Number of distinct operands
+        N1 = len(operators)       # Total number of operators
+        N2 = len(operands)        # Total number of operands
+        
+        vocabulary = n1 + n2
+        length = N1 + N2
+        
+        if vocabulary > 0:
+            volume = length * math.log2(vocabulary)
+            difficulty = (n1 / 2) * (N2 / n2) if n2 > 0 else 0
+            effort = difficulty * volume
+        else:
+            volume = difficulty = effort = 0
+        
+        return {
+            'volume': volume,
+            'difficulty': difficulty,
+            'effort': effort,
+            'n1': n1,
+            'n2': n2,
+            'N1': N1,
+            'N2': N2,
+            'vocabulary': vocabulary,
+            'length': length
+        }
+
+class TrainingDataGenerator:
+    """Generate training data for ML models (from successful PRs)."""
+    
+    def __init__(self, codebase=None):
+        self.codebase = codebase
+        self.training_items = []
+    
+    def generate_function_training_data(self, functions: List[FunctionMetrics], 
+                                      all_functions: Set[str], 
+                                      file_contents: Dict[str, str]) -> List[TrainingDataItem]:
+        """Generate training data for functions."""
+        training_data = []
+        
+        for func in functions:
+            try:
+                # Get function source
+                if func.file_path in file_contents:
+                    lines = file_contents[func.file_path].split('\n')
+                    func_source = '\n'.join(lines[func.line_number-1:func.line_number+func.lines_of_code])
+                else:
+                    func_source = ""
+                
+                # Analyze dependencies (simplified)
+                dependencies = []
+                for other_func in all_functions:
+                    if other_func != func.name and other_func in func_source:
+                        dependencies.append(other_func)
+                
+                # Analyze usages (simplified)
+                usages = []
+                for file_path, content in file_contents.items():
+                    if func.name in content and file_path != func.file_path:
+                        usages.append(file_path)
+                
+                # Create training data item
+                training_data.append(TrainingDataItem(
+                    function_name=func.name,
+                    file_path=func.file_path,
+                    source_code=func_source,
+                    dependencies=dependencies,
+                    usages=usages,
+                    complexity_metrics={
+                        'cyclomatic_complexity': func.cyclomatic_complexity,
+                        'halstead_volume': func.halstead_volume,
+                        'lines_of_code': func.lines_of_code,
+                        'parameters_count': func.parameters_count,
+                        'maintainability_index': func.maintainability_index
+                    },
+                    context={
+                        'file_path': func.file_path,
+                        'line_number': func.line_number,
+                        'is_private': func.name.startswith('_'),
+                        'has_docstring': func.docstring_coverage,
+                        'return_statements': func.return_statements
+                    }
+                ))
+            except Exception as e:
+                logger.warning(f"Error generating training data for {func.name}: {e}")
+        
+        return training_data
+
+class ImportLoopDetector:
+    """Detect circular import dependencies (from successful PRs)."""
+    
+    def __init__(self):
+        self.import_graph = defaultdict(set)
+        self.file_imports = defaultdict(list)
+    
+    def analyze_imports_ast(self, tree: ast.AST, file_path: str) -> None:
+        """Analyze imports using AST."""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    self.import_graph[file_path].add(alias.name)
+                    self.file_imports[file_path].append({
+                        'module': alias.name,
+                        'line': node.lineno,
+                        'type': 'import'
+                    })
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    self.import_graph[file_path].add(node.module)
+                    self.file_imports[file_path].append({
+                        'module': node.module,
+                        'line': node.lineno,
+                        'type': 'from_import'
+                    })
+    
+    def detect_loops(self) -> List[ImportLoop]:
+        """Detect circular import loops."""
+        if not NETWORKX_AVAILABLE:
+            return []
+        
+        try:
+            # Build NetworkX graph
+            G = nx.DiGraph()
+            
+            for file_path, imports in self.import_graph.items():
+                for imported_module in imports:
+                    # Try to resolve to actual file paths
+                    target_file = self._resolve_import_to_file(imported_module, file_path)
+                    if target_file and target_file != file_path:
+                        G.add_edge(file_path, target_file)
+            
+            # Find strongly connected components (cycles)
+            cycles = list(nx.simple_cycles(G))
+            import_loops = []
+            
+            for cycle in cycles:
+                if len(cycle) > 1:
+                    # Determine severity based on cycle length
+                    severity = "critical" if len(cycle) <= 3 else "warning"
+                    
+                    # Collect import information for this cycle
+                    cycle_imports = []
+                    for i, file_path in enumerate(cycle):
+                        next_file = cycle[(i + 1) % len(cycle)]
+                        for imp_info in self.file_imports[file_path]:
+                            # Check if this import could lead to the next file in cycle
+                            if self._could_import_lead_to_file(imp_info['module'], next_file):
+                                cycle_imports.append(imp_info)
+                    
+                    import_loops.append(ImportLoop(
+                        files=cycle,
+                        loop_type="static",
+                        severity=severity,
+                        imports=cycle_imports
+                    ))
+            
+            return import_loops
+        
+        except Exception as e:
+            logger.warning(f"Error detecting import loops: {e}")
+            return []
+    
+    def _resolve_import_to_file(self, module_name: str, current_file: str) -> Optional[str]:
+        """Resolve import to actual file path (simplified)."""
+        # This is a simplified resolution - in practice would need more sophisticated logic
+        current_dir = os.path.dirname(current_file)
+        
+        # Try relative import
+        potential_file = os.path.join(current_dir, module_name.replace('.', '/') + '.py')
+        if os.path.exists(potential_file):
+            return potential_file
+        
+        # Try as package
+        potential_init = os.path.join(current_dir, module_name.replace('.', '/'), '__init__.py')
+        if os.path.exists(potential_init):
+            return potential_init
+        
+        return None
+    
+    def _could_import_lead_to_file(self, module_name: str, target_file: str) -> bool:
+        """Check if import could lead to target file (simplified)."""
+        return module_name in target_file or target_file.endswith(module_name.replace('.', '/') + '.py')
+
+class DeadCodeDetector:
+    """Detect dead/unused code (from successful PRs)."""
+    
+    def __init__(self):
+        self.function_definitions = {}
+        self.function_calls = set()
+        self.class_definitions = {}
+        self.class_usages = set()
+    
+    def analyze_definitions_and_usages(self, tree: ast.AST, file_path: str) -> None:
+        """Analyze function/class definitions and usages."""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                self.function_definitions[node.name] = {
+                    'file_path': file_path,
+                    'line_start': node.lineno,
+                    'line_end': node.end_lineno or node.lineno,
+                    'is_private': node.name.startswith('_'),
+                    'is_test': node.name.startswith('test_'),
+                    'is_main': node.name in ['main', '__main__']
+                }
+            elif isinstance(node, ast.ClassDef):
+                self.class_definitions[node.name] = {
+                    'file_path': file_path,
+                    'line_start': node.lineno,
+                    'line_end': node.end_lineno or node.lineno,
+                    'is_private': node.name.startswith('_')
+                }
+            elif isinstance(node, ast.Call):
+                if isinstance(node.func, ast.Name):
+                    self.function_calls.add(node.func.id)
+                elif isinstance(node.func, ast.Attribute):
+                    self.function_calls.add(node.func.attr)
+            elif isinstance(node, ast.Name):
+                # Could be class usage
+                self.class_usages.add(node.id)
+    
+    def detect_dead_functions(self) -> List[DeadCodeItem]:
+        """Detect unused functions."""
+        dead_items = []
+        
+        for func_name, func_info in self.function_definitions.items():
+            # Skip special functions
+            if (func_info['is_main'] or func_info['is_test'] or 
+                func_name.startswith('__') and func_name.endswith('__')):
+                continue
+            
+            # Check if function is called
+            if func_name not in self.function_calls:
+                confidence = 0.9 if not func_info['is_private'] else 0.7
+                
+                dead_items.append(DeadCodeItem(
+                    type="function",
+                    name=func_name,
+                    file_path=func_info['file_path'],
+                    line_number=func_info['line_start'],
+                    reason="Function is defined but never called"
+                ))
+        
+        return dead_items
+    
+    def detect_dead_classes(self) -> List[DeadCodeItem]:
+        """Detect unused classes."""
+        dead_items = []
+        
+        for class_name, class_info in self.class_definitions.items():
+            # Skip private classes for now (might be used dynamically)
+            if class_info['is_private']:
+                continue
+            
+            # Check if class is used
+            if class_name not in self.class_usages:
+                dead_items.append(DeadCodeItem(
+                    type="class",
+                    name=class_name,
+                    file_path=class_info['file_path'],
+                    line_number=class_info['line_start'],
+                    reason="Class is defined but never used"
+                ))
+        
+        return dead_items
 
 # ============================================================================
 # MAIN ANALYZER CLASS
