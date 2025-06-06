@@ -3,10 +3,11 @@
 Entry point for running the analysis module as a script.
 
 Usage:
-    python -m graph_sitter.adapters.analysis [arguments]
+    python -m graph_sitter.adapters.analysis <path>
+    python -m graph_sitter.adapters.analysis.cli <path>
 """
 
-from .main import main
+from .cli import main
 
 if __name__ == "__main__":
     main()

@@ -1,222 +1,419 @@
 #!/usr/bin/env python3
 """
-Analysis CLI
+🚀 ENHANCED COMPREHENSIVE ANALYSIS CLI 🚀
 
-Command-line interface for codebase analysis.
+Command-line interface for the enhanced comprehensive analysis system.
+Supports all advanced features including import loop detection, dead code analysis,
+training data generation, graph structure analysis, and enhanced metrics.
+
+Usage:
+    python -m graph_sitter.adapters.analysis.cli /path/to/code
+    python -m graph_sitter.adapters.analysis.cli . --comprehensive
+    python -m graph_sitter.adapters.analysis.cli . --import-loops --dead-code
+    python -m graph_sitter.adapters.analysis.cli . --training-data --output training.json
+    python -m graph_sitter.adapters.analysis.cli . --enhanced-metrics --graph-analysis
+    python -m graph_sitter.adapters.analysis.cli . --quick --quiet
 """
 
 import argparse
-import sys
+import json
 import logging
+import sys
 from pathlib import Path
 from typing import Optional
+from dataclasses import asdict
 
-from .analyzer import CodebaseAnalyzer
-from .config.analysis_config import AnalysisConfig
+from .core.engine import ComprehensiveAnalysisEngine, AnalysisConfig, AnalysisPresets, AnalysisResult
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """Create the command-line argument parser."""
+    """Create the argument parser with all enhanced options."""
     parser = argparse.ArgumentParser(
-        description="Comprehensive codebase analysis tool",
+        description="🚀 Enhanced Comprehensive Codebase Analysis Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Basic analysis
-  python -m graph_sitter.adapters.analysis.cli path/to/code
-  
-  # Quick analysis with JSON output
-  python -m graph_sitter.adapters.analysis.cli path/to/code --quick --output results.json
-  
-  # Comprehensive analysis with HTML report
-  python -m graph_sitter.adapters.analysis.cli path/to/code --comprehensive --html report.html
-  
-  # Tree-sitter analysis with visualization
-  python -m graph_sitter.adapters.analysis.cli path/to/code --tree-sitter --visualize --output-dir analysis/
-  
-  # Export HTML report only
-  python -m graph_sitter.adapters.analysis.cli path/to/code --export-html analysis.html
+  %(prog)s /path/to/code                    # Basic analysis
+  %(prog)s . --comprehensive               # Full comprehensive analysis
+  %(prog)s . --import-loops --dead-code    # Specific analysis types
+  %(prog)s . --training-data --output ml_data.json  # Generate ML training data
+  %(prog)s . --enhanced-metrics --graph-analysis    # Advanced metrics and graph analysis
+  %(prog)s . --quick --quiet               # Fast analysis with minimal output
+  %(prog)s . --preset quality             # Use quality-focused preset
+  %(prog)s . --preset performance         # Use performance-focused preset
+
+Analysis Types:
+  --import-loops        Detect circular import dependencies
+  --dead-code          Find potentially unused code
+  --training-data      Generate ML training data
+  --graph-analysis     Analyze code graph structure
+  --enhanced-metrics   Generate enhanced function/class metrics
+
+Presets:
+  comprehensive        Enable all analysis features (default)
+  quality             Focus on code quality metrics
+  performance         Fast analysis with essential features only
+  minimal             Basic analysis only
+
+Output Formats:
+  json                Structured JSON output
+  text                Human-readable text output
+  summary             Brief summary only
         """
     )
     
     # Positional arguments
     parser.add_argument(
-        "codebase_path",
-        help="Path to the codebase to analyze"
+        'path',
+        help='Path to the codebase to analyze'
     )
     
-    # Analysis modes
-    mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument(
-        "--quick",
-        action="store_true",
-        help="Perform quick analysis with minimal features"
+    # Analysis type options
+    analysis_group = parser.add_argument_group('Analysis Options')
+    analysis_group.add_argument(
+        '--comprehensive',
+        action='store_true',
+        help='Enable all analysis features (import loops, dead code, training data, graph analysis, enhanced metrics)'
     )
-    mode_group.add_argument(
-        "--comprehensive",
-        action="store_true",
-        help="Perform comprehensive analysis with all features"
+    analysis_group.add_argument(
+        '--import-loops',
+        action='store_true',
+        help='Detect circular import dependencies'
+    )
+    analysis_group.add_argument(
+        '--dead-code',
+        action='store_true',
+        help='Find potentially unused code'
+    )
+    analysis_group.add_argument(
+        '--training-data',
+        action='store_true',
+        help='Generate training data for ML models'
+    )
+    analysis_group.add_argument(
+        '--graph-analysis',
+        action='store_true',
+        help='Analyze code graph structure and dependencies'
+    )
+    analysis_group.add_argument(
+        '--enhanced-metrics',
+        action='store_true',
+        help='Generate enhanced function and class metrics'
     )
     
-    # Feature flags
-    parser.add_argument(
-        "--tree-sitter",
-        action="store_true",
-        help="Enable tree-sitter integration and syntax analysis"
+    # Preset options
+    preset_group = parser.add_argument_group('Preset Configurations')
+    preset_group.add_argument(
+        '--preset',
+        choices=['comprehensive', 'quality', 'performance', 'minimal'],
+        help='Use predefined analysis configuration'
     )
-    parser.add_argument(
-        "--ai-analysis",
-        action="store_true",
-        help="Enable AI-powered code analysis"
+    preset_group.add_argument(
+        '--quick',
+        action='store_true',
+        help='Quick analysis (equivalent to --preset performance)'
     )
-    parser.add_argument(
-        "--visualize",
-        action="store_true",
-        help="Enable visualization generation"
+    
+    # Performance options
+    perf_group = parser.add_argument_group('Performance Options')
+    perf_group.add_argument(
+        '--max-functions',
+        type=int,
+        default=100,
+        help='Maximum number of functions to analyze for enhanced metrics (default: 100)'
     )
-    parser.add_argument(
-        "--no-dead-code",
-        action="store_true",
-        help="Disable dead code detection"
+    perf_group.add_argument(
+        '--max-classes',
+        type=int,
+        default=100,
+        help='Maximum number of classes to analyze for enhanced metrics (default: 100)'
     )
-    parser.add_argument(
-        "--no-dependencies",
-        action="store_true",
-        help="Disable dependency analysis"
+    perf_group.add_argument(
+        '--ignore-external',
+        action='store_true',
+        help='Ignore external modules in analysis'
     )
-    parser.add_argument(
-        "--no-tests",
-        action="store_true",
-        help="Disable test analysis"
+    perf_group.add_argument(
+        '--ignore-tests',
+        action='store_true',
+        help='Ignore test files in analysis'
     )
     
     # Output options
-    parser.add_argument(
-        "--output", "-o",
-        help="Output file for analysis results"
+    output_group = parser.add_argument_group('Output Options')
+    output_group.add_argument(
+        '--output', '-o',
+        help='Output file path (default: stdout)'
     )
-    parser.add_argument(
-        "--output-dir",
-        help="Output directory for multiple analysis files"
+    output_group.add_argument(
+        '--format', '-f',
+        choices=['json', 'text', 'summary'],
+        default='text',
+        help='Output format (default: text)'
     )
-    parser.add_argument(
-        "--export-html",
-        help="Export HTML report to specified file"
+    output_group.add_argument(
+        '--quiet', '-q',
+        action='store_true',
+        help='Suppress progress messages'
     )
-    parser.add_argument(
-        "--export-json",
-        help="Export JSON data to specified file"
+    output_group.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Enable verbose output'
     )
-    parser.add_argument(
-        "--format",
-        choices=["json", "html", "text"],
-        default="json",
-        help="Output format (default: json)"
-    )
-    
-    # Configuration options
-    parser.add_argument(
-        "--title",
-        help="Custom title for reports"
-    )
-    parser.add_argument(
-        "--include-source",
-        action="store_true",
-        help="Include source code snippets in reports"
-    )
-    parser.add_argument(
-        "--max-files",
-        type=int,
-        default=1000,
-        help="Maximum number of files to analyze"
-    )
-    parser.add_argument(
-        "--max-file-size",
-        type=int,
-        default=1024,
-        help="Maximum file size to analyze (KB)"
+    output_group.add_argument(
+        '--no-recommendations',
+        action='store_true',
+        help='Suppress recommendations in output'
     )
     
-    # Debug options
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging"
-    )
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Enable verbose output"
-    )
-    parser.add_argument(
-        "--quiet", "-q",
-        action="store_true",
-        help="Suppress non-error output"
-    )
+    # Phase 2 features - Tree-sitter queries
+    parser.add_argument('--query-patterns', action='store_true',
+                       help='Enable tree-sitter query patterns analysis')
+    parser.add_argument('--query-categories', nargs='+', 
+                       default=['function', 'class', 'security', 'performance'],
+                       help='Query pattern categories to execute')
+    parser.add_argument('--custom-patterns', nargs='+', default=[],
+                       help='Custom query pattern names to execute')
     
+    # Phase 2 features - Visualization
+    parser.add_argument('--html-report', action='store_true',
+                       help='Generate interactive HTML report')
+    parser.add_argument('--html-output', type=str,
+                       help='Output path for HTML report')
+    parser.add_argument('--report-theme', choices=['default', 'dark', 'light', 'professional'],
+                       default='default', help='HTML report theme')
+    
+    # Phase 2 features - Performance optimization
+    parser.add_argument('--enable-caching', action='store_true', default=True,
+                       help='Enable result caching')
+    parser.add_argument('--cache-backend', choices=['memory', 'file', 'redis'],
+                       default='memory', help='Cache backend to use')
+    parser.add_argument('--parallel', action='store_true', default=True,
+                       help='Enable parallel processing')
+    parser.add_argument('--max-workers', type=int,
+                       help='Maximum number of worker threads/processes')
+    
+    # Phase 2 features - Advanced configuration
+    parser.add_argument('--language', type=str,
+                       help='Primary language of the codebase')
+    parser.add_argument('--codebase-size', choices=['small', 'medium', 'large'],
+                       default='medium', help='Size category of the codebase')
+    parser.add_argument('--optimization-level', choices=['minimal', 'balanced', 'aggressive'],
+                       default='balanced', help='Analysis optimization level')
+    parser.add_argument('--lazy-graph', action='store_true', default=True,
+                       help='Enable lazy graph loading')
+
     return parser
 
 
-def setup_logging(debug: bool = False, verbose: bool = False, quiet: bool = False):
-    """Setup logging configuration."""
-    if quiet:
-        level = logging.ERROR
-    elif debug:
-        level = logging.DEBUG
-    elif verbose:
-        level = logging.INFO
-    else:
-        level = logging.WARNING
-    
-    logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-
-
 def create_config_from_args(args) -> AnalysisConfig:
-    """Create analysis configuration from command-line arguments."""
-    if args.quick:
-        config = AnalysisConfig.get_basic_config()
-    elif args.comprehensive:
-        config = AnalysisConfig.get_comprehensive_config()
+    """Create AnalysisConfig from command line arguments."""
+    
+    # Handle presets first
+    if args.preset:
+        config = get_preset_config(args.preset)
     else:
         config = AnalysisConfig()
     
-    # Apply feature flags
-    if args.tree_sitter:
-        config.enable_tree_sitter = True
-    if args.ai_analysis:
-        config.enable_ai_analysis = True
-    if args.visualize:
-        config.enable_visualization = True
-        config.export_visualizations = True
-    if args.no_dead_code:
-        config.enable_dead_code_detection = False
-    if args.no_dependencies:
-        config.enable_dependency_analysis = False
-    if args.no_tests:
-        config.enable_test_analysis = False
+    # Override with specific arguments
+    if hasattr(args, 'import_loops'):
+        config.detect_import_loops = args.import_loops
+    if hasattr(args, 'dead_code'):
+        config.detect_dead_code = args.dead_code
+    if hasattr(args, 'training_data'):
+        config.generate_training_data = args.training_data
+    if hasattr(args, 'graph_analysis'):
+        config.analyze_graph_structure = args.graph_analysis
+    if hasattr(args, 'enhanced_metrics'):
+        config.enhanced_metrics = args.enhanced_metrics
+    if hasattr(args, 'max_functions'):
+        config.max_functions = args.max_functions
+    if hasattr(args, 'max_classes'):
+        config.max_classes = args.max_classes
     
-    # Apply configuration options
-    config.max_file_size_kb = args.max_file_size
-    config.performance.max_files_per_batch = min(args.max_files, config.performance.max_files_per_batch)
+    # Phase 2 features - Tree-sitter queries
+    if hasattr(args, 'query_patterns'):
+        config.enable_query_patterns = args.query_patterns
+    if hasattr(args, 'query_categories'):
+        config.query_categories = args.query_categories
+    if hasattr(args, 'custom_patterns'):
+        config.custom_query_patterns = args.custom_patterns
     
-    # Debug settings
-    if args.debug:
-        config.graph_sitter.debug = True
-        config.performance.enable_memory_monitoring = True
-        config.performance.enable_progress_reporting = True
+    # Phase 2 features - Visualization
+    if hasattr(args, 'html_report'):
+        config.generate_html_report = args.html_report
+    if hasattr(args, 'html_output'):
+        config.html_report_path = args.html_output
+    if hasattr(args, 'report_theme'):
+        config.report_theme = args.report_theme
     
-    # Output format
-    if args.format == "html":
-        config.output_formats = {"html"}
-    elif args.format == "text":
-        config.output_formats = {"text"}
-    else:
-        config.output_formats = {"json"}
+    # Phase 2 features - Performance optimization
+    if hasattr(args, 'enable_caching'):
+        config.enable_caching = args.enable_caching
+    if hasattr(args, 'cache_backend'):
+        config.cache_backend = args.cache_backend
+    if hasattr(args, 'parallel'):
+        config.enable_parallel_processing = args.parallel
+    if hasattr(args, 'max_workers'):
+        config.max_workers = args.max_workers
+    
+    # Phase 2 features - Advanced configuration
+    if hasattr(args, 'language'):
+        config.codebase_language = args.language
+    if hasattr(args, 'codebase_size'):
+        config.codebase_size = args.codebase_size
+    if hasattr(args, 'optimization_level'):
+        config.optimization_level = args.optimization_level
+    if hasattr(args, 'lazy_graph'):
+        config.enable_lazy_graph = args.lazy_graph
     
     return config
+
+
+def format_output(result: AnalysisResult, args) -> str:
+    """Format analysis results for display."""
+    
+    output_format = getattr(args, 'output_format', getattr(args, 'format', 'text'))
+    
+    if output_format == 'json':
+        return format_json_output(result)
+    
+    # Text output
+    output = []
+    
+    # Header with enhanced information
+    output.append("🚀 ENHANCED COMPREHENSIVE ANALYSIS REPORT")
+    output.append("=" * 60)
+    output.append(f"📁 Path: {result.path}")
+    output.append(f"⏱️  Time: {result.analysis_time:.2f}s")
+    output.append("")
+    
+    # Overview section
+    output.append("📊 OVERVIEW")
+    output.append(f"Files: {result.total_files}")
+    output.append(f"Functions: {result.total_functions}")
+    output.append(f"Classes: {result.total_classes}")
+    output.append(f"Lines: {result.total_lines:,}")
+    output.append("")
+    
+    # Analysis results
+    output.append("🔍 ANALYSIS RESULTS")
+    output.append(f"Import Loops: {len(result.import_loops)}")
+    output.append(f"Dead Code Items: {len(result.dead_code)}")
+    output.append(f"Training Data: {len(result.training_data)}")
+    output.append(f"Enhanced Metrics: {len(result.enhanced_function_metrics)} functions, {len(result.enhanced_class_metrics)} classes")
+    
+    # Phase 2 results
+    if result.query_results:
+        output.append("")
+        output.append("🌳 QUERY PATTERN RESULTS")
+        total_matches = sum(result.pattern_matches.values())
+        output.append(f"Total Patterns: {len(result.query_results)}")
+        output.append(f"Total Matches: {total_matches}")
+        
+        if result.pattern_matches:
+            output.append("Matches by Category:")
+            for category, count in result.pattern_matches.items():
+                output.append(f"  {category}: {count}")
+    
+    if result.performance_metrics:
+        output.append("")
+        output.append("⚡ PERFORMANCE METRICS")
+        perf = result.performance_metrics
+        if 'operation' in perf:
+            op = perf['operation']
+            output.append(f"Items Processed: {op.get('items_processed', 0)}")
+            output.append(f"Items/Second: {op.get('items_per_second', 0):.1f}")
+        
+        if 'cache' in perf:
+            cache = perf['cache']
+            output.append(f"Cache Hit Rate: {cache.get('hit_rate', 0):.1%}")
+            output.append(f"Cache Backend: {cache.get('backend', 'unknown')}")
+        
+        if 'memory' in perf:
+            memory = perf['memory']
+            output.append(f"Peak Memory: {memory.get('peak_mb', 0):.1f}MB")
+    
+    if result.html_report_path:
+        output.append("")
+        output.append("📊 INTERACTIVE REPORT")
+        output.append(f"HTML Report: {result.html_report_path}")
+    
+    # Recommendations section
+    quiet = getattr(args, 'quiet', False)
+    if result.recommendations and not quiet:
+        output.append("")
+        output.append("💡 RECOMMENDATIONS")
+        for i, rec in enumerate(result.recommendations[:5], 1):
+            output.append(f"{i}. {rec}")
+    
+    return "\n".join(output)
+
+
+def format_json_output(result: AnalysisResult) -> str:
+    """Format result as JSON."""
+    try:
+        # Convert dataclass to dict, handling nested objects
+        result_dict = asdict(result)
+        return json.dumps(result_dict, indent=2, default=str)
+    except Exception as e:
+        logger.warning(f"Error formatting JSON output: {e}")
+        return json.dumps({"error": str(e)}, indent=2)
+
+
+def print_summary(result, verbose: bool = False):
+    """Print analysis results summary."""
+    print("🚀 Comprehensive Codebase Analysis Results")
+    print("=" * 50)
+    
+    # Basic statistics
+    print(f"📁 Files: {result.total_files}")
+    print(f"⚡ Functions: {result.total_functions}")
+    print(f"🏗️  Classes: {result.total_classes}")
+    print(f"📦 Imports: {result.total_imports}")
+    print(f"⏱️  Analysis Time: {result.analysis_time:.2f}s")
+    
+    # Import loops
+    if result.import_loops:
+        print(f"\n🔄 Import Loops Found: {len(result.import_loops)}")
+        if verbose:
+            for i, loop in enumerate(result.import_loops[:5]):  # Show first 5
+                print(f"  {i+1}. {' -> '.join(loop.files)} ({loop.severity})")
+            if len(result.import_loops) > 5:
+                print(f"  ... and {len(result.import_loops) - 5} more")
+    
+    # Dead code
+    if result.dead_code:
+        print(f"\n💀 Dead Code Items: {len(result.dead_code)}")
+        if verbose:
+            dead_by_type = {}
+            for item in result.dead_code:
+                dead_by_type[item.type] = dead_by_type.get(item.type, 0) + 1
+            for code_type, count in dead_by_type.items():
+                print(f"  {code_type.title()}s: {count}")
+    
+    # Training data
+    if result.training_data:
+        print(f"\n🤖 Training Data Items: {len(result.training_data)}")
+    
+    # Graph metrics
+    if result.graph_metrics:
+        print(f"\n📊 Graph Analysis:")
+        if 'symbol_distribution' in result.graph_metrics:
+            symbol_dist = result.graph_metrics['symbol_distribution']
+            for symbol_type, count in list(symbol_dist.items())[:5]:
+                print(f"  {symbol_type}: {count}")
+        
+        if 'file_extensions' in result.graph_metrics:
+            file_ext = result.graph_metrics['file_extensions']
+            print(f"  File types: {len(file_ext)}")
+    
+    print("\n✅ Analysis Complete!")
 
 
 def main():
@@ -224,128 +421,59 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     
-    # Setup logging
-    setup_logging(args.debug, args.verbose, args.quiet)
-    logger = logging.getLogger(__name__)
+    # Configure logging based on verbosity
+    if args.quiet:
+        logging.getLogger().setLevel(logging.WARNING)
+    elif args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
     
-    # Validate codebase path
-    codebase_path = Path(args.codebase_path)
-    if not codebase_path.exists():
-        logger.error(f"Codebase path does not exist: {codebase_path}")
+    # Validate path
+    path = Path(args.path)
+    if not path.exists():
+        print(f"❌ Error: Path '{path}' does not exist", file=sys.stderr)
         sys.exit(1)
     
     try:
         # Create configuration
         config = create_config_from_args(args)
         
-        # Create analyzer
-        analyzer = CodebaseAnalyzer(config)
+        # Create analysis engine
+        engine = ComprehensiveAnalysisEngine()
         
-        # Handle different operation modes
-        if args.export_html:
-            # Export HTML report only
-            success = analyzer.export_html(
-                codebase_path,
-                args.export_html,
-                args.title,
-                args.include_source
-            )
-            if success:
-                print(f"HTML report exported to: {args.export_html}")
-            else:
-                logger.error("Failed to export HTML report")
-                sys.exit(1)
-                
-        elif args.export_json:
-            # Export JSON data only
-            success = analyzer.export_json(codebase_path, args.export_json)
-            if success:
-                print(f"JSON data exported to: {args.export_json}")
-            else:
-                logger.error("Failed to export JSON data")
-                sys.exit(1)
-                
-        elif args.output_dir:
-            # Full analysis with output directory
-            if args.comprehensive:
-                result = analyzer.comprehensive_analyze(codebase_path, args.output_dir)
-            elif args.tree_sitter:
-                result = analyzer.analyze_with_tree_sitter(codebase_path, args.output_dir)
-            else:
-                result = analyzer.analyze(codebase_path, args.output_dir)
-            
-            print(f"Analysis completed. Results saved to: {args.output_dir}")
-            print_summary(result)
-            
-        elif args.output:
-            # Analysis with single output file
-            if args.quick:
-                result = analyzer.quick_analyze(codebase_path, args.output)
-            else:
-                result = analyzer.analyze(codebase_path)
-                analyzer._save_result(result, args.output)
-            
-            print(f"Analysis completed. Results saved to: {args.output}")
-            print_summary(result)
-            
+        # Perform analysis
+        if not args.quiet:
+            print(f"🚀 Starting enhanced analysis of: {path}")
+        
+        result = engine.analyze(path, config)
+        
+        # Format output
+        output = format_output(result, args)
+        
+        # Write output
+        if args.output:
+            output_path = Path(args.output)
+            output_path.write_text(output)
+            if not args.quiet:
+                print(f"📄 Results written to: {output_path}")
         else:
-            # Analysis with console output
-            if args.quick:
-                result = analyzer.quick_analyze(codebase_path)
-            elif args.comprehensive:
-                result = analyzer.comprehensive_analyze(codebase_path, "analysis_output")
-            else:
-                result = analyzer.analyze(codebase_path)
+            print(output)
+        
+        # Exit with appropriate code
+        if result.summary.get('issues', {}).get('critical_issues', 0) > 0:
+            sys.exit(1)  # Critical issues found
+        else:
+            sys.exit(0)  # Success
             
-            print_summary(result)
-            
-            # Print issues if any
-            if result.issues:
-                print("\n🚨 Issues Found:")
-                for issue in result.issues[:10]:  # Show first 10 issues
-                    severity_icon = {"critical": "🔴", "warning": "🟡", "info": "🔵"}.get(issue.get("severity", "info"), "⚪")
-                    print(f"  {severity_icon} {issue.get('type', 'Unknown')}: {issue.get('message', 'No message')}")
-                
-                if len(result.issues) > 10:
-                    print(f"  ... and {len(result.issues) - 10} more issues")
-    
     except KeyboardInterrupt:
-        logger.info("Analysis interrupted by user")
-        sys.exit(1)
+        print("\n❌ Analysis interrupted by user", file=sys.stderr)
+        sys.exit(130)
     except Exception as e:
-        logger.error(f"Analysis failed: {e}")
-        if args.debug:
+        print(f"❌ Error during analysis: {e}", file=sys.stderr)
+        if args.verbose:
             import traceback
             traceback.print_exc()
         sys.exit(1)
 
 
-def print_summary(result):
-    """Print a summary of analysis results."""
-    print("\n📊 Analysis Summary")
-    print("=" * 50)
-    
-    # Codebase overview
-    if result.codebase_summary:
-        nodes = result.codebase_summary.get("nodes", {})
-        print(f"📁 Files: {nodes.get('files', 0)}")
-        print(f"🔧 Functions: {nodes.get('functions', 0)}")
-        print(f"🏗️  Classes: {nodes.get('classes', 0)}")
-        print(f"📦 Symbols: {nodes.get('symbols', 0)}")
-    
-    # Metrics
-    if result.metrics:
-        quality = result.metrics.get("quality_metrics", {})
-        print(f"\n📈 Quality Metrics")
-        print(f"  Test Coverage: {quality.get('test_coverage_estimate', 0) * 100:.1f}%")
-        print(f"  Dead Code Items: {quality.get('dead_code_count', 0)}")
-        print(f"  Issues Found: {quality.get('issue_count', 0)}")
-    
-    # Execution info
-    print(f"\n⏱️  Execution Time: {result.execution_time:.2f}s")
-    print(f"📅 Generated: {result.timestamp}")
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-
