@@ -4,11 +4,11 @@ from pathlib import Path
 from rich.status import Status
 
 from graph_sitter.cli.api.schemas import SerializedExample
-from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.codemod.convert import convert_to_cli
 
 
-def populate_examples(session: CodegenSession, dest: Path, examples: list[SerializedExample], status: Status):
+def populate_examples(session: CliSession, dest: Path, examples: list[SerializedExample], status: Status):
     """Populate the examples folder with examples for the current repository."""
     status.update("Populating example codemods...")
     # Remove existing examples

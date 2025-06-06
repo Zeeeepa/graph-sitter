@@ -8,7 +8,7 @@ PR status changes, and other dashboard events.
 
 import json
 import logging
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Optional
 from datetime import datetime
 
 try:
@@ -415,4 +415,3 @@ class WebSocketManager:
                 await self._cleanup_connection(connection_id)
         
         logger.info("All WebSocket connections cleaned up")
-

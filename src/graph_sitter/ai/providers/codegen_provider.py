@@ -8,7 +8,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from codegen import Agent
-from codegen.exceptions import CodegenError, AuthenticationError as CodegenAuthError
+from codegen.cli.errors import CodegenError, AuthError as CodegenAuthError
 
 from .base import (
     AIProvider, 
