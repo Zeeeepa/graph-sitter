@@ -108,8 +108,8 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
         return operator in true_operators and condition.source == f"process.env.NODE_ENV {operator} 'production'"
 
     # Fix: Call files() as a method with proper parameters
-    for file in directory.files(extensions="*", recursive=True):
-        for imp in file.inbound_imports:
+    for source_file in directory.files(extensions="*", recursive=True):
+        for imp in source_file.inbound_imports:
             if imp.file.filepath not in modified_files:
                 # skip if the import is not in the pull request's modified files
                 continue
@@ -129,7 +129,8 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
                 continue
 
             # Report invalid imports that aren't properly guarded
-            violation = f"- Violation in `{file.filepath}`: Importing from `{imp.file.filepath}` ([link]({imp.github_url}))"
+            violation = f"- Violation in `{source_file.filepath}`: Importing from `{imp.file.filepath}` ([link]({imp.github_url}))"
+
             violations.append(violation)
             logger.info(f"Found violation: {violation}")
 
