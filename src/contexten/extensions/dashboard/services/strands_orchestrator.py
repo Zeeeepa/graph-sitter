@@ -54,7 +54,7 @@ class StrandsOrchestrator:
         try:
             # Try to import ControlFlow
             import controlflow
-            self.workflow_managers['controlflow'] = ControlFlowManager()
+            self.workflow_managers['controlflow'] = MockControlFlowManager()  # Use mock for now
         except ImportError:
             logger.warning("ControlFlow not available, using mock implementation")
             self.workflow_managers['controlflow'] = MockControlFlowManager()
@@ -62,7 +62,7 @@ class StrandsOrchestrator:
         try:
             # Try to import Prefect
             import prefect
-            self.workflow_managers['prefect'] = PrefectManager()
+            self.workflow_managers['prefect'] = MockPrefectManager()  # Use mock for now
         except ImportError:
             logger.warning("Prefect not available, using mock implementation")
             self.workflow_managers['prefect'] = MockPrefectManager()
@@ -528,4 +528,3 @@ class MockPrefectManager:
     
     async def check_health(self) -> bool:
         return True
-
