@@ -13,6 +13,22 @@ from ..consolidated_models import (
     Flow, Task, FlowStatus, TaskStatus, ServiceStatus
 )
 
+# Import workflow managers with fallbacks
+try:
+    from ..workflows.controlflow_integration import ControlFlowManager
+except ImportError:
+    ControlFlowManager = None
+
+try:
+    from ..workflows.prefect_integration import PrefectManager
+except ImportError:
+    PrefectManager = None
+
+try:
+    from ..workflows.mcp_integration import MCPManager
+except ImportError:
+    MCPManager = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,20 +67,30 @@ class StrandsOrchestrator:
             logger.warning("Strands MCP client not available, using mock implementation")
             self.workflow_managers['mcp'] = MockMCPManager()
         
-        try:
-            # Try to import ControlFlow
-            import controlflow
-            self.workflow_managers['controlflow'] = ControlFlowManager()
-        except ImportError:
-            logger.warning("ControlFlow not available, using mock implementation")
+        # Initialize ControlFlow manager
+        if ControlFlowManager:
+            try:
+                import controlflow
+                self.workflow_managers['controlflow'] = ControlFlowManager()
+                logger.info("ControlFlow manager initialized successfully")
+            except ImportError:
+                logger.warning("ControlFlow package not available, using mock implementation")
+                self.workflow_managers['controlflow'] = MockControlFlowManager()
+        else:
+            logger.warning("ControlFlowManager class not available, using mock implementation")
             self.workflow_managers['controlflow'] = MockControlFlowManager()
         
-        try:
-            # Try to import Prefect
-            import prefect
-            self.workflow_managers['prefect'] = PrefectManager()
-        except ImportError:
-            logger.warning("Prefect not available, using mock implementation")
+        # Initialize Prefect manager
+        if PrefectManager:
+            try:
+                import prefect
+                self.workflow_managers['prefect'] = PrefectManager()
+                logger.info("Prefect manager initialized successfully")
+            except ImportError:
+                logger.warning("Prefect package not available, using mock implementation")
+                self.workflow_managers['prefect'] = MockPrefectManager()
+        else:
+            logger.warning("PrefectManager class not available, using mock implementation")
             self.workflow_managers['prefect'] = MockPrefectManager()
     
     async def start_workflow(
@@ -528,4 +554,3 @@ class MockPrefectManager:
     
     async def check_health(self) -> bool:
         return True
-
