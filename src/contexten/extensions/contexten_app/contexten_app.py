@@ -12,6 +12,7 @@ from graph_sitter.shared.logging.get_logger import get_logger
 from .github import GitHub
 from .linear import Linear
 from .slack import Slack
+from ..dashboard.dashboard import setup_dashboard
 
 logger = get_logger(__name__)
 
@@ -38,6 +39,9 @@ class ContextenApp:
         self.commit = commit
         # Initialize codebase cache
         self.codebase: Codebase | None = None
+
+        # Setup dashboard extension
+        self.dashboard = setup_dashboard(self)
 
         # Register routes
         self._setup_routes()
