@@ -205,7 +205,9 @@ def test_models():
         task = Task(
             id="task-1",
             flow_id="flow-1",
-            name="Test Task",
+            project_id="test-1",
+            title="Test Task",  # Changed from 'name' to 'title'
+            description="Test task description",
             status=TaskStatus.PENDING
         )
         
@@ -272,4 +274,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
