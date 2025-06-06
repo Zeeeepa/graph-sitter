@@ -1,134 +1,101 @@
-import axios from 'axios';
-import {
-  Project,
-  WorkflowPlan,
-  DashboardStats,
-  GitHubRepository,
-  DashboardResponse,
-  ProjectCreateRequest,
-  ProjectPinRequest,
-  WorkflowPlanRequest,
-  SettingsUpdateRequest,
-  EnvironmentVariables,
-} from '../types';
+// Simplified API service for Strands Dashboard
+import { WorkflowStatus, SystemHealth, CodegenTask, ApiResponse } from '../types';
 
-// Create axios instance with base configuration
-const api = axios.create({
-  baseURL: '/dashboard',
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-// Request interceptor for authentication
-api.interceptors.request.use(
-  (config) => {
-    // Add authentication token if available
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+class StrandsAPI {
+  private async request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
+        ...options,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error(`API request failed for ${endpoint}:`, error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
     }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
   }
-);
 
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('API Error:', error);
-    
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
-    }
-    
-    return Promise.reject(error);
+  // System Health
+  async getSystemHealth(): Promise<ApiResponse<SystemHealth>> {
+    return this.request<SystemHealth>('/api/health');
   }
-);
 
-export const dashboardApi = {
-  // Health check
-  healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
-    const response = await api.get('/health');
-    return response.data;
-  },
+  // Workflows
+  async getWorkflows(): Promise<ApiResponse<{ workflows: WorkflowStatus[] }>> {
+    return this.request<{ workflows: WorkflowStatus[] }>('/api/workflows');
+  }
 
-  // Project management
-  getProjects: async (): Promise<Project[]> => {
-    const response = await api.get<DashboardResponse<{ projects: Project[] }>>('/projects');
-    return response.data.data?.projects || [];
-  },
+  async createWorkflow(name: string): Promise<ApiResponse<WorkflowStatus>> {
+    return this.request<WorkflowStatus>('/api/workflows', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+  }
 
-  createProject: async (projectData: ProjectCreateRequest): Promise<string> => {
-    const response = await api.post<DashboardResponse<{ project_id: string }>>('/projects', projectData);
-    return response.data.data?.project_id || '';
-  },
+  async restartWorkflow(workflowId: string): Promise<ApiResponse<void>> {
+    return this.request<void>(`/api/workflows/${workflowId}/restart`, {
+      method: 'POST',
+    });
+  }
 
-  pinProject: async (pinData: ProjectPinRequest): Promise<void> => {
-    await api.post('/projects/pin', pinData);
-  },
+  // Codegen Tasks
+  async getCodegenTasks(): Promise<ApiResponse<{ tasks: CodegenTask[] }>> {
+    return this.request<{ tasks: CodegenTask[] }>('/api/codegen/tasks');
+  }
 
-  unpinProject: async (projectId: string): Promise<void> => {
-    await api.delete(`/projects/${projectId}/pin`);
-  },
+  async createCodegenTask(prompt: string): Promise<ApiResponse<CodegenTask>> {
+    return this.request<CodegenTask>('/api/codegen/tasks', {
+      method: 'POST',
+      body: JSON.stringify({ prompt }),
+    });
+  }
 
-  getProjectStatus: async (projectId: string): Promise<any> => {
-    const response = await api.get<DashboardResponse>(`/projects/${projectId}/status`);
-    return response.data.data;
-  },
-
-  // GitHub integration
-  getGitHubRepositories: async (): Promise<GitHubRepository[]> => {
-    const response = await api.get<DashboardResponse<{ repositories: GitHubRepository[] }>>('/projects/github');
-    return response.data.data?.repositories || [];
-  },
-
-  // Workflow management
-  getWorkflowPlans: async (projectId: string): Promise<WorkflowPlan[]> => {
-    const response = await api.get<DashboardResponse<{ plans: WorkflowPlan[] }>>(`/projects/${projectId}/plans`);
-    return response.data.data?.plans || [];
-  },
-
-  createWorkflowPlan: async (planData: WorkflowPlanRequest): Promise<{ plan_id: string; generated_plan: any }> => {
-    const response = await api.post<DashboardResponse<{ plan_id: string; generated_plan: any }>>(
-      `/projects/${planData.project_id}/plans`,
-      planData
-    );
-    return response.data.data || { plan_id: '', generated_plan: {} };
-  },
-
-  startWorkflow: async (projectId: string, planId: string): Promise<void> => {
-    await api.post(`/projects/${projectId}/plans/${planId}/start`);
-  },
-
-  // Settings management
-  updateProjectSettings: async (projectId: string, settings: SettingsUpdateRequest): Promise<void> => {
-    await api.put(`/projects/${projectId}/settings`, settings);
-  },
-
-  updateEnvironmentVariables: async (variables: EnvironmentVariables): Promise<void> => {
-    await api.put('/settings/environment', variables);
-  },
-
-  // Dashboard stats
-  getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await api.get<DashboardResponse<DashboardStats>>('/stats');
-    return response.data.data || {
-      total_projects: 0,
-      active_workflows: 0,
-      completed_tasks: 0,
-      pending_prs: 0,
-      quality_score: 0,
-      last_updated: new Date().toISOString(),
+  // WebSocket connection helper
+  createWebSocketConnection(onMessage: (data: any) => void, onConnectionChange: (connected: boolean) => void): WebSocket {
+    const ws = new WebSocket(`ws://localhost:8000/ws`);
+    
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      onConnectionChange(true);
     };
-  },
-};
+    
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        onMessage(message);
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
+      }
+    };
+    
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      onConnectionChange(false);
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      onConnectionChange(false);
+    };
 
-export default api;
+    return ws;
+  }
+}
+
+export const strandsAPI = new StrandsAPI();
+export default strandsAPI;
 
