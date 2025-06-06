@@ -1,0 +1,3294 @@
+{
+  "timestamp": "2025-06-06 08:47:44",
+  "project_root": ".",
+  "capabilities": [
+    {
+      "name": "Agent Orchestration",
+      "category": "CI/CD",
+      "description": "Ability to orchestrate multiple AI agents",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'agents/' in ./graph_sitter_analysis_results.json",
+        "Found 'agents/' in ./src/graph_sitter/adapters/analysis/__pycache__/architectural_assessment.cpython-313.pyc",
+        "Found 'agents/' in ./src/graph_sitter/adapters/analysis/architectural_assessment.py",
+        "Found 'ContextenApp' in ./graph_sitter_analysis_results.json",
+        "Found 'ContextenApp' in ./examples/examples/snapshot_event_handler/event_handlers.py",
+        "Found 'ContextenApp' in ./examples/examples/pr_review_bot/app.py",
+        "Found 'CodeAgent' in ./graph_sitter_analysis_results.json",
+        "Found 'CodeAgent' in ./examples/examples/snapshot_event_handler/event_handlers.py",
+        "Found 'CodeAgent' in ./examples/examples/pr_review_bot/helpers.py",
+        "Found 'ChatAgent' in ./graph_sitter_analysis_results.json",
+        "Found 'ChatAgent' in ./src/contexten/agents/chat_agent.py",
+        "Found 'ChatAgent' in ./src/graph_sitter/adapters/analysis/__pycache__/architectural_assessment.cpython-313.pyc"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "GitHub Integration",
+      "category": "CI/CD",
+      "description": "Integration with GitHub for PR management",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'github' in ./examples.md",
+        "Found 'github' in ./architecture/external/type-engine.md",
+        "Found 'github' in ./tests/integration/codemod/repos/open_source/requests-oauthlib.json",
+        "Found 'pull_request' in ./tests/unit/runner/sandbox/test_executor.py",
+        "Found 'pull_request' in ./database/schemas/06_events_db.sql",
+        "Found 'pull_request' in ./database/schemas/02_projects_db.sql",
+        "Found 'create_pr_comment' in ./tests/unit/extensions/test_tools.py",
+        "Found 'create_pr_comment' in ./graph_sitter_analysis_results.json",
+        "Found 'create_pr_comment' in ./examples/examples/snapshot_event_handler/pr_tasks.py"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "Linear Integration",
+      "category": "CI/CD",
+      "description": "Integration with Linear for issue tracking",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'linear' in ./tests/unit/extensions/test_message_annotation.py",
+        "Found 'linear' in ./database/schemas/03_prompts_db.sql",
+        "Found 'linear' in ./database/schemas/06_events_db.sql",
+        "Found 'LinearEvent' in ./graph_sitter_analysis_results.json",
+        "Found 'LinearEvent' in ./examples/examples/snapshot_event_handler/event_handlers.py",
+        "Found 'LinearEvent' in ./examples/examples/linear_webhooks/webhooks.py",
+        "Found 'LinearIssue' in ./graph_sitter_analysis_results.json",
+        "Found 'LinearIssue' in ./examples/examples/ticket-to-pr/helpers.py",
+        "Found 'LinearIssue' in ./examples/examples/ticket-to-pr/data.py"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "Slack Integration",
+      "category": "CI/CD",
+      "description": "Integration with Slack for notifications",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'slack' in ./tests/unit/cli/commands/update/data/response.json",
+        "Found 'slack' in ./tests/unit/extensions/test_message_annotation.py",
+        "Found 'slack' in ./database/schemas/06_events_db.sql",
+        "Found 'SlackEvent' in ./graph_sitter_analysis_results.json",
+        "Found 'SlackEvent' in ./examples/examples/snapshot_event_handler/event_handlers.py",
+        "Found 'SlackEvent' in ./examples/examples/codegen_app/app.py"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "Code Analysis",
+      "category": "CI/CD",
+      "description": "Code analysis and quality assessment",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'analysis' in ./architecture/3. imports-exports/C. TSConfig.md",
+        "Found 'analysis' in ./architecture/3. imports-exports/A. Imports.md",
+        "Found 'analysis' in ./architecture/3. imports-exports/B. Exports.md",
+        "Found 'graph_sitter' in ./.codegen/codemods/update_loggers/update_loggers.py",
+        "Found 'graph_sitter' in ./.codegen/codemods/no_link_backticks/no_link_backticks.py",
+        "Found 'graph_sitter' in ./.codegen/codemods/test_language/test_language.py",
+        "Found 'codebase' in ./.codegen/codemods/update_loggers/update_loggers.py",
+        "Found 'codebase' in ./.codegen/codemods/no_link_backticks/no_link_backticks.py",
+        "Found 'codebase' in ./.codegen/codemods/test_language/test_language.py"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "LangChain Integration",
+      "category": "CI/CD",
+      "description": "LangChain framework integration",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'langchain' in ./graph_sitter_analysis_results.json",
+        "Found 'langchain' in ./examples/examples/snapshot_event_handler/uv.lock",
+        "Found 'langchain' in ./examples/examples/pr_review_bot/helpers.py",
+        "Found 'create_agent' in ./graph_sitter_analysis_results.json",
+        "Found 'create_agent' in ./examples/examples/deep_code_research/run.py",
+        "Found 'create_agent' in ./src/contexten/agents/langchain/agent.py",
+        "Found 'tools' in ./architecture/architecture.md",
+        "Found 'tools' in ./tests/integration/codemod/canonical/move_functions_to_new_file/test_pylsp/expected_diff.patch.skip",
+        "Found 'tools' in ./tests/integration/codemod/canonical/split_large_files/test_vite/expected_diff.patch.skip"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "Vector Search",
+      "category": "CI/CD",
+      "description": "Vector-based search and RAG capabilities",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'VectorIndex' in ./graph_sitter_analysis_results.json",
+        "Found 'VectorIndex' in ./examples/examples/slack_chatbot/README.md",
+        "Found 'VectorIndex' in ./examples/examples/slack_chatbot/api.py",
+        "Found 'embedding' in ./tests/integration/test_vector_index.py",
+        "Found 'embedding' in ./tests/shared/mocks/mock_ai_helper.py",
+        "Found 'embedding' in ./graph_sitter_analysis_results.json",
+        "Found 'rag' in ./architecture/external/type-engine.md",
+        "Found 'rag' in ./tests/integration/codemod/repos/open_source/graphrag.json",
+        "Found 'rag' in ./tests/integration/codemod/canonical/move_functions_to_new_file/test_pylsp/expected_diff.patch.skip"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "Build Automation",
+      "category": "CI/CD",
+      "description": "Automated build and deployment processes",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'build' in ./architecture/3. imports-exports/C. TSConfig.md",
+        "Found 'build' in ./architecture/3. imports-exports/A. Imports.md",
+        "Found 'build' in ./architecture/3. imports-exports/B. Exports.md",
+        "Found 'deploy' in ./tests/integration/codemod/canonical/split_large_files/test_vite/expected_diff.patch.skip",
+        "Found 'deploy' in ./database/README_COMPREHENSIVE_SCHEMA.md",
+        "Found 'deploy' in ./database/schemas/06_events_db.sql",
+        "Found 'ci' in ./architecture/1. plumbing/file-discovery.md",
+        "Found 'ci' in ./architecture/3. imports-exports/C. TSConfig.md",
+        "Found 'ci' in ./architecture/3. imports-exports/A. Imports.md",
+        "Found 'cd' in ./tests/integration/codemod/repos/open_source/fastapi.json",
+        "Found 'cd' in ./tests/integration/codemod/canonical/move_functions_to_new_file/test_pylsp/expected_diff.patch.skip",
+        "Found 'cd' in ./tests/integration/codemod/canonical/bang_bang_to_boolean/test_vite/expected_diff.patch.skip"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "Testing Framework",
+      "category": "CI/CD",
+      "description": "Automated testing capabilities",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'test' in ./.codegen/codemods/no_link_backticks/no_link_backticks.py",
+        "Found 'test' in ./.codegen/codemods/test_language/test_language.py",
+        "Found 'test' in ./architecture/external/dependency-manager.md",
+        "Found 'pytest' in ./tests/integration/codemod/conftest.py",
+        "Found 'pytest' in ./tests/integration/codemod/test_verified_codemods.py",
+        "Found 'pytest' in ./tests/integration/codemod/test_parse.py",
+        "Found 'unittest' in ./tests/integration/codemod/conftest.py",
+        "Found 'unittest' in ./tests/integration/codemod/canonical/move_functions_to_new_file/test_pylsp/expected_diff.patch.skip",
+        "Found 'unittest' in ./tests/integration/codegen/runner/conftest.py"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    },
+    {
+      "name": "Monitoring & Observability",
+      "category": "CI/CD",
+      "description": "System monitoring and observability",
+      "current_state": "present",
+      "confidence": 0.9,
+      "evidence": [
+        "Found 'monitoring' in ./database/README_COMPREHENSIVE_SCHEMA.md",
+        "Found 'monitoring' in ./database/schemas/06_events_db.sql",
+        "Found 'monitoring' in ./database/schemas/05_analytics_db.sql",
+        "Found 'metrics' in ./database/README_COMPREHENSIVE_SCHEMA.md",
+        "Found 'metrics' in ./database/schemas/03_prompts_db.sql",
+        "Found 'metrics' in ./database/schemas/06_events_db.sql",
+        "Found 'logging' in ./.codegen/codemods/update_loggers/update_loggers.py",
+        "Found 'logging' in ./tests/integration/codemod/conftest.py",
+        "Found 'logging' in ./tests/integration/codemod/test_verified_codemods.py",
+        "Found 'tracer' in ./graph_sitter_analysis_results.json",
+        "Found 'tracer' in ./src/contexten/agents/code_agent.py",
+        "Found 'tracer' in ./src/graph_sitter/adapters/analysis/__pycache__/architectural_assessment.cpython-313.pyc"
+      ],
+      "dependencies": [],
+      "integration_points": []
+    }
+  ],
+  "components": [
+    {
+      "name": "tracer",
+      "type": "agent",
+      "path": "src/contexten/agents/tracer.py",
+      "description": "No description available",
+      "dependencies": [
+        "collections.abc",
+        "typing",
+        "langchain.schema",
+        "langchain.schema",
+        "langchain.schema",
+        "langchain_core.messages",
+        "data",
+        "loggers"
+      ],
+      "interfaces": [
+        "class:MessageStreamTracer",
+        "function:__init__",
+        "function:process_stream",
+        "function:extract_structured_data",
+        "function:_get_message_type",
+        "function:_get_message_content",
+        "function:_extract_tool_calls",
+        "function:get_traces",
+        "function:clear_traces"
+      ],
+      "metrics": {
+        "lines_of_code": 143,
+        "num_classes": 1,
+        "num_functions": 8,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "chat_agent",
+      "type": "agent",
+      "path": "src/contexten/agents/chat_agent.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "uuid",
+        "langchain.tools",
+        "langchain_core.messages",
+        "contexten.agents.langchain.agent",
+        "graph_sitter",
+        "codegen"
+      ],
+      "interfaces": [
+        "class:ChatAgent",
+        "function:__init__",
+        "function:run",
+        "function:chat",
+        "function:get_chat_history"
+      ],
+      "metrics": {
+        "lines_of_code": 138,
+        "num_classes": 1,
+        "num_functions": 4,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "code_agent",
+      "type": "agent",
+      "path": "src/contexten/agents/code_agent.py",
+      "description": "No description available",
+      "dependencies": [
+        "os",
+        "typing",
+        "uuid",
+        "langchain.tools",
+        "langchain_core.messages",
+        "langchain_core.runnables.config",
+        "langgraph.graph.graph",
+        "langsmith",
+        "contexten.agents.loggers",
+        "contexten.agents.tracer"
+      ],
+      "interfaces": [
+        "class:CodeAgent",
+        "function:__init__",
+        "function:run",
+        "function:get_agent_trace_url",
+        "function:get_tools",
+        "function:get_state",
+        "function:get_tags_metadata"
+      ],
+      "metrics": {
+        "lines_of_code": 262,
+        "num_classes": 1,
+        "num_functions": 6,
+        "num_imports": 17
+      }
+    },
+    {
+      "name": "utils",
+      "type": "agent",
+      "path": "src/contexten/agents/utils.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing"
+      ],
+      "interfaces": [
+        "class:AgentConfig"
+      ],
+      "metrics": {
+        "lines_of_code": 8,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "loggers",
+      "type": "agent",
+      "path": "src/contexten/agents/loggers.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "data"
+      ],
+      "interfaces": [
+        "class:ExternalLogger",
+        "function:log"
+      ],
+      "metrics": {
+        "lines_of_code": 16,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 2
+      }
+    },
+    {
+      "name": "data",
+      "type": "agent",
+      "path": "src/contexten/agents/data.py",
+      "description": "No description available",
+      "dependencies": [
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "interfaces": [
+        "class:BaseMessage",
+        "class:UserMessage",
+        "class:SystemMessageData",
+        "class:ToolCall",
+        "class:AssistantMessage",
+        "class:ToolMessageData",
+        "class:FunctionMessageData",
+        "class:UnknownMessage"
+      ],
+      "metrics": {
+        "lines_of_code": 72,
+        "num_classes": 8,
+        "num_functions": 0,
+        "num_imports": 3
+      }
+    },
+    {
+      "name": "agent",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/agent.py",
+      "description": "Demo implementation of an agent with Codegen tools.",
+      "dependencies": [
+        "typing",
+        "langchain.tools",
+        "langchain_core.messages",
+        "langgraph.checkpoint.memory",
+        "langgraph.graph.graph",
+        "contexten.agents.utils",
+        "contexten.agents.langchain.llm",
+        "contexten.agents.langchain.prompts",
+        "contexten.agents.langchain.tools",
+        "graph"
+      ],
+      "interfaces": [
+        "function:create_codebase_agent",
+        "function:create_chat_agent",
+        "function:create_codebase_inspector_agent",
+        "function:create_agent_with_tools"
+      ],
+      "metrics": {
+        "lines_of_code": 217,
+        "num_classes": 0,
+        "num_functions": 4,
+        "num_imports": 11
+      }
+    },
+    {
+      "name": "tools",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/tools.py",
+      "description": "Langchain tools for workspace operations.",
+      "dependencies": [
+        "collections.abc",
+        "typing",
+        "langchain_core.messages",
+        "langchain_core.stores",
+        "langchain_core.tools",
+        "langchain_core.tools.base",
+        "langgraph.prebuilt",
+        "pydantic",
+        "contexten.agents.tools.bash",
+        "contexten.agents.tools.github.checkout_pr"
+      ],
+      "interfaces": [
+        "class:ViewFileInput",
+        "class:ViewFileTool",
+        "class:ListDirectoryInput",
+        "class:ListDirectoryTool",
+        "class:SearchInput",
+        "class:RipGrepTool",
+        "class:EditFileInput",
+        "class:EditFileTool",
+        "class:CreateFileInput",
+        "class:CreateFileTool"
+      ],
+      "metrics": {
+        "lines_of_code": 1181,
+        "num_classes": 66,
+        "num_functions": 68,
+        "num_imports": 27
+      }
+    },
+    {
+      "name": "prompts",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/prompts.py",
+      "description": "No description available",
+      "dependencies": [],
+      "interfaces": [],
+      "metrics": {
+        "lines_of_code": 81,
+        "num_classes": 0,
+        "num_functions": 0,
+        "num_imports": 0
+      }
+    },
+    {
+      "name": "graph",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/graph.py",
+      "description": "Demo implementation of an agent with Codegen tools.",
+      "dependencies": [
+        "uuid",
+        "typing",
+        "anthropic",
+        "openai",
+        "langchain.tools",
+        "langchain_core.messages",
+        "langchain_core.prompts",
+        "langchain_core.stores",
+        "langgraph.checkpoint.memory",
+        "langgraph.graph"
+      ],
+      "interfaces": [
+        "function:manage_messages",
+        "class:GraphState",
+        "class:AgentGraph",
+        "function:create_react_agent",
+        "function:__init__",
+        "function:reasoner",
+        "function:summarize_conversation",
+        "function:should_continue",
+        "function:create",
+        "function:format_header"
+      ],
+      "metrics": {
+        "lines_of_code": 516,
+        "num_classes": 2,
+        "num_functions": 10,
+        "num_imports": 23
+      }
+    },
+    {
+      "name": "llm",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/llm.py",
+      "description": "LLM implementation supporting both OpenAI and Anthropic models.",
+      "dependencies": [
+        "os",
+        "collections.abc",
+        "typing",
+        "langchain_anthropic",
+        "langchain_core.callbacks",
+        "langchain_core.language_models.base",
+        "langchain_core.language_models.chat_models",
+        "langchain_core.messages",
+        "langchain_core.outputs",
+        "langchain_core.runnables"
+      ],
+      "interfaces": [
+        "class:LLM",
+        "function:__init__",
+        "function:_llm_type",
+        "function:_get_model_kwargs",
+        "function:_get_model",
+        "function:_generate",
+        "function:bind_tools"
+      ],
+      "metrics": {
+        "lines_of_code": 144,
+        "num_classes": 1,
+        "num_functions": 6,
+        "num_imports": 14
+      }
+    },
+    {
+      "name": "observation",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/observation.py",
+      "description": "Base class for tool observations/responses.",
+      "dependencies": [
+        "json",
+        "typing",
+        "langchain_core.messages",
+        "pydantic",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:Observation",
+        "function:_get_details",
+        "function:__str__",
+        "function:__repr__",
+        "function:render_as_string",
+        "function:render"
+      ],
+      "metrics": {
+        "lines_of_code": 92,
+        "num_classes": 1,
+        "num_functions": 5,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "rename_file",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/rename_file.py",
+      "description": "Tool for renaming files and updating imports.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation",
+        "view_file"
+      ],
+      "interfaces": [
+        "class:RenameFileObservation",
+        "function:rename_file"
+      ],
+      "metrics": {
+        "lines_of_code": 95,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "tool_output_types",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/tool_output_types.py",
+      "description": "Type definitions for tool outputs.",
+      "dependencies": [
+        "typing"
+      ],
+      "interfaces": [
+        "class:EditFileArtifacts",
+        "class:ViewFileArtifacts",
+        "class:ListDirectoryArtifacts",
+        "class:SearchMatch",
+        "class:SearchArtifacts",
+        "class:SemanticEditArtifacts",
+        "class:RelaceEditArtifacts"
+      ],
+      "metrics": {
+        "lines_of_code": 105,
+        "num_classes": 7,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "search",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/search.py",
+      "description": "Simple text-based search functionality for the codebase.\n\nThis performs either a regex pattern match or simple text search across all files in the codebase.\nEach matching line will be returned with it...",
+      "dependencies": [
+        "logging",
+        "os",
+        "re",
+        "subprocess",
+        "typing",
+        "langchain_core.messages",
+        "pydantic",
+        "contexten.agents.tools.tool_output_types",
+        "contexten.agents.tools.tool_output_types",
+        "graph_sitter"
+      ],
+      "interfaces": [
+        "class:SearchMatch",
+        "class:SearchFileResult",
+        "class:SearchObservation",
+        "function:_search_with_ripgrep",
+        "function:_search_with_python",
+        "function:search",
+        "function:render_as_string",
+        "function:to_dict",
+        "function:render_as_string",
+        "function:_get_details"
+      ],
+      "metrics": {
+        "lines_of_code": 444,
+        "num_classes": 3,
+        "num_functions": 8,
+        "num_imports": 11
+      }
+    },
+    {
+      "name": "bash",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/bash.py",
+      "description": "Tools for running bash commands.",
+      "dependencies": [
+        "re",
+        "shlex",
+        "subprocess",
+        "typing",
+        "pydantic",
+        "observation"
+      ],
+      "interfaces": [
+        "class:RunBashCommandObservation",
+        "function:validate_command",
+        "function:run_bash_command"
+      ],
+      "metrics": {
+        "lines_of_code": 183,
+        "num_classes": 1,
+        "num_functions": 2,
+        "num_imports": 6
+      }
+    },
+    {
+      "name": "relace_edit",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/relace_edit.py",
+      "description": "Tool for making edits to files using the Relace Instant Apply API.",
+      "dependencies": [
+        "difflib",
+        "os",
+        "typing",
+        "requests",
+        "langchain_core.messages",
+        "pydantic",
+        "graph_sitter",
+        "observation",
+        "view_file",
+        "contexten.agents.tools.tool_output_types"
+      ],
+      "interfaces": [
+        "class:RelaceEditObservation",
+        "function:generate_diff",
+        "function:get_relace_api_key",
+        "function:apply_relace_edit",
+        "function:relace_edit",
+        "function:render"
+      ],
+      "metrics": {
+        "lines_of_code": 201,
+        "num_classes": 1,
+        "num_functions": 5,
+        "num_imports": 10
+      }
+    },
+    {
+      "name": "semantic_edit",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/semantic_edit.py",
+      "description": "Tool for making semantic edits to files using a small, fast LLM.",
+      "dependencies": [
+        "difflib",
+        "re",
+        "typing",
+        "langchain_core.messages",
+        "langchain_core.output_parsers",
+        "langchain_core.prompts",
+        "pydantic",
+        "contexten.agents.langchain.llm",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:SemanticEditObservation",
+        "function:generate_diff",
+        "function:_extract_code_block",
+        "function:get_llm_edit",
+        "function:_validate_edit_boundaries",
+        "function:extract_file_window",
+        "function:apply_semantic_edit",
+        "function:semantic_edit",
+        "function:render"
+      ],
+      "metrics": {
+        "lines_of_code": 318,
+        "num_classes": 1,
+        "num_functions": 8,
+        "num_imports": 13
+      }
+    },
+    {
+      "name": "reveal_symbol",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/reveal_symbol.py",
+      "description": "Tool for revealing symbol dependencies and usages.",
+      "dependencies": [
+        "typing",
+        "tiktoken",
+        "pydantic",
+        "graph_sitter.ai.utils",
+        "graph_sitter",
+        "graph_sitter.core.external_module",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.core.symbol",
+        "observation"
+      ],
+      "interfaces": [
+        "class:SymbolInfo",
+        "class:RevealSymbolObservation",
+        "function:truncate_source",
+        "function:get_symbol_info",
+        "function:hop_through_imports",
+        "function:get_extended_context",
+        "function:reveal_symbol",
+        "function:_get_details",
+        "function:under_token_limit"
+      ],
+      "metrics": {
+        "lines_of_code": 316,
+        "num_classes": 2,
+        "num_functions": 7,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "reflection",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/reflection.py",
+      "description": "Tool for agent self-reflection and planning.",
+      "dependencies": [
+        "typing",
+        "langchain_core.messages",
+        "langchain_core.output_parsers",
+        "langchain_core.prompts",
+        "pydantic",
+        "contexten.agents.langchain.llm",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:ReflectionSection",
+        "class:ReflectionObservation",
+        "function:parse_reflection_response",
+        "function:perform_reflection",
+        "function:_get_details",
+        "function:render"
+      ],
+      "metrics": {
+        "lines_of_code": 225,
+        "num_classes": 2,
+        "num_functions": 4,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "delete_file",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/delete_file.py",
+      "description": "Tool for deleting files.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:DeleteFileObservation",
+        "function:delete_file"
+      ],
+      "metrics": {
+        "lines_of_code": 60,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "relace_edit_prompts",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/relace_edit_prompts.py",
+      "description": "Prompts for the Relace edit tool.",
+      "dependencies": [],
+      "interfaces": [],
+      "metrics": {
+        "lines_of_code": 94,
+        "num_classes": 0,
+        "num_functions": 0,
+        "num_imports": 0
+      }
+    },
+    {
+      "name": "view_file",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/view_file.py",
+      "description": "Tool for viewing file contents and metadata.",
+      "dependencies": [
+        "typing",
+        "langchain_core.messages",
+        "pydantic",
+        "graph_sitter",
+        "observation",
+        "tool_output_types"
+      ],
+      "interfaces": [
+        "class:ViewFileObservation",
+        "function:add_line_numbers",
+        "function:view_file",
+        "function:render"
+      ],
+      "metrics": {
+        "lines_of_code": 191,
+        "num_classes": 1,
+        "num_functions": 3,
+        "num_imports": 6
+      }
+    },
+    {
+      "name": "run_codemod",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/run_codemod.py",
+      "description": "Tool for running custom codemod functions on the codebase.",
+      "dependencies": [
+        "importlib.util",
+        "sys",
+        "pathlib",
+        "tempfile",
+        "typing",
+        "graph_sitter"
+      ],
+      "interfaces": [
+        "function:run_codemod"
+      ],
+      "metrics": {
+        "lines_of_code": 71,
+        "num_classes": 0,
+        "num_functions": 1,
+        "num_imports": 6
+      }
+    },
+    {
+      "name": "search_files_by_name",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/search_files_by_name.py",
+      "description": "No description available",
+      "dependencies": [
+        "math",
+        "shutil",
+        "subprocess",
+        "typing",
+        "pydantic",
+        "contexten.agents.tools.observation",
+        "graph_sitter",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:SearchFilesByNameResultObservation",
+        "function:search_files_by_name",
+        "function:total"
+      ],
+      "metrics": {
+        "lines_of_code": 123,
+        "num_classes": 1,
+        "num_functions": 2,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "list_directory",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/list_directory.py",
+      "description": "Tool for listing directory contents.",
+      "dependencies": [
+        "typing",
+        "langchain_core.messages",
+        "pydantic",
+        "contexten.agents.tools.observation",
+        "contexten.agents.tools.tool_output_types",
+        "graph_sitter",
+        "graph_sitter.core.directory"
+      ],
+      "interfaces": [
+        "class:DirectoryInfo",
+        "class:ListDirectoryObservation",
+        "function:list_directory",
+        "function:_get_details",
+        "function:render_as_string",
+        "function:to_artifacts",
+        "function:render",
+        "function:get_directory_info",
+        "function:add_tree_item",
+        "function:build_tree"
+      ],
+      "metrics": {
+        "lines_of_code": 232,
+        "num_classes": 2,
+        "num_functions": 8,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "semantic_edit_prompts",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/semantic_edit_prompts.py",
+      "description": "No description available",
+      "dependencies": [],
+      "interfaces": [],
+      "metrics": {
+        "lines_of_code": 349,
+        "num_classes": 0,
+        "num_functions": 0,
+        "num_imports": 0
+      }
+    },
+    {
+      "name": "replacement_edit",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/replacement_edit.py",
+      "description": "Tool for making regex-based replacements in files.",
+      "dependencies": [
+        "difflib",
+        "re",
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation",
+        "view_file"
+      ],
+      "interfaces": [
+        "class:ReplacementEditObservation",
+        "function:generate_diff",
+        "function:_merge_content",
+        "function:replacement_edit"
+      ],
+      "metrics": {
+        "lines_of_code": 186,
+        "num_classes": 1,
+        "num_functions": 3,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "link_annotation",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/link_annotation.py",
+      "description": "Tool for viewing PR contents and modified symbols.",
+      "dependencies": [
+        "re",
+        "enum",
+        "typing",
+        "graph_sitter"
+      ],
+      "interfaces": [
+        "class:MessageChannel",
+        "function:format_link_linear",
+        "function:format_link_markdown",
+        "function:format_link_html",
+        "function:format_link_slack",
+        "function:clean_github_url",
+        "function:format_link",
+        "function:extract_code_snippets",
+        "function:is_likely_filepath",
+        "function:add_links_to_message"
+      ],
+      "metrics": {
+        "lines_of_code": 149,
+        "num_classes": 1,
+        "num_functions": 9,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "global_replacement_edit",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/global_replacement_edit.py",
+      "description": "Tool for making regex-based replacements in files.",
+      "dependencies": [
+        "difflib",
+        "logging",
+        "math",
+        "re",
+        "typing",
+        "pydantic",
+        "contexten.agents.tools.search_files_by_name",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:GlobalReplacementEditObservation",
+        "function:generate_diff",
+        "function:replacement_edit_global"
+      ],
+      "metrics": {
+        "lines_of_code": 130,
+        "num_classes": 1,
+        "num_functions": 2,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "semantic_search",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/semantic_search.py",
+      "description": "Semantic search over codebase files.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "contexten.extensions.index.file_index",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:SearchResult",
+        "class:SemanticSearchObservation",
+        "function:semantic_search",
+        "function:_get_details"
+      ],
+      "metrics": {
+        "lines_of_code": 122,
+        "num_classes": 2,
+        "num_functions": 2,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "create_file",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/create_file.py",
+      "description": "Tool for creating new files.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation",
+        "view_file"
+      ],
+      "interfaces": [
+        "class:CreateFileObservation",
+        "function:create_file"
+      ],
+      "metrics": {
+        "lines_of_code": 88,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "edit_file",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/edit_file.py",
+      "description": "Tool for editing file contents.",
+      "dependencies": [
+        "typing",
+        "langchain_core.messages",
+        "pydantic",
+        "graph_sitter",
+        "observation",
+        "replacement_edit",
+        "tool_output_types"
+      ],
+      "interfaces": [
+        "class:EditFileObservation",
+        "function:edit_file",
+        "function:render"
+      ],
+      "metrics": {
+        "lines_of_code": 82,
+        "num_classes": 1,
+        "num_functions": 2,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "move_symbol",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/move_symbol.py",
+      "description": "Tool for moving symbols between files.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation",
+        "view_file"
+      ],
+      "interfaces": [
+        "class:MoveSymbolObservation",
+        "function:move_symbol"
+      ],
+      "metrics": {
+        "lines_of_code": 141,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "commit",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/commit.py",
+      "description": "Tool for committing changes to disk.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:CommitObservation",
+        "function:commit"
+      ],
+      "metrics": {
+        "lines_of_code": 42,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "linear",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/linear/linear.py",
+      "description": "Tools for interacting with Linear.",
+      "dependencies": [
+        "typing",
+        "requests",
+        "pydantic",
+        "contexten.extensions.linear.linear_client",
+        "observation"
+      ],
+      "interfaces": [
+        "class:LinearIssueObservation",
+        "class:LinearCommentsObservation",
+        "class:LinearCommentObservation",
+        "class:LinearWebhookObservation",
+        "class:LinearSearchObservation",
+        "class:LinearCreateIssueObservation",
+        "class:LinearTeamsObservation",
+        "function:linear_get_issue_tool",
+        "function:linear_get_issue_comments_tool",
+        "function:linear_comment_on_issue_tool"
+      ],
+      "metrics": {
+        "lines_of_code": 402,
+        "num_classes": 7,
+        "num_functions": 10,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "checkout_pr",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/github/checkout_pr.py",
+      "description": "Tool for viewing PR contents and modified symbols.",
+      "dependencies": [
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:CheckoutPRObservation",
+        "function:checkout_pr"
+      ],
+      "metrics": {
+        "lines_of_code": 47,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 3
+      }
+    },
+    {
+      "name": "view_pr",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/github/view_pr.py",
+      "description": "Tool for viewing PR contents and modified symbols.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:ViewPRObservation",
+        "function:view_pr"
+      ],
+      "metrics": {
+        "lines_of_code": 57,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "create_pr_review_comment",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/github/create_pr_review_comment.py",
+      "description": "Tool for creating PR review comments.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:PRReviewCommentObservation",
+        "function:create_pr_review_comment"
+      ],
+      "metrics": {
+        "lines_of_code": 78,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "create_pr_comment",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/github/create_pr_comment.py",
+      "description": "Tool for creating PR comments.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:PRCommentObservation",
+        "function:create_pr_comment"
+      ],
+      "metrics": {
+        "lines_of_code": 46,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "view_pr_checks",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/github/view_pr_checks.py",
+      "description": "Tool for creating PR review comments.",
+      "dependencies": [
+        "json",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:PRCheckObservation",
+        "function:view_pr_checks"
+      ],
+      "metrics": {
+        "lines_of_code": 54,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "search",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/github/search.py",
+      "description": "Tools for searching GitHub issues and pull requests.",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:SearchResultObservation",
+        "function:search",
+        "function:total"
+      ],
+      "metrics": {
+        "lines_of_code": 77,
+        "num_classes": 1,
+        "num_functions": 2,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "create_pr",
+      "type": "agent",
+      "path": "src/contexten/agents/tools/github/create_pr.py",
+      "description": "Tool for creating pull requests.",
+      "dependencies": [
+        "uuid",
+        "typing",
+        "github",
+        "pydantic",
+        "graph_sitter",
+        "observation"
+      ],
+      "interfaces": [
+        "class:CreatePRObservation",
+        "function:create_pr"
+      ],
+      "metrics": {
+        "lines_of_code": 84,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 6
+      }
+    },
+    {
+      "name": "utils",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/utils/utils.py",
+      "description": "No description available",
+      "dependencies": [
+        "langchain_core.language_models"
+      ],
+      "interfaces": [
+        "function:get_max_model_input_tokens"
+      ],
+      "metrics": {
+        "lines_of_code": 21,
+        "num_classes": 0,
+        "num_functions": 1,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "get_langsmith_url",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/utils/get_langsmith_url.py",
+      "description": "No description available",
+      "dependencies": [
+        "datetime",
+        "typing",
+        "langsmith",
+        "traceback"
+      ],
+      "interfaces": [
+        "function:get_langsmith_url",
+        "function:find_and_print_langsmith_run_url"
+      ],
+      "metrics": {
+        "lines_of_code": 101,
+        "num_classes": 0,
+        "num_functions": 2,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "custom_tool_node",
+      "type": "agent",
+      "path": "src/contexten/agents/langchain/utils/custom_tool_node.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "langchain_core.messages",
+        "langchain_core.stores",
+        "langgraph.prebuilt",
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:CustomToolNode",
+        "function:_parse_input"
+      ],
+      "metrics": {
+        "lines_of_code": 43,
+        "num_classes": 1,
+        "num_functions": 1,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "linear",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/linear.py",
+      "description": "No description available",
+      "dependencies": [
+        "logging",
+        "typing",
+        "pydantic",
+        "contexten.extensions.contexten_app.interface",
+        "contexten.extensions.linear.types",
+        "contexten.extensions.linear.config",
+        "contexten.extensions.linear.integration_agent",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:Linear",
+        "function:__init__",
+        "function:unsubscribe_all_handlers",
+        "function:event",
+        "function:get_active_tasks",
+        "function:register_handler",
+        "function:new_func"
+      ],
+      "metrics": {
+        "lines_of_code": 235,
+        "num_classes": 1,
+        "num_functions": 6,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "webhook_processor",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/webhook_processor.py",
+      "description": "\nLinear Webhook Processor\n\nComprehensive webhook processing system with:\n- Signature validation and security\n- Event routing and handler management\n- Retry logic for failed events\n- Event persistence ...",
+      "dependencies": [
+        "asyncio",
+        "hashlib",
+        "hmac",
+        "json",
+        "time",
+        "datetime",
+        "typing",
+        "dataclasses",
+        "pathlib",
+        "config"
+      ],
+      "interfaces": [
+        "class:EventHandler",
+        "class:ProcessingStats",
+        "class:WebhookProcessor",
+        "function:matches",
+        "function:__init__",
+        "function:register_handler",
+        "function:register_global_handler",
+        "function:unregister_handler",
+        "function:_validate_signature",
+        "function:_validate_payload_size"
+      ],
+      "metrics": {
+        "lines_of_code": 532,
+        "num_classes": 3,
+        "num_functions": 11,
+        "num_imports": 12
+      }
+    },
+    {
+      "name": "types",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/types.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic",
+        "typing",
+        "datetime",
+        "enum"
+      ],
+      "interfaces": [
+        "class:LinearUser",
+        "class:LinearTeam",
+        "class:LinearLabel",
+        "class:LinearProject",
+        "class:LinearState",
+        "class:LinearComment",
+        "class:LinearIssue",
+        "class:LinearEventType",
+        "class:LinearEventAction",
+        "class:AssignmentAction"
+      ],
+      "metrics": {
+        "lines_of_code": 207,
+        "num_classes": 19,
+        "num_functions": 0,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "workflow_automation",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/workflow_automation.py",
+      "description": "\nLinear Workflow Automation\n\nComprehensive workflow automation system that:\n- Creates tasks from Linear issues\n- Integrates with Codegen SDK for task execution\n- Provides real-time progress tracking\n-...",
+      "dependencies": [
+        "asyncio",
+        "uuid",
+        "datetime",
+        "typing",
+        "dataclasses",
+        "config",
+        "types",
+        "graph_sitter.shared.logging.get_logger",
+        "re"
+      ],
+      "interfaces": [
+        "class:TaskTemplate",
+        "class:WorkflowStats",
+        "class:WorkflowAutomation",
+        "function:__init__",
+        "function:set_linear_client",
+        "function:set_codegen_agent",
+        "function:_initialize_default_templates",
+        "function:_determine_task_type",
+        "function:_extract_task_parameters",
+        "function:_extract_section"
+      ],
+      "metrics": {
+        "lines_of_code": 812,
+        "num_classes": 3,
+        "num_functions": 10,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "config",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/config.py",
+      "description": "\nLinear Integration Configuration Management\n\nComprehensive configuration system for Linear integration with support for\nenvironment variables, validation, and default values.\n",
+      "dependencies": [
+        "os",
+        "typing",
+        "dataclasses",
+        "pathlib",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:LinearAPIConfig",
+        "class:LinearWebhookConfig",
+        "class:LinearBotConfig",
+        "class:LinearAssignmentConfig",
+        "class:LinearWorkflowConfig",
+        "class:LinearEventConfig",
+        "class:LinearMonitoringConfig",
+        "class:LinearIntegrationConfig",
+        "function:get_linear_config",
+        "function:create_config_template"
+      ],
+      "metrics": {
+        "lines_of_code": 346,
+        "num_classes": 8,
+        "num_functions": 5,
+        "num_imports": 5
+      }
+    },
+    {
+      "name": "assignment_detector",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/assignment_detector.py",
+      "description": "\nLinear Assignment Detector\n\nIntelligent assignment detection system that:\n- Detects when the bot is assigned to issues\n- Implements auto-assignment based on labels and keywords\n- Tracks assignment hi...",
+      "dependencies": [
+        "asyncio",
+        "re",
+        "datetime",
+        "typing",
+        "dataclasses",
+        "config",
+        "types",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:AssignmentRecord",
+        "class:AssignmentStats",
+        "class:AssignmentDetector",
+        "function:__init__",
+        "function:_is_bot_user",
+        "function:_extract_assignee_info",
+        "function:_extract_previous_assignee_info",
+        "function:_check_rate_limit",
+        "function:_is_in_cooldown",
+        "function:_cleanup_old_records"
+      ],
+      "metrics": {
+        "lines_of_code": 512,
+        "num_classes": 3,
+        "num_functions": 13,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "integration_agent",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/integration_agent.py",
+      "description": "\nLinear Integration Agent\n\nMain orchestrator for comprehensive Linear integration that coordinates:\n- Enhanced Linear client with caching and rate limiting\n- Webhook processing with event routing\n- As...",
+      "dependencies": [
+        "asyncio",
+        "datetime",
+        "typing",
+        "pathlib",
+        "config",
+        "enhanced_client",
+        "webhook_processor",
+        "assignment_detector",
+        "workflow_automation",
+        "types"
+      ],
+      "interfaces": [
+        "class:LinearIntegrationAgent",
+        "function:__init__",
+        "function:_register_webhook_handlers"
+      ],
+      "metrics": {
+        "lines_of_code": 536,
+        "num_classes": 1,
+        "num_functions": 2,
+        "num_imports": 12
+      }
+    },
+    {
+      "name": "linear_client",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/linear_client.py",
+      "description": "No description available",
+      "dependencies": [
+        "os",
+        "requests",
+        "requests.adapters",
+        "urllib3.util.retry",
+        "contexten.extensions.linear.types",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:LinearClient",
+        "function:__init__",
+        "function:get_issue",
+        "function:get_issue_comments",
+        "function:comment_on_issue",
+        "function:register_webhook",
+        "function:search_issues",
+        "function:create_issue",
+        "function:get_teams"
+      ],
+      "metrics": {
+        "lines_of_code": 294,
+        "num_classes": 1,
+        "num_functions": 8,
+        "num_imports": 6
+      }
+    },
+    {
+      "name": "enhanced_client",
+      "type": "extension",
+      "path": "src/contexten/extensions/linear/enhanced_client.py",
+      "description": "\nEnhanced Linear GraphQL Client\n\nComprehensive Linear API client with advanced features including:\n- Rate limiting and request throttling\n- Response caching with TTL\n- Retry logic with exponential bac...",
+      "dependencies": [
+        "asyncio",
+        "hashlib",
+        "json",
+        "time",
+        "datetime",
+        "typing",
+        "dataclasses",
+        "aiohttp",
+        "aiohttp",
+        "config"
+      ],
+      "interfaces": [
+        "class:CacheEntry",
+        "class:RateLimiter",
+        "class:EnhancedLinearClient",
+        "function:is_expired",
+        "function:can_make_request",
+        "function:record_request",
+        "function:time_until_reset",
+        "function:__init__",
+        "function:_get_headers",
+        "function:_get_cache_key"
+      ],
+      "metrics": {
+        "lines_of_code": 599,
+        "num_classes": 3,
+        "num_functions": 13,
+        "num_imports": 12
+      }
+    },
+    {
+      "name": "github",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/github.py",
+      "description": "No description available",
+      "dependencies": [
+        "logging",
+        "os",
+        "typing",
+        "fastapi",
+        "github",
+        "pydantic",
+        "contexten.extensions.contexten_app.interface",
+        "contexten.extensions.github.types.base",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:GitHub",
+        "class:GitHubEventHandler",
+        "function:__init__",
+        "function:client",
+        "function:unsubscribe_all_handlers",
+        "function:event",
+        "function:__init__",
+        "function:client",
+        "function:register_handler",
+        "function:new_func"
+      ],
+      "metrics": {
+        "lines_of_code": 157,
+        "num_classes": 2,
+        "num_functions": 8,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "github_types",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/github_types.py",
+      "description": "No description available",
+      "dependencies": [
+        "datetime",
+        "typing"
+      ],
+      "interfaces": [
+        "class:GitHubRepository",
+        "class:GitHubAccount",
+        "class:GitHubInstallation",
+        "class:GitHubUser",
+        "class:GitHubInstallationEvent"
+      ],
+      "metrics": {
+        "lines_of_code": 62,
+        "num_classes": 5,
+        "num_functions": 0,
+        "num_imports": 2
+      }
+    },
+    {
+      "name": "contexten_app",
+      "type": "extension",
+      "path": "src/contexten/extensions/contexten_app/contexten_app.py",
+      "description": "No description available",
+      "dependencies": [
+        "os",
+        "typing",
+        "fastapi",
+        "fastapi.responses",
+        "graph_sitter.configs.models.codebase",
+        "graph_sitter.configs.models.secrets",
+        "graph_sitter",
+        "graph_sitter.shared.logging.get_logger",
+        "github",
+        "linear"
+      ],
+      "interfaces": [
+        "class:ContextenApp",
+        "function:__init__",
+        "function:parse_repo",
+        "function:_parse_repo",
+        "function:get_codebase",
+        "function:add_repo",
+        "function:_setup_routes",
+        "function:run"
+      ],
+      "metrics": {
+        "lines_of_code": 183,
+        "num_classes": 1,
+        "num_functions": 7,
+        "num_imports": 12
+      }
+    },
+    {
+      "name": "interface",
+      "type": "extension",
+      "path": "src/contexten/extensions/contexten_app/interface.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "modal"
+      ],
+      "interfaces": [
+        "class:EventHandlerManagerProtocol",
+        "function:subscribe_handler_to_webhook",
+        "function:unsubscribe_handler_to_webhook",
+        "function:unsubscribe_all_handlers"
+      ],
+      "metrics": {
+        "lines_of_code": 14,
+        "num_classes": 1,
+        "num_functions": 3,
+        "num_imports": 2
+      }
+    },
+    {
+      "name": "client",
+      "type": "extension",
+      "path": "src/contexten/extensions/contexten_app/client.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "httpx",
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:SlackTestEvent",
+        "class:CodegenClient",
+        "function:__init__"
+      ],
+      "metrics": {
+        "lines_of_code": 87,
+        "num_classes": 2,
+        "num_functions": 1,
+        "num_imports": 3
+      }
+    },
+    {
+      "name": "linear_client",
+      "type": "extension",
+      "path": "src/contexten/extensions/modal/linear_client.py",
+      "description": "No description available",
+      "dependencies": [
+        "json",
+        "requests",
+        "pydantic",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:LinearUser",
+        "class:LinearComment",
+        "class:LinearIssue",
+        "class:LinearClient",
+        "function:__init__",
+        "function:get_issue",
+        "function:get_issue_comments",
+        "function:comment_on_issue",
+        "function:unregister_webhook",
+        "function:register_webhook"
+      ],
+      "metrics": {
+        "lines_of_code": 163,
+        "num_classes": 4,
+        "num_functions": 6,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "request_util",
+      "type": "extension",
+      "path": "src/contexten/extensions/modal/request_util.py",
+      "description": "No description available",
+      "dependencies": [
+        "json",
+        "fastapi"
+      ],
+      "interfaces": [],
+      "metrics": {
+        "lines_of_code": 46,
+        "num_classes": 0,
+        "num_functions": 0,
+        "num_imports": 2
+      }
+    },
+    {
+      "name": "base",
+      "type": "extension",
+      "path": "src/contexten/extensions/modal/base.py",
+      "description": "No description available",
+      "dependencies": [
+        "logging",
+        "os",
+        "typing",
+        "modal",
+        "fastapi",
+        "contexten.extensions.contexten_app.contexten_app",
+        "contexten.extensions.modal.request_util",
+        "graph_sitter.git.clients.git_repo_client",
+        "graph_sitter.git.schemas.repo_config"
+      ],
+      "interfaces": [
+        "class:EventRouterMixin",
+        "class:CodebaseEventsApp",
+        "function:get_event_handler_cls",
+        "function:refresh_repository_snapshots",
+        "function:get_codegen_app",
+        "function:load",
+        "function:setup_handlers",
+        "function:ping",
+        "function:fastapi_endpoint"
+      ],
+      "metrics": {
+        "lines_of_code": 169,
+        "num_classes": 2,
+        "num_functions": 7,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "slack",
+      "type": "extension",
+      "path": "src/contexten/extensions/slack/slack.py",
+      "description": "No description available",
+      "dependencies": [
+        "logging",
+        "os",
+        "slack_sdk",
+        "contexten.extensions.contexten_app.interface",
+        "contexten.extensions.slack.types",
+        "graph_sitter.shared.logging.get_logger"
+      ],
+      "interfaces": [
+        "class:Slack",
+        "function:__init__",
+        "function:client",
+        "function:unsubscribe_all_handlers",
+        "function:event",
+        "function:register_handler"
+      ],
+      "metrics": {
+        "lines_of_code": 75,
+        "num_classes": 1,
+        "num_functions": 5,
+        "num_imports": 6
+      }
+    },
+    {
+      "name": "types",
+      "type": "extension",
+      "path": "src/contexten/extensions/slack/types.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:RichTextElement",
+        "class:RichTextSection",
+        "class:Block",
+        "class:SlackEvent",
+        "class:SlackWebhookPayload",
+        "class:SlackMessageReaction",
+        "class:SlackMessage"
+      ],
+      "metrics": {
+        "lines_of_code": 79,
+        "num_classes": 7,
+        "num_functions": 0,
+        "num_imports": 2
+      }
+    },
+    {
+      "name": "organization",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/organization.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:GitHubOrganization"
+      ],
+      "metrics": {
+        "lines_of_code": 16,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "push",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/push.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic",
+        "base",
+        "commit",
+        "enterprise",
+        "installation",
+        "organization",
+        "pusher"
+      ],
+      "interfaces": [
+        "class:PushEvent"
+      ],
+      "metrics": {
+        "lines_of_code": 27,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "author",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/author.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:GitHubAuthor"
+      ],
+      "metrics": {
+        "lines_of_code": 7,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "base",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/base.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:GitHubUser",
+        "class:GitHubRepository",
+        "class:GitHubIssue",
+        "class:GitHubPullRequest",
+        "class:GitHubEvent",
+        "class:GitHubWebhookHeaders",
+        "class:GitHubWebhookPayload",
+        "class:GitHubInstallation"
+      ],
+      "metrics": {
+        "lines_of_code": 68,
+        "num_classes": 8,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "commit",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/commit.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic",
+        "author"
+      ],
+      "interfaces": [
+        "class:GitHubCommit"
+      ],
+      "metrics": {
+        "lines_of_code": 17,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 2
+      }
+    },
+    {
+      "name": "enterprise",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/enterprise.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:GitHubEnterprise"
+      ],
+      "metrics": {
+        "lines_of_code": 14,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "pull_request",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/pull_request.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "base"
+      ],
+      "interfaces": [
+        "class:PullRequestRef",
+        "class:PullRequestLinks",
+        "class:Label",
+        "class:PullRequest",
+        "class:PullRequestLabeledEvent"
+      ],
+      "metrics": {
+        "lines_of_code": 89,
+        "num_classes": 5,
+        "num_functions": 0,
+        "num_imports": 3
+      }
+    },
+    {
+      "name": "installation",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/installation.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:GitHubInstallation"
+      ],
+      "metrics": {
+        "lines_of_code": 6,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "pusher",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/pusher.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:GitHubPusher"
+      ],
+      "metrics": {
+        "lines_of_code": 6,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "label",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/label.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic"
+      ],
+      "interfaces": [
+        "class:GitHubLabel"
+      ],
+      "metrics": {
+        "lines_of_code": 11,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "push",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/events/push.py",
+      "description": "No description available",
+      "dependencies": [
+        "pydantic",
+        "base",
+        "commit",
+        "enterprise",
+        "installation",
+        "organization",
+        "pusher"
+      ],
+      "interfaces": [
+        "class:PushEvent"
+      ],
+      "metrics": {
+        "lines_of_code": 27,
+        "num_classes": 1,
+        "num_functions": 0,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "pull_request",
+      "type": "extension",
+      "path": "src/contexten/extensions/github/types/events/pull_request.py",
+      "description": "No description available",
+      "dependencies": [
+        "typing",
+        "pydantic",
+        "base",
+        "enterprise",
+        "installation",
+        "label",
+        "organization",
+        "pull_request"
+      ],
+      "interfaces": [
+        "class:User",
+        "class:Label",
+        "class:SimplePullRequest",
+        "class:PullRequestLabeledEvent",
+        "class:PullRequestOpenedEvent",
+        "class:PullRequestUnlabeledEvent"
+      ],
+      "metrics": {
+        "lines_of_code": 73,
+        "num_classes": 6,
+        "num_functions": 0,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "legacy_enhanced_analyzer",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/legacy_enhanced_analyzer.py",
+      "description": "\nEnhanced Codebase Analyzer with Graph-Sitter Integration\n\nThis module provides an enhanced analyzer that leverages graph-sitter's\npre-computed graph elements and advanced features.\n",
+      "dependencies": [
+        "logging",
+        "time",
+        "typing",
+        "dataclasses",
+        "graph_sitter",
+        "graph_sitter.configs.models.codebase",
+        "graph_sitter.adapters.graph_sitter_enhancements"
+      ],
+      "interfaces": [
+        "class:EnhancedCodebaseAnalyzer",
+        "function:__init__",
+        "function:_create_config",
+        "function:analyze_codebase_enhanced",
+        "function:analyze_training_data",
+        "function:analyze_import_loops",
+        "function:analyze_dead_code",
+        "function:analyze_graph_structure",
+        "function:analyze_enhanced_metrics",
+        "function:_generate_import_loop_recommendations"
+      ],
+      "metrics": {
+        "lines_of_code": 322,
+        "num_classes": 1,
+        "num_functions": 12,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "import_analysis",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/import_analysis.py",
+      "description": "\nImport Analysis Module\n\nAnalyzes import relationships, detects circular imports, and provides\ninsights into module dependencies and coupling.\n",
+      "dependencies": [
+        "typing",
+        "collections",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.file",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.core.external_module"
+      ],
+      "interfaces": [
+        "function:analyze_import_relationships",
+        "function:detect_circular_imports",
+        "function:get_import_graph",
+        "function:analyze_import_patterns",
+        "function:get_file_import_details",
+        "function:generate_import_report",
+        "function:dfs_find_cycles"
+      ],
+      "metrics": {
+        "lines_of_code": 446,
+        "num_classes": 0,
+        "num_functions": 7,
+        "num_imports": 6
+      }
+    },
+    {
+      "name": "training_data",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/training_data.py",
+      "description": "\nTraining Data Generation Module\n\nGenerates structured training data for LLM training, including function context extraction,\ndependency mapping, and code embeddings. Based on features from README4.md...",
+      "dependencies": [
+        "json",
+        "typing",
+        "collections",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.function",
+        "graph_sitter.core.symbol",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.core.external_module"
+      ],
+      "interfaces": [
+        "function:generate_training_data",
+        "function:extract_function_context",
+        "function:hop_through_imports",
+        "function:calculate_complexity_score",
+        "function:extract_code_patterns",
+        "function:analyze_naming_patterns",
+        "function:analyze_dependency_patterns",
+        "function:analyze_usage_patterns",
+        "function:create_function_embeddings",
+        "function:create_training_example"
+      ],
+      "metrics": {
+        "lines_of_code": 600,
+        "num_classes": 0,
+        "num_functions": 12,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "cli",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/cli.py",
+      "description": "\n\ud83d\ude80 ENHANCED COMPREHENSIVE ANALYSIS CLI \ud83d\ude80\n\nCommand-line interface for the enhanced comprehensive analysis system.\nSupports all advanced features including import loop detection, dead code analysis,\ntra...",
+      "dependencies": [
+        "argparse",
+        "json",
+        "logging",
+        "sys",
+        "pathlib",
+        "typing",
+        "dataclasses",
+        "core.engine",
+        "traceback"
+      ],
+      "interfaces": [
+        "function:create_parser",
+        "function:create_config_from_args",
+        "function:format_output",
+        "function:format_json_output",
+        "function:print_summary",
+        "function:main"
+      ],
+      "metrics": {
+        "lines_of_code": 479,
+        "num_classes": 0,
+        "num_functions": 6,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "__main__",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/__main__.py",
+      "description": "\nEntry point for running the analysis module as a script.\n\nUsage:\n    python -m graph_sitter.adapters.analysis <path>\n    python -m graph_sitter.adapters.analysis.cli <path>\n",
+      "dependencies": [
+        "cli"
+      ],
+      "interfaces": [],
+      "metrics": {
+        "lines_of_code": 14,
+        "num_classes": 0,
+        "num_functions": 0,
+        "num_imports": 1
+      }
+    },
+    {
+      "name": "symbol_analysis",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/symbol_analysis.py",
+      "description": "\nSymbol Analysis Module\n\nProvides detailed analysis of symbol usage, dependencies, and relationships\nwithin the codebase. Includes recursive function detection and dependency tracking.\n",
+      "dependencies": [
+        "typing",
+        "collections",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.function",
+        "graph_sitter.core.symbol",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.enums"
+      ],
+      "interfaces": [
+        "function:analyze_symbol_usage",
+        "function:find_recursive_functions",
+        "function:get_symbol_dependencies",
+        "function:analyze_function_complexity",
+        "function:find_symbol_clusters",
+        "function:analyze_symbol_relationships"
+      ],
+      "metrics": {
+        "lines_of_code": 352,
+        "num_classes": 0,
+        "num_functions": 6,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "codebase_summary",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/codebase_summary.py",
+      "description": "\nCodebase Summary Analysis\n\nProvides comprehensive summary functions for analyzing codebase structure,\ndependencies, and usage patterns. Based on features from README4.md.\n",
+      "dependencies": [
+        "typing",
+        "collections",
+        "graph_sitter.core.class_definition",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.external_module",
+        "graph_sitter.core.file",
+        "graph_sitter.core.function",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.core.symbol",
+        "graph_sitter.enums"
+      ],
+      "interfaces": [
+        "function:get_codebase_summary",
+        "function:get_file_summary",
+        "function:get_class_summary",
+        "function:get_function_summary",
+        "function:get_symbol_summary",
+        "function:get_codebase_statistics",
+        "function:print_codebase_overview"
+      ],
+      "metrics": {
+        "lines_of_code": 314,
+        "num_classes": 0,
+        "num_functions": 7,
+        "num_imports": 10
+      }
+    },
+    {
+      "name": "dead_code_detection",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/dead_code_detection.py",
+      "description": "\nDead Code Detection Module\n\nIdentifies unused functions, imports, and unreachable code within the codebase.\nHelps maintain code quality by finding code that can be safely removed.\n",
+      "dependencies": [
+        "typing",
+        "collections",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.function",
+        "graph_sitter.core.symbol",
+        "graph_sitter.core.file",
+        "graph_sitter.core.import_resolution"
+      ],
+      "interfaces": [
+        "function:find_dead_code",
+        "function:analyze_unused_imports",
+        "function:detect_unreachable_code",
+        "function:analyze_function_reachability",
+        "function:remove_dead_code",
+        "function:generate_dead_code_report"
+      ],
+      "metrics": {
+        "lines_of_code": 377,
+        "num_classes": 0,
+        "num_functions": 6,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "ai_analysis",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/ai_analysis.py",
+      "description": "\nAI-Powered Analysis Module\n\nProvides AI-enhanced code analysis capabilities including automated issue detection,\ncontext gathering, and intelligent code improvement suggestions.\nBased on features fro...",
+      "dependencies": [
+        "typing",
+        "collections",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.function",
+        "graph_sitter.core.class_definition",
+        "graph_sitter.core.symbol",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.core.external_module",
+        "graph_sitter.core.file"
+      ],
+      "interfaces": [
+        "function:analyze_codebase",
+        "function:analyze_function_issues",
+        "function:analyze_class_issues",
+        "function:has_try_catch",
+        "function:has_base_case_check",
+        "function:categorize_issue",
+        "function:get_function_context",
+        "function:hop_through_imports",
+        "function:flag_code_issues",
+        "function:can_auto_fix"
+      ],
+      "metrics": {
+        "lines_of_code": 577,
+        "num_classes": 7,
+        "num_functions": 12,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "test_analysis",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/test_analysis.py",
+      "description": "\nTest Analysis Module\n\nAnalyzes test coverage, organization, and provides utilities for\ntest file management and splitting.\n",
+      "dependencies": [
+        "typing",
+        "collections",
+        "os",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.function",
+        "graph_sitter.core.class_definition",
+        "graph_sitter.core.file"
+      ],
+      "interfaces": [
+        "function:analyze_test_coverage",
+        "function:is_test_function",
+        "function:is_test_class",
+        "function:classify_test_type",
+        "function:find_test_files",
+        "function:is_test_file",
+        "function:analyze_test_patterns",
+        "function:analyze_test_organization",
+        "function:find_tested_functions",
+        "function:find_tested_classes"
+      ],
+      "metrics": {
+        "lines_of_code": 587,
+        "num_classes": 0,
+        "num_functions": 13,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "class_hierarchy",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/class_hierarchy.py",
+      "description": "\nClass Hierarchy Analysis Module\n\nAnalyzes class inheritance relationships, finds inheritance chains,\nand provides insights into object-oriented design patterns.\n",
+      "dependencies": [
+        "typing",
+        "collections",
+        "graph_sitter.core.codebase",
+        "graph_sitter.core.class_definition"
+      ],
+      "interfaces": [
+        "function:analyze_inheritance_chains",
+        "function:find_deepest_inheritance",
+        "function:find_inheritance_chains",
+        "function:find_abstract_classes",
+        "function:build_inheritance_tree",
+        "function:get_class_relationships",
+        "function:detect_design_patterns",
+        "function:has_singleton_methods",
+        "function:has_factory_methods",
+        "function:has_observer_methods"
+      ],
+      "metrics": {
+        "lines_of_code": 579,
+        "num_classes": 0,
+        "num_functions": 15,
+        "num_imports": 4
+      }
+    },
+    {
+      "name": "architectural_assessment",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/architectural_assessment.py",
+      "description": "\n\ud83c\udfd7\ufe0f ARCHITECTURAL ASSESSMENT ENGINE \ud83c\udfd7\ufe0f\n\nStep 2 of CI/CD Orchestration Platform Transformation:\nComprehensive assessment of current contexten capabilities and system architecture.\n\nThis module provides...",
+      "dependencies": [
+        "os",
+        "json",
+        "time",
+        "logging",
+        "subprocess",
+        "pathlib",
+        "typing",
+        "dataclasses",
+        "collections",
+        "ast"
+      ],
+      "interfaces": [
+        "class:SystemCapability",
+        "class:ArchitecturalComponent",
+        "class:PerformanceBaseline",
+        "class:GapAnalysisItem",
+        "class:ArchitecturalAssessment",
+        "class:ArchitecturalAssessmentEngine",
+        "function:assess_architecture",
+        "function:generate_assessment_report",
+        "function:to_dict",
+        "function:save_to_file"
+      ],
+      "metrics": {
+        "lines_of_code": 638,
+        "num_classes": 6,
+        "num_functions": 18,
+        "num_imports": 10
+      }
+    },
+    {
+      "name": "dashboards",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/visualization/dashboards.py",
+      "description": "\n\ud83d\udcca DASHBOARDS MODULE \ud83d\udcca\n\nComprehensive dashboard components for codebase analysis visualization.\nProvides real-time project state monitoring and code quality insights.\n\nFeatures:\n- MetricsDashboard: Co...",
+      "dependencies": [
+        "logging",
+        "json",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "time",
+        "datetime"
+      ],
+      "interfaces": [
+        "class:DashboardConfig",
+        "class:MetricData",
+        "class:MetricsDashboard",
+        "class:QualityDashboard",
+        "class:PerformanceDashboard",
+        "function:create_comprehensive_dashboard",
+        "function:__init__",
+        "function:add_metric",
+        "function:add_code_quality_metrics",
+        "function:generate_html"
+      ],
+      "metrics": {
+        "lines_of_code": 479,
+        "num_classes": 5,
+        "num_functions": 14,
+        "num_imports": 7
+      }
+    },
+    {
+      "name": "interactive_reports",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/visualization/interactive_reports.py",
+      "description": "\n\ud83d\udcca INTERACTIVE REPORTS GENERATOR \ud83d\udcca\n\nAdvanced interactive HTML report generation with D3.js integration for\ncomprehensive codebase analysis visualization.\n\nFeatures:\n- Interactive HTML reports with nav...",
+      "dependencies": [
+        "logging",
+        "json",
+        "time",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "base64",
+        "jinja2"
+      ],
+      "interfaces": [
+        "class:ReportSection",
+        "class:ReportConfig",
+        "class:InteractiveReportGenerator",
+        "function:create_interactive_report",
+        "function:generate_html_report",
+        "function:__init__",
+        "function:_load_templates",
+        "function:add_section",
+        "function:create_overview_section",
+        "function:create_issues_section"
+      ],
+      "metrics": {
+        "lines_of_code": 760,
+        "num_classes": 3,
+        "num_functions": 14,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "exporters",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/visualization/exporters.py",
+      "description": "\n\ud83d\udce4 EXPORTERS MODULE \ud83d\udce4\n\nComprehensive export capabilities for analysis results and visualizations.\nSupports multiple output formats for different use cases and stakeholders.\n\nFeatures:\n- ReportExporter...",
+      "dependencies": [
+        "logging",
+        "json",
+        "csv",
+        "base64",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "datetime",
+        "tempfile",
+        "zipfile"
+      ],
+      "interfaces": [
+        "class:ExportConfig",
+        "class:ExportResult",
+        "class:ReportExporter",
+        "function:export_to_html",
+        "function:export_to_pdf",
+        "function:export_to_json",
+        "function:export_to_svg",
+        "function:export_multiple_formats",
+        "function:create_export_package",
+        "function:__init__"
+      ],
+      "metrics": {
+        "lines_of_code": 672,
+        "num_classes": 3,
+        "num_functions": 26,
+        "num_imports": 13
+      }
+    },
+    {
+      "name": "dependency_graphs",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/visualization/dependency_graphs.py",
+      "description": "\n\ud83d\udd78\ufe0f DEPENDENCY GRAPHS MODULE \ud83d\udd78\ufe0f\n\nAdvanced dependency graph generation and visualization for codebase analysis.\nProvides interactive network visualizations of code dependencies and relationships.\n\nFeat...",
+      "dependencies": [
+        "logging",
+        "json",
+        "networkx",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "collections",
+        "hashlib"
+      ],
+      "interfaces": [
+        "class:GraphNode",
+        "class:GraphEdge",
+        "class:GraphConfig",
+        "class:DependencyGraphGenerator",
+        "function:create_dependency_graph",
+        "function:visualize_call_graph",
+        "function:visualize_import_graph",
+        "function:__init__",
+        "function:add_node",
+        "function:add_edge"
+      ],
+      "metrics": {
+        "lines_of_code": 641,
+        "num_classes": 4,
+        "num_functions": 14,
+        "num_imports": 8
+      }
+    },
+    {
+      "name": "engine",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/core/engine.py",
+      "description": "\n\ud83d\ude80 COMPREHENSIVE ANALYSIS ENGINE - ENHANCED WITH ADVANCED FEATURES \ud83d\ude80\n\nA unified analysis engine that consolidates all analysis capabilities:\n- Core quality metrics (maintainability, complexity, Halste...",
+      "dependencies": [
+        "logging",
+        "time",
+        "json",
+        "pathlib",
+        "typing",
+        "dataclasses",
+        "collections",
+        "networkx",
+        "graph_sitter",
+        "graph_sitter.configs.models.codebase"
+      ],
+      "interfaces": [
+        "class:AnalysisConfig",
+        "class:ImportLoop",
+        "class:TrainingDataItem",
+        "class:DeadCodeItem",
+        "class:GraphAnalysisResult",
+        "class:EnhancedFunctionMetrics",
+        "class:EnhancedClassMetrics",
+        "class:AnalysisResult",
+        "class:ComprehensiveAnalysisEngine",
+        "function:analyze_codebase"
+      ],
+      "metrics": {
+        "lines_of_code": 1518,
+        "num_classes": 17,
+        "num_functions": 27,
+        "num_imports": 19
+      }
+    },
+    {
+      "name": "performance",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/core/performance.py",
+      "description": "\n\u26a1 PERFORMANCE OPTIMIZATION MODULE \u26a1\n\nAdvanced performance optimizations for large codebase analysis including:\n- Result caching and memoization\n- Lazy loading of graph elements\n- Parallel processing ...",
+      "dependencies": [
+        "logging",
+        "time",
+        "threading",
+        "multiprocessing",
+        "concurrent.futures",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "pickle",
+        "hashlib"
+      ],
+      "interfaces": [
+        "class:PerformanceConfig",
+        "class:PerformanceMetrics",
+        "class:CacheManager",
+        "class:ResourceMonitor",
+        "class:ParallelProcessor",
+        "class:PerformanceOptimizer",
+        "function:create_optimizer",
+        "function:optimized_analysis",
+        "function:finish",
+        "function:cache_hit_rate"
+      ],
+      "metrics": {
+        "lines_of_code": 579,
+        "num_classes": 6,
+        "num_functions": 29,
+        "num_imports": 16
+      }
+    },
+    {
+      "name": "legacy_enhancements",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/enhanced/legacy_enhancements.py",
+      "description": "\n\ud83d\ude80 GRAPH-SITTER ENHANCED ANALYSIS FUNCTIONS \ud83d\ude80\n\nThis module contains enhanced analysis functions that leverage graph-sitter's\npre-computed graph elements and advanced features for comprehensive codebas...",
+      "dependencies": [
+        "logging",
+        "collections",
+        "dataclasses",
+        "typing",
+        "graph_sitter.core.external_module",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.core.symbol",
+        "graph_sitter.enums",
+        "networkx"
+      ],
+      "interfaces": [
+        "class:ImportLoop",
+        "class:TrainingDataItem",
+        "class:DeadCodeItem",
+        "class:GraphAnalysisResult",
+        "class:EnhancedFunctionMetrics",
+        "class:EnhancedClassMetrics",
+        "function:hop_through_imports",
+        "function:get_function_context",
+        "function:detect_import_loops",
+        "function:analyze_graph_structure"
+      ],
+      "metrics": {
+        "lines_of_code": 584,
+        "num_classes": 11,
+        "num_functions": 9,
+        "num_imports": 9
+      }
+    },
+    {
+      "name": "graph_sitter_integration",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/enhanced/graph_sitter_integration.py",
+      "description": "\n\ud83d\udd27 ENHANCED GRAPH-SITTER INTEGRATION \ud83d\udd27\n\nThis module provides enhanced integration with graph-sitter's advanced features,\nconsolidating functionality from graph_sitter_enhancements.py and enhanced_anal...",
+      "dependencies": [
+        "logging",
+        "ast",
+        "math",
+        "collections",
+        "dataclasses",
+        "typing",
+        "graph_sitter.core.external_module",
+        "graph_sitter.core.import_resolution",
+        "graph_sitter.core.symbol",
+        "graph_sitter.core.function"
+      ],
+      "interfaces": [
+        "class:EnhancedFunctionMetrics",
+        "class:EnhancedClassMetrics",
+        "function:get_codebase_summary_enhanced",
+        "function:analyze_function_enhanced",
+        "function:analyze_class_enhanced",
+        "function:calculate_cyclomatic_complexity",
+        "function:calculate_halstead_volume",
+        "function:calculate_maintainability_index",
+        "function:calculate_lines_of_code",
+        "function:calculate_class_coupling"
+      ],
+      "metrics": {
+        "lines_of_code": 599,
+        "num_classes": 9,
+        "num_functions": 13,
+        "num_imports": 13
+      }
+    },
+    {
+      "name": "tree_sitter_queries",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/enhanced/tree_sitter_queries.py",
+      "description": "\n\ud83c\udf33 TREE-SITTER QUERY PATTERNS & ADVANCED SYNTAX ANALYSIS \ud83c\udf33\n\nAdvanced tree-sitter query patterns based on graph-sitter.com/introduction/advanced-settings\nfor comprehensive syntax tree analysis and patt...",
+      "dependencies": [
+        "logging",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "json",
+        "tree_sitter",
+        "tree_sitter",
+        "graph_sitter",
+        "graph_sitter.configs.models.codebase",
+        "time"
+      ],
+      "interfaces": [
+        "class:QueryPattern",
+        "class:QueryMatch",
+        "class:QueryResult",
+        "class:TreeSitterQueryEngine",
+        "function:create_query_engine",
+        "function:analyze_with_queries",
+        "function:__init__",
+        "function:_load_builtin_patterns",
+        "function:_initialize_parsers",
+        "function:add_pattern"
+      ],
+      "metrics": {
+        "lines_of_code": 708,
+        "num_classes": 4,
+        "num_functions": 25,
+        "num_imports": 10
+      }
+    },
+    {
+      "name": "advanced_config",
+      "type": "analysis",
+      "path": "src/graph_sitter/adapters/analysis/config/advanced_config.py",
+      "description": "\n\ud83c\udf9b\ufe0f ADVANCED CODEBASE CONFIGURATION \ud83c\udf9b\ufe0f\n\nAdvanced CodebaseConfig usage based on graph-sitter.com/introduction/advanced-settings\nwith comprehensive flag management and optimization strategies.\n\nThis mod...",
+      "dependencies": [
+        "logging",
+        "dataclasses",
+        "typing",
+        "pathlib",
+        "graph_sitter.configs.models.codebase"
+      ],
+      "interfaces": [
+        "class:AdvancedCodebaseConfig",
+        "function:create_optimized_config",
+        "function:create_debug_config",
+        "function:create_production_config",
+        "function:create_minimal_config",
+        "function:create_security_focused_config",
+        "function:create_performance_config",
+        "function:create_config_from_template",
+        "function:to_codebase_config",
+        "function:optimize_for_language"
+      ],
+      "metrics": {
+        "lines_of_code": 452,
+        "num_classes": 2,
+        "num_functions": 14,
+        "num_imports": 5
+      }
+    }
+  ],
+  "performance_baselines": [
+    {
+      "metric_name": "total_python_files",
+      "current_value": 1294,
+      "unit": "files",
+      "measurement_time": "2025-06-06 08:47:51",
+      "context": {}
+    },
+    {
+      "metric_name": "total_lines_of_code",
+      "current_value": 163559,
+      "unit": "lines",
+      "measurement_time": "2025-06-06 08:47:52",
+      "context": {}
+    }
+  ],
+  "gap_analysis": [
+    {
+      "area": "Automated Testing Pipeline",
+      "current_state": "unknown",
+      "desired_state": "comprehensive",
+      "priority": "critical",
+      "effort_estimate": "large",
+      "impact": "high",
+      "recommendations": [
+        "Implement automated test execution on PR creation",
+        "Add test coverage reporting",
+        "Set up parallel test execution"
+      ]
+    },
+    {
+      "area": "Deployment Automation",
+      "current_state": "manual",
+      "desired_state": "automated",
+      "priority": "high",
+      "effort_estimate": "large",
+      "impact": "high",
+      "recommendations": [
+        "Implement automated deployment pipelines",
+        "Add environment-specific configurations",
+        "Set up rollback mechanisms"
+      ]
+    },
+    {
+      "area": "Real-time Monitoring",
+      "current_state": "limited",
+      "desired_state": "comprehensive",
+      "priority": "medium",
+      "effort_estimate": "medium",
+      "impact": "medium",
+      "recommendations": [
+        "Implement real-time performance monitoring",
+        "Add alerting for critical issues",
+        "Create monitoring dashboards"
+      ]
+    }
+  ],
+  "technology_stack": {
+    "languages": {},
+    "frameworks": {
+      "FastAPI": {
+        "detected": true,
+        "evidence": [
+          "Found 'fastapi' in ./tests/integration/codemod/repos/open_source/fastapi.json",
+          "Found 'fastapi' in ./tests/unit/cli/commands/update/data/response.json",
+          "Found 'fastapi' in ./graph_sitter_analysis_results.json"
+        ]
+      },
+      "LangChain": {
+        "detected": true,
+        "evidence": [
+          "Found 'langchain' in ./graph_sitter_analysis_results.json",
+          "Found 'langchain' in ./examples/examples/snapshot_event_handler/uv.lock",
+          "Found 'langchain' in ./examples/examples/pr_review_bot/helpers.py"
+        ]
+      },
+      "Modal": {
+        "detected": true,
+        "evidence": [
+          "Found 'modal' in ./tests/shared/codemod/verified_codemod_utils.py",
+          "Found 'modal' in ./tests/shared/codemod/__pycache__/constants.cpython-313.pyc",
+          "Found 'modal' in ./tests/shared/codemod/__pycache__/verified_codemod_utils.cpython-313.pyc"
+        ]
+      },
+      "Pytest": {
+        "detected": true,
+        "evidence": [
+          "Found 'pytest' in ./tests/integration/codemod/conftest.py",
+          "Found 'pytest' in ./tests/integration/codemod/test_verified_codemods.py",
+          "Found 'pytest' in ./tests/integration/codemod/test_parse.py"
+        ]
+      },
+      "Graph-sitter": {
+        "detected": true,
+        "evidence": [
+          "Found 'graph_sitter' in ./.codegen/codemods/update_loggers/update_loggers.py",
+          "Found 'graph_sitter' in ./.codegen/codemods/no_link_backticks/no_link_backticks.py",
+          "Found 'graph_sitter' in ./.codegen/codemods/test_language/test_language.py"
+        ]
+      }
+    },
+    "tools": {},
+    "dependencies": {
+      "pyproject.toml": "[project]\nname = \"graph-sitter\"\ndynamic = [\"version\", \"urls\"]\ndescription = \"Scriptable interface to a powerful, multi-lingual language server built on top of Tree-sitter\"\nreadme = \"README.md\"\n# renovate: datasource=python-version depName=python\nrequires-python = \">=3.12, <3.14\"\ndependencies = [\n  \"openai==1.78.1\",\n  \"requests>=2.31.0\",\n  \"tiktoken<1.0.0,>=0.5.1\",\n  \"tabulate>=0.9.0,<1.0.0\",\n  \"codeowners<1.0.0,>=0.6.0\",\n  \"dataclasses-json<1.0.0,>=0.6.4\",\n  \"dicttoxml<2.0.0,>=1.7.16\",\n  \"xmltod"
+    }
+  },
+  "integration_map": {
+    "chat_agent": [
+      "contexten.agents.langchain.agent",
+      "graph_sitter"
+    ],
+    "code_agent": [
+      "contexten.agents.loggers",
+      "contexten.agents.tracer"
+    ],
+    "agent": [
+      "contexten.agents.utils",
+      "contexten.agents.langchain.llm",
+      "contexten.agents.langchain.prompts",
+      "contexten.agents.langchain.tools"
+    ],
+    "tools": [
+      "contexten.agents.tools.bash",
+      "contexten.agents.tools.github.checkout_pr"
+    ],
+    "observation": [
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "rename_file": [
+      "graph_sitter"
+    ],
+    "search": [
+      "contexten.agents.tools.tool_output_types",
+      "contexten.agents.tools.tool_output_types",
+      "graph_sitter",
+      "graph_sitter"
+    ],
+    "relace_edit": [
+      "graph_sitter",
+      "contexten.agents.tools.tool_output_types"
+    ],
+    "semantic_edit": [
+      "contexten.agents.langchain.llm",
+      "graph_sitter"
+    ],
+    "reveal_symbol": [
+      "graph_sitter.ai.utils",
+      "graph_sitter",
+      "graph_sitter.core.external_module",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.core.symbol"
+    ],
+    "reflection": [
+      "contexten.agents.langchain.llm",
+      "graph_sitter"
+    ],
+    "delete_file": [
+      "graph_sitter"
+    ],
+    "view_file": [
+      "graph_sitter"
+    ],
+    "run_codemod": [
+      "graph_sitter"
+    ],
+    "search_files_by_name": [
+      "contexten.agents.tools.observation",
+      "graph_sitter",
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "list_directory": [
+      "contexten.agents.tools.observation",
+      "contexten.agents.tools.tool_output_types",
+      "graph_sitter",
+      "graph_sitter.core.directory"
+    ],
+    "replacement_edit": [
+      "graph_sitter"
+    ],
+    "link_annotation": [
+      "graph_sitter"
+    ],
+    "global_replacement_edit": [
+      "contexten.agents.tools.search_files_by_name",
+      "graph_sitter"
+    ],
+    "semantic_search": [
+      "contexten.extensions.index.file_index",
+      "graph_sitter"
+    ],
+    "create_file": [
+      "graph_sitter"
+    ],
+    "edit_file": [
+      "graph_sitter"
+    ],
+    "move_symbol": [
+      "graph_sitter"
+    ],
+    "commit": [
+      "graph_sitter"
+    ],
+    "linear": [
+      "contexten.extensions.linear.linear_client",
+      "contexten.extensions.contexten_app.interface",
+      "contexten.extensions.linear.types",
+      "contexten.extensions.linear.config",
+      "contexten.extensions.linear.integration_agent",
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "checkout_pr": [
+      "graph_sitter"
+    ],
+    "view_pr": [
+      "graph_sitter"
+    ],
+    "create_pr_review_comment": [
+      "graph_sitter"
+    ],
+    "create_pr_comment": [
+      "graph_sitter"
+    ],
+    "view_pr_checks": [
+      "graph_sitter"
+    ],
+    "create_pr": [
+      "graph_sitter"
+    ],
+    "workflow_automation": [
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "config": [
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "assignment_detector": [
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "linear_client": [
+      "contexten.extensions.linear.types",
+      "graph_sitter.shared.logging.get_logger",
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "github": [
+      "contexten.extensions.contexten_app.interface",
+      "contexten.extensions.github.types.base",
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "contexten_app": [
+      "graph_sitter.configs.models.codebase",
+      "graph_sitter.configs.models.secrets",
+      "graph_sitter",
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "base": [
+      "contexten.extensions.contexten_app.contexten_app",
+      "contexten.extensions.modal.request_util",
+      "graph_sitter.git.clients.git_repo_client",
+      "graph_sitter.git.schemas.repo_config"
+    ],
+    "slack": [
+      "contexten.extensions.contexten_app.interface",
+      "contexten.extensions.slack.types",
+      "graph_sitter.shared.logging.get_logger"
+    ],
+    "legacy_enhanced_analyzer": [
+      "graph_sitter",
+      "graph_sitter.configs.models.codebase",
+      "graph_sitter.adapters.graph_sitter_enhancements"
+    ],
+    "import_analysis": [
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.file",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.core.external_module"
+    ],
+    "training_data": [
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.function",
+      "graph_sitter.core.symbol",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.core.external_module"
+    ],
+    "symbol_analysis": [
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.function",
+      "graph_sitter.core.symbol",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.enums"
+    ],
+    "codebase_summary": [
+      "graph_sitter.core.class_definition",
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.external_module",
+      "graph_sitter.core.file",
+      "graph_sitter.core.function",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.core.symbol",
+      "graph_sitter.enums"
+    ],
+    "dead_code_detection": [
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.function",
+      "graph_sitter.core.symbol",
+      "graph_sitter.core.file",
+      "graph_sitter.core.import_resolution"
+    ],
+    "ai_analysis": [
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.function",
+      "graph_sitter.core.class_definition",
+      "graph_sitter.core.symbol",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.core.external_module",
+      "graph_sitter.core.file"
+    ],
+    "test_analysis": [
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.function",
+      "graph_sitter.core.class_definition",
+      "graph_sitter.core.file"
+    ],
+    "class_hierarchy": [
+      "graph_sitter.core.codebase",
+      "graph_sitter.core.class_definition"
+    ],
+    "engine": [
+      "graph_sitter",
+      "graph_sitter.configs.models.codebase"
+    ],
+    "legacy_enhancements": [
+      "graph_sitter.core.external_module",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.core.symbol",
+      "graph_sitter.enums"
+    ],
+    "graph_sitter_integration": [
+      "graph_sitter.core.external_module",
+      "graph_sitter.core.import_resolution",
+      "graph_sitter.core.symbol",
+      "graph_sitter.core.function"
+    ],
+    "tree_sitter_queries": [
+      "graph_sitter",
+      "graph_sitter.configs.models.codebase"
+    ],
+    "advanced_config": [
+      "graph_sitter.configs.models.codebase"
+    ]
+  },
+  "recommendations": [
+    "Implement comprehensive automated testing pipeline",
+    "Set up continuous deployment with environment promotion",
+    "Add real-time monitoring and alerting systems",
+    "Enhance code quality gates and automated reviews",
+    "Implement infrastructure as code practices",
+    "Set up centralized logging and observability",
+    "Add automated security scanning and compliance checks",
+    "Implement feature flag management system",
+    "Set up automated rollback and recovery mechanisms",
+    "Add performance testing and optimization workflows"
+  ]
+}
