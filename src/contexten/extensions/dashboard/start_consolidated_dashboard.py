@@ -10,12 +10,17 @@ import logging
 import argparse
 from pathlib import Path
 
-# Add the project root to Python path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
+# Add the current directory to Python path for local imports
+current_dir = Path(__file__).parent
+sys.path.insert(0, str(current_dir))
 
-from src.contexten.extensions.dashboard.consolidated_dashboard import create_consolidated_dashboard
-
+# Use local import instead of complex path
+try:
+    from consolidated_dashboard import create_consolidated_dashboard
+except ImportError:
+    # Fallback to standalone if consolidated doesn't work
+    print("⚠️  Consolidated dashboard imports failed, falling back to standalone version...")
+    from start_dashboard_standalone import create_standalone_dashboard as create_consolidated_dashboard
 
 def setup_logging(debug: bool = False):
     """Setup logging configuration."""
@@ -160,8 +165,14 @@ def main():
         print("Press Ctrl+C to stop the dashboard")
         print("=" * 60)
         
-        # Start dashboard
-        dashboard.run()
+        # Start dashboard with uvicorn
+        import uvicorn
+        uvicorn.run(
+            dashboard,
+            host="0.0.0.0",
+            port=args.port,
+            log_level="info"
+        )
         
     except KeyboardInterrupt:
         logger.info("Dashboard stopped by user")
@@ -174,4 +185,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
