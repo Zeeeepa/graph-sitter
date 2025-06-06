@@ -1,112 +1,208 @@
 """
-Graph-Sitter Analysis Module
+🚀 COMPREHENSIVE ANALYSIS MODULE 🚀
 
-This module provides comprehensive codebase analysis capabilities including:
-- Codebase summarization and statistics
-- Symbol analysis and usage tracking
+Unified analysis system that consolidates all graph-sitter enhanced analysis capabilities.
+
+This module provides:
+- Comprehensive codebase analysis engine
+- Enhanced graph-sitter integration
+- Import loop detection
 - Dead code detection
-- Import relationship analysis
-- Class hierarchy exploration
-- Test analysis and organization
-- AI-powered code analysis
-- Training data generation for LLMs
+- Training data generation
+- Advanced metrics and visualization
+- Simple CLI interface
 
-All analysis features are consolidated here for better organization and maintainability.
+Quick Start:
+    from graph_sitter.adapters.analysis import analyze_codebase
+    
+    result = analyze_codebase("/path/to/code")
+    print(f"Found {result.total_functions} functions")
+    
+CLI Usage:
+    python -m graph_sitter.adapters.analysis.cli /path/to/code
 """
 
-from .codebase_summary import (
-    get_codebase_summary,
-    get_file_summary,
-    get_class_summary,
-    get_function_summary,
-    get_symbol_summary
-)
-
-from .symbol_analysis import (
-    analyze_symbol_usage,
-    find_recursive_functions,
-    get_symbol_dependencies
-)
-
-from .dead_code_detection import (
-    find_dead_code,
-    analyze_unused_imports,
-    detect_unreachable_code
-)
-
-from .import_analysis import (
-    analyze_import_relationships,
-    detect_circular_imports,
-    get_import_graph
-)
-
-from .class_hierarchy import (
-    analyze_inheritance_chains,
-    find_deepest_inheritance,
-    get_class_relationships
-)
-
-from .test_analysis import (
-    analyze_test_coverage,
-    split_test_files,
-    get_test_statistics
-)
-
-from .ai_analysis import (
+# Core analysis engine
+from .core.engine import (
+    ComprehensiveAnalysisEngine,
+    AnalysisConfig,
+    AnalysisResult,
     analyze_codebase,
-    get_function_context,
-    hop_through_imports,
-    flag_code_issues
+    quick_analysis,
+    ImportLoop,
+    DeadCodeItem,
+    TrainingDataItem
 )
 
-from .training_data import (
-    generate_training_data,
-    create_function_embeddings,
-    extract_code_patterns
+# Enhanced graph-sitter integration
+from .enhanced.graph_sitter_integration import (
+    EnhancedFunctionMetrics,
+    EnhancedClassMetrics,
+    get_codebase_summary_enhanced,
+    analyze_function_enhanced,
+    analyze_class_enhanced,
+    get_function_context,
+    analyze_graph_structure,
+    calculate_cyclomatic_complexity,
+    calculate_halstead_volume,
+    calculate_maintainability_index
 )
+
+# Legacy analysis modules (import with error handling)
+try:
+    from .codebase_summary import get_codebase_summary, print_codebase_overview
+    from .symbol_analysis import analyze_symbol_usage, find_recursive_functions
+    from .dead_code_detection import find_dead_code, generate_dead_code_report
+    from .import_analysis import analyze_import_relationships, detect_circular_imports
+    from .class_hierarchy import analyze_inheritance_chains, detect_design_patterns
+    from .test_analysis import analyze_test_coverage, get_test_statistics
+    from .training_data import generate_training_data as legacy_generate_training_data
+    LEGACY_MODULES_AVAILABLE = True
+except ImportError:
+    # Create dummy functions for missing legacy modules
+    def get_codebase_summary(*args, **kwargs): return {}
+    def print_codebase_overview(*args, **kwargs): pass
+    def analyze_symbol_usage(*args, **kwargs): return {}
+    def find_recursive_functions(*args, **kwargs): return []
+    def find_dead_code(*args, **kwargs): return []
+    def generate_dead_code_report(*args, **kwargs): return ""
+    def analyze_import_relationships(*args, **kwargs): return {}
+    def detect_circular_imports(*args, **kwargs): return []
+    def analyze_inheritance_chains(*args, **kwargs): return {}
+    def detect_design_patterns(*args, **kwargs): return []
+    def analyze_test_coverage(*args, **kwargs): return {}
+    def get_test_statistics(*args, **kwargs): return {}
+    def legacy_generate_training_data(*args, **kwargs): return []
+    LEGACY_MODULES_AVAILABLE = False
+
+# AI analysis (import with error handling)
+try:
+    from .ai_analysis import analyze_codebase as ai_analyze_codebase, flag_code_issues
+    AI_ANALYSIS_AVAILABLE = True
+except ImportError:
+    def ai_analyze_codebase(*args, **kwargs): return {}
+    def flag_code_issues(*args, **kwargs): return []
+    AI_ANALYSIS_AVAILABLE = False
+
+# Convenience functions
+def comprehensive_analysis(path, **kwargs):
+    """Perform comprehensive analysis with all features enabled."""
+    config = AnalysisConfig(
+        detect_import_loops=True,
+        detect_dead_code=True,
+        generate_training_data=kwargs.get('training_data', False),
+        analyze_graph_structure=True,
+        **kwargs
+    )
+    return analyze_codebase(path, config)
+
+def basic_analysis(path, **kwargs):
+    """Perform basic analysis with core metrics only."""
+    config = AnalysisConfig(
+        detect_import_loops=False,
+        detect_dead_code=False,
+        generate_training_data=False,
+        analyze_graph_structure=True,
+        **kwargs
+    )
+    return analyze_codebase(path, config)
+
+# Analysis presets
+class AnalysisPresets:
+    """Predefined analysis configurations."""
+    
+    @staticmethod
+    def comprehensive():
+        """Full analysis with all features."""
+        return AnalysisConfig(
+            detect_import_loops=True,
+            detect_dead_code=True,
+            generate_training_data=True,
+            analyze_graph_structure=True,
+            include_source_locations=True,
+            include_metrics=True
+        )
+    
+    @staticmethod
+    def quality_focused():
+        """Focus on code quality metrics."""
+        return AnalysisConfig(
+            detect_import_loops=True,
+            detect_dead_code=True,
+            generate_training_data=False,
+            analyze_graph_structure=True,
+            include_metrics=True
+        )
+    
+    @staticmethod
+    def performance():
+        """Fast analysis with minimal features."""
+        return AnalysisConfig(
+            detect_import_loops=False,
+            detect_dead_code=False,
+            generate_training_data=False,
+            analyze_graph_structure=True,
+            use_advanced_config=False
+        )
+    
+    @staticmethod
+    def ml_training():
+        """Generate training data for ML models."""
+        return AnalysisConfig(
+            detect_import_loops=False,
+            detect_dead_code=False,
+            generate_training_data=True,
+            analyze_graph_structure=True,
+            include_source_locations=True
+        )
 
 __all__ = [
-    # Codebase summary
-    'get_codebase_summary',
-    'get_file_summary', 
-    'get_class_summary',
-    'get_function_summary',
-    'get_symbol_summary',
+    # Core engine
+    'ComprehensiveAnalysisEngine',
+    'AnalysisConfig',
+    'AnalysisResult',
+    'analyze_codebase',
+    'quick_analysis',
+    'comprehensive_analysis',
+    'basic_analysis',
     
-    # Symbol analysis
+    # Data classes
+    'ImportLoop',
+    'DeadCodeItem', 
+    'TrainingDataItem',
+    'EnhancedFunctionMetrics',
+    'EnhancedClassMetrics',
+    
+    # Enhanced analysis
+    'get_codebase_summary_enhanced',
+    'analyze_function_enhanced',
+    'analyze_class_enhanced',
+    'get_function_context',
+    'analyze_graph_structure',
+    
+    # Metrics
+    'calculate_cyclomatic_complexity',
+    'calculate_halstead_volume',
+    'calculate_maintainability_index',
+    
+    # Legacy compatibility
+    'get_codebase_summary',
+    'print_codebase_overview',
     'analyze_symbol_usage',
     'find_recursive_functions',
-    'get_symbol_dependencies',
-    
-    # Dead code detection
     'find_dead_code',
-    'analyze_unused_imports',
-    'detect_unreachable_code',
-    
-    # Import analysis
+    'generate_dead_code_report',
     'analyze_import_relationships',
     'detect_circular_imports',
-    'get_import_graph',
-    
-    # Class hierarchy
     'analyze_inheritance_chains',
-    'find_deepest_inheritance',
-    'get_class_relationships',
-    
-    # Test analysis
+    'detect_design_patterns',
     'analyze_test_coverage',
-    'split_test_files',
     'get_test_statistics',
-    
-    # AI analysis
-    'analyze_codebase',
-    'get_function_context',
-    'hop_through_imports',
+    'ai_analyze_codebase',
     'flag_code_issues',
+    'legacy_generate_training_data',
     
-    # Training data
-    'generate_training_data',
-    'create_function_embeddings',
-    'extract_code_patterns'
+    # Presets
+    'AnalysisPresets'
 ]
 

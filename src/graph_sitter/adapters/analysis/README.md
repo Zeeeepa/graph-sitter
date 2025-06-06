@@ -1,243 +1,166 @@
-# Graph-Sitter Analysis Module
+# 🚀 Comprehensive Analysis System
 
-This module provides comprehensive codebase analysis capabilities for the graph-sitter project. All analysis features have been consolidated here for better organization and maintainability.
+**Unified codebase analysis system with graph-sitter integration**
 
-## Features
+## ⚡ Quick Start
 
-### Core Analysis
-- **Codebase Summary**: Comprehensive statistics and overview of codebase structure
-- **Symbol Analysis**: Detailed analysis of symbol usage, dependencies, and relationships
-- **Dead Code Detection**: Identification of unused functions, imports, and unreachable code
-- **Import Analysis**: Analysis of import relationships and circular dependency detection
-- **Class Hierarchy**: Inheritance chain analysis and design pattern detection
+### Python API
+```python
+from graph_sitter.adapters.analysis import analyze_codebase
 
-### Advanced Analysis
-- **Test Analysis**: Test coverage analysis, organization assessment, and test file management
-- **AI-Powered Analysis**: Automated issue detection and intelligent code improvement suggestions
-- **Training Data Generation**: LLM training data creation for code embeddings and pattern analysis
+# Basic analysis
+result = analyze_codebase("/path/to/code")
+print(f"Found {result.total_functions} functions")
 
-## Module Structure
+# Comprehensive analysis
+from graph_sitter.adapters.analysis import AnalysisPresets
+config = AnalysisPresets.comprehensive()
+result = analyze_codebase("/path/to/code", config)
+
+# Save results
+result.save_to_file("analysis_results.json")
+```
+
+### Command Line
+```bash
+# Basic analysis
+python -m graph_sitter.adapters.analysis.cli /path/to/code
+
+# Comprehensive analysis
+python -m graph_sitter.adapters.analysis.cli /path/to/code --comprehensive
+
+# Quick analysis
+python -m graph_sitter.adapters.analysis.cli /path/to/code --quick
+
+# Save results
+python -m graph_sitter.adapters.analysis.cli /path/to/code --output results.json
+```
+
+## 🎯 Features
+
+- **🔧 Enhanced Graph-Sitter Integration** - Advanced codebase analysis
+- **🔄 Import Loop Detection** - Find circular dependencies
+- **💀 Dead Code Detection** - Identify unused functions and classes
+- **📊 Advanced Metrics** - Complexity, maintainability, quality scores
+- **🤖 Training Data Generation** - ML model training data
+- **⚡ Performance Optimized** - Fast analysis with configurable depth
+- **🎛️ Flexible Configuration** - Customizable analysis options
+
+## 📁 Architecture
 
 ```
 analysis/
-├── __init__.py                     # Main module exports
-├── codebase_summary.py            # Codebase overview and statistics
-├── symbol_analysis.py             # Symbol usage and dependency analysis
-├── dead_code_detection.py         # Unused code identification
-├── import_analysis.py             # Import relationship analysis
-├── class_hierarchy.py             # Inheritance and design patterns
-├── test_analysis.py               # Test coverage and organization
-├── ai_analysis.py                 # AI-powered code analysis
-├── training_data.py               # LLM training data generation
-├── legacy_analyze_codebase.py     # Legacy analysis tool (moved)
-├── legacy_enhanced_analyzer.py    # Legacy enhanced analyzer (moved)
-└── legacy_analyze_codebase_enhanced.py  # Legacy enhanced tool (moved)
+├── core/
+│   └── engine.py              # Main analysis engine
+├── enhanced/
+│   └── graph_sitter_integration.py  # Enhanced metrics & analysis
+├── modules/                   # Legacy analysis modules (8 modules)
+├── cli.py                     # Command-line interface
+└── __init__.py               # Unified exports
 ```
 
-## Quick Start
-
-### Basic Usage
+## 🔧 Configuration
 
 ```python
-from graph_sitter.adapters.analysis import (
-    get_codebase_summary,
-    analyze_symbol_usage,
-    find_dead_code,
-    analyze_test_coverage
+from graph_sitter.adapters.analysis import AnalysisConfig
+
+config = AnalysisConfig(
+    detect_import_loops=True,      # Find circular imports
+    detect_dead_code=True,         # Find unused code
+    generate_training_data=False,  # Generate ML training data
+    analyze_graph_structure=True,  # Graph analysis
+    use_advanced_config=True,      # Use advanced CodebaseConfig
+    ignore_external_modules=True,  # Skip external dependencies
+    include_source_locations=True  # Include file locations
 )
-
-# Get codebase overview
-summary = get_codebase_summary(codebase)
-print(summary)
-
-# Analyze symbol usage
-symbol_analysis = analyze_symbol_usage(codebase)
-print(f"Total symbols: {symbol_analysis['total_symbols']}")
-
-# Find dead code
-dead_code = find_dead_code(codebase)
-print(f"Unused functions: {len(dead_code['unused_functions'])}")
-
-# Analyze test coverage
-test_analysis = analyze_test_coverage(codebase)
-print(f"Coverage: {test_analysis['coverage_metrics']['coverage_percentage']:.1f}%")
 ```
 
-### Advanced Analysis
+## 📊 Analysis Results
 
 ```python
-from graph_sitter.adapters.analysis import (
-    analyze_inheritance_chains,
-    detect_circular_imports,
-    analyze_codebase,
-    generate_training_data
-)
+result = analyze_codebase("/path/to/code")
 
-# Analyze class hierarchies
-hierarchy = analyze_inheritance_chains(codebase)
-if hierarchy["deepest_inheritance"]:
-    print(f"Deepest inheritance: {hierarchy['deepest_inheritance']['class']}")
+# Basic metrics
+print(f"Files: {result.total_files}")
+print(f"Functions: {result.total_functions}")
+print(f"Classes: {result.total_classes}")
 
-# Detect circular imports
-circular = detect_circular_imports(codebase)
-print(f"Circular imports found: {circular['total_cycles']}")
+# Advanced analysis
+print(f"Import loops: {len(result.import_loops)}")
+print(f"Dead code items: {len(result.dead_code)}")
+print(f"Analysis time: {result.analysis_time:.2f}s")
 
-# AI-powered analysis
-ai_analysis = analyze_codebase(codebase)
-print(f"Issues found: {ai_analysis['total_issues']}")
-
-# Generate training data for LLMs
-training_data = generate_training_data(codebase)
-print(f"Functions processed: {training_data['metadata']['total_processed']}")
+# Graph metrics
+print(f"Graph metrics: {result.graph_metrics}")
 ```
 
-### Comprehensive Reports
+## 🎛️ Presets
 
 ```python
-from graph_sitter.adapters.analysis import (
-    print_codebase_overview,
-    generate_dead_code_report,
-    generate_import_report,
-    generate_hierarchy_report,
-    generate_test_report,
-    generate_ai_analysis_report
-)
+from graph_sitter.adapters.analysis import AnalysisPresets
 
-# Print formatted overview
-print_codebase_overview(codebase)
+# Full analysis with all features
+config = AnalysisPresets.comprehensive()
 
-# Generate detailed reports
-print(generate_dead_code_report(codebase))
-print(generate_import_report(codebase))
-print(generate_hierarchy_report(codebase))
-print(generate_test_report(codebase))
-print(generate_ai_analysis_report(codebase))
+# Focus on code quality
+config = AnalysisPresets.quality_focused()
+
+# Fast analysis
+config = AnalysisPresets.performance()
+
+# Generate ML training data
+config = AnalysisPresets.ml_training()
 ```
 
-## Analysis Categories
+## 🚀 Examples
 
-### 1. Codebase Summary (`codebase_summary.py`)
-- `get_codebase_summary()`: Overall codebase statistics
-- `get_file_summary()`: Individual file analysis
-- `get_class_summary()`: Class structure analysis
-- `get_function_summary()`: Function analysis
-- `get_symbol_summary()`: Symbol usage patterns
-- `print_codebase_overview()`: Formatted overview with emojis
-
-### 2. Symbol Analysis (`symbol_analysis.py`)
-- `analyze_symbol_usage()`: Symbol usage patterns and statistics
-- `find_recursive_functions()`: Recursive function detection
-- `get_symbol_dependencies()`: Detailed dependency information
-- `analyze_function_complexity()`: Function complexity metrics
-- `find_symbol_clusters()`: Related symbol grouping
-- `analyze_symbol_relationships()`: Symbol relationship mapping
-
-### 3. Dead Code Detection (`dead_code_detection.py`)
-- `find_dead_code()`: Comprehensive dead code analysis
-- `analyze_unused_imports()`: Unused import detection
-- `detect_unreachable_code()`: Unreachable code patterns
-- `remove_dead_code()`: Automated dead code removal (with dry-run)
-- `generate_dead_code_report()`: Formatted dead code report
-
-### 4. Import Analysis (`import_analysis.py`)
-- `analyze_import_relationships()`: Import dependency analysis
-- `detect_circular_imports()`: Circular dependency detection
-- `get_import_graph()`: Import dependency graph generation
-- `analyze_import_patterns()`: Import style and pattern analysis
-- `get_file_import_details()`: Per-file import analysis
-- `generate_import_report()`: Comprehensive import report
-
-### 5. Class Hierarchy (`class_hierarchy.py`)
-- `analyze_inheritance_chains()`: Inheritance relationship analysis
-- `find_deepest_inheritance()`: Deep inheritance detection
-- `get_class_relationships()`: Detailed class relationship mapping
-- `detect_design_patterns()`: Common design pattern detection
-- `generate_hierarchy_report()`: Class hierarchy report
-
-### 6. Test Analysis (`test_analysis.py`)
-- `analyze_test_coverage()`: Test coverage assessment
-- `split_test_files()`: Large test file splitting utility
-- `get_test_statistics()`: Comprehensive test statistics
-- `generate_test_report()`: Test analysis report
-
-### 7. AI Analysis (`ai_analysis.py`)
-- `analyze_codebase()`: Automated issue detection
-- `get_function_context()`: Comprehensive function context extraction
-- `flag_code_issues()`: Issue flagging with auto-fix suggestions
-- `generate_ai_analysis_report()`: AI-powered analysis report
-
-### 8. Training Data (`training_data.py`)
-- `generate_training_data()`: LLM training data generation
-- `create_function_embeddings()`: Code embedding data creation
-- `extract_code_patterns()`: Pattern extraction for ML
-- `run_training_data_generation()`: Complete training pipeline
-
-## Integration with Graph-Sitter
-
-This analysis module integrates seamlessly with the graph-sitter ecosystem:
-
-- **Configuration Support**: Works with all graph-sitter.com advanced settings
-- **Performance Optimized**: Leverages pre-computed graph elements
-- **Error Handling**: Graceful degradation when graph-sitter is unavailable
-- **Extensible**: Easy to add new analysis capabilities
-
-## Configuration
-
-The analysis module respects graph-sitter configuration options:
-
+### Find Import Loops
 ```python
-from graph_sitter import Codebase
-from graph_sitter.configs.models.codebase import CodebaseConfig
-
-# Configure for enhanced analysis
-config = CodebaseConfig(
-    method_usages=True,      # Enable method usage tracking
-    generics=True,           # Enable generic type resolution
-    debug=False,             # Disable verbose logging
-    sync_enabled=True        # Enable graph sync
-)
-
-codebase = Codebase("path/to/code", config=config)
+result = analyze_codebase("/path/to/code")
+for loop in result.import_loops:
+    print(f"Loop: {' -> '.join(loop.files)} ({loop.severity})")
 ```
 
-## Performance Considerations
+### Detect Dead Code
+```python
+result = analyze_codebase("/path/to/code")
+for dead_item in result.dead_code:
+    print(f"Dead {dead_item.type}: {dead_item.name} in {dead_item.file_path}")
+```
 
-- **Lazy Loading**: Analysis functions only process what's needed
-- **Caching**: Results can be cached for repeated analysis
-- **Memory Efficient**: Large codebases are processed in chunks
-- **Configurable Limits**: Analysis depth and scope can be controlled
+### Enhanced Function Analysis
+```python
+from graph_sitter.adapters.analysis import analyze_function_enhanced
 
-## Error Handling
+# Analyze specific function
+function = codebase.get_function("my_function")
+metrics = analyze_function_enhanced(function)
+print(f"Complexity: {metrics.cyclomatic_complexity}")
+print(f"Maintainability: {metrics.maintainability_index}")
+```
 
-All analysis functions include comprehensive error handling:
+## 🔗 Integration
 
-- **Graceful Degradation**: Functions work even with partial data
-- **Clear Error Messages**: Detailed error information when issues occur
-- **Fallback Modes**: Alternative analysis when graph-sitter is unavailable
-- **Validation**: Input validation and sanity checks
+This system consolidates functionality from:
+- `graph_sitter_enhancements.py` - Enhanced analysis functions
+- `enhanced_analyzer.py` - Advanced analyzer with CodebaseConfig
+- `analyze_codebase_enhanced.py` - Comprehensive analysis tool
+- All 8 existing analysis modules
 
-## Legacy Support
+## ⚡ Performance
 
-Legacy analysis tools have been moved to maintain compatibility:
+- **Advanced CodebaseConfig** - Optimized graph-sitter settings
+- **Configurable Analysis Depth** - Control analysis scope
+- **Lazy Loading** - Load only what's needed
+- **Caching** - Reuse computed results
+- **Parallel Processing** - Multi-threaded analysis (where applicable)
 
-- `legacy_analyze_codebase.py`: Original comprehensive analysis tool
-- `legacy_enhanced_analyzer.py`: Enhanced analyzer with graph-sitter integration
-- `legacy_analyze_codebase_enhanced.py`: Enhanced comprehensive tool
+## 🎯 Use Cases
 
-These can still be imported and used if needed for backward compatibility.
-
-## Contributing
-
-When adding new analysis features:
-
-1. Follow the existing module structure
-2. Include comprehensive error handling
-3. Add type hints and docstrings
-4. Provide both programmatic and report interfaces
-5. Include examples in the documentation
-6. Add appropriate tests
-
-## Examples
-
-See the individual module files for detailed examples and usage patterns. Each module includes comprehensive docstrings and example code.
+- **Code Quality Assessment** - Measure maintainability and complexity
+- **Refactoring Planning** - Identify problematic code areas
+- **Dependency Analysis** - Understand code relationships
+- **ML Model Training** - Generate training data for AI models
+- **CI/CD Integration** - Automated code quality checks
+- **Architecture Review** - Analyze system structure
 

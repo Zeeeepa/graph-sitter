@@ -19,13 +19,15 @@ try:
     from graph_sitter.core.file import SourceFile
     GRAPH_SITTER_AVAILABLE = True
 except ImportError:
+    # Create dummy classes for type hints
+    class Codebase: pass
+    class Function: pass
+    class Class: pass
+    class Symbol: pass
+    class Import: pass
+    class ExternalModule: pass
+    class SourceFile: pass
     GRAPH_SITTER_AVAILABLE = False
-    # Fallback types
-    Codebase = Any
-    Function = Any
-    Class = Any
-    Symbol = Any
-    Import = Any
 
 
 def analyze_codebase(codebase: Codebase) -> Dict[str, Any]:
@@ -573,4 +575,3 @@ def generate_ai_analysis_report(codebase: Codebase) -> str:
         
     except Exception as e:
         return f"❌ Error generating AI analysis report: {str(e)}"
-
