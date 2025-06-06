@@ -1,12 +1,12 @@
 import logging
 import os
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from fastapi import Request
 from github import Github
 from pydantic import BaseModel
 
-from contexten.extensions.events.interface import EventHandlerManagerProtocol
+from contexten.extensions.contexten_app.interface import EventHandlerManagerProtocol
 from contexten.extensions.github.types.base import GitHubInstallation, GitHubWebhookPayload
 from graph_sitter.shared.logging.get_logger import get_logger
 
@@ -22,6 +22,7 @@ class GitHub(EventHandlerManagerProtocol):
     def __init__(self, app):
         self.app = app
         self.registered_handlers = {}
+        self._client: Optional[Github] = None
 
     @property
     def client(self) -> Github:
@@ -51,13 +52,13 @@ class GitHub(EventHandlerManagerProtocol):
         """
         logger.info(f"[EVENT] Registering handler for {event_name}")
 
-        def register_handler(func: Callable[[T], Any]):
+        def register_handler(func: Callable[[T], Any]) -> Callable[[dict], Any]:
             # Get the type annotation from the first parameter
             event_type = func.__annotations__.get("event")
             func_name = func.__qualname__
             logger.info(f"[EVENT] Registering function {func_name} for {event_name}")
 
-            def new_func(raw_event: dict):
+            def new_func(raw_event: dict) -> Any:
                 # Only validate if a Pydantic model was specified
                 if event_type and issubclass(event_type, BaseModel):
                     try:
@@ -68,7 +69,7 @@ class GitHub(EventHandlerManagerProtocol):
                         raise
                 else:
                     # Pass through raw dict if no type validation needed
-                    return func(raw_event)
+                    return func(raw_event)  # type: ignore[arg-type]
 
             self.registered_handlers[event_name] = new_func
             return new_func
@@ -136,3 +137,21 @@ class GitHub(EventHandlerManagerProtocol):
         except Exception as e:
             logger.exception(f"Error handling webhook: {e}")
             raise
+
+
+class GitHubEventHandler:
+    """Handles GitHub webhook events and routes them to appropriate handlers."""
+    
+    def __init__(self, webhook_secret: str, app_id: str, private_key: str):
+        self.webhook_secret = webhook_secret
+        self.app_id = app_id
+        self.private_key = private_key
+        self._client: Optional[Github] = None
+        self.event_handlers: Dict[str, Any] = {}
+    
+    @property
+    def client(self) -> Github:
+        """Get or create GitHub client."""
+        if self._client is None:
+            self._client = Github()
+        return self._client

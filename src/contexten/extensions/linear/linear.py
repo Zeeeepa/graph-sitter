@@ -3,7 +3,7 @@ from typing import Any, Callable, TypeVar, Optional
 
 from pydantic import BaseModel
 
-from contexten.extensions.events.interface import EventHandlerManagerProtocol
+from contexten.extensions.contexten_app.interface import EventHandlerManagerProtocol
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.linear.config import get_linear_config
 from contexten.extensions.linear.integration_agent import LinearIntegrationAgent
@@ -228,7 +228,7 @@ class Linear(EventHandlerManagerProtocol):
             return self.integration_agent.workflow_automation.get_active_tasks()
         return {}
 
-    async def handle_webhook(self, payload: bytes, signature: str, headers: dict = None) -> bool:
+    async def handle_webhook(self, payload: bytes, signature: str, headers: Optional[dict] = None) -> bool:
         """Handle webhook (backward compatibility)"""
         if self.integration_agent:
             return await self.integration_agent.handle_webhook(payload, signature, headers)
