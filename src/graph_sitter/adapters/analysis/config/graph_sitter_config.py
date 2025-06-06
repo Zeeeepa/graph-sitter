@@ -3,10 +3,23 @@ Graph-sitter Configuration
 
 Advanced configuration options for graph-sitter based on:
 https://graph-sitter.com/introduction/advanced-settings
+
+This module provides backward compatibility while integrating with
+the new comprehensive advanced settings system.
 """
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
+import logging
+
+# Import the new advanced settings system
+from .advanced_settings import (
+    AdvancedGraphSitterSettings, 
+    get_preset_config,
+    create_codebase_config
+)
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -14,112 +27,184 @@ class GraphSitterConfig:
     """
     Configuration for graph-sitter advanced settings.
     
+    This class provides backward compatibility while leveraging
+    the new comprehensive AdvancedGraphSitterSettings system.
+    
     Based on CodebaseConfig from graph-sitter documentation.
     """
     
-    # Debug and Development
-    debug: bool = False
-    """Enables verbose logging for debugging purposes"""
+    # Core settings - delegated to AdvancedGraphSitterSettings
+    _advanced_settings: AdvancedGraphSitterSettings = field(default_factory=AdvancedGraphSitterSettings)
     
-    verify_graph: bool = False
-    """Adds assertions for graph state during reset resync"""
+    # Legacy properties for backward compatibility
+    @property
+    def debug(self) -> bool:
+        return self._advanced_settings.debug.debug
     
-    track_graph: bool = False
-    """Keeps a copy of the original graph before a resync"""
+    @debug.setter
+    def debug(self, value: bool):
+        self._advanced_settings.debug.debug = value
     
-    # Performance and Optimization
-    sync_enabled: bool = False
-    """Enables or disables graph sync during codebase.commit"""
+    @property
+    def verify_graph(self) -> bool:
+        return self._advanced_settings.debug.verify_graph
     
-    full_range_index: bool = False
-    """Creates additional index that maps all tree-sitter ranges to nodes"""
+    @verify_graph.setter
+    def verify_graph(self, value: bool):
+        self._advanced_settings.debug.verify_graph = value
     
-    ignore_process_errors: bool = True
-    """Controls whether to ignore errors during external process execution"""
+    @property
+    def track_graph(self) -> bool:
+        return self._advanced_settings.debug.track_graph
     
-    exp_lazy_graph: bool = False
-    """Experimental flag that pushes graph creation back until needed"""
+    @track_graph.setter
+    def track_graph(self, value: bool):
+        self._advanced_settings.debug.track_graph = value
     
-    # Graph Construction Control
-    disable_graph: bool = False
-    """Disables the graph construction process entirely"""
+    @property
+    def sync_enabled(self) -> bool:
+        return self._advanced_settings.performance.sync_enabled
     
-    disable_file_parse: bool = False
-    """Disables ALL parsing, including file and graph parsing"""
+    @sync_enabled.setter
+    def sync_enabled(self, value: bool):
+        self._advanced_settings.performance.sync_enabled = value
     
-    # Feature Flags
-    method_usages: bool = True
-    """Enables and disables resolving method usages"""
+    @property
+    def full_range_index(self) -> bool:
+        return self._advanced_settings.performance.full_range_index
     
-    generics: bool = True
-    """Enables and disables generic type resolution"""
+    @full_range_index.setter
+    def full_range_index(self, value: bool):
+        self._advanced_settings.performance.full_range_index = value
     
-    allow_external: bool = False
-    """Enables resolving imports, files, modules from outside repo path"""
+    @property
+    def method_usages(self) -> bool:
+        return self._advanced_settings.language.method_usages
     
-    # Import Resolution
-    import_resolution_paths: List[str] = field(default_factory=list)
-    """Alternative paths to resolve imports from"""
+    @method_usages.setter
+    def method_usages(self, value: bool):
+        self._advanced_settings.language.method_usages = value
     
-    import_resolution_overrides: Dict[str, str] = field(default_factory=dict)
-    """Import path overrides during import resolution"""
+    @property
+    def generics(self) -> bool:
+        return self._advanced_settings.language.generics
     
-    py_resolve_syspath: bool = False
-    """Enables resolution of imports from sys.path"""
+    @generics.setter
+    def generics(self, value: bool):
+        self._advanced_settings.language.generics = value
     
-    # TypeScript Specific
-    ts_dependency_manager: bool = False
-    """Enables internal dependency installer for TypeScript"""
+    @property
+    def import_resolution_paths(self) -> List[str]:
+        return self._advanced_settings.import_resolution.import_resolution_paths
     
-    ts_language_engine: bool = False
-    """Enables using TypeScript compiler to extract information"""
+    @import_resolution_paths.setter
+    def import_resolution_paths(self, value: List[str]):
+        self._advanced_settings.import_resolution.import_resolution_paths = value
     
-    v8_ts_engine: bool = False
-    """Enables V8-based TypeScript compiler"""
+    # Additional convenience properties
+    @property
+    def advanced_settings(self) -> AdvancedGraphSitterSettings:
+        """Access to the full advanced settings system."""
+        return self._advanced_settings
     
-    # Advanced Features
-    unpacking_assignment_partial_removal: bool = False
-    """Enables smarter removal of unpacking assignments"""
-    
+    @advanced_settings.setter
+    def advanced_settings(self, value: AdvancedGraphSitterSettings):
+        self._advanced_settings = value
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary format."""
-        return {
-            field.name: getattr(self, field.name)
-            for field in self.__dataclass_fields__.values()
-        }
+        return self._advanced_settings.to_codebase_config_dict()
     
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]) -> 'GraphSitterConfig':
         """Create configuration from dictionary."""
-        return cls(**{
-            k: v for k, v in config_dict.items()
-            if k in cls.__dataclass_fields__
-        })
+        config = cls()
+        
+        # Update advanced settings from dictionary
+        for key, value in config_dict.items():
+            if hasattr(config._advanced_settings.debug, key):
+                setattr(config._advanced_settings.debug, key, value)
+            elif hasattr(config._advanced_settings.performance, key):
+                setattr(config._advanced_settings.performance, key, value)
+            elif hasattr(config._advanced_settings.language, key):
+                setattr(config._advanced_settings.language, key, value)
+            elif hasattr(config._advanced_settings.import_resolution, key):
+                setattr(config._advanced_settings.import_resolution, key, value)
+            elif hasattr(config._advanced_settings.experimental, key):
+                setattr(config._advanced_settings.experimental, key, value)
+        
+        return config
+    
+    @classmethod
+    def from_preset(cls, preset_name: str) -> 'GraphSitterConfig':
+        """Create configuration from a preset."""
+        config = cls()
+        config._advanced_settings = get_preset_config(preset_name)
+        return config
     
     def get_performance_config(self) -> 'GraphSitterConfig':
         """Get a performance-optimized configuration."""
         config = GraphSitterConfig()
-        config.sync_enabled = True
-        config.method_usages = True
-        config.generics = True
-        config.ignore_process_errors = True
-        config.exp_lazy_graph = True
+        config._advanced_settings = AdvancedGraphSitterSettings.get_performance_config()
         return config
     
     def get_debug_config(self) -> 'GraphSitterConfig':
         """Get a debug-enabled configuration."""
         config = GraphSitterConfig()
-        config.debug = True
-        config.verify_graph = True
-        config.track_graph = True
-        config.full_range_index = True
+        config._advanced_settings = AdvancedGraphSitterSettings.get_debug_config()
+        return config
+    
+    def get_comprehensive_config(self) -> 'GraphSitterConfig':
+        """Get a comprehensive configuration with most features enabled."""
+        config = GraphSitterConfig()
+        config._advanced_settings = AdvancedGraphSitterSettings.get_comprehensive_config()
+        return config
+    
+    def get_typescript_config(self) -> 'GraphSitterConfig':
+        """Get a TypeScript-optimized configuration."""
+        config = GraphSitterConfig()
+        config._advanced_settings = AdvancedGraphSitterSettings.get_typescript_config()
+        return config
+    
+    def get_python_config(self) -> 'GraphSitterConfig':
+        """Get a Python-optimized configuration."""
+        config = GraphSitterConfig()
+        config._advanced_settings = AdvancedGraphSitterSettings.get_python_config()
         return config
     
     def get_minimal_config(self) -> 'GraphSitterConfig':
         """Get a minimal configuration for basic analysis."""
         config = GraphSitterConfig()
-        config.method_usages = False
-        config.generics = False
-        config.sync_enabled = False
+        config._advanced_settings.language.method_usages = False
+        config._advanced_settings.language.generics = False
+        config._advanced_settings.performance.sync_enabled = False
         return config
+    
+    def create_codebase_config(self) -> Optional[Any]:
+        """Create a CodebaseConfig object from current settings."""
+        return create_codebase_config(self._advanced_settings)
+    
+    def validate(self) -> List[str]:
+        """Validate configuration and return warnings."""
+        return self._advanced_settings.validate()
+    
+    def get_summary(self) -> Dict[str, Any]:
+        """Get a summary of current configuration."""
+        return self._advanced_settings.get_summary()
+
+
+# Legacy compatibility functions
+def get_default_config() -> GraphSitterConfig:
+    """Get default graph-sitter configuration."""
+    return GraphSitterConfig()
+
+
+def get_optimized_config() -> GraphSitterConfig:
+    """Get performance-optimized configuration."""
+    return GraphSitterConfig().get_performance_config()
+
+
+def get_debug_config() -> GraphSitterConfig:
+    """Get debug-enabled configuration."""
+    return GraphSitterConfig().get_debug_config()
 

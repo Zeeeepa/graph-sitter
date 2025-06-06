@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 """
-🚀 GRAPH-SITTER ENHANCED ANALYSIS FUNCTIONS 🚀
+Graph-Sitter Enhancement Module
 
 This module contains enhanced analysis functions that leverage graph-sitter's
 pre-computed graph elements and advanced features for comprehensive codebase analysis.
 
-Features:
-- Pre-computed graph element access
-- Import loop detection
-- Training data generation for LLMs
-- Dead code detection using usage analysis
-- Advanced graph structure analysis
-- Function/class dependency mapping
+Consolidated from the original graph_sitter_enhancements.py file.
 """
 
 import logging
 from collections import defaultdict
-from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional, Union
+
+# Import models
+from .models import (
+    ImportLoop, TrainingDataItem, DeadCodeItem, GraphAnalysisResult,
+    EnhancedFunctionMetrics, EnhancedClassMetrics
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,90 +38,9 @@ except ImportError as e:
     class SymbolType: pass
 
 
-@dataclass
-class ImportLoop:
-    """Represents a circular import dependency."""
-    files: List[str]
-    loop_type: str  # 'static', 'dynamic', 'mixed'
-    severity: str   # 'critical', 'warning', 'info'
-    imports: List[Dict[str, Any]]
-
-@dataclass
-class TrainingDataItem:
-    """Training data item for ML models."""
-    implementation: Dict[str, str]
-    dependencies: List[Dict[str, str]]
-    usages: List[Dict[str, str]]
-    metadata: Dict[str, Any]
-
-@dataclass
-class DeadCodeItem:
-    """Represents dead/unused code."""
-    type: str  # 'function', 'class', 'variable'
-    name: str
-    file_path: str
-    line_start: int
-    line_end: int
-    reason: str
-    confidence: float
-
-@dataclass
-class GraphAnalysisResult:
-    """Results from graph-based analysis."""
-    total_nodes: int
-    total_edges: int
-    symbol_usage_edges: int
-    import_resolution_edges: int
-    export_edges: int
-    strongly_connected_components: List[List[str]]
-    import_loops: List[ImportLoop]
-
-@dataclass
-class EnhancedFunctionMetrics:
-    """Enhanced function metrics using graph-sitter."""
-    name: str
-    file_path: str
-    line_start: int
-    line_end: int
-    # Basic metrics
-    cyclomatic_complexity: int
-    halstead_volume: float
-    maintainability_index: int
-    lines_of_code: int
-    # Graph-sitter enhanced metrics
-    dependencies: List[str] = field(default_factory=list)
-    usages: List[str] = field(default_factory=list)
-    call_sites: List[str] = field(default_factory=list)
-    function_calls: List[str] = field(default_factory=list)
-    parameters: List[str] = field(default_factory=list)
-    return_statements: List[str] = field(default_factory=list)
-    decorators: List[str] = field(default_factory=list)
-    is_async: bool = False
-    is_generator: bool = False
-    docstring: str = ""
-
-@dataclass
-class EnhancedClassMetrics:
-    """Enhanced class metrics using graph-sitter."""
-    name: str
-    file_path: str
-    line_start: int
-    line_end: int
-    # Basic metrics
-    depth_of_inheritance: int
-    method_count: int
-    attribute_count: int
-    lines_of_code: int
-    # Graph-sitter enhanced metrics
-    parent_classes: List[str] = field(default_factory=list)
-    subclasses: List[str] = field(default_factory=list)
-    methods: List[str] = field(default_factory=list)
-    attributes: List[str] = field(default_factory=list)
-    decorators: List[str] = field(default_factory=list)
-    usages: List[str] = field(default_factory=list)
-    dependencies: List[str] = field(default_factory=list)
-    is_abstract: bool = False
-
+# ============================================================================
+# CORE ENHANCEMENT FUNCTIONS
+# ============================================================================
 
 def hop_through_imports(imp: Import) -> Union[Symbol, ExternalModule]:
     """Finds the root symbol for an import by following the import chain."""
@@ -188,6 +106,10 @@ def get_function_context(function) -> TrainingDataItem:
 
     return context
 
+
+# ============================================================================
+# IMPORT LOOP DETECTION
+# ============================================================================
 
 def detect_import_loops(codebase) -> List[ImportLoop]:
     """Detect circular import dependencies using NetworkX."""
@@ -268,6 +190,10 @@ def detect_import_loops(codebase) -> List[ImportLoop]:
         return []
 
 
+# ============================================================================
+# GRAPH STRUCTURE ANALYSIS
+# ============================================================================
+
 def analyze_graph_structure(codebase) -> GraphAnalysisResult:
     """Analyze the graph structure of the codebase."""
     if not DEPENDENCIES_AVAILABLE:
@@ -287,21 +213,16 @@ def analyze_graph_structure(codebase) -> GraphAnalysisResult:
         import_resolution_edges = len([x for x in edges if x[2].type == EdgeType.IMPORT_SYMBOL_RESOLUTION])
         export_edges = len([x for x in edges if x[2].type == EdgeType.EXPORT])
         
+        # Find strongly connected components
+        G = nx.DiGraph()
+        for edge in edges:
+            G.add_edge(edge[0], edge[1])
+        
+        strongly_connected = list(nx.strongly_connected_components(G))
+        scc_lists = [list(component) for component in strongly_connected if len(component) > 1]
+        
         # Detect import loops
         import_loops = detect_import_loops(codebase)
-        
-        # Find strongly connected components in the import graph
-        strongly_connected_components = []
-        try:
-            G = nx.DiGraph()
-            for imp in codebase.imports:
-                if hasattr(imp, 'from_file') and hasattr(imp, 'to_file') and imp.from_file and imp.to_file:
-                    G.add_edge(imp.from_file.filepath, imp.to_file.filepath)
-            
-            components = list(nx.strongly_connected_components(G))
-            strongly_connected_components = [list(comp) for comp in components if len(comp) > 1]
-        except Exception as e:
-            logger.debug(f"Error finding strongly connected components: {e}")
         
         return GraphAnalysisResult(
             total_nodes=len(nodes),
@@ -309,7 +230,7 @@ def analyze_graph_structure(codebase) -> GraphAnalysisResult:
             symbol_usage_edges=symbol_usage_edges,
             import_resolution_edges=import_resolution_edges,
             export_edges=export_edges,
-            strongly_connected_components=strongly_connected_components,
+            strongly_connected_components=scc_lists,
             import_loops=import_loops
         )
         
@@ -322,9 +243,14 @@ def analyze_graph_structure(codebase) -> GraphAnalysisResult:
         )
 
 
+# ============================================================================
+# DEAD CODE DETECTION
+# ============================================================================
+
 def detect_dead_code(codebase) -> List[DeadCodeItem]:
-    """Detect unused functions, classes, and variables using graph-sitter."""
+    """Detect unused functions, classes, and variables using usage analysis."""
     if not DEPENDENCIES_AVAILABLE:
+        logger.warning("Dependencies not available - skipping dead code detection")
         return []
     
     dead_code_items = []
@@ -334,7 +260,7 @@ def detect_dead_code(codebase) -> List[DeadCodeItem]:
         for function in codebase.functions:
             if not getattr(function, 'usages', []):
                 # Skip main functions and special methods
-                if function.name not in ['main', '__init__', '__str__', '__repr__'] and not function.name.startswith('test_'):
+                if function.name not in ['main', '__init__', '__main__'] and not function.name.startswith('_'):
                     dead_code_items.append(DeadCodeItem(
                         type="function",
                         name=function.name,
@@ -348,8 +274,8 @@ def detect_dead_code(codebase) -> List[DeadCodeItem]:
         # Check for unused classes
         for cls in codebase.classes:
             if not getattr(cls, 'usages', []):
-                # Skip exception classes and abstract base classes
-                if not cls.name.endswith('Error') and not cls.name.endswith('Exception'):
+                # Skip base classes and exception classes
+                if not cls.name.endswith('Base') and not cls.name.endswith('Exception'):
                     dead_code_items.append(DeadCodeItem(
                         type="class",
                         name=cls.name,
@@ -381,6 +307,10 @@ def detect_dead_code(codebase) -> List[DeadCodeItem]:
     return dead_code_items
 
 
+# ============================================================================
+# TRAINING DATA GENERATION
+# ============================================================================
+
 def generate_training_data(codebase) -> List[TrainingDataItem]:
     """Generate training data for LLMs using graph-sitter analysis."""
     if not DEPENDENCIES_AVAILABLE:
@@ -409,6 +339,10 @@ def generate_training_data(codebase) -> List[TrainingDataItem]:
     
     return training_data
 
+
+# ============================================================================
+# ENHANCED METRICS ANALYSIS
+# ============================================================================
 
 def analyze_function_enhanced(function) -> EnhancedFunctionMetrics:
     """Analyze a function using graph-sitter enhanced features."""
@@ -540,6 +474,10 @@ def analyze_class_enhanced(cls) -> EnhancedClassMetrics:
         )
 
 
+# ============================================================================
+# ENHANCED SUMMARY FUNCTIONS
+# ============================================================================
+
 def get_codebase_summary_enhanced(codebase) -> Dict[str, Any]:
     """Get enhanced codebase summary using graph-sitter features."""
     if not DEPENDENCIES_AVAILABLE:
@@ -581,4 +519,77 @@ def get_codebase_summary_enhanced(codebase) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error generating enhanced codebase summary: {e}")
         return {"error": str(e)}
+
+
+# ============================================================================
+# UTILITY FUNCTIONS
+# ============================================================================
+
+def generate_import_loop_recommendations(import_loops: List[ImportLoop]) -> List[str]:
+    """Generate recommendations for fixing import loops."""
+    recommendations = []
+    
+    critical_loops = [loop for loop in import_loops if loop.severity == "critical"]
+    if critical_loops:
+        recommendations.append("🚨 Critical: Fix mixed static/dynamic import loops immediately")
+        recommendations.append("Consider using dependency injection or factory patterns")
+    
+    if len(import_loops) > 5:
+        recommendations.append("📊 High number of import loops detected - consider architectural refactoring")
+    
+    if import_loops:
+        recommendations.append("💡 Consider moving shared code to separate modules")
+        recommendations.append("🔄 Use lazy imports where appropriate")
+    
+    return recommendations
+
+
+def generate_dead_code_recommendations(dead_code_items: List[DeadCodeItem]) -> List[str]:
+    """Generate recommendations for handling dead code."""
+    recommendations = []
+    
+    high_confidence_items = [item for item in dead_code_items if item.confidence > 0.7]
+    if high_confidence_items:
+        recommendations.append(f"🗑️ {len(high_confidence_items)} high-confidence dead code items can be safely removed")
+    
+    if len(dead_code_items) > 10:
+        recommendations.append("📈 Consider implementing automated dead code removal in CI/CD")
+    
+    if dead_code_items:
+        recommendations.append("🔍 Review dead code items before removal - some may be used dynamically")
+        recommendations.append("📝 Update documentation to reflect removed functionality")
+    
+    return recommendations
+
+
+def generate_graph_insights(graph_analysis: GraphAnalysisResult) -> List[str]:
+    """Generate insights from graph analysis."""
+    insights = []
+    
+    if graph_analysis.total_nodes > 1000:
+        insights.append(f"📊 Large codebase with {graph_analysis.total_nodes:,} nodes")
+    
+    edge_ratio = graph_analysis.total_edges / graph_analysis.total_nodes if graph_analysis.total_nodes > 0 else 0
+    if edge_ratio > 3:
+        insights.append(f"🔗 High connectivity (edge ratio: {edge_ratio:.1f}) - well-connected codebase")
+    elif edge_ratio < 1:
+        insights.append(f"🔗 Low connectivity (edge ratio: {edge_ratio:.1f}) - loosely coupled modules")
+    
+    if graph_analysis.import_loops:
+        insights.append(f"🔄 {len(graph_analysis.import_loops)} import loops detected")
+    
+    return insights
+
+
+def generate_graph_recommendations(graph_analysis: GraphAnalysisResult) -> List[str]:
+    """Generate recommendations from graph analysis."""
+    recommendations = []
+    
+    if graph_analysis.strongly_connected_components:
+        recommendations.append("🔄 Consider breaking up strongly connected components")
+    
+    if graph_analysis.symbol_usage_edges < graph_analysis.total_edges * 0.3:
+        recommendations.append("📊 Low symbol usage ratio - consider code organization review")
+    
+    return recommendations
 

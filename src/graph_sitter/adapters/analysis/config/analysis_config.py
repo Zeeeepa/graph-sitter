@@ -1,192 +1,244 @@
+#!/usr/bin/env python3
 """
-Analysis Configuration
+Enhanced Analysis Configuration
 
-Main configuration class that orchestrates all analysis settings.
+Updated configuration system to support all features from the consolidated analysis system.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Set
+from typing import Dict, List, Any, Optional
 from pathlib import Path
-
-from .graph_sitter_config import GraphSitterConfig
-from .performance_config import PerformanceConfig
 
 
 @dataclass
 class AnalysisConfig:
-    """
-    Comprehensive configuration for codebase analysis.
+    """Enhanced configuration for comprehensive analysis."""
     
-    Combines graph-sitter settings, performance options, and analysis features.
-    """
+    # Core analysis settings
+    use_graph_sitter: bool = True
+    use_advanced_config: bool = False
+    extensions: List[str] = field(default_factory=lambda: ['.py'])
     
-    # Core Configuration
-    graph_sitter: GraphSitterConfig = field(default_factory=GraphSitterConfig)
-    """Graph-sitter specific configuration"""
+    # Quality thresholds
+    max_complexity: int = 10
+    min_maintainability: int = 20
+    confidence_threshold: float = 0.5
     
-    performance: PerformanceConfig = field(default_factory=PerformanceConfig)
-    """Performance optimization configuration"""
+    # Feature flags
+    include_dead_code: bool = False
+    include_import_loops: bool = False
+    include_training_data: bool = False
+    include_enhanced_metrics: bool = False
+    include_graph_analysis: bool = False
     
-    # Analysis Features
-    enable_tree_sitter: bool = True
-    """Enable tree-sitter integration and syntax analysis"""
+    # Output settings
+    output_format: str = "text"  # text, json, yaml
+    output_file: Optional[str] = None
+    quiet: bool = False
+    verbose: bool = False
     
-    enable_ai_analysis: bool = True
-    """Enable AI-powered code analysis and suggestions"""
+    # Performance settings
+    max_files: Optional[int] = None
+    timeout_seconds: Optional[int] = None
+    parallel_processing: bool = True
     
-    enable_visualization: bool = True
-    """Enable visualization generation"""
+    # Graph-sitter specific settings
+    graph_sitter_config: Dict[str, Any] = field(default_factory=dict)
     
-    enable_metrics_collection: bool = True
-    """Enable comprehensive metrics collection"""
+    # Exclusion patterns
+    exclude_patterns: List[str] = field(default_factory=lambda: [
+        '__pycache__', '.git', '.venv', 'venv', 'env',
+        'node_modules', '.pytest_cache', '.mypy_cache'
+    ])
     
-    enable_dependency_analysis: bool = True
-    """Enable dependency tracking and analysis"""
-    
-    enable_dead_code_detection: bool = True
-    """Enable dead code detection"""
-    
-    enable_import_analysis: bool = True
-    """Enable import relationship analysis"""
-    
-    enable_test_analysis: bool = True
-    """Enable test-specific analysis"""
-    
-    # Output Configuration
-    output_formats: Set[str] = field(default_factory=lambda: {'json', 'html'})
-    """Enabled output formats: json, html, text, csv"""
-    
-    export_visualizations: bool = True
-    """Export interactive visualizations"""
-    
-    generate_reports: bool = True
-    """Generate comprehensive analysis reports"""
-    
-    # File Filtering
-    include_patterns: List[str] = field(default_factory=lambda: ['*.py', '*.js', '*.ts', '*.jsx', '*.tsx'])
-    """File patterns to include in analysis"""
-    
-    exclude_patterns: List[str] = field(default_factory=lambda: ['node_modules/*', '.git/*', '__pycache__/*', '*.pyc'])
-    """File patterns to exclude from analysis"""
-    
-    exclude_directories: Set[str] = field(default_factory=lambda: {'.git', 'node_modules', '__pycache__', '.pytest_cache'})
-    """Directories to exclude from analysis"""
-    
-    max_file_size_kb: int = 1024
-    """Maximum file size to analyze in KB"""
-    
-    # Language-Specific Settings
-    python_settings: Dict[str, Any] = field(default_factory=dict)
-    """Python-specific analysis settings"""
-    
-    javascript_settings: Dict[str, Any] = field(default_factory=dict)
-    """JavaScript/TypeScript-specific analysis settings"""
-    
-    # AI Configuration
-    ai_max_requests: int = 150
-    """Maximum AI requests per analysis session"""
-    
-    ai_context_window: int = 8000
-    """Maximum context window for AI requests"""
-    
-    ai_temperature: float = 0.1
-    """Temperature setting for AI requests"""
-    
-    # Visualization Settings
-    visualization_theme: str = 'default'
-    """Theme for visualizations: default, dark, light"""
-    
-    max_graph_nodes: int = 1000
-    """Maximum nodes to display in graph visualizations"""
-    
-    enable_interactive_graphs: bool = True
-    """Enable interactive graph features"""
-    
-    # Reporting Configuration
-    report_title: Optional[str] = None
-    """Custom title for analysis reports"""
-    
-    include_source_code: bool = False
-    """Include source code snippets in reports"""
-    
-    detailed_metrics: bool = True
-    """Include detailed metrics in reports"""
+    # Analysis modes
+    analysis_mode: str = "standard"  # standard, comprehensive, quick, training, refactoring
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert configuration to dictionary format."""
-        result = {}
-        for field_name, field_obj in self.__dataclass_fields__.items():
-            value = getattr(self, field_name)
-            if hasattr(value, 'to_dict'):
-                result[field_name] = value.to_dict()
-            elif isinstance(value, (set, list)):
-                result[field_name] = list(value) if isinstance(value, set) else value
-            elif isinstance(value, Path):
-                result[field_name] = str(value)
-            else:
-                result[field_name] = value
-        return result
+        """Convert configuration to dictionary."""
+        return {
+            'use_graph_sitter': self.use_graph_sitter,
+            'use_advanced_config': self.use_advanced_config,
+            'extensions': self.extensions,
+            'max_complexity': self.max_complexity,
+            'min_maintainability': self.min_maintainability,
+            'confidence_threshold': self.confidence_threshold,
+            'include_dead_code': self.include_dead_code,
+            'include_import_loops': self.include_import_loops,
+            'include_training_data': self.include_training_data,
+            'include_enhanced_metrics': self.include_enhanced_metrics,
+            'include_graph_analysis': self.include_graph_analysis,
+            'output_format': self.output_format,
+            'output_file': self.output_file,
+            'quiet': self.quiet,
+            'verbose': self.verbose,
+            'max_files': self.max_files,
+            'timeout_seconds': self.timeout_seconds,
+            'parallel_processing': self.parallel_processing,
+            'graph_sitter_config': self.graph_sitter_config,
+            'exclude_patterns': self.exclude_patterns,
+            'analysis_mode': self.analysis_mode
+        }
     
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]) -> 'AnalysisConfig':
         """Create configuration from dictionary."""
-        # Handle nested configurations
-        if 'graph_sitter' in config_dict:
-            config_dict['graph_sitter'] = GraphSitterConfig.from_dict(config_dict['graph_sitter'])
-        if 'performance' in config_dict:
-            config_dict['performance'] = PerformanceConfig(**config_dict['performance'])
+        return cls(**config_dict)
+    
+    @classmethod
+    def load_from_file(cls, config_path: str) -> 'AnalysisConfig':
+        """Load configuration from file."""
+        import json
+        try:
+            import yaml
+            YAML_AVAILABLE = True
+        except ImportError:
+            YAML_AVAILABLE = False
         
-        # Convert sets back from lists
-        if 'output_formats' in config_dict:
-            config_dict['output_formats'] = set(config_dict['output_formats'])
-        if 'exclude_directories' in config_dict:
-            config_dict['exclude_directories'] = set(config_dict['exclude_directories'])
+        config_path = Path(config_path)
         
-        return cls(**{
-            k: v for k, v in config_dict.items()
-            if k in cls.__dataclass_fields__
-        })
+        if not config_path.exists():
+            raise FileNotFoundError(f"Configuration file not found: {config_path}")
+        
+        with open(config_path, 'r') as f:
+            if config_path.suffix.lower() in ['.yaml', '.yml'] and YAML_AVAILABLE:
+                config_dict = yaml.safe_load(f)
+            else:
+                config_dict = json.load(f)
+        
+        return cls.from_dict(config_dict)
     
-    @classmethod
-    def get_comprehensive_config(cls) -> 'AnalysisConfig':
-        """Get a comprehensive analysis configuration with all features enabled."""
-        config = cls()
-        config.graph_sitter = config.graph_sitter.get_performance_config()
-        config.performance = config.performance.get_optimized_config()
-        config.enable_tree_sitter = True
-        config.enable_ai_analysis = True
-        config.enable_visualization = True
-        config.enable_metrics_collection = True
-        config.enable_dependency_analysis = True
-        config.enable_dead_code_detection = True
-        config.enable_import_analysis = True
-        config.enable_test_analysis = True
-        config.output_formats = {'json', 'html', 'text'}
-        config.detailed_metrics = True
-        config.include_source_code = True
-        return config
+    def save_to_file(self, config_path: str):
+        """Save configuration to file."""
+        import json
+        try:
+            import yaml
+            YAML_AVAILABLE = True
+        except ImportError:
+            YAML_AVAILABLE = False
+        
+        config_path = Path(config_path)
+        config_dict = self.to_dict()
+        
+        with open(config_path, 'w') as f:
+            if config_path.suffix.lower() in ['.yaml', '.yml'] and YAML_AVAILABLE:
+                yaml.dump(config_dict, f, default_flow_style=False)
+            else:
+                json.dump(config_dict, f, indent=2)
+
+
+@dataclass
+class PresetConfigs:
+    """Predefined configuration presets for common use cases."""
     
-    @classmethod
-    def get_basic_config(cls) -> 'AnalysisConfig':
-        """Get a basic analysis configuration for quick analysis."""
-        config = cls()
-        config.graph_sitter = config.graph_sitter.get_minimal_config()
-        config.performance = config.performance.get_conservative_config()
-        config.enable_ai_analysis = False
-        config.enable_visualization = False
-        config.output_formats = {'json'}
-        config.detailed_metrics = False
-        config.include_source_code = False
-        return config
+    @staticmethod
+    def quick_analysis() -> AnalysisConfig:
+        """Configuration for quick analysis."""
+        return AnalysisConfig(
+            analysis_mode="quick",
+            include_dead_code=False,
+            include_import_loops=False,
+            include_training_data=False,
+            include_enhanced_metrics=False,
+            include_graph_analysis=False
+        )
     
-    @classmethod
-    def get_debug_config(cls) -> 'AnalysisConfig':
-        """Get a debug configuration for troubleshooting."""
-        config = cls()
-        config.graph_sitter = config.graph_sitter.get_debug_config()
-        config.performance.enable_memory_monitoring = True
-        config.performance.enable_progress_reporting = True
-        config.include_source_code = True
-        config.detailed_metrics = True
-        return config
+    @staticmethod
+    def comprehensive_analysis() -> AnalysisConfig:
+        """Configuration for comprehensive analysis."""
+        return AnalysisConfig(
+            analysis_mode="comprehensive",
+            include_dead_code=True,
+            include_import_loops=True,
+            include_training_data=True,
+            include_enhanced_metrics=True,
+            include_graph_analysis=True,
+            use_advanced_config=True
+        )
+    
+    @staticmethod
+    def ml_training() -> AnalysisConfig:
+        """Configuration for ML training data generation."""
+        return AnalysisConfig(
+            analysis_mode="training",
+            include_training_data=True,
+            include_enhanced_metrics=True,
+            use_advanced_config=True,
+            output_format="json"
+        )
+    
+    @staticmethod
+    def refactoring_analysis() -> AnalysisConfig:
+        """Configuration for refactoring analysis."""
+        return AnalysisConfig(
+            analysis_mode="refactoring",
+            include_dead_code=True,
+            include_import_loops=True,
+            include_graph_analysis=True,
+            max_complexity=8,  # Stricter complexity threshold
+            min_maintainability=30  # Higher maintainability threshold
+        )
+    
+    @staticmethod
+    def ci_cd_analysis() -> AnalysisConfig:
+        """Configuration for CI/CD pipeline analysis."""
+        return AnalysisConfig(
+            analysis_mode="standard",
+            quiet=True,
+            output_format="json",
+            max_complexity=15,  # Reasonable for CI/CD
+            min_maintainability=20,
+            timeout_seconds=300  # 5 minute timeout
+        )
+
+
+def create_default_config() -> AnalysisConfig:
+    """Create default analysis configuration."""
+    return AnalysisConfig()
+
+
+def create_config_from_args(args) -> AnalysisConfig:
+    """Create configuration from command line arguments."""
+    config = AnalysisConfig()
+    
+    # Update from args
+    if hasattr(args, 'no_graph_sitter'):
+        config.use_graph_sitter = not args.no_graph_sitter
+    if hasattr(args, 'advanced_config'):
+        config.use_advanced_config = args.advanced_config
+    if hasattr(args, 'extensions'):
+        config.extensions = args.extensions
+    if hasattr(args, 'max_complexity'):
+        config.max_complexity = args.max_complexity
+    if hasattr(args, 'min_maintainability'):
+        config.min_maintainability = args.min_maintainability
+    
+    # Feature flags
+    if hasattr(args, 'comprehensive') and args.comprehensive:
+        config = PresetConfigs.comprehensive_analysis()
+    elif hasattr(args, 'quick_analyze') and args.quick_analyze:
+        config = PresetConfigs.quick_analysis()
+    elif hasattr(args, 'training_data') and args.training_data:
+        config = PresetConfigs.ml_training()
+    else:
+        if hasattr(args, 'dead_code'):
+            config.include_dead_code = args.dead_code
+        if hasattr(args, 'import_loops'):
+            config.include_import_loops = args.import_loops
+        if hasattr(args, 'enhanced_metrics'):
+            config.include_enhanced_metrics = args.enhanced_metrics
+        if hasattr(args, 'graph_analysis'):
+            config.include_graph_analysis = args.graph_analysis
+    
+    # Output settings
+    if hasattr(args, 'format'):
+        config.output_format = args.format
+    if hasattr(args, 'output'):
+        config.output_file = args.output
+    if hasattr(args, 'quiet'):
+        config.quiet = args.quiet
+    if hasattr(args, 'verbose'):
+        config.verbose = args.verbose
+    
+    return config
 
