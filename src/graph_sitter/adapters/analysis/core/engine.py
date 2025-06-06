@@ -20,6 +20,13 @@ Enhanced Features from Legacy Integration:
 - Training data extraction for ML models
 - Advanced visualization and reporting
 - Performance optimizations with caching
+
+PHASE 2 ENHANCEMENTS:
+- Tree-sitter query patterns for advanced syntax analysis
+- Interactive HTML reports with D3.js integration
+- Performance optimizations with caching and parallel processing
+- Advanced CodebaseConfig usage with all flags
+- Custom analysis pipelines and feature toggles
 """
 
 import logging
@@ -52,6 +59,26 @@ except ImportError as e:
     class CodebaseConfig: pass
 
 
+# Phase 2 imports - Advanced modules
+try:
+    from ..enhanced.tree_sitter_queries import (
+        TreeSitterQueryEngine, QueryPattern, QueryResult, analyze_with_queries
+    )
+    from ..visualization.interactive_reports import (
+        InteractiveReportGenerator, ReportConfig, create_interactive_report
+    )
+    from ..core.performance import (
+        PerformanceOptimizer, PerformanceConfig, create_optimizer
+    )
+    from ..config.advanced_config import (
+        AdvancedCodebaseConfig, create_optimized_config, create_production_config
+    )
+    PHASE2_MODULES_AVAILABLE = True
+    logger.info("Phase 2 modules loaded successfully")
+except ImportError as e:
+    PHASE2_MODULES_AVAILABLE = False
+    logger.warning(f"Phase 2 modules not available: {e}")
+
 try:
     from graph_sitter.core.external_module import ExternalModule
     from graph_sitter.core.import_resolution import Import
@@ -72,24 +99,14 @@ except ImportError as e:
 @dataclass
 class AnalysisConfig:
     """Configuration for comprehensive analysis."""
-    # Performance settings
-    use_advanced_config: bool = True
-    enable_method_usages: bool = True
-    enable_generics: bool = True
-    enable_sync: bool = True
-    
-    # Analysis features
+    # Phase 1 features
     detect_import_loops: bool = True
     detect_dead_code: bool = True
     generate_training_data: bool = False
     analyze_graph_structure: bool = True
+    use_advanced_config: bool = True
     
-    # Output settings
-    include_source_locations: bool = True
-    include_metrics: bool = True
-    include_visualizations: bool = False
-    
-    # Filtering
+    # File filtering
     ignore_external_modules: bool = True
     ignore_test_files: bool = False
     file_extensions: Optional[List[str]] = None
@@ -98,6 +115,32 @@ class AnalysisConfig:
     enhanced_metrics: bool = True
     max_functions: int = 100
     max_classes: int = 100
+    
+    # Phase 2 features - Tree-sitter queries
+    enable_query_patterns: bool = True
+    query_categories: List[str] = field(default_factory=lambda: ["function", "class", "security", "performance"])
+    custom_query_patterns: List[str] = field(default_factory=list)
+    
+    # Phase 2 features - Visualization
+    generate_html_report: bool = False
+    html_report_path: Optional[str] = None
+    report_theme: str = "default"  # default, dark, light, professional
+    include_interactive_charts: bool = True
+    
+    # Phase 2 features - Performance optimization
+    enable_performance_optimization: bool = True
+    enable_caching: bool = True
+    enable_parallel_processing: bool = True
+    cache_backend: str = "memory"  # memory, file, redis
+    max_workers: Optional[int] = None
+    
+    # Phase 2 features - Advanced configuration
+    codebase_language: Optional[str] = None
+    codebase_size: str = "medium"  # small, medium, large
+    optimization_level: str = "balanced"  # minimal, balanced, aggressive
+    enable_lazy_graph: bool = True
+    enable_method_usages: bool = True
+    enable_generics: bool = True
 
 
 @dataclass
@@ -220,6 +263,18 @@ class AnalysisResult:
     
     # Configuration used
     config: Optional[AnalysisConfig] = None
+    
+    # Phase 2 results - Query patterns
+    query_results: List[Any] = field(default_factory=list)  # List[QueryResult] when available
+    pattern_matches: Dict[str, int] = field(default_factory=dict)
+    
+    # Phase 2 results - Visualization
+    html_report_path: Optional[str] = None
+    interactive_charts: Dict[str, Any] = field(default_factory=dict)
+    
+    # Phase 2 results - Performance metrics
+    performance_metrics: Dict[str, Any] = field(default_factory=dict)
+    cache_statistics: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -234,39 +289,99 @@ class ComprehensiveAnalysisEngine:
     - Graph structure analysis
     - Enhanced function and class metrics
     - Performance optimizations
+    
+    Phase 2 enhancements:
+    - Tree-sitter query patterns for advanced syntax analysis
+    - Interactive HTML reports with D3.js integration
+    - Performance optimizations with caching and parallel processing
+    - Advanced CodebaseConfig usage with all flags
     """
     
     def __init__(self, config: Optional[AnalysisConfig] = None):
         """Initialize the analysis engine."""
         self.config = config or AnalysisConfig()
         self.codebase_config = self._create_advanced_config() if GRAPH_SITTER_AVAILABLE else None
+        
+        # Phase 2 components
+        self.query_engine = None
+        self.report_generator = None
+        self.performance_optimizer = None
+        
+        if PHASE2_MODULES_AVAILABLE:
+            self._initialize_phase2_components()
     
-    def _create_advanced_config(self) -> Optional[CodebaseConfig]:
-        """Create advanced CodebaseConfig with enhanced features."""
-        if not GRAPH_SITTER_AVAILABLE or not self.config.use_advanced_config:
+    def _initialize_phase2_components(self):
+        """Initialize Phase 2 components."""
+        try:
+            # Initialize query engine
+            if self.config.enable_query_patterns:
+                self.query_engine = TreeSitterQueryEngine()
+                logger.info("Tree-sitter query engine initialized")
+            
+            # Initialize report generator
+            if self.config.generate_html_report:
+                report_config = ReportConfig(
+                    theme=self.config.report_theme,
+                    include_navigation=True,
+                    include_search=True,
+                    include_filters=True
+                )
+                self.report_generator = InteractiveReportGenerator(report_config)
+                logger.info("Interactive report generator initialized")
+            
+            # Initialize performance optimizer
+            if self.config.enable_performance_optimization:
+                perf_config = PerformanceConfig(
+                    enable_caching=self.config.enable_caching,
+                    enable_parallel=self.config.enable_parallel_processing,
+                    cache_backend=self.config.cache_backend,
+                    max_workers=self.config.max_workers
+                )
+                self.performance_optimizer = create_optimizer(perf_config)
+                logger.info("Performance optimizer initialized")
+        
+        except Exception as e:
+            logger.warning(f"Error initializing Phase 2 components: {e}")
+    
+    def _create_advanced_config(self) -> Optional[Any]:
+        """Create advanced CodebaseConfig with Phase 2 enhancements."""
+        if not GRAPH_SITTER_AVAILABLE:
             return None
         
         try:
-            return CodebaseConfig(
-                # Performance optimizations
-                method_usages=self.config.enable_method_usages,
-                generics=self.config.enable_generics,
-                sync_enabled=self.config.enable_sync,
+            if PHASE2_MODULES_AVAILABLE:
+                # Use Phase 2 advanced configuration
+                advanced_config = create_optimized_config(
+                    language=self.config.codebase_language,
+                    codebase_size=self.config.codebase_size,
+                    optimization_level=self.config.optimization_level
+                )
                 
-                # Advanced analysis
-                full_range_index=True,
-                py_resolve_syspath=True,
+                # Apply specific flags from config
+                advanced_config.exp_lazy_graph = self.config.enable_lazy_graph
+                advanced_config.method_usages = self.config.enable_method_usages
+                advanced_config.generics = self.config.enable_generics
                 
-                # Debugging disabled for performance
-                debug=False,
-                verify_graph=False,
-                track_graph=False,
-                
-                # Experimental features
-                exp_lazy_graph=False,
-            )
+                return advanced_config.to_codebase_config()
+            else:
+                # Fallback to basic configuration
+                return self._create_basic_config()
+        
         except Exception as e:
             logger.warning(f"Could not create advanced config: {e}")
+            return None
+    
+    def _create_basic_config(self) -> Optional[Any]:
+        """Create basic CodebaseConfig for fallback."""
+        try:
+            return CodebaseConfig(
+                exp_lazy_graph=self.config.enable_lazy_graph,
+                method_usages=self.config.enable_method_usages,
+                generics=self.config.enable_generics,
+                ignore_process_errors=True
+            )
+        except Exception as e:
+            logger.warning(f"Could not create basic config: {e}")
             return None
     
     def analyze(self, path: Union[str, Path], config: Optional[AnalysisConfig] = None) -> AnalysisResult:
@@ -287,6 +402,10 @@ class ComprehensiveAnalysisEngine:
         
         logger.info(f"🚀 Starting enhanced comprehensive analysis of: {path}")
         
+        # Initialize performance optimizer if available
+        if self.performance_optimizer:
+            self.performance_optimizer.start_operation("comprehensive_analysis")
+        
         # Initialize results
         result = AnalysisResult(
             path=str(path),
@@ -302,7 +421,11 @@ class ComprehensiveAnalysisEngine:
             enhanced_function_metrics=[],
             enhanced_class_metrics=[],
             summary={},
-            recommendations=[]
+            recommendations=[],
+            query_results=[],
+            pattern_matches={},
+            performance_metrics={},
+            cache_statistics={}
         )
         
         try:
@@ -323,7 +446,7 @@ class ComprehensiveAnalysisEngine:
                         total_lines += len(file.source.split('\n'))
                 result.total_lines = total_lines
                 
-                # Enhanced analysis features
+                # Phase 1 analysis features
                 if config.detect_import_loops:
                     logger.info("🔍 Detecting import loops...")
                     result.import_loops = self._detect_import_loops_advanced(codebase)
@@ -354,11 +477,31 @@ class ComprehensiveAnalysisEngine:
                         enhanced_metrics = self._analyze_class_enhanced(cls)
                         result.enhanced_class_metrics.append(enhanced_metrics)
                 
+                # Phase 2 analysis features
+                if PHASE2_MODULES_AVAILABLE:
+                    # Tree-sitter query patterns
+                    if config.enable_query_patterns and self.query_engine:
+                        logger.info("🌳 Executing tree-sitter query patterns...")
+                        result.query_results = self._execute_query_patterns(codebase, config)
+                        result.pattern_matches = self._summarize_pattern_matches(result.query_results)
+                
                 # Generate summary
                 result.summary = self._generate_enhanced_summary(result)
                 
                 # Generate recommendations
                 result.recommendations = self._generate_enhanced_recommendations(result)
+                
+                # Phase 2 post-processing
+                if PHASE2_MODULES_AVAILABLE:
+                    # Generate interactive HTML report
+                    if config.generate_html_report and self.report_generator:
+                        logger.info("📊 Generating interactive HTML report...")
+                        result.html_report_path = self._generate_html_report(result, config)
+                    
+                    # Collect performance metrics
+                    if self.performance_optimizer:
+                        result.performance_metrics = self.performance_optimizer.get_performance_report()
+                        result.cache_statistics = self.performance_optimizer.cache.stats()
             
             else:
                 logger.warning("Graph-sitter not available, performing basic analysis...")
@@ -367,6 +510,11 @@ class ComprehensiveAnalysisEngine:
         except Exception as e:
             logger.error(f"Error during analysis: {e}")
             result.summary = {"error": str(e)}
+        
+        finally:
+            # Finish performance optimization
+            if self.performance_optimizer:
+                self.performance_optimizer.finish_operation()
         
         # Calculate analysis time
         result.analysis_time = time.time() - start_time
@@ -379,6 +527,10 @@ class ComprehensiveAnalysisEngine:
         
         if result.dead_code:
             logger.info(f"🗑️ Found {len(result.dead_code)} potential dead code items")
+        
+        if result.query_results:
+            total_matches = sum(result.pattern_matches.values())
+            logger.info(f"🌳 Found {total_matches} pattern matches across {len(result.query_results)} patterns")
         
         return result
     
@@ -1032,7 +1184,7 @@ class ComprehensiveAnalysisEngine:
         if result.dead_code:
             high_confidence = [item for item in result.dead_code if item.confidence > 0.8]
             if high_confidence:
-                recommendations.append(f"🗑️ Remove {len(high_confidence)} high-confidence dead code items to reduce codebase size")
+                recommendations.append(f"🗑�� Remove {len(high_confidence)} high-confidence dead code items to reduce codebase size")
             
             medium_confidence = [item for item in result.dead_code if 0.5 < item.confidence <= 0.8]
             if medium_confidence:
@@ -1149,6 +1301,67 @@ class ComprehensiveAnalysisEngine:
             result.summary = {"error": str(e)}
         
         return result
+    
+    def _execute_query_patterns(self, codebase, config: AnalysisConfig) -> List[Any]:
+        """Execute tree-sitter query patterns on the codebase."""
+        if not self.query_engine:
+            return []
+        
+        try:
+            query_results = []
+            
+            # Execute patterns by category
+            for category in config.query_categories:
+                category_results = self.query_engine.execute_patterns_by_category(category, codebase)
+                query_results.extend(category_results)
+            
+            # Execute custom patterns
+            if config.custom_query_patterns:
+                custom_results = self.query_engine.execute_patterns(config.custom_query_patterns, codebase)
+                query_results.extend(custom_results)
+            
+            logger.info(f"Executed {len(query_results)} query patterns")
+            return query_results
+        
+        except Exception as e:
+            logger.warning(f"Error executing query patterns: {e}")
+            return []
+    
+    def _summarize_pattern_matches(self, query_results: List[Any]) -> Dict[str, int]:
+        """Summarize pattern matches by category."""
+        pattern_matches = {}
+        
+        try:
+            for result in query_results:
+                if hasattr(result, 'pattern') and hasattr(result, 'total_matches'):
+                    category = result.pattern.category
+                    pattern_matches[category] = pattern_matches.get(category, 0) + result.total_matches
+        
+        except Exception as e:
+            logger.warning(f"Error summarizing pattern matches: {e}")
+        
+        return pattern_matches
+    
+    def _generate_html_report(self, result: AnalysisResult, config: AnalysisConfig) -> Optional[str]:
+        """Generate interactive HTML report."""
+        if not self.report_generator:
+            return None
+        
+        try:
+            # Determine output path
+            if config.html_report_path:
+                output_path = config.html_report_path
+            else:
+                output_path = f"analysis_report_{int(time.time())}.html"
+            
+            # Generate and save report
+            self.report_generator.save_report(result, output_path)
+            logger.info(f"HTML report saved to: {output_path}")
+            return output_path
+        
+        except Exception as e:
+            logger.warning(f"Error generating HTML report: {e}")
+            return None
 
 
 def analyze_codebase(path: Union[str, Path], config: Optional[AnalysisConfig] = None) -> AnalysisResult:

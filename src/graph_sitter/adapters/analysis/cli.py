@@ -21,8 +21,9 @@ import logging
 import sys
 from pathlib import Path
 from typing import Optional
+from dataclasses import asdict
 
-from .core.engine import ComprehensiveAnalysisEngine, AnalysisConfig, AnalysisPresets
+from .core.engine import ComprehensiveAnalysisEngine, AnalysisConfig, AnalysisPresets, AnalysisResult
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -170,84 +171,199 @@ Output Formats:
         help='Suppress recommendations in output'
     )
     
+    # Phase 2 features - Tree-sitter queries
+    parser.add_argument('--query-patterns', action='store_true',
+                       help='Enable tree-sitter query patterns analysis')
+    parser.add_argument('--query-categories', nargs='+', 
+                       default=['function', 'class', 'security', 'performance'],
+                       help='Query pattern categories to execute')
+    parser.add_argument('--custom-patterns', nargs='+', default=[],
+                       help='Custom query pattern names to execute')
+    
+    # Phase 2 features - Visualization
+    parser.add_argument('--html-report', action='store_true',
+                       help='Generate interactive HTML report')
+    parser.add_argument('--html-output', type=str,
+                       help='Output path for HTML report')
+    parser.add_argument('--report-theme', choices=['default', 'dark', 'light', 'professional'],
+                       default='default', help='HTML report theme')
+    
+    # Phase 2 features - Performance optimization
+    parser.add_argument('--enable-caching', action='store_true', default=True,
+                       help='Enable result caching')
+    parser.add_argument('--cache-backend', choices=['memory', 'file', 'redis'],
+                       default='memory', help='Cache backend to use')
+    parser.add_argument('--parallel', action='store_true', default=True,
+                       help='Enable parallel processing')
+    parser.add_argument('--max-workers', type=int,
+                       help='Maximum number of worker threads/processes')
+    
+    # Phase 2 features - Advanced configuration
+    parser.add_argument('--language', type=str,
+                       help='Primary language of the codebase')
+    parser.add_argument('--codebase-size', choices=['small', 'medium', 'large'],
+                       default='medium', help='Size category of the codebase')
+    parser.add_argument('--optimization-level', choices=['minimal', 'balanced', 'aggressive'],
+                       default='balanced', help='Analysis optimization level')
+    parser.add_argument('--lazy-graph', action='store_true', default=True,
+                       help='Enable lazy graph loading')
+
     return parser
 
 
 def create_config_from_args(args) -> AnalysisConfig:
-    """Create analysis configuration from command line arguments."""
+    """Create AnalysisConfig from command line arguments."""
     
     # Handle presets first
     if args.preset:
-        if args.preset == 'comprehensive':
-            config = AnalysisPresets.comprehensive()
-        elif args.preset == 'quality':
-            config = AnalysisPresets.quality_focused()
-        elif args.preset == 'performance':
-            config = AnalysisPresets.performance()
-        elif args.preset == 'minimal':
-            config = AnalysisPresets.minimal()
-        else:
-            config = AnalysisConfig()
-    elif args.quick:
-        config = AnalysisPresets.performance()
-    elif args.comprehensive:
-        config = AnalysisPresets.comprehensive()
+        config = get_preset_config(args.preset)
     else:
-        # Create custom config based on individual flags
-        config = AnalysisConfig(
-            detect_import_loops=args.import_loops,
-            detect_dead_code=args.dead_code,
-            generate_training_data=args.training_data,
-            analyze_graph_structure=args.graph_analysis,
-            enhanced_metrics=args.enhanced_metrics
-        )
+        config = AnalysisConfig()
     
     # Override with specific arguments
+    if hasattr(args, 'import_loops'):
+        config.detect_import_loops = args.import_loops
+    if hasattr(args, 'dead_code'):
+        config.detect_dead_code = args.dead_code
+    if hasattr(args, 'training_data'):
+        config.generate_training_data = args.training_data
+    if hasattr(args, 'graph_analysis'):
+        config.analyze_graph_structure = args.graph_analysis
+    if hasattr(args, 'enhanced_metrics'):
+        config.enhanced_metrics = args.enhanced_metrics
     if hasattr(args, 'max_functions'):
         config.max_functions = args.max_functions
     if hasattr(args, 'max_classes'):
         config.max_classes = args.max_classes
-    if hasattr(args, 'ignore_external'):
-        config.ignore_external_modules = args.ignore_external
-    if hasattr(args, 'ignore_tests'):
-        config.ignore_test_files = args.ignore_tests
+    
+    # Phase 2 features - Tree-sitter queries
+    if hasattr(args, 'query_patterns'):
+        config.enable_query_patterns = args.query_patterns
+    if hasattr(args, 'query_categories'):
+        config.query_categories = args.query_categories
+    if hasattr(args, 'custom_patterns'):
+        config.custom_query_patterns = args.custom_patterns
+    
+    # Phase 2 features - Visualization
+    if hasattr(args, 'html_report'):
+        config.generate_html_report = args.html_report
+    if hasattr(args, 'html_output'):
+        config.html_report_path = args.html_output
+    if hasattr(args, 'report_theme'):
+        config.report_theme = args.report_theme
+    
+    # Phase 2 features - Performance optimization
+    if hasattr(args, 'enable_caching'):
+        config.enable_caching = args.enable_caching
+    if hasattr(args, 'cache_backend'):
+        config.cache_backend = args.cache_backend
+    if hasattr(args, 'parallel'):
+        config.enable_parallel_processing = args.parallel
+    if hasattr(args, 'max_workers'):
+        config.max_workers = args.max_workers
+    
+    # Phase 2 features - Advanced configuration
+    if hasattr(args, 'language'):
+        config.codebase_language = args.language
+    if hasattr(args, 'codebase_size'):
+        config.codebase_size = args.codebase_size
+    if hasattr(args, 'optimization_level'):
+        config.optimization_level = args.optimization_level
+    if hasattr(args, 'lazy_graph'):
+        config.enable_lazy_graph = args.lazy_graph
     
     return config
 
 
-def format_output(result, args):
-    """Format analysis results based on output format."""
-    if args.format == 'json':
-        return json.dumps(result.__dict__, indent=2, default=str)
-    elif args.format == 'summary':
-        return f"""🚀 ENHANCED ANALYSIS SUMMARY
-Path: {result.path}
-Files: {result.total_files} | Functions: {result.total_functions} | Classes: {result.total_classes}
-Analysis Time: {result.analysis_time:.2f}s
-Import Loops: {len(result.import_loops)} | Dead Code: {len(result.dead_code)}
-Training Data: {len(result.training_data)} items
-"""
-    else:  # text format
-        return f"""🚀 ENHANCED COMPREHENSIVE ANALYSIS REPORT
-{'='*60}
-📁 Path: {result.path}
-⏱️  Time: {result.analysis_time:.2f}s
+def format_output(result: AnalysisResult, args) -> str:
+    """Format analysis results for display."""
+    
+    output_format = getattr(args, 'output_format', getattr(args, 'format', 'text'))
+    
+    if output_format == 'json':
+        return format_json_output(result)
+    
+    # Text output
+    output = []
+    
+    # Header with enhanced information
+    output.append("🚀 ENHANCED COMPREHENSIVE ANALYSIS REPORT")
+    output.append("=" * 60)
+    output.append(f"📁 Path: {result.path}")
+    output.append(f"⏱️  Time: {result.analysis_time:.2f}s")
+    output.append("")
+    
+    # Overview section
+    output.append("📊 OVERVIEW")
+    output.append(f"Files: {result.total_files}")
+    output.append(f"Functions: {result.total_functions}")
+    output.append(f"Classes: {result.total_classes}")
+    output.append(f"Lines: {result.total_lines:,}")
+    output.append("")
+    
+    # Analysis results
+    output.append("🔍 ANALYSIS RESULTS")
+    output.append(f"Import Loops: {len(result.import_loops)}")
+    output.append(f"Dead Code Items: {len(result.dead_code)}")
+    output.append(f"Training Data: {len(result.training_data)}")
+    output.append(f"Enhanced Metrics: {len(result.enhanced_function_metrics)} functions, {len(result.enhanced_class_metrics)} classes")
+    
+    # Phase 2 results
+    if result.query_results:
+        output.append("")
+        output.append("🌳 QUERY PATTERN RESULTS")
+        total_matches = sum(result.pattern_matches.values())
+        output.append(f"Total Patterns: {len(result.query_results)}")
+        output.append(f"Total Matches: {total_matches}")
+        
+        if result.pattern_matches:
+            output.append("Matches by Category:")
+            for category, count in result.pattern_matches.items():
+                output.append(f"  {category}: {count}")
+    
+    if result.performance_metrics:
+        output.append("")
+        output.append("⚡ PERFORMANCE METRICS")
+        perf = result.performance_metrics
+        if 'operation' in perf:
+            op = perf['operation']
+            output.append(f"Items Processed: {op.get('items_processed', 0)}")
+            output.append(f"Items/Second: {op.get('items_per_second', 0):.1f}")
+        
+        if 'cache' in perf:
+            cache = perf['cache']
+            output.append(f"Cache Hit Rate: {cache.get('hit_rate', 0):.1%}")
+            output.append(f"Cache Backend: {cache.get('backend', 'unknown')}")
+        
+        if 'memory' in perf:
+            memory = perf['memory']
+            output.append(f"Peak Memory: {memory.get('peak_mb', 0):.1f}MB")
+    
+    if result.html_report_path:
+        output.append("")
+        output.append("📊 INTERACTIVE REPORT")
+        output.append(f"HTML Report: {result.html_report_path}")
+    
+    # Recommendations section
+    quiet = getattr(args, 'quiet', False)
+    if result.recommendations and not quiet:
+        output.append("")
+        output.append("💡 RECOMMENDATIONS")
+        for i, rec in enumerate(result.recommendations[:5], 1):
+            output.append(f"{i}. {rec}")
+    
+    return "\n".join(output)
 
-📊 OVERVIEW
-Files: {result.total_files}
-Functions: {result.total_functions}
-Classes: {result.total_classes}
-Lines: {result.total_lines:,}
 
-🔍 ANALYSIS RESULTS
-Import Loops: {len(result.import_loops)}
-Dead Code Items: {len(result.dead_code)}
-Training Data: {len(result.training_data)}
-Enhanced Metrics: {len(result.enhanced_function_metrics)} functions, {len(result.enhanced_class_metrics)} classes
-
-💡 RECOMMENDATIONS
-{chr(10).join(f'{i+1}. {rec}' for i, rec in enumerate(result.recommendations[:5]))}
-"""
+def format_json_output(result: AnalysisResult) -> str:
+    """Format result as JSON."""
+    try:
+        # Convert dataclass to dict, handling nested objects
+        result_dict = asdict(result)
+        return json.dumps(result_dict, indent=2, default=str)
+    except Exception as e:
+        logger.warning(f"Error formatting JSON output: {e}")
+        return json.dumps({"error": str(e)}, indent=2)
 
 
 def print_summary(result, verbose: bool = False):
