@@ -1,0 +1,77 @@
+{
+  "timestamp": "2025-06-06T08:59:30.491511",
+  "quality_gates": [
+    {
+      "name": "Test Coverage",
+      "metric": "test_coverage",
+      "threshold": 80.0,
+      "operator": ">=",
+      "severity": "high",
+      "adaptive": true,
+      "historical_data": [
+        97.5,
+        97.5,
+        97.5
+      ]
+    },
+    {
+      "name": "Code Complexity",
+      "metric": "complexity_score",
+      "threshold": 7.0,
+      "operator": "<=",
+      "severity": "medium",
+      "adaptive": true,
+      "historical_data": [
+        11.4,
+        11.4,
+        11.4
+      ]
+    },
+    {
+      "name": "Security Score",
+      "metric": "security_score",
+      "threshold": 85.0,
+      "operator": ">=",
+      "severity": "critical",
+      "adaptive": false,
+      "historical_data": []
+    },
+    {
+      "name": "Performance Score",
+      "metric": "performance_score",
+      "threshold": 75.0,
+      "operator": ">=",
+      "severity": "high",
+      "adaptive": true,
+      "historical_data": [
+        99.3,
+        99.3,
+        99.3
+      ]
+    },
+    {
+      "name": "Dependency Health",
+      "metric": "dependency_health",
+      "threshold": 90.0,
+      "operator": ">=",
+      "severity": "medium",
+      "adaptive": true,
+      "historical_data": [
+        61.2,
+        61.2,
+        61.2
+      ]
+    },
+    {
+      "name": "Recent Failures",
+      "metric": "recent_failures",
+      "threshold": 3,
+      "operator": "<=",
+      "severity": "high",
+      "adaptive": false,
+      "historical_data": []
+    }
+  ],
+  "analysis_history": [],
+  "decision_history": []
+}
