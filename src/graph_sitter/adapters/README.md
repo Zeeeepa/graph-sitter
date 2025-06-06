@@ -2,20 +2,68 @@
 
 This directory contains adapters and integrations for the graph-sitter analysis system.
 
-## Analysis Module Consolidation
+## Analysis Module
 
-**Note**: The analysis functionality has been consolidated into a single comprehensive tool:
+**All analysis functionality has been consolidated into the `analysis/` module:**
 
-- **Main Analysis Tool**: `analyze_codebase.py` (in project root)
-- **Features**: All analysis capabilities including tree-sitter integration, visualization, and comprehensive reporting
+- **Location**: `src/graph_sitter/adapters/analysis/`
+- **Features**: Comprehensive codebase analysis including:
+  - Codebase summarization and statistics
+  - Symbol analysis and usage tracking
+  - Dead code detection
+  - Import relationship analysis
+  - Class hierarchy exploration
+  - Test analysis and organization
+  - AI-powered code analysis
+  - Training data generation for LLMs
 
-### Previous Structure (Removed)
-- `analysis/analysis.py` - Redundant analysis module (removed for clarity)
+### Quick Start
 
-### Current Structure
-- All analysis functionality is now in the main `analyze_codebase.py` file
-- This provides a single source of truth for all analysis capabilities
-- Includes tree-sitter query patterns, visualization, and comprehensive reporting
+```python
+from graph_sitter.adapters.analysis import (
+    get_codebase_summary,
+    find_dead_code,
+    analyze_test_coverage,
+    generate_training_data
+)
+
+# Get comprehensive codebase overview
+summary = get_codebase_summary(codebase)
+print(summary)
+
+# Find unused code
+dead_code = find_dead_code(codebase)
+print(f"Found {len(dead_code['unused_functions'])} unused functions")
+
+# Analyze test coverage
+test_analysis = analyze_test_coverage(codebase)
+print(f"Test coverage: {test_analysis['coverage_metrics']['coverage_percentage']:.1f}%")
+
+# Generate training data for LLMs
+training_data = generate_training_data(codebase)
+print(f"Generated training data for {training_data['metadata']['total_processed']} functions")
+```
+
+### Available Analysis Tools
+
+1. **Codebase Summary** - Overview and statistics
+2. **Symbol Analysis** - Usage patterns and dependencies
+3. **Dead Code Detection** - Unused functions and imports
+4. **Import Analysis** - Dependency relationships and circular imports
+5. **Class Hierarchy** - Inheritance chains and design patterns
+6. **Test Analysis** - Coverage and organization assessment
+7. **AI Analysis** - Automated issue detection and suggestions
+8. **Training Data** - LLM training data generation
+
+See `analysis/README.md` for detailed documentation and examples.
+
+## Legacy Analysis Tools
+
+Previous analysis tools have been moved to `analysis/legacy_*` for backward compatibility:
+
+- `legacy_analyze_codebase.py` - Original comprehensive analysis tool
+- `legacy_enhanced_analyzer.py` - Enhanced analyzer with graph-sitter integration
+- `legacy_analyze_codebase_enhanced.py` - Enhanced comprehensive tool
 
 ## Usage
 
@@ -1163,8 +1211,6 @@ regular_methods = class_def.methods(magic=False)   # Exclude magic methods
 Continuing with more sections...
 :computer: View my work
 
-
-
 12:12
 :clipboard: Graph-sitter Features & Functions Catalog - Part 2: Import & Class Analysis
 :link: Import & Dependency Analysis
@@ -1404,8 +1450,6 @@ Important patterns
 Key files and their roles
 How components work together
 
-
-
 print(f"🔍 Processing file: {filepath}")
 file = codebase.get_file(filepath)
 
@@ -1521,6 +1565,7 @@ for cycle in cycles:
             function.move_to_file(new_file, include_dependencies=True)
 
 print("\n✅ Import cycles resolved!")
+
 ### Primary Library Interface
 
 ```python
@@ -1983,9 +2028,6 @@ def get_symbol_summary(symbol: Symbol) -> str:
 \t\t- {len([x for x in imported_symbols if isinstance(x, SourceFile)])} files
     """
 
-
-
-To View all codebase statistics and issues, not used dead code -> and to be able to use codebase_ai.py in a similar manner =->  (Where after analysis -> it would automatically be sent error code +codebase's contextual code  with get_function_context - Asking to resolve the issue (Automatic relevant error code context retrieval + prompt sending via python code execution 
 
 def analyze_codebase(codebase):
     for function in codebase.functions:            
