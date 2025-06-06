@@ -28,7 +28,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   shape: {
     borderRadius: 12,
@@ -91,4 +91,3 @@ function App() {
 }
 
 export default App;
-
