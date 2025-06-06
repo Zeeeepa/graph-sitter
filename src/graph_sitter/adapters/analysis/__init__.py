@@ -1,43 +1,75 @@
 """
-🚀 COMPREHENSIVE ANALYSIS MODULE 🚀
+🚀 ENHANCED COMPREHENSIVE ANALYSIS SYSTEM 🚀
 
-Unified analysis system that consolidates all graph-sitter enhanced analysis capabilities.
+A unified analysis system that consolidates all advanced analysis capabilities:
+- Core quality metrics (maintainability, complexity, Halstead, etc.)
+- Advanced investigation features (function context, relationships)
+- Import loop detection and circular dependency analysis
+- Training data generation for LLMs
+- Dead code detection using usage analysis
+- Advanced graph structure analysis
+- Tree-sitter query patterns and visualization
+- Performance optimizations with lazy loading
+- Enhanced configuration with CodebaseConfig
 
-This module provides:
-- Comprehensive codebase analysis engine
-- Enhanced graph-sitter integration
-- Import loop detection
-- Dead code detection
-- Training data generation
-- Advanced metrics and visualization
-- Simple CLI interface
+Enhanced Features from Legacy Integration:
+- Graph-sitter pre-computed element access
+- Function/class dependency and usage analysis
+- Import relationship mapping and loop detection
+- Training data extraction for ML models
+- Advanced visualization and reporting
+- Performance optimizations with caching
 
-Quick Start:
-    from graph_sitter.adapters.analysis import analyze_codebase
+Usage:
+    from graph_sitter.adapters.analysis import analyze_codebase, AnalysisPresets
     
+    # Quick analysis
     result = analyze_codebase("/path/to/code")
-    print(f"Found {result.total_functions} functions")
     
-CLI Usage:
-    python -m graph_sitter.adapters.analysis.cli /path/to/code
+    # Comprehensive analysis
+    result = analyze_codebase("/path/to/code", AnalysisPresets.comprehensive())
+    
+    # Custom configuration
+    from graph_sitter.adapters.analysis import AnalysisConfig
+    config = AnalysisConfig(
+        detect_import_loops=True,
+        detect_dead_code=True,
+        generate_training_data=True,
+        analyze_graph_structure=True,
+        enhanced_metrics=True
+    )
+    result = analyze_codebase("/path/to/code", config)
+
+Command Line:
+    python -m graph_sitter.adapters.analysis.cli /path/to/code --comprehensive
+    python -m graph_sitter.adapters.analysis.cli /path/to/code --import-loops --dead-code
+    python -m graph_sitter.adapters.analysis.cli /path/to/code --training-data --output ml_data.json
 """
 
 # Core analysis engine
 from .core.engine import (
+    # Main analysis function
+    analyze_codebase,
+    
+    # Core classes
     ComprehensiveAnalysisEngine,
     AnalysisConfig,
     AnalysisResult,
-    analyze_codebase,
-    quick_analysis,
+    
+    # Enhanced data classes
     ImportLoop,
+    TrainingDataItem,
     DeadCodeItem,
-    TrainingDataItem
+    GraphAnalysisResult,
+    EnhancedFunctionMetrics,
+    EnhancedClassMetrics,
+    
+    # Preset configurations
+    AnalysisPresets,
 )
 
 # Enhanced graph-sitter integration
 from .enhanced.graph_sitter_integration import (
-    EnhancedFunctionMetrics,
-    EnhancedClassMetrics,
     get_codebase_summary_enhanced,
     analyze_function_enhanced,
     analyze_class_enhanced,
@@ -157,52 +189,29 @@ class AnalysisPresets:
         )
 
 __all__ = [
-    # Core engine
+    # Main analysis function
+    'analyze_codebase',
+    
+    # Core classes
     'ComprehensiveAnalysisEngine',
     'AnalysisConfig',
     'AnalysisResult',
-    'analyze_codebase',
-    'quick_analysis',
-    'comprehensive_analysis',
-    'basic_analysis',
     
-    # Data classes
+    # Enhanced data classes
     'ImportLoop',
-    'DeadCodeItem', 
-    'TrainingDataItem',
+    'TrainingDataItem', 
+    'DeadCodeItem',
+    'GraphAnalysisResult',
     'EnhancedFunctionMetrics',
     'EnhancedClassMetrics',
     
-    # Enhanced analysis
-    'get_codebase_summary_enhanced',
-    'analyze_function_enhanced',
-    'analyze_class_enhanced',
-    'get_function_context',
-    'analyze_graph_structure',
+    # Preset configurations
+    'AnalysisPresets',
     
-    # Metrics
-    'calculate_cyclomatic_complexity',
-    'calculate_halstead_volume',
-    'calculate_maintainability_index',
-    
-    # Legacy compatibility
-    'get_codebase_summary',
-    'print_codebase_overview',
-    'analyze_symbol_usage',
-    'find_recursive_functions',
-    'find_dead_code',
-    'generate_dead_code_report',
-    'analyze_import_relationships',
-    'detect_circular_imports',
-    'analyze_inheritance_chains',
-    'detect_design_patterns',
-    'analyze_test_coverage',
-    'get_test_statistics',
-    'ai_analyze_codebase',
-    'flag_code_issues',
-    'legacy_generate_training_data',
-    
-    # Presets
-    'AnalysisPresets'
+    # ... existing exports ...
 ]
 
+# Version info
+__version__ = "2.0.0"
+__author__ = "Graph-Sitter Analysis Team"
+__description__ = "Enhanced comprehensive codebase analysis with graph-sitter integration"

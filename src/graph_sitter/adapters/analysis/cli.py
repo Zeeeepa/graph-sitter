@@ -1,157 +1,253 @@
 #!/usr/bin/env python3
 """
-🚀 COMPREHENSIVE ANALYSIS CLI 🚀
+🚀 ENHANCED COMPREHENSIVE ANALYSIS CLI 🚀
 
-Simple command-line interface for the comprehensive analysis system.
-Consolidates all analysis functionality into easy-to-use commands.
+Command-line interface for the enhanced comprehensive analysis system.
+Supports all advanced features including import loop detection, dead code analysis,
+training data generation, graph structure analysis, and enhanced metrics.
 
 Usage:
-    python -m graph_sitter.adapters.analysis.cli <path>
-    python -m graph_sitter.adapters.analysis.cli <path> --comprehensive
-    python -m graph_sitter.adapters.analysis.cli <path> --quick
-    python -m graph_sitter.adapters.analysis.cli <path> --output results.json
+    python -m graph_sitter.adapters.analysis.cli /path/to/code
+    python -m graph_sitter.adapters.analysis.cli . --comprehensive
+    python -m graph_sitter.adapters.analysis.cli . --import-loops --dead-code
+    python -m graph_sitter.adapters.analysis.cli . --training-data --output training.json
+    python -m graph_sitter.adapters.analysis.cli . --enhanced-metrics --graph-analysis
+    python -m graph_sitter.adapters.analysis.cli . --quick --quiet
 """
 
 import argparse
+import json
+import logging
 import sys
-import time
 from pathlib import Path
 from typing import Optional
 
-from .core.engine import (
-    ComprehensiveAnalysisEngine, 
-    AnalysisConfig, 
-    analyze_codebase, 
-    quick_analysis
-)
+from .core.engine import ComprehensiveAnalysisEngine, AnalysisConfig, AnalysisPresets
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """Create command-line argument parser."""
+    """Create the argument parser with all enhanced options."""
     parser = argparse.ArgumentParser(
-        description="🚀 Comprehensive Codebase Analysis Tool",
+        description="🚀 Enhanced Comprehensive Codebase Analysis Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   %(prog)s /path/to/code                    # Basic analysis
-  %(prog)s /path/to/code --comprehensive    # Full analysis with all features
-  %(prog)s /path/to/code --quick            # Quick analysis (basic metrics only)
-  %(prog)s /path/to/code --output results.json  # Save results to file
-  %(prog)s /path/to/code --no-import-loops  # Skip import loop detection
-  %(prog)s /path/to/code --training-data    # Generate training data for ML
+  %(prog)s . --comprehensive               # Full comprehensive analysis
+  %(prog)s . --import-loops --dead-code    # Specific analysis types
+  %(prog)s . --training-data --output ml_data.json  # Generate ML training data
+  %(prog)s . --enhanced-metrics --graph-analysis    # Advanced metrics and graph analysis
+  %(prog)s . --quick --quiet               # Fast analysis with minimal output
+  %(prog)s . --preset quality             # Use quality-focused preset
+  %(prog)s . --preset performance         # Use performance-focused preset
+
+Analysis Types:
+  --import-loops        Detect circular import dependencies
+  --dead-code          Find potentially unused code
+  --training-data      Generate ML training data
+  --graph-analysis     Analyze code graph structure
+  --enhanced-metrics   Generate enhanced function/class metrics
+
+Presets:
+  comprehensive        Enable all analysis features (default)
+  quality             Focus on code quality metrics
+  performance         Fast analysis with essential features only
+  minimal             Basic analysis only
+
+Output Formats:
+  json                Structured JSON output
+  text                Human-readable text output
+  summary             Brief summary only
         """
     )
     
     # Positional arguments
     parser.add_argument(
-        "path",
-        help="Path to the codebase to analyze"
+        'path',
+        help='Path to the codebase to analyze'
     )
     
-    # Analysis options
-    parser.add_argument(
-        "--comprehensive",
-        action="store_true",
-        help="Enable all analysis features (default)"
+    # Analysis type options
+    analysis_group = parser.add_argument_group('Analysis Options')
+    analysis_group.add_argument(
+        '--comprehensive',
+        action='store_true',
+        help='Enable all analysis features (import loops, dead code, training data, graph analysis, enhanced metrics)'
+    )
+    analysis_group.add_argument(
+        '--import-loops',
+        action='store_true',
+        help='Detect circular import dependencies'
+    )
+    analysis_group.add_argument(
+        '--dead-code',
+        action='store_true',
+        help='Find potentially unused code'
+    )
+    analysis_group.add_argument(
+        '--training-data',
+        action='store_true',
+        help='Generate training data for ML models'
+    )
+    analysis_group.add_argument(
+        '--graph-analysis',
+        action='store_true',
+        help='Analyze code graph structure and dependencies'
+    )
+    analysis_group.add_argument(
+        '--enhanced-metrics',
+        action='store_true',
+        help='Generate enhanced function and class metrics'
     )
     
-    parser.add_argument(
-        "--quick",
-        action="store_true",
-        help="Quick analysis with basic metrics only"
+    # Preset options
+    preset_group = parser.add_argument_group('Preset Configurations')
+    preset_group.add_argument(
+        '--preset',
+        choices=['comprehensive', 'quality', 'performance', 'minimal'],
+        help='Use predefined analysis configuration'
+    )
+    preset_group.add_argument(
+        '--quick',
+        action='store_true',
+        help='Quick analysis (equivalent to --preset performance)'
     )
     
-    parser.add_argument(
-        "--no-import-loops",
-        action="store_true",
-        help="Skip import loop detection"
+    # Performance options
+    perf_group = parser.add_argument_group('Performance Options')
+    perf_group.add_argument(
+        '--max-functions',
+        type=int,
+        default=100,
+        help='Maximum number of functions to analyze for enhanced metrics (default: 100)'
     )
-    
-    parser.add_argument(
-        "--no-dead-code",
-        action="store_true",
-        help="Skip dead code detection"
+    perf_group.add_argument(
+        '--max-classes',
+        type=int,
+        default=100,
+        help='Maximum number of classes to analyze for enhanced metrics (default: 100)'
     )
-    
-    parser.add_argument(
-        "--training-data",
-        action="store_true",
-        help="Generate training data for ML models"
+    perf_group.add_argument(
+        '--ignore-external',
+        action='store_true',
+        help='Ignore external modules in analysis'
     )
-    
-    parser.add_argument(
-        "--no-graph-analysis",
-        action="store_true",
-        help="Skip graph structure analysis"
-    )
-    
-    # Configuration options
-    parser.add_argument(
-        "--no-advanced-config",
-        action="store_true",
-        help="Disable advanced CodebaseConfig features"
-    )
-    
-    parser.add_argument(
-        "--include-external",
-        action="store_true",
-        help="Include external modules in analysis"
-    )
-    
-    parser.add_argument(
-        "--include-tests",
-        action="store_true",
-        help="Include test files in analysis"
+    perf_group.add_argument(
+        '--ignore-tests',
+        action='store_true',
+        help='Ignore test files in analysis'
     )
     
     # Output options
-    parser.add_argument(
-        "--output", "-o",
-        help="Output file path for results (JSON format)"
+    output_group = parser.add_argument_group('Output Options')
+    output_group.add_argument(
+        '--output', '-o',
+        help='Output file path (default: stdout)'
     )
-    
-    parser.add_argument(
-        "--format",
-        choices=["json", "summary"],
-        default="summary",
-        help="Output format (default: summary)"
+    output_group.add_argument(
+        '--format', '-f',
+        choices=['json', 'text', 'summary'],
+        default='text',
+        help='Output format (default: text)'
     )
-    
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Enable verbose output"
+    output_group.add_argument(
+        '--quiet', '-q',
+        action='store_true',
+        help='Suppress progress messages'
     )
-    
-    parser.add_argument(
-        "--quiet", "-q",
-        action="store_true",
-        help="Suppress all output except errors"
+    output_group.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Enable verbose output'
+    )
+    output_group.add_argument(
+        '--no-recommendations',
+        action='store_true',
+        help='Suppress recommendations in output'
     )
     
     return parser
 
 
 def create_config_from_args(args) -> AnalysisConfig:
-    """Create analysis configuration from command-line arguments."""
-    if args.quick:
-        return AnalysisConfig(
-            detect_import_loops=False,
-            detect_dead_code=False,
-            generate_training_data=False,
-            analyze_graph_structure=True,
-            use_advanced_config=not args.no_advanced_config
+    """Create analysis configuration from command line arguments."""
+    
+    # Handle presets first
+    if args.preset:
+        if args.preset == 'comprehensive':
+            config = AnalysisPresets.comprehensive()
+        elif args.preset == 'quality':
+            config = AnalysisPresets.quality_focused()
+        elif args.preset == 'performance':
+            config = AnalysisPresets.performance()
+        elif args.preset == 'minimal':
+            config = AnalysisPresets.minimal()
+        else:
+            config = AnalysisConfig()
+    elif args.quick:
+        config = AnalysisPresets.performance()
+    elif args.comprehensive:
+        config = AnalysisPresets.comprehensive()
+    else:
+        # Create custom config based on individual flags
+        config = AnalysisConfig(
+            detect_import_loops=args.import_loops,
+            detect_dead_code=args.dead_code,
+            generate_training_data=args.training_data,
+            analyze_graph_structure=args.graph_analysis,
+            enhanced_metrics=args.enhanced_metrics
         )
     
-    return AnalysisConfig(
-        use_advanced_config=not args.no_advanced_config,
-        detect_import_loops=not args.no_import_loops,
-        detect_dead_code=not args.no_dead_code,
-        generate_training_data=args.training_data,
-        analyze_graph_structure=not args.no_graph_analysis,
-        ignore_external_modules=not args.include_external,
-        ignore_test_files=not args.include_tests
-    )
+    # Override with specific arguments
+    if hasattr(args, 'max_functions'):
+        config.max_functions = args.max_functions
+    if hasattr(args, 'max_classes'):
+        config.max_classes = args.max_classes
+    if hasattr(args, 'ignore_external'):
+        config.ignore_external_modules = args.ignore_external
+    if hasattr(args, 'ignore_tests'):
+        config.ignore_test_files = args.ignore_tests
+    
+    return config
+
+
+def format_output(result, args):
+    """Format analysis results based on output format."""
+    if args.format == 'json':
+        return json.dumps(result.__dict__, indent=2, default=str)
+    elif args.format == 'summary':
+        return f"""🚀 ENHANCED ANALYSIS SUMMARY
+Path: {result.path}
+Files: {result.total_files} | Functions: {result.total_functions} | Classes: {result.total_classes}
+Analysis Time: {result.analysis_time:.2f}s
+Import Loops: {len(result.import_loops)} | Dead Code: {len(result.dead_code)}
+Training Data: {len(result.training_data)} items
+"""
+    else:  # text format
+        return f"""🚀 ENHANCED COMPREHENSIVE ANALYSIS REPORT
+{'='*60}
+📁 Path: {result.path}
+⏱️  Time: {result.analysis_time:.2f}s
+
+📊 OVERVIEW
+Files: {result.total_files}
+Functions: {result.total_functions}
+Classes: {result.total_classes}
+Lines: {result.total_lines:,}
+
+🔍 ANALYSIS RESULTS
+Import Loops: {len(result.import_loops)}
+Dead Code Items: {len(result.dead_code)}
+Training Data: {len(result.training_data)}
+Enhanced Metrics: {len(result.enhanced_function_metrics)} functions, {len(result.enhanced_class_metrics)} classes
+
+💡 RECOMMENDATIONS
+{chr(10).join(f'{i+1}. {rec}' for i, rec in enumerate(result.recommendations[:5]))}
+"""
 
 
 def print_summary(result, verbose: bool = False):
@@ -209,78 +305,59 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     
+    # Configure logging based on verbosity
+    if args.quiet:
+        logging.getLogger().setLevel(logging.WARNING)
+    elif args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+    
     # Validate path
     path = Path(args.path)
     if not path.exists():
         print(f"❌ Error: Path '{path}' does not exist", file=sys.stderr)
         sys.exit(1)
     
-    # Configure logging based on verbosity
-    import logging
-    if args.quiet:
-        logging.basicConfig(level=logging.ERROR)
-    elif args.verbose:
-        logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
-    else:
-        logging.basicConfig(level=logging.WARNING)
-    
     try:
-        if not args.quiet:
-            print(f"🔍 Analyzing codebase: {path}")
-            if args.quick:
-                print("⚡ Quick analysis mode")
-            elif args.comprehensive or not any([args.no_import_loops, args.no_dead_code]):
-                print("🚀 Comprehensive analysis mode")
+        # Create configuration
+        config = create_config_from_args(args)
+        
+        # Create analysis engine
+        engine = ComprehensiveAnalysisEngine()
         
         # Perform analysis
-        if args.quick:
-            result_dict = quick_analysis(path)
-            
-            if not args.quiet:
-                print("\n📊 Quick Analysis Results:")
-                print(f"Files: {result_dict['files']}")
-                print(f"Functions: {result_dict['functions']}")
-                print(f"Classes: {result_dict['classes']}")
-                print(f"Imports: {result_dict['imports']}")
-                print(f"Analysis Time: {result_dict['analysis_time']:.2f}s")
-            
-            # Save results if requested
-            if args.output:
-                import json
-                with open(args.output, 'w') as f:
-                    json.dump(result_dict, f, indent=2, default=str)
-                if not args.quiet:
-                    print(f"\n💾 Results saved to: {args.output}")
+        if not args.quiet:
+            print(f"🚀 Starting enhanced analysis of: {path}")
         
+        result = engine.analyze(path, config)
+        
+        # Format output
+        output = format_output(result, args)
+        
+        # Write output
+        if args.output:
+            output_path = Path(args.output)
+            output_path.write_text(output)
+            if not args.quiet:
+                print(f"📄 Results written to: {output_path}")
         else:
-            # Full analysis
-            config = create_config_from_args(args)
-            result = analyze_codebase(path, config)
+            print(output)
+        
+        # Exit with appropriate code
+        if result.summary.get('issues', {}).get('critical_issues', 0) > 0:
+            sys.exit(1)  # Critical issues found
+        else:
+            sys.exit(0)  # Success
             
-            # Output results
-            if args.format == "json" or args.output:
-                if args.output:
-                    result.save_to_file(args.output)
-                    if not args.quiet:
-                        print(f"💾 Results saved to: {args.output}")
-                else:
-                    print(result.to_json())
-            else:
-                if not args.quiet:
-                    print_summary(result, args.verbose)
-    
     except KeyboardInterrupt:
-        print("\n⚠️  Analysis interrupted by user", file=sys.stderr)
-        sys.exit(1)
-    
+        print("\n❌ Analysis interrupted by user", file=sys.stderr)
+        sys.exit(130)
     except Exception as e:
-        print(f"❌ Analysis failed: {e}", file=sys.stderr)
+        print(f"❌ Error during analysis: {e}", file=sys.stderr)
         if args.verbose:
             import traceback
             traceback.print_exc()
         sys.exit(1)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-
