@@ -48,7 +48,7 @@ def print_banner():
 ║  • Real-time monitoring and quality gates                   ║
 ║  • GitHub, Linear, and Slack integrations                   ║
 ║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
+╚═══════════════════════════��══════════════════════════════════╝
 """
     print(banner)
 
@@ -168,6 +168,187 @@ def create_standalone_dashboard():
                 "timestamp": datetime.now().isoformat()
             }
         
+        # Root route - Dashboard UI
+        @app.get("/")
+        async def dashboard_home():
+            """Main dashboard page."""
+            html_content = """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Consolidated Strands Agent Dashboard</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        margin: 0;
+                        padding: 20px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        min-height: 100vh;
+                    }
+                    .container {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 20px;
+                        padding: 30px;
+                        backdrop-filter: blur(10px);
+                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    }
+                    .header {
+                        text-align: center;
+                        margin-bottom: 40px;
+                    }
+                    .header h1 {
+                        font-size: 2.5em;
+                        margin: 0;
+                        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+                    }
+                    .header p {
+                        font-size: 1.2em;
+                        opacity: 0.9;
+                        margin: 10px 0;
+                    }
+                    .grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 20px;
+                        margin-bottom: 30px;
+                    }
+                    .card {
+                        background: rgba(255, 255, 255, 0.15);
+                        border-radius: 15px;
+                        padding: 25px;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        transition: transform 0.3s ease;
+                    }
+                    .card:hover {
+                        transform: translateY(-5px);
+                    }
+                    .card h3 {
+                        margin: 0 0 15px 0;
+                        font-size: 1.3em;
+                    }
+                    .card p {
+                        margin: 0;
+                        opacity: 0.9;
+                        line-height: 1.6;
+                    }
+                    .links {
+                        display: flex;
+                        gap: 15px;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                        margin-top: 30px;
+                    }
+                    .link {
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        text-decoration: none;
+                        padding: 12px 24px;
+                        border-radius: 25px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        transition: all 0.3s ease;
+                        font-weight: 500;
+                    }
+                    .link:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                    }
+                    .status {
+                        display: inline-block;
+                        background: #4CAF50;
+                        color: white;
+                        padding: 4px 12px;
+                        border-radius: 12px;
+                        font-size: 0.9em;
+                        font-weight: bold;
+                    }
+                    .feature-list {
+                        list-style: none;
+                        padding: 0;
+                    }
+                    .feature-list li {
+                        padding: 8px 0;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    }
+                    .feature-list li:before {
+                        content: "✅ ";
+                        margin-right: 8px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🚀 Consolidated Strands Agent Dashboard</h1>
+                        <p>Comprehensive dashboard for Strands tools ecosystem</p>
+                        <span class="status">OPERATIONAL</span>
+                    </div>
+                    
+                    <div class="grid">
+                        <div class="card">
+                            <h3>🎯 Multi-Layer Orchestration</h3>
+                            <ul class="feature-list">
+                                <li>Strands Workflow Engine</li>
+                                <li>ControlFlow Integration</li>
+                                <li>Prefect Orchestration</li>
+                                <li>MCP Protocol Support</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>🤖 AI-Powered Planning</h3>
+                            <p>Integrated with Codegen SDK for intelligent task planning and execution. Automatically generates project plans and manages workflow execution.</p>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>📊 Real-Time Monitoring</h3>
+                            <p>Live monitoring of project progress, quality gates, and system health. WebSocket-powered real-time updates.</p>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>🔗 Platform Integrations</h3>
+                            <ul class="feature-list">
+                                <li>GitHub Repository Management</li>
+                                <li>Linear Issue Tracking</li>
+                                <li>Slack Notifications</li>
+                                <li>Quality Gate Validation</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="links">
+                        <a href="/docs" class="link">📚 API Documentation</a>
+                        <a href="/health" class="link">❤️ Health Check</a>
+                        <a href="/api/health" class="link">🔍 Detailed Status</a>
+                        <a href="/api/projects" class="link">📁 Projects API</a>
+                    </div>
+                </div>
+                
+                <script>
+                    // Add some interactivity
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Fetch and display real-time status
+                        fetch('/api/health')
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Dashboard Status:', data);
+                            })
+                            .catch(error => {
+                                console.log('Status check failed:', error);
+                            });
+                    });
+                </script>
+            </body>
+            </html>
+            """
+            from fastapi.responses import HTMLResponse
+            return HTMLResponse(content=html_content)
+        
         # Project endpoints
         @app.get("/api/projects")
         async def get_projects():
@@ -268,4 +449,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
