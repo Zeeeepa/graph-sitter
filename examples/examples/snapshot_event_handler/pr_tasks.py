@@ -107,8 +107,8 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
         # Valid if the main if block checks for production
         return operator in true_operators and condition.source == f"process.env.NODE_ENV {operator} 'production'"
 
-    # Fix: Call files() as a method
-    for file in directory.files(extensions=["*"], recursive=True):
+    # Fix: Call files() as a method with proper parameters
+    for file in directory.files(extensions="*", recursive=True):
         for imp in file.inbound_imports:
             if imp.file.filepath not in modified_files:
                 # skip if the import is not in the pull request's modified files

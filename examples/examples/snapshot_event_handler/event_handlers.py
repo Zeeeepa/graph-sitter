@@ -79,15 +79,15 @@ class CustomEventHandlersAPI(CodebaseEventsApp):
             codebase = cg.get_codebase()
             lint_for_dev_import_violations(codebase, event)
 
-            # Fix: Call files() and functions() as methods
-            return {"message": "PR event handled", "num_files": len(codebase.files()), "num_functions": len(codebase.functions())}
+            # Fix: files() is a method, functions is a property
+            return {"message": "PR event handled", "num_files": len(codebase.files()), "num_functions": len(codebase.functions)}
 
         @cg.linear.event("Issue")
         def handle_issue(event: LinearEvent):
             logger.info(f"Issue created: {event}")
             codebase = cg.get_codebase()
-            # Fix: Call files() and functions() as methods
-            return {"message": "Linear Issue event", "num_files": len(codebase.files()), "num_functions": len(codebase.functions())}
+            # Fix: files() is a method, functions is a property
+            return {"message": "Linear Issue event", "num_files": len(codebase.files()), "num_functions": len(codebase.functions)}
 
 
 @codegen_events_app.cls(image=base_image, secrets=[modal.Secret.from_dotenv(".env")])
