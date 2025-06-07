@@ -1,4 +1,22 @@
 import React, { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Menu,
+  MenuItem,
+  Box,
+  Chip,
+  IconButton,
+  Tooltip
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Settings as SettingsIcon,
+  PushPin as PinIcon,
+  KeyboardArrowDown as ArrowDownIcon
+} from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 
 interface TopBarProps {
@@ -12,83 +30,147 @@ export const TopBar: React.FC<TopBarProps> = ({
   onPinProject,
   onOpenSettings
 }) => {
-  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handlePinProject = (project: Project) => {
+    onPinProject(project);
+    handleClose();
+  };
 
   return (
-    <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-gray-900">Contexten Dashboard</h1>
-          <div className="text-sm text-gray-500">
-            Project Management & Workflow Orchestration
-          </div>
-        </div>
+    <AppBar 
+      position="static" 
+      elevation={1}
+      sx={{ 
+        backgroundColor: 'white', 
+        color: 'text.primary',
+        borderBottom: '1px solid',
+        borderColor: 'divider'
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between', px: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography 
+            variant="h5" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 'bold',
+              color: 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            🎯 Contexten Dashboard
+          </Typography>
+          <Chip 
+            label="Multi-layered Workflow Orchestration Platform" 
+            variant="outlined" 
+            size="small"
+            sx={{ 
+              fontSize: '0.75rem',
+              color: 'text.secondary',
+              borderColor: 'divider'
+            }}
+          />
+        </Box>
 
-        <div className="flex items-center space-x-4">
-          {/* Select Project to Pin */}
-          <div className="relative">
-            <button
-              onClick={() => setShowProjectDropdown(!showProjectDropdown)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
-            >
-              <span>📌</span>
-              <span>Select Project To Pin</span>
-              <span className="text-blue-200">▼</span>
-            </button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* Project Pin Button */}
+          <Button
+            variant="outlined"
+            startIcon={<PinIcon />}
+            endIcon={<ArrowDownIcon />}
+            onClick={handleClick}
+            sx={{
+              textTransform: 'none',
+              borderColor: 'primary.main',
+              color: 'primary.main',
+              '&:hover': {
+                borderColor: 'primary.dark',
+                backgroundColor: 'primary.50'
+              }
+            }}
+          >
+            Select Project To Pin
+          </Button>
 
-            {showProjectDropdown && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                <div className="p-3 border-b border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-900">Available Projects</h3>
-                  <p className="text-xs text-gray-500">Select a project to add to your dashboard</p>
-                </div>
-                <div className="max-h-60 overflow-y-auto">
-                  {availableProjects.length > 0 ? (
-                    availableProjects.map((project) => (
-                      <button
-                        key={project.id}
-                        onClick={() => {
-                          onPinProject(project);
-                          setShowProjectDropdown(false);
-                        }}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                      >
-                        <div className="font-medium text-gray-900">{project.name}</div>
-                        <div className="text-sm text-gray-600">{project.repository}</div>
-                        <div className="text-xs text-gray-500 mt-1">{project.description}</div>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="px-4 py-6 text-center text-gray-500">
-                      <div className="text-2xl mb-2">🔍</div>
-                      <p className="text-sm">No projects available</p>
-                      <p className="text-xs">Check your GitHub integration settings</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            PaperProps={{
+              sx: {
+                width: 320,
+                maxHeight: 400,
+                mt: 1
+              }
+            }}
+          >
+            {availableProjects.length === 0 ? (
+              <MenuItem disabled>
+                <Box sx={{ py: 2, textAlign: 'center', width: '100%' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No projects available to pin
+                  </Typography>
+                </Box>
+              </MenuItem>
+            ) : (
+              availableProjects.map((project) => (
+                <MenuItem 
+                  key={project.id} 
+                  onClick={() => handlePinProject(project)}
+                  sx={{ 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-start',
+                    py: 2,
+                    '&:hover': {
+                      backgroundColor: 'primary.50'
+                    }
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                    {project.name}
+                  </Typography>
+                  <Typography 
+                    variant="caption" 
+                    color="text.secondary"
+                    sx={{ mt: 0.5, maxWidth: '100%' }}
+                    noWrap
+                  >
+                    {project.description || project.repository}
+                  </Typography>
+                </MenuItem>
+              ))
             )}
-          </div>
+          </Menu>
 
           {/* Settings Button */}
-          <button
-            onClick={onOpenSettings}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center space-x-2"
-          >
-            <span>⚙️</span>
-            <span>Settings</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Click outside to close dropdown */}
-      {showProjectDropdown && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setShowProjectDropdown(false)}
-        />
-      )}
-    </div>
+          <Tooltip title="Open Settings">
+            <IconButton
+              onClick={onOpenSettings}
+              sx={{
+                color: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'primary.50'
+                }
+              }}
+            >
+              <SettingsIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 
