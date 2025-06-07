@@ -12,6 +12,8 @@ from graph_sitter.shared.logging.get_logger import get_logger
 from ..github.github import GitHub
 from ..linear.linear import Linear
 from ..slack.slack import Slack
+from ..circleci.circleci import CircleCI
+from ..modal.base import CodebaseEventsApp
 from ..dashboard.dashboard import setup_dashboard
 
 logger = get_logger(__name__)
@@ -23,6 +25,8 @@ class ContextenApp:
     github: GitHub
     linear: Linear
     slack: Slack
+    circleci: CircleCI
+    modal: CodebaseEventsApp
 
     def __init__(self, name: str, repo: Optional[str] = None, tmp_dir: str = "/tmp/contexten", commit: str | None = "latest"):
         self.name = name
@@ -32,16 +36,24 @@ class ContextenApp:
         self.app = FastAPI(title=name)
 
         # Initialize event handlers
+        self.github = GitHub(self)
         self.linear = Linear(self)
         self.slack = Slack(self)
-        self.github = GitHub(self)
+        self.circleci = CircleCI(self)
+        self.modal = CodebaseEventsApp()
+        
+        # Set repository and commit info
         self.repo = repo
         self.commit = commit
+        
         # Initialize codebase cache
-        self.codebase: Codebase | None = None
+        self._codebase_cache = {}
 
         # Setup dashboard extension
         self.dashboard = setup_dashboard(self)
+
+        # Setup webhook routes for all services
+        self._setup_webhook_routes()
 
         # Register routes
         self._setup_routes()
@@ -179,6 +191,46 @@ class ContextenApp:
         @self.app.post("/linear/events")
         async def handle_linear_event(request: Request):
             return await self.handle_linear_event(request)
+
+    def _setup_webhook_routes(self):
+        """Setup webhook routes for all integrated services."""
+        
+        @self.app.post("/webhooks/github")
+        async def github_webhook(request: Request):
+            payload = await request.json()
+            return await self.github.handle(payload, request)
+
+        @self.app.post("/webhooks/linear")
+        async def linear_webhook(request: Request):
+            payload = await request.json()
+            return await self.linear.handle(payload, request)
+
+        @self.app.post("/webhooks/slack")
+        async def slack_webhook(request: Request):
+            payload = await request.json()
+            return await self.slack.handle(payload, request)
+
+        @self.app.post("/webhooks/circleci")
+        async def circleci_webhook(request: Request):
+            payload = await request.json()
+            return await self.circleci.handle(payload, request)
+
+    async def initialize_services(self):
+        """Initialize all services with proper error handling."""
+        services = {
+            'github': self.github,
+            'linear': self.linear,
+            'slack': self.slack,
+            'circleci': self.circleci
+        }
+        
+        for service_name, service in services.items():
+            try:
+                if hasattr(service, 'initialize'):
+                    await service.initialize()
+                logger.info(f"✅ {service_name.title()} service initialized successfully")
+            except Exception as e:
+                logger.error(f"❌ Failed to initialize {service_name} service: {e}")
 
     def run(self, host: str = "0.0.0.0", port: int = 8000, **kwargs):
         """Run the FastAPI application."""

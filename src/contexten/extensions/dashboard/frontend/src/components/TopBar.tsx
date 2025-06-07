@@ -4,234 +4,173 @@ import {
   Toolbar,
   Typography,
   Button,
-  Box,
   Menu,
   MenuItem,
+  Box,
   Chip,
   IconButton,
-  Badge,
+  Tooltip
 } from '@mui/material';
 import {
+  Add as AddIcon,
   Settings as SettingsIcon,
   PushPin as PinIcon,
-  Notifications as NotificationsIcon,
-  GitHub as GitHubIcon,
+  KeyboardArrowDown as ArrowDownIcon
 } from '@mui/icons-material';
-import { useQuery } from 'react-query';
+import { Project } from '../types/dashboard';
 
-import { useDashboardStore } from '../store/dashboardStore';
-import { dashboardApi } from '../services/api';
-import ProjectSelectionDialog from './ProjectSelectionDialog';
+interface TopBarProps {
+  availableProjects: Project[];
+  onPinProject: (project: Project) => void;
+  onOpenSettings: () => void;
+}
 
-const TopBar: React.FC = () => {
-  const { setSettingsOpen, user } = useDashboardStore();
-  const [projectMenuAnchor, setProjectMenuAnchor] = useState<null | HTMLElement>(null);
-  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
-  const [notificationMenuAnchor, setNotificationMenuAnchor] = useState<null | HTMLElement>(null);
+export const TopBar: React.FC<TopBarProps> = ({
+  availableProjects,
+  onPinProject,
+  onOpenSettings
+}) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
-  // Fetch GitHub repositories
-  const { data: repositories = [] } = useQuery(
-    'github-repositories',
-    dashboardApi.getGitHubRepositories,
-    {
-      enabled: true,
-      staleTime: 10 * 60 * 1000, // 10 minutes
-    }
-  );
-
-  // Fetch pinned projects
-  const { data: pinnedProjects = [] } = useQuery(
-    'pinned-projects',
-    dashboardApi.getProjects,
-    {
-      refetchInterval: 30000, // Refresh every 30 seconds
-    }
-  );
-
-  const handleProjectMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setProjectMenuAnchor(event.currentTarget);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleProjectMenuClose = () => {
-    setProjectMenuAnchor(null);
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
-  const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setNotificationMenuAnchor(event.currentTarget);
-  };
-
-  const handleNotificationMenuClose = () => {
-    setNotificationMenuAnchor(null);
-  };
-
-  const handleSelectProjectToPin = () => {
-    handleProjectMenuClose();
-    setProjectDialogOpen(true);
+  const handlePinProject = (project: Project) => {
+    onPinProject(project);
+    handleClose();
   };
 
   return (
-    <>
-      <AppBar 
-        position="sticky" 
-        elevation={0}
-        sx={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        }}
-      >
-        <Toolbar>
-          {/* Logo and Title */}
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Typography 
-              variant="h6" 
-              component="div" 
-              sx={{ 
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #fff, #f0f0f0)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Contexten Dashboard
-            </Typography>
-            
-            {/* Status Indicators */}
-            <Box sx={{ ml: 3, display: 'flex', gap: 1 }}>
-              <Chip
-                size="small"
-                label={`${pinnedProjects.length} Projects`}
-                sx={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontSize: '0.75rem',
-                }}
-              />
-              <Chip
-                size="small"
-                label="Multi-Layer Orchestration"
-                sx={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontSize: '0.75rem',
-                }}
-              />
-            </Box>
-          </Box>
+    <AppBar 
+      position="static" 
+      elevation={1}
+      sx={{ 
+        backgroundColor: 'white', 
+        color: 'text.primary',
+        borderBottom: '1px solid',
+        borderColor: 'divider'
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between', px: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography 
+            variant="h5" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 'bold',
+              color: 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            🎯 Contexten Dashboard
+          </Typography>
+          <Chip 
+            label="Multi-layered Workflow Orchestration Platform" 
+            variant="outlined" 
+            size="small"
+            sx={{ 
+              fontSize: '0.75rem',
+              color: 'text.secondary',
+              borderColor: 'divider'
+            }}
+          />
+        </Box>
 
-          {/* Action Buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {/* Notifications */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* Project Pin Button */}
+          <Button
+            variant="outlined"
+            startIcon={<PinIcon />}
+            endIcon={<ArrowDownIcon />}
+            onClick={handleClick}
+            sx={{
+              textTransform: 'none',
+              borderColor: 'primary.main',
+              color: 'primary.main',
+              '&:hover': {
+                borderColor: 'primary.dark',
+                backgroundColor: 'primary.50'
+              }
+            }}
+          >
+            Select Project To Pin
+          </Button>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            PaperProps={{
+              sx: {
+                width: 320,
+                maxHeight: 400,
+                mt: 1
+              }
+            }}
+          >
+            {availableProjects.length === 0 ? (
+              <MenuItem disabled>
+                <Box sx={{ py: 2, textAlign: 'center', width: '100%' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No projects available to pin
+                  </Typography>
+                </Box>
+              </MenuItem>
+            ) : (
+              availableProjects.map((project) => (
+                <MenuItem 
+                  key={project.id} 
+                  onClick={() => handlePinProject(project)}
+                  sx={{ 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-start',
+                    py: 2,
+                    '&:hover': {
+                      backgroundColor: 'primary.50'
+                    }
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'medium' }}>
+                    {project.name}
+                  </Typography>
+                  <Typography 
+                    variant="caption" 
+                    color="text.secondary"
+                    sx={{ mt: 0.5, maxWidth: '100%' }}
+                    noWrap
+                  >
+                    {project.description || project.repository}
+                  </Typography>
+                </MenuItem>
+              ))
+            )}
+          </Menu>
+
+          {/* Settings Button */}
+          <Tooltip title="Open Settings">
             <IconButton
-              color="inherit"
-              onClick={handleNotificationMenuOpen}
-              sx={{ color: 'white' }}
+              onClick={onOpenSettings}
+              sx={{
+                color: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'primary.50'
+                }
+              }}
             >
-              <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
-              </Badge>
+              <SettingsIcon />
             </IconButton>
-
-            {/* Select Project To Pin */}
-            <Button
-              variant="outlined"
-              startIcon={<PinIcon />}
-              onClick={handleProjectMenuOpen}
-              sx={{
-                color: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.5)',
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-              }}
-            >
-              Select Project To Pin
-            </Button>
-
-            {/* Settings */}
-            <Button
-              variant="outlined"
-              startIcon={<SettingsIcon />}
-              onClick={() => setSettingsOpen(true)}
-              sx={{
-                color: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.5)',
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-              }}
-            >
-              Settings
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Project Selection Menu */}
-      <Menu
-        anchorEl={projectMenuAnchor}
-        open={Boolean(projectMenuAnchor)}
-        onClose={handleProjectMenuClose}
-        PaperProps={{
-          sx: { minWidth: 250 }
-        }}
-      >
-        <MenuItem onClick={handleSelectProjectToPin}>
-          <GitHubIcon sx={{ mr: 1 }} />
-          Browse GitHub Repositories
-        </MenuItem>
-        <MenuItem onClick={handleProjectMenuClose} disabled>
-          <PinIcon sx={{ mr: 1 }} />
-          Quick Pin Recent Projects
-        </MenuItem>
-      </Menu>
-
-      {/* Notification Menu */}
-      <Menu
-        anchorEl={notificationMenuAnchor}
-        open={Boolean(notificationMenuAnchor)}
-        onClose={handleNotificationMenuClose}
-        PaperProps={{
-          sx: { minWidth: 300, maxHeight: 400 }
-        }}
-      >
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <Box>
-            <Typography variant="subtitle2">Workflow Completed</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Project "FastAPI Enhancement" finished successfully
-            </Typography>
-          </Box>
-        </MenuItem>
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <Box>
-            <Typography variant="subtitle2">Quality Gate Failed</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Code coverage below threshold in "React Dashboard"
-            </Typography>
-          </Box>
-        </MenuItem>
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <Box>
-            <Typography variant="subtitle2">PR Created</Typography>
-            <Typography variant="body2" color="text.secondary">
-              New pull request opened for "Database Migration"
-            </Typography>
-          </Box>
-        </MenuItem>
-      </Menu>
-
-      {/* Project Selection Dialog */}
-      <ProjectSelectionDialog
-        open={projectDialogOpen}
-        onClose={() => setProjectDialogOpen(false)}
-        repositories={repositories}
-      />
-    </>
+          </Tooltip>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
-
-export default TopBar;
 
