@@ -15,7 +15,13 @@ A React-based dashboard for managing AI-powered development workflows with real-
    npm install
    ```
 
-2. **Start the development server:**
+2. **Set up environment (optional):**
+   ```bash
+   cp .env.example .env
+   # Edit .env if you need to change default settings
+   ```
+
+3. **Start the development server:**
    ```bash
    npm start
    ```
@@ -25,7 +31,7 @@ A React-based dashboard for managing AI-powered development workflows with real-
    ./start-dev.sh
    ```
 
-3. **Open your browser:**
+4. **Open your browser:**
    - The dashboard will be available at: `http://localhost:3001`
    - The app will automatically reload when you make changes
 
@@ -107,4 +113,3 @@ npm run type-check
 - State management is handled by Zustand
 - Real-time features use WebSocket connections
 - The app is configured to proxy API requests to `localhost:8000`
-
