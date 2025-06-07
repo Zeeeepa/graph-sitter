@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   // Mock data for demonstration
   useEffect(() => {
@@ -251,4 +251,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

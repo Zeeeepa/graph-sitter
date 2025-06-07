@@ -6,19 +6,14 @@ import {
   DialogActions,
   Button,
   TextField,
-  Typography,
-  Box,
-  Alert,
-  Tabs,
-  Tab,
   FormControlLabel,
   Switch,
-  Divider
+  Box,
+  Typography
 } from '@mui/material';
 import {
   Save as SaveIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon
+  Cancel as CancelIcon
 } from '@mui/icons-material';
 
 interface SettingsDialogProps {
@@ -259,4 +254,3 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
 };
 
 export default SettingsDialog;
-

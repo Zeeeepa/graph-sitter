@@ -18,11 +18,11 @@ const Dashboard: React.FC = () => {
   const { projects, setProjects } = useDashboardStore();
 
   // Fetch projects
-  const { data: projectsData = [], isLoading: projectsLoading } = useQuery(
+  const { data: projectsData, isLoading, error } = useQuery(
     'projects',
     dashboardApi.getProjects,
     {
-      onSuccess: (data) => {
+      onSuccess: (data: Project[]) => {
         setProjects(data);
       },
       refetchInterval: 30000, // Refresh every 30 seconds
@@ -47,17 +47,27 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleRemovePin = async (projectId: string) => {
+  const handlePin = async (projectId: string) => {
+    try {
+      await dashboardApi.pinProject(projectId);
+      // Refresh projects
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to pin project:', error);
+    }
+  };
+
+  const handleUnpin = async (projectId: string) => {
     try {
       await dashboardApi.unpinProject(projectId);
       // Refresh projects
       window.location.reload();
     } catch (error) {
-      console.error('Failed to remove pin:', error);
+      console.error('Failed to unpin project:', error);
     }
   };
 
-  if (projectsLoading) {
+  if (isLoading) {
     return (
       <Box 
         sx={{ 
@@ -136,12 +146,12 @@ const Dashboard: React.FC = () => {
         </Paper>
       ) : (
         <Grid container spacing={3}>
-          {projects.map((project) => (
+          {projects.map((project: Project) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
               <ProjectCard
                 project={project}
-                onFlowToggle={handleFlowToggle}
-                onRemovePin={handleRemovePin}
+                onPin={handlePin}
+                onUnpin={handleUnpin}
               />
             </Grid>
           ))}
@@ -159,4 +169,3 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
-

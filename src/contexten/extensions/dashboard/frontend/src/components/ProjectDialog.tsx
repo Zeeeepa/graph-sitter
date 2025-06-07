@@ -19,9 +19,7 @@ import {
   Divider
 } from '@mui/material';
 import {
-  Assignment as AssignmentIcon,
   PlayArrow as PlayIcon,
-  CheckCircle as CheckIcon,
   Schedule as ScheduleIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
@@ -239,4 +237,3 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({ open, project, onClose, o
 };
 
 export default ProjectDialog;
-

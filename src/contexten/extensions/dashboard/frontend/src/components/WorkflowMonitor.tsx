@@ -27,8 +27,8 @@ interface WorkflowMonitorProps {
 const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
   // Generate mock workflow events
   const generateWorkflowEvents = () => {
-    const events = [];
-    
+    const events: any[] = []; // Explicitly type the events array
+
     projects.forEach(project => {
       if (project.plan?.tasks) {
         project.plan.tasks.forEach(task => {
@@ -178,4 +178,3 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
 };
 
 export default WorkflowMonitor;
-
