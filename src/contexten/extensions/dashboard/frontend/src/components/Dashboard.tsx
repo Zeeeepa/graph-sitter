@@ -1,18 +1,18 @@
 import React from 'react';
 import {
-  Box,
   Grid,
-  Typography,
-  Container,
   Paper,
-  Chip,
-  CircularProgress,
+  Typography,
+  Box,
+  CircularProgress
 } from '@mui/material';
 import { useQuery } from 'react-query';
-
 import ProjectCard from './ProjectCard';
-import { dashboardApi } from '../services/api';
+import RealTimeMetrics from './RealTimeMetrics';
+import WorkflowMonitor from './WorkflowMonitor';
 import { useDashboardStore } from '../store/dashboardStore';
+import { dashboardApi } from '../api/dashboardApi';
+import { Project } from '../types/dashboard';
 
 const Dashboard: React.FC = () => {
   const { projects, setProjects } = useDashboardStore();
@@ -49,7 +49,7 @@ const Dashboard: React.FC = () => {
 
   const handlePin = async (projectId: string) => {
     try {
-      await dashboardApi.pinProject(projectId);
+      await dashboardApi.pinProject({ projectId });
       // Refresh projects
       window.location.reload();
     } catch (error) {
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
 
   const handleUnpin = async (projectId: string) => {
     try {
-      await dashboardApi.unpinProject(projectId);
+      await dashboardApi.unpinProject({ projectId });
       // Refresh projects
       window.location.reload();
     } catch (error) {
@@ -157,6 +157,12 @@ const Dashboard: React.FC = () => {
           ))}
         </Grid>
       )}
+
+      {/* Real Time Metrics */}
+      <RealTimeMetrics />
+
+      {/* Workflow Monitor */}
+      <WorkflowMonitor />
 
       {/* Footer Info */}
       <Box sx={{ mt: 6, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
