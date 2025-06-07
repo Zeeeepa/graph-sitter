@@ -1,18 +1,15 @@
 import React from 'react';
 import {
-  Card,
-  CardContent,
-  Typography,
   Box,
+  Paper,
+  Typography,
   Grid,
-  Chip,
-  // LinearProgress removed as it's unused
+  LinearProgress
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
   Speed as SpeedIcon,
-  CheckCircle as CheckCircleIcon,
-  // ErrorIcon removed as it's unused
+  Assessment as AssessmentIcon
 } from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 
@@ -21,133 +18,67 @@ interface RealTimeMetricsProps {
 }
 
 const RealTimeMetrics: React.FC<RealTimeMetricsProps> = ({ projects }) => {
-  const activeProjects = projects.filter(p => p.status === 'active').length;
-  const completedProjects = projects.filter(p => p.status === 'completed').length;
-  const runningFlows = projects.filter(p => p.flowEnabled && p.flowStatus === 'running').length;
+  // Calculate metrics from projects
+  const totalCommits = projects.reduce((sum, project) => sum + (project.metrics?.commits || 0), 0);
+  const totalPRs = projects.reduce((sum, project) => sum + (project.metrics?.prs || 0), 0);
   const averageProgress = projects.length > 0 
-    ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length)
+    ? projects.reduce((sum, project) => sum + project.progress, 0) / projects.length 
     : 0;
 
-  const metrics = [
-    {
-      title: 'Active Projects',
-      value: activeProjects,
-      icon: <TrendingUpIcon />,
-      color: 'primary',
-      description: 'Currently in development'
-    },
-    {
-      title: 'Running Flows',
-      value: runningFlows,
-      icon: <SpeedIcon />,
-      color: 'success',
-      description: 'Automated workflows active'
-    },
-    {
-      title: 'Completed',
-      value: completedProjects,
-      icon: <CheckCircleIcon />,
-      color: 'info',
-      description: 'Successfully finished'
-    },
-    {
-      title: 'Avg Progress',
-      value: `${averageProgress}%`,
-      icon: <TrendingUpIcon />,
-      color: 'warning',
-      description: 'Overall completion rate'
-    }
-  ];
-
   return (
-    <Box sx={{ mb: 3 }}>
-      <Typography variant="h5" gutterBottom>
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
         Real-time Metrics
       </Typography>
       
       <Grid container spacing={3}>
-        {metrics.map((metric, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card 
-              sx={{ 
-                p: 2, 
-                display: 'flex', 
-                flexDirection: 'column',
-                height: 120,
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Box 
-                    sx={{ 
-                      color: `${metric.color}.main`,
-                      mr: 1,
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    {metric.icon}
-                  </Box>
-                  <Typography variant="h6" component="div">
-                    {metric.value}
-                  </Typography>
-                </Box>
-                
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {metric.title}
-                </Typography>
-                
-                <Typography variant="caption" color="text.secondary">
-                  {metric.description}
-                </Typography>
-                
-                {/* Animated background effect */}
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 4,
-                    background: `linear-gradient(90deg, transparent, ${metric.color === 'primary' ? '#1976d2' : 
-                      metric.color === 'success' ? '#2e7d32' :
-                      metric.color === 'info' ? '#0288d1' : '#ed6c02'}20)`,
-                    animation: 'pulse 2s infinite'
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      
-      {projects.length > 0 && (
-        <Card sx={{ p: 2, mt: 2 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              System Health
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Chip 
-                label="All Systems Operational" 
-                color="success" 
-                icon={<CheckCircleIcon />}
-              />
-              <Chip 
-                label={`${projects.length} Projects Monitored`} 
-                variant="outlined"
-              />
-              <Chip 
-                label="Real-time Updates Active" 
-                color="info" 
-                variant="outlined"
-              />
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <TrendingUpIcon color="primary" sx={{ mr: 1 }} />
+              <Typography variant="h6">Total Commits</Typography>
             </Box>
-          </CardContent>
-        </Card>
-      )}
+            <Typography variant="h4" color="primary">
+              {totalCommits}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Across all projects
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <SpeedIcon color="success" sx={{ mr: 1 }} />
+              <Typography variant="h6">Active PRs</Typography>
+            </Box>
+            <Typography variant="h4" color="success.main">
+              {totalPRs}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Currently open
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <AssessmentIcon color="info" sx={{ mr: 1 }} />
+              <Typography variant="h6">Average Progress</Typography>
+            </Box>
+            <Typography variant="h4" color="info.main">
+              {Math.round(averageProgress)}%
+            </Typography>
+            <LinearProgress 
+              variant="determinate" 
+              value={averageProgress} 
+              sx={{ mt: 1 }}
+            />
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

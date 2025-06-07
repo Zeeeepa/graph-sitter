@@ -1,24 +1,26 @@
 import React from 'react';
 import {
-  Box,
   Grid,
-  Typography,
-  Container,
   Paper,
-  Chip,
+  Typography,
+  Box,
   CircularProgress,
+  Container,
+  Chip
 } from '@mui/material';
 import { useQuery } from 'react-query';
-
 import ProjectCard from './ProjectCard';
-import { dashboardApi } from '../services/api';
+import RealTimeMetrics from './RealTimeMetrics';
+import WorkflowMonitor from './WorkflowMonitor';
 import { useDashboardStore } from '../store/dashboardStore';
+import { dashboardApi, DashboardStats } from '../api/dashboardApi';
+import { Project } from '../types/dashboard';
 
 const Dashboard: React.FC = () => {
   const { projects, setProjects } = useDashboardStore();
 
   // Fetch projects
-  const { data: projectsData, isLoading, error } = useQuery(
+  const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useQuery(
     'projects',
     dashboardApi.getProjects,
     {
@@ -30,26 +32,17 @@ const Dashboard: React.FC = () => {
   );
 
   // Fetch dashboard stats
-  const { data: stats } = useQuery(
+  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>(
     'dashboard-stats',
-    dashboardApi.getDashboardStats,
+    dashboardApi.getStats,
     {
       refetchInterval: 60000, // Refresh every minute
     }
   );
 
-  const handleFlowToggle = async (projectId: string, enabled: boolean) => {
-    try {
-      // TODO: Implement flow toggle API call
-      console.log(`Toggle flow for project ${projectId}: ${enabled}`);
-    } catch (error) {
-      console.error('Failed to toggle flow:', error);
-    }
-  };
-
   const handlePin = async (projectId: string) => {
     try {
-      await dashboardApi.pinProject(projectId);
+      await dashboardApi.pinProject({ projectId });
       // Refresh projects
       window.location.reload();
     } catch (error) {
@@ -59,7 +52,7 @@ const Dashboard: React.FC = () => {
 
   const handleUnpin = async (projectId: string) => {
     try {
-      await dashboardApi.unpinProject(projectId);
+      await dashboardApi.unpinProject({ projectId });
       // Refresh projects
       window.location.reload();
     } catch (error) {
@@ -67,35 +60,49 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (projectsLoading) {
     return (
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          minHeight: '60vh' 
-        }}
-      >
-        <CircularProgress size={60} />
-      </Box>
+      <Container maxWidth="xl">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="400px"
+        >
+          <CircularProgress size={60} />
+        </Box>
+      </Container>
+    );
+  }
+
+  if (projectsError) {
+    return (
+      <Container maxWidth="xl">
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" color="error" gutterBottom>
+            Failed to load dashboard data
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Please try refreshing the page or contact support if the issue persists.
+          </Typography>
+        </Box>
+      </Container>
     );
   }
 
   return (
     <Container maxWidth="xl">
-      {/* Dashboard Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
           Project Dashboard
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-          Multi-layered workflow orchestration for your development projects
+        <Typography variant="body1" color="text.secondary">
+          Monitor and manage your development projects
         </Typography>
-        
-        {/* Stats Overview */}
+
+        {/* Dashboard Stats */}
         {stats && (
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
             <Chip
               label={`${stats.total_projects} Projects`}
               color="primary"
@@ -126,22 +133,13 @@ const Dashboard: React.FC = () => {
       </Box>
 
       {/* Projects Grid */}
-      {projects.length === 0 ? (
-        <Paper 
-          sx={{ 
-            p: 6, 
-            textAlign: 'center',
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-          }}
-        >
-          <Typography variant="h5" gutterBottom>
-            No Projects Pinned
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Get started by pinning your first project from GitHub
+      {!projects || projects.length === 0 ? (
+        <Paper sx={{ p: 6, textAlign: 'center' }}>
+          <Typography variant="h6" gutterBottom>
+            No projects found
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Click "Select Project To Pin" in the top bar to browse your repositories
+            Start by creating your first project or check your connection.
           </Typography>
         </Paper>
       ) : (
@@ -158,10 +156,16 @@ const Dashboard: React.FC = () => {
         </Grid>
       )}
 
+      {/* Real Time Metrics */}
+      <RealTimeMetrics projects={projects || []} />
+
+      {/* Workflow Monitor */}
+      <WorkflowMonitor projects={projects || []} />
+
       {/* Footer Info */}
       <Box sx={{ mt: 6, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography variant="body2" color="text.secondary" align="center">
-          Powered by Contexten • Multi-layered Workflow Orchestration
+          Graph Sitter Dashboard - Real-time project monitoring and management
         </Typography>
       </Box>
     </Container>
@@ -169,3 +173,4 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
