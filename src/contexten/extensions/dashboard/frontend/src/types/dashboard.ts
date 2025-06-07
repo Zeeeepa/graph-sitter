@@ -1,3 +1,28 @@
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  repository: string;
+  status: 'active' | 'completed' | 'paused' | 'error';
+  progress: number;
+  flowEnabled: boolean;
+  flowStatus?: FlowStatus;
+  lastActivity: Date;
+  requirements?: string;
+  plan?: Plan;
+}
+
+export interface Plan {
+  id: string;
+  projectId: string;
+  requirements: string;
+  tasks: Task[];
+  createdAt: Date;
+  updatedAt: Date;
+  estimatedDuration?: string;
+  totalTasks?: number;
+}
+
 export type FlowStatus = 'stopped' | 'running' | 'paused' | 'error';
 
 export interface Task {
@@ -5,61 +30,117 @@ export interface Task {
   title: string;
   description: string;
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
-  assignee?: string;
-  estimatedHours?: number;
+  assignee: string;
+  estimatedHours: number;
+  actualHours?: number;
   dependencies?: string[];
-  createdAt: string;
-  updatedAt: string;
 }
 
-export interface Plan {
+export interface WorkflowExecution {
   id: string;
-  tasks: Task[];
-  estimatedDuration?: string;
-  totalTasks?: number;
-  createdAt: string;
-  updatedAt: string;
+  projectId: string;
+  projectName: string;
+  workflowType: string;
+  status: 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
+  startTime?: Date;
+  endTime?: Date;
+  progress: number;
+  totalSteps: number;
+  completedSteps: number;
+  tasks: WorkflowTask[];
+  metadata?: Record<string, any>;
 }
 
-export interface ProjectStats {
-  openPRs: number;
-  openIssues: number;
-  completedTasks: number;
-  totalTasks: number;
-}
-
-export interface ProjectEvent {
-  id: string;
-  message: string;
-  timestamp: string;
-  type: 'pr' | 'issue' | 'task' | 'flow' | 'error';
-}
-
-export interface Project {
+export interface WorkflowTask {
   id: string;
   name: string;
   description: string;
-  repository: string;
-  flowStatus: FlowStatus;
-  requirements?: string;
-  plan?: Plan;
-  stats?: ProjectStats;
-  recentEvents?: ProjectEvent[];
-  createdAt: string;
-  updatedAt: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  startTime?: Date;
+  endTime?: Date;
+  duration?: number;
+  logs: string[];
+  error?: string;
+  dependencies: string[];
 }
 
-export interface DashboardState {
-  pinnedProjects: Project[];
-  availableProjects: Project[];
-  selectedProject: Project | null;
-  isLoading: boolean;
-  error: string | null;
+export interface DashboardMetrics {
+  projects: {
+    total: number;
+    active: number;
+    completed: number;
+    change: number;
+  };
+  pull_requests: {
+    open: number;
+    merged_today: number;
+    change: number;
+  };
+  issues: {
+    open: number;
+    resolved_today: number;
+    change: number;
+  };
+  workflows: {
+    active: number;
+    completed_today: number;
+    success_rate: number;
+  };
+  performance: {
+    avg_response_time: string;
+    code_quality_score: number;
+    test_coverage: number;
+  };
+  last_updated: string;
 }
 
-export interface WebSocketMessage {
-  type: 'project_update' | 'flow_status' | 'task_update' | 'error';
-  projectId?: string;
-  data: any;
+export interface Activity {
+  id: string;
+  type: 'workflow' | 'pr' | 'issue' | 'deployment';
+  title: string;
+  description: string;
+  timestamp: string;
+  status: 'success' | 'error' | 'warning' | 'pending' | 'running';
+  user: string;
+  metadata?: Record<string, any>;
+}
+
+export interface Settings {
+  workflow: {
+    auto_execute_workflows: boolean;
+    parallel_execution: boolean;
+    max_concurrent_tasks: number;
+    retry_failed_tasks: boolean;
+    max_retries: number;
+    task_timeout: number;
+  };
+  notifications: {
+    email_notifications: boolean;
+    slack_notifications: boolean;
+    webhook_notifications: boolean;
+    notification_level: string;
+  };
+  quality_gates: {
+    enable_code_review: boolean;
+    enable_testing: boolean;
+    enable_security: boolean;
+    min_code_coverage: number;
+    max_complexity: number;
+  };
+  advanced: {
+    enable_ai_assistance: boolean;
+    enable_predictive_analysis: boolean;
+    enable_auto_optimization: boolean;
+    data_retention_days: number;
+  };
+}
+
+export interface EnvironmentSettings {
+  github_token?: string;
+  linear_token?: string;
+  slack_token?: string;
+  codegen_org_id?: string;
+  codegen_token?: string;
+  postgresql_url?: string;
 }
 

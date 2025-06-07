@@ -30,10 +30,10 @@ import {
   Notifications as NotificationsIcon
 } from '@mui/icons-material';
 
-import { TopBar } from './components/TopBar';
-import { ProjectCard } from './components/ProjectCard';
+import TopBar from './components/TopBar';
+import ProjectCard from './components/ProjectCard';
 import { ProjectDialog } from './components/ProjectDialog';
-import { SettingsDialog } from './components/SettingsDialog';
+import SettingsDialog from './components/SettingsDialog';
 import { WorkflowMonitor } from './components/WorkflowMonitor';
 import { RealTimeMetrics } from './components/RealTimeMetrics';
 import { AdvancedSettings } from './components/AdvancedSettings';
@@ -372,4 +372,3 @@ function App() {
 }
 
 export default App;
-
