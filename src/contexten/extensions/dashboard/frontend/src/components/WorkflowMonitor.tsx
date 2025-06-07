@@ -1,22 +1,20 @@
 import React from 'react';
 import {
+  Box,
   Paper,
   Typography,
+  Grid,
+  Chip,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
-  Box,
-  Chip,
-  Avatar,
-  Divider
+  ListItemIcon
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
+  Pause as PauseIcon,
   CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Schedule as ScheduleIcon,
-  Person as PersonIcon
+  Error as ErrorIcon
 } from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 
@@ -25,51 +23,19 @@ interface WorkflowMonitorProps {
 }
 
 const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
-  // Generate mock workflow events
-  const generateWorkflowEvents = () => {
-    const events: any[] = []; // Explicitly type the events array
-
-    projects.forEach(project => {
-      if (project.plan?.tasks) {
-        project.plan.tasks.forEach(task => {
-          events.push({
-            id: `${project.id}-${task.id}`,
-            projectName: project.name,
-            taskTitle: task.title,
-            status: task.status,
-            assignee: task.assignee || 'AI Agent',
-            timestamp: task.updatedAt,
-            type: 'task'
-          });
-        });
-      }
-      
-      // Add project-level events
-      events.push({
-        id: `${project.id}-status`,
-        projectName: project.name,
-        taskTitle: `Project ${project.status}`,
-        status: project.status,
-        assignee: 'System',
-        timestamp: project.lastActivity,
-        type: 'project'
-      });
-    });
-    
-    return events.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 10);
-  };
-
-  const events = generateWorkflowEvents();
+  // Filter projects by workflow status
+  const runningWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'running');
+  const stoppedWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'stopped');
+  const completedWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'completed');
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'running':
+        return <PlayIcon color="success" />;
+      case 'stopped':
+        return <PauseIcon color="warning" />;
       case 'completed':
-      case 'active':
-        return <CheckIcon color="success" />;
-      case 'in_progress':
-        return <PlayIcon color="primary" />;
-      case 'pending':
-        return <ScheduleIcon color="action" />;
+        return <CheckIcon color="primary" />;
       default:
         return <ErrorIcon color="error" />;
     }
@@ -77,104 +43,120 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-      case 'active':
+      case 'running':
         return 'success';
-      case 'in_progress':
+      case 'stopped':
+        return 'warning';
+      case 'completed':
         return 'primary';
-      case 'pending':
-        return 'default';
       default:
         return 'error';
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
-  };
-
   return (
-    <Box sx={{ mb: 3 }}>
-      <Typography variant="h5" gutterBottom>
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
         Workflow Monitor
       </Typography>
       
-      <Paper sx={{ maxHeight: 400, overflow: 'auto' }}>
-        {events.length === 0 ? (
-          <Box sx={{ p: 3, textAlign: 'center' }}>
-            <Typography color="text.secondary">
-              No workflow events yet. Start by pinning a project and creating a plan!
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Running Workflows
             </Typography>
-          </Box>
-        ) : (
-          <List>
-            {events.map((event, index) => (
-              <React.Fragment key={event.id}>
-                <ListItem>
+            <Chip 
+              label={runningWorkflows.length} 
+              color="success" 
+              sx={{ mb: 2 }}
+            />
+            <List dense>
+              {runningWorkflows.slice(0, 3).map((project) => (
+                <ListItem key={project.id}>
                   <ListItemIcon>
-                    {getStatusIcon(event.status)}
+                    {getStatusIcon(project.flowStatus)}
                   </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body1">
-                          {event.taskTitle}
-                        </Typography>
-                        <Chip 
-                          label={event.status} 
-                          size="small" 
-                          color={getStatusColor(event.status) as any}
-                        />
-                      </Box>
-                    }
-                    secondary={
-                      <Box sx={{ mt: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          {event.projectName}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                          <Avatar sx={{ width: 16, height: 16 }}>
-                            <PersonIcon sx={{ fontSize: 12 }} />
-                          </Avatar>
-                          <Typography variant="caption" color="text.secondary">
-                            {event.assignee}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            • {formatTimeAgo(event.timestamp)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    }
+                  <ListItemText 
+                    primary={project.name}
+                    secondary={`Progress: ${project.progress}%`}
                   />
                 </ListItem>
-                {index < events.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </List>
-        )}
-      </Paper>
-      
-      {events.length > 0 && (
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-          <Chip 
-            label="Live Updates Active" 
-            color="success" 
-            variant="outlined"
-            sx={{ animation: 'pulse 2s infinite' }}
-          />
-        </Box>
-      )}
+              ))}
+              {runningWorkflows.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No running workflows
+                </Typography>
+              )}
+            </List>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Stopped Workflows
+            </Typography>
+            <Chip 
+              label={stoppedWorkflows.length} 
+              color="warning" 
+              sx={{ mb: 2 }}
+            />
+            <List dense>
+              {stoppedWorkflows.slice(0, 3).map((project) => (
+                <ListItem key={project.id}>
+                  <ListItemIcon>
+                    {getStatusIcon(project.flowStatus)}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={project.name}
+                    secondary={`Progress: ${project.progress}%`}
+                  />
+                </ListItem>
+              ))}
+              {stoppedWorkflows.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No stopped workflows
+                </Typography>
+              )}
+            </List>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Completed Workflows
+            </Typography>
+            <Chip 
+              label={completedWorkflows.length} 
+              color="primary" 
+              sx={{ mb: 2 }}
+            />
+            <List dense>
+              {completedWorkflows.slice(0, 3).map((project) => (
+                <ListItem key={project.id}>
+                  <ListItemIcon>
+                    {getStatusIcon(project.flowStatus)}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={project.name}
+                    secondary={`Progress: ${project.progress}%`}
+                  />
+                </ListItem>
+              ))}
+              {completedWorkflows.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No completed workflows
+                </Typography>
+              )}
+            </List>
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
 
 export default WorkflowMonitor;
+

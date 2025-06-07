@@ -138,12 +138,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUn
           </Tooltip>
         </Box>
         
-        <Button 
-          size="small" 
+        <Button
           variant="outlined"
+          size="small"
           onClick={(e) => {
             e.stopPropagation();
-            onClick();
+            if (onClick) {
+              onClick();
+            }
           }}
         >
           Manage
