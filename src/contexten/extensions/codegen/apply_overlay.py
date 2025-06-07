@@ -7,7 +7,7 @@ It modifies the installed package to add enhanced functionality while preserving
 the original API: from codegen.agents.agent import Agent
 
 Usage:
-    python extensions/codegen/apply_overlay.py
+    python src/contexten/extensions/codegen/apply_overlay.py
 
 This will:
 1. Detect the installed codegen package
