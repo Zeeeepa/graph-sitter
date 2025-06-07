@@ -30,16 +30,25 @@ import {
   Slider
 } from '@mui/material';
 import {
+  Security as SecurityIcon,
+  Notifications as NotificationsIcon,
   Settings as SettingsIcon,
+  Code as CodeIcon,
+  Speed as SpeedIcon,
+  Psychology as PsychologyIcon,
+  AutoFixHigh as AutoFixHighIcon,
+  Storage as StorageIcon,
+  Email as EmailIcon,
+  Chat as SlackIcon,
+  Webhook as WebhookIcon,
+  GitHub as GitHubIcon,
+  LinearScale as LinearIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
   Save as SaveIcon,
   Refresh as RefreshIcon,
-  Security as SecurityIcon,
-  Notifications as NotificationsIcon,
-  Integration as IntegrationIcon,
   Tune as TuneIcon
 } from '@mui/icons-material';
 
@@ -109,10 +118,12 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
     maxComplexity: 10,
     
     // Advanced Features
-    enableAIAssistance: true,
-    enablePredictiveAnalysis: false,
-    enableAutoOptimization: true,
-    dataRetentionDays: 90,
+    advanced: {
+      enable_ai_assistance: true,
+      enable_predictive_analysis: false,
+      enable_auto_optimization: true,
+      data_retention_days: 90
+    },
     
     // Custom Webhooks
     webhooks: [
@@ -184,12 +195,13 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
       </DialogTitle>
       
       <DialogContent dividers>
+        {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab icon={<SecurityIcon />} label="API Keys" />
             <Tab icon={<TuneIcon />} label="Workflow" />
             <Tab icon={<NotificationsIcon />} label="Notifications" />
-            <Tab icon={<IntegrationIcon />} label="Integrations" />
+            <Tab icon={<SettingsIcon />} label="Advanced" />
           </Tabs>
         </Box>
 
@@ -392,37 +404,19 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           </Grid>
         </TabPanel>
 
-        {/* Integrations Tab */}
+        {/* Code Tab */}
         <TabPanel value={tabValue} index={3}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>Advanced Features</Typography>
+              <Typography variant="h6" gutterBottom>Advanced Settings</Typography>
               <FormControlLabel
                 control={
                   <Switch
-                    checked={settings.enableAIAssistance}
-                    onChange={(e) => handleSettingChange('enableAIAssistance', e.target.checked)}
+                    checked={settings.advanced.enable_ai_assistance}
+                    onChange={(e) => handleSettingChange('advanced.enable_ai_assistance', e.target.checked)}
                   />
                 }
-                label="Enable AI-powered assistance"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={settings.enablePredictiveAnalysis}
-                    onChange={(e) => handleSettingChange('enablePredictiveAnalysis', e.target.checked)}
-                  />
-                }
-                label="Enable predictive analysis"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={settings.enableAutoOptimization}
-                    onChange={(e) => handleSettingChange('enableAutoOptimization', e.target.checked)}
-                  />
-                }
-                label="Enable automatic optimization"
+                label="Enable AI Assistance"
               />
             </Grid>
 
@@ -507,4 +501,3 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
     </Dialog>
   );
 };
-
