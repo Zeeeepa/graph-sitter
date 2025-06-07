@@ -14,7 +14,7 @@ import {
 import {
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
-  Settings as SettingsIcon,
+  PushPin as PinIcon,
   GitHub as GitHubIcon,
   Timeline as TimelineIcon
 } from '@mui/icons-material';
@@ -153,4 +153,3 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
 };
 
 export default ProjectCard;
-
