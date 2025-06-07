@@ -27,7 +27,7 @@ def main():
         
     except ImportError:
         print("   ❌ Overlay not applied yet")
-        print("   Run: python extensions/codegen/apply_overlay.py")
+        print("   Run: python src/contexten/extensions/codegen/apply_overlay.py")
         return
     
     # Step 2: Set up event handlers

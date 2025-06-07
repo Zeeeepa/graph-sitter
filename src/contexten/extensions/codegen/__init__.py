@@ -5,7 +5,7 @@ This package provides overlay functionality for enhancing pip-installed codegen 
 with contexten integration while preserving the original API.
 
 Usage:
-    python extensions/codegen/apply_overlay.py
+    python src/contexten/extensions/codegen/apply_overlay.py
 
 This will enhance the existing codegen package with:
 - Contexten ecosystem integration
@@ -23,4 +23,3 @@ __author__ = "Contexten Team"
 
 # This module provides overlay functionality for the codegen package
 # It does not replace the codegen package, but enhances it
-

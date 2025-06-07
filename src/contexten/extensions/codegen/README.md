@@ -32,7 +32,7 @@ pip install codegen
 ### Apply the Overlay
 
 ```bash
-python extensions/codegen/apply_overlay.py
+python src/contexten/extensions/codegen/apply_overlay.py
 ```
 
 This will:
@@ -41,6 +41,14 @@ This will:
 3. Create contexten extension modules
 4. Enhance the Agent class with new functionality
 5. Preserve all original functionality
+
+### Command Line Application
+
+You can also apply the overlay from the command line:
+
+```bash
+python src/contexten/extensions/codegen/apply_overlay.py
+```
 
 ### Usage After Overlay
 
@@ -324,4 +332,3 @@ When contributing to this overlay system:
 ## License
 
 This overlay system follows the same license as the contexten project.
-
