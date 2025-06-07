@@ -6,6 +6,7 @@ export interface Project {
   status: 'active' | 'completed' | 'paused' | 'error';
   progress: number;
   flowEnabled: boolean;
+  flowStatus?: FlowStatus;
   lastActivity: Date;
   requirements?: string;
   plan?: Plan;
@@ -18,7 +19,11 @@ export interface Plan {
   tasks: Task[];
   createdAt: Date;
   updatedAt: Date;
+  estimatedDuration?: string;
+  totalTasks?: number;
 }
+
+export type FlowStatus = 'stopped' | 'running' | 'paused' | 'error';
 
 export interface Task {
   id: string;
