@@ -9,11 +9,13 @@ import {
   FormControlLabel,
   Switch,
   Box,
-  Typography
+  Typography,
+  Tabs,
+  Tab,
+  Alert
 } from '@mui/material';
 import {
-  Save as SaveIcon,
-  Cancel as CancelIcon
+  Save as SaveIcon
 } from '@mui/icons-material';
 
 interface SettingsDialogProps {

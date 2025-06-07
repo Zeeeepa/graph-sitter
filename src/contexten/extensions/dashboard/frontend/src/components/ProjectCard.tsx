@@ -14,7 +14,6 @@ import {
 import {
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
-  PushPin as PinIcon,
   GitHub as GitHubIcon,
   Timeline as TimelineIcon
 } from '@mui/icons-material';
@@ -22,10 +21,12 @@ import { Project } from '../types/dashboard';
 
 interface ProjectCardProps {
   project: Project;
-  onClick: () => void;
+  onClick?: () => void;
+  onPin?: (projectId: string) => void;
+  onUnpin?: (projectId: string) => void;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUnpin }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
