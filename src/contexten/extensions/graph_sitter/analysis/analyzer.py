@@ -14,9 +14,11 @@ from .config.analysis_config import AnalysisConfig
 from .unified_analyzer import UnifiedAnalyzer, AnalysisResult as UnifiedAnalysisResult, CodebaseAnalysisResult
 from .core.tree_sitter_core import get_tree_sitter_core
 
-# Legacy imports for backward compatibility
-from .core.analysis_engine import AnalysisResult
-from .visualization.html_reporter import HTMLReporter
+# Visualization components (keep if they exist)
+try:
+    from .visualization.html_reporter import HTMLReporter
+except ImportError:
+    HTMLReporter = None
 
 
 class CodebaseAnalyzer:

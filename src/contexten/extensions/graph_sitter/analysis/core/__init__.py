@@ -1,8 +1,7 @@
 """
-Core Analysis Engine
+Core Analysis Components
 
-Provides the fundamental analysis capabilities for codebase examination.
-Consolidated from the original analysis modules.
+Provides the fundamental analysis capabilities for the unified tree-sitter system.
 """
 
 from .models import (
@@ -12,6 +11,9 @@ from .models import (
     EnhancedFunctionMetrics, EnhancedClassMetrics,
     create_default_analysis_options, merge_analysis_results
 )
+
+# Tree-sitter core components
+from .tree_sitter_core import TreeSitterCore, get_tree_sitter_core, ParseResult, QueryMatch
 
 from .analysis_engine import (
     calculate_cyclomatic_complexity, calculate_cyclomatic_complexity_graph_sitter,
@@ -56,9 +58,11 @@ __all__ = [
     "analyze_function_enhanced", "analyze_class_enhanced", "get_codebase_summary_enhanced",
     "generate_import_loop_recommendations", "generate_dead_code_recommendations",
     "generate_graph_insights", "generate_graph_recommendations",
+    
+    # Tree-sitter core components
+    "TreeSitterCore", "get_tree_sitter_core", "ParseResult", "QueryMatch",
 ]
 
 # Add CodebaseAnalyzer if available
 if CODEBASE_ANALYZER_AVAILABLE:
     __all__.append("CodebaseAnalyzer")
-
