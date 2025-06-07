@@ -66,8 +66,8 @@ try:
     from graph_sitter.core.import_resolution import Import
     from graph_sitter.core.symbol import Symbol
     from graph_sitter.enums import EdgeType, SymbolType
-    from graph_sitter.adapters.graph_sitter_enhancements import (
-    from graph_sitter.adapters.enhanced_analyzer import EnhancedCodebaseAnalyzer
+    from contexten.extensions.graph_sitter.graph_sitter_enhancements import (
+    from contexten.extensions.graph_sitter.enhanced_analyzer import EnhancedCodebaseAnalyzer
         detect_import_loops, analyze_graph_structure, detect_dead_code,
         generate_training_data, get_codebase_summary_enhanced,
         analyze_function_enhanced, analyze_class_enhanced,

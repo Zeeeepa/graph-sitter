@@ -6,7 +6,7 @@ Simple, powerful single-function interface for complete codebase analysis
 with interactive exploration capabilities.
 
 Usage:
-    from graph_sitter.adapters.code_analysis import analyze_codebase
+    from contexten.extensions.graph_sitter.code_analysis import analyze_codebase
     result = analyze_codebase("/path/to/code")
     print(f"Explore your code at: {result.interactive_url}")
 
@@ -217,7 +217,7 @@ def analyze_codebase(
         CodeAnalysisResult with interactive exploration capabilities
     
     Example:
-        >>> from graph_sitter.adapters.code_analysis import analyze_codebase
+        >>> from contexten.extensions.graph_sitter.code_analysis import analyze_codebase
         >>> result = analyze_codebase("/path/to/code")
         >>> print(result)
         >>> result.open_browser()  # Open interactive analysis
@@ -428,7 +428,7 @@ if __name__ == "__main__":
     import sys
     
     if len(sys.argv) < 2:
-        print("Usage: python -m graph_sitter.adapters.code_analysis <path>")
+        print("Usage: python -m contexten.extensions.graph_sitter.code_analysis <path>")
         sys.exit(1)
     
     path = sys.argv[1]
@@ -448,4 +448,3 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             print("\n🛑 Stopping server...")
             result.stop_server()
-
