@@ -1,459 +1,394 @@
-# Codegen Agent API Extension
+# Codegen Agent API Overlay Extension
 
-A comprehensive Codegen integration extension for the Contexten ecosystem that provides overlay functionality to work seamlessly with `pip install codegen` packages while maintaining fallback capabilities.
+A contexten extension that provides overlay functionality for the pip-installed `codegen` package, enhancing it with contexten ecosystem integration while preserving the original API.
+
+## Overview
+
+This extension applies an overlay to the existing `pip install codegen` package, adding contexten-specific functionality without changing the original API. Users can continue to use the standard codegen imports and methods while gaining enhanced features.
 
 ## Features
 
-- 🔄 **Overlay Functionality**: Automatically detects and uses `pip install codegen` packages with local fallback
-- 🤖 **Agent Interface**: Full-featured Agent class for programmatic interaction with Codegen SWE agents
-- 🎯 **CodebaseAI Interface**: Direct function call interface similar to codebase.ai
-- 🔗 **Contexten Integration**: Seamless integration with the broader contexten ecosystem
-- 📡 **Webhook Support**: Comprehensive webhook processing and event handling
-- 📊 **Monitoring**: Built-in metrics, health checks, and performance monitoring
-- ⚙️ **Configuration**: Flexible configuration management with multiple sources
-- 🛡️ **Error Handling**: Robust error handling with detailed exception types
+- 🔄 **API Preservation**: Maintains 100% compatibility with original codegen API
+- 🎯 **Overlay Architecture**: Enhances existing package without modification
+- 🔗 **Contexten Integration**: Seamless integration with contexten ecosystem
+- 📊 **Enhanced Monitoring**: Built-in metrics, health checks, and performance tracking
+- 📡 **Event System**: Comprehensive event handling and callbacks
+- 🛡️ **Error Handling**: Enhanced error reporting and debugging
+- ⚡ **Auto-Detection**: Automatically detects and validates codegen package
 
-## Quick Start
+## Installation & Usage
+
+### Prerequisites
+
+First, ensure you have the codegen package installed:
+
+```bash
+pip install codegen
+```
 
 ### Basic Usage
 
 ```python
-from contexten.extensions.codegen_agent_api import create_codegen_extension
+# Apply the overlay
+from contexten.extensions.codegen_agent_api import apply_codegen_overlay
+overlay = apply_codegen_overlay()
 
-# Create extension instance
-extension = create_codegen_extension(
-    org_id="your_org_id",
-    token="your_api_token"
+# Now use codegen normally - API unchanged!
+from codegen.agents.agent import Agent
+
+agent = Agent(
+    org_id="11",
+    token="your_api_token_here",
+    base_url="https://codegen-sh-rest-api.modal.run"
 )
 
-# Create an agent
-agent = extension.create_agent()
+# The agent now has enhanced contexten integration
+task = agent.run(prompt="Which github repos can you currently access?")
 
-# Run a task
-task = agent.run("Fix the bug in the login function")
-task.wait_for_completion()
-print(task.result)
+# Enhanced functionality available
+print(task.status)
+task.refresh()
+
+# New: Wait for completion with enhanced monitoring
+task.wait_for_completion(timeout=300)
+
+if task.status == "completed":
+    print(task.result)
 ```
 
-### Direct Agent Creation
+### Command Line Application
 
-```python
-from contexten.extensions.codegen_agent_api import create_agent_with_overlay
-
-# Create agent directly with overlay functionality
-agent = create_agent_with_overlay(
-    org_id="your_org_id",
-    token="your_api_token"
-)
-
-# Use the agent
-task = agent.run("Improve the performance of this function", context={"file": "app.py"})
-```
-
-### CodebaseAI Interface
-
-```python
-from contexten.extensions.codegen_agent_api import create_codebase_ai_with_overlay
-
-# Create CodebaseAI instance
-codebase_ai = create_codebase_ai_with_overlay(
-    org_id="your_org_id", 
-    token="your_api_token"
-)
-
-# Use direct function calls
-result = codebase_ai(
-    "Improve this function's implementation",
-    target={"source": "def slow_function(): ..."},
-    context={"performance": "critical"}
-)
-
-# Or use convenience methods
-improved_code = codebase_ai.improve_function(function_code)
-documentation = codebase_ai.generate_docs(class_code, doc_type="comprehensive")
-```
-
-## Overlay Functionality
-
-The extension automatically detects and uses `pip install codegen` packages while providing fallback to local implementations:
-
-### Overlay Strategies
-
-- **`pip_first`** (default): Use pip package if available, fallback to local
-- **`local_first`**: Use local implementation first, fallback to pip
-- **`pip_only`**: Only use pip package (fails if not available)
-- **`local_only`**: Only use local implementation
-
-### Configuration
-
-```python
-from contexten.extensions.codegen_agent_api import CodegenAgentAPIConfig
-
-config = CodegenAgentAPIConfig(
-    org_id="your_org_id",
-    token="your_api_token",
-    overlay_priority="pip_first",  # Overlay strategy
-    enable_overlay=True,           # Enable overlay functionality
-    fallback_to_local=True         # Allow fallback to local implementation
-)
-
-extension = CodegenAgentAPI(config)
-```
-
-### Environment Variables
+You can also apply the overlay from the command line:
 
 ```bash
-export CODEGEN_ORG_ID="your_org_id"
-export CODEGEN_TOKEN="your_api_token"
-export CODEGEN_OVERLAY_PRIORITY="pip_first"
-export CODEGEN_ENABLE_OVERLAY="true"
-export CODEGEN_FALLBACK_TO_LOCAL="true"
+python extensions/codegen_agent_api/apply.py
 ```
 
-## Configuration Management
+This will:
+1. Detect the installed codegen package
+2. Validate its structure
+3. Apply the contexten overlay
+4. Provide status information
 
-### Multiple Configuration Sources
+## Enhanced Features
 
-The extension supports configuration from multiple sources with priority order:
+### Event Handling
 
-1. Explicit parameters
-2. Configuration file
-3. Environment variables
-4. Default values
+Register event handlers to monitor codegen operations:
 
 ```python
-from contexten.extensions.codegen_agent_api import get_codegen_config
+from contexten.extensions.codegen_agent_api import register_event_handler
 
-# From environment variables
-config = get_codegen_config()
+def on_agent_created(data):
+    print(f"Agent created for org {data['org_id']}")
 
-# From file
-config = get_codegen_config(config_file="config.json")
+def on_task_status_changed(data):
+    print(f"Task {data['task_id']}: {data['old_status']} -> {data['new_status']}")
 
-# With explicit overrides
-config = get_codegen_config(
-    config_file="config.json",
-    org_id="override_org_id",
-    timeout=60
-)
+def on_task_finished(data):
+    print(f"Task {data['task_id']} finished in {data['duration']:.2f}s")
+
+# Register event handlers
+register_event_handler("agent_created", on_agent_created)
+register_event_handler("task_status_changed", on_task_status_changed)
+register_event_handler("task_finished", on_task_finished)
+
+# Now use codegen normally - events will be emitted
+agent = Agent(org_id="11", token="your_token")
+task = agent.run("Your prompt here")
 ```
 
-### Configuration File
+### Available Events
 
-Create a configuration template:
+- `agent_created`: When a new agent is created
+- `task_starting`: Before a task starts running
+- `task_created`: When a new task is created
+- `task_status_changed`: When task status changes
+- `task_finished`: When a task completes (success/failure)
+- `task_timeout`: When a task times out
+- `task_error`: When a task encounters an error
+- `overlay_applied`: When the overlay is successfully applied
+
+### Enhanced Agent Methods
+
+The overlay adds new methods to agents while preserving all original functionality:
 
 ```python
-from contexten.extensions.codegen_agent_api import create_config_template
+# Original methods work unchanged
+agent = Agent(org_id="11", token="your_token")
+task = agent.run("Your prompt")
+status = agent.get_status()
 
-create_config_template("codegen_config.json")
+# New enhanced methods
+metrics = agent.get_integration_metrics()
+print(f"Agents created: {metrics['agents_created']}")
+print(f"Tasks run: {metrics['tasks_run']}")
+print(f"Uptime: {metrics['uptime_seconds']:.2f}s")
+
+# Add task callbacks
+def on_status_change(old_status, new_status):
+    print(f"Status changed: {old_status} -> {new_status}")
+
+agent.add_task_callback(on_status_change)
 ```
 
-Example configuration file:
+### Enhanced Task Methods
 
-```json
-{
-  "org_id": "your_org_id",
-  "token": "your_api_token",
-  "base_url": "https://api.codegen.com",
-  "timeout": 30,
-  "max_retries": 3,
-  "enable_overlay": true,
-  "overlay_priority": "pip_first",
-  "enable_logging": true,
-  "enable_metrics": true
-}
-```
-
-## Webhook Integration
-
-### Setting Up Webhooks
+Tasks also gain new functionality:
 
 ```python
-from contexten.extensions.codegen_agent_api import WebhookProcessor, WebhookEventType
+task = agent.run("Your prompt")
 
-# Create webhook processor
-webhook_processor = WebhookProcessor(secret="your_webhook_secret")
+# Original methods work unchanged
+task.refresh()
+print(task.status)
+print(task.result)
 
-# Register handlers
-def handle_task_completion(event):
-    print(f"Task {event.task_id} completed: {event.data}")
+# New enhanced methods
+task.wait_for_completion(timeout=300, poll_interval=5)
 
-webhook_processor.register_handler(
-    WebhookEventType.TASK_COMPLETED,
-    handle_task_completion
-)
+# Add status change callbacks
+def on_status_change(old_status, new_status):
+    print(f"Task status: {old_status} -> {new_status}")
 
-# Process incoming webhook
-result = webhook_processor.process_webhook(payload, signature)
+task.add_status_callback(on_status_change)
 ```
 
-### Flask Integration
+### Metrics and Monitoring
+
+Get comprehensive metrics about overlay usage:
 
 ```python
-from flask import Flask
-from contexten.extensions.codegen_agent_api import WebhookProcessor
+from contexten.extensions.codegen_agent_api import get_overlay_metrics
 
-app = Flask(__name__)
-webhook_processor = WebhookProcessor(secret="your_secret")
-
-# Create webhook endpoint
-webhook_processor.create_flask_endpoint(app, "/webhooks/codegen")
-
-if __name__ == "__main__":
-    app.run()
+metrics = get_overlay_metrics()
+print(f"Overlay applied: {metrics['applied']}")
+print(f"Package version: {metrics['package_info']['version']}")
+print(f"Agents created: {metrics['integration_metrics']['agents_created']}")
+print(f"Tasks run: {metrics['integration_metrics']['tasks_run']}")
+print(f"Errors: {metrics['integration_metrics']['errors']}")
 ```
 
-### Convenience Handlers
+## Architecture
 
-```python
-from contexten.extensions.codegen_agent_api import (
-    create_task_completion_handler,
-    create_task_failure_handler,
-    create_progress_handler
-)
+### Overlay Pattern
 
-# Create handlers
-completion_handler = create_task_completion_handler(
-    lambda task_id, result: print(f"Task {task_id} completed: {result}")
-)
+The extension uses a non-invasive overlay pattern:
 
-failure_handler = create_task_failure_handler(
-    lambda task_id, error: print(f"Task {task_id} failed: {error}")
-)
+1. **Detection**: Automatically detects the installed codegen package
+2. **Validation**: Ensures the package has the expected structure
+3. **Wrapping**: Wraps the original classes with enhanced versions
+4. **Replacement**: Replaces the original classes in the module namespace
+5. **Preservation**: All original functionality remains unchanged
 
-progress_handler = create_progress_handler(
-    lambda task_id, progress: print(f"Task {task_id} progress: {progress['percentage']}%")
-)
+### Class Hierarchy
 
-# Register handlers
-webhook_processor.register_handler(WebhookEventType.TASK_COMPLETED, completion_handler)
-webhook_processor.register_handler(WebhookEventType.TASK_FAILED, failure_handler)
-webhook_processor.register_handler(WebhookEventType.TASK_PROGRESS, progress_handler)
+```
+Original codegen.agents.agent.Agent
+    ↓ (wrapped by)
+EnhancedAgentWrapper
+    ↓ (creates)
+EnhancedAgent
+    ↓ (delegates to original + adds features)
+
+Original codegen.agents.task.AgentTask  
+    ↓ (wrapped by)
+EnhancedAgentTask
+    ↓ (delegates to original + adds features)
 ```
 
-## Monitoring and Metrics
+### Integration Flow
 
-### Health Checks
-
-```python
-# Perform comprehensive health check
-health = extension.health_check()
-print(f"Overall status: {health['overall']}")
-
-# Check specific components
-for component, status in health['components'].items():
-    print(f"{component}: {status['status']}")
 ```
+User Code:
+from codegen.agents.agent import Agent  # Gets EnhancedAgentWrapper
+agent = Agent(...)                      # Creates EnhancedAgent
+task = agent.run(...)                   # Creates EnhancedAgentTask
 
-### Metrics Collection
-
-```python
-# Get comprehensive metrics
-metrics = extension.get_metrics()
-
-print(f"Extension uptime: {metrics['uptime_seconds']} seconds")
-print(f"Overlay strategy: {metrics['overlay_info']['strategy']}")
-print(f"Active implementation: {metrics['overlay_info']['active_implementation']}")
-
-# Get overlay-specific metrics
-overlay_metrics = extension.overlay_client.get_metrics()
-print(f"Pip calls: {overlay_metrics['pip_calls']}")
-print(f"Local calls: {overlay_metrics['local_calls']}")
-print(f"Fallback count: {overlay_metrics['fallback_count']}")
-```
-
-### Testing Implementations
-
-```python
-# Test both pip and local implementations
-test_results = extension.test_implementations()
-
-for impl, result in test_results.items():
-    if result['available']:
-        print(f"{impl} implementation: Available")
-    else:
-        print(f"{impl} implementation: Error - {result['error']}")
-```
-
-## Advanced Usage
-
-### Custom Integration Agent
-
-```python
-from contexten.extensions.codegen_agent_api import create_integration_agent
-
-# Create integration agent
-integration_agent = create_integration_agent(config)
-
-# Register custom event handlers
-def handle_agent_created(event):
-    print(f"Agent created with strategy: {event['data']['overlay_strategy']}")
-
-integration_agent.register_event_handler("agent_created", handle_agent_created)
-
-# Create agents through integration agent
-agent = integration_agent.create_agent()
-```
-
-### Global CodebaseAI Instance
-
-```python
-from contexten.extensions.codegen_agent_api import (
-    initialize_codebase_ai,
-    codebase_ai,
-    improve_function,
-    analyze_codebase
-)
-
-# Initialize global instance
-initialize_codebase_ai(org_id="your_org_id", token="your_api_token")
-
-# Use global functions anywhere in your code
-result = codebase_ai("Explain this code", target=code_snippet)
-improved = improve_function(function_code)
-analysis = analyze_codebase(codebase_info)
-```
-
-### Context Manager Usage
-
-```python
-# Use extension as context manager
-with create_codegen_extension(org_id="your_org_id", token="your_api_token") as extension:
-    agent = extension.create_agent()
-    task = agent.run("Analyze this codebase")
-    task.wait_for_completion()
-    print(task.result)
-# Extension automatically shuts down
+Enhanced Features:
+- Event emission
+- Metrics tracking  
+- Callback support
+- Enhanced monitoring
+- Contexten integration
 ```
 
 ## Error Handling
 
-The extension provides comprehensive error handling with specific exception types:
+The overlay includes comprehensive error handling:
 
 ```python
-from contexten.extensions.codegen_agent_api import (
-    CodegenError,
-    AuthenticationError,
-    OverlayError,
-    PipPackageNotFoundError,
-    ConfigurationError
-)
+from contexten.extensions.codegen_agent_api import CodegenOverlayError
 
 try:
-    agent = create_agent_with_overlay(org_id="invalid", token="invalid")
-except AuthenticationError as e:
-    print(f"Authentication failed: {e}")
-except OverlayError as e:
-    print(f"Overlay error: {e}")
-    print(f"Overlay info: {e.details.get('overlay_info', {})}")
-except ConfigurationError as e:
-    print(f"Configuration error: {e}")
-    print(f"Config key: {e.config_key}")
-except CodegenError as e:
-    print(f"General Codegen error: {e}")
-    print(f"Error code: {e.error_code}")
-    print(f"Details: {e.details}")
+    overlay = apply_codegen_overlay()
+except CodegenOverlayError as e:
+    print(f"Overlay failed: {e}")
+    # Handle missing or invalid codegen package
 ```
 
-## API Reference
+Common error scenarios:
+- **Package Not Found**: `pip install codegen` not run
+- **Invalid Structure**: Codegen package missing expected modules
+- **Version Incompatibility**: Codegen package structure changed
 
-### Main Classes
+## Advanced Usage
 
-- **`CodegenAgentAPI`**: Main extension class
-- **`Agent`**: Enhanced agent for API interaction
-- **`Task`**: Task representation with monitoring
-- **`CodebaseAI`**: Direct function call interface
-- **`OverlayClient`**: Handles pip/local overlay functionality
-- **`WebhookProcessor`**: Processes incoming webhooks
-- **`CodegenIntegrationAgent`**: Contexten ecosystem integration
-
-### Configuration
-
-- **`CodegenAgentAPIConfig`**: Configuration dataclass
-- **`get_codegen_config()`**: Get configuration from multiple sources
-- **`create_config_template()`**: Create configuration file template
-- **`detect_pip_codegen()`**: Detect pip-installed codegen package
-
-### Factory Functions
-
-- **`create_codegen_extension()`**: Create main extension instance
-- **`create_agent_with_overlay()`**: Create agent with overlay functionality
-- **`create_codebase_ai_with_overlay()`**: Create CodebaseAI with overlay functionality
-
-### Types and Enums
-
-- **`TaskStatus`**: Task status enumeration
-- **`TaskPriority`**: Task priority levels
-- **`OverlayStrategy`**: Overlay strategy options
-- **`WebhookEventType`**: Webhook event types
-
-## Integration with Contexten
-
-This extension follows the established contexten extension patterns:
-
-- Standard directory structure and naming conventions
-- Consistent configuration management
-- Integration with contexten event system
-- Comprehensive error handling and logging
-- Metrics and monitoring capabilities
-
-### Extension Metadata
+### Manual Overlay Control
 
 ```python
-from contexten.extensions.codegen_agent_api import get_extension_info
+from contexten.extensions.codegen_agent_api import CodegenOverlayApplicator
 
-info = get_extension_info()
-print(f"Extension: {info['name']} v{info['version']}")
-print(f"Overlay support: {info['overlay_support']}")
-print(f"Pip package: {info['pip_package']}")
+# Create overlay applicator
+applicator = CodegenOverlayApplicator()
+
+# Manual detection and validation
+applicator.detect_and_validate()
+
+# Get package info
+package_info = applicator.package_info
+print(f"Codegen version: {package_info['version']}")
+
+# Apply overlay
+applicator.apply_overlay()
+
+# Get integration instance
+integration = applicator.get_integration()
+
+# Register custom event handlers
+integration.register_event_handler("custom_event", my_handler)
+```
+
+### Custom Event Handlers
+
+```python
+def comprehensive_task_monitor(data):
+    """Comprehensive task monitoring handler."""
+    event_type = data.get('event_type', 'unknown')
+    
+    if event_type == 'task_created':
+        print(f"📝 New task: {data['task_id']}")
+    elif event_type == 'task_status_changed':
+        print(f"🔄 Task {data['task_id']}: {data['old_status']} → {data['new_status']}")
+    elif event_type == 'task_finished':
+        duration = data['duration']
+        print(f"✅ Task {data['task_id']} completed in {duration:.2f}s")
+    elif event_type == 'task_error':
+        print(f"❌ Task error: {data['error']}")
+
+# Register for multiple events
+events = ['task_created', 'task_status_changed', 'task_finished', 'task_error']
+for event in events:
+    register_event_handler(event, comprehensive_task_monitor)
+```
+
+### Integration with Contexten Ecosystem
+
+```python
+# Example: Integration with other contexten extensions
+from contexten.extensions.codegen_agent_api import apply_codegen_overlay
+
+# Apply overlay
+overlay = apply_codegen_overlay()
+integration = overlay.get_integration()
+
+# Connect to other contexten components
+def forward_to_contexten_events(data):
+    # Forward codegen events to broader contexten event system
+    contexten_event_bus.emit('codegen_event', data)
+
+integration.register_event_handler('*', forward_to_contexten_events)
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Pip package not found**: Ensure `pip install codegen` is run in the same environment
-2. **Authentication errors**: Verify org_id and token are correct
-3. **Overlay failures**: Check overlay strategy and fallback settings
-4. **Webhook signature failures**: Verify webhook secret matches
+1. **"Codegen package not found"**
+   ```bash
+   pip install codegen
+   ```
+
+2. **"Package structure invalid"**
+   - Ensure you have the latest codegen version
+   - Check that `from codegen.agents.agent import Agent` works
+
+3. **"Overlay already applied"**
+   - This is normal - overlay can only be applied once per session
+   - Restart Python session to reapply
 
 ### Debug Information
 
 ```python
-# Get overlay status
-from contexten.extensions.codegen_agent_api import get_overlay_status
+from contexten.extensions.codegen_agent_api import get_overlay_instance
 
-status = get_overlay_status()
-print(f"Pip available: {status['pip_available']}")
-if status['pip_info']:
-    print(f"Pip version: {status['pip_info']['version']}")
-
-# Enable debug logging
-import logging
-logging.basicConfig(level=logging.DEBUG)
+overlay = get_overlay_instance()
+if overlay:
+    status = overlay.get_status()
+    print("Overlay Status:")
+    print(f"  Applied: {status['applied']}")
+    print(f"  Package Version: {status['package_info']['version']}")
+    print(f"  Package Location: {status['package_info']['location']}")
+    print(f"  Metrics: {status['integration_metrics']}")
+else:
+    print("Overlay not applied")
 ```
 
-### Health Checks
+### Logging
+
+Enable debug logging to see overlay operations:
 
 ```python
-# Comprehensive health check
-health = extension.health_check()
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
-if health['overall'] != 'healthy':
-    print("Extension health issues detected:")
-    for component, info in health['components'].items():
-        if info.get('status') != 'healthy':
-            print(f"  {component}: {info.get('status')} - {info.get('error', 'No details')}")
+# Now apply overlay with debug output
+from contexten.extensions.codegen_agent_api import apply_codegen_overlay
+overlay = apply_codegen_overlay()
 ```
+
+## API Reference
+
+### Main Functions
+
+- `apply_codegen_overlay()` - Apply the overlay to codegen package
+- `get_overlay_instance()` - Get current overlay instance
+- `register_event_handler(event_type, handler)` - Register event handler
+- `get_overlay_metrics()` - Get overlay metrics and status
+
+### Classes
+
+- `CodegenOverlayApplicator` - Main overlay application class
+- `ContextenIntegration` - Contexten ecosystem integration
+- `EnhancedAgent` - Enhanced agent wrapper
+- `EnhancedAgentTask` - Enhanced task wrapper
+
+### Events
+
+- `agent_created` - New agent created
+- `task_starting` - Task about to start
+- `task_created` - New task created
+- `task_status_changed` - Task status changed
+- `task_finished` - Task completed
+- `task_timeout` - Task timed out
+- `task_error` - Task error occurred
+- `overlay_applied` - Overlay successfully applied
+
+## Compatibility
+
+- **Python**: 3.7+
+- **Codegen Package**: Latest version from `pip install codegen`
+- **Contexten**: 1.0.0+
 
 ## Contributing
 
-This extension is part of the contexten ecosystem. For contributions:
+This extension follows contexten development guidelines:
 
-1. Follow contexten extension development guidelines
-2. Ensure compatibility with both pip and local implementations
-3. Add comprehensive tests for overlay functionality
-4. Update documentation for new features
+1. Preserve original API compatibility
+2. Use non-invasive overlay patterns
+3. Provide comprehensive error handling
+4. Include thorough documentation
+5. Add comprehensive event coverage
 
 ## License
 
