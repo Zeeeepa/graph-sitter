@@ -84,18 +84,18 @@ export const useWebSocket = () => {
           switch (event_type) {
             case 'pull_request':
               if (data.action === 'opened') {
-                toast.success(`New PR opened: ${data.pull_request?.title}`);
+                toast(`New PR opened: ${data.pull_request?.title}`, { icon: 'ℹ️' });
               } else if (data.action === 'merged') {
-                toast.success(`PR merged: ${data.pull_request?.title}`);
+                toast(`PR merged: ${data.pull_request?.title}`, { icon: '✅' });
               }
               break;
             case 'issues':
               if (data.action === 'opened') {
-                toast.info(`New issue: ${data.issue?.title}`);
+                toast(`New issue: ${data.issue?.title}`, { icon: 'ℹ️' });
               }
               break;
             case 'push':
-              toast.info(`New commits pushed to ${data.ref}`);
+              toast(`New commits pushed to ${data.ref}`, { icon: 'ℹ️' });
               break;
           }
         });
@@ -106,7 +106,7 @@ export const useWebSocket = () => {
           const { event_type, data } = message;
           
           if (event_type === 'issue_updated') {
-            toast.info(`Linear issue updated: ${data.title}`);
+            toast(`Linear issue updated: ${data.title}`, { icon: 'ℹ️' });
           }
         });
 
@@ -128,9 +128,9 @@ export const useWebSocket = () => {
           const { pr_data } = message;
           
           if (pr_data.status === 'merged') {
-            toast.success(`PR merged: ${pr_data.title}`);
+            toast(`PR merged: ${pr_data.title}`, { icon: '✅' });
           } else if (pr_data.status === 'closed') {
-            toast.info(`PR closed: ${pr_data.title}`);
+            toast(`PR closed: ${pr_data.title}`, { icon: 'ℹ️' });
           }
         });
 
@@ -199,4 +199,3 @@ export const useWebSocket = () => {
     getStatus,
   };
 };
-

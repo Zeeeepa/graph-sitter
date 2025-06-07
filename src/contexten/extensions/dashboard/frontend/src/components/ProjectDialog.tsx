@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
+  CheckCircle as CheckIcon,
   Schedule as ScheduleIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
