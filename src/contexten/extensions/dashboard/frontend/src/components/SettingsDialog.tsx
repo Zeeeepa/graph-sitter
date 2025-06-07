@@ -1,475 +1,229 @@
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Box,
-  Typography,
-  Divider,
-  IconButton,
-  InputAdornment,
-  Alert,
-  Tabs,
-  Tab,
-  Switch,
-  FormControlLabel,
-  FormGroup,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-  Save as SaveIcon,
-} from '@mui/icons-material';
-import { useForm, Controller } from 'react-hook-form';
-import toast from 'react-hot-toast';
-
-import { dashboardApi } from '../services/api';
-import { EnvironmentVariables, SettingsUpdateRequest } from '../types';
+import React, { useState, useEffect } from 'react';
 
 interface SettingsDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
+  onSave: (settings: EnvironmentSettings) => void;
 }
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+export interface EnvironmentSettings {
+  github_token: string;
+  linear_api_key: string;
+  slack_bot_token: string;
+  codegen_org_id: string;
+  codegen_token: string;
+  postgresql_url: string;
+  circleci_token: string;
 }
 
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other }) => {
+export const SettingsDialog: React.FC<SettingsDialogProps> = ({
+  isOpen,
+  onClose,
+  onSave
+}) => {
+  const [settings, setSettings] = useState<EnvironmentSettings>({
+    github_token: '',
+    linear_api_key: '',
+    slack_bot_token: '',
+    codegen_org_id: '',
+    codegen_token: '',
+    postgresql_url: '',
+    circleci_token: ''
+  });
+
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResults, setValidationResults] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      // Load current settings
+      loadCurrentSettings();
+    }
+  }, [isOpen]);
+
+  const loadCurrentSettings = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const currentSettings = await response.json();
+        setSettings(currentSettings);
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
+  };
+
+  const validateSettings = async () => {
+    setIsValidating(true);
+    const results: Record<string, boolean> = {};
+
+    try {
+      const response = await fetch('/api/settings/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+
+      if (response.ok) {
+        const validation = await response.json();
+        Object.assign(results, validation);
+      }
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
+
+    setValidationResults(results);
+    setIsValidating(false);
+  };
+
+  const handleSave = async () => {
+    await validateSettings();
+    
+    // Check if all validations passed
+    const allValid = Object.values(validationResults).every(valid => valid);
+    
+    if (allValid) {
+      onSave(settings);
+      onClose();
+    }
+  };
+
+  const settingsFields = [
+    {
+      key: 'github_token' as keyof EnvironmentSettings,
+      label: 'GitHub Token',
+      description: 'Personal access token for GitHub API access',
+      placeholder: 'ghp_...',
+      type: 'password'
+    },
+    {
+      key: 'linear_api_key' as keyof EnvironmentSettings,
+      label: 'Linear API Key',
+      description: 'API key for Linear integration',
+      placeholder: 'lin_api_...',
+      type: 'password'
+    },
+    {
+      key: 'slack_bot_token' as keyof EnvironmentSettings,
+      label: 'Slack Bot Token',
+      description: 'Bot token for Slack integration',
+      placeholder: 'xoxb-...',
+      type: 'password'
+    },
+    {
+      key: 'codegen_org_id' as keyof EnvironmentSettings,
+      label: 'Codegen Organization ID',
+      description: 'Your Codegen organization identifier',
+      placeholder: 'org_...',
+      type: 'text'
+    },
+    {
+      key: 'codegen_token' as keyof EnvironmentSettings,
+      label: 'Codegen API Token',
+      description: 'API token for Codegen SDK access',
+      placeholder: 'cg_...',
+      type: 'password'
+    },
+    {
+      key: 'postgresql_url' as keyof EnvironmentSettings,
+      label: 'PostgreSQL URL',
+      description: 'Database connection string',
+      placeholder: 'postgresql://user:pass@host:port/db',
+      type: 'password'
+    },
+    {
+      key: 'circleci_token' as keyof EnvironmentSettings,
+      label: 'CircleCI Token',
+      description: 'API token for CircleCI integration',
+      placeholder: 'circle_...',
+      type: 'password'
+    }
+  ];
+
+  if (!isOpen) return null;
+
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`settings-tabpanel-${index}`}
-      aria-labelledby={`settings-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Environment Settings</h2>
+            <p className="text-sm text-gray-600">Configure API keys and environment variables</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[70vh]">
+          <div className="space-y-6">
+            {settingsFields.map((field) => (
+              <div key={field.key}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {field.label}
+                </label>
+                <p className="text-xs text-gray-500 mb-2">{field.description}</p>
+                <div className="relative">
+                  <input
+                    type={field.type}
+                    value={settings[field.key]}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      [field.key]: e.target.value
+                    }))}
+                    placeholder={field.placeholder}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      validationResults[field.key] === false 
+                        ? 'border-red-300 bg-red-50' 
+                        : validationResults[field.key] === true
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-gray-300'
+                    }`}
+                  />
+                  {validationResults[field.key] === true && (
+                    <div className="absolute right-3 top-2 text-green-500">✓</div>
+                  )}
+                  {validationResults[field.key] === false && (
+                    <div className="absolute right-3 top-2 text-red-500">✗</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center p-6 border-t border-gray-200">
+          <button
+            onClick={validateSettings}
+            disabled={isValidating}
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 disabled:bg-gray-400"
+          >
+            {isValidating ? 'Validating...' : 'Validate Settings'}
+          </button>
+          
+          <div className="flex space-x-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+              Save Settings
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
-
-const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
-  const [tabValue, setTabValue] = useState(0);
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
-  const [saving, setSaving] = useState(false);
-
-  const envForm = useForm<EnvironmentVariables>({
-    defaultValues: {
-      github_token: '',
-      linear_api_key: '',
-      slack_token: '',
-      codegen_org_id: '',
-      codegen_token: '',
-      postgresql_url: '',
-    },
-  });
-
-  const projectForm = useForm<SettingsUpdateRequest>({
-    defaultValues: {
-      github_enabled: true,
-      linear_enabled: true,
-      slack_enabled: true,
-      codegen_enabled: true,
-      auto_pr_creation: true,
-      auto_issue_creation: true,
-      quality_gates_enabled: true,
-    },
-  });
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  const togglePasswordVisibility = (field: string) => {
-    setShowPasswords(prev => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
-
-  const handleSaveEnvironment = async (data: EnvironmentVariables) => {
-    setSaving(true);
-    try {
-      await dashboardApi.updateEnvironmentVariables(data);
-      toast.success('Environment variables updated successfully');
-    } catch (error) {
-      toast.error('Failed to update environment variables');
-      console.error('Environment update error:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveProjectSettings = async (data: SettingsUpdateRequest) => {
-    setSaving(true);
-    try {
-      // TODO: Implement project-specific settings update
-      // For now, we'll just show a success message
-      toast.success('Project settings updated successfully');
-    } catch (error) {
-      toast.error('Failed to update project settings');
-      console.error('Project settings update error:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleClose = () => {
-    envForm.reset();
-    projectForm.reset();
-    setTabValue(0);
-    onClose();
-  };
-
-  return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: { minHeight: '70vh' }
-      }}
-    >
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Dashboard Settings</Typography>
-        <IconButton onClick={handleClose} size="small">
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
-          <Tab label="Environment Variables" />
-          <Tab label="Project Settings" />
-          <Tab label="Notifications" />
-        </Tabs>
-      </Box>
-
-      <DialogContent sx={{ p: 0 }}>
-        {/* Environment Variables Tab */}
-        <TabPanel value={tabValue} index={0}>
-          <Box sx={{ px: 3 }}>
-            <Alert severity="info" sx={{ mb: 3 }}>
-              Configure API keys and tokens for external service integrations.
-              These are stored securely and used for automated workflows.
-            </Alert>
-
-            <form onSubmit={envForm.handleSubmit(handleSaveEnvironment)}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {/* GitHub Token */}
-                <Controller
-                  name="github_token"
-                  control={envForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="GitHub Access Token"
-                      type={showPasswords.github_token ? 'text' : 'password'}
-                      fullWidth
-                      placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                      helperText="Personal access token for GitHub API access"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => togglePasswordVisibility('github_token')}
-                              edge="end"
-                            >
-                              {showPasswords.github_token ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-
-                {/* Linear API Key */}
-                <Controller
-                  name="linear_api_key"
-                  control={envForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Linear API Key"
-                      type={showPasswords.linear_api_key ? 'text' : 'password'}
-                      fullWidth
-                      placeholder="lin_api_xxxxxxxxxxxxxxxxxxxx"
-                      helperText="API key for Linear issue management"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => togglePasswordVisibility('linear_api_key')}
-                              edge="end"
-                            >
-                              {showPasswords.linear_api_key ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-
-                {/* Slack Token */}
-                <Controller
-                  name="slack_token"
-                  control={envForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Slack Bot Token"
-                      type={showPasswords.slack_token ? 'text' : 'password'}
-                      fullWidth
-                      placeholder="xoxb-xxxxxxxxxxxxxxxxxxxx"
-                      helperText="Bot token for Slack notifications"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => togglePasswordVisibility('slack_token')}
-                              edge="end"
-                            >
-                              {showPasswords.slack_token ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-
-                <Divider />
-
-                {/* Codegen Settings */}
-                <Typography variant="h6" color="primary">
-                  Codegen SDK Configuration
-                </Typography>
-
-                <Controller
-                  name="codegen_org_id"
-                  control={envForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Codegen Organization ID"
-                      fullWidth
-                      placeholder="org_xxxxxxxxxxxxxxxxxxxx"
-                      helperText="Your Codegen organization identifier"
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="codegen_token"
-                  control={envForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Codegen API Token"
-                      type={showPasswords.codegen_token ? 'text' : 'password'}
-                      fullWidth
-                      placeholder="cg_xxxxxxxxxxxxxxxxxxxx"
-                      helperText="API token for Codegen SDK access"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => togglePasswordVisibility('codegen_token')}
-                              edge="end"
-                            >
-                              {showPasswords.codegen_token ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-
-                <Divider />
-
-                {/* Database Settings */}
-                <Typography variant="h6" color="primary">
-                  Database Configuration
-                </Typography>
-
-                <Controller
-                  name="postgresql_url"
-                  control={envForm.control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="PostgreSQL Connection URL"
-                      type={showPasswords.postgresql_url ? 'text' : 'password'}
-                      fullWidth
-                      placeholder="postgresql://user:password@localhost:5432/database"
-                      helperText="PostgreSQL database connection string"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => togglePasswordVisibility('postgresql_url')}
-                              edge="end"
-                            >
-                              {showPasswords.postgresql_url ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </Box>
-            </form>
-          </Box>
-        </TabPanel>
-
-        {/* Project Settings Tab */}
-        <TabPanel value={tabValue} index={1}>
-          <Box sx={{ px: 3 }}>
-            <Alert severity="info" sx={{ mb: 3 }}>
-              Configure default settings for new projects and workflow automation.
-            </Alert>
-
-            <form onSubmit={projectForm.handleSubmit(handleSaveProjectSettings)}>
-              <FormGroup>
-                <Typography variant="h6" gutterBottom>
-                  Service Integrations
-                </Typography>
-                
-                <Controller
-                  name="github_enabled"
-                  control={projectForm.control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch {...field} checked={field.value} />}
-                      label="Enable GitHub Integration"
-                    />
-                  )}
-                />
-                
-                <Controller
-                  name="linear_enabled"
-                  control={projectForm.control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch {...field} checked={field.value} />}
-                      label="Enable Linear Integration"
-                    />
-                  )}
-                />
-                
-                <Controller
-                  name="slack_enabled"
-                  control={projectForm.control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch {...field} checked={field.value} />}
-                      label="Enable Slack Notifications"
-                    />
-                  )}
-                />
-                
-                <Controller
-                  name="codegen_enabled"
-                  control={projectForm.control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch {...field} checked={field.value} />}
-                      label="Enable Codegen SDK"
-                    />
-                  )}
-                />
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  Automation Settings
-                </Typography>
-                
-                <Controller
-                  name="auto_pr_creation"
-                  control={projectForm.control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch {...field} checked={field.value} />}
-                      label="Automatic PR Creation"
-                    />
-                  )}
-                />
-                
-                <Controller
-                  name="auto_issue_creation"
-                  control={projectForm.control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch {...field} checked={field.value} />}
-                      label="Automatic Issue Creation"
-                    />
-                  )}
-                />
-                
-                <Controller
-                  name="quality_gates_enabled"
-                  control={projectForm.control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch {...field} checked={field.value} />}
-                      label="Enable Quality Gates"
-                    />
-                  )}
-                />
-              </FormGroup>
-            </form>
-          </Box>
-        </TabPanel>
-
-        {/* Notifications Tab */}
-        <TabPanel value={tabValue} index={2}>
-          <Box sx={{ px: 3 }}>
-            <Alert severity="info" sx={{ mb: 3 }}>
-              Configure notification preferences for workflow events and updates.
-            </Alert>
-            
-            <Typography variant="body1" color="text.secondary">
-              Notification settings will be available in a future update.
-            </Typography>
-          </Box>
-        </TabPanel>
-      </DialogContent>
-
-      <DialogActions sx={{ p: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Button onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<SaveIcon />}
-          disabled={saving}
-          onClick={() => {
-            if (tabValue === 0) {
-              envForm.handleSubmit(handleSaveEnvironment)();
-            } else if (tabValue === 1) {
-              projectForm.handleSubmit(handleSaveProjectSettings)();
-            }
-          }}
-        >
-          {saving ? 'Saving...' : 'Save Settings'}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-export default SettingsDialog;
 

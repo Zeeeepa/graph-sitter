@@ -29,13 +29,13 @@ from .workflow_automation import WorkflowAutomation
 from .integration_agent import CircleCIIntegrationAgent
 from .failure_analyzer import FailureAnalyzer
 from .auto_fix_generator import AutoFixGenerator
+from .circleci import CircleCI
 
 __version__ = "1.0.0"
 __author__ = "Contexten Team"
 
 __all__ = [
-    # Core components
-    "CircleCIIntegrationAgent",
+    "CircleCI",  # Add main integration class
     "CircleCIIntegrationConfig",
     
     # API and processing
@@ -55,4 +55,3 @@ __all__ = [
     "FailureAnalysis",
     "CircleCIIntegrationMetrics",
 ]
-

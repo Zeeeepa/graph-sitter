@@ -1,237 +1,94 @@
 import React, { useState } from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  Menu,
-  MenuItem,
-  Chip,
-  IconButton,
-  Badge,
-} from '@mui/material';
-import {
-  Settings as SettingsIcon,
-  PushPin as PinIcon,
-  Notifications as NotificationsIcon,
-  GitHub as GitHubIcon,
-} from '@mui/icons-material';
-import { useQuery } from 'react-query';
+import { Project } from '../types/dashboard';
 
-import { useDashboardStore } from '../store/dashboardStore';
-import { dashboardApi } from '../services/api';
-import ProjectSelectionDialog from './ProjectSelectionDialog';
+interface TopBarProps {
+  availableProjects: Project[];
+  onPinProject: (project: Project) => void;
+  onOpenSettings: () => void;
+}
 
-const TopBar: React.FC = () => {
-  const { setSettingsOpen, user } = useDashboardStore();
-  const [projectMenuAnchor, setProjectMenuAnchor] = useState<null | HTMLElement>(null);
-  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
-  const [notificationMenuAnchor, setNotificationMenuAnchor] = useState<null | HTMLElement>(null);
-
-  // Fetch GitHub repositories
-  const { data: repositories = [] } = useQuery(
-    'github-repositories',
-    dashboardApi.getGitHubRepositories,
-    {
-      enabled: true,
-      staleTime: 10 * 60 * 1000, // 10 minutes
-    }
-  );
-
-  // Fetch pinned projects
-  const { data: pinnedProjects = [] } = useQuery(
-    'pinned-projects',
-    dashboardApi.getProjects,
-    {
-      refetchInterval: 30000, // Refresh every 30 seconds
-    }
-  );
-
-  const handleProjectMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setProjectMenuAnchor(event.currentTarget);
-  };
-
-  const handleProjectMenuClose = () => {
-    setProjectMenuAnchor(null);
-  };
-
-  const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setNotificationMenuAnchor(event.currentTarget);
-  };
-
-  const handleNotificationMenuClose = () => {
-    setNotificationMenuAnchor(null);
-  };
-
-  const handleSelectProjectToPin = () => {
-    handleProjectMenuClose();
-    setProjectDialogOpen(true);
-  };
+export const TopBar: React.FC<TopBarProps> = ({
+  availableProjects,
+  onPinProject,
+  onOpenSettings
+}) => {
+  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
 
   return (
-    <>
-      <AppBar 
-        position="sticky" 
-        elevation={0}
-        sx={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        }}
-      >
-        <Toolbar>
-          {/* Logo and Title */}
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Typography 
-              variant="h6" 
-              component="div" 
-              sx={{ 
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #fff, #f0f0f0)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
+    <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-2xl font-bold text-gray-900">Contexten Dashboard</h1>
+          <div className="text-sm text-gray-500">
+            Project Management & Workflow Orchestration
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          {/* Select Project to Pin */}
+          <div className="relative">
+            <button
+              onClick={() => setShowProjectDropdown(!showProjectDropdown)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
             >
-              Contexten Dashboard
-            </Typography>
-            
-            {/* Status Indicators */}
-            <Box sx={{ ml: 3, display: 'flex', gap: 1 }}>
-              <Chip
-                size="small"
-                label={`${pinnedProjects.length} Projects`}
-                sx={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontSize: '0.75rem',
-                }}
-              />
-              <Chip
-                size="small"
-                label="Multi-Layer Orchestration"
-                sx={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontSize: '0.75rem',
-                }}
-              />
-            </Box>
-          </Box>
+              <span>📌</span>
+              <span>Select Project To Pin</span>
+              <span className="text-blue-200">▼</span>
+            </button>
 
-          {/* Action Buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {/* Notifications */}
-            <IconButton
-              color="inherit"
-              onClick={handleNotificationMenuOpen}
-              sx={{ color: 'white' }}
-            >
-              <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            {showProjectDropdown && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                <div className="p-3 border-b border-gray-200">
+                  <h3 className="text-sm font-medium text-gray-900">Available Projects</h3>
+                  <p className="text-xs text-gray-500">Select a project to add to your dashboard</p>
+                </div>
+                <div className="max-h-60 overflow-y-auto">
+                  {availableProjects.length > 0 ? (
+                    availableProjects.map((project) => (
+                      <button
+                        key={project.id}
+                        onClick={() => {
+                          onPinProject(project);
+                          setShowProjectDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="font-medium text-gray-900">{project.name}</div>
+                        <div className="text-sm text-gray-600">{project.repository}</div>
+                        <div className="text-xs text-gray-500 mt-1">{project.description}</div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-6 text-center text-gray-500">
+                      <div className="text-2xl mb-2">🔍</div>
+                      <p className="text-sm">No projects available</p>
+                      <p className="text-xs">Check your GitHub integration settings</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
-            {/* Select Project To Pin */}
-            <Button
-              variant="outlined"
-              startIcon={<PinIcon />}
-              onClick={handleProjectMenuOpen}
-              sx={{
-                color: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.5)',
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-              }}
-            >
-              Select Project To Pin
-            </Button>
+          {/* Settings Button */}
+          <button
+            onClick={onOpenSettings}
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center space-x-2"
+          >
+            <span>⚙️</span>
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
 
-            {/* Settings */}
-            <Button
-              variant="outlined"
-              startIcon={<SettingsIcon />}
-              onClick={() => setSettingsOpen(true)}
-              sx={{
-                color: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.5)',
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-              }}
-            >
-              Settings
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Project Selection Menu */}
-      <Menu
-        anchorEl={projectMenuAnchor}
-        open={Boolean(projectMenuAnchor)}
-        onClose={handleProjectMenuClose}
-        PaperProps={{
-          sx: { minWidth: 250 }
-        }}
-      >
-        <MenuItem onClick={handleSelectProjectToPin}>
-          <GitHubIcon sx={{ mr: 1 }} />
-          Browse GitHub Repositories
-        </MenuItem>
-        <MenuItem onClick={handleProjectMenuClose} disabled>
-          <PinIcon sx={{ mr: 1 }} />
-          Quick Pin Recent Projects
-        </MenuItem>
-      </Menu>
-
-      {/* Notification Menu */}
-      <Menu
-        anchorEl={notificationMenuAnchor}
-        open={Boolean(notificationMenuAnchor)}
-        onClose={handleNotificationMenuClose}
-        PaperProps={{
-          sx: { minWidth: 300, maxHeight: 400 }
-        }}
-      >
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <Box>
-            <Typography variant="subtitle2">Workflow Completed</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Project "FastAPI Enhancement" finished successfully
-            </Typography>
-          </Box>
-        </MenuItem>
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <Box>
-            <Typography variant="subtitle2">Quality Gate Failed</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Code coverage below threshold in "React Dashboard"
-            </Typography>
-          </Box>
-        </MenuItem>
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <Box>
-            <Typography variant="subtitle2">PR Created</Typography>
-            <Typography variant="body2" color="text.secondary">
-              New pull request opened for "Database Migration"
-            </Typography>
-          </Box>
-        </MenuItem>
-      </Menu>
-
-      {/* Project Selection Dialog */}
-      <ProjectSelectionDialog
-        open={projectDialogOpen}
-        onClose={() => setProjectDialogOpen(false)}
-        repositories={repositories}
-      />
-    </>
+      {/* Click outside to close dropdown */}
+      {showProjectDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowProjectDropdown(false)}
+        />
+      )}
+    </div>
   );
 };
-
-export default TopBar;
 
