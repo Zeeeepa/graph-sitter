@@ -1,201 +1,375 @@
 import React, { useState, useEffect } from 'react';
+import {
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  AppBar,
+  Toolbar,
+  Typography,
+  Container,
+  Grid,
+  Box,
+  Fab,
+  Snackbar,
+  Alert,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  Badge
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Dashboard as DashboardIcon,
+  Timeline as TimelineIcon,
+  Analytics as AnalyticsIcon,
+  Settings as SettingsIcon,
+  Menu as MenuIcon,
+  Notifications as NotificationsIcon
+} from '@mui/icons-material';
+
+import { TopBar } from './components/TopBar';
 import { ProjectCard } from './components/ProjectCard';
 import { ProjectDialog } from './components/ProjectDialog';
-import { TopBar } from './components/TopBar';
-import { SettingsDialog, EnvironmentSettings } from './components/SettingsDialog';
+import { SettingsDialog } from './components/SettingsDialog';
+import { WorkflowMonitor } from './components/WorkflowMonitor';
+import { RealTimeMetrics } from './components/RealTimeMetrics';
+import { AdvancedSettings } from './components/AdvancedSettings';
 import { Project } from './types/dashboard';
 
-const App: React.FC = () => {
-  const [pinnedProjects, setPinnedProjects] = useState<Project[]>([]);
-  const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [showProjectDialog, setShowProjectDialog] = useState(false);
-  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+// Create a modern theme for the dashboard
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+      light: '#42a5f5',
+      dark: '#1565c0',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#ffffff',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h4: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: 'none',
+        },
+      },
+    },
+  },
+});
 
+function App() {
+  const [currentView, setCurrentView] = useState<'dashboard' | 'workflows' | 'analytics'>('dashboard');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error' | 'warning' | 'info';
+  }>({
+    open: false,
+    message: '',
+    severity: 'info'
+  });
+
+  // Mock projects data
   useEffect(() => {
-    loadPinnedProjects();
-    loadAvailableProjects();
+    const mockProjects: Project[] = [
+      {
+        id: '1',
+        name: 'Graph Sitter Dashboard',
+        description: 'Multi-layered workflow orchestration platform',
+        repository: 'Zeeeepa/graph-sitter',
+        status: 'active',
+        progress: 75,
+        flowEnabled: true,
+        lastActivity: new Date(Date.now() - 300000),
+        requirements: 'Implement Material-UI dashboard with real-time monitoring',
+        plan: {
+          id: 'plan-1',
+          projectId: '1',
+          requirements: 'Implement Material-UI dashboard with real-time monitoring',
+          tasks: [
+            {
+              id: 'task-1',
+              title: 'Setup Material-UI components',
+              description: 'Convert existing components to Material-UI',
+              status: 'completed',
+              assignee: 'codegen-bot',
+              estimatedHours: 4,
+              actualHours: 3.5
+            },
+            {
+              id: 'task-2',
+              title: 'Implement real-time monitoring',
+              description: 'Add WebSocket connections and live updates',
+              status: 'in_progress',
+              assignee: 'codegen-bot',
+              estimatedHours: 6,
+              actualHours: 2
+            },
+            {
+              id: 'task-3',
+              title: 'Add workflow orchestration',
+              description: 'Implement advanced workflow management',
+              status: 'pending',
+              assignee: 'codegen-bot',
+              estimatedHours: 8
+            }
+          ],
+          createdAt: new Date(Date.now() - 86400000),
+          updatedAt: new Date(Date.now() - 3600000)
+        }
+      },
+      {
+        id: '2',
+        name: 'Contexten Core',
+        description: 'Core orchestration framework',
+        repository: 'Zeeeepa/contexten',
+        status: 'completed',
+        progress: 100,
+        flowEnabled: false,
+        lastActivity: new Date(Date.now() - 3600000),
+        requirements: 'Enhance core framework with new features'
+      }
+    ];
+    setProjects(mockProjects);
   }, []);
 
-  const loadPinnedProjects = async () => {
-    try {
-      const response = await fetch('/api/projects/pinned');
-      if (response.ok) {
-        const projects = await response.json();
-        setPinnedProjects(projects);
-      }
-    } catch (error) {
-      console.error('Failed to load pinned projects:', error);
-    }
-  };
-
-  const loadAvailableProjects = async () => {
-    try {
-      const response = await fetch('/api/projects/available');
-      if (response.ok) {
-        const projects = await response.json();
-        setAvailableProjects(projects);
-      }
-    } catch (error) {
-      console.error('Failed to load available projects:', error);
-    }
-  };
-
-  const handlePinProject = async (project: Project) => {
-    try {
-      const response = await fetch('/api/projects/pin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: project.id })
-      });
-
-      if (response.ok) {
-        setPinnedProjects(prev => [...prev, project]);
-        setAvailableProjects(prev => prev.filter(p => p.id !== project.id));
-      }
-    } catch (error) {
-      console.error('Failed to pin project:', error);
-    }
-  };
-
-  const handleSelectProject = (project: Project) => {
+  const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
-    setShowProjectDialog(true);
+    setProjectDialogOpen(true);
   };
 
-  const handleToggleFlow = async (projectId: string) => {
-    try {
-      const project = pinnedProjects.find(p => p.id === projectId);
-      if (!project) return;
-
-      const action = project.flowStatus === 'running' ? 'stop' : 'start';
-      const response = await fetch(`/api/projects/${projectId}/flow/${action}`, {
-        method: 'POST'
-      });
-
-      if (response.ok) {
-        setPinnedProjects(prev => prev.map(p => 
-          p.id === projectId 
-            ? { ...p, flowStatus: action === 'start' ? 'running' : 'stopped' }
-            : p
-        ));
-      }
-    } catch (error) {
-      console.error('Failed to toggle flow:', error);
-    }
+  const handleToggleFlow = (projectId: string, enabled: boolean) => {
+    setProjects(prev => prev.map(p => 
+      p.id === projectId ? { ...p, flowEnabled: enabled } : p
+    ));
+    setSnackbar({
+      open: true,
+      message: `Flow ${enabled ? 'enabled' : 'disabled'} for project`,
+      severity: 'success'
+    });
   };
 
-  const handleCreatePlan = async (projectId: string, requirements: string) => {
-    try {
-      const response = await fetch(`/api/projects/${projectId}/plan`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requirements })
-      });
-
-      if (response.ok) {
-        const plan = await response.json();
-        setPinnedProjects(prev => prev.map(p => 
-          p.id === projectId 
-            ? { ...p, plan, requirements }
-            : p
-        ));
-        setSelectedProject(prev => prev ? { ...prev, plan, requirements } : null);
-      }
-    } catch (error) {
-      console.error('Failed to create plan:', error);
-    }
+  const handleOpenSettings = (project: Project) => {
+    setSelectedProject(project);
+    setAdvancedSettingsOpen(true);
   };
 
-  const handleStartFlow = async (projectId: string) => {
-    try {
-      const response = await fetch(`/api/projects/${projectId}/flow/start`, {
-        method: 'POST'
-      });
-
-      if (response.ok) {
-        setPinnedProjects(prev => prev.map(p => 
-          p.id === projectId 
-            ? { ...p, flowStatus: 'running' }
-            : p
-        ));
-        setSelectedProject(prev => prev ? { ...prev, flowStatus: 'running' } : null);
-      }
-    } catch (error) {
-      console.error('Failed to start flow:', error);
-    }
+  const handleSaveSettings = (settings: any) => {
+    console.log('Saving settings:', settings);
+    setSnackbar({
+      open: true,
+      message: 'Settings saved successfully',
+      severity: 'success'
+    });
   };
 
-  const handleSaveSettings = async (settings: EnvironmentSettings) => {
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, view: 'dashboard' as const },
+    { text: 'Workflows', icon: <TimelineIcon />, view: 'workflows' as const },
+    { text: 'Analytics', icon: <AnalyticsIcon />, view: 'analytics' as const },
+  ];
 
-      if (response.ok) {
-        // Reload projects after settings update
-        loadAvailableProjects();
-      }
-    } catch (error) {
-      console.error('Failed to save settings:', error);
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'workflows':
+        return <WorkflowMonitor />;
+      case 'analytics':
+        return <RealTimeMetrics />;
+      default:
+        return (
+          <Grid container spacing={3}>
+            {projects.map((project) => (
+              <Grid item xs={12} sm={6} md={4} key={project.id}>
+                <ProjectCard
+                  project={project}
+                  onOpenProject={handleProjectSelect}
+                  onToggleFlow={handleToggleFlow}
+                  onOpenSettings={handleOpenSettings}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <TopBar
-        availableProjects={availableProjects}
-        onPinProject={handlePinProject}
-        onOpenSettings={() => setShowSettingsDialog(true)}
-      />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      
+      {/* App Bar */}
+      <AppBar position="fixed" elevation={1}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => setDrawerOpen(true)}
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Contexten Dashboard
+          </Typography>
+          
+          <IconButton color="inherit">
+            <Badge badgeContent={3} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+          
+          <IconButton 
+            color="inherit"
+            onClick={() => setSettingsDialogOpen(true)}
+          >
+            <SettingsIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-      <main className="container mx-auto px-6 py-8">
-        {pinnedProjects.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📌</div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No Projects Pinned</h2>
-            <p className="text-gray-600 mb-6">
-              Start by pinning a project from the "Select Project To Pin" dropdown above.
-            </p>
-            <p className="text-sm text-gray-500">
-              Once pinned, you can add requirements, generate plans, and start automated workflows.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pinnedProjects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onSelect={handleSelectProject}
-                onToggleFlow={handleToggleFlow}
-              />
+      {/* Side Drawer */}
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <Box sx={{ width: 250, pt: 2 }}>
+          <List>
+            {menuItems.map((item) => (
+              <ListItem
+                button
+                key={item.text}
+                selected={currentView === item.view}
+                onClick={() => {
+                  setCurrentView(item.view);
+                  setDrawerOpen(false);
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItem>
             ))}
-          </div>
-        )}
-      </main>
+          </List>
+        </Box>
+      </Drawer>
 
+      {/* Main Content */}
+      <Container maxWidth="xl" sx={{ mt: 10, mb: 4 }}>
+        <Box mb={3}>
+          <Typography variant="h4" gutterBottom>
+            {currentView === 'dashboard' && 'Project Dashboard'}
+            {currentView === 'workflows' && 'Workflow Monitor'}
+            {currentView === 'analytics' && 'Real-Time Analytics'}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {currentView === 'dashboard' && 'Manage your projects and workflows'}
+            {currentView === 'workflows' && 'Monitor active workflow executions'}
+            {currentView === 'analytics' && 'View real-time metrics and activity'}
+          </Typography>
+        </Box>
+
+        {renderCurrentView()}
+      </Container>
+
+      {/* Floating Action Button */}
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+        }}
+        onClick={() => {
+          // Handle add new project
+          setSnackbar({
+            open: true,
+            message: 'Add new project feature coming soon!',
+            severity: 'info'
+          });
+        }}
+      >
+        <AddIcon />
+      </Fab>
+
+      {/* Dialogs */}
       <ProjectDialog
+        open={projectDialogOpen}
         project={selectedProject}
-        isOpen={showProjectDialog}
         onClose={() => {
-          setShowProjectDialog(false);
+          setProjectDialogOpen(false);
           setSelectedProject(null);
         }}
-        onCreatePlan={handleCreatePlan}
-        onStartFlow={handleStartFlow}
+        onSave={(project) => {
+          console.log('Saving project:', project);
+          setProjectDialogOpen(false);
+          setSelectedProject(null);
+        }}
       />
 
       <SettingsDialog
-        isOpen={showSettingsDialog}
-        onClose={() => setShowSettingsDialog(false)}
+        open={settingsDialogOpen}
+        onClose={() => setSettingsDialogOpen(false)}
         onSave={handleSaveSettings}
       />
-    </div>
+
+      <AdvancedSettings
+        open={advancedSettingsOpen}
+        onClose={() => setAdvancedSettingsOpen(false)}
+        onSave={handleSaveSettings}
+      />
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+      >
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </ThemeProvider>
   );
-};
+}
 
 export default App;
 
