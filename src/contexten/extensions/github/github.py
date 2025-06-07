@@ -6,7 +6,7 @@ from fastapi import Request
 from github import Github
 from pydantic import BaseModel
 
-from contexten.extensions.contexten_app.interface import EventHandlerManagerProtocol
+from contexten.extensions.modal.interface import EventHandlerManagerProtocol
 from contexten.extensions.github.types.base import GitHubInstallation, GitHubWebhookPayload
 from graph_sitter.shared.logging.get_logger import get_logger
 

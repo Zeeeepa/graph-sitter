@@ -1,325 +1,113 @@
-import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Box,
-  Chip,
-  IconButton,
-  Switch,
-  FormControlLabel,
-  LinearProgress,
-  Menu,
-  MenuItem,
-  Divider,
-  Avatar,
-  Tooltip,
-} from '@mui/material';
-import {
-  MoreVert as MoreVertIcon,
-  GitHub as GitHubIcon,
-  PlayArrow as PlayIcon,
-  Pause as PauseIcon,
-  Settings as SettingsIcon,
-  Timeline as TimelineIcon,
-  BugReport as BugReportIcon,
-  CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
-} from '@mui/icons-material';
-import { format } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
-
-import { Project } from '../types';
-import { useDashboardStore } from '../store/dashboardStore';
+import React from 'react';
+import { Project, FlowStatus } from '../types/dashboard';
 
 interface ProjectCardProps {
   project: Project;
-  onFlowToggle: (projectId: string, enabled: boolean) => void;
-  onRemovePin: (projectId: string) => void;
+  onSelect: (project: Project) => void;
+  onToggleFlow: (projectId: string) => void;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
-  project,
-  onFlowToggle,
-  onRemovePin,
+export const ProjectCard: React.FC<ProjectCardProps> = ({ 
+  project, 
+  onSelect, 
+  onToggleFlow 
 }) => {
-  const navigate = useNavigate();
-  const { setSelectedProject } = useDashboardStore();
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
-    setMenuAnchor(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
-  };
-
-  const handleCardClick = () => {
-    setSelectedProject(project);
-    navigate(`/project/${project.id}`);
-  };
-
-  const handleFlowToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.stopPropagation();
-    onFlowToggle(project.id, event.target.checked);
-  };
-
-  const handleRemovePin = () => {
-    handleMenuClose();
-    onRemovePin(project.id);
-  };
-
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: FlowStatus) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'inactive': return 'default';
-      case 'error': return 'error';
-      default: return 'default';
+      case 'running': return 'bg-green-500';
+      case 'paused': return 'bg-yellow-500';
+      case 'error': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
 
-  const getLanguageColor = (language: string) => {
-    const colors: Record<string, string> = {
-      'TypeScript': '#3178c6',
-      'JavaScript': '#f7df1e',
-      'Python': '#3776ab',
-      'Java': '#ed8b00',
-      'Go': '#00add8',
-      'Rust': '#000000',
-      'C++': '#00599c',
-    };
-    return colors[language] || '#666666';
-  };
-
-  // Mock data for demonstration
-  const mockStats = {
-    activePRs: Math.floor(Math.random() * 5) + 1,
-    openIssues: Math.floor(Math.random() * 10) + 2,
-    workflowProgress: Math.floor(Math.random() * 100),
-    lastActivity: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-    flowEnabled: Math.random() > 0.5,
+  const getProgressPercentage = () => {
+    if (!project.plan || project.plan.tasks.length === 0) return 0;
+    const completedTasks = project.plan.tasks.filter(task => task.status === 'completed').length;
+    return (completedTasks / project.plan.tasks.length) * 100;
   };
 
   return (
-    <Card
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-        },
-        border: '1px solid',
-        borderColor: 'divider',
-      }}
-      onClick={handleCardClick}
-    >
-      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Typography variant="h6" component="h2" noWrap sx={{ fontWeight: 600 }}>
-              {project.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {project.full_name}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Chip
-              size="small"
-              label={project.status}
-              color={getStatusColor(project.status) as any}
-              variant="outlined"
-            />
-            <IconButton size="small" onClick={handleMenuOpen}>
-              <MoreVertIcon />
-            </IconButton>
-          </Box>
-        </Box>
-
-        {/* Description */}
-        {project.description && (
-          <Typography 
-            variant="body2" 
-            color="text.secondary" 
-            sx={{ 
-              mb: 2,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
+      <div className="flex justify-between items-start mb-4">
+        <div onClick={() => onSelect(project)} className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
+          <p className="text-sm text-gray-600">{project.description}</p>
+          <div className="flex items-center mt-2">
+            <span className="text-xs text-gray-500">Repository:</span>
+            <span className="text-xs text-blue-600 ml-1">{project.repository}</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <div className={`w-3 h-3 rounded-full ${getStatusColor(project.flowStatus)}`}></div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFlow(project.id);
             }}
+            className={`px-3 py-1 text-xs rounded-full ${
+              project.flowStatus === 'running' 
+                ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+                : 'bg-green-100 text-green-800 hover:bg-green-200'
+            }`}
           >
-            {project.description}
-          </Typography>
-        )}
+            {project.flowStatus === 'running' ? 'Stop' : 'Start'} Flow
+          </button>
+        </div>
+      </div>
 
-        {/* Language and Stats */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          {project.language && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  backgroundColor: getLanguageColor(project.language),
-                }}
-              />
-              <Typography variant="caption" color="text.secondary">
-                {project.language}
-              </Typography>
-            </Box>
-          )}
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Tooltip title="Active PRs">
-              <Chip
-                size="small"
-                icon={<GitHubIcon />}
-                label={mockStats.activePRs}
-                variant="outlined"
-                sx={{ fontSize: '0.7rem', height: 20 }}
-              />
-            </Tooltip>
-            
-            <Tooltip title="Open Issues">
-              <Chip
-                size="small"
-                icon={<BugReportIcon />}
-                label={mockStats.openIssues}
-                variant="outlined"
-                sx={{ fontSize: '0.7rem', height: 20 }}
-              />
-            </Tooltip>
-          </Box>
-        </Box>
+      {/* Progress Bar */}
+      <div className="mb-4">
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Progress</span>
+          <span>{Math.round(getProgressPercentage())}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${getProgressPercentage()}%` }}
+          ></div>
+        </div>
+      </div>
 
-        {/* Workflow Progress */}
-        {mockStats.workflowProgress > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">
-                Workflow Progress
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {mockStats.workflowProgress}%
-              </Typography>
-            </Box>
-            <LinearProgress 
-              variant="determinate" 
-              value={mockStats.workflowProgress} 
-              sx={{ height: 6, borderRadius: 3 }}
-            />
-          </Box>
-        )}
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div>
+          <div className="text-lg font-semibold text-gray-900">
+            {project.stats?.openPRs || 0}
+          </div>
+          <div className="text-xs text-gray-500">Open PRs</div>
+        </div>
+        <div>
+          <div className="text-lg font-semibold text-gray-900">
+            {project.stats?.openIssues || 0}
+          </div>
+          <div className="text-xs text-gray-500">Issues</div>
+        </div>
+        <div>
+          <div className="text-lg font-semibold text-gray-900">
+            {project.plan?.tasks.length || 0}
+          </div>
+          <div className="text-xs text-gray-500">Tasks</div>
+        </div>
+      </div>
 
-        {/* Event List Preview */}
-        <Box sx={{ mb: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            Recent Activity
-          </Typography>
-          <Box sx={{ mt: 0.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <CheckCircleIcon sx={{ fontSize: 14, color: 'success.main' }} />
-              <Typography variant="caption" color="text.secondary">
-                PR #42 merged successfully
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <ScheduleIcon sx={{ fontSize: 14, color: 'warning.main' }} />
-              <Typography variant="caption" color="text.secondary">
-                Quality gate pending review
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TimelineIcon sx={{ fontSize: 14, color: 'info.main' }} />
-              <Typography variant="caption" color="text.secondary">
-                Workflow started 2h ago
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Last Activity */}
-        <Typography variant="caption" color="text.secondary">
-          Last activity: {format(mockStats.lastActivity, 'MMM d, HH:mm')}
-        </Typography>
-      </CardContent>
-
-      <Divider />
-
-      {/* Actions */}
-      <CardActions sx={{ justifyContent: 'space-between', px: 2, py: 1.5 }}>
-        <FormControlLabel
-          control={
-            <Switch
-              size="small"
-              checked={mockStats.flowEnabled}
-              onChange={handleFlowToggle}
-              onClick={(e) => e.stopPropagation()}
-            />
-          }
-          label={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {mockStats.flowEnabled ? <PlayIcon sx={{ fontSize: 16 }} /> : <PauseIcon sx={{ fontSize: 16 }} />}
-              <Typography variant="caption">
-                Flow {mockStats.flowEnabled ? 'On' : 'Off'}
-              </Typography>
-            </Box>
-          }
-          sx={{ margin: 0 }}
-        />
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Typography variant="caption" color="text.secondary">
-            Health: 
-          </Typography>
-          <Chip
-            size="small"
-            label="85%"
-            color="success"
-            variant="outlined"
-            sx={{ fontSize: '0.7rem', height: 18 }}
-          />
-        </Box>
-      </CardActions>
-
-      {/* Context Menu */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <MenuItem onClick={handleMenuClose}>
-          <SettingsIcon sx={{ mr: 1, fontSize: 18 }} />
-          Project Settings
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <TimelineIcon sx={{ mr: 1, fontSize: 18 }} />
-          View Workflows
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <GitHubIcon sx={{ mr: 1, fontSize: 18 }} />
-          Open in GitHub
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleRemovePin} sx={{ color: 'error.main' }}>
-          Remove Pin
-        </MenuItem>
-      </Menu>
-    </Card>
+      {/* Recent Events */}
+      {project.recentEvents && project.recentEvents.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Recent Activity</h4>
+          <div className="space-y-1">
+            {project.recentEvents.slice(0, 3).map((event, index) => (
+              <div key={index} className="text-xs text-gray-600 flex justify-between">
+                <span className="truncate">{event.message}</span>
+                <span className="text-gray-400 ml-2">{event.timestamp}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
-
-export default ProjectCard;
 
