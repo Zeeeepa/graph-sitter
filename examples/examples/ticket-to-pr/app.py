@@ -5,7 +5,7 @@ from contexten import ContextenApp
 from contexten.agents.code_agent import CodeAgent
 
 from graph_sitter import Codebase
-from contexten.extensions.modal.linear_client import LinearClient
+from contexten.extensions.linear.linear_client_modal import LinearClient
 from contexten.agents.tools.github.create_pr import create_pr
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from helpers import create_codebase, format_linear_message, has_codegen_label, process_update_event
