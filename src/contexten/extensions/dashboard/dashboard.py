@@ -1,26 +1,48 @@
+#!/usr/bin/env python3
 """
-Main Dashboard extension class for Contexten.
-
-This module implements the core Dashboard extension that integrates with the
-ContextenApp to provide comprehensive project management and workflow orchestration
-capabilities.
+Contexten Dashboard Main Module
+Multi-layered Workflow Orchestration Platform
 """
 
 import os
+import sys
+import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+# Add the project root to Python path for imports
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
-from .api import router as api_router
-from .websocket import WebSocketManager
-from .database import initialize_database, db_manager
-from .github_integration import GitHubProjectManager
-from .codegen_integration import CodegenPlanGenerator
-from .workflows.orchestrator import WorkflowOrchestrator
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import uvicorn
+
+# Import dashboard modules with absolute imports
+try:
+    from src.contexten.extensions.dashboard.api import router as api_router
+    from src.contexten.extensions.dashboard.websocket import websocket_manager
+    from src.contexten.extensions.dashboard.models import Project, Plan, PlanTask
+    from src.contexten.extensions.dashboard.services.github_service import GitHubService
+    from src.contexten.extensions.dashboard.services.linear_service import LinearService
+    from src.contexten.extensions.dashboard.services.codegen_service import CodegenService
+except ImportError as e:
+    # Fallback to relative imports if absolute imports fail
+    try:
+        from .api import router as api_router
+        from .websocket import websocket_manager
+        from .models import Project, Plan, PlanTask
+        from .services.github_service import GitHubService
+        from .services.linear_service import LinearService
+        from .services.codegen_service import CodegenService
+    except ImportError:
+        print(f"Import error: {e}")
+        print("Please run the dashboard from the project root or use start_dashboard.py")
+        sys.exit(1)
 
 logger = logging.getLogger(__name__)
 
@@ -49,10 +71,10 @@ class Dashboard:
         self.app = contexten_app.app
         
         # Initialize components
-        self.websocket_manager = WebSocketManager()
-        self.github_manager = GitHubProjectManager()
-        self.codegen_generator = CodegenPlanGenerator()
-        self.workflow_orchestrator = WorkflowOrchestrator()
+        self.websocket_manager = websocket_manager
+        self.github_manager = GitHubService()
+        self.codegen_generator = CodegenService()
+        self.workflow_orchestrator = None
         
         # Setup routes and middleware
         self._setup_routes()
@@ -344,4 +366,3 @@ def setup_dashboard(contexten_app) -> Dashboard:
     contexten_app.dashboard = dashboard
     
     return dashboard
-

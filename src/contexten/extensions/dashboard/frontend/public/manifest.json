@@ -1,6 +1,6 @@
 {
   "short_name": "Contexten Dashboard",
-  "name": "Contexten Dashboard - Workflow Orchestration",
+  "name": "Contexten Dashboard - Multi-layered Workflow Orchestration Platform",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,7 +10,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#667eea",
+  "theme_color": "#1976d2",
   "background_color": "#ffffff"
 }
 
