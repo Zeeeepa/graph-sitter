@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from graph_sitter import Codebase
-from graph_sitter.adapters.visualizations.react_visualizations import (
+from graph_sitter.visualizations.react_visualizations import (
     ReactVisualizationGenerator,
     create_react_visualizations,
     generate_function_blast_radius,
@@ -59,7 +59,7 @@ def main():
             visualization_types=visualization_types
         )
         
-        print(f"✅ Generated {result['metadata']['total_visualizations']} visualizations")
+        print(f"��� Generated {result['metadata']['total_visualizations']} visualizations")
         
         # Create output directory
         output_dir = Path("visualization_output")

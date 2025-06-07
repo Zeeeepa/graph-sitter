@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.graph_sitter.adapters.code_analysis import analyze_codebase
+from src.contexten.extensions.graph_sitter.code_analysis import analyze_codebase
 
 def main():
     """Example of super comprehensive single-mode analysis."""
@@ -45,9 +45,15 @@ def main():
     else:
         print("No files found to analyze (dependencies not available)")
     
+    # Quick analysis example
+    print("\n" + "="*50)
+    print("QUICK ANALYSIS EXAMPLE")
+    print("="*50)
+    
+    from src.contexten.extensions.graph_sitter.code_analysis import quick_analyze
+
     # Example 4: Different analysis modes
     print("\n⚡ Example 4: Quick analysis mode")
-    from src.graph_sitter.adapters.code_analysis import quick_analyze
     quick_result = quick_analyze(".")
     print(f"Quick analysis completed in {quick_result.analysis_time:.2f}s")
     

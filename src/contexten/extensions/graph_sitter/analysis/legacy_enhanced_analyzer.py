@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 try:
     from graph_sitter import Codebase
     from graph_sitter.configs.models.codebase import CodebaseConfig
-    from graph_sitter.adapters.graph_sitter_enhancements import (
+    from contexten.extensions.graph_sitter.graph_sitter_enhancements import (
         detect_import_loops, analyze_graph_structure, detect_dead_code,
         generate_training_data, get_codebase_summary_enhanced,
         analyze_function_enhanced, analyze_class_enhanced,

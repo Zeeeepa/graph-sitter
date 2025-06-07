@@ -5,7 +5,7 @@ The simplest and most powerful way to analyze any codebase with interactive expl
 ## Quick Start
 
 ```python
-from graph_sitter.adapters.code_analysis import analyze_codebase
+from contexten.extensions.graph_sitter.code_analysis import analyze_codebase
 
 # One line to analyze everything
 result = analyze_codebase("/path/to/code")
@@ -93,7 +93,7 @@ print(result)
 ### 1. Basic Analysis
 
 ```python
-from graph_sitter.adapters.code_analysis import analyze_codebase
+from contexten.extensions.graph_sitter.code_analysis import analyze_codebase
 
 # Analyze current directory
 result = analyze_codebase(".")
@@ -133,16 +133,18 @@ if result.dead_code_items > 0:
 ### 4. Quick Analysis Mode
 
 ```python
-from graph_sitter.adapters.code_analysis import quick_analyze
+from contexten.extensions.graph_sitter.code_analysis import quick_analyze
 
 # Fast analysis without interactive features
 result = quick_analyze("/path/to/project")
 print(f"Quick analysis: {result.quality_score:.1f}/10")
 ```
 
-### 5. Custom Configuration
+### 5. Advanced Configuration
 
 ```python
+from contexten.extensions.graph_sitter.code_analysis import quick_analyze
+
 # Analysis without auto-opening browser
 result = analyze_codebase(
     "/path/to/project",
@@ -246,7 +248,7 @@ The system works even without optional dependencies:
 
 ```bash
 # Direct module execution
-python -m graph_sitter.adapters.code_analysis /path/to/code
+python -m contexten.extensions.graph_sitter.code_analysis /path/to/code
 
 # Using the comprehensive CLI
 python -m graph_sitter.adapters.analysis.cli /path/to/code --comprehensive --html-report
@@ -258,7 +260,7 @@ python -m graph_sitter.adapters.analysis.cli /path/to/code --comprehensive --htm
 
 ```python
 import sys
-from graph_sitter.adapters.code_analysis import analyze_codebase
+from contexten.extensions.graph_sitter.code_analysis import analyze_codebase
 
 def check_code_quality(path, min_quality=7.0):
     """Check code quality in CI/CD pipeline."""
@@ -280,7 +282,7 @@ check_code_quality(".", min_quality=7.0)
 ### Development Workflow
 
 ```python
-from graph_sitter.adapters.code_analysis import analyze_codebase
+from contexten.extensions.graph_sitter.code_analysis import analyze_codebase
 
 def analyze_changes(project_path):
     """Analyze code changes during development."""
@@ -353,4 +355,3 @@ The super comprehensive analysis system is built on top of the enhanced analysis
 ## License
 
 Same as the main graph-sitter project.
-

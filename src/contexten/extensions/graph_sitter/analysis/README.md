@@ -6,14 +6,14 @@
 
 ### Python API
 ```python
-from graph_sitter.adapters.analysis import analyze_codebase
+from contexten.extensions.graph_sitter.analysis import analyze_codebase
 
 # Basic analysis
 result = analyze_codebase("/path/to/code")
 print(f"Found {result.total_functions} functions")
 
 # Comprehensive analysis
-from graph_sitter.adapters.analysis import AnalysisPresets
+from contexten.extensions.graph_sitter.analysis import AnalysisPresets
 config = AnalysisPresets.comprehensive()
 result = analyze_codebase("/path/to/code", config)
 
@@ -24,16 +24,16 @@ result.save_to_file("analysis_results.json")
 ### Command Line
 ```bash
 # Basic analysis
-python -m graph_sitter.adapters.analysis.cli /path/to/code
+python -m contexten.extensions.graph_sitter.analysis.cli /path/to/code
 
 # Comprehensive analysis
-python -m graph_sitter.adapters.analysis.cli /path/to/code --comprehensive
+python -m contexten.extensions.graph_sitter.analysis.cli /path/to/code --comprehensive
 
 # Quick analysis
-python -m graph_sitter.adapters.analysis.cli /path/to/code --quick
+python -m contexten.extensions.graph_sitter.analysis.cli /path/to/code --quick
 
 # Save results
-python -m graph_sitter.adapters.analysis.cli /path/to/code --output results.json
+python -m contexten.extensions.graph_sitter.analysis.cli /path/to/code --output results.json
 ```
 
 ## 🎯 Features
@@ -62,7 +62,7 @@ analysis/
 ## 🔧 Configuration
 
 ```python
-from graph_sitter.adapters.analysis import AnalysisConfig
+from contexten.extensions.graph_sitter.analysis import AnalysisConfig
 
 config = AnalysisConfig(
     detect_import_loops=True,      # Find circular imports
@@ -97,7 +97,7 @@ print(f"Graph metrics: {result.graph_metrics}")
 ## 🎛️ Presets
 
 ```python
-from graph_sitter.adapters.analysis import AnalysisPresets
+from contexten.extensions.graph_sitter.analysis import AnalysisPresets
 
 # Full analysis with all features
 config = AnalysisPresets.comprehensive()
@@ -130,7 +130,7 @@ for dead_item in result.dead_code:
 
 ### Enhanced Function Analysis
 ```python
-from graph_sitter.adapters.analysis import analyze_function_enhanced
+from contexten.extensions.graph_sitter.analysis import analyze_function_enhanced
 
 # Analyze specific function
 function = codebase.get_function("my_function")
@@ -163,4 +163,3 @@ This system consolidates functionality from:
 - **ML Model Training** - Generate training data for AI models
 - **CI/CD Integration** - Automated code quality checks
 - **Architecture Review** - Analyze system structure
-
