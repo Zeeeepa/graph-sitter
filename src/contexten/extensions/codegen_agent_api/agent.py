@@ -1,7 +1,7 @@
 """
 Enhanced Agent class for interacting with Codegen SWE agents via API.
 
-Includes robust error handling, retry mechanisms, rate limiting, and comprehensive monitoring.
+Migrated from src/codegen/agent.py with contexten extension integration.
 """
 
 import requests
@@ -13,6 +13,7 @@ from urllib.parse import urljoin
 from datetime import datetime, timezone
 
 from .task import Task
+from .types import TaskPriority, WebhookEventType, AgentStats
 from .exceptions import (
     AuthenticationError, 
     APIError, 
@@ -21,7 +22,8 @@ from .exceptions import (
     TaskError,
     TimeoutError,
     NetworkError,
-    ConfigurationError
+    ConfigurationError,
+    wrap_network_error
 )
 
 logger = logging.getLogger(__name__)
@@ -39,6 +41,7 @@ class Agent:
     - Connection pooling
     - Webhook support
     - Monitoring and metrics
+    - Contexten extension integration
     """
     
     def __init__(
@@ -91,6 +94,7 @@ class Agent:
         self.max_retries = max_retries
         self.retry_backoff_factor = retry_backoff_factor
         self.rate_limit_buffer = rate_limit_buffer
+        self.enable_logging = enable_logging
         
         # Set up enhanced session with connection pooling
         self.session = requests.Session()
@@ -105,8 +109,9 @@ class Agent:
         self.session.headers.update({
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "User-Agent": "enhanced-codegen-python-sdk/1.1.0",
-            "X-Client-Version": "1.1.0"
+            "User-Agent": "contexten-codegen-extension/1.0.0",
+            "X-Client-Version": "1.0.0",
+            "X-Extension": "contexten-codegen-agent-api"
         })
         
         # Enhanced monitoring
@@ -124,7 +129,7 @@ class Agent:
         if enable_logging:
             logging.basicConfig(level=logging.INFO)
         
-        logger.info(f"Enhanced Codegen Agent initialized for org {org_id}")
+        logger.info(f"Enhanced Codegen Agent initialized for org {org_id} (contexten extension)")
         
         # Validate credentials during initialization (optional)
         if validate_on_init:
@@ -145,6 +150,7 @@ class Agent:
         except requests.RequestException as e:
             raise AuthenticationError(f"Failed to validate credentials: {str(e)}")
     
+    @wrap_network_error
     def _make_request(
         self, 
         method: str, 
@@ -186,64 +192,51 @@ class Agent:
         request_id = f"req_{int(time.time() * 1000)}"
         start_time = time.time()
         
-        try:
-            if self.enable_logging:
-                logger.debug(f"[{request_id}] {method} {url}")
-            
-            response = self.session.request(
-                method=method,
-                url=url,
-                json=data,
-                params=params,
-                timeout=timeout
+        if self.enable_logging:
+            logger.debug(f"[{request_id}] {method} {url}")
+        
+        response = self.session.request(
+            method=method,
+            url=url,
+            json=data,
+            params=params,
+            timeout=timeout
+        )
+        
+        response_time = time.time() - start_time
+        self._request_count += 1
+        self._last_request_time = time.time()
+        
+        if self.enable_logging:
+            logger.debug(f"[{request_id}] Response: {response.status_code} ({response_time:.2f}s)")
+        
+        # Handle rate limiting
+        if response.status_code == 429:
+            self._rate_limit_count += 1
+            retry_after = int(response.headers.get("Retry-After", 60))
+            self._rate_limit_reset_time = time.time() + retry_after
+            raise RateLimitError(
+                "Rate limit exceeded",
+                retry_after=retry_after
             )
-            
-            response_time = time.time() - start_time
-            self._request_count += 1
-            self._last_request_time = time.time()
-            
-            if self.enable_logging:
-                logger.debug(f"[{request_id}] Response: {response.status_code} ({response_time:.2f}s)")
-            
-            # Handle rate limiting
-            if response.status_code == 429:
-                self._rate_limit_count += 1
-                retry_after = int(response.headers.get("Retry-After", 60))
-                self._rate_limit_reset_time = time.time() + retry_after
-                raise RateLimitError(
-                    "Rate limit exceeded",
-                    retry_after=retry_after
-                )
-            
-            # Handle authentication errors
-            if response.status_code == 401:
-                raise AuthenticationError("Authentication failed - invalid token")
-            
-            # Handle other client/server errors
-            if response.status_code >= 400:
-                error_data = {}
-                try:
-                    error_data = response.json()
-                except (json.JSONDecodeError, ValueError):
-                    pass
-                
-                error_message = error_data.get("error", f"HTTP {response.status_code}")
-                self._error_count += 1
-                raise APIError(error_message, response.status_code, error_data)
-            
-            return response
-            
-        except requests.exceptions.Timeout:
-            self._error_count += 1
-            raise TimeoutError(f"Request timed out after {timeout} seconds")
         
-        except requests.exceptions.ConnectionError as e:
-            self._error_count += 1
-            raise NetworkError(f"Connection failed: {str(e)}", original_error=e)
+        # Handle authentication errors
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed - invalid token")
         
-        except requests.RequestException as e:
+        # Handle other client/server errors
+        if response.status_code >= 400:
+            error_data = {}
+            try:
+                error_data = response.json()
+            except (json.JSONDecodeError, ValueError):
+                pass
+            
+            error_message = error_data.get("error", f"HTTP {response.status_code}")
             self._error_count += 1
-            raise NetworkError(f"Request failed: {str(e)}", original_error=e)
+            raise APIError(error_message, response.status_code, error_data)
+        
+        return response
     
     def _is_rate_limited(self) -> bool:
         """Check if we're currently rate limited."""
@@ -257,7 +250,7 @@ class Agent:
         context: Optional[Dict[str, Any]] = None,
         repository: Optional[str] = None,
         branch: Optional[str] = None,
-        priority: str = "normal",
+        priority: Union[str, TaskPriority] = TaskPriority.NORMAL,
         timeout: Optional[int] = None,
         tags: Optional[List[str]] = None,
         webhook_url: Optional[str] = None
@@ -270,7 +263,7 @@ class Agent:
             context: Additional context for the task
             repository: Target repository (format: "owner/repo")
             branch: Target branch (default: main/master)
-            priority: Task priority ("low", "normal", "high", "urgent")
+            priority: Task priority (TaskPriority enum or string)
             timeout: Task timeout in seconds
             tags: Optional tags for task categorization
             webhook_url: Optional webhook URL for task updates
@@ -285,13 +278,20 @@ class Agent:
         if not prompt or not isinstance(prompt, str):
             raise ValidationError("prompt must be a non-empty string", field="prompt")
         
-        if priority not in ["low", "normal", "high", "urgent"]:
-            raise ValidationError("priority must be 'low', 'normal', 'high', or 'urgent'", field="priority")
+        # Convert string priority to enum if needed
+        if isinstance(priority, str):
+            try:
+                priority = TaskPriority(priority.lower())
+            except ValueError:
+                raise ValidationError(
+                    f"priority must be one of {[p.value for p in TaskPriority]}", 
+                    field="priority"
+                )
         
         task_data: Dict[str, Any] = {
             "org_id": self.org_id,
             "prompt": prompt,
-            "priority": priority,
+            "priority": priority.value,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
@@ -308,7 +308,7 @@ class Agent:
         if webhook_url:
             task_data["webhook_url"] = webhook_url
         
-        logger.info(f"Creating task with priority {priority}: {prompt[:100]}...")
+        logger.info(f"Creating task with priority {priority.value}: {prompt[:100]}...")
         
         response = self._make_request("POST", "/v1/tasks", data=task_data)
         task_info = response.json()
@@ -416,7 +416,7 @@ class Agent:
         Args:
             start_date: Start date in YYYY-MM-DD format
             end_date: End date in YYYY-MM-DD format
-            granularity: Data granularity ("hour", "day", "week", "month")
+            granularity: Data granularity (\"hour\", \"day\", \"week\", \"month\")
             
         Returns:
             Enhanced usage statistics
@@ -437,7 +437,12 @@ class Agent:
         response = self._make_request("GET", "/v1/repositories", params=params)
         return response.json().get("repositories", [])
     
-    def create_webhook(self, url: str, events: List[str], secret: Optional[str] = None) -> Dict[str, Any]:
+    def create_webhook(
+        self, 
+        url: str, 
+        events: List[Union[str, WebhookEventType]], 
+        secret: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Create a webhook for task events with enhanced options.
         
@@ -449,10 +454,21 @@ class Agent:
         Returns:
             Webhook information
         """
+        # Convert string events to enum values
+        event_values = []
+        for event in events:
+            if isinstance(event, str):
+                try:
+                    event_values.append(WebhookEventType(event))
+                except ValueError:
+                    raise ValidationError(f"Invalid webhook event: {event}", field="events")
+            else:
+                event_values.append(event)
+        
         data = {
             "org_id": self.org_id,
             "url": url,
-            "events": events
+            "events": [e.value for e in event_values]
         }
         
         if secret:
@@ -485,7 +501,7 @@ class Agent:
         response = self._make_request("GET", "/v1/health")
         return response.json()
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> AgentStats:
         """Get comprehensive agent statistics."""
         uptime = time.time() - self._start_time
         
@@ -524,3 +540,4 @@ class Agent:
         if hasattr(self, 'session'):
             self.session.close()
         logger.info(f"Agent session closed. Stats: {self.get_stats()}")
+
