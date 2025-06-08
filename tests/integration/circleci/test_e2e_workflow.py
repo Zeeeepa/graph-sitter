@@ -5,12 +5,12 @@ End-to-end integration tests for CircleCI extension workflow
 import pytest
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.contexten.extensions.circleci.integration_agent import CircleCIIntegrationAgent
-from src.contexten.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
-from src.contexten.extensions.circleci.types import (
+from graph_sitter.extensions.circleci.integration_agent import CircleCIIntegrationAgent
+from graph_sitter.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
+from graph_sitter.extensions.circleci.types import (
     CircleCIEventType, BuildStatus, FailureType, FixConfidence
 )
 
@@ -128,7 +128,7 @@ class TestE2EWorkflow:
     async def test_complete_failure_analysis_workflow(self, test_config, sample_failure_webhook, mock_circleci_client):
         """Test complete workflow from webhook to failure analysis"""
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -170,7 +170,7 @@ class TestE2EWorkflow:
     async def test_failure_analysis_task_execution(self, test_config, mock_circleci_client):
         """Test failure analysis task execution"""
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -197,7 +197,7 @@ class TestE2EWorkflow:
         test_config.auto_fix.fix_confidence_threshold = 0.1  # Low threshold for testing
         test_config.failure_analysis.enabled = True
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -227,7 +227,7 @@ class TestE2EWorkflow:
     async def test_health_monitoring(self, test_config, mock_circleci_client):
         """Test health monitoring functionality"""
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -259,7 +259,7 @@ class TestE2EWorkflow:
     async def test_metrics_collection(self, test_config, sample_failure_webhook, mock_circleci_client):
         """Test metrics collection throughout workflow"""
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -298,7 +298,7 @@ class TestE2EWorkflow:
         # Make client health check fail initially
         mock_circleci_client.health_check = AsyncMock(side_effect=[False, True, True])
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -338,7 +338,7 @@ class TestE2EWorkflow:
     async def test_task_cancellation(self, test_config, mock_circleci_client):
         """Test task cancellation functionality"""
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -409,7 +409,7 @@ class TestIntegrationConfiguration:
     async def test_agent_initialization_with_config(self, test_config):
         """Test agent initialization with configuration"""
         
-        with patch('src.contexten.extensions.circleci.client.CircleCIClient') as mock_client_class:
+        with patch('graph_sitter.extensions.circleci.client.CircleCIClient') as mock_client_class:
             mock_client = MagicMock()
             mock_client.health_check = AsyncMock(return_value=True)
             mock_client.close = AsyncMock()
@@ -440,7 +440,7 @@ class TestPerformanceAndScaling:
     async def test_concurrent_webhook_processing(self, test_config, sample_failure_webhook, mock_circleci_client):
         """Test concurrent webhook processing"""
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -476,7 +476,7 @@ class TestPerformanceAndScaling:
         # Set small queue size
         test_config.webhook.max_queue_size = 2
         
-        with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+        with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
             agent = CircleCIIntegrationAgent(test_config)
             
             try:
@@ -510,7 +510,7 @@ class TestPerformanceAndScaling:
 async def test_agent_context_manager(test_config, mock_circleci_client):
     """Test agent as context manager"""
     
-    with patch('src.contexten.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
+    with patch('graph_sitter.extensions.circleci.integration_agent.CircleCIClient', return_value=mock_circleci_client):
         async with CircleCIIntegrationAgent(test_config) as agent:
             assert agent.is_running is True
             
@@ -520,4 +520,3 @@ async def test_agent_context_manager(test_config, mock_circleci_client):
         
         # Should be stopped after context exit
         assert agent.is_running is False
-

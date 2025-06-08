@@ -6,7 +6,7 @@ from codeowners import CodeOwners
 def example_codeowners_file_contents() -> str:
     return """# CODEOWNERS file example
 
-/src/codemods   @user-a
+/src/graph_sitter/codemods   @user-a
 /src/codegen    @org/team1
 /src/graph_sitter/adapters/codemods   @user-a
 """
@@ -25,5 +25,6 @@ def test_codebase_codeowners(codebase, example_codeowners_file_contents):
         assert _file.filepath.startswith("src/codegen")
 
     for _file in codeowners_by_name["@user-a"]:
-        assert _file.filepath.startswith("src/codemods")
+        assert _file.filepath.startswith("src/graph_sitter/codemods")
         assert _file.filepath.startswith("src/graph_sitter/adapters/codemods")
+

@@ -1,4 +1,4 @@
-from .codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.expressions.generic_type import GenericType
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage

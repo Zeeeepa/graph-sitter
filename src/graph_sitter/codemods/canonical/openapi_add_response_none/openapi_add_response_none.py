@@ -1,4 +1,4 @@
-from .codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.detached_symbols.decorator import Decorator
 from graph_sitter.core.symbol import Symbol
