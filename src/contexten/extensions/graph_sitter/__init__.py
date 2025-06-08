@@ -1,141 +1,70 @@
 """
-Graph-sitter adapters for enhanced codebase analysis and visualization.
+Graph_Sitter Extension for Contexten
 
-This package provides comprehensive adapters for analyzing codebases using tree-sitter,
-with specialized modules for analysis, visualization, and code modification functionality.
+Comprehensive codebase analysis using the actual graph_sitter API.
+Provides real issue detection, complexity analysis, security scanning, and more.
+
+Main Components:
+- dead_code_detector: Find and remove unused code
+- complexity_analyzer: Analyze cyclomatic complexity and maintainability
+- dependency_analyzer: Analyze imports and circular dependencies  
+- security_analyzer: Detect security vulnerabilities
+- call_graph_analyzer: Analyze function call relationships
+- main_analyzer: Comprehensive analysis combining all modules
+
+Usage:
+    from contexten.extensions.graph_sitter import comprehensive_analysis
+    from graph_sitter import Codebase
+    
+    # Run comprehensive analysis
+    codebase = Codebase("./my_project")
+    results = comprehensive_analysis(codebase)
+    
+    # Or run individual analyzers
+    from contexten.extensions.graph_sitter.analysis.dead_code_detector import detect_dead_code
+    dead_code_results = detect_dead_code(codebase)
 """
 
-# Analysis module
-from .analysis import (
-    analyze_codebase,
-    ComprehensiveAnalysisEngine,
-    AnalysisConfig,
-    AnalysisResult,
-    AnalysisPresets,
-    ImportLoop,
-    DeadCodeItem,
-    TrainingDataItem,
-    EnhancedFunctionMetrics,
-    EnhancedClassMetrics,
-    GraphAnalysisResult,
-)
+# Import main analysis functions for easy access
+from .analysis.main_analyzer import comprehensive_analysis, print_analysis_summary, save_analysis_report
 
-# Visualization adapters (if available)
-try:
-    from .visualizations import (
-        # Configuration
-        VisualizationConfig,
-        VisualizationType,
-        OutputFormat,
-        CallTraceConfig,
-        DependencyTraceConfig,
-        BlastRadiusConfig,
-        MethodRelationshipsConfig,
-        create_config,
-        get_default_config,
-        DEFAULT_COLOR_PALETTE,
-        
-        # Base classes
-        BaseVisualizationAdapter,
-        VisualizationResult,
-        FunctionCallMixin,
-        DependencyMixin,
-        UsageMixin,
-        
-        # Specific visualizers
-        CallTraceVisualizer,
-        DependencyTraceVisualizer,
-        BlastRadiusVisualizer,
-        MethodRelationshipsVisualizer,
-        UnifiedVisualizationManager,
-        
-        # React visualizations
-        ReactVisualizationGenerator,
-        create_react_visualizations,
-    )
-    VISUALIZATIONS_AVAILABLE = True
-except ImportError:
-    VISUALIZATIONS_AVAILABLE = False
+# Import individual analyzers
+from .analysis.dead_code_detector import detect_dead_code, remove_dead_code
+from .analysis.complexity_analyzer import analyze_complexity, find_complex_functions, find_large_functions
+from .analysis.dependency_analyzer import analyze_dependencies, detect_circular_dependencies, analyze_module_coupling
+from .analysis.security_analyzer import analyze_security, check_import_security
+from .analysis.call_graph_analyzer import analyze_call_graph, find_hotspot_functions
 
 __all__ = [
-    # Core analysis engine
-    'ComprehensiveAnalysisEngine',
-    'AnalysisConfig',
-    'AnalysisResult',
-    'analyze_codebase',
-    'quick_analysis',
+    # Main analysis functions
     'comprehensive_analysis',
-    'basic_analysis',
-    'AnalysisPresets',
+    'print_analysis_summary', 
+    'save_analysis_report',
     
-    # Data classes
-    'ImportLoop',
-    'DeadCodeItem',
-    'TrainingDataItem',
-    'EnhancedFunctionMetrics',
-    'EnhancedClassMetrics',
-    'GraphAnalysisResult',
+    # Dead code analysis
+    'detect_dead_code',
+    'remove_dead_code',
     
-    # Enhanced analysis
-    'get_codebase_summary_enhanced',
-    'analyze_function_enhanced',
-    'analyze_class_enhanced',
-    'get_function_context',
-    'analyze_graph_structure',
+    # Complexity analysis
+    'analyze_complexity',
+    'find_complex_functions',
+    'find_large_functions',
     
-    # Metrics
-    'calculate_cyclomatic_complexity',
-    'calculate_halstead_volume',
-    'calculate_maintainability_index',
+    # Dependency analysis
+    'analyze_dependencies',
+    'detect_circular_dependencies',
+    'analyze_module_coupling',
     
-    # Legacy compatibility
-    'get_codebase_summary',
-    'print_codebase_overview',
-    'analyze_symbol_usage',
-    'find_recursive_functions',
-    'find_dead_code',
-    'generate_dead_code_report',
-    'analyze_import_relationships',
-    'detect_circular_imports',
-    'analyze_inheritance_chains',
-    'detect_design_patterns',
-    'analyze_test_coverage',
-    'get_test_statistics',
-    'ai_analyze_codebase',
-    'flag_code_issues',
-    'legacy_generate_training_data'
+    # Security analysis
+    'analyze_security',
+    'check_import_security',
+    
+    # Call graph analysis
+    'analyze_call_graph',
+    'find_hotspot_functions'
 ]
 
-# Add visualization exports if available
-if VISUALIZATIONS_AVAILABLE:
-    __all__.extend([
-        # Visualization configuration
-        'VisualizationConfig',
-        'VisualizationType',
-        'OutputFormat',
-        'CallTraceConfig',
-        'DependencyTraceConfig',
-        'BlastRadiusConfig',
-        'MethodRelationshipsConfig',
-        'create_config',
-        'get_default_config',
-        'DEFAULT_COLOR_PALETTE',
-        
-        # Base classes
-        'BaseVisualizationAdapter',
-        'VisualizationResult',
-        'FunctionCallMixin',
-        'DependencyMixin',
-        'UsageMixin',
-        
-        # Specific visualizers
-        'CallTraceVisualizer',
-        'DependencyTraceVisualizer',
-        'BlastRadiusVisualizer',
-        'MethodRelationshipsVisualizer',
-        'UnifiedVisualizationManager',
-        
-        # React visualizations
-        'ReactVisualizationGenerator',
-        'create_react_visualizations',
-    ])
+# Version info
+__version__ = "1.0.0"
+__description__ = "Comprehensive codebase analysis using graph_sitter API"
+
