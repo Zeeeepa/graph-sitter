@@ -1,25 +1,10 @@
+#!/usr/bin/env python3
 """
 GitHub Extension for Contexten
-
-Provides comprehensive GitHub integration with webhook handling, 
-repository management, and event processing.
+Provides GitHub integration capabilities for repository management, PR handling, and issue tracking.
 """
 
-from .github import GitHub, GitHubEventHandler
-from .github_types import GitHubWebhookPayload
-from .types.base import GitHubInstallation
-from .types.pull_request import PullRequest
-from .types.push import Push
-from .types.commit import Commit
+from .github_integration import GitHubIntegration
 
-__version__ = "1.0.0"
-__all__ = [
-    "GitHub",
-    "GitHubEventHandler",
-    "GitHubWebhookPayload",
-    "GitHubInstallation",
-    "PullRequest", 
-    "Push",
-    "Commit"
-]
+__all__ = ["GitHubIntegration"]
 

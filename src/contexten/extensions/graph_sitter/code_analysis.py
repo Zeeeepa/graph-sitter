@@ -1,451 +1,507 @@
-#!/usr/bin/env python3
 """
-🚀 SUPER COMPREHENSIVE SINGLE-MODE ANALYSIS 🚀
-
-Simple, powerful single-function interface for complete codebase analysis
-with interactive exploration capabilities.
-
-Usage:
-    from graph_sitter.adapters.code_analysis import analyze_codebase
-    result = analyze_codebase("/path/to/code")
-    print(f"Explore your code at: {result.interactive_url}")
-
-Features:
-- Complete analysis in one function call
-- Interactive web interface for exploration
-- All Phase 1 & Phase 2 features enabled
-- Automatic report generation
-- Local web server for exploration
-- Comprehensive results with insights
+Graph Sitter Code Analysis Engine
+Provides comprehensive code analysis and PR validation capabilities.
 """
 
+import asyncio
 import logging
-import time
-import webbrowser
-import threading
-from pathlib import Path
-from typing import Union, Optional, Dict, Any
-from dataclasses import dataclass, field
-import tempfile
+import uuid
+import subprocess
 import os
-import json
+from typing import Dict, List, Any, Optional
+from datetime import datetime
+from pathlib import Path
+
+from ..base.interfaces import BaseAnalysisEngine
 
 logger = logging.getLogger(__name__)
 
-# Import the comprehensive analysis system
-try:
-    from .analysis import (
-        ComprehensiveAnalysisEngine,
-        AnalysisConfig,
-        AnalysisResult,
-        AnalysisPresets
-    )
-    ANALYSIS_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"Analysis system not available: {e}")
-    ANALYSIS_AVAILABLE = False
 
-# Try to import web server capabilities
-try:
-    import http.server
-    import socketserver
-    from urllib.parse import urlparse, parse_qs
-    WEB_SERVER_AVAILABLE = True
-except ImportError:
-    WEB_SERVER_AVAILABLE = False
-
-# Try to import additional dependencies
-try:
-    import webbrowser
-    BROWSER_AVAILABLE = True
-except ImportError:
-    BROWSER_AVAILABLE = False
-
-
-@dataclass
-class CodeAnalysisResult:
-    """
-    Comprehensive analysis result with interactive exploration capabilities.
-    """
-    # Basic information
-    path: str
-    analysis_time: float
-    timestamp: str
+class ComprehensiveAnalysisEngine(BaseAnalysisEngine):
+    """Comprehensive code analysis engine using Graph Sitter."""
     
-    # Core metrics
-    total_files: int = 0
-    total_functions: int = 0
-    total_classes: int = 0
-    total_lines: int = 0
-    
-    # Analysis results
-    import_loops: int = 0
-    dead_code_items: int = 0
-    training_data_items: int = 0
-    security_issues: int = 0
-    performance_issues: int = 0
-    quality_score: float = 0.0
-    
-    # Interactive exploration
-    interactive_url: Optional[str] = None
-    report_path: Optional[str] = None
-    web_server_port: Optional[int] = None
-    
-    # Detailed results (hidden from simple interface)
-    _detailed_results: Optional[AnalysisResult] = field(default=None, repr=False)
-    _web_server: Optional[Any] = field(default=None, repr=False)
-    
-    def __str__(self) -> str:
-        """String representation of analysis results."""
-        return f"""
-🚀 COMPREHENSIVE CODE ANALYSIS COMPLETE
-{'=' * 50}
-📁 Path: {self.path}
-⏱️  Analysis Time: {self.analysis_time:.2f}s
-📊 Files: {self.total_files} | Functions: {self.total_functions} | Classes: {self.total_classes}
-📏 Lines of Code: {self.total_lines:,}
-
-🔍 ANALYSIS RESULTS
-Import Loops: {self.import_loops}
-Dead Code: {self.dead_code_items}
-Security Issues: {self.security_issues}
-Performance Issues: {self.performance_issues}
-Quality Score: {self.quality_score:.1f}/10
-
-🌐 INTERACTIVE EXPLORATION
-{f"🔗 Open: {self.interactive_url}" if self.interactive_url else "❌ Interactive URL not available"}
-{f"📄 Report: {self.report_path}" if self.report_path else ""}
-        """.strip()
-    
-    def open_browser(self):
-        """Open the interactive analysis in the default browser."""
-        if self.interactive_url and BROWSER_AVAILABLE:
-            webbrowser.open(self.interactive_url)
-            print(f"🌐 Opening interactive analysis: {self.interactive_url}")
-        else:
-            print("❌ Browser opening not available")
-    
-    def stop_server(self):
-        """Stop the web server if running."""
-        if self._web_server:
-            try:
-                self._web_server.shutdown()
-                print("🛑 Web server stopped")
-            except Exception as e:
-                logger.warning(f"Error stopping web server: {e}")
-
-
-class InteractiveWebServer:
-    """Simple web server for interactive code exploration."""
-    
-    def __init__(self, report_path: str, port: int = 8000):
-        self.report_path = report_path
-        self.port = port
-        self.server = None
-        self.thread = None
-    
-    def start(self) -> str:
-        """Start the web server and return the URL."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        super().__init__(config)
+        self.analysis_cache: Dict[str, Dict[str, Any]] = {}
+        self.pr_validations: Dict[str, Dict[str, Any]] = {}
+        
+        # Try to import graph_sitter if available
         try:
-            # Create a simple HTTP handler
-            class AnalysisHandler(http.server.SimpleHTTPRequestHandler):
-                def __init__(self, *args, **kwargs):
-                    super().__init__(*args, directory=os.path.dirname(report_path), **kwargs)
+            import tree_sitter
+            self.tree_sitter_available = True
+            self.logger.info("Tree-sitter library available")
+        except ImportError:
+            self.tree_sitter_available = False
+            self.logger.warning("Tree-sitter library not available, using fallback analysis")
+    
+    async def _initialize_impl(self) -> None:
+        """Initialize the analysis engine."""
+        self.logger.info("Initializing Graph Sitter analysis engine")
+        
+        # Initialize any required parsers or analysis tools
+        if self.tree_sitter_available:
+            await self._initialize_parsers()
+    
+    async def _initialize_parsers(self) -> None:
+        """Initialize tree-sitter parsers for different languages."""
+        try:
+            # This would initialize parsers for different languages
+            # For now, we'll just log that we're ready
+            self.logger.info("Tree-sitter parsers initialized")
+        except Exception as e:
+            self.logger.warning(f"Failed to initialize parsers: {e}")
+    
+    async def _handle_impl(self, payload: Dict[str, Any], request: Any = None) -> Dict[str, Any]:
+        """Handle analysis requests."""
+        action = payload.get("action")
+        
+        if action == "analyze_code":
+            result = await self.analyze_code(
+                payload.get("code_path", ""),
+                payload.get("analysis_type", "comprehensive")
+            )
+            return {"analysis_id": result.get("analysis_id"), "status": "completed", "result": result}
+        elif action == "validate_pr":
+            result = await self.validate_pr(payload.get("pr_data", {}))
+            return {"validation_id": result.get("validation_id"), "status": "completed", "result": result}
+        elif action == "get_analysis_report":
+            return await self.get_analysis_report(payload.get("analysis_id"))
+        else:
+            return {"error": f"Unknown action: {action}", "status": "failed"}
+    
+    async def analyze_code(self, code_path: str, analysis_type: str = "comprehensive") -> Dict[str, Any]:
+        """Analyze code at the given path."""
+        analysis_id = str(uuid.uuid4())
+        
+        analysis_result = {
+            "analysis_id": analysis_id,
+            "code_path": code_path,
+            "analysis_type": analysis_type,
+            "status": "running",
+            "started_at": datetime.utcnow().isoformat(),
+            "issues": [],
+            "metrics": {},
+            "suggestions": []
+        }
+        
+        self.analysis_cache[analysis_id] = analysis_result
+        
+        try:
+            # Check if path exists
+            if not os.path.exists(code_path):
+                raise FileNotFoundError(f"Code path not found: {code_path}")
+            
+            # Perform different types of analysis
+            if analysis_type == "comprehensive":
+                await self._comprehensive_analysis(code_path, analysis_result)
+            elif analysis_type == "syntax":
+                await self._syntax_analysis(code_path, analysis_result)
+            elif analysis_type == "quality":
+                await self._quality_analysis(code_path, analysis_result)
+            else:
+                await self._basic_analysis(code_path, analysis_result)
+            
+            analysis_result["status"] = "completed"
+            analysis_result["completed_at"] = datetime.utcnow().isoformat()
+            
+            self.logger.info(f"Code analysis completed: {analysis_id}")
+            
+        except Exception as e:
+            analysis_result["status"] = "failed"
+            analysis_result["error"] = str(e)
+            analysis_result["failed_at"] = datetime.utcnow().isoformat()
+            
+            self.logger.error(f"Code analysis failed: {e}")
+        
+        return analysis_result
+    
+    async def validate_pr(self, pr_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate a pull request."""
+        validation_id = str(uuid.uuid4())
+        
+        validation_result = {
+            "validation_id": validation_id,
+            "pr_number": pr_data.get("number"),
+            "pr_title": pr_data.get("title"),
+            "status": "running",
+            "started_at": datetime.utcnow().isoformat(),
+            "checks": {},
+            "overall_score": 0,
+            "recommendations": []
+        }
+        
+        self.pr_validations[validation_id] = validation_result
+        
+        try:
+            # Validate different aspects of the PR
+            await self._validate_pr_structure(pr_data, validation_result)
+            await self._validate_code_changes(pr_data, validation_result)
+            await self._validate_tests(pr_data, validation_result)
+            await self._validate_documentation(pr_data, validation_result)
+            
+            # Calculate overall score
+            validation_result["overall_score"] = self._calculate_pr_score(validation_result)
+            
+            validation_result["status"] = "completed"
+            validation_result["completed_at"] = datetime.utcnow().isoformat()
+            
+            self.logger.info(f"PR validation completed: {validation_id}")
+            
+        except Exception as e:
+            validation_result["status"] = "failed"
+            validation_result["error"] = str(e)
+            validation_result["failed_at"] = datetime.utcnow().isoformat()
+            
+            self.logger.error(f"PR validation failed: {e}")
+        
+        return validation_result
+    
+    async def get_analysis_report(self, analysis_id: str) -> Dict[str, Any]:
+        """Get analysis report."""
+        if analysis_id in self.analysis_cache:
+            return self.analysis_cache[analysis_id]
+        elif analysis_id in self.pr_validations:
+            return self.pr_validations[analysis_id]
+        else:
+            return {"error": f"Analysis {analysis_id} not found", "status": "not_found"}
+    
+    async def _comprehensive_analysis(self, code_path: str, result: Dict[str, Any]) -> None:
+        """Perform comprehensive code analysis."""
+        # Syntax analysis
+        await self._syntax_analysis(code_path, result)
+        
+        # Quality analysis
+        await self._quality_analysis(code_path, result)
+        
+        # Security analysis
+        await self._security_analysis(code_path, result)
+        
+        # Performance analysis
+        await self._performance_analysis(code_path, result)
+    
+    async def _syntax_analysis(self, code_path: str, result: Dict[str, Any]) -> None:
+        """Perform syntax analysis."""
+        if self.tree_sitter_available:
+            # Use tree-sitter for syntax analysis
+            syntax_issues = await self._tree_sitter_syntax_check(code_path)
+        else:
+            # Fallback to basic syntax checking
+            syntax_issues = await self._basic_syntax_check(code_path)
+        
+        result["issues"].extend(syntax_issues)
+        result["metrics"]["syntax_errors"] = len(syntax_issues)
+    
+    async def _quality_analysis(self, code_path: str, result: Dict[str, Any]) -> None:
+        """Perform code quality analysis."""
+        quality_issues = []
+        
+        # Check for common quality issues
+        if os.path.isfile(code_path):
+            quality_issues.extend(await self._analyze_file_quality(code_path))
+        elif os.path.isdir(code_path):
+            for root, dirs, files in os.walk(code_path):
+                for file in files:
+                    if file.endswith(('.py', '.js', '.ts', '.java', '.cpp', '.c')):
+                        file_path = os.path.join(root, file)
+                        quality_issues.extend(await self._analyze_file_quality(file_path))
+        
+        result["issues"].extend(quality_issues)
+        result["metrics"]["quality_issues"] = len(quality_issues)
+    
+    async def _security_analysis(self, code_path: str, result: Dict[str, Any]) -> None:
+        """Perform security analysis."""
+        security_issues = []
+        
+        # Basic security checks
+        if os.path.isfile(code_path):
+            security_issues.extend(await self._check_file_security(code_path))
+        elif os.path.isdir(code_path):
+            for root, dirs, files in os.walk(code_path):
+                for file in files:
+                    if file.endswith(('.py', '.js', '.ts', '.java', '.cpp', '.c')):
+                        file_path = os.path.join(root, file)
+                        security_issues.extend(await self._check_file_security(file_path))
+        
+        result["issues"].extend(security_issues)
+        result["metrics"]["security_issues"] = len(security_issues)
+    
+    async def _performance_analysis(self, code_path: str, result: Dict[str, Any]) -> None:
+        """Perform performance analysis."""
+        performance_issues = []
+        
+        # Basic performance checks
+        if os.path.isfile(code_path):
+            performance_issues.extend(await self._check_file_performance(code_path))
+        elif os.path.isdir(code_path):
+            for root, dirs, files in os.walk(code_path):
+                for file in files:
+                    if file.endswith(('.py', '.js', '.ts', '.java', '.cpp', '.c')):
+                        file_path = os.path.join(root, file)
+                        performance_issues.extend(await self._check_file_performance(file_path))
+        
+        result["issues"].extend(performance_issues)
+        result["metrics"]["performance_issues"] = len(performance_issues)
+    
+    async def _basic_analysis(self, code_path: str, result: Dict[str, Any]) -> None:
+        """Perform basic code analysis."""
+        await self._syntax_analysis(code_path, result)
+    
+    async def _tree_sitter_syntax_check(self, code_path: str) -> List[Dict[str, Any]]:
+        """Use tree-sitter for syntax checking."""
+        issues = []
+        
+        try:
+            # This would use tree-sitter to parse and check syntax
+            # For now, return empty list as placeholder
+            pass
+        except Exception as e:
+            issues.append({
+                "type": "syntax_error",
+                "severity": "error",
+                "message": f"Tree-sitter parsing failed: {e}",
+                "file": code_path,
+                "line": 1
+            })
+        
+        return issues
+    
+    async def _basic_syntax_check(self, code_path: str) -> List[Dict[str, Any]]:
+        """Basic syntax checking without tree-sitter."""
+        issues = []
+        
+        if code_path.endswith('.py'):
+            # Use Python's ast module for basic syntax checking
+            try:
+                with open(code_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
                 
-                def do_GET(self):
-                    if self.path == '/' or self.path == '/index.html':
-                        # Serve the analysis report
-                        self.path = '/' + os.path.basename(report_path)
-                    super().do_GET()
+                import ast
+                ast.parse(content)
                 
-                def log_message(self, format, *args):
-                    # Suppress server logs
-                    pass
+            except SyntaxError as e:
+                issues.append({
+                    "type": "syntax_error",
+                    "severity": "error",
+                    "message": str(e),
+                    "file": code_path,
+                    "line": e.lineno or 1
+                })
+            except Exception as e:
+                issues.append({
+                    "type": "parse_error",
+                    "severity": "warning",
+                    "message": f"Could not parse file: {e}",
+                    "file": code_path,
+                    "line": 1
+                })
+        
+        return issues
+    
+    async def _analyze_file_quality(self, file_path: str) -> List[Dict[str, Any]]:
+        """Analyze file quality."""
+        issues = []
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
             
-            # Find available port
-            for port_attempt in range(self.port, self.port + 100):
-                try:
-                    self.server = socketserver.TCPServer(("", port_attempt), AnalysisHandler)
-                    self.port = port_attempt
-                    break
-                except OSError:
-                    continue
+            # Check for long lines
+            for i, line in enumerate(lines, 1):
+                if len(line.rstrip()) > 120:
+                    issues.append({
+                        "type": "line_too_long",
+                        "severity": "warning",
+                        "message": f"Line too long ({len(line.rstrip())} characters)",
+                        "file": file_path,
+                        "line": i
+                    })
             
-            if not self.server:
-                raise Exception("No available ports found")
-            
-            # Start server in background thread
-            self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-            self.thread.start()
-            
-            url = f"http://localhost:{self.port}"
-            logger.info(f"Web server started at {url}")
-            return url
+            # Check for large functions (basic heuristic)
+            if file_path.endswith('.py'):
+                function_lines = 0
+                in_function = False
+                function_start = 0
+                
+                for i, line in enumerate(lines, 1):
+                    stripped = line.strip()
+                    if stripped.startswith('def ') or stripped.startswith('async def '):
+                        if in_function and function_lines > 50:
+                            issues.append({
+                                "type": "function_too_long",
+                                "severity": "warning",
+                                "message": f"Function is too long ({function_lines} lines)",
+                                "file": file_path,
+                                "line": function_start
+                            })
+                        in_function = True
+                        function_start = i
+                        function_lines = 1
+                    elif in_function:
+                        if stripped and not line.startswith(' ') and not line.startswith('\t'):
+                            # End of function
+                            if function_lines > 50:
+                                issues.append({
+                                    "type": "function_too_long",
+                                    "severity": "warning",
+                                    "message": f"Function is too long ({function_lines} lines)",
+                                    "file": file_path,
+                                    "line": function_start
+                                })
+                            in_function = False
+                            function_lines = 0
+                        else:
+                            function_lines += 1
         
         except Exception as e:
-            logger.error(f"Failed to start web server: {e}")
-            return None
-    
-    def stop(self):
-        """Stop the web server."""
-        if self.server:
-            self.server.shutdown()
-            self.server.server_close()
-        if self.thread:
-            self.thread.join(timeout=1.0)
-
-
-def analyze_codebase(
-    path: Union[str, Path],
-    auto_open: bool = True,
-    port: int = 8000,
-    include_interactive: bool = True
-) -> CodeAnalysisResult:
-    """
-    🚀 SUPER COMPREHENSIVE SINGLE-MODE ANALYSIS
-    
-    Performs complete codebase analysis with all features enabled and
-    creates an interactive web interface for exploration.
-    
-    Args:
-        path: Path to the codebase to analyze
-        auto_open: Automatically open browser to interactive analysis
-        port: Port for web server (will find available port if busy)
-        include_interactive: Generate interactive web interface
-    
-    Returns:
-        CodeAnalysisResult with interactive exploration capabilities
-    
-    Example:
-        >>> from graph_sitter.adapters.code_analysis import analyze_codebase
-        >>> result = analyze_codebase("/path/to/code")
-        >>> print(result)
-        >>> result.open_browser()  # Open interactive analysis
-    """
-    start_time = time.time()
-    path_str = str(path)
-    
-    print(f"🚀 Starting comprehensive analysis of: {path_str}")
-    
-    if not ANALYSIS_AVAILABLE:
-        print("❌ Analysis system not available")
-        return CodeAnalysisResult(
-            path=path_str,
-            analysis_time=0.0,
-            timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
-            interactive_url=None
-        )
-    
-    try:
-        # Create comprehensive configuration with all features enabled
-        config = AnalysisConfig(
-            # Phase 1 features - all enabled
-            detect_import_loops=True,
-            detect_dead_code=True,
-            generate_training_data=True,
-            analyze_graph_structure=True,
-            enhanced_metrics=True,
-            
-            # Phase 2 features - all enabled
-            enable_query_patterns=True,
-            query_categories=['function', 'class', 'security', 'performance', 'design_pattern'],
-            generate_html_report=include_interactive,
-            report_theme='professional',
-            include_interactive_charts=True,
-            
-            # Performance optimization
-            enable_performance_optimization=True,
-            enable_caching=True,
-            enable_parallel_processing=True,
-            cache_backend='memory',
-            
-            # Advanced configuration
-            optimization_level='balanced',
-            enable_lazy_graph=True,
-            enable_method_usages=True,
-            enable_generics=True,
-            
-            # Limits for comprehensive analysis
-            max_functions=1000,
-            max_classes=500
-        )
+            issues.append({
+                "type": "analysis_error",
+                "severity": "warning",
+                "message": f"Could not analyze file: {e}",
+                "file": file_path,
+                "line": 1
+            })
         
-        # Create and run analysis engine
-        engine = ComprehensiveAnalysisEngine(config)
-        detailed_result = engine.analyze(path, config)
-        
-        # Calculate quality score
-        quality_score = _calculate_quality_score(detailed_result)
-        
-        # Count issues
-        security_issues = sum(1 for qr in detailed_result.query_results 
-                            if hasattr(qr, 'pattern') and qr.pattern.category == 'security')
-        performance_issues = sum(1 for qr in detailed_result.query_results 
-                               if hasattr(qr, 'pattern') and qr.pattern.category == 'performance')
-        
-        # Create result object
-        result = CodeAnalysisResult(
-            path=path_str,
-            analysis_time=time.time() - start_time,
-            timestamp=detailed_result.timestamp,
-            total_files=detailed_result.total_files,
-            total_functions=detailed_result.total_functions,
-            total_classes=detailed_result.total_classes,
-            total_lines=detailed_result.total_lines,
-            import_loops=len(detailed_result.import_loops),
-            dead_code_items=len(detailed_result.dead_code),
-            training_data_items=len(detailed_result.training_data),
-            security_issues=security_issues,
-            performance_issues=performance_issues,
-            quality_score=quality_score,
-            report_path=detailed_result.html_report_path,
-            _detailed_results=detailed_result
-        )
-        
-        # Set up interactive web server if report was generated
-        if include_interactive and detailed_result.html_report_path and WEB_SERVER_AVAILABLE:
-            try:
-                web_server = InteractiveWebServer(detailed_result.html_report_path, port)
-                interactive_url = web_server.start()
-                
-                if interactive_url:
-                    result.interactive_url = interactive_url
-                    result.web_server_port = web_server.port
-                    result._web_server = web_server
-                    
-                    print(f"🌐 Interactive analysis available at: {interactive_url}")
-                    
-                    # Auto-open browser if requested
-                    if auto_open and BROWSER_AVAILABLE:
-                        threading.Timer(1.0, lambda: webbrowser.open(interactive_url)).start()
-                        print("🔗 Opening in browser...")
-            
-            except Exception as e:
-                logger.warning(f"Could not start web server: {e}")
-        
-        # Print summary
-        print(f"✅ Analysis complete in {result.analysis_time:.2f}s")
-        print(f"📊 Analyzed {result.total_files} files, {result.total_functions} functions, {result.total_classes} classes")
-        
-        if result.import_loops > 0:
-            print(f"⚠️  Found {result.import_loops} import loops")
-        if result.dead_code_items > 0:
-            print(f"🗑️  Found {result.dead_code_items} dead code items")
-        if result.security_issues > 0:
-            print(f"🔒 Found {result.security_issues} security issues")
-        if result.performance_issues > 0:
-            print(f"⚡ Found {result.performance_issues} performance issues")
-        
-        print(f"🏆 Quality Score: {result.quality_score:.1f}/10")
-        
-        return result
+        return issues
     
-    except Exception as e:
-        logger.error(f"Analysis failed: {e}")
-        return CodeAnalysisResult(
-            path=path_str,
-            analysis_time=time.time() - start_time,
-            timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
-            interactive_url=None
-        )
-
-
-def _calculate_quality_score(result: AnalysisResult) -> float:
-    """Calculate a quality score from 0-10 based on analysis results."""
-    try:
-        score = 10.0  # Start with perfect score
-        
-        # Deduct for issues
-        if result.total_functions > 0:
-            # Import loops penalty
-            import_loop_ratio = len(result.import_loops) / max(result.total_files, 1)
-            score -= min(import_loop_ratio * 20, 3.0)  # Max 3 points deduction
-            
-            # Dead code penalty
-            dead_code_ratio = len(result.dead_code) / max(result.total_functions, 1)
-            score -= min(dead_code_ratio * 10, 2.0)  # Max 2 points deduction
-            
-            # Security issues penalty
-            security_issues = sum(1 for qr in result.query_results 
-                                if hasattr(qr, 'pattern') and qr.pattern.category == 'security')
-            if security_issues > 0:
-                score -= min(security_issues * 0.5, 2.0)  # Max 2 points deduction
-            
-            # Performance issues penalty
-            performance_issues = sum(1 for qr in result.query_results 
-                                   if hasattr(qr, 'pattern') and qr.pattern.category == 'performance')
-            if performance_issues > 0:
-                score -= min(performance_issues * 0.3, 1.5)  # Max 1.5 points deduction
-            
-            # Function complexity bonus/penalty
-            if result.enhanced_function_metrics:
-                avg_complexity = sum(f.complexity for f in result.enhanced_function_metrics) / len(result.enhanced_function_metrics)
-                if avg_complexity > 10:
-                    score -= min((avg_complexity - 10) * 0.1, 1.5)  # Penalty for high complexity
-                elif avg_complexity < 5:
-                    score += 0.5  # Bonus for low complexity
-        
-        return max(0.0, min(10.0, score))  # Clamp between 0 and 10
-    
-    except Exception as e:
-        logger.warning(f"Error calculating quality score: {e}")
-        return 5.0  # Default neutral score
-
-
-def quick_analyze(path: Union[str, Path]) -> CodeAnalysisResult:
-    """
-    Quick analysis with performance optimizations.
-    
-    Args:
-        path: Path to the codebase to analyze
-    
-    Returns:
-        CodeAnalysisResult with basic metrics
-    """
-    return analyze_codebase(path, auto_open=False, include_interactive=False)
-
-
-def analyze_and_explore(path: Union[str, Path], port: int = 8000) -> CodeAnalysisResult:
-    """
-    Comprehensive analysis with automatic browser opening.
-    
-    Args:
-        path: Path to the codebase to analyze
-        port: Port for web server
-    
-    Returns:
-        CodeAnalysisResult with interactive exploration
-    """
-    return analyze_codebase(path, auto_open=True, port=port, include_interactive=True)
-
-
-# Convenience aliases
-analyze = analyze_codebase
-comprehensive_analysis = analyze_codebase
-
-
-if __name__ == "__main__":
-    import sys
-    
-    if len(sys.argv) < 2:
-        print("Usage: python -m graph_sitter.adapters.code_analysis <path>")
-        sys.exit(1)
-    
-    path = sys.argv[1]
-    print(f"🚀 Analyzing: {path}")
-    
-    result = analyze_codebase(path)
-    print(result)
-    
-    if result.interactive_url:
-        print(f"\n🌐 Interactive analysis: {result.interactive_url}")
-        print("Press Ctrl+C to stop the server")
+    async def _check_file_security(self, file_path: str) -> List[Dict[str, Any]]:
+        """Check file for security issues."""
+        issues = []
         
         try:
-            # Keep the server running
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            print("\n🛑 Stopping server...")
-            result.stop_server()
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Check for potential security issues
+            security_patterns = [
+                ('password', 'Potential hardcoded password'),
+                ('api_key', 'Potential hardcoded API key'),
+                ('secret', 'Potential hardcoded secret'),
+                ('eval(', 'Use of eval() function'),
+                ('exec(', 'Use of exec() function'),
+            ]
+            
+            lines = content.split('\n')
+            for i, line in enumerate(lines, 1):
+                line_lower = line.lower()
+                for pattern, message in security_patterns:
+                    if pattern in line_lower and not line.strip().startswith('#'):
+                        issues.append({
+                            "type": "security_warning",
+                            "severity": "warning",
+                            "message": message,
+                            "file": file_path,
+                            "line": i
+                        })
+        
+        except Exception as e:
+            pass  # Ignore file reading errors for security check
+        
+        return issues
+    
+    async def _check_file_performance(self, file_path: str) -> List[Dict[str, Any]]:
+        """Check file for performance issues."""
+        issues = []
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Check for potential performance issues
+            performance_patterns = [
+                ('for.*in.*range(len(', 'Consider using enumerate() instead of range(len())'),
+                ('time.sleep(', 'Consider using async sleep for better performance'),
+            ]
+            
+            lines = content.split('\n')
+            for i, line in enumerate(lines, 1):
+                for pattern, message in performance_patterns:
+                    import re
+                    if re.search(pattern, line) and not line.strip().startswith('#'):
+                        issues.append({
+                            "type": "performance_warning",
+                            "severity": "info",
+                            "message": message,
+                            "file": file_path,
+                            "line": i
+                        })
+        
+        except Exception as e:
+            pass  # Ignore file reading errors for performance check
+        
+        return issues
+    
+    async def _validate_pr_structure(self, pr_data: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """Validate PR structure."""
+        checks = {}
+        
+        # Check title
+        title = pr_data.get("title", "")
+        if len(title) < 10:
+            checks["title_length"] = {"status": "fail", "message": "PR title too short"}
+        elif len(title) > 100:
+            checks["title_length"] = {"status": "warning", "message": "PR title very long"}
+        else:
+            checks["title_length"] = {"status": "pass", "message": "PR title length OK"}
+        
+        # Check description
+        description = pr_data.get("body", "")
+        if len(description) < 20:
+            checks["description"] = {"status": "warning", "message": "PR description is very short"}
+        else:
+            checks["description"] = {"status": "pass", "message": "PR description provided"}
+        
+        result["checks"]["structure"] = checks
+    
+    async def _validate_code_changes(self, pr_data: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """Validate code changes in PR."""
+        checks = {}
+        
+        # This would analyze the actual diff/changes
+        # For now, provide basic validation
+        files_changed = pr_data.get("changed_files", 0)
+        
+        if files_changed == 0:
+            checks["files_changed"] = {"status": "fail", "message": "No files changed"}
+        elif files_changed > 20:
+            checks["files_changed"] = {"status": "warning", "message": "Many files changed, consider splitting PR"}
+        else:
+            checks["files_changed"] = {"status": "pass", "message": f"{files_changed} files changed"}
+        
+        result["checks"]["code_changes"] = checks
+    
+    async def _validate_tests(self, pr_data: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """Validate tests in PR."""
+        checks = {}
+        
+        # Check if test files are included
+        # This would analyze the actual files in the PR
+        checks["tests_included"] = {"status": "warning", "message": "Cannot verify test coverage"}
+        
+        result["checks"]["tests"] = checks
+    
+    async def _validate_documentation(self, pr_data: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """Validate documentation in PR."""
+        checks = {}
+        
+        # Check if documentation is updated
+        checks["documentation"] = {"status": "info", "message": "Documentation check not implemented"}
+        
+        result["checks"]["documentation"] = checks
+    
+    def _calculate_pr_score(self, validation_result: Dict[str, Any]) -> int:
+        """Calculate overall PR score."""
+        score = 100
+        
+        for category, checks in validation_result["checks"].items():
+            for check_name, check_result in checks.items():
+                if check_result["status"] == "fail":
+                    score -= 20
+                elif check_result["status"] == "warning":
+                    score -= 10
+        
+        return max(0, score)
+
+
+# Alias for backward compatibility and expected import name
+CodeAnalysisEngine = ComprehensiveAnalysisEngine
 

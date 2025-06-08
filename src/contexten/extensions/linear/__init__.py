@@ -1,58 +1,10 @@
-# Linear integration module exports
+#!/usr/bin/env python3
+"""
+Linear Extension for Contexten
+Provides Linear integration capabilities for issue management, project tracking, and team coordination.
+"""
 
-# Legacy components (backward compatibility)
-from .linear_client import LinearClient
-from .types import LinearUser, LinearTeam, LinearComment, LinearIssue, LinearEvent
+from .linear_integration import LinearIntegration
 
-# Comprehensive integration components
-from .config import LinearIntegrationConfig, get_linear_config, create_config_template
-from .enhanced_client import EnhancedLinearClient
-from .webhook_processor import WebhookProcessor
-from .assignment_detector import AssignmentDetector
-from .workflow_automation import WorkflowAutomation
-from .integration_agent import LinearIntegrationAgent, create_linear_integration_agent
-
-# Additional types for comprehensive integration
-from .types import (
-    LinearEventType, LinearEventAction, AssignmentAction, AssignmentEvent,
-    TaskStatus, TaskProgress, WorkflowTask, WebhookEvent, IntegrationStatus,
-    ComponentStats, LinearIntegrationMetrics
-)
-
-__version__ = "2.0.0"
-__all__ = [
-    # Legacy exports
-    "LinearClient",
-    "LinearUser", 
-    "LinearTeam",
-    "LinearComment",
-    "LinearIssue", 
-    "LinearEvent",
-    
-    # Configuration
-    "LinearIntegrationConfig",
-    "get_linear_config",
-    "create_config_template",
-    
-    # Core components
-    "EnhancedLinearClient",
-    "WebhookProcessor",
-    "AssignmentDetector", 
-    "WorkflowAutomation",
-    "LinearIntegrationAgent",
-    "create_linear_integration_agent",
-    
-    # Types
-    "LinearEventType",
-    "LinearEventAction", 
-    "AssignmentAction",
-    "AssignmentEvent",
-    "TaskStatus",
-    "TaskProgress",
-    "WorkflowTask", 
-    "WebhookEvent",
-    "IntegrationStatus",
-    "ComponentStats",
-    "LinearIntegrationMetrics"
-]
+__all__ = ["LinearIntegration"]
 
