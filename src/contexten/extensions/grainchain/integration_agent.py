@@ -68,11 +68,12 @@ class GrainchainIntegrationAgent:
         fail_fast: bool = True
     ) -> List[QualityGateResult]:
         """Run quality gates."""
-        return await self._quality_gate_manager.run_quality_gates(
+        results = await self._quality_gate_manager.run_quality_gates(
             gates=gates,
             parallel=parallel,
             fail_fast=fail_fast
         )
+        return cast(List[QualityGateResult], results)
 
     def on_event(self, event_type: GrainchainEventType) -> Callable[[Callable[[GrainchainEvent], T]], Callable[[GrainchainEvent], T]]:
         """Decorator for registering event handlers."""

@@ -450,41 +450,30 @@ class QualityGateManager:
 
 @dataclass
 class QualityGateExecution:
-    """Represents a quality gate execution."""
-    execution_id: str
-    pr_number: int | None
-    commit_sha: str | None
-    base_snapshot: str | None
-    gates: list[QualityGateType]
-    fail_fast: bool
-    started_at: datetime
-    completed_at: datetime | None = None
-    status: str = "running"
-    results: dict[QualityGateType, QualityGateResult] = None
-    error_message: str | None = None
+    """Quality gate execution details."""
 
-    def __post_init__(self):
-        if self.results is None:
-            self.results = {}
+    execution_id: str
+    pr_number: Optional[int] = None
+    commit_sha: Optional[str] = None
+    base_snapshot: Optional[str] = None
+    gates: List[QualityGateType] = field(default_factory=list)
+    fail_fast: bool = True
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    status: str = "pending"
+    error_message: Optional[str] = None
+    results: Dict[QualityGateType, QualityGateResult] = field(default_factory=dict)
 
     @property
     def duration(self) -> float:
         """Get execution duration in seconds."""
-        if self.completed_at:
-            return (self.completed_at - self.started_at).total_seconds()
-        return (datetime.now(UTC) - self.started_at).total_seconds()
+        if not self.started_at:
+            return 0.0
+        end_time = self.completed_at or datetime.now(UTC)
+        return (end_time - self.started_at).total_seconds()
 
     @property
     def all_passed(self) -> bool:
         """Check if all gates passed."""
         return all(result.passed for result in self.results.values())
 
-    @property
-    def failed_gates(self) -> list[QualityGateType]:
-        """Get list of failed gates."""
-        return [gate for gate, result in self.results.items() if not result.passed]
-
-    @property
-    def passed_gates(self) -> list[QualityGateType]:
-        """Get list of passed gates."""
-        return [gate for gate, result in self.results.items() if result.passed]
