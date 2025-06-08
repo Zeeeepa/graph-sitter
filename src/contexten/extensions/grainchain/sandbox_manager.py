@@ -254,20 +254,48 @@ class SandboxManager:
                 "issues": ["Failed to get health status"]
             }
 
-    async def shutdown(self):
-        """Shutdown the sandbox manager and cleanup resources."""
-        # Cancel cleanup tasks
-        for task in self._cleanup_tasks:
-            task.cancel()
+    async def shutdown(self) -> None:
+        """Shutdown the sandbox manager."""
+        # Clean up active sessions
+        for session_id in list(self._active_sessions.keys()):
             try:
-                await task
-            except asyncio.CancelledError:
-                pass
+                await self._client.destroy_sandbox(session_id)
+            except Exception as e:
+                logger.exception(f"Failed to destroy sandbox {session_id}: {e}")
 
-        # Terminate all active sessions
-        session_ids = list(self._active_sessions.keys())
-        for session_id in session_ids:
-            await self.terminate_session(session_id)
+        self._active_sessions.clear()
+        self._session_metrics.clear()
+
+    async def cleanup_inactive_sessions(self, max_age: int = 3600) -> None:
+        """Clean up inactive sessions older than max_age seconds."""
+        now = datetime.now(UTC)
+        sessions = await self.get_active_sessions()
+
+        for session in sessions:
+            age = (now - session["created_at"]).total_seconds()
+            if age > max_age:
+                session_id = session["session_id"]
+                if session_id in self._active_sessions:
+                    try:
+                        await self._client.destroy_sandbox(session_id)
+                    except Exception as e:
+                        logger.exception(f"Failed to destroy sandbox {session_id}: {e}")
+                    self._active_sessions.pop(session_id, None)
+                    self._session_metrics.pop(session_id, None)
+
+    async def terminate_session(self, session_id: str) -> bool:
+        """Terminate a specific session."""
+        if session_id not in self._active_sessions:
+            return False
+
+        try:
+            await self._client.destroy_sandbox(session_id)
+            self._active_sessions.pop(session_id, None)
+            self._session_metrics.pop(session_id, None)
+            return True
+        except Exception as e:
+            logger.exception(f"Failed to terminate session {session_id}: {e}")
+            return False
 
 
 class TrackedSandboxSession:
