@@ -793,7 +793,7 @@ class PrefectWorkflowPipeline:
         self,
         context: PipelineContext,
         controlflow_config: Optional[Dict[str, Any]] = None,
-        pipeline_result: Dict[str, Any] = None
+        pipeline_result: Optional[Dict[str, Any]] = None
     ) -> StageResult:
         """Execute planning stage using Codegen SDK."""
         logger = get_run_logger()
@@ -812,6 +812,9 @@ class PrefectWorkflowPipeline:
         try:
             # Import and initialize Codegen workflow integration
             from ..codegen.workflow_integration import create_codegen_workflow_integration
+            
+            if not controlflow_config:
+                raise ValueError("controlflow_config is required for planning stage")
             
             codegen_integration = create_codegen_workflow_integration(
                 org_id=controlflow_config['org_id'],
@@ -836,8 +839,11 @@ class PrefectWorkflowPipeline:
             Format the response as a structured JSON plan that can be executed by automated agents.
             """
             
-            # Execute planning with Codegen
+            # Alternative: Use Codegen SDK directly
             from codegen.agents.agent import Agent
+            
+            if not controlflow_config:
+                raise ValueError("controlflow_config is required for planning stage")
             
             agent = Agent(
                 org_id=controlflow_config['org_id'],
@@ -845,6 +851,7 @@ class PrefectWorkflowPipeline:
                 base_url=controlflow_config.get('base_url', 'https://api.codegen.com')
             )
             
+            # Execute planning with Codegen
             planning_task = agent.run(planning_prompt)
             
             # Wait for completion
@@ -894,8 +901,8 @@ class PrefectWorkflowPipeline:
         self,
         context: PipelineContext,
         controlflow_config: Optional[Dict[str, Any]] = None,
-        planning_result: Dict[str, Any] = None,
-        pipeline_result: Dict[str, Any] = None
+        planning_result: Optional[Dict[str, Any]] = None,
+        pipeline_result: Optional[Dict[str, Any]] = None
     ) -> StageResult:
         """Execute orchestration stage using ControlFlow."""
         logger = get_run_logger()
@@ -930,6 +937,9 @@ class PrefectWorkflowPipeline:
                     )
             
             # Create workflow definition from planning result
+            if not planning_result:
+                raise ValueError("planning_result is required for orchestration stage")
+                
             workflow_definition = {
                 'id': f"workflow_{context.project_id}",
                 'name': f"Contexten Workflow - {context.project_id}",
@@ -970,8 +980,8 @@ class PrefectWorkflowPipeline:
         self,
         context: PipelineContext,
         controlflow_config: Optional[Dict[str, Any]] = None,
-        orchestration_result: Dict[str, Any] = None,
-        pipeline_result: Dict[str, Any] = None
+        orchestration_result: Optional[Dict[str, Any]] = None,
+        pipeline_result: Optional[Dict[str, Any]] = None
     ) -> StageResult:
         """Execute tasks using enhanced Codegen workflow integration."""
         logger = get_run_logger()
@@ -990,6 +1000,9 @@ class PrefectWorkflowPipeline:
         try:
             # The orchestration stage should have already executed the tasks
             # This stage focuses on collecting and validating results
+            
+            if not orchestration_result:
+                raise ValueError("orchestration_result is required for execution stage")
             
             workflow_tasks = orchestration_result.get('tasks', {})
             execution_summary = {
@@ -1048,8 +1061,8 @@ class PrefectWorkflowPipeline:
         self,
         context: PipelineContext,
         grainchain_config: Optional[Dict[str, Any]] = None,
-        execution_result: Dict[str, Any] = None,
-        pipeline_result: Dict[str, Any] = None
+        execution_result: Optional[Dict[str, Any]] = None,
+        pipeline_result: Optional[Dict[str, Any]] = None
     ) -> StageResult:
         """Execute quality gates using Grainchain + Graph_sitter."""
         logger = get_run_logger()
