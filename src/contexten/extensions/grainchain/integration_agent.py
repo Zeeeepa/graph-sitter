@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, TypeVar, cast
 
-from .config import GrainchainIntegrationConfig, get_grainchain_config
+from .config import GrainchainIntegrationConfig
 from .grainchain_types import (
     GrainchainEvent,
     GrainchainEventType,
@@ -79,7 +79,7 @@ class GrainchainIntegrationAgent:
         def decorator(handler: Callable[[GrainchainEvent], T]) -> Callable[[GrainchainEvent], T]:
             if event_type not in self._event_handlers:
                 self._event_handlers[event_type] = []
-            self._event_handlers[event_type].append(handler)
+            self._event_handlers[event_type].append(cast(Callable[[GrainchainEvent], Any], handler))
             return handler
         return decorator
 
