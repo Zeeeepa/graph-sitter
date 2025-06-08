@@ -126,10 +126,6 @@ const App: React.FC = () => {
     setProjects(mockProjects);
   };
 
-  const handleProjectSelect = (project: Project) => {
-    setSelectedProject(project);
-  };
-
   const handleDialogClose = () => {
     setSelectedProject(null);
   };
