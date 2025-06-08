@@ -1,168 +1,191 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
-  Grid,
   Box,
+  Container,
   Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
+  IconButton,
+  Grid,
   CircularProgress,
+  Alert,
 } from '@mui/material';
+import {
+  Add as AddIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
+import { Project, Settings, Task, WorkflowEvent } from './types/dashboard';
 import ProjectCard from './components/ProjectCard';
-import { Project } from './types/dashboard';
+import ProjectDialog from './components/ProjectDialog';
+import SettingsDialog from './components/SettingsDialog';
+import TaskManagement from './components/TaskManagement';
+import WorkflowControl from './components/WorkflowControl';
+import RealTimeMetrics from './components/RealTimeMetrics';
+import websocketService from './services/websocketService';
 
 const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [openSettings, setOpenSettings] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [workflowEvents, setWorkflowEvents] = useState<WorkflowEvent[]>([]);
+
+  const [settings, setSettings] = useState<Settings>({
+    githubToken: '',
+    linearToken: '',
+    codegenOrgId: '',
+    codegenToken: '',
+    autoStartFlows: false,
+    enableNotifications: true,
+    enableAnalytics: true,
+  });
 
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      loadMockData();
-      setIsLoading(false);
-    }, 1000);
+    // Load initial data
+    loadMockData();
+
+    // Setup WebSocket connection
+    websocketService.connect();
+    const unsubscribe = websocketService.addListener((event) => {
+      handleWebSocketEvent(event);
+    });
+
+    return () => {
+      unsubscribe();
+      websocketService.disconnect();
+    };
   }, []);
 
   const loadMockData = () => {
-    const mockProjects: Project[] = [
-      {
-        id: '1',
-        name: 'AI Dashboard System',
-        description: 'Complete dashboard for AI-powered development workflows',
-        repository: 'https://github.com/Zeeeepa/graph-sitter',
-        status: 'active',
-        progress: 75,
-        flowEnabled: true,
-        flowStatus: 'running',
-        lastActivity: new Date(),
-        tags: ['dashboard', 'react', 'typescript'],
-        metrics: {
-          commits: 156,
-          prs: 23,
-          contributors: 8,
-          issues: 45
-        },
-        requirements: 'Build a comprehensive dashboard system with React and Material-UI',
-        plan: {
-          id: 'plan-1',
-          projectId: '1',
-          title: 'Dashboard Implementation Plan',
-          description: 'Complete implementation of the dashboard system',
-          tasks: [
-            {
-              id: 'task-1',
-              title: 'Setup React Frontend',
-              description: 'Initialize React app with Material-UI',
-              status: 'completed',
-              assignee: 'AI Agent',
-              estimatedHours: 4,
-              actualHours: 3,
-              dependencies: [],
-              createdAt: new Date(),
-              updatedAt: new Date()
-            },
-            {
-              id: 'task-2',
-              title: 'Implement Dashboard Components',
-              description: 'Create all necessary UI components',
-              status: 'in_progress',
-              assignee: 'AI Agent',
-              estimatedHours: 8,
-              actualHours: 6,
-              dependencies: ['task-1'],
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }
-          ],
-          status: 'in_progress',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      },
-      {
-        id: '2',
-        name: 'Code Analysis Engine',
-        description: 'Advanced code analysis and manipulation system',
-        repository: 'https://github.com/Zeeeepa/graph-sitter',
-        status: 'paused',
-        progress: 45,
-        flowEnabled: false,
-        flowStatus: 'stopped',
-        lastActivity: new Date(Date.now() - 86400000), // 1 day ago
-        tags: ['analysis', 'tree-sitter', 'typescript'],
-        metrics: {
-          commits: 89,
-          prs: 12,
-          contributors: 5,
-          issues: 28
-        },
-        requirements: 'Implement graph-sitter based code analysis'
-      },
-      {
-        id: '3',
-        name: 'Workflow Orchestrator',
-        description: 'Orchestration system for development workflows',
-        repository: 'https://github.com/Zeeeepa/contexten',
-        status: 'completed',
-        progress: 100,
-        flowEnabled: true,
-        flowStatus: 'stopped',
-        lastActivity: new Date(Date.now() - 172800000), // 2 days ago
-        tags: ['workflow', 'automation', 'typescript'],
-        metrics: {
-          commits: 234,
-          prs: 45,
-          contributors: 12,
-          issues: 67
-        },
-        requirements: 'Create workflow orchestration with webhook integrations'
-      }
-    ];
+    setLoading(true);
+    try {
+      setProjects(mockProjects);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to load projects');
+      setLoading(false);
+    }
+  };
 
-    setProjects(mockProjects);
+  const handleWebSocketEvent = (event: WebSocketEvent) => {
+    switch (event.type) {
+      case 'project_updated':
+        setProjects(prev => 
+          prev.map(p => p.id === event.payload.id ? { ...p, ...event.payload } : p)
+        );
+        break;
+      case 'workflow_event':
+        setWorkflowEvents(prev => [event.payload, ...prev].slice(0, 50));
+        break;
+      case 'metrics_updated':
+        // Handle metrics update
+        break;
+    }
+  };
+
+  const handleCreateProject = () => {
+    setSelectedProject(null);
+    setOpenProjectDialog(true);
+  };
+
+  const handleSaveProject = (project: Project) => {
+    if (project.id && projects.some(p => p.id === project.id)) {
+      setProjects(prev =>
+        prev.map(p => p.id === project.id ? project : p)
+      );
+    } else {
+      setProjects(prev => [...prev, project]);
+    }
+  };
+
+  const handleTaskUpdate = (projectId: string, task: Task) => {
+    setProjects(prev =>
+      prev.map(p => {
+        if (p.id === projectId && p.plan) {
+          return {
+            ...p,
+            plan: {
+              ...p.plan,
+              tasks: p.plan.tasks.map(t => t.id === task.id ? task : t),
+            },
+          };
+        }
+        return p;
+      })
+    );
+  };
+
+  const handleTaskCreate = (projectId: string, task: Partial<Task>) => {
+    setProjects(prev =>
+      prev.map(p => {
+        if (p.id === projectId && p.plan) {
+          return {
+            ...p,
+            plan: {
+              ...p.plan,
+              tasks: [...p.plan.tasks, task as Task],
+            },
+          };
+        }
+        return p;
+      })
+    );
+  };
+
+  const handleTaskDelete = (projectId: string, taskId: string) => {
+    setProjects(prev =>
+      prev.map(p => {
+        if (p.id === projectId && p.plan) {
+          return {
+            ...p,
+            plan: {
+              ...p.plan,
+              tasks: p.plan.tasks.filter(t => t.id !== taskId),
+            },
+          };
+        }
+        return p;
+      })
+    );
+  };
+
+  const handleStartFlow = async (projectId: string) => {
+    setProjects(prev =>
+      prev.map(p =>
+        p.id === projectId
+          ? { ...p, flowStatus: 'running', flowEnabled: true }
+          : p
+      )
+    );
+  };
+
+  const handleStopFlow = async (projectId: string) => {
+    setProjects(prev =>
+      prev.map(p =>
+        p.id === projectId
+          ? { ...p, flowStatus: 'stopped', flowEnabled: false }
+          : p
+      )
+    );
+  };
+
+  const handleRefreshStatus = async (projectId: string) => {
+    // In a real app, this would fetch the latest status from the server
+    console.log('Refreshing status for project:', projectId);
   };
 
   const handleDialogClose = () => {
     setSelectedProject(null);
   };
 
-  const handleProjectPin = (projectName: string) => {
-    // Mock project pinning
-    const newProject: Project = {
-      id: Date.now().toString(),
-      name: projectName,
-      description: `Pinned project: ${projectName}`,
-      repository: 'https://github.com/example/repo',
-      status: 'active',
-      progress: 0,
-      flowEnabled: false,
-      flowStatus: 'stopped',
-      lastActivity: new Date(),
-      tags: ['pinned'],
-      metrics: {
-        commits: 0,
-        prs: 0,
-        contributors: 1
-      }
-    };
-
-    setProjects([...projects, newProject]);
+  const handleSettingsSave = (newSettings: Settings) => {
+    setSettings(newSettings);
+    setOpenSettings(false);
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
       </Box>
     );
@@ -171,54 +194,90 @@ const App: React.FC = () => {
   return (
     <Container maxWidth="xl">
       <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Project Dashboard
-        </Typography>
+        {/* Header */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" component="h1">
+            Project Dashboard
+          </Typography>
+          <Box>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleCreateProject}
+              sx={{ mr: 2 }}
+            >
+              New Project
+            </Button>
+            <IconButton onClick={() => setOpenSettings(true)}>
+              <SettingsIcon />
+            </IconButton>
+          </Box>
+        </Box>
 
-        <Grid container spacing={3}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Real Time Metrics */}
+        <RealTimeMetrics projects={projects} />
+
+        {/* Project Grid */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
           {projects.map((project) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
+            <Grid item xs={12} sm={6} md={4} key={project.id}>
               <ProjectCard
                 project={project}
-                onPin={() => handleProjectPin(project.name)}
+                onSelect={() => setSelectedProject(project)}
               />
             </Grid>
           ))}
         </Grid>
 
-        <Dialog
-          open={Boolean(selectedProject)}
+        {/* Selected Project Details */}
+        {selectedProject && (
+          <>
+            <Typography variant="h5" gutterBottom>
+              {selectedProject.name} Details
+            </Typography>
+
+            {/* Task Management */}
+            <TaskManagement
+              project={selectedProject}
+              onTaskUpdate={handleTaskUpdate}
+              onTaskCreate={handleTaskCreate}
+              onTaskDelete={handleTaskDelete}
+            />
+
+            {/* Workflow Control */}
+            <WorkflowControl
+              project={selectedProject}
+              events={workflowEvents.filter(e => e.projectId === selectedProject.id)}
+              onStartFlow={handleStartFlow}
+              onStopFlow={handleStopFlow}
+              onRefreshStatus={handleRefreshStatus}
+            />
+          </>
+        )}
+
+        {/* Dialogs */}
+        <ProjectDialog
+          open={selectedProject !== null}
+          project={selectedProject}
           onClose={handleDialogClose}
-          maxWidth="md"
-          fullWidth
-        >
-          {selectedProject && (
-            <>
-              <DialogTitle>{selectedProject.name}</DialogTitle>
-              <DialogContent>
-                <Typography gutterBottom>
-                  {selectedProject.description}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Repository: {selectedProject.repository}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Status: {selectedProject.status}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Progress: {selectedProject.progress}%
-                </Typography>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleDialogClose}>Close</Button>
-              </DialogActions>
-            </>
-          )}
-        </Dialog>
+          onSave={handleSaveProject}
+        />
+
+        <SettingsDialog
+          open={openSettings}
+          settings={settings}
+          onClose={() => setOpenSettings(false)}
+          onSave={handleSettingsSave}
+        />
       </Box>
     </Container>
   );
 };
 
 export default App;
-
