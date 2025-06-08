@@ -13,7 +13,8 @@ import {
   Add as AddIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
-import { Project, Settings, Task, WorkflowEvent } from './types/dashboard';
+import { Project, Settings, Task, WorkflowEvent, WebSocketEvent } from './types/dashboard';
+import { dashboardApi } from './api/dashboardApi';
 import ProjectCard from './components/ProjectCard';
 import ProjectDialog from './components/ProjectDialog';
 import SettingsDialog from './components/SettingsDialog';
@@ -25,6 +26,7 @@ import websocketService from './services/websocketService';
 const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [openProjectDialog, setOpenProjectDialog] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Load initial data
-    loadMockData();
+    loadProjects();
 
     // Setup WebSocket connection
     websocketService.connect();
@@ -56,10 +58,11 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const loadMockData = () => {
+  const loadProjects = async () => {
     setLoading(true);
     try {
-      setProjects(mockProjects);
+      const projectsData = await dashboardApi.getProjects();
+      setProjects(projectsData);
       setLoading(false);
     } catch (err) {
       setError('Failed to load projects');
@@ -78,7 +81,9 @@ const App: React.FC = () => {
         setWorkflowEvents(prev => [event.payload, ...prev].slice(0, 50));
         break;
       case 'metrics_updated':
-        // Handle metrics update
+        // Handle metrics updates
+        break;
+      default:
         break;
     }
   };
@@ -229,7 +234,7 @@ const App: React.FC = () => {
             <Grid item xs={12} sm={6} md={4} key={project.id}>
               <ProjectCard
                 project={project}
-                onSelect={() => setSelectedProject(project)}
+                onSelect={(project) => setSelectedProject(project)}
               />
             </Grid>
           ))}

@@ -1,391 +1,114 @@
 """
-🚀 COMPREHENSIVE ANALYSIS MODULE 🚀
+🚀 ANALYSIS MODULE 🚀
 
-Enhanced analysis capabilities for graph-sitter with advanced features:
-
-PHASE 1 FEATURES:
-- Import loop detection and circular dependency analysis
-- Dead code detection using usage analysis
-- Training data generation for LLMs
-- Enhanced function and class metrics
-- Graph structure analysis with NetworkX
-- Performance optimizations and graceful degradation
-
-PHASE 2 FEATURES:
-- Tree-sitter query patterns for advanced syntax analysis
-- Interactive HTML reports with D3.js integration
-- Performance optimizations with caching and parallel processing
-- Advanced CodebaseConfig usage with all flags
-- Custom analysis pipelines and feature toggles
-
-This module consolidates all analysis functionality into a unified system
-while maintaining backward compatibility and clean architecture.
-
-DOCUMENTATION API:
-- Analysis class providing the exact API from graph-sitter documentation
-- Direct access to pre-computed graph elements
-- Advanced function and class analysis
+Simplified analysis capabilities for graph-sitter integration.
+This module provides the core Analysis class and available analyzers.
 """
 
-# Import the Analysis class that provides the documentation API
+# Import the main Analysis class that provides the documentation API
 from .analyzer import Analysis
-try:
-    from .enhanced_analyzer import EnhancedCodebaseAnalyzer
-except ImportError:
-    EnhancedCodebaseAnalyzer = None
 
+# Import individual analyzers that exist
 try:
-    from .codebase_analysis import (
-        get_codebase_summary,
-        get_file_summary,
-        get_class_summary,
-        get_function_summary,
-        get_symbol_summary
+    from .complexity_analyzer import (
+        analyze_complexity,
+        calculate_cyclomatic_complexity,
+        find_complex_functions,
+        find_large_functions
     )
+    complexity_available = True
 except ImportError:
-    # Provide stub functions with identical signatures if not available
-    from typing import Any, Optional, Union
-    from pathlib import Path
-    
-    def get_codebase_summary(
-        codebase_path: Union[str, Path],
-        config: Optional[Any] = None
-    ) -> Any:
-        raise NotImplementedError("codebase_analysis module not available")
-    
-    def get_file_summary(
-        codebase_path: Union[str, Path],
-        filepath: str,
-        config: Optional[Any] = None
-    ) -> Any:
-        raise NotImplementedError("codebase_analysis module not available")
-    
-    def get_class_summary(
-        codebase_path: Union[str, Path],
-        class_name: str,
-        config: Optional[Any] = None
-    ) -> Any:
-        raise NotImplementedError("codebase_analysis module not available")
-    
-    def get_function_summary(
-        codebase_path: Union[str, Path],
-        function_name: str,
-        config: Optional[Any] = None
-    ) -> Any:
-        raise NotImplementedError("codebase_analysis module not available")
-    
-    def get_symbol_summary(
-        codebase_path: Union[str, Path],
-        symbol_name: str,
-        config: Optional[Any] = None
-    ) -> Any:
-        raise NotImplementedError("codebase_analysis module not available")
-
-# Import optional analyzers with fallbacks
-try:
-    from .complexity_analyzer import ComplexityAnalyzer
-except ImportError:
-    ComplexityAnalyzer = None
+    complexity_available = False
 
 try:
-    from .dependency_analyzer import DependencyAnalyzer
-except ImportError:
-    DependencyAnalyzer = None
-
-try:
-    from .security_analyzer import SecurityAnalyzer
-except ImportError:
-    SecurityAnalyzer = None
-
-try:
-    from .call_graph_analyzer import CallGraphAnalyzer
-except ImportError:
-    CallGraphAnalyzer = None
-
-try:
-    from .dead_code_detector import DeadCodeDetector
-except ImportError:
-    DeadCodeDetector = None
-
-# Import existing comprehensive analysis functionality
-from .core.engine import (
-    ComprehensiveAnalysisEngine,
-    AnalysisConfig,
-    AnalysisResult,
-    AnalysisMetrics,
-    QualityMetrics,
-    SecurityMetrics,
-    PerformanceMetrics,
-    MaintainabilityMetrics,
-    ComplexityMetrics,
-    DependencyMetrics,
-    TestCoverageMetrics,
-    DocumentationMetrics,
-    CodeStyleMetrics,
-    ArchitecturalMetrics,
-    TechnicalDebtMetrics,
-    analyze_codebase,
-    
-    # Data classes
-    ImportLoop,
-    DeadCodeItem,
-    TrainingDataItem,
-    GraphAnalysisResult,
-    EnhancedFunctionMetrics,
-    EnhancedClassMetrics
-)
-
-# Phase 2 exports - Tree-sitter queries
-try:
-    from .enhanced.tree_sitter_queries import (
-        TreeSitterQueryEngine,
-        QueryPattern,
-        QueryResult,
-        analyze_with_queries
+    from .dependency_analyzer import (
+        analyze_dependencies,
+        detect_circular_dependencies,
+        create_dependency_graph
     )
-    TREE_SITTER_QUERIES_AVAILABLE = True
+    dependency_available = True
 except ImportError:
-    TREE_SITTER_QUERIES_AVAILABLE = False
+    dependency_available = False
 
-# Phase 2 exports - Visualization
 try:
-    from .visualization import (
-        InteractiveReportGenerator,
-        ReportConfig,
-        create_interactive_report,
-        generate_html_report
+    from .security_analyzer import (
+        analyze_security,
+        detect_sql_injection,
+        detect_hardcoded_secrets
     )
-    VISUALIZATION_AVAILABLE = True
+    security_available = True
 except ImportError:
-    VISUALIZATION_AVAILABLE = False
+    security_available = False
 
-# Phase 2 exports - Performance optimization
 try:
-    from .core.performance import (
-        PerformanceOptimizer,
-        PerformanceConfig,
-        create_optimizer
+    from .dead_code_detector import (
+        detect_dead_code,
+        remove_dead_code
     )
-    PERFORMANCE_AVAILABLE = True
+    dead_code_available = True
 except ImportError:
-    PERFORMANCE_AVAILABLE = False
+    dead_code_available = False
 
-# Phase 2 exports - Advanced configuration
 try:
-    from .config import (
-        AdvancedCodebaseConfig,
-        create_optimized_config,
-        create_debug_config,
-        create_production_config
+    from .call_graph_analyzer import (
+        analyze_call_graph,
+        find_call_chains,
+        find_hotspot_functions
     )
-    ADVANCED_CONFIG_AVAILABLE = True
+    call_graph_available = True
 except ImportError:
-    ADVANCED_CONFIG_AVAILABLE = False
+    call_graph_available = False
 
-__all__ = [
-    # Documentation API
-    'Analysis',
-    
-    # New codebase analysis API
-    'get_codebase_summary',
-    'get_file_summary',
-    'get_class_summary',
-    'get_function_summary',
-    'get_symbol_summary',
-    
-    # Specialized analyzers
-    'ComplexityAnalyzer',
-    'DependencyAnalyzer',
-    'SecurityAnalyzer',
-    'CallGraphAnalyzer',
-    'DeadCodeDetector',
-    
-    # Core analysis
-    'ComprehensiveAnalysisEngine',
-    'AnalysisConfig',
-    'AnalysisResult',
-    'AnalysisMetrics',
-    'QualityMetrics',
-    'SecurityMetrics',
-    'PerformanceMetrics',
-    'MaintainabilityMetrics',
-    'ComplexityMetrics',
-    'DependencyMetrics',
-    'TestCoverageMetrics',
-    'DocumentationMetrics',
-    'CodeStyleMetrics',
-    'ArchitecturalMetrics',
-    'TechnicalDebtMetrics',
-    
-    # Analysis functions
-    'analyze_codebase',
-    'analyze_file',
-    'analyze_function',
-    'analyze_class',
-    'analyze_dependencies',
-    'analyze_complexity',
-    'analyze_security',
-    'analyze_performance',
-    'analyze_maintainability',
-    'analyze_test_coverage',
-    'analyze_documentation',
-    'analyze_code_style',
-    'analyze_architecture',
-    'analyze_technical_debt',
-    
-    # Utility functions
-    'get_analysis_summary',
-    'export_analysis_results',
-    'generate_analysis_report',
-    'compare_analysis_results',
-    'track_analysis_trends',
-    
-    # Configuration
-    'create_analysis_config',
-    'load_analysis_config',
-    'save_analysis_config',
-    'validate_analysis_config',
-    
-    # Reporting
-    'generate_html_report',
-    'generate_json_report',
-    'generate_csv_report',
-    'generate_markdown_report',
-    
-    # Visualization
-    'create_dependency_graph',
-    'create_complexity_heatmap',
-    'create_architecture_diagram',
-    'create_call_graph',
-    'create_metrics_dashboard',
-]
+# Export what's available
+__all__ = ['Analysis']
 
-# Add Phase 2 exports if available
-if TREE_SITTER_QUERIES_AVAILABLE:
+# Add available analyzers to exports
+if complexity_available:
     __all__.extend([
-        'TreeSitterQueryEngine',
-        'QueryPattern',
-        'QueryResult',
-        'analyze_with_queries'
+        'analyze_complexity',
+        'calculate_cyclomatic_complexity', 
+        'find_complex_functions',
+        'find_large_functions'
     ])
 
-if VISUALIZATION_AVAILABLE:
+if dependency_available:
     __all__.extend([
-        'InteractiveReportGenerator',
-        'ReportConfig',
-        'create_interactive_report',
-        'generate_html_report'
+        'analyze_dependencies',
+        'detect_circular_dependencies',
+        'create_dependency_graph'
     ])
 
-if PERFORMANCE_AVAILABLE:
+if security_available:
     __all__.extend([
-        'PerformanceOptimizer',
-        'PerformanceConfig',
-        'create_optimizer'
+        'analyze_security',
+        'detect_sql_injection',
+        'detect_hardcoded_secrets'
     ])
 
-if ADVANCED_CONFIG_AVAILABLE:
+if dead_code_available:
     __all__.extend([
-        'AdvancedCodebaseConfig',
-        'create_optimized_config',
-        'create_debug_config',
-        'create_production_config'
+        'detect_dead_code',
+        'remove_dead_code'
     ])
 
-# Convenience functions for quick analysis
-def quick_analysis(path: str, **kwargs):
-    """Perform quick analysis with performance preset."""
-    try:
-        from .core.engine import ComprehensiveAnalysisEngine, AnalysisPresets
-        config = AnalysisPresets.performance()
-        
-        # Apply any keyword arguments
-        for key, value in kwargs.items():
-            if hasattr(config, key):
-                setattr(config, key, value)
-        
-        engine = ComprehensiveAnalysisEngine(config)
-        return engine.analyze(path)
-    except ImportError:
-        raise NotImplementedError("Analysis engine not available")
-
-
-def comprehensive_analysis(path: str, **kwargs):
-    """Perform comprehensive analysis with all features enabled."""
-    try:
-        from .core.engine import ComprehensiveAnalysisEngine, AnalysisPresets
-        config = AnalysisPresets.comprehensive()
-        
-        # Apply any keyword arguments
-        for key, value in kwargs.items():
-            if hasattr(config, key):
-                setattr(config, key, value)
-        
-        engine = ComprehensiveAnalysisEngine(config)
-        return engine.analyze(path)
-    except ImportError:
-        raise NotImplementedError("Analysis engine not available")
-
-
-def quality_analysis(path: str, **kwargs):
-    """Perform quality-focused analysis."""
-    try:
-        from .core.engine import ComprehensiveAnalysisEngine, AnalysisPresets
-        config = AnalysisPresets.quality_focused()
-        
-        # Apply any keyword arguments
-        for key, value in kwargs.items():
-            if hasattr(config, key):
-                setattr(config, key, value)
-        
-        engine = ComprehensiveAnalysisEngine(config)
-        return engine.analyze(path)
-    except ImportError:
-        raise NotImplementedError("Analysis engine not available")
-
-# Add convenience functions to __all__
-__all__.extend([
-    'quick_analysis',
-    'comprehensive_analysis',
-    'quality_analysis'
-])
+if call_graph_available:
+    __all__.extend([
+        'analyze_call_graph',
+        'find_call_chains',
+        'find_hotspot_functions'
+    ])
 
 # Module metadata
-__version__ = "2.0.0"
-__author__ = "Graph-Sitter Analysis Team"
-__description__ = "Enhanced comprehensive analysis system with Phase 2 features"
+__version__ = "1.0.0"
+__description__ = "Simplified graph-sitter analysis module"
 
 # Feature availability information
 FEATURES = {
     "core_analysis": True,
-    "import_loops": True,
-    "dead_code": True,
-    "training_data": True,
-    "graph_analysis": True,
-    "enhanced_metrics": True,
-    "tree_sitter_queries": TREE_SITTER_QUERIES_AVAILABLE,
-    "visualization": VISUALIZATION_AVAILABLE,
-    "performance_optimization": PERFORMANCE_AVAILABLE,
-    "advanced_configuration": ADVANCED_CONFIG_AVAILABLE
+    "complexity_analysis": complexity_available,
+    "dependency_analysis": dependency_available,
+    "security_analysis": security_available,
+    "dead_code_detection": dead_code_available,
+    "call_graph_analysis": call_graph_available,
 }
 
-def get_feature_status() -> dict:
-    """Get the status of all available features."""
-    return FEATURES.copy()
-
-
-def print_feature_status():
-    """Print the status of all features."""
-    print("🚀 Graph-Sitter Analysis Features")
-    print("=" * 40)
-    
-    for feature, available in FEATURES.items():
-        status = "✅" if available else "❌"
-        print(f"{status} {feature.replace('_', ' ').title()}")
-    
-    print(f"\nVersion: {__version__}")
-    print(f"Phase 2 Features: {sum(1 for f in ['tree_sitter_queries', 'visualization', 'performance_optimization', 'advanced_configuration'] if FEATURES[f])}/4")
-
-
-if __name__ == "__main__":
-    print_feature_status()

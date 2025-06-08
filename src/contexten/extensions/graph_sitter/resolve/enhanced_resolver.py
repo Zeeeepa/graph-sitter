@@ -10,7 +10,7 @@ import ast
 import os
 from dataclasses import dataclass
 
-from ..core.config import CodebaseConfig
+from graph_sitter.configs.models.codebase import CodebaseConfig
 
 
 @dataclass

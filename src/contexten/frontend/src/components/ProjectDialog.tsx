@@ -79,7 +79,13 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
   }, [project]);
 
   const handleChange = (field: keyof Project) => (
-    event: React.ChangeEvent<HTMLInputElement | { value: unknown }>
+    event: React.ChangeEvent<HTMLInputElement> | { target: { value: unknown } }
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleSelectChange = (field: keyof Project) => (
+    event: any
   ) => {
     setFormData((prev) => ({ ...prev, [field]: event.target.value }));
   };
@@ -156,7 +162,7 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
               <Select
                 value={formData.status}
                 label="Status"
-                onChange={handleChange('status')}
+                onChange={handleSelectChange('status')}
               >
                 <MenuItem value="active">Active</MenuItem>
                 <MenuItem value="paused">Paused</MenuItem>
@@ -226,11 +232,16 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     fullWidth
                     type="number"
                     label="Commits"
-                    value={formData.metrics?.commits}
+                    value={formData.metrics?.commits || 0}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), commits: Number(e.target.value) },
+                        metrics: { 
+                          commits: Number(e.target.value),
+                          prs: prev.metrics?.prs || 0,
+                          contributors: prev.metrics?.contributors || 0,
+                          issues: prev.metrics?.issues || 0
+                        },
                       }))
                     }
                   />
@@ -240,11 +251,16 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     fullWidth
                     type="number"
                     label="PRs"
-                    value={formData.metrics?.prs}
+                    value={formData.metrics?.prs || 0}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), prs: Number(e.target.value) },
+                        metrics: { 
+                          commits: prev.metrics?.commits || 0,
+                          prs: Number(e.target.value),
+                          contributors: prev.metrics?.contributors || 0,
+                          issues: prev.metrics?.issues || 0
+                        },
                       }))
                     }
                   />
@@ -254,11 +270,16 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     fullWidth
                     type="number"
                     label="Contributors"
-                    value={formData.metrics?.contributors}
+                    value={formData.metrics?.contributors || 0}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), contributors: Number(e.target.value) },
+                        metrics: { 
+                          commits: prev.metrics?.commits || 0,
+                          prs: prev.metrics?.prs || 0,
+                          contributors: Number(e.target.value),
+                          issues: prev.metrics?.issues || 0
+                        },
                       }))
                     }
                   />
@@ -268,11 +289,16 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     fullWidth
                     type="number"
                     label="Issues"
-                    value={formData.metrics?.issues}
+                    value={formData.metrics?.issues || 0}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), issues: Number(e.target.value) },
+                        metrics: { 
+                          commits: prev.metrics?.commits || 0,
+                          prs: prev.metrics?.prs || 0,
+                          contributors: prev.metrics?.contributors || 0,
+                          issues: Number(e.target.value)
+                        },
                       }))
                     }
                   />
@@ -298,4 +324,3 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
 };
 
 export default ProjectDialog;
-

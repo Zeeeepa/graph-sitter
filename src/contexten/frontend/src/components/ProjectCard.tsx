@@ -30,6 +30,7 @@ interface ProjectCardProps {
   project: Project;
   onPin?: (projectId: string) => void;
   onUnpin?: (projectId: string) => void;
+  onSelect?: (project: Project) => void;
 }
 
 const getFlowStatusColor = (status: string): 'success' | 'warning' | 'error' | 'default' => {
@@ -45,7 +46,7 @@ const getFlowStatusColor = (status: string): 'success' | 'warning' | 'error' | '
   }
 };
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPin, onUnpin }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPin, onUnpin, onSelect }) => {
   const handlePin = () => {
     if (onPin) {
       onPin(project.id);
@@ -58,8 +59,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPin, onUnpin }) =>
     }
   };
 
+  const handleCardClick = () => {
+    if (onSelect) {
+      onSelect(project);
+    }
+  };
+
   return (
-    <Card>
+    <Card 
+      sx={{ cursor: onSelect ? 'pointer' : 'default' }}
+      onClick={handleCardClick}
+    >
       <CardContent>
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -196,4 +206,3 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPin, onUnpin }) =>
 };
 
 export default ProjectCard;
-
