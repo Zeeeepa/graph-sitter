@@ -18,7 +18,7 @@ export const useWebSocket = () => {
   useEffect(() => {
     // Initialize WebSocket connection
     const initializeWebSocket = () => {
-      const wsUrl = `ws://localhost:8000/dashboard/ws/${user.id}`;
+      const wsUrl = `ws://localhost:8000/ws/${user.id}`;
       
       try {
         socketRef.current = io(wsUrl, {

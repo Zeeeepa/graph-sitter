@@ -14,7 +14,7 @@ import {
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: '/dashboard',
+  baseURL: '/api',  // Changed from '/dashboard' to '/api' for more generic usage
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -131,4 +131,3 @@ export const dashboardApi = {
 };
 
 export default api;
-
