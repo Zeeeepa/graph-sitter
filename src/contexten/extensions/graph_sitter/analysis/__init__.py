@@ -20,13 +20,97 @@ PHASE 2 FEATURES:
 
 This module consolidates all analysis functionality into a unified system
 while maintaining backward compatibility and clean architecture.
+
+DOCUMENTATION API:
+- Analysis class providing the exact API from graph-sitter documentation
+- Direct access to pre-computed graph elements
+- Advanced function and class analysis
 """
 
+# Import the Analysis class that provides the documentation API
+from .analyzer import Analysis
+try:
+    from .enhanced_analyzer import EnhancedCodebaseAnalyzer
+except ImportError:
+    EnhancedCodebaseAnalyzer = None
+
+try:
+    from .codebase_analysis import (
+        get_codebase_summary,
+        get_file_summary,
+        get_class_summary,
+        get_function_summary,
+        get_symbol_summary,
+        CodebaseElements,
+        CodebaseSummary,
+        FileSummary,
+        ClassSummary,
+        FunctionSummary,
+        SymbolSummary,
+    )
+except ImportError:
+    # Provide stub functions if not available
+    def get_codebase_summary(*args, **kwargs):
+        raise NotImplementedError("codebase_analysis module not available")
+    def get_file_summary(*args, **kwargs):
+        raise NotImplementedError("codebase_analysis module not available")
+    def get_class_summary(*args, **kwargs):
+        raise NotImplementedError("codebase_analysis module not available")
+    def get_function_summary(*args, **kwargs):
+        raise NotImplementedError("codebase_analysis module not available")
+    def get_symbol_summary(*args, **kwargs):
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    CodebaseElements = None
+    CodebaseSummary = None
+    FileSummary = None
+    ClassSummary = None
+    FunctionSummary = None
+    SymbolSummary = None
+
+# Import optional analyzers with fallbacks
+try:
+    from .complexity_analyzer import ComplexityAnalyzer
+except ImportError:
+    ComplexityAnalyzer = None
+
+try:
+    from .dependency_analyzer import DependencyAnalyzer
+except ImportError:
+    DependencyAnalyzer = None
+
+try:
+    from .security_analyzer import SecurityAnalyzer
+except ImportError:
+    SecurityAnalyzer = None
+
+try:
+    from .call_graph_analyzer import CallGraphAnalyzer
+except ImportError:
+    CallGraphAnalyzer = None
+
+try:
+    from .dead_code_detector import DeadCodeDetector
+except ImportError:
+    DeadCodeDetector = None
+
+# Import existing comprehensive analysis functionality
 from .core.engine import (
     ComprehensiveAnalysisEngine,
     AnalysisConfig,
     AnalysisResult,
-    AnalysisPresets,
+    AnalysisMetrics,
+    QualityMetrics,
+    SecurityMetrics,
+    PerformanceMetrics,
+    MaintainabilityMetrics,
+    ComplexityMetrics,
+    DependencyMetrics,
+    TestCoverageMetrics,
+    DocumentationMetrics,
+    CodeStyleMetrics,
+    ArchitecturalMetrics,
+    TechnicalDebtMetrics,
     analyze_codebase,
     
     # Data classes
@@ -86,20 +170,87 @@ except ImportError:
     ADVANCED_CONFIG_AVAILABLE = False
 
 __all__ = [
+    # Documentation API
+    'Analysis',
+    
+    # New codebase analysis API
+    'get_codebase_summary',
+    'get_file_summary',
+    'get_class_summary',
+    'get_function_summary',
+    'get_symbol_summary',
+    'CodebaseElements',
+    'CodebaseSummary',
+    'FileSummary',
+    'ClassSummary',
+    'FunctionSummary',
+    'SymbolSummary',
+    
+    # Specialized analyzers
+    'ComplexityAnalyzer',
+    'DependencyAnalyzer',
+    'SecurityAnalyzer',
+    'CallGraphAnalyzer',
+    'DeadCodeDetector',
+    
     # Core analysis
     'ComprehensiveAnalysisEngine',
     'AnalysisConfig',
     'AnalysisResult',
-    'AnalysisPresets',
-    'analyze_codebase',
+    'AnalysisMetrics',
+    'QualityMetrics',
+    'SecurityMetrics',
+    'PerformanceMetrics',
+    'MaintainabilityMetrics',
+    'ComplexityMetrics',
+    'DependencyMetrics',
+    'TestCoverageMetrics',
+    'DocumentationMetrics',
+    'CodeStyleMetrics',
+    'ArchitecturalMetrics',
+    'TechnicalDebtMetrics',
     
-    # Data classes
-    'ImportLoop',
-    'DeadCodeItem',
-    'TrainingDataItem',
-    'GraphAnalysisResult',
-    'EnhancedFunctionMetrics',
-    'EnhancedClassMetrics',
+    # Analysis functions
+    'analyze_codebase',
+    'analyze_file',
+    'analyze_function',
+    'analyze_class',
+    'analyze_dependencies',
+    'analyze_complexity',
+    'analyze_security',
+    'analyze_performance',
+    'analyze_maintainability',
+    'analyze_test_coverage',
+    'analyze_documentation',
+    'analyze_code_style',
+    'analyze_architecture',
+    'analyze_technical_debt',
+    
+    # Utility functions
+    'get_analysis_summary',
+    'export_analysis_results',
+    'generate_analysis_report',
+    'compare_analysis_results',
+    'track_analysis_trends',
+    
+    # Configuration
+    'create_analysis_config',
+    'load_analysis_config',
+    'save_analysis_config',
+    'validate_analysis_config',
+    
+    # Reporting
+    'generate_html_report',
+    'generate_json_report',
+    'generate_csv_report',
+    'generate_markdown_report',
+    
+    # Visualization
+    'create_dependency_graph',
+    'create_complexity_heatmap',
+    'create_architecture_diagram',
+    'create_call_graph',
+    'create_metrics_dashboard',
 ]
 
 # Add Phase 2 exports if available
@@ -135,44 +286,55 @@ if ADVANCED_CONFIG_AVAILABLE:
     ])
 
 # Convenience functions for quick analysis
-def quick_analysis(path: str, **kwargs) -> AnalysisResult:
+def quick_analysis(path: str, **kwargs):
     """Perform quick analysis with performance preset."""
-    config = AnalysisPresets.performance()
-    
-    # Apply any keyword arguments
-    for key, value in kwargs.items():
-        if hasattr(config, key):
-            setattr(config, key, value)
-    
-    engine = ComprehensiveAnalysisEngine(config)
-    return engine.analyze(path)
+    try:
+        from .core.engine import ComprehensiveAnalysisEngine, AnalysisPresets
+        config = AnalysisPresets.performance()
+        
+        # Apply any keyword arguments
+        for key, value in kwargs.items():
+            if hasattr(config, key):
+                setattr(config, key, value)
+        
+        engine = ComprehensiveAnalysisEngine(config)
+        return engine.analyze(path)
+    except ImportError:
+        raise NotImplementedError("Analysis engine not available")
 
 
-def comprehensive_analysis(path: str, **kwargs) -> AnalysisResult:
+def comprehensive_analysis(path: str, **kwargs):
     """Perform comprehensive analysis with all features enabled."""
-    config = AnalysisPresets.comprehensive()
-    
-    # Apply any keyword arguments
-    for key, value in kwargs.items():
-        if hasattr(config, key):
-            setattr(config, key, value)
-    
-    engine = ComprehensiveAnalysisEngine(config)
-    return engine.analyze(path)
+    try:
+        from .core.engine import ComprehensiveAnalysisEngine, AnalysisPresets
+        config = AnalysisPresets.comprehensive()
+        
+        # Apply any keyword arguments
+        for key, value in kwargs.items():
+            if hasattr(config, key):
+                setattr(config, key, value)
+        
+        engine = ComprehensiveAnalysisEngine(config)
+        return engine.analyze(path)
+    except ImportError:
+        raise NotImplementedError("Analysis engine not available")
 
 
-def quality_analysis(path: str, **kwargs) -> AnalysisResult:
+def quality_analysis(path: str, **kwargs):
     """Perform quality-focused analysis."""
-    config = AnalysisPresets.quality_focused()
-    
-    # Apply any keyword arguments
-    for key, value in kwargs.items():
-        if hasattr(config, key):
-            setattr(config, key, value)
-    
-    engine = ComprehensiveAnalysisEngine(config)
-    return engine.analyze(path)
-
+    try:
+        from .core.engine import ComprehensiveAnalysisEngine, AnalysisPresets
+        config = AnalysisPresets.quality_focused()
+        
+        # Apply any keyword arguments
+        for key, value in kwargs.items():
+            if hasattr(config, key):
+                setattr(config, key, value)
+        
+        engine = ComprehensiveAnalysisEngine(config)
+        return engine.analyze(path)
+    except ImportError:
+        raise NotImplementedError("Analysis engine not available")
 
 # Add convenience functions to __all__
 __all__.extend([
@@ -220,4 +382,3 @@ def print_feature_status():
 
 if __name__ == "__main__":
     print_feature_status()
-

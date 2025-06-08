@@ -1,29 +1,57 @@
 """
-Graph_Sitter Extension for Contexten
+Graph-Sitter Extensions
 
-Comprehensive codebase analysis using the actual graph_sitter API.
-Provides real issue detection, complexity analysis, security scanning, and more.
-
-Main Components:
-- dead_code_detector: Find and remove unused code
-- complexity_analyzer: Analyze cyclomatic complexity and maintainability
-- dependency_analyzer: Analyze imports and circular dependencies  
-- security_analyzer: Detect security vulnerabilities
-- call_graph_analyzer: Analyze function call relationships
-- main_analyzer: Comprehensive analysis combining all modules
-
-Usage:
-    from contexten.extensions.graph_sitter import comprehensive_analysis
-    from graph_sitter import Codebase
-    
-    # Run comprehensive analysis
-    codebase = Codebase("./my_project")
-    results = comprehensive_analysis(codebase)
-    
-    # Or run individual analyzers
-    from contexten.extensions.graph_sitter.analysis.dead_code_detector import detect_dead_code
-    dead_code_results = detect_dead_code(codebase)
+Consolidated entry point for all graph-sitter functionality.
+Based on the official graph-sitter.com API and features.
 """
+
+# Core configuration
+from .core import CodebaseConfig, PresetConfigs
+
+# Analysis module - comprehensive code analysis
+from .analysis import (
+    # Main API functions
+    get_codebase_summary,
+    get_file_summary,
+    get_class_summary,
+    get_function_summary,
+    get_symbol_summary,
+    
+    # Pre-computed graph element access
+    CodebaseElements,
+    
+    # Data classes
+    CodebaseSummary,
+    FileSummary,
+    ClassSummary,
+    FunctionSummary,
+    SymbolSummary,
+    
+    # Analyzers
+    CodebaseAnalyzer,
+    EnhancedCodebaseAnalyzer,
+    ComplexityAnalyzer,
+    DependencyAnalyzer,
+    SecurityAnalyzer,
+    CallGraphAnalyzer,
+    DeadCodeDetector,
+)
+
+# Visualization module
+from .visualize import Visualize
+
+# Resolve module - symbol resolution and import analysis
+from .resolve import (
+    Resolve,
+    EnhancedResolver,
+    ResolvedSymbol,
+    ImportRelationship,
+)
+
+# Import the three main extension modules
+from .analysis import Analysis
+from .visualize import Visualize
+from .resolve import Resolve
 
 # Import main analysis functions for easy access
 from .analysis.main_analyzer import comprehensive_analysis, print_analysis_summary, save_analysis_report
@@ -49,6 +77,50 @@ from .analysis.enhanced_analyzer import enhanced_comprehensive_analysis
 from .analysis.config_manager import ConfigurationManager
 
 __all__ = [
+    # Core configuration
+    'CodebaseConfig',
+    'PresetConfigs',
+    
+    # Main API functions (as requested by user)
+    'get_codebase_summary',
+    'get_file_summary',
+    'get_class_summary',
+    'get_function_summary',
+    'get_symbol_summary',
+    
+    # Pre-computed graph element access
+    'CodebaseElements',
+    
+    # Data classes
+    'CodebaseSummary',
+    'FileSummary',
+    'ClassSummary',
+    'FunctionSummary',
+    'SymbolSummary',
+    
+    # Analyzers
+    'CodebaseAnalyzer',
+    'EnhancedCodebaseAnalyzer',
+    'ComplexityAnalyzer',
+    'DependencyAnalyzer',
+    'SecurityAnalyzer',
+    'CallGraphAnalyzer',
+    'DeadCodeDetector',
+    
+    # Visualization
+    'Visualize',
+    
+    # Resolution
+    'Resolve',
+    'EnhancedResolver',
+    'ResolvedSymbol',
+    'ImportRelationship',
+    
+    # Legacy compatibility (existing modules)
+    'Analysis',
+    'Visualize', 
+    'Resolve',
+    
     # Main analysis functions
     'comprehensive_analysis',
     'print_analysis_summary', 
