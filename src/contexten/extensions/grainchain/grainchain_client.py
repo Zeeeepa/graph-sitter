@@ -21,6 +21,16 @@ from typing import (
 )
 
 from .config import GrainchainIntegrationConfig
+from .error_handling import (
+    CircuitBreakerConfig,
+    ErrorCategory,
+    ErrorContext,
+    ErrorHandler,
+    ErrorSeverity,
+    RetryConfig,
+    RetryableError,
+    with_retry,
+)
 from .grainchain_types import (
     ExecutionResult,
     GrainchainEvent,
@@ -104,12 +114,12 @@ class GrainchainClientError(Exception):
     pass
 
 
-class ProviderUnavailableError(GrainchainClientError):
+class ProviderUnavailableError(GrainchainClientError, RetryableError):
     """Raised when no providers are available."""
     pass
 
 
-class SandboxCreationError(GrainchainClientError):
+class SandboxCreationError(GrainchainClientError, RetryableError):
     """Raised when sandbox creation fails."""
     pass
 
@@ -130,37 +140,72 @@ class GrainchainClient:
         self._active_sandboxes: Dict[str, Dict[str, Any]] = {}
         self._metrics: Dict[SandboxProvider, SandboxMetrics] = {}
         self._event_handlers: List[Callable[[GrainchainEvent], Any]] = []
+        self._error_handler = ErrorHandler()
 
         # Initialize provider clients
         self._initialize_providers()
+        self._setup_error_handling()
 
-    def _initialize_providers(self) -> None:
-        """Initialize clients for enabled providers."""
+    def _setup_error_handling(self) -> None:
+        """Set up error handling and circuit breakers."""
+        # Create circuit breakers for each provider
         for provider in self.config.get_enabled_providers():
-            try:
-                client = self._create_provider_client(provider)
-                self._provider_clients[provider] = client
-                logger.info(f"Initialized {provider.value} provider client")
-            except Exception as e:
-                logger.exception(f"Failed to initialize {provider.value} provider: {e}")
+            self._error_handler.create_circuit_breaker(
+                f"provider_{provider.value}",
+                CircuitBreakerConfig(
+                    failure_threshold=3,
+                    reset_timeout=60.0,
+                    half_open_timeout=30.0
+                )
+            )
 
-    def _create_provider_client(self, provider: SandboxProvider) -> ProviderClientProtocol:
-        """Create a client for the specified provider."""
-        # This would import and create the actual provider clients
-        # For now, we'll create mock clients
+        # Register error handlers
+        self._error_handler.register_error_handler(
+            ErrorCategory.PROVIDER,
+            self._handle_provider_error
+        )
+        self._error_handler.register_error_handler(
+            ErrorCategory.NETWORK,
+            self._handle_network_error
+        )
 
-        if provider == SandboxProvider.LOCAL:
-            return cast(ProviderClientProtocol, MockLocalClient(self.config.get_provider_config(provider)))
-        elif provider == SandboxProvider.E2B:
-            return cast(ProviderClientProtocol, MockE2BClient(self.config.get_provider_config(provider)))
-        elif provider == SandboxProvider.DAYTONA:
-            return cast(ProviderClientProtocol, MockDaytonaClient(self.config.get_provider_config(provider)))
-        elif provider == SandboxProvider.MORPH:
-            return cast(ProviderClientProtocol, MockMorphClient(self.config.get_provider_config(provider)))
-        else:
-            msg = f"Unsupported provider: {provider}"
-            raise ValueError(msg)
+        # Register recovery procedures
+        self._error_handler.register_recovery_procedure(
+            ErrorCategory.PROVIDER,
+            self._recover_provider
+        )
 
+    def _handle_provider_error(self, context: ErrorContext) -> None:
+        """Handle provider-specific errors."""
+        if context.provider:
+            logger.error(
+                f"Provider {context.provider} error: {context.error}",
+                extra={
+                    "provider": context.provider,
+                    "operation": context.operation,
+                    "resource_id": context.resource_id
+                }
+            )
+
+    def _handle_network_error(self, context: ErrorContext) -> None:
+        """Handle network-related errors."""
+        logger.error(
+            f"Network error in operation {context.operation}: {context.error}",
+            extra={
+                "provider": context.provider,
+                "operation": context.operation
+            }
+        )
+
+    def _recover_provider(self) -> None:
+        """Attempt to recover failed provider."""
+        # Implementation will depend on provider-specific recovery procedures
+        pass
+
+    @with_retry(
+        retry_config=RetryConfig(max_attempts=3),
+        retryable_errors=[ProviderUnavailableError, SandboxCreationError]
+    )
     async def get_available_providers(self) -> List[SandboxProvider]:
         """Get list of currently available providers."""
         available = []
@@ -170,6 +215,14 @@ class GrainchainClient:
                 if await client.health_check():
                     available.append(provider)
             except Exception as e:
+                context = ErrorContext(
+                    error=e,
+                    severity=ErrorSeverity.WARNING,
+                    category=ErrorCategory.PROVIDER,
+                    provider=provider.value,
+                    operation="health_check"
+                )
+                self._error_handler.handle_error(e, context)
                 logger.warning(f"Health check failed for {provider.value}: {e}")
 
         return available

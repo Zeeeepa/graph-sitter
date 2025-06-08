@@ -11,6 +11,16 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, AsyncIterator, Dict, List, Optional, Set, cast
 
 from .config import GrainchainIntegrationConfig
+from .error_handling import (
+    CircuitBreakerConfig,
+    ErrorCategory,
+    ErrorContext,
+    ErrorHandler,
+    ErrorSeverity,
+    RetryConfig,
+    RetryableError,
+    with_retry,
+)
 from .grainchain_client import GrainchainClient, SandboxSession
 from .grainchain_types import (
     IntegrationStatus,
@@ -21,6 +31,13 @@ from .grainchain_types import (
 
 logger = logging.getLogger(__name__)
 
+class SandboxError(Exception, RetryableError):
+    """Base exception for sandbox errors."""
+    pass
+
+class ResourceLimitError(SandboxError):
+    """Raised when resource limits are exceeded."""
+    pass
 
 class SandboxManager:
     """High-level sandbox management.
@@ -43,7 +60,52 @@ class SandboxManager:
             "memory_limit": "4GB",
             "cpu_limit": 2.0
         }
+        self._error_handler = ErrorHandler()
+        self._setup_error_handling()
 
+    def _setup_error_handling(self) -> None:
+        """Set up error handling and circuit breakers."""
+        # Create circuit breaker for resource management
+        self._error_handler.create_circuit_breaker(
+            "resource_management",
+            CircuitBreakerConfig(
+                failure_threshold=5,
+                reset_timeout=300.0,  # 5 minutes
+                half_open_timeout=60.0
+            )
+        )
+
+        # Register error handlers
+        self._error_handler.register_error_handler(
+            ErrorCategory.RESOURCE,
+            self._handle_resource_error
+        )
+
+        # Register recovery procedures
+        self._error_handler.register_recovery_procedure(
+            ErrorCategory.RESOURCE,
+            self._recover_resources
+        )
+
+    def _handle_resource_error(self, context: ErrorContext) -> None:
+        """Handle resource-related errors."""
+        logger.error(
+            f"Resource error in sandbox operation: {context.error}",
+            extra={
+                "operation": context.operation,
+                "resource_id": context.resource_id,
+                "provider": context.provider
+            }
+        )
+
+    def _recover_resources(self) -> None:
+        """Attempt to recover from resource errors."""
+        asyncio.create_task(self.optimize_resources())
+
+    @with_retry(
+        retry_config=RetryConfig(max_attempts=3),
+        retryable_errors=[SandboxError, ResourceLimitError]
+    )
     @asynccontextmanager
     async def create_session(
         self,
@@ -62,13 +124,33 @@ class SandboxManager:
             SandboxSession context manager
         """
         if len(self._active_sessions) >= self._resource_limits["max_concurrent_sandboxes"]:
-            await self.optimize_resources()
+            try:
+                await self.optimize_resources()
+            except Exception as e:
+                context = ErrorContext(
+                    error=e,
+                    severity=ErrorSeverity.ERROR,
+                    category=ErrorCategory.RESOURCE,
+                    operation="optimize_resources"
+                )
+                self._error_handler.handle_error(e, context)
+                raise ResourceLimitError("Failed to optimize resources") from e
 
         # Select optimal provider
-        selected_provider = await self._select_optimal_provider(
-            provider_id=provider_id,
-            config=config
-        )
+        try:
+            selected_provider = await self._select_optimal_provider(
+                provider_id=provider_id,
+                config=config
+            )
+        except Exception as e:
+            context = ErrorContext(
+                error=e,
+                severity=ErrorSeverity.ERROR,
+                category=ErrorCategory.PROVIDER,
+                operation="select_provider"
+            )
+            self._error_handler.handle_error(e, context)
+            raise SandboxError("Failed to select provider") from e
 
         # Create sandbox session
         try:
@@ -86,12 +168,33 @@ class SandboxManager:
                     yield session
                 finally:
                     if auto_cleanup:
-                        self._active_sessions.pop(session_id, None)
-                        self._session_metrics.pop(session_id, None)
+                        try:
+                            await self._cleanup_session(session_id)
+                        except Exception as e:
+                            context = ErrorContext(
+                                error=e,
+                                severity=ErrorSeverity.WARNING,
+                                category=ErrorCategory.RESOURCE,
+                                operation="cleanup_session",
+                                resource_id=session_id
+                            )
+                            self._error_handler.handle_error(e, context)
 
         except Exception as e:
-            logger.exception(f"Failed to create sandbox session: {e}")
-            raise
+            context = ErrorContext(
+                error=e,
+                severity=ErrorSeverity.ERROR,
+                category=ErrorCategory.PROVIDER,
+                provider=selected_provider.value,
+                operation="create_sandbox"
+            )
+            self._error_handler.handle_error(e, context)
+            raise SandboxError("Failed to create sandbox session") from e
+
+    async def _cleanup_session(self, session_id: str) -> None:
+        """Clean up a sandbox session."""
+        self._active_sessions.pop(session_id, None)
+        self._session_metrics.pop(session_id, None)
 
     async def _select_optimal_provider(
         self,
