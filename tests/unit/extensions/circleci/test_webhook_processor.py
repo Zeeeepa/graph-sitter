@@ -460,35 +460,50 @@ class TestWebhookStats:
         assert initial_stats.requests_total == 0
         assert initial_stats.events_processed == 0
         
-        body = json.dumps(sample_workflow_payload)
-        headers = {"content-type": "application/json"}
+        # Start the processor to enable background event processing
+        await webhook_processor.start()
         
-        result = await webhook_processor.process_webhook(headers, body)
-        assert result.success is True
-        
-        updated_stats = webhook_processor.get_stats()
-        assert updated_stats.requests_total == 1
-        assert updated_stats.requests_successful == 1
-        assert updated_stats.events_processed == 1
-        assert updated_stats.workflow_events == 1
+        try:
+            body = json.dumps(sample_workflow_payload)
+            headers = {"content-type": "application/json"}
+            
+            result = await webhook_processor.process_webhook(headers, body)
+            assert result.success is True
+            
+            # Wait for background processing to complete
+            await asyncio.sleep(0.1)
+            
+            updated_stats = webhook_processor.get_stats()
+            assert updated_stats.requests_total == 1
+            assert updated_stats.requests_successful == 1
+            assert updated_stats.events_processed == 1
+            assert updated_stats.workflow_events == 1
+        finally:
+            await webhook_processor.stop()
     
     @pytest.mark.asyncio
     async def test_failed_request_stats(self, webhook_processor):
         """Test failed request statistics"""
         webhook_processor.config.webhook.validate_signatures = False
         
-        # Send invalid payload
-        body = "invalid json"
-        headers = {"content-type": "application/json"}
+        # Start the processor
+        await webhook_processor.start()
         
-        result = await webhook_processor.process_webhook(headers, body)
-        assert result.success is False
-        
-        stats = webhook_processor.get_stats()
-        assert stats.requests_total == 1
-        assert stats.requests_failed == 1
-        assert stats.events_failed == 1
-    
+        try:
+            # Send invalid payload
+            body = "invalid json"
+            headers = {"content-type": "application/json"}
+            
+            result = await webhook_processor.process_webhook(headers, body)
+            assert result.success is False
+            
+            stats = webhook_processor.get_stats()
+            assert stats.requests_total == 1
+            assert stats.requests_failed == 1
+            assert stats.events_failed == 1
+        finally:
+            await webhook_processor.stop()
+
     def test_success_rate_calculation(self, webhook_processor):
         """Test success rate calculation"""
         stats = webhook_processor.get_stats()
