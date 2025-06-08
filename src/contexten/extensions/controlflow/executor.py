@@ -4,7 +4,7 @@ ControlFlow Executor Implementation
 
 from typing import Dict, List, Any
 from controlflow import Executor as BaseExecutor
-from ..strand-agents import StrandAgent, StrandWorkflow
+from ..strand_agents import StrandAgent, StrandWorkflow  # Fixed: replaced hyphen with underscore
 
 class FlowExecutor(BaseExecutor):
     async def execute_workflow(
@@ -128,4 +128,3 @@ class FlowExecutor(BaseExecutor):
                 return agent
                 
         return None
-

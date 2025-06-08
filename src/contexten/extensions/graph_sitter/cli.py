@@ -151,21 +151,7 @@ Examples:
             results = analyze_call_graph(codebase)
             print_call_graph_results(results)
 
-        # Handle configuration recommendations
-        if args.config_recommend:
-            if not args.quiet:
-                print("\n🎯 Getting configuration recommendations...")
-            manager = ConfigurationManager()
-            recommendations = manager.get_config_recommendations(str(codebase_path))
-            print_config_recommendations(recommendations)
-        
-        # Handle configuration comparison
-        if args.config_compare:
-            if not args.quiet:
-                print(f"\n⚖️ Comparing configurations: {", ".join(args.config_compare)}")
-            manager = ConfigurationManager()
-            comparison = manager.compare_configurations(str(codebase_path), args.config_compare)
-            print_config_comparison(comparison)
+        handle_config_operations(args, codebase_path)
         
         # Handle dead code removal
         if args.fix_dead_code:
@@ -251,22 +237,6 @@ def print_security_results(results):
 
 
 def print_call_graph_results(results):
-
-        # Handle configuration recommendations
-        if args.config_recommend:
-            if not args.quiet:
-                print("\n🎯 Getting configuration recommendations...")
-            manager = ConfigurationManager()
-            recommendations = manager.get_config_recommendations(str(codebase_path))
-            print_config_recommendations(recommendations)
-        
-        # Handle configuration comparison
-        if args.config_compare:
-            if not args.quiet:
-                print(f"\n⚖️ Comparing configurations: {", ".join(args.config_compare)}")
-            manager = ConfigurationManager()
-            comparison = manager.compare_configurations(str(codebase_path), args.config_compare)
-            print_config_comparison(comparison)
     """Print call graph analysis results."""
     summary = results.get('summary', {})
     print(f"\n📞 Call Graph Analysis Results:")
@@ -275,6 +245,25 @@ def print_call_graph_results(results):
     print(f"Average calls per function: {summary.get('avg_calls_per_function', 0):.1f}")
     print(f"Recursive functions: {summary.get('recursive_count', 0)}")
     print(f"Unused functions: {summary.get('unused_count', 0)}")
+
+
+def handle_config_operations(args, codebase_path):
+    """Handle configuration-related operations."""
+    # Handle configuration recommendations
+    if args.config_recommend:
+        if not args.quiet:
+            print("\n🎯 Getting configuration recommendations...")
+        manager = ConfigurationManager()
+        recommendations = manager.get_config_recommendations(str(codebase_path))
+        print_config_recommendations(recommendations)
+    
+    # Handle configuration comparison
+    if args.config_compare:
+        if not args.quiet:
+            print(f"\n⚖️ Comparing configurations: {', '.join(args.config_compare)}")
+        manager = ConfigurationManager()
+        comparison = manager.compare_configurations(str(codebase_path), args.config_compare)
+        print_config_comparison(comparison)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ Prefect Task Integration
 from typing import Dict, Any, Optional, Callable, Awaitable
 from prefect import task
 from prefect.context import get_run_context
-from ..strand-agents import StrandAgent
+from ..strand_agents import StrandAgent  # Fixed: replaced hyphen with underscore
 
 class PrefectTask:
     def __init__(
@@ -65,4 +65,3 @@ class PrefectTask:
         if "metrics" in result:
             for key, value in result["metrics"].items():
                 context.task_run.metrics[key] = value
-
