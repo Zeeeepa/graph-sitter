@@ -1,236 +1,468 @@
-# Graph-Sitter Dashboard
+# Graph-Sitter
 
-A modern, dark-themed dashboard for the Graph-Sitter code analysis framework with real-time WebSocket updates and comprehensive extension support.
+A powerful code analysis framework with semantic understanding, dependency resolution, and comprehensive tooling for modern software development.
 
 ## 🚀 Features
 
-- **Dark-Only Theme**: Beautiful, modern dark interface optimized for developer workflows
-- **Real-time Updates**: WebSocket-powered live project status and flow monitoring
-- **Extension Integration**: Seamless integration with Graph-Sitter analysis, visualization, and resolution extensions
-- **Responsive Design**: Works perfectly on desktop and mobile devices
-- **Connection Management**: Intelligent connection handling with automatic retry and fallback mechanisms
-- **Project Management**: Pin/unpin projects, track progress, and monitor flow status
+- **Code Analysis**: Deep semantic analysis of codebases with symbol resolution
+- **Dependency Tracking**: Comprehensive dependency analysis and visualization
+- **Multi-Language Support**: Python, TypeScript, JavaScript, and more
+- **Extension System**: Modular architecture with pluggable extensions
+- **Dashboard Interface**: Modern web-based dashboard for project management
+- **Real-time Updates**: WebSocket-powered live monitoring and updates
+- **Cython Performance**: High-performance core modules written in Cython
 
-## 🏗️ Architecture
+## 📋 Prerequisites
 
-### Backend (FastAPI)
-- **WebSocket Support**: Real-time communication for live updates
-- **REST API**: Comprehensive endpoints for project management and statistics
-- **Extension API**: Dynamic extension loading and capability discovery
-- **Health Monitoring**: Built-in health checks and connection monitoring
+Before installing Graph-Sitter, ensure you have the following prerequisites:
 
-### Frontend (React + TypeScript)
-- **Modern React**: Hooks-based architecture with TypeScript
-- **React Query**: Intelligent data fetching with caching and error handling
-- **WebSocket Service**: Robust connection management with exponential backoff
-- **Component Library**: Reusable, themed components following design system
+### System Requirements
 
-### Extensions
-- **Graph-Sitter Analysis**: Code complexity and dependency analysis
-- **Graph-Sitter Visualize**: Interactive code visualization and graph generation
-- **Graph-Sitter Resolve**: Symbol resolution and cross-reference analysis
+- **Python 3.8+** (Python 3.13 recommended)
+- **Node.js 16+** (for frontend components)
+- **Git** (for version control)
 
-## 🛠️ Development Setup
+### System Dependencies
 
-### Prerequisites
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt update
+sudo apt install -y gcc build-essential python3-dev libpixman-1-dev libcairo2-dev \
+  libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev jq libssl-dev zlib1g-dev \
+  libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
+  libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-openssl
+```
 
-- **Python 3.8+** (for backend)
-- **Node.js 16+** (for frontend)
-- **npm or yarn** (package manager)
+#### macOS
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-### Backend Setup
+# Install dependencies
+brew install jq openssl readline sqlite3 xz zlib tcl-tk
+```
 
-1. **Install Python dependencies**:
-   ```bash
-   pip install fastapi uvicorn websockets
-   ```
+## 🛠️ Installation
 
-2. **Start the backend server**:
-   ```bash
-   python simple_backend.py
-   ```
-   
-   The backend will start on `http://localhost:8000` with:
-   - REST API endpoints at `/api/*`
-   - WebSocket endpoint at `/ws`
-   - Health check at `/health`
+### Quick Start (Recommended)
 
-### Frontend Setup
+The fastest way to get started is using our automated setup script:
 
-1. **Navigate to frontend directory**:
-   ```bash
-   cd src/contexten/frontend
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/Zeeeepa/graph-sitter.git
+cd graph-sitter
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+# Run the full build script (sets up everything)
+./scripts/fullbuild.sh
 
-3. **Start the development server**:
-   ```bash
-   npm start
-   # or
-   yarn start
-   ```
-   
-   The frontend will start on `http://localhost:3000`
+# Or run with tests
+./scripts/fullbuild.sh --test
+```
 
-### Full Development Workflow
+This script will:
+- Install UV package manager
+- Create and activate a virtual environment
+- Install all dependencies
+- Set up pre-commit hooks
+- Compile Cython modules
+- Install the package in development mode
+- Optionally run tests
 
-1. **Start Backend** (Terminal 1):
-   ```bash
-   python simple_backend.py
-   ```
+### Manual Installation
 
-2. **Start Frontend** (Terminal 2):
-   ```bash
-   cd src/contexten/frontend
-   npm start
-   ```
+If you prefer manual installation or need more control:
 
-3. **Open Browser**:
-   Navigate to `http://localhost:3000`
+#### 1. Install UV Package Manager
 
-## 📡 API Endpoints
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.cargo/bin:$PATH"
+```
 
-### REST API
+#### 2. Create Virtual Environment
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/projects` | Get all projects |
-| `GET` | `/api/projects/{id}` | Get specific project |
-| `POST` | `/api/projects/{id}/pin` | Pin project to dashboard |
-| `POST` | `/api/projects/{id}/unpin` | Unpin project from dashboard |
-| `GET` | `/api/stats` | Get dashboard statistics |
-| `GET` | `/api/extensions` | Get available extensions |
-| `GET` | `/health` | Health check |
+```bash
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
 
-### WebSocket Events
+#### 3. Install Dependencies
 
-| Event Type | Description |
-|------------|-------------|
-| `connection_established` | Initial connection confirmation |
-| `project_status_update` | Periodic project status updates |
-| `project_pinned` | Project pinned notification |
-| `project_unpinned` | Project unpinned notification |
+```bash
+uv sync --dev
+```
 
-## 🎨 Theme System
+#### 4. Install Development Tools
 
-The dashboard uses a comprehensive dark-only theme with CSS custom properties:
+```bash
+uv tool install deptry
+uv tool install pre-commit --with pre-commit-uv
+pre-commit install
+pre-commit install-hooks
+```
 
-```css
-:root {
-  --bg-primary: #0d1117;      /* Main background */
-  --bg-secondary: #161b22;    /* Card backgrounds */
-  --bg-tertiary: #21262d;     /* Input backgrounds */
-  --text-primary: #f0f6fc;    /* Primary text */
-  --text-secondary: #8b949e;  /* Secondary text */
-  --accent-primary: #238636;  /* Success/active states */
-  --accent-secondary: #1f6feb; /* Links and buttons */
-}
+#### 5. Build Cython Modules
+
+```bash
+# Quick build and test
+./scripts/build_and_test.sh --test
+
+# Or manually
+python setup.py build_ext --inplace
+uv pip install -e .
+```
+
+## 🏃‍♂️ Quick Start
+
+### Basic Usage
+
+```python
+from graph_sitter import GraphSitter
+
+# Initialize the analyzer
+analyzer = GraphSitter()
+
+# Analyze a codebase
+result = analyzer.analyze_project("/path/to/your/project")
+
+# Get dependency graph
+dependencies = analyzer.get_dependencies()
+
+# Resolve symbols
+symbols = analyzer.resolve_symbols("MyClass")
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+python -m pytest tests/unit -v
+
+# Run specific test file
+python -m pytest tests/unit/test_specific.py -v
+
+# Run with coverage
+python -m pytest tests --cov=graph_sitter
+```
+
+### Starting the Dashboard
+
+```bash
+# Start the backend server
+python src/contexten/backend/main.py
+
+# In another terminal, start the frontend
+cd src/contexten/frontend
+npm install
+npm run dev
+```
+
+The dashboard will be available at `http://localhost:3000`.
+
+## 🏗️ Development Setup
+
+### Development Environment
+
+For active development, use the build script with test mode:
+
+```bash
+./scripts/build_and_test.sh --test
+```
+
+This will:
+- Check for virtual environment
+- Install Cython if needed
+- Compile all Cython modules
+- Install the package in development mode
+- Run the test suite
+
+### Pre-commit Hooks
+
+Pre-commit hooks are automatically installed during setup. They include:
+- Code formatting (Ruff, Biome)
+- Linting (Ruff, Cython-lint)
+- Type checking
+- Dependency validation
+
+To run pre-commit manually:
+```bash
+pre-commit run --all-files
+```
+
+### Extension Development
+
+Graph-Sitter supports custom extensions. To create a new extension:
+
+1. Create your extension in `src/graph_sitter/extensions/`
+2. Implement the required interface
+3. Register your extension in the configuration
+4. Test your extension with the test suite
+
+## 🚀 Deployment
+
+### Production Deployment
+
+#### 1. Environment Setup
+
+```bash
+# Clone and setup
+git clone https://github.com/Zeeeepa/graph-sitter.git
+cd graph-sitter
+
+# Production build
+./scripts/fullbuild.sh
+```
+
+#### 2. Configuration
+
+Create a production configuration file:
+
+```python
+# config/production.py
+DATABASE_URL = "postgresql://user:pass@localhost/graphsitter"
+REDIS_URL = "redis://localhost:6379"
+SECRET_KEY = "your-secret-key"
+DEBUG = False
+```
+
+#### 3. Database Setup
+
+```bash
+# Setup databases
+./database/setup_all_databases.sh
+```
+
+#### 4. Start Services
+
+```bash
+# Start the backend API
+uvicorn src.contexten.backend.main:app --host 0.0.0.0 --port 8000
+
+# Start the frontend (build first)
+cd src/contexten/frontend
+npm run build
+npm run start
+```
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile example
+FROM python:3.13-slim
+
+WORKDIR /app
+COPY . .
+
+RUN ./scripts/fullbuild.sh
+EXPOSE 8000
+
+CMD ["uvicorn", "src.contexten.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### Environment Variables
+
+Key environment variables for deployment:
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:pass@localhost/graphsitter
+REDIS_URL=redis://localhost:6379
+
+# Security
+SECRET_KEY=your-secret-key-here
+ALLOWED_HOSTS=yourdomain.com,localhost
+
+# Features
+DEBUG=false
+ENABLE_WEBSOCKETS=true
+ENABLE_EXTENSIONS=true
 ```
 
 ## 🔧 Configuration
 
-### Environment Variables
+### Project Configuration
 
-Create a `.env` file in the frontend directory:
+Graph-Sitter can be configured via `pyproject.toml`:
 
-```env
-REACT_APP_API_URL=http://localhost:8000
-REACT_APP_WS_URL=ws://localhost:8000/ws
+```toml
+[tool.graph_sitter]
+# Analysis settings
+max_depth = 10
+include_tests = true
+exclude_patterns = ["node_modules", ".git", "__pycache__"]
+
+# Extension settings
+extensions = ["analyze", "visualize", "resolve"]
+
+# Performance settings
+cache_enabled = true
+parallel_processing = true
 ```
 
-### Backend Configuration
+### Extension Configuration
 
-The backend can be configured by modifying `simple_backend.py`:
+Extensions can be configured individually:
 
-```python
-# CORS origins
-allow_origins=["http://localhost:3001", "http://localhost:3000"]
+```toml
+[tool.graph_sitter.extensions.analyze]
+enabled = true
+deep_analysis = true
 
-# Server settings
-uvicorn.run(app, host="0.0.0.0", port=8000)
-```
-
-## 🧪 Testing
-
-### Frontend Testing
-```bash
-cd src/contexten/frontend
-npm test
-```
-
-### Backend Testing
-```bash
-# Install test dependencies
-pip install pytest httpx
-
-# Run tests
-pytest
-```
-
-## 🚀 Production Deployment
-
-### Backend
-```bash
-# Install production dependencies
-pip install gunicorn
-
-# Run with gunicorn
-gunicorn simple_backend:app -w 4 -k uvicorn.workers.UvicornWorker
-```
-
-### Frontend
-```bash
-cd src/contexten/frontend
-npm run build
+[tool.graph_sitter.extensions.visualize]
+enabled = true
+output_format = "svg"
 ```
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
-1. **WebSocket Connection Failed**
-   - Ensure backend is running on port 8000
-   - Check firewall settings
-   - Verify CORS configuration
+#### 1. Cython Compilation Errors
 
-2. **API Requests Failing**
-   - Check backend logs for errors
-   - Verify API endpoints are accessible
-   - Check network connectivity
+```bash
+# Ensure you have the required system dependencies
+sudo apt install gcc python3-dev  # Linux
+brew install gcc  # macOS
 
-3. **Frontend Build Issues**
-   - Clear node_modules and reinstall
-   - Check Node.js version compatibility
-   - Verify all dependencies are installed
+# Clean and rebuild
+python setup.py clean --all
+./scripts/build_and_test.sh
+```
+
+#### 2. Import Errors
+
+```bash
+# Ensure the package is installed in development mode
+uv pip install -e .
+
+# Check if Cython modules are compiled
+python -c "import graph_sitter.compiled.utils"
+```
+
+#### 3. Pre-commit Hook Failures
+
+```bash
+# Update pre-commit hooks
+pre-commit autoupdate
+
+# Run specific hook
+pre-commit run biome-check --all-files
+```
+
+#### 4. WebSocket Connection Issues
+
+- Ensure backend is running on the correct port
+- Check firewall settings
+- Verify CORS configuration in the backend
+
+#### 5. Database Connection Issues
+
+```bash
+# Check database status
+./database/setup_all_databases.sh
+
+# Verify connection
+python -c "from src.contexten.backend.database import test_connection; test_connection()"
+```
 
 ### Debug Mode
 
-Enable debug logging by setting:
-```javascript
-localStorage.setItem('debug', 'true');
+Enable debug logging:
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Or set environment variable
+export GRAPH_SITTER_DEBUG=true
 ```
 
-## 📝 Contributing
+### Performance Issues
+
+If you experience performance issues:
+
+1. **Enable caching**: Set `cache_enabled = true` in configuration
+2. **Parallel processing**: Set `parallel_processing = true`
+3. **Reduce analysis depth**: Lower `max_depth` setting
+4. **Exclude unnecessary files**: Add patterns to `exclude_patterns`
+
+## 📚 Documentation
+
+- **API Reference**: [docs/api/](docs/api/)
+- **Extension Guide**: [docs/extensions/](docs/extensions/)
+- **Architecture Overview**: [docs/architecture/](docs/architecture/)
+- **Contributing Guide**: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# All tests
+python -m pytest tests/unit -v
+
+# Specific test categories
+python -m pytest tests/unit/core -v          # Core functionality
+python -m pytest tests/unit/extensions -v   # Extensions
+python -m pytest tests/unit/api -v          # API tests
+
+# With coverage
+python -m pytest tests --cov=graph_sitter --cov-report=html
+```
+
+### Test Configuration
+
+Tests can be configured via `pytest.ini`:
+
+```ini
+[tool:pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts = -v --tb=short
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Workflow
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+4. Run tests: `./scripts/build_and_test.sh --test`
+5. Commit your changes: `git commit -m 'Add amazing feature'`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+### Code Style
+
+We use automated code formatting and linting:
+- **Python**: Ruff for formatting and linting
+- **JavaScript/TypeScript**: Biome for formatting and linting
+- **Cython**: cython-lint for Cython-specific linting
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
 - Built with [FastAPI](https://fastapi.tiangolo.com/) and [React](https://reactjs.org/)
-- Inspired by modern developer tools and GitHub's design system
-- WebSocket implementation based on FastAPI WebSocket documentation
+- Powered by [Tree-sitter](https://tree-sitter.github.io/) for parsing
+- Uses [UV](https://github.com/astral-sh/uv) for fast Python package management
+- Inspired by modern developer tools and static analysis frameworks
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/Zeeeepa/graph-sitter/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Zeeeepa/graph-sitter/discussions)
+- **Documentation**: [Project Wiki](https://github.com/Zeeeepa/graph-sitter/wiki)
+
+---
+
+**Happy coding with Graph-Sitter! 🎉**
 

@@ -17,13 +17,16 @@ repos:
       - id: ruff-format
         types_or: [python, jupyter, pyi]
 
-  - repo: https://github.com/biomejs/pre-commit
-    rev: "v2.0.0-beta.1"
+  - repo: local
     hooks:
       - id: biome-check
+        name: biome-check
+        entry: npx --yes @biomejs/biome check
         language: node
-        additional_dependencies: ["@biomejs/biome@1.9.4"]
+        types: [file]
+        files: \.(js|ts|jsx|tsx)$
         exclude: (src/graph_sitter/adapters/codemods/eval)|(tests/unit/skills/snapshots)|(tests/unit/sdk/output)|(tests/integration/verified_codemods)|(docs/samples)|(examples/examples/ai_impact_analysis)
+        additional_dependencies: ["@biomejs/biome@1.9.4"]
 
   - repo: https://github.com/MarcoGorelli/cython-lint
     rev: v0.16.6
