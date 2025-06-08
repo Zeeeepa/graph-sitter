@@ -6,11 +6,10 @@ import pytest
 import asyncio
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
 
-from src.contexten.extensions.circleci.integration_agent import CircleCIIntegrationAgent
-from src.contexten.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
-from src.contexten.extensions.circleci.types import (
+from contexten.extensions.circleci.integration_agent import CircleCIIntegrationAgent
+from contexten.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
+from contexten.extensions.circleci.types import (
     CircleCIEventType, BuildStatus, FailureType, FixConfidence
 )
 
@@ -520,4 +519,3 @@ async def test_agent_context_manager(test_config, mock_circleci_client):
         
         # Should be stopped after context exit
         assert agent.is_running is False
-

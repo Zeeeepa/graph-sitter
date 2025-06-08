@@ -8,13 +8,15 @@ import json
 import hmac
 import hashlib
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.contexten.extensions.circleci.webhook_processor import (
-    WebhookProcessor, WebhookValidationError, WebhookProcessingError
+from contexten.extensions.circleci.webhook_processor import (
+    WebhookProcessor,
+    WebhookValidationError,
+    WebhookProcessingError
 )
-from src.contexten.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
-from src.contexten.extensions.circleci.types import CircleCIEventType, BuildStatus
+from contexten.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
+from contexten.extensions.circleci.types import CircleCIEventType, BuildStatus
 
 
 @pytest.fixture
@@ -552,4 +554,3 @@ class TestWebhookUtilities:
         
         assert health["healthy"] is False  # Not running
         assert health["handlers_count"] == 0
-
