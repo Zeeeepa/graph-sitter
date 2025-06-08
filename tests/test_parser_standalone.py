@@ -294,6 +294,12 @@ class PlanningResultParser:
                 name = task_data.get('name', task_data.get('title', f"Task {i+1}"))
                 description = task_data.get('description', task_data.get('desc', name))
                 
+                # Ensure name and description are strings
+                if not isinstance(name, str):
+                    name = str(name) if name is not None else f"Task {i+1}"
+                if not isinstance(description, str):
+                    description = str(description) if description is not None else name
+                
                 tasks.append(self._create_task_definition(
                     task_id=task_id,
                     name=name,
@@ -429,7 +435,7 @@ class PlanningResultParser:
     def _validate_and_enhance_tasks(self, tasks: List[Dict[str, Any]], 
                                   planning_result: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Validate and enhance parsed tasks."""
-        enhanced_tasks = []
+        enhanced_tasks: List[Dict[str, Any]] = []
         
         for task in tasks:
             # Ensure required fields
@@ -543,4 +549,3 @@ def test_parser():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     test_parser()
-
