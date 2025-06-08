@@ -65,7 +65,11 @@ class QualityGateManager:
         """Initialize default quality gates."""
         # Initialize standard gates
         for gate_type in QualityGateType:
-            self._gate_definitions[gate_type] = QualityGateDefinition()
+            self._gate_definitions[gate_type] = QualityGateDefinition(
+                gate_type=gate_type,
+                name=gate_type.value,
+                description=f"Standard {gate_type.value} gate"
+            )
 
         # Set up dependencies
         self._gate_definitions[QualityGateType.INTEGRATION_TESTS].dependencies = [
@@ -287,6 +291,78 @@ class QualityGateManager:
                 ]
 
         return graph
+
+    async def _execute_code_quality_gate(self, session: SandboxSession) -> Dict[str, Any]:
+        """Execute code quality gate."""
+        result = await session.execute("ruff check . --output-format=json")
+        return {
+            "passed": result.exit_code == 0,
+            "metrics": {
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr
+            }
+        }
+
+    async def _execute_unit_tests_gate(self, session: SandboxSession) -> Dict[str, Any]:
+        """Execute unit tests gate."""
+        result = await session.execute("python -m pytest tests/unit/ -v")
+        return {
+            "passed": result.exit_code == 0,
+            "metrics": {
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr
+            }
+        }
+
+    async def _execute_integration_tests_gate(self, session: SandboxSession) -> Dict[str, Any]:
+        """Execute integration tests gate."""
+        result = await session.execute("python -m pytest tests/integration/ -v")
+        return {
+            "passed": result.exit_code == 0,
+            "metrics": {
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr
+            }
+        }
+
+    async def _execute_security_scan_gate(self, session: SandboxSession) -> Dict[str, Any]:
+        """Execute security scan gate."""
+        result = await session.execute("bandit -r . -f json")
+        return {
+            "passed": result.exit_code == 0,
+            "metrics": {
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr
+            }
+        }
+
+    async def _execute_performance_test_gate(self, session: SandboxSession) -> Dict[str, Any]:
+        """Execute performance test gate."""
+        result = await session.execute("python -m pytest tests/performance/ -v")
+        return {
+            "passed": result.exit_code == 0,
+            "metrics": {
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr
+            }
+        }
+
+    async def _execute_deployment_test_gate(self, session: SandboxSession) -> Dict[str, Any]:
+        """Execute deployment test gate."""
+        result = await session.execute("python -m pytest tests/deployment/ -v")
+        return {
+            "passed": result.exit_code == 0,
+            "metrics": {
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr
+            }
+        }
 
     def _topological_sort(self, gates: list[QualityGateType]) -> list[QualityGateType]:
         """Sort gates topologically based on dependencies."""
