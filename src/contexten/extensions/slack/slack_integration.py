@@ -104,6 +104,8 @@ class SlackIntegration(BaseExtension):
             if payload.get("thread_ts"):
                 data["thread_ts"] = payload["thread_ts"]
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.post(url, json=data) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -132,6 +134,8 @@ class SlackIntegration(BaseExtension):
             url = f"{self.base_url}/conversations.list"
             params = {"types": "public_channel,private_channel"}
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -171,6 +175,8 @@ class SlackIntegration(BaseExtension):
             url = f"{self.base_url}/conversations.info"
             params = {"channel": channel_id}
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -215,6 +221,8 @@ class SlackIntegration(BaseExtension):
             if payload.get("is_private"):
                 data["is_private"] = payload["is_private"]
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.post(url, json=data) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -244,6 +252,8 @@ class SlackIntegration(BaseExtension):
         try:
             url = f"{self.base_url}/users.list"
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -285,6 +295,8 @@ class SlackIntegration(BaseExtension):
             url = f"{self.base_url}/users.info"
             params = {"user": user_id}
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -342,6 +354,8 @@ class SlackIntegration(BaseExtension):
             if payload.get("filetype"):
                 data["filetype"] = payload["filetype"]
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.post(url, data=data) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -375,9 +389,11 @@ class SlackIntegration(BaseExtension):
             url = f"{self.base_url}/conversations.history"
             params = {
                 "channel": channel_id,
-                "limit": min(limit, 1000)  # Slack API limit
+                "limit": str(min(limit, 1000))  # Slack API limit
             }
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -432,6 +448,8 @@ class SlackIntegration(BaseExtension):
             if payload.get("blocks"):
                 data["blocks"] = payload["blocks"]
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.post(url, json=data) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -469,6 +487,8 @@ class SlackIntegration(BaseExtension):
                 "ts": ts
             }
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.post(url, json=data) as response:
                 if response.status == 200:
                     result = await response.json()

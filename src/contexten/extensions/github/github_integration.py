@@ -94,6 +94,8 @@ class GitHubIntegration(BaseExtension):
             else:
                 url = f"{self.base_url}/user/repos"
                 
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url) as response:
                 if response.status == 200:
                     repos = await response.json()
@@ -130,6 +132,8 @@ class GitHubIntegration(BaseExtension):
         try:
             url = f"{self.base_url}/repos/{repo_name}"
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url) as response:
                 if response.status == 200:
                     repo = await response.json()
@@ -181,6 +185,8 @@ class GitHubIntegration(BaseExtension):
                 "base": base
             }
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.post(url, json=data) as response:
                 if response.status == 201:
                     pr = await response.json()
@@ -212,6 +218,8 @@ class GitHubIntegration(BaseExtension):
             url = f"{self.base_url}/repos/{repo_name}/pulls"
             params = {"state": state}
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     prs = await response.json()
@@ -247,6 +255,8 @@ class GitHubIntegration(BaseExtension):
         try:
             url = f"{self.base_url}/repos/{repo_name}/pulls/{pr_number}"
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url) as response:
                 if response.status == 200:
                     pr = await response.json()
@@ -299,6 +309,8 @@ class GitHubIntegration(BaseExtension):
                 "assignees": assignees
             }
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.post(url, json=data) as response:
                 if response.status == 201:
                     issue = await response.json()
@@ -330,6 +342,8 @@ class GitHubIntegration(BaseExtension):
             url = f"{self.base_url}/repos/{repo_name}/issues"
             params = {"state": state}
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     issues = await response.json()
@@ -364,8 +378,10 @@ class GitHubIntegration(BaseExtension):
         """Get recent commits for a repository branch."""
         try:
             url = f"{self.base_url}/repos/{repo_name}/commits"
-            params = {"sha": branch, "per_page": 20}
+            params = {"sha": branch, "per_page": "20"}
             
+            if not self.session:
+                raise RuntimeError("Session not initialized")
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
                     commits = await response.json()

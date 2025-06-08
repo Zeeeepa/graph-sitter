@@ -82,11 +82,13 @@ class LinearIntegration(BaseExtension):
     async def _execute_graphql(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute a GraphQL query against Linear API."""
         try:
-            payload = {"query": query}
+            request_payload: Dict[str, Any] = {"query": query}
             if variables:
-                payload["variables"] = variables
+                request_payload["variables"] = variables
                 
-            async with self.session.post(self.base_url, json=payload) as response:
+            if not self.session:
+                raise RuntimeError("Session not initialized")
+            async with self.session.post(self.base_url, json=request_payload) as response:
                 if response.status == 200:
                     result = await response.json()
                     if "errors" in result:
