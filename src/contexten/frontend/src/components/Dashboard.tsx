@@ -134,10 +134,14 @@ const Dashboard: React.FC = () => {
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {projects.map((project) => (
+          {projects.filter(project => project && project.id).map((project) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
               <ProjectCard
-                project={project}
+                project={{
+                  ...project,
+                  tags: project.tags || [], // Ensure tags is always an array
+                  flowStatus: project.flowStatus || 'unknown'
+                }}
                 onPin={handlePin}
                 onUnpin={handleUnpin}
               />
@@ -163,4 +167,3 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
-

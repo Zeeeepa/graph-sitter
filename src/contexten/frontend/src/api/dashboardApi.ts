@@ -131,11 +131,14 @@ export const dashboardApi = {
   getStats: async (): Promise<DashboardStats> => {
     try {
       const response = await fetchWithTimeout(`${API_BASE_URL}/api/stats`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       const data = await response.json();
       return data.stats || mockStats;
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
-      console.log('🔄 Using mock stats as fallback');
+      console.warn('📊 Stats API not available, using mock data:', error);
+      // Return mock data instead of throwing error
       return mockStats;
     }
   },

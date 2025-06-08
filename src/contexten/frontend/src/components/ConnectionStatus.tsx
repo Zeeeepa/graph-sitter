@@ -15,7 +15,9 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ className = 
 
   useEffect(() => {
     // Listen to WebSocket connection status
-    websocketService.addConnectionStatusListener(setWsStatus);
+    websocketService.addConnectionStatusListener((status: string) => {
+      setWsStatus(status as ConnectionState);
+    });
 
     // Check API health periodically
     const checkApiHealth = async () => {
@@ -153,4 +155,3 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ className = 
 };
 
 export default ConnectionStatus;
-
