@@ -20,6 +20,11 @@ export interface DashboardStats {
   quality_score: number;
 }
 
+// Add type conversion helper
+function toDate(isoString: string): Date {
+  return new Date(isoString);
+}
+
 export const dashboardApi = {
   // Get all projects
   getProjects: async (): Promise<Project[]> => {
@@ -39,7 +44,7 @@ export const dashboardApi = {
           progress: 85,
           flowEnabled: true,
           flowStatus: 'running',
-          lastActivity: new Date().toISOString(),
+          lastActivity: toDate(new Date().toISOString()),
           tags: ['core', 'typescript'],
           metrics: {
             commits: 156,
@@ -52,12 +57,12 @@ export const dashboardApi = {
           id: '2',
           name: 'Dashboard UI',
           description: 'React dashboard interface',
-          status: 'in_progress',
+          status: 'active',
           repository: 'https://github.com/example/dashboard',
           progress: 60,
           flowEnabled: false,
           flowStatus: 'stopped',
-          lastActivity: new Date().toISOString(),
+          lastActivity: toDate(new Date().toISOString()),
           tags: ['frontend', 'react'],
           metrics: {
             commits: 89,
@@ -119,4 +124,3 @@ export const dashboardApi = {
     }
   }
 };
-

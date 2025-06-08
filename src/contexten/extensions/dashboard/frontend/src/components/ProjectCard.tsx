@@ -124,7 +124,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUn
               color={project.flowEnabled ? 'warning' : 'success'}
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle flow toggle
+                if (onClick) {
+                  onClick();
+                }
               }}
             >
               {project.flowEnabled ? <PauseIcon /> : <PlayIcon />}

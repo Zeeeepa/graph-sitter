@@ -14,7 +14,8 @@ import RealTimeMetrics from './RealTimeMetrics';
 import WorkflowMonitor from './WorkflowMonitor';
 import { useDashboardStore } from '../store/dashboardStore';
 import { dashboardApi, DashboardStats } from '../api/dashboardApi';
-import { Project } from '../types/dashboard';
+import { Project as DashboardProject } from '../types/dashboard';
+import { Project as BaseProject } from '../types/index';
 
 const Dashboard: React.FC = () => {
   const { projects, setProjects } = useDashboardStore();
@@ -24,8 +25,8 @@ const Dashboard: React.FC = () => {
     'projects',
     dashboardApi.getProjects,
     {
-      onSuccess: (data: Project[]) => {
-        setProjects(data);
+      onSuccess: (data: BaseProject[]) => {
+        setProjects(data.map(convertToDashboardProject));
       },
       refetchInterval: 30000, // Refresh every 30 seconds
     }
@@ -59,6 +60,21 @@ const Dashboard: React.FC = () => {
       console.error('Failed to unpin project:', error);
     }
   };
+
+  function convertToDashboardProject(project: BaseProject): DashboardProject {
+    return {
+      id: project.id,
+      name: project.name,
+      description: project.description || '',
+      repository: project.url,
+      status: project.status === 'active' ? 'active' : 
+             project.status === 'error' ? 'error' : 'paused',
+      progress: 0, // Default value
+      flowEnabled: false,
+      flowStatus: 'stopped',
+      lastActivity: new Date(project.updated_at),
+    };
+  }
 
   if (projectsLoading) {
     return (
@@ -144,7 +160,7 @@ const Dashboard: React.FC = () => {
         </Paper>
       ) : (
         <Grid container spacing={3}>
-          {projects.map((project: Project) => (
+          {projects.map((project: DashboardProject) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
               <ProjectCard
                 project={project}
@@ -157,10 +173,10 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Real Time Metrics */}
-      <RealTimeMetrics projects={projects || []} />
+      <RealTimeMetrics projects={projects.map(convertToDashboardProject) || []} />
 
       {/* Workflow Monitor */}
-      <WorkflowMonitor projects={projects || []} />
+      <WorkflowMonitor projects={projects.map(convertToDashboardProject) || []} />
 
       {/* Footer Info */}
       <Box sx={{ mt: 6, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
