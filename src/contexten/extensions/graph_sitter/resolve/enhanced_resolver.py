@@ -422,12 +422,12 @@ class EnhancedResolver:
     def _detect_circular_imports(self, relationships: List[ImportRelationship]):
         """Detect circular import dependencies using graph analysis."""
         # Build dependency graph
-        graph = {}
+        graph: Dict[str, List[str]] = {}
         for rel in relationships:
             if rel.source_file not in graph:
                 graph[rel.source_file] = []
             graph[rel.source_file].append(rel.target_file)
-        
+
         # Find cycles using DFS
         visited = set()
         rec_stack = set()
@@ -492,7 +492,10 @@ class EnhancedResolver:
         if isinstance(decorator, ast.Name):
             return decorator.id
         elif isinstance(decorator, ast.Attribute):
-            return f"{decorator.value.id}.{decorator.attr}"
+            if hasattr(decorator.value, 'id'):
+                return f"{decorator.value.id}.{decorator.attr}"
+            else:
+                return f"{str(decorator.value)}.{decorator.attr}"
         else:
             return str(decorator)
     
@@ -501,10 +504,12 @@ class EnhancedResolver:
         if isinstance(base, ast.Name):
             return base.id
         elif isinstance(base, ast.Attribute):
-            return f"{base.value.id}.{base.attr}"
+            if hasattr(base.value, 'id'):
+                return f"{base.value.id}.{base.attr}"
+            else:
+                return f"{str(base.value)}.{base.attr}"
         else:
             return str(base)
 
 
 __all__ = ['EnhancedResolver', 'ResolvedSymbol', 'ImportRelationship']
-

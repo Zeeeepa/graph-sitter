@@ -60,10 +60,10 @@ class CodebaseConfig:
     """Ignore errors that occur during external process execution."""
     
     # Import resolution
-    import_resolution_paths: List[str] = None
+    import_resolution_paths: Optional[List[str]] = None
     """Alternative paths to resolve imports from."""
     
-    import_resolution_overrides: Dict[str, str] = None
+    import_resolution_overrides: Optional[Dict[str, str]] = None
     """Import path overrides during import resolution."""
     
     allow_external: bool = False
@@ -253,4 +253,3 @@ class PresetConfigs:
 
 
 __all__ = ['CodebaseConfig', 'PresetConfigs']
-
