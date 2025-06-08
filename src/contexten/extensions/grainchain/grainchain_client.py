@@ -7,7 +7,7 @@ sandbox system with provider abstraction and automatic fallback.
 import logging
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, AsyncIterator, Optional, Dict
 
 from .config import GrainchainIntegrationConfig
 from .grainchain_types import ExecutionResult, GrainchainEvent, GrainchainEventType, SandboxConfig, SandboxMetrics, SandboxProvider, SnapshotInfo
@@ -45,7 +45,7 @@ class GrainchainClient:
         from .config import get_grainchain_config
 
         self.config = config or get_grainchain_config()
-        self._provider_clients: dict[SandboxProvider, Any] = {}
+        self._provider_clients: dict[SandboxProvider, MockProviderClient] = {}
         self._active_sandboxes: dict[str, dict[str, Any]] = {}
         self._metrics: dict[SandboxProvider, SandboxMetrics] = {}
         self._event_handlers: list[Callable] = []
@@ -63,22 +63,24 @@ class GrainchainClient:
             except Exception as e:
                 logger.exception(f"Failed to initialize {provider.value} provider: {e}")
 
-    def _create_provider_client(self, provider: SandboxProvider):
-        """Create a client for the specified provider."""
-        # This would import and create the actual provider clients
-        # For now, we'll create mock clients
+    def _create_provider_client(self, provider: SandboxProvider) -> MockProviderClient:
+        """Create a provider client.
 
-        if provider == SandboxProvider.LOCAL:
-            return MockLocalClient(self.config.get_provider_config(provider))
-        elif provider == SandboxProvider.E2B:
-            return MockE2BClient(self.config.get_provider_config(provider))
-        elif provider == SandboxProvider.DAYTONA:
-            return MockDaytonaClient(self.config.get_provider_config(provider))
-        elif provider == SandboxProvider.MORPH:
-            return MockMorphClient(self.config.get_provider_config(provider))
-        else:
-            msg = f"Unsupported provider: {provider}"
-            raise ValueError(msg)
+        Args:
+            provider: The provider to create a client for
+
+        Returns:
+            MockProviderClient: The provider client
+        """
+        if provider not in self._provider_clients:
+            client = {
+                SandboxProvider.LOCAL: MockLocalClient,
+                SandboxProvider.E2B: MockE2BClient,
+                SandboxProvider.DAYTONA: MockDaytonaClient,
+                SandboxProvider.MORPH: MockMorphClient
+            }[provider]()
+            self._provider_clients[provider] = client
+        return self._provider_clients[provider]
 
     async def get_available_providers(self) -> list[SandboxProvider]:
         """Get list of currently available providers."""
@@ -124,18 +126,32 @@ class GrainchainClient:
     @asynccontextmanager
     async def create_sandbox(
         self,
-        config: SandboxConfig | None = None,
-        provider: SandboxProvider | None = None
-    ) -> AbstractAsyncContextManager['SandboxSession']:
-        """Create a sandbox session with automatic cleanup.
+        config: Optional[SandboxConfig] = None,
+        provider: Optional[SandboxProvider] = None,
+    ) -> AsyncIterator[SandboxSession]:
+        """Create a new sandbox session.
 
         Args:
-            config: Sandbox configuration
-            provider: Preferred provider (will auto-select if None)
+            config: Optional sandbox configuration
+            provider: Optional sandbox provider
 
         Returns:
-            SandboxSession context manager
+            AsyncIterator[SandboxSession]: The sandbox session
         """
+        session = None
+        try:
+            session = await self._create_sandbox_session(config, provider)
+            yield session
+        finally:
+            if session:
+                await self._cleanup_sandbox_session(session)
+
+    async def _create_sandbox_session(
+        self,
+        config: Optional[SandboxConfig] = None,
+        provider: Optional[SandboxProvider] = None,
+    ) -> SandboxSession:
+        """Create a new sandbox session."""
         if config is None:
             config = SandboxConfig()
 
@@ -185,35 +201,7 @@ class GrainchainClient:
                 except Exception as e:
                     logger.exception(f"Event handler failed: {e}")
 
-            try:
-                yield session
-            finally:
-                # Cleanup sandbox
-                try:
-                    await client.destroy_sandbox(sandbox_id)
-
-                    # Remove from tracking
-                    self._active_sandboxes.pop(sandbox_id, None)
-
-                    # Emit event
-                    event = GrainchainEvent(
-                        event_type=GrainchainEventType.SANDBOX_DESTROYED,
-                        timestamp=datetime.now(UTC),
-                        source="grainchain_client",
-                        data={
-                            'sandbox_id': sandbox_id,
-                            'provider': selected_provider.value
-                        }
-                    )
-
-                    for handler in self._event_handlers:
-                        try:
-                            await handler(event)
-                        except Exception as e:
-                            logger.exception(f"Event handler failed: {e}")
-
-                except Exception as e:
-                    logger.exception(f"Failed to cleanup sandbox {sandbox_id}: {e}")
+            return session
 
         except Exception as e:
             logger.exception(f"Failed to create sandbox with {selected_provider.value}: {e}")
@@ -222,59 +210,54 @@ class GrainchainClient:
 
     async def list_snapshots(
         self,
-        provider: SandboxProvider | None = None
+        sandbox_id: str
     ) -> list[SnapshotInfo]:
-        """List available snapshots."""
-        snapshots = []
+        """List snapshots for a sandbox.
 
-        providers_to_check = [provider] if provider else self._provider_clients.keys()
+        Args:
+            sandbox_id: ID of the sandbox
 
-        for prov in providers_to_check:
-            client = self._provider_clients.get(prov)
-            if client:
-                try:
-                    provider_snapshots = await client.list_snapshots()
-                    snapshots.extend(provider_snapshots)
-                except Exception as e:
-                    logger.exception(f"Failed to list snapshots for {prov.value}: {e}")
+        Returns:
+            list[SnapshotInfo]: List of snapshot information
+        """
+        client = self._get_provider_client(sandbox_id)
+        return await client.list_snapshots(sandbox_id)
 
-        return snapshots
+    async def get_metrics(self, sandbox_id: str) -> SandboxMetrics:
+        """Get metrics for a sandbox.
 
-    async def get_metrics(self) -> dict[SandboxProvider, SandboxMetrics]:
-        """Get metrics for all providers."""
-        metrics = {}
+        Args:
+            sandbox_id: ID of the sandbox
 
-        for provider, client in self._provider_clients.items():
-            try:
-                provider_metrics = await client.get_metrics()
-                metrics[provider] = provider_metrics
-            except Exception as e:
-                logger.exception(f"Failed to get metrics for {provider.value}: {e}")
-
-        return metrics
+        Returns:
+            SandboxMetrics: Sandbox metrics
+        """
+        client = self._get_provider_client(sandbox_id)
+        return await client.get_metrics(sandbox_id)
 
     async def benchmark_providers(
         self,
         test_suite: str = "standard",
         providers: list[SandboxProvider] | None = None
-    ) -> dict[SandboxProvider, dict[str, float]]:
-        """Run performance benchmarks across providers."""
+    ) -> dict[str, float]:
+        """Run benchmarks on all providers.
+
+        Returns:
+            dict[str, float]: Benchmark results
+        """
         if providers is None:
             providers = list(self._provider_clients.keys())
 
-        results = {}
+        results: dict[str, float] = {}
 
         for provider in providers:
-            client = self._provider_clients.get(provider)
-            if not client:
-                continue
-
+            client = self._create_provider_client(provider)
             try:
-                benchmark_result = await client.run_benchmark(test_suite)
-                results[provider] = benchmark_result
+                benchmark_results = await client.run_benchmark(test_suite)
+                results[provider.value] = benchmark_results.get("score", 0.0)
             except Exception as e:
-                logger.exception(f"Benchmark failed for {provider.value}: {e}")
-                results[provider] = {'error': str(e)}
+                logger.exception(f"Failed to benchmark {provider.value}: {e}")
+                results[provider.value] = 0.0
 
         return results
 
@@ -297,6 +280,66 @@ class GrainchainClient:
             except Exception as e:
                 logger.exception(f"Event handler failed: {e}")
 
+    async def _cleanup_sandbox_session(self, session: SandboxSession) -> None:
+        """Clean up a sandbox session.
+
+        Args:
+            session: The sandbox session to clean up
+        """
+        try:
+            # Get the provider client
+            client = self._provider_clients.get(session.provider)
+            if not client:
+                raise ProviderUnavailableError(f"Provider {session.provider.value} not available")
+
+            # Cleanup sandbox
+            await client.destroy_sandbox(session.sandbox_id)
+
+            # Emit event
+            event = GrainchainEvent(
+                event_type=GrainchainEventType.SANDBOX_DESTROYED,
+                timestamp=datetime.now(UTC),
+                source="grainchain_client",
+                data={
+                    'sandbox_id': session.sandbox_id,
+                    'provider': session.provider.value
+                }
+            )
+
+            for handler in self._event_handlers:
+                try:
+                    await handler(event)
+                except Exception as e:
+                    logger.exception(f"Event handler failed: {e}")
+
+        except Exception as e:
+            logger.exception(f"Failed to cleanup sandbox {session.sandbox_id}: {e}")
+
+    def _get_provider_client(self, sandbox_id: str) -> MockProviderClient:
+        """Get the provider client for a sandbox.
+
+        Args:
+            sandbox_id: ID of the sandbox
+
+        Returns:
+            MockProviderClient: The provider client
+
+        Raises:
+            ProviderUnavailableError: If the provider is not available
+        """
+        # Get the sandbox info from active sandboxes
+        sandbox_info = self._active_sandboxes.get(sandbox_id)
+        if not sandbox_info:
+            raise ProviderUnavailableError(f"Sandbox {sandbox_id} not found")
+
+        # Get the provider client
+        provider = sandbox_info['provider']
+        client = self._provider_clients.get(provider)
+        if not client:
+            raise ProviderUnavailableError(f"Provider {provider.value} not available")
+
+        return client
+
 
 class SandboxSession:
     """A session representing an active sandbox.
@@ -317,9 +360,27 @@ class SandboxSession:
         self._client = client
         self._grainchain_client = grainchain_client
 
-    async def execute(self, command: str, timeout: int | None = None) -> ExecutionResult:
-        """Execute a command in the sandbox."""
-        return await self._client.execute(self.sandbox_id, command, timeout)
+    async def execute(self, sandbox_id: str, command: str, timeout: int | None = None) -> ExecutionResult:
+        """Execute a command in a sandbox.
+
+        Args:
+            sandbox_id: ID of the sandbox
+            command: Command to execute
+            timeout: Optional timeout in seconds
+
+        Returns:
+            ExecutionResult: Result of the command execution
+        """
+        return ExecutionResult(
+            command=command,
+            exit_code=0,
+            stdout="Mock stdout",
+            stderr="",
+            duration=0.1,
+            timestamp=datetime.now(UTC),
+            sandbox_id=sandbox_id,
+            provider=SandboxProvider.LOCAL
+        )
 
     async def upload_file(self, path: str, content: str) -> None:
         """Upload a file to the sandbox."""
@@ -387,25 +448,37 @@ class SandboxSession:
 class MockProviderClient:
     """Base mock provider client."""
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
+        """Initialize the mock provider client."""
+        self._sandboxes: Dict[str, Any] = {}
 
     async def health_check(self) -> bool:
         return True
 
     async def create_sandbox(self, config: SandboxConfig) -> str:
-        return f"sandbox_{self.__class__.__name__}_{datetime.now(UTC).timestamp()}"
+        sandbox_id = f"sandbox_{self.__class__.__name__}_{datetime.now(UTC).timestamp()}"
+        self._sandboxes[sandbox_id] = config
+        return sandbox_id
 
     async def destroy_sandbox(self, sandbox_id: str) -> None:
-        pass
+        """Destroy a sandbox.
+
+        Args:
+            sandbox_id: ID of the sandbox to destroy
+        """
+        try:
+            self._sandboxes.pop(sandbox_id, None)
+        except Exception as e:
+            logger.exception(f"Failed to destroy sandbox {sandbox_id}: {e}")
+            raise
 
     async def execute(self, sandbox_id: str, command: str, timeout: int | None = None) -> ExecutionResult:
         return ExecutionResult(
             command=command,
             exit_code=0,
-            stdout="Mock output",
+            stdout="Mock stdout",
             stderr="",
-            duration=1.0,
+            duration=0.1,
             timestamp=datetime.now(UTC),
             sandbox_id=sandbox_id,
             provider=SandboxProvider.LOCAL
@@ -417,19 +490,16 @@ class MockProviderClient:
     async def download_file(self, sandbox_id: str, path: str) -> str:
         return "Mock file content"
 
-    async def list_files(self, sandbox_id: str, path: str) -> list[dict[str, Any]]:
-        return [{"name": "mock_file.txt", "size": 100, "type": "file"}]
-
     async def create_snapshot(self, sandbox_id: str, name: str, metadata: dict[str, Any] | None = None) -> str:
-        return f"snapshot_{name}_{datetime.now(UTC).timestamp()}"
+        return f"snapshot_{sandbox_id}_{name}"
 
     async def restore_snapshot(self, sandbox_id: str, snapshot_id: str) -> None:
         pass
 
-    async def list_snapshots(self) -> list[SnapshotInfo]:
+    async def list_snapshots(self, sandbox_id: str) -> list[SnapshotInfo]:
         return []
 
-    async def get_metrics(self) -> SandboxMetrics:
+    async def get_metrics(self, sandbox_id: str) -> SandboxMetrics:
         return SandboxMetrics(
             provider=SandboxProvider.LOCAL,
             total_sandboxes_created=10,
