@@ -1,347 +1,219 @@
-"""
-Main Dashboard extension class for Contexten.
+"""Main dashboard application.
 
-This module implements the core Dashboard extension that integrates with the
-ContextenApp to provide comprehensive project management and workflow orchestration
-capabilities.
+This module provides the main dashboard application with real-time
+project monitoring, workflow management, and integration features.
 """
 
-import os
+import asyncio
 import logging
+import uuid
+from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from datetime import datetime
 
-from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-from .api import router as api_router
-from .websocket import WebSocketManager
-from .database import initialize_database, db_manager
-from .github_integration import GitHubProjectManager
-from .codegen_integration import CodegenPlanGenerator
-from .workflows.orchestrator import WorkflowOrchestrator
+from .models import Project, ProjectPlan, ProjectRequirements, ProjectStatus
+from .services.integration_service import IntegrationService
+from .services.websocket_service import WebSocketService
 
 logger = logging.getLogger(__name__)
 
+class DashboardApp:
+    """Main dashboard application."""
 
-class Dashboard:
-    """
-    Dashboard extension for Contexten providing comprehensive project management
-    and workflow orchestration capabilities.
-    
-    Features:
-    - Project pinning and management
-    - GitHub repository integration
-    - Automated plan generation via Codegen SDK
-    - Multi-layered workflow orchestration (Prefect, ControlFlow, MCP)
-    - Real-time progress tracking
-    - Quality gates and validation
-    """
-    
-    def __init__(self, contexten_app):
-        """Initialize the Dashboard extension.
-        
-        Args:
-            contexten_app: The parent ContextenApp instance
-        """
-        self.contexten_app = contexten_app
-        self.app = contexten_app.app
-        
-        # Initialize components
-        self.websocket_manager = WebSocketManager()
-        self.github_manager = GitHubProjectManager()
-        self.codegen_generator = CodegenPlanGenerator()
-        self.workflow_orchestrator = WorkflowOrchestrator()
-        
-        # Setup routes and middleware
+    def __init__(self) -> None:
+        """Initialize dashboard application."""
+        self.app = FastAPI(title="Contexten Dashboard")
+        self.integration_service = IntegrationService()
+        self.websocket_service = WebSocketService()
+        self._setup_middleware()
         self._setup_routes()
-        self._setup_static_files()
-        
-        logger.info("Dashboard extension initialized")
-    
-    def _setup_routes(self):
-        """Setup FastAPI routes for the dashboard."""
-        # Include API routes
-        self.app.include_router(api_router)
-        
-        # Add WebSocket routes
-        self.websocket_manager.setup_routes(self.app)
-        
-        # Dashboard UI routes
-        @self.app.get("/dashboard", response_class=HTMLResponse)
-        async def dashboard_ui():
-            """Serve the main dashboard UI."""
-            return await self._serve_dashboard_ui()
-        
-        @self.app.get("/dashboard/{path:path}")
-        async def dashboard_spa_routes(path: str):
-            """Handle SPA routing for dashboard."""
-            return await self._serve_dashboard_ui()
-    
-    def _setup_static_files(self):
-        """Setup static file serving for the React frontend."""
-        frontend_path = os.path.join(os.path.dirname(__file__), "frontend", "build")
-        
-        if os.path.exists(frontend_path):
-            self.app.mount(
-                "/dashboard/static", 
-                StaticFiles(directory=os.path.join(frontend_path, "static")), 
-                name="dashboard_static"
-            )
-            logger.info(f"Serving dashboard static files from: {frontend_path}")
-        else:
-            logger.warning(f"Dashboard frontend build not found at: {frontend_path}")
-    
-    async def _serve_dashboard_ui(self) -> HTMLResponse:
-        """Serve the dashboard UI HTML."""
-        frontend_path = os.path.join(os.path.dirname(__file__), "frontend", "build")
-        index_path = os.path.join(frontend_path, "index.html")
-        
-        if os.path.exists(index_path):
-            with open(index_path, 'r') as f:
-                content = f.read()
-            return HTMLResponse(content=content)
-        else:
-            # Fallback HTML if React build is not available
-            return HTMLResponse(content=self._get_fallback_html())
-    
-    def _get_fallback_html(self) -> str:
-        """Get fallback HTML when React build is not available."""
-        return f"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Contexten Dashboard</title>
-            <style>
-                body {{
-                    margin: 0;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                }}
-                .container {{
-                    text-align: center;
-                    max-width: 800px;
-                    padding: 2rem;
-                }}
-                .logo {{
-                    font-size: 3rem;
-                    font-weight: bold;
-                    margin-bottom: 1rem;
-                    background: linear-gradient(45deg, #fff, #f0f0f0);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                }}
-                .subtitle {{
-                    font-size: 1.2rem;
-                    margin-bottom: 2rem;
-                    opacity: 0.9;
-                }}
-                .features {{
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                    gap: 1rem;
-                    margin-top: 2rem;
-                }}
-                .feature {{
-                    background: rgba(255, 255, 255, 0.1);
-                    padding: 1.5rem;
-                    border-radius: 10px;
-                    backdrop-filter: blur(10px);
-                }}
-                .feature h3 {{
-                    margin: 0 0 0.5rem 0;
-                    font-size: 1.1rem;
-                }}
-                .feature p {{
-                    margin: 0;
-                    opacity: 0.8;
-                    font-size: 0.9rem;
-                }}
-                .status {{
-                    margin-top: 2rem;
-                    padding: 1rem;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 10px;
-                    backdrop-filter: blur(10px);
-                }}
-                .api-link {{
-                    color: #fff;
-                    text-decoration: none;
-                    background: rgba(255, 255, 255, 0.2);
-                    padding: 0.5rem 1rem;
-                    border-radius: 5px;
-                    display: inline-block;
-                    margin-top: 1rem;
-                    transition: background 0.3s;
-                }}
-                .api-link:hover {{
-                    background: rgba(255, 255, 255, 0.3);
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="logo">Contexten Dashboard</div>
-                <div class="subtitle">Multi-layered Workflow Orchestration Platform</div>
-                
-                <div class="features">
-                    <div class="feature">
-                        <h3>🏗️ Project Management</h3>
-                        <p>Pin GitHub repositories, manage settings, and track progress</p>
-                    </div>
-                    <div class="feature">
-                        <h3>🤖 AI-Powered Planning</h3>
-                        <p>Generate automated plans using Codegen SDK integration</p>
-                    </div>
-                    <div class="feature">
-                        <h3>⚡ Workflow Orchestration</h3>
-                        <p>Multi-layered execution with Prefect, ControlFlow, and MCP</p>
-                    </div>
-                    <div class="feature">
-                        <h3>✅ Quality Gates</h3>
-                        <p>Automated code analysis and validation cycles</p>
-                    </div>
-                </div>
-                
-                <div class="status">
-                    <h3>🚀 Dashboard Status</h3>
-                    <p>Backend API is running. React frontend build in progress.</p>
-                    <a href="/dashboard/docs" class="api-link">View API Documentation</a>
-                </div>
-            </div>
-            
-            <script>
-                // Auto-refresh to check for React build
-                setTimeout(() => {{
-                    window.location.reload();
-                }}, 30000);
-            </script>
-        </body>
-        </html>
-        """
-    
-    async def initialize(self):
-        """Initialize the dashboard extension."""
-        try:
-            # Initialize database
-            await initialize_database()
-            logger.info("Dashboard database initialized")
-            
-            # Initialize components
-            await self.github_manager.initialize()
-            await self.codegen_generator.initialize()
-            await self.workflow_orchestrator.initialize()
-            
-            logger.info("Dashboard extension fully initialized")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to initialize dashboard: {e}")
-            return False
-    
-    async def handle_github_event(self, event_type: str, payload: Dict[str, Any]):
-        """Handle GitHub webhook events."""
-        try:
-            logger.info(f"Dashboard handling GitHub event: {event_type}")
-            
-            # Process the event and broadcast updates
-            await self.github_manager.handle_event(event_type, payload)
-            
-            # Broadcast real-time update to connected clients
-            await self.websocket_manager.broadcast({
-                "type": "github_event",
-                "event_type": event_type,
-                "timestamp": datetime.utcnow().isoformat(),
-                "data": payload
-            })
-            
-        except Exception as e:
-            logger.error(f"Failed to handle GitHub event: {e}")
-    
-    async def handle_linear_event(self, event_type: str, payload: Dict[str, Any]):
-        """Handle Linear webhook events."""
-        try:
-            logger.info(f"Dashboard handling Linear event: {event_type}")
-            
-            # Broadcast real-time update to connected clients
-            await self.websocket_manager.broadcast({
-                "type": "linear_event",
-                "event_type": event_type,
-                "timestamp": datetime.utcnow().isoformat(),
-                "data": payload
-            })
-            
-        except Exception as e:
-            logger.error(f"Failed to handle Linear event: {e}")
-    
-    async def handle_workflow_update(self, workflow_id: str, status: str, progress: float):
-        """Handle workflow execution updates."""
-        try:
-            logger.info(f"Dashboard handling workflow update: {workflow_id} - {status} ({progress}%)")
-            
-            # Broadcast real-time update to connected clients
-            await self.websocket_manager.broadcast({
-                "type": "workflow_update",
-                "workflow_id": workflow_id,
-                "status": status,
-                "progress": progress,
-                "timestamp": datetime.utcnow().isoformat()
-            })
-            
-        except Exception as e:
-            logger.error(f"Failed to handle workflow update: {e}")
-    
-    async def get_dashboard_stats(self) -> Dict[str, Any]:
-        """Get dashboard statistics and metrics."""
-        try:
-            # TODO: Implement comprehensive dashboard statistics
-            stats = {
-                "total_projects": 0,
-                "active_workflows": 0,
-                "completed_tasks": 0,
-                "pending_prs": 0,
-                "quality_score": 85.5,
-                "last_updated": datetime.utcnow().isoformat()
+
+    def _setup_middleware(self) -> None:
+        """Set up application middleware."""
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],  # Configure appropriately in production
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
+    def _setup_routes(self) -> None:
+        """Set up application routes."""
+        # Health check
+        @self.app.get("/health")
+        async def health_check() -> Dict[str, str]:
+            return {
+                "status": "healthy",
+                "timestamp": datetime.now(UTC).isoformat()
             }
-            
-            return stats
-        except Exception as e:
-            logger.error(f"Failed to get dashboard stats: {e}")
-            return {}
-    
-    async def cleanup(self):
-        """Cleanup dashboard resources."""
-        try:
-            await self.websocket_manager.cleanup()
-            await db_manager.close()
-            logger.info("Dashboard extension cleaned up")
-        except Exception as e:
-            logger.error(f"Failed to cleanup dashboard: {e}")
 
+        # Project management
+        @self.app.post("/projects")
+        async def create_project(
+            name: str,
+            repository: str,
+            requirements: Optional[ProjectRequirements] = None
+        ) -> Dict[str, Any]:
+            try:
+                project = await self.integration_service.initialize_project(
+                    project_name=name,
+                    repository=repository,
+                    requirements=requirements
+                )
+                return {
+                    "success": True,
+                    "data": {
+                        "project_id": project.id,
+                        "name": project.name,
+                        "status": project.status
+                    }
+                }
+            except Exception as e:
+                logger.error(f"Failed to create project: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
 
-# Integration function for ContextenApp
-def setup_dashboard(contexten_app) -> Dashboard:
-    """Setup dashboard extension for ContextenApp.
-    
-    Args:
-        contexten_app: The ContextenApp instance
-        
-    Returns:
-        Dashboard: The initialized dashboard extension
-    """
-    dashboard = Dashboard(contexten_app)
-    
-    # Add dashboard to the ContextenApp
-    contexten_app.dashboard = dashboard
-    
-    return dashboard
+        @self.app.post("/projects/{project_id}/plan")
+        async def generate_plan(
+            project_id: str,
+            requirements: ProjectRequirements
+        ) -> Dict[str, Any]:
+            try:
+                plan = await self.integration_service.generate_project_plan(
+                    project_id=project_id,
+                    requirements=requirements
+                )
+                return {
+                    "success": True,
+                    "data": {
+                        "plan_id": plan.id,
+                        "tasks": plan.tasks
+                    }
+                }
+            except Exception as e:
+                logger.error(f"Failed to generate plan: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.app.post("/projects/{project_id}/flow/start")
+        async def start_flow(project_id: str) -> Dict[str, Any]:
+            try:
+                await self.integration_service.start_project_flow(project_id)
+                return {
+                    "success": True,
+                    "message": "Flow started successfully"
+                }
+            except Exception as e:
+                logger.error(f"Failed to start flow: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.app.post("/projects/{project_id}/flow/stop")
+        async def stop_flow(project_id: str) -> Dict[str, Any]:
+            try:
+                await self.integration_service.stop_project_flow(project_id)
+                return {
+                    "success": True,
+                    "message": "Flow stopped successfully"
+                }
+            except Exception as e:
+                logger.error(f"Failed to stop flow: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.app.get("/projects/{project_id}/status")
+        async def get_project_status(project_id: str) -> Dict[str, Any]:
+            try:
+                status = await self.integration_service.get_project_status(project_id)
+                return {
+                    "success": True,
+                    "data": status
+                }
+            except Exception as e:
+                logger.error(f"Failed to get project status: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.app.get("/projects/{project_id}/events")
+        async def get_project_events(
+            project_id: str,
+            limit: int = 100
+        ) -> Dict[str, Any]:
+            try:
+                events = await self.integration_service.get_project_events(
+                    project_id=project_id,
+                    limit=limit
+                )
+                return {
+                    "success": True,
+                    "data": {
+                        "events": [event.dict() for event in events]
+                    }
+                }
+            except Exception as e:
+                logger.error(f"Failed to get project events: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+
+        # WebSocket connection
+        @self.app.websocket("/ws")
+        async def websocket_endpoint(websocket: WebSocket) -> None:
+            client_id = str(uuid.uuid4())
+            try:
+                await self.websocket_service.handle_connection(websocket, client_id)
+            except WebSocketDisconnect:
+                pass
+            except Exception as e:
+                logger.error(f"WebSocket error: {e}")
+
+    async def start(self) -> None:
+        """Start dashboard application."""
+        await self.websocket_service.start()
+
+    async def stop(self) -> None:
+        """Stop dashboard application."""
+        await self.websocket_service.stop()
+
+    def register_event_handler(
+        self,
+        event_type: str,
+        handler: Any
+    ) -> None:
+        """Register event handler."""
+        self.integration_service.register_event_handler(event_type, handler)
+
+    async def broadcast_project_update(
+        self,
+        project_id: str,
+        update_type: str,
+        data: Dict[str, Any]
+    ) -> None:
+        """Broadcast project update."""
+        await self.websocket_service.broadcast_project_update(
+            project_id=project_id,
+            update_type=update_type,
+            data=data
+        )
+
+    async def broadcast_workflow_event(
+        self,
+        project_id: str,
+        event_type: str,
+        event_data: Dict[str, Any]
+    ) -> None:
+        """Broadcast workflow event."""
+        await self.websocket_service.broadcast_workflow_event(
+            project_id=project_id,
+            event_type=event_type,
+            event_data=event_data
+        )
+
+    async def broadcast_metrics_update(
+        self,
+        project_id: str,
+        metrics: Dict[str, Any]
+    ) -> None:
+        """Broadcast metrics update."""
+        await self.websocket_service.broadcast_metrics_update(
+            project_id=project_id,
+            metrics=metrics
+        )
 

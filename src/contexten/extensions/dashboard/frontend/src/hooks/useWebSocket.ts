@@ -1,201 +1,131 @@
-import { useEffect, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
-import toast from 'react-hot-toast';
-
+import { useEffect, useRef, useState } from 'react';
+import { WebSocketEvent } from '../types';
 import { useDashboardStore } from '../store/dashboardStore';
-import { WebSocketMessage } from '../types';
 
-export const useWebSocket = () => {
-  const socketRef = useRef<Socket | null>(null);
-  const { 
-    user, 
-    setConnected, 
-    updateProject, 
-    addWorkflowPlan, 
-    updateWorkflowPlan 
-  } = useDashboardStore();
+interface UseWebSocketOptions {
+  onProjectUpdate?: (projectId: string, updateType: string, data: any) => void;
+  onWorkflowEvent?: (projectId: string, eventType: string, data: any) => void;
+  onMetricsUpdate?: (projectId: string, metrics: any) => void;
+  onConnectionChange?: (connected: boolean) => void;
+}
 
-  useEffect(() => {
-    // Initialize WebSocket connection
-    const initializeWebSocket = () => {
-      const wsUrl = `ws://localhost:8000/dashboard/ws/${user.id}`;
-      
-      try {
-        socketRef.current = io(wsUrl, {
-          transports: ['websocket'],
-          autoConnect: true,
-        });
+export const useWebSocket = (options: UseWebSocketOptions = {}) => {
+  const [connected, setConnected] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const setStoreConnected = useDashboardStore(state => state.setConnected);
 
-        const socket = socketRef.current;
+  const connect = () => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-        // Connection events
-        socket.on('connect', () => {
-          console.log('WebSocket connected');
-          setConnected(true);
-          toast.success('Connected to dashboard');
-        });
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
 
-        socket.on('disconnect', () => {
-          console.log('WebSocket disconnected');
-          setConnected(false);
-          toast.error('Disconnected from dashboard');
-        });
-
-        socket.on('connect_error', (error) => {
-          console.error('WebSocket connection error:', error);
-          setConnected(false);
-          toast.error('Failed to connect to dashboard');
-        });
-
-        // Dashboard event handlers
-        socket.on('connection_established', (data: any) => {
-          console.log('Dashboard connection established:', data);
-          
-          // Subscribe to relevant topics
-          socket.emit('subscribe', { topic: 'project_updates' });
-          socket.emit('subscribe', { topic: 'workflow_updates' });
-          socket.emit('subscribe', { topic: 'github_events' });
-          socket.emit('subscribe', { topic: 'linear_events' });
-        });
-
-        socket.on('project_update', (message: WebSocketMessage) => {
-          console.log('Project update received:', message);
-          
-          if (message.project_id && message.data) {
-            updateProject(message.project_id, message.data);
-            toast.success(`Project ${message.data.name || message.project_id} updated`);
-          }
-        });
-
-        socket.on('workflow_update', (message: WebSocketMessage) => {
-          console.log('Workflow update received:', message);
-          
-          if (message.workflow_id) {
-            const { status, progress } = message;
-            toast.success(`Workflow ${status}: ${progress}% complete`);
-          }
-        });
-
-        socket.on('github_event', (message: WebSocketMessage) => {
-          console.log('GitHub event received:', message);
-          
-          const { event_type, data } = message;
-          
-          switch (event_type) {
-            case 'pull_request':
-              if (data.action === 'opened') {
-                toast(`New PR opened: ${data.pull_request?.title}`, { icon: 'ℹ️' });
-              } else if (data.action === 'merged') {
-                toast(`PR merged: ${data.pull_request?.title}`, { icon: '✅' });
-              }
-              break;
-            case 'issues':
-              if (data.action === 'opened') {
-                toast(`New issue: ${data.issue?.title}`, { icon: 'ℹ️' });
-              }
-              break;
-            case 'push':
-              toast(`New commits pushed to ${data.ref}`, { icon: 'ℹ️' });
-              break;
-          }
-        });
-
-        socket.on('linear_event', (message: WebSocketMessage) => {
-          console.log('Linear event received:', message);
-          
-          const { event_type, data } = message;
-          
-          if (event_type === 'issue_updated') {
-            toast(`Linear issue updated: ${data.title}`, { icon: 'ℹ️' });
-          }
-        });
-
-        socket.on('quality_gate_update', (message: WebSocketMessage) => {
-          console.log('Quality gate update received:', message);
-          
-          const { gate_data } = message;
-          
-          if (gate_data.status === 'passed') {
-            toast.success(`Quality gate passed: ${gate_data.gate_type}`);
-          } else if (gate_data.status === 'failed') {
-            toast.error(`Quality gate failed: ${gate_data.gate_type}`);
-          }
-        });
-
-        socket.on('pr_update', (message: WebSocketMessage) => {
-          console.log('PR update received:', message);
-          
-          const { pr_data } = message;
-          
-          if (pr_data.status === 'merged') {
-            toast(`PR merged: ${pr_data.title}`, { icon: '✅' });
-          } else if (pr_data.status === 'closed') {
-            toast(`PR closed: ${pr_data.title}`, { icon: 'ℹ️' });
-          }
-        });
-
-        // Handle ping/pong for connection health
-        socket.on('pong', () => {
-          console.log('WebSocket pong received');
-        });
-
-        // Send periodic ping to keep connection alive
-        const pingInterval = setInterval(() => {
-          if (socket.connected) {
-            socket.emit('ping');
-          }
-        }, 30000); // Ping every 30 seconds
-
-        // Cleanup interval on disconnect
-        socket.on('disconnect', () => {
-          clearInterval(pingInterval);
-        });
-
-      } catch (error) {
-        console.error('Failed to initialize WebSocket:', error);
-        setConnected(false);
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      setConnected(true);
+      setStoreConnected(true);
+      if (options.onConnectionChange) {
+        options.onConnectionChange(true);
       }
     };
 
-    // Initialize WebSocket
-    initializeWebSocket();
-
-    // Cleanup on unmount
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
       setConnected(false);
-    };
-  }, [user.id, setConnected, updateProject, addWorkflowPlan, updateWorkflowPlan]);
+      setStoreConnected(false);
+      if (options.onConnectionChange) {
+        options.onConnectionChange(false);
+      }
+      wsRef.current = null;
 
-  // Utility functions for sending messages
-  const sendMessage = (type: string, data: any) => {
-    if (socketRef.current?.connected) {
-      socketRef.current.emit(type, data);
-    } else {
-      console.warn('WebSocket not connected, cannot send message:', type, data);
+      // Attempt to reconnect
+      reconnectTimeoutRef.current = setTimeout(() => {
+        connect();
+      }, 5000);
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const message: WebSocketEvent = JSON.parse(event.data);
+        handleMessage(message);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    wsRef.current = ws;
+  };
+
+  const handleMessage = (message: WebSocketEvent) => {
+    switch (message.type) {
+      case 'project_update':
+        if (options.onProjectUpdate) {
+          const { project_id, type, data } = message.payload;
+          options.onProjectUpdate(project_id, type, data);
+        }
+        break;
+
+      case 'workflow_event':
+        if (options.onWorkflowEvent) {
+          const { project_id, type, data } = message.payload;
+          options.onWorkflowEvent(project_id, type, data);
+        }
+        break;
+
+      case 'metrics_update':
+        if (options.onMetricsUpdate) {
+          const { project_id, metrics } = message.payload;
+          options.onMetricsUpdate(project_id, metrics);
+        }
+        break;
+
+      default:
+        console.warn('Unknown message type:', message.type);
     }
   };
 
-  const subscribeToTopic = (topic: string) => {
-    sendMessage('subscribe', { topic });
+  const subscribeToProject = (projectId: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'subscribe',
+        project_id: projectId
+      }));
+    }
   };
 
-  const unsubscribeFromTopic = (topic: string) => {
-    sendMessage('unsubscribe', { topic });
+  const unsubscribeFromProject = (projectId: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'unsubscribe',
+        project_id: projectId
+      }));
+    }
   };
 
-  const getStatus = () => {
-    sendMessage('get_status', {});
-  };
+  useEffect(() => {
+    connect();
+
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
   return {
-    connected: socketRef.current?.connected || false,
-    sendMessage,
-    subscribeToTopic,
-    unsubscribeFromTopic,
-    getStatus,
+    connected,
+    subscribeToProject,
+    unsubscribeFromProject
   };
 };
+
+export default useWebSocket;
+
