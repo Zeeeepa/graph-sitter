@@ -299,55 +299,52 @@ class SandboxManager:
 
 
 class TrackedSandboxSession:
-    """A wrapper around SandboxSession that tracks usage metrics."""
+    """Sandbox session with tracking."""
 
-    def __init__(self, session: SandboxSession, session_id: str, manager: SandboxManager):
+    def __init__(
+        self,
+        session: SandboxSession,
+        session_id: str,
+        manager: "SandboxManager"
+    ) -> None:
+        """Initialize the tracked session."""
         self.session = session
         self.session_id = session_id
-        self.manager = manager
+        self._manager = manager
 
-    def __getattr__(self, name):
-        """Delegate attribute access to the wrapped session."""
-        return getattr(self.session, name)
-
-    async def execute(self, command: str, timeout: int | None = None):
-        """Execute command with metrics tracking."""
+    async def execute(self, command: str, timeout: Optional[int] = None) -> Dict[str, Any]:
+        """Execute a command in the sandbox."""
         result = await self.session.execute(command, timeout)
-
-        # Update metrics
-        session_info = self.manager._active_sessions.get(self.session_id)
-        if session_info:
-            session_info['metrics']['commands_executed'] += 1
-
+        self._manager._session_metrics[self.session_id]["metrics"]["commands_executed"] = (
+            self._manager._session_metrics[self.session_id]["metrics"].get("commands_executed", 0) + 1
+        )
         return result
 
-    async def upload_file(self, path: str, content: str):
-        """Upload file with metrics tracking."""
-        await self.session.upload_file(path, content)
+    async def upload_file(self, local_path: str, remote_path: str) -> None:
+        """Upload a file to the sandbox."""
+        await self.session.upload_file(local_path, remote_path)
+        self._manager._session_metrics[self.session_id]["metrics"]["files_uploaded"] = (
+            self._manager._session_metrics[self.session_id]["metrics"].get("files_uploaded", 0) + 1
+        )
 
-        # Update metrics
-        session_info = self.manager._active_sessions.get(self.session_id)
-        if session_info:
-            session_info['metrics']['files_uploaded'] += 1
+    async def download_file(self, remote_path: str, local_path: str) -> None:
+        """Download a file from the sandbox."""
+        await self.session.download_file(remote_path, local_path)
+        self._manager._session_metrics[self.session_id]["metrics"]["files_downloaded"] = (
+            self._manager._session_metrics[self.session_id]["metrics"].get("files_downloaded", 0) + 1
+        )
 
-    async def download_file(self, path: str) -> str:
-        """Download file with metrics tracking."""
-        content = await self.session.download_file(path)
-
-        # Update metrics
-        session_info = self.manager._active_sessions.get(self.session_id)
-        if session_info:
-            session_info['metrics']['files_downloaded'] += 1
-
-        return content
-
-    async def create_snapshot(self, name: str, metadata: dict[str, Any] | None = None) -> str:
-        """Create snapshot with metrics tracking."""
+    async def create_snapshot(self, name: str, metadata: Optional[Dict[str, Any]] = None) -> str:
+        """Create a snapshot of the sandbox."""
         snapshot_id = await self.session.create_snapshot(name, metadata)
+        self._manager._session_metrics[self.session_id]["metrics"]["snapshots_created"] = (
+            self._manager._session_metrics[self.session_id]["metrics"].get("snapshots_created", 0) + 1
+        )
+        return cast(str, snapshot_id)
 
-        # Update metrics
-        session_info = self.manager._active_sessions.get(self.session_id)
-        if session_info:
-            session_info['metrics']['snapshots_created'] += 1
-
-        return snapshot_id
+    async def restore_snapshot(self, snapshot_id: str) -> None:
+        """Restore a snapshot in the sandbox."""
+        await self.session.restore_snapshot(snapshot_id)
+        self._manager._session_metrics[self.session_id]["metrics"]["snapshots_restored"] = (
+            self._manager._session_metrics[self.session_id]["metrics"].get("snapshots_restored", 0) + 1
+        )
