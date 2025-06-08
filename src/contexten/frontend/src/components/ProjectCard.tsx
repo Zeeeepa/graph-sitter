@@ -114,7 +114,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPin, onUnpin, onSe
             size="small"
             color={getFlowStatusColor(project.flowStatus)}
           />
-          {project.tags.map((tag: string) => (
+          {(project.tags || []).map((tag: string) => (
             <Chip 
               key={tag} 
               size="small" 
