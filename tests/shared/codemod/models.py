@@ -18,11 +18,10 @@ from tests.shared.codemod.verified_codemod_utils import CodemodAPI
 BASE_TMP_DIR = Path(os.getenv("GITHUB_WORKSPACE", tempfile.gettempdir()))
 BASE_PATH: Path = Path(__file__).parent.parent.parent.parent
 TEST_DIR: Path = BASE_PATH / "tests" / "integration" / "codemod"
-CODEMOD_PATH: Path = BASE_PATH / "src" / "codemods"
+CODEMOD_PATH: Path = BASE_PATH / "src" / "graph_sitter" / "codemods"
 VERIFIED_CODEMOD_DIR: Path = BASE_PATH / "tests" / "integration" / "verified_codemods"
 VERIFIED_CODEMOD_DATA_DIR: Path = VERIFIED_CODEMOD_DIR / "codemod_data"
 VERIFIED_CODEMOD_DIFFS: Path = VERIFIED_CODEMOD_DIR / "verified_codemod_diffs"
-
 
 try:
     REPO_ID_TO_URL = json.loads((TEST_DIR / "repos" / "repos.json").read_text())
