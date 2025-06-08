@@ -35,6 +35,19 @@ from .analysis.dependency_analyzer import analyze_dependencies, detect_circular_
 from .analysis.security_analyzer import analyze_security, check_import_security
 from .analysis.call_graph_analyzer import analyze_call_graph, find_hotspot_functions
 
+# Import advanced configuration features
+from .analysis.advanced_config import (
+    AdvancedCodebaseConfig,
+    create_debug_config,
+    create_performance_config,
+    create_comprehensive_analysis_config,
+    create_typescript_analysis_config,
+    create_ast_only_config,
+    analyze_with_advanced_config
+)
+from .analysis.enhanced_analyzer import enhanced_comprehensive_analysis
+from .analysis.config_manager import ConfigurationManager
+
 __all__ = [
     # Main analysis functions
     'comprehensive_analysis',
@@ -61,10 +74,20 @@ __all__ = [
     
     # Call graph analysis
     'analyze_call_graph',
-    'find_hotspot_functions'
+    'find_hotspot_functions',
+    
+    # Advanced configuration
+    'AdvancedCodebaseConfig',
+    'create_debug_config',
+    'create_performance_config',
+    'create_comprehensive_analysis_config',
+    'create_typescript_analysis_config',
+    'create_ast_only_config',
+    'analyze_with_advanced_config',
+    'enhanced_comprehensive_analysis',
+    'ConfigurationManager'
 ]
 
 # Version info
 __version__ = "1.0.0"
 __description__ = "Comprehensive codebase analysis using graph_sitter API"
-

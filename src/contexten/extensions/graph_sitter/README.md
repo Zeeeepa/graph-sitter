@@ -327,3 +327,186 @@ This extension uses the official graph_sitter API patterns. When adding new anal
 
 This extension is part of the Contexten project and follows the same license terms.
 
+
+## Advanced Configuration
+
+The extension now supports all advanced graph-sitter configuration flags from [graph-sitter.com/introduction/advanced-settings](https://graph-sitter.com/introduction/advanced-settings).
+
+### Configuration Modes
+
+#### Performance Mode
+Optimized for large codebases with fast analysis:
+```python
+from contexten.extensions.graph_sitter import enhanced_comprehensive_analysis
+
+# Performance-optimized analysis
+results = enhanced_comprehensive_analysis("./large_project", optimization_mode="performance")
+```
+
+**Features:**
+- `exp_lazy_graph=True` - Lazy graph construction for faster initialization
+- `method_usages=False` - Disabled for speed boost
+- `generics=False` - Simplified type analysis
+- `full_range_index=False` - Reduced memory usage
+
+#### Debug Mode
+Comprehensive debugging with verbose logging:
+```python
+# Debug mode with full verification
+results = enhanced_comprehensive_analysis("./project", optimization_mode="debug")
+```
+
+**Features:**
+- `debug=True` - Verbose logging for debugging
+- `verify_graph=True` - Graph state verification
+- `track_graph=True` - Original graph tracking
+- `full_range_index=True` - Complete range-to-node mapping
+
+#### TypeScript Mode
+Optimized for TypeScript/JavaScript projects:
+```python
+# TypeScript-specific optimizations
+results = enhanced_comprehensive_analysis("./ts_project", optimization_mode="typescript")
+```
+
+**Features:**
+- `ts_dependency_manager=True` - TypeScript dependency resolution
+- `ts_language_engine=True` - TypeScript compiler integration
+- `generics=True` - Generic type resolution
+- `method_usages=True` - Complete call graph analysis
+
+### Configuration Manager
+
+Get intelligent configuration recommendations:
+
+```python
+from contexten.extensions.graph_sitter import ConfigurationManager
+
+manager = ConfigurationManager()
+
+# Get recommendations based on codebase characteristics
+recommendations = manager.get_config_recommendations("./my_project")
+print(f"Recommended config: {recommendations['recommended_config']['config_name']}")
+print(f"Reason: {recommendations['recommended_config']['reasoning']}")
+
+# Compare multiple configurations
+comparison = manager.compare_configurations("./my_project", 
+                                          ["performance", "comprehensive", "debug"])
+print(f"Fastest config: {comparison['performance_comparison']['fastest_config']}")
+```
+
+### Advanced Configuration Flags
+
+All flags from the official documentation are supported:
+
+#### Performance Flags
+- `exp_lazy_graph` - Lazy graph construction for large codebases
+- `method_usages` - Enable/disable method usage resolution
+- `generics` - Enable/disable generic type resolution
+- `sync_enabled` - Graph sync during codebase.commit()
+
+#### Debugging Flags
+- `debug` - Verbose logging and additional assertions
+- `verify_graph` - Graph state verification after reset
+- `track_graph` - Keep copy of original graph for debugging
+- `full_range_index` - Complete tree-sitter range-to-node mapping
+
+#### Import Resolution Flags
+- `py_resolve_syspath` - Resolve imports from sys.path
+- `allow_external` - Resolve external imports and modules
+- `import_resolution_paths` - Alternative import resolution paths
+- `import_resolution_overrides` - Import path overrides
+
+#### TypeScript Flags
+- `ts_dependency_manager` - TypeScript dependency installer
+- `ts_language_engine` - TypeScript compiler integration
+- `v8_ts_engine` - V8-based TypeScript compiler
+
+#### Experimental Flags
+- `unpacking_assignment_partial_removal` - Smart unpacking assignment removal
+- `ignore_process_errors` - Control external process error handling
+- `disable_graph` - AST-only mode without graph construction
+
+### Custom Configuration
+
+Create custom configurations for specific needs:
+
+```python
+from contexten.extensions.graph_sitter import AdvancedCodebaseConfig
+from graph_sitter import Codebase
+
+# Create custom configuration
+config = AdvancedCodebaseConfig()
+config.method_usages = True
+config.generics = True
+config.full_range_index = True
+config.debug = True
+
+# Use with codebase
+codebase = Codebase("./project", config=config.create_config())
+```
+
+### Command Line Advanced Features
+
+```bash
+# Enhanced analysis with performance mode
+python -m contexten.extensions.graph_sitter.cli ./project --enhanced --mode performance
+
+# Get configuration recommendations
+python -m contexten.extensions.graph_sitter.cli ./project --config-recommend
+
+# Compare multiple configurations
+python -m contexten.extensions.graph_sitter.cli ./project --config-compare performance comprehensive debug
+
+# Debug mode analysis
+python -m contexten.extensions.graph_sitter.cli ./project --enhanced --mode debug
+```
+
+### Configuration Examples
+
+#### Large Codebase (1000+ files)
+```python
+# Optimized for performance
+config = create_performance_config()
+# - Uses lazy graph construction
+# - Disables expensive features
+# - Minimizes memory usage
+```
+
+#### Complex TypeScript Project
+```python
+# Full TypeScript support
+config = create_typescript_analysis_config()
+# - TypeScript language engine
+# - Generic type resolution
+# - Dependency management
+```
+
+#### Debugging Problematic Repository
+```python
+# Maximum debugging information
+config = create_debug_config()
+# - Verbose logging
+# - Graph verification
+# - Complete range indexing
+```
+
+### Performance Impact
+
+Configuration choice significantly affects performance:
+
+| Configuration | Initialization Time | Memory Usage | Features Available |
+|---------------|-------------------|--------------|-------------------|
+| Performance   | Fast (0.1-0.5s)  | Low          | Basic analysis    |
+| Comprehensive | Medium (0.5-2s)  | Medium       | Full analysis     |
+| Debug         | Slow (2-10s)     | High         | All + debugging   |
+| TypeScript    | Medium (1-3s)    | Medium       | TS-specific       |
+
+### Best Practices
+
+1. **Start with recommendations**: Use `ConfigurationManager` to get optimal settings
+2. **Performance first**: Use performance mode for CI/CD pipelines
+3. **Debug when needed**: Enable debug mode only for troubleshooting
+4. **Language-specific**: Use TypeScript mode for TS/JS projects
+5. **Monitor impact**: Compare configurations to understand trade-offs
+
