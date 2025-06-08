@@ -1,8 +1,7 @@
 # StrandsAgentic Extension
 
 StrandsAgentic is a comprehensive agent orchestration extension for Contexten that integrates:
-- [Zeeeepa Tools](https://github.com/Zeeeepa/tools/) - Agent tools and capabilities
-- [Zeeeepa SDK](https://github.com/Zeeeepa/sdk-python/) - Python SDK for agent development
+- [strands-agents/tools](https://github.com/strands-agents/tools) - Agent tools and capabilities
 - [ControlFlow](https://github.com/zeeeepa/ControlFlow) - Agent orchestration framework
 - [Prefect](https://github.com/zeeeepa/prefect) - Workflow monitoring and management
 
@@ -16,8 +15,8 @@ The extension consists of three main components:
    - Manages task distribution and execution
 
 2. **StrandsAgent** (`agent.py`) 
-   - Agent implementation using Zeeeepa SDK
-   - Integrates with Zeeeepa tools
+   - Agent implementation using strands-agents tools
+   - Integrates with strands-agents tool system
    - Handles task execution and tool management
 
 3. **StrandsFlow** (`flow.py`)
@@ -195,4 +194,3 @@ The extension provides detailed metrics through Prefect:
    - User-defined metrics
    - Business-specific KPIs
    - Integration metrics
-

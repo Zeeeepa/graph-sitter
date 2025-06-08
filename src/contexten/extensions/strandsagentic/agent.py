@@ -1,10 +1,9 @@
 """
-StrandsAgent - Agent implementation integrating Zeeeepa tools and SDK capabilities.
+StrandsAgent - Agent implementation integrating strands-agents tools capabilities.
 """
 
 from typing import Dict, List, Any, Optional
-from zeeeepa.sdk import Agent as BaseAgent
-from zeeeepa.tools import Tool
+from strands_agents.tools import Tool, BaseAgent
 from controlflow import AgentContext
 
 class StrandsAgent(BaseAgent):
@@ -131,4 +130,3 @@ class StrandsAgent(BaseAgent):
             "status": "failed",
             "error": f"No tool available for action: {action}"
         }
-

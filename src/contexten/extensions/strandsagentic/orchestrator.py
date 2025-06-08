@@ -5,8 +5,7 @@ StrandsOrchestrator - Main orchestration component integrating ControlFlow with 
 from typing import Dict, List, Optional, Any
 from prefect import flow, task
 from controlflow import Orchestrator, AgentConfig
-from zeeeepa.tools import ToolRegistry
-from zeeeepa.sdk import Agent
+from strands_agents.tools import ToolRegistry, Tool, BaseAgent
 
 class StrandsOrchestrator:
     def __init__(
@@ -19,7 +18,7 @@ class StrandsOrchestrator:
         Initialize the StrandsOrchestrator with configuration for tools, agents, and monitoring.
         
         Args:
-            tools_config: Configuration for Zeeeepa tools
+            tools_config: Configuration for strands-agents tools
             agent_config: Configuration for agent behavior and capabilities
             prefect_config: Optional configuration for Prefect monitoring
         """
@@ -88,4 +87,3 @@ class StrandsOrchestrator:
             "failed_tasks": sum(1 for r in results if r.get("status") == "failed"),
             "average_duration": sum(r.get("duration", 0) for r in results) / len(results)
         }
-
