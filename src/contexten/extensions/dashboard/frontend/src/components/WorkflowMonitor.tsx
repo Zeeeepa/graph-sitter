@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Box,
   Grid,
   Paper,
   Typography,
@@ -33,7 +34,6 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
       case 'stopped':
         return <PauseIcon color="warning" />;
       case 'error':
-        return <ErrorIcon color="error" />;
       default:
         return <ErrorIcon color="error" />;
     }
@@ -144,3 +144,4 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
 };
 
 export default WorkflowMonitor;
+
