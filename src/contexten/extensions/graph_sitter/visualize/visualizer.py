@@ -48,10 +48,13 @@ class Visualize:
         files = list(files_attr) if hasattr(files_attr, '__iter__') else []
         
         for file in files:
-            G.add_node(file.path, type='file')
-        
+            if hasattr(file, 'path') and file.path:
+                G.add_node(file.path, type='file')
+    
         # Add edges for dependencies
         for file in files:
+            if not (hasattr(file, 'path') and file.path):
+                continue
             imports = getattr(file, 'imports', [])
             if hasattr(imports, '__iter__'):
                 imports_list = list(imports)
