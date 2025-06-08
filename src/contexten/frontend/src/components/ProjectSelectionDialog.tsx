@@ -33,15 +33,15 @@ import { GitHubRepository, ProjectCreateRequest } from '../types';
 import { dashboardApi } from '../services/api';
 
 interface ProjectSelectionDialogProps {
-  open: boolean;
-  onClose: () => void;
-  repositories: GitHubRepository[];
+  open?: boolean;
+  onClose?: () => void;
+  repositories?: GitHubRepository[];
 }
 
 const ProjectSelectionDialog: React.FC<ProjectSelectionDialogProps> = ({
-  open,
-  onClose,
-  repositories,
+  open = false,
+  onClose = () => {},
+  repositories = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRepo, setSelectedRepo] = useState<GitHubRepository | null>(null);
@@ -267,4 +267,3 @@ const ProjectSelectionDialog: React.FC<ProjectSelectionDialogProps> = ({
 };
 
 export default ProjectSelectionDialog;
-

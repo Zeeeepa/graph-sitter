@@ -4,14 +4,14 @@ export interface BaseProject {
   id: string;
   name: string;
   description: string;
-  status: 'active' | 'paused' | 'completed' | 'error';
+  status: 'active' | 'paused' | 'completed' | 'error' | 'development';
 }
 
 export interface Project extends BaseProject {
   repository: string;
   progress: number;
   flowEnabled: boolean;
-  flowStatus: 'running' | 'stopped' | 'error';
+  flowStatus: 'running' | 'stopped' | 'error' | 'idle' | 'disabled';
   lastActivity: Date;
   tags: string[];
   metrics?: {
@@ -71,12 +71,20 @@ export interface Settings {
 }
 
 export interface DashboardStats {
-  total_projects: number;
-  active_workflows: number;
-  completed_tasks: number;
-  pending_prs: number;
-  quality_score: number;
-  last_updated: string;
+  totalProjects: number;
+  activeProjects: number;
+  flowEnabled: number;
+  totalCommits: number;
+  totalPRs: number;
+  totalContributors: number;
+  totalIssues: number;
+  // Legacy support
+  total_projects?: number;
+  active_workflows?: number;
+  completed_tasks?: number;
+  pending_prs?: number;
+  quality_score?: number;
+  last_updated?: string;
 }
 
 export interface Metrics {
@@ -183,4 +191,3 @@ export interface WorkflowMonitorProps {
   projects: Project[];
   events?: WorkflowEvent[];
 }
-

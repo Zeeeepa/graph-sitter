@@ -66,7 +66,7 @@ class FailureAnalysisConfig(BaseModel):
     enabled: bool = True
     
     # Analysis depth
-    log_analysis_depth: str = Field(default="deep", regex="^(shallow|medium|deep)$")
+    log_analysis_depth: str = Field(default="deep", pattern="^(shallow|medium|deep)$")
     max_log_lines: int = Field(default=10000, ge=100, le=100000)
     pattern_matching_enabled: bool = True
     similarity_search_enabled: bool = True
@@ -454,4 +454,3 @@ class CircleCIIntegrationConfig(BaseModel):
             "dry_run_mode": self.dry_run_mode,
             "production_ready": self.is_production_ready
         }
-
