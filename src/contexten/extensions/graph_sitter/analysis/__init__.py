@@ -28,14 +28,44 @@ DOCUMENTATION API:
 """
 
 # Import the Analysis class that provides the documentation API
-from .analyzer import Analysis
+from .analyzer import CodebaseAnalyzer
+from .enhanced_analyzer import EnhancedCodebaseAnalyzer
+from .codebase_analysis import (
+    get_codebase_summary,
+    get_file_summary,
+    get_class_summary,
+    get_function_summary,
+    get_symbol_summary,
+    CodebaseElements,
+    CodebaseSummary,
+    FileSummary,
+    ClassSummary,
+    FunctionSummary,
+    SymbolSummary,
+)
+from .complexity_analyzer import ComplexityAnalyzer
+from .dependency_analyzer import DependencyAnalyzer
+from .security_analyzer import SecurityAnalyzer
+from .call_graph_analyzer import CallGraphAnalyzer
+from .dead_code_detector import DeadCodeDetector
 
 # Import existing comprehensive analysis functionality
 from .core.engine import (
     ComprehensiveAnalysisEngine,
     AnalysisConfig,
     AnalysisResult,
-    AnalysisPresets,
+    AnalysisMetrics,
+    QualityMetrics,
+    SecurityMetrics,
+    PerformanceMetrics,
+    MaintainabilityMetrics,
+    ComplexityMetrics,
+    DependencyMetrics,
+    TestCoverageMetrics,
+    DocumentationMetrics,
+    CodeStyleMetrics,
+    ArchitecturalMetrics,
+    TechnicalDebtMetrics,
     analyze_codebase,
     
     # Data classes
@@ -96,22 +126,87 @@ except ImportError:
 
 __all__ = [
     # Documentation API
-    'Analysis',
+    'CodebaseAnalyzer',
+    'EnhancedCodebaseAnalyzer',
+    
+    # New codebase analysis API
+    'get_codebase_summary',
+    'get_file_summary',
+    'get_class_summary',
+    'get_function_summary',
+    'get_symbol_summary',
+    'CodebaseElements',
+    'CodebaseSummary',
+    'FileSummary',
+    'ClassSummary',
+    'FunctionSummary',
+    'SymbolSummary',
+    
+    # Specialized analyzers
+    'ComplexityAnalyzer',
+    'DependencyAnalyzer',
+    'SecurityAnalyzer',
+    'CallGraphAnalyzer',
+    'DeadCodeDetector',
     
     # Core analysis
     'ComprehensiveAnalysisEngine',
     'AnalysisConfig',
     'AnalysisResult',
-    'AnalysisPresets',
-    'analyze_codebase',
+    'AnalysisMetrics',
+    'QualityMetrics',
+    'SecurityMetrics',
+    'PerformanceMetrics',
+    'MaintainabilityMetrics',
+    'ComplexityMetrics',
+    'DependencyMetrics',
+    'TestCoverageMetrics',
+    'DocumentationMetrics',
+    'CodeStyleMetrics',
+    'ArchitecturalMetrics',
+    'TechnicalDebtMetrics',
     
-    # Data classes
-    'ImportLoop',
-    'DeadCodeItem',
-    'TrainingDataItem',
-    'GraphAnalysisResult',
-    'EnhancedFunctionMetrics',
-    'EnhancedClassMetrics',
+    # Analysis functions
+    'analyze_codebase',
+    'analyze_file',
+    'analyze_function',
+    'analyze_class',
+    'analyze_dependencies',
+    'analyze_complexity',
+    'analyze_security',
+    'analyze_performance',
+    'analyze_maintainability',
+    'analyze_test_coverage',
+    'analyze_documentation',
+    'analyze_code_style',
+    'analyze_architecture',
+    'analyze_technical_debt',
+    
+    # Utility functions
+    'get_analysis_summary',
+    'export_analysis_results',
+    'generate_analysis_report',
+    'compare_analysis_results',
+    'track_analysis_trends',
+    
+    # Configuration
+    'create_analysis_config',
+    'load_analysis_config',
+    'save_analysis_config',
+    'validate_analysis_config',
+    
+    # Reporting
+    'generate_html_report',
+    'generate_json_report',
+    'generate_csv_report',
+    'generate_markdown_report',
+    
+    # Visualization
+    'create_dependency_graph',
+    'create_complexity_heatmap',
+    'create_architecture_diagram',
+    'create_call_graph',
+    'create_metrics_dashboard',
 ]
 
 # Add Phase 2 exports if available

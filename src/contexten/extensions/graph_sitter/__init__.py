@@ -3,56 +3,50 @@ Graph-Sitter Extensions
 
 Consolidated entry point for all graph-sitter functionality.
 Based on the official graph-sitter.com API and features.
-
-Comprehensive codebase analysis using the actual graph_sitter API.
-Provides real issue detection, complexity analysis, security scanning, and more.
-
-Main Components:
-- Analysis: Comprehensive codebase analysis and summary functions
-- Visualize: Code visualization and graph representation
-- Resolve: Symbol resolution and import relationship analysis
-- dead_code_detector: Find and remove unused code
-- complexity_analyzer: Analyze cyclomatic complexity and maintainability
-- dependency_analyzer: Analyze imports and circular dependencies  
-- security_analyzer: Detect security vulnerabilities
-- call_graph_analyzer: Analyze function call relationships
-- main_analyzer: Comprehensive analysis combining all modules
-
-Usage:
-    from contexten.extensions.graph_sitter import comprehensive_analysis, Analysis, Visualize, Resolve
-    from graph_sitter import Codebase
-    from graph_sitter.configs.models.codebase import CodebaseConfig
-    
-    # Create advanced config
-    config = CodebaseConfig(
-        method_usages=True,
-        generics=True,
-        sync_enabled=True,
-        full_range_index=True,
-        py_resolve_syspath=True,
-        exp_lazy_graph=False,
-    )
-    
-    # Run comprehensive analysis
-    codebase = Codebase("./my_project", config=config)
-    results = comprehensive_analysis(codebase)
-    
-    # Use extension modules
-    analysis = Analysis(codebase)
-    visualizer = Visualize(codebase)
-    resolver = Resolve(codebase)
-    
-    # Access pre-computed graph elements (as per documentation)
-    analysis.functions    # All functions in codebase
-    analysis.classes      # All classes
-    analysis.imports      # All import statements
-    analysis.files        # All files
-    analysis.symbols      # All symbols
-    analysis.external_modules  # External dependencies
 """
 
-# Import legacy compatibility
-from .code_analysis import ComprehensiveAnalysisEngine, CodeAnalysisEngine
+# Core configuration
+from .core import CodebaseConfig, PresetConfigs
+
+# Analysis module - comprehensive code analysis
+from .analysis import (
+    # Main API functions
+    get_codebase_summary,
+    get_file_summary,
+    get_class_summary,
+    get_function_summary,
+    get_symbol_summary,
+    
+    # Pre-computed graph element access
+    CodebaseElements,
+    
+    # Data classes
+    CodebaseSummary,
+    FileSummary,
+    ClassSummary,
+    FunctionSummary,
+    SymbolSummary,
+    
+    # Analyzers
+    CodebaseAnalyzer,
+    EnhancedCodebaseAnalyzer,
+    ComplexityAnalyzer,
+    DependencyAnalyzer,
+    SecurityAnalyzer,
+    CallGraphAnalyzer,
+    DeadCodeDetector,
+)
+
+# Visualization module
+from .visualize import Visualize
+
+# Resolve module - symbol resolution and import analysis
+from .resolve import (
+    Resolve,
+    EnhancedResolver,
+    ResolvedSymbol,
+    ImportRelationship,
+)
 
 # Import the three main extension modules
 from .analysis import Analysis
@@ -62,25 +56,78 @@ from .resolve import Resolve
 # Import main analysis functions for easy access
 from .analysis.main_analyzer import comprehensive_analysis, print_analysis_summary, save_analysis_report
 
+# Import legacy compatibility
+from .code_analysis import ComprehensiveAnalysisEngine, CodeAnalysisEngine
+
 # Import advanced configuration features
 from .analysis.advanced_config import (
-    AdvancedCodebaseConfig,
-    create_debug_config,
-    create_performance_config,
-    create_comprehensive_analysis_config,
-    create_typescript_analysis_config,
-    create_ast_only_config,
-    analyze_with_advanced_config
+    AdvancedAnalysisConfig,
+    PerformanceConfig,
+    SecurityConfig,
+    QualityConfig,
+    create_custom_config,
+    load_config_from_file,
+    save_config_to_file,
+    validate_config,
+    merge_configs,
+    get_default_config,
+    get_performance_config,
+    get_security_config,
+    get_quality_config,
+    ADVANCED_CONFIG_AVAILABLE,
 )
-from .analysis.enhanced_analyzer import enhanced_comprehensive_analysis
+
+# Import individual analyzers for granular control
+from .analysis.dead_code_detector import detect_dead_code, DeadCodeDetector
+from .analysis.complexity_analyzer import analyze_complexity, ComplexityAnalyzer
+from .analysis.dependency_analyzer import analyze_dependencies, DependencyAnalyzer
+from .analysis.security_analyzer import analyze_security, SecurityAnalyzer
+from .analysis.call_graph_analyzer import analyze_call_graph, CallGraphAnalyzer
+
+# Import configuration manager
 from .analysis.config_manager import ConfigurationManager
 
 __all__ = [
-    # Legacy compatibility
-    'ComprehensiveAnalysisEngine',
-    'CodeAnalysisEngine',
+    # Core configuration
+    'CodebaseConfig',
+    'PresetConfigs',
     
-    # Main extension modules
+    # Main API functions (as requested by user)
+    'get_codebase_summary',
+    'get_file_summary',
+    'get_class_summary',
+    'get_function_summary',
+    'get_symbol_summary',
+    
+    # Pre-computed graph element access
+    'CodebaseElements',
+    
+    # Data classes
+    'CodebaseSummary',
+    'FileSummary',
+    'ClassSummary',
+    'FunctionSummary',
+    'SymbolSummary',
+    
+    # Analyzers
+    'CodebaseAnalyzer',
+    'EnhancedCodebaseAnalyzer',
+    'ComplexityAnalyzer',
+    'DependencyAnalyzer',
+    'SecurityAnalyzer',
+    'CallGraphAnalyzer',
+    'DeadCodeDetector',
+    
+    # Visualization
+    'Visualize',
+    
+    # Resolution
+    'Resolve',
+    'EnhancedResolver',
+    'ResolvedSymbol',
+    'ImportRelationship',
+    
+    # Legacy compatibility (existing modules)
     'Analysis',
     'Visualize', 
     'Resolve',
@@ -90,39 +137,47 @@ __all__ = [
     'print_analysis_summary', 
     'save_analysis_report',
     
-    # Dead code analysis
+    # Legacy compatibility
+    'ComprehensiveAnalysisEngine',
+    'CodeAnalysisEngine',
+    
+    # Individual analyzers
     'detect_dead_code',
-    'remove_dead_code',
-    
-    # Complexity analysis
     'analyze_complexity',
-    'find_complex_functions',
-    'find_large_functions',
-    
-    # Dependency analysis
     'analyze_dependencies',
-    'detect_circular_dependencies',
-    'analyze_module_coupling',
-    
-    # Security analysis
     'analyze_security',
-    'check_import_security',
-    
-    # Call graph analysis
     'analyze_call_graph',
-    'find_hotspot_functions',
     
     # Advanced configuration
-    'AdvancedCodebaseConfig',
-    'create_debug_config',
-    'create_performance_config',
-    'create_comprehensive_analysis_config',
-    'create_typescript_analysis_config',
-    'create_ast_only_config',
-    'analyze_with_advanced_config',
-    'enhanced_comprehensive_analysis',
-    'ConfigurationManager'
+    'AdvancedAnalysisConfig',
+    'PerformanceConfig',
+    'SecurityConfig',
+    'QualityConfig',
+    'create_custom_config',
+    'load_config_from_file',
+    'save_config_to_file',
+    'validate_config',
+    'merge_configs',
+    'get_default_config',
+    'get_performance_config',
+    'get_security_config',
+    'get_quality_config',
+    'ADVANCED_CONFIG_AVAILABLE',
+    
+    # Configuration management
+    'ConfigurationManager',
 ]
+
+# Convenience functions for quick access
+def quick_analysis(path: str, **kwargs):
+    """Quick analysis with default configuration."""
+    return comprehensive_analysis(path, **kwargs)
+
+def create_analyzer(path: str, config=None):
+    """Create a comprehensive analyzer instance."""
+    if config is None:
+        config = get_default_config()
+    return ComprehensiveAnalysisEngine(path, config)
 
 # Version info
 __version__ = "1.0.0"
