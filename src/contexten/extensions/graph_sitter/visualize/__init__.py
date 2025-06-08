@@ -164,102 +164,110 @@ class Visualize:
         
         return fig
     
-    def create_dependency_graph(self, analysis_results: Dict[str, Any], 
-                              max_nodes: int = 50) -> go.Figure:
-        """
-        Create an interactive dependency graph.
-        
-        Args:
-            analysis_results: Results from dependency analysis
-            max_nodes: Maximum number of nodes to display
+    def create_dependency_graph(self, codebase: Optional[Any] = None) -> str:
+        """Create a dependency graph visualization"""
+        if codebase is None:
+            codebase = self.codebase
             
-        Returns:
-            go.Figure: Interactive dependency graph
-        """
-        # Build NetworkX graph
-        G = nx.DiGraph()
-        
-        # Add nodes and edges from module coupling data
-        coupling_data = analysis_results['dependencies']['module_coupling']
-        
-        # Limit nodes for readability
-        node_count = 0
-        for source, targets in coupling_data.items():
-            if node_count >= max_nodes:
-                break
+        if codebase is None:
+            return "No codebase available for visualization"
             
-            G.add_node(source)
-            node_count += 1
+        try:
+            import networkx as nx
+            import matplotlib.pyplot as plt
+            from io import BytesIO
+            import base64
             
-            for target, weight in targets.items():
-                if node_count >= max_nodes:
-                    break
-                G.add_node(target)
-                G.add_edge(source, target, weight=weight)
-                node_count += 1
-        
-        # Calculate layout
-        pos = nx.spring_layout(G, k=1, iterations=50)
-        
-        # Extract node and edge information
-        node_x = [pos[node][0] for node in G.nodes()]
-        node_y = [pos[node][1] for node in G.nodes()]
-        node_text = list(G.nodes())
-        
-        edge_x = []
-        edge_y = []
-        edge_weights = []
-        
-        for edge in G.edges():
-            x0, y0 = pos[edge[0]]
-            x1, y1 = pos[edge[1]]
-            edge_x.extend([x0, x1, None])
-            edge_y.extend([y0, y1, None])
-            edge_weights.append(G[edge[0]][edge[1]].get('weight', 1))
-        
-        # Create edge trace
-        edge_trace = go.Scatter(
-            x=edge_x, y=edge_y,
-            line=dict(width=2, color=self.color_scheme['light']),
-            hoverinfo='none',
-            mode='lines'
-        )
-        
-        # Create node trace
-        node_trace = go.Scatter(
-            x=node_x, y=node_y,
-            mode='markers+text',
-            hoverinfo='text',
-            text=node_text,
-            textposition="middle center",
-            marker=dict(
-                size=20,
-                color=self.color_scheme['primary'],
-                line=dict(width=2, color='white')
+            G: nx.DiGraph = nx.DiGraph()
+            
+            # Add basic nodes from codebase files
+            if hasattr(codebase, 'files'):
+                for file in list(codebase.files)[:20]:  # Limit to 20 files
+                    G.add_node(file.name)
+                    
+                    # Add edges for imports
+                    if hasattr(file, 'imports'):
+                        for imp in file.imports:
+                            if hasattr(imp, 'module_name'):
+                                G.add_edge(file.name, imp.module_name)
+            
+            # Calculate layout
+            pos = nx.spring_layout(G, k=1, iterations=50)
+            
+            # Extract node and edge information
+            node_x = [pos[node][0] for node in G.nodes()]
+            node_y = [pos[node][1] for node in G.nodes()]
+            node_text = list(G.nodes())
+            
+            edge_x = []
+            edge_y = []
+            edge_weights = []
+            
+            for edge in G.edges():
+                x0, y0 = pos[edge[0]]
+                x1, y1 = pos[edge[1]]
+                edge_x.extend([x0, x1, None])
+                edge_y.extend([y0, y1, None])
+                edge_weights.append(G[edge[0]][edge[1]].get('weight', 1))
+            
+            # Create edge trace
+            edge_trace = go.Scatter(
+                x=edge_x, y=edge_y,
+                line=dict(width=2, color=self.color_scheme['light']),
+                hoverinfo='none',
+                mode='lines'
             )
-        )
+            
+            # Create node trace
+            node_trace = go.Scatter(
+                x=node_x, y=node_y,
+                mode='markers+text',
+                hoverinfo='text',
+                text=node_text,
+                textposition="middle center",
+                marker=dict(
+                    size=20,
+                    color=self.color_scheme['primary'],
+                    line=dict(width=2, color='white')
+                )
+            )
+            
+            # Create figure
+            fig = go.Figure(data=[edge_trace, node_trace],
+                           layout=go.Layout(
+                               title='Module Dependency Graph',
+                               titlefont_size=16,
+                               showlegend=False,
+                               hovermode='closest',
+                               margin=dict(b=20,l=5,r=5,t=40),
+                               annotations=[ dict(
+                                   text="Dependency relationships between modules",
+                                   showarrow=False,
+                                   xref="paper", yref="paper",
+                                   x=0.005, y=-0.002,
+                                   xanchor="left", yanchor="bottom",
+                                   font=dict(color="#888", size=12)
+                               )],
+                               xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                               yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+                           ))
+            
+            # Export as PNG (requires kaleido)
+            try:
+                png_file = BytesIO()
+                plt.figure(figsize=(10, 10))
+                nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=1000, font_size=10)
+                plt.savefig(png_file, format='png')
+                png_file.seek(0)
+                png_base64 = base64.b64encode(png_file.read()).decode('utf-8')
+                return f"data:image/png;base64,{png_base64}"
+            except Exception as e:
+                print(f"���️ Could not export PNG: {e}")
+                return "No PNG export available"
         
-        # Create figure
-        fig = go.Figure(data=[edge_trace, node_trace],
-                       layout=go.Layout(
-                           title='Module Dependency Graph',
-                           titlefont_size=16,
-                           showlegend=False,
-                           hovermode='closest',
-                           margin=dict(b=20,l=5,r=5,t=40),
-                           annotations=[ dict(
-                               text="Dependency relationships between modules",
-                               showarrow=False,
-                               xref="paper", yref="paper",
-                               x=0.005, y=-0.002,
-                               xanchor="left", yanchor="bottom",
-                               font=dict(color="#888", size=12)
-                           )],
-                           xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                           yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
-                       ))
-        
-        return fig
+        except Exception as e:
+            print(f"���️ Error creating dependency graph: {e}")
+            return "Error creating dependency graph"
     
     def create_complexity_heatmap(self, analysis_results: Dict[str, Any]) -> go.Figure:
         """
@@ -491,7 +499,7 @@ class Visualize:
                 fig.write_image(str(png_file), width=1200, height=800)
                 exported_files.append(str(png_file))
             except Exception as e:
-                print(f"⚠️ Could not export PNG for {name}: {e}")
+                print(f"���️ Could not export PNG for {name}: {e}")
         
         print(f"📊 Charts exported to: {output_dir}")
         return exported_files
@@ -499,4 +507,3 @@ class Visualize:
 
 # Export main class
 __all__ = ['Visualize']
-

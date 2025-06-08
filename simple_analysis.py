@@ -19,9 +19,9 @@ import re
 class SimpleAnalyzer:
     def __init__(self, target_repo_path: str):
         self.target_path = Path(target_repo_path)
-        self.issues = []
-        self.recommendations = []
-        self.metrics = {}
+        self.issues: List[str] = []
+        self.recommendations: List[str] = []
+        self.metrics: Dict[str, Any] = {}
         
     def analyze_tree_sitter_compliance(self) -> Dict[str, Any]:
         """Analyze compliance with official Tree-sitter patterns"""
@@ -422,4 +422,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
