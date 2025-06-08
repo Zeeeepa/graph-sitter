@@ -12,10 +12,8 @@ from classy_fastapi import Routable, post
 import modal
 import logging
 import asyncio
-from contexten.extensions.contexten_app.contexten_app import ContextenApp
 from graph_sitter.git.clients.git_repo_client import GitRepoClient
 from graph_sitter.git.schemas.repo_config import RepoConfig
-from contexten.extensions.modal.base import CodebaseEventsApp, EventRouterMixin
 
 load_dotenv(".env")
 
