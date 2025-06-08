@@ -174,9 +174,16 @@ class Visualize:
             
         Returns:
             Dictionary representation of the symbol usage graph
-        """
-        nodes = []
-        edges = []
+    
+                if symbol_name:
+                    try:
+                        symbol = self.codebase.get_symbol(symbol_name)
+                        symbols = [symbol] if symbol is not None else []
+                    except (AttributeError, KeyError):
+                        symbols = []
+                else:
+                    symbols = getattr(self.codebase, 'symbols', [])
+                symbols = [s for s in symbols if s is not None]
         
         symbols = [self.codebase.get_symbol(symbol_name)] if symbol_name else self.codebase.symbols
         symbols = [s for s in symbols if s is not None]
