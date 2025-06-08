@@ -112,7 +112,7 @@ def main():
     
     print("\nVisualize module:")
     dep_graph = visualizer.dependency_graph()
-    print(f"  Dependency graph: {len(dep_graph['nodes'])} nodes, {len(dep_graph['edges'])} edges")
+    print(f"  Dependency graph: {dep_graph['total_files']} files, {dep_graph['total_dependencies']} dependencies")
     
     print("\nResolve module:")
     import_analysis = resolver.analyze_imports()
