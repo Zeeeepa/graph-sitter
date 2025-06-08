@@ -1,52 +1,52 @@
 """
-Graph_Sitter Extension for Contexten
+Graph-Sitter Extensions
 
-Comprehensive codebase analysis using the actual graph_sitter API.
-Provides real issue detection, complexity analysis, security scanning, and more.
-
-Main Components:
-- Analysis: Comprehensive codebase analysis and summary functions
-- Visualize: Code visualization and graph representation
-- Resolve: Symbol resolution and import relationship analysis
-- dead_code_detector: Find and remove unused code
-- complexity_analyzer: Analyze cyclomatic complexity and maintainability
-- dependency_analyzer: Analyze imports and circular dependencies  
-- security_analyzer: Detect security vulnerabilities
-- call_graph_analyzer: Analyze function call relationships
-- main_analyzer: Comprehensive analysis combining all modules
-
-Usage:
-    from contexten.extensions.graph_sitter import comprehensive_analysis, Analysis, Visualize, Resolve
-    from graph_sitter import Codebase
-    from graph_sitter.configs.models.codebase import CodebaseConfig
-    
-    # Create advanced config
-    config = CodebaseConfig(
-        method_usages=True,
-        generics=True,
-        sync_enabled=True,
-        full_range_index=True,
-        py_resolve_syspath=True,
-        exp_lazy_graph=False,
-    )
-    
-    # Run comprehensive analysis
-    codebase = Codebase("./my_project", config=config)
-    results = comprehensive_analysis(codebase)
-    
-    # Use extension modules
-    analysis = Analysis(codebase)
-    visualizer = Visualize(codebase)
-    resolver = Resolve(codebase)
-    
-    # Access pre-computed graph elements (as per documentation)
-    analysis.functions    # All functions in codebase
-    analysis.classes      # All classes
-    analysis.imports      # All import statements
-    analysis.files        # All files
-    analysis.symbols      # All symbols
-    analysis.external_modules  # External dependencies
+Consolidated entry point for all graph-sitter functionality.
+Based on the official graph-sitter.com API and features.
 """
+
+# Core configuration
+from .core import CodebaseConfig, PresetConfigs
+
+# Analysis module - comprehensive code analysis
+from .analysis import (
+    # Main API functions
+    get_codebase_summary,
+    get_file_summary,
+    get_class_summary,
+    get_function_summary,
+    get_symbol_summary,
+    
+    # Pre-computed graph element access
+    CodebaseElements,
+    
+    # Data classes
+    CodebaseSummary,
+    FileSummary,
+    ClassSummary,
+    FunctionSummary,
+    SymbolSummary,
+    
+    # Analyzers
+    CodebaseAnalyzer,
+    EnhancedCodebaseAnalyzer,
+    ComplexityAnalyzer,
+    DependencyAnalyzer,
+    SecurityAnalyzer,
+    CallGraphAnalyzer,
+    DeadCodeDetector,
+)
+
+# Visualization module
+from .visualize import Visualizer
+
+# Resolve module - symbol resolution and import analysis
+from .resolve import (
+    Resolver,
+    EnhancedResolver,
+    ResolvedSymbol,
+    ImportRelationship,
+)
 
 # Import the three main extension modules
 from .analysis import Analysis
@@ -77,7 +77,46 @@ from .analysis.enhanced_analyzer import enhanced_comprehensive_analysis
 from .analysis.config_manager import ConfigurationManager
 
 __all__ = [
-    # Main extension modules
+    # Core configuration
+    'CodebaseConfig',
+    'PresetConfigs',
+    
+    # Main API functions (as requested by user)
+    'get_codebase_summary',
+    'get_file_summary',
+    'get_class_summary',
+    'get_function_summary',
+    'get_symbol_summary',
+    
+    # Pre-computed graph element access
+    'CodebaseElements',
+    
+    # Data classes
+    'CodebaseSummary',
+    'FileSummary',
+    'ClassSummary',
+    'FunctionSummary',
+    'SymbolSummary',
+    
+    # Analyzers
+    'CodebaseAnalyzer',
+    'EnhancedCodebaseAnalyzer',
+    'ComplexityAnalyzer',
+    'DependencyAnalyzer',
+    'SecurityAnalyzer',
+    'CallGraphAnalyzer',
+    'DeadCodeDetector',
+    
+    # Visualization
+    'Visualizer',
+    
+    # Resolution
+    'Resolver',
+    'EnhancedResolver',
+    'ResolvedSymbol',
+    'ImportRelationship',
+    
+    # Legacy compatibility (existing modules)
     'Analysis',
     'Visualize', 
     'Resolve',

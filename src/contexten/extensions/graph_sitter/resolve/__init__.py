@@ -1,14 +1,10 @@
 """
-Resolve Extension for Graph-sitter
+Graph-Sitter Resolve Extension
 
-Provides symbol resolution functionality including:
-- Import relationship analysis
-- Symbol resolution and tracking
-- Dependency loop detection
-- External module resolution
+Provides symbol resolution and import analysis capabilities.
 """
 
-from .resolver import Resolve
+from .resolver import Resolver
+from .enhanced_resolver import EnhancedResolver, ResolvedSymbol, ImportRelationship
 
-__all__ = ['Resolve']
-
+__all__ = ['Resolver', 'EnhancedResolver', 'ResolvedSymbol', 'ImportRelationship']
