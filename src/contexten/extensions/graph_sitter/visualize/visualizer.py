@@ -41,15 +41,15 @@ class Visualize:
     
     def dependency_graph(self, output_path: str = "dependency_graph.png"):
         """Generate a dependency graph visualization."""
-        G = nx.DiGraph()
+        G: nx.DiGraph = nx.DiGraph()
         
         # Add nodes for each file
         files_attr = getattr(self.codebase, 'files', [])
         files = list(files_attr) if hasattr(files_attr, '__iter__') else []
-        
+
         for file in files:
             G.add_node(file.path, type='file')
-        
+
         # Add edges for dependencies
         for file in files:
             imports = getattr(file, 'imports', [])
@@ -58,7 +58,7 @@ class Visualize:
                 for imp in imports_list:
                     if hasattr(imp, 'target_file') and imp.target_file:
                         G.add_edge(file.path, imp.target_file)
-        
+
         # Create visualization
         plt.figure(figsize=(12, 8))
         pos = nx.spring_layout(G)
@@ -67,7 +67,7 @@ class Visualize:
         plt.title("Codebase Dependency Graph")
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()
-        
+
         return {
             'graph_file': output_path,
             'total_files': len(files),
@@ -77,19 +77,19 @@ class Visualize:
     
     def call_graph(self, function_name: Optional[str] = None, output_path: str = "call_graph.png"):
         """Generate a function call graph visualization."""
-        G = nx.DiGraph()
-        
+        G: nx.DiGraph = nx.DiGraph()
+
         # Add function nodes
         functions_attr = getattr(self.codebase, 'functions', [])
         functions = list(functions_attr) if hasattr(functions_attr, '__iter__') else []
-        
+
         for func in functions:
             G.add_node(func.name, 
                       type='function',
                       is_async=func.is_async,
                       is_generator=getattr(func, 'is_generator', False),
                       complexity=getattr(func, 'complexity', 0))
-        
+
         # Add call edges
         for func in functions:
             calls = getattr(func, 'function_calls', [])
@@ -98,14 +98,14 @@ class Visualize:
                 for call in calls_list:
                     if hasattr(call, 'name'):
                         G.add_edge(func.name, call.name)
-        
+
         # Filter to specific function if requested
         if function_name and function_name in G:
             subgraph_nodes = set([function_name])
             subgraph_nodes.update(G.successors(function_name))
             subgraph_nodes.update(G.predecessors(function_name))
-            G = G.subgraph(subgraph_nodes)
-        
+            G = nx.DiGraph(G.subgraph(subgraph_nodes))
+
         # Create visualization
         plt.figure(figsize=(12, 8))
         pos = nx.spring_layout(G)
@@ -114,7 +114,7 @@ class Visualize:
         plt.title(f"Function Call Graph{' for ' + function_name if function_name else ''}")
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()
-        
+
         return {
             'graph_file': output_path,
             'total_functions': len(functions),
@@ -124,12 +124,12 @@ class Visualize:
     
     def class_hierarchy(self, output_path: str = "class_hierarchy.png"):
         """Generate a class hierarchy visualization."""
-        G = nx.DiGraph()
-        
+        G: nx.DiGraph = nx.DiGraph()
+
         # Add class nodes
         classes_attr = getattr(self.codebase, 'classes', [])
         classes = list(classes_attr) if hasattr(classes_attr, '__iter__') else []
-        
+
         for cls in classes:
             methods = getattr(cls, 'methods', [])
             methods_list = list(methods) if hasattr(methods, '__iter__') else []
@@ -137,7 +137,7 @@ class Visualize:
                       type='class',
                       methods_count=len(methods_list),
                       is_abstract=getattr(cls, 'is_abstract', False))
-        
+
         # Add inheritance edges
         for cls in classes:
             superclasses = getattr(cls, 'superclasses', [])
@@ -146,7 +146,7 @@ class Visualize:
                 for parent in superclasses_list:
                     if hasattr(parent, 'name'):
                         G.add_edge(parent.name, cls.name)
-        
+
         # Create visualization
         plt.figure(figsize=(12, 8))
         pos = nx.spring_layout(G)

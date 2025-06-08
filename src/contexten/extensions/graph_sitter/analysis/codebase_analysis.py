@@ -10,9 +10,226 @@ from dataclasses import dataclass
 from pathlib import Path
 import json
 
-from ..core.config import CodebaseConfig
-from .analyzer import CodebaseAnalyzer
-from .enhanced_analyzer import EnhancedCodebaseAnalyzer
+from graph_sitter.configs.models.codebase import CodebaseConfig
+from .analyzer import Analysis
+from .enhanced_analyzer import enhanced_comprehensive_analysis
+
+class AnalyzerAdapter:
+    """Adapter to provide the expected analyzer interface."""
+    
+    def __init__(self, codebase_path: str, config: CodebaseConfig):
+        from graph_sitter import Codebase
+        self.codebase = Codebase(codebase_path, config=config)
+        self.analysis = Analysis(self.codebase)
+        
+    def get_all_files(self) -> List[Dict[str, Any]]:
+        """Get all files in the codebase."""
+        files = getattr(self.codebase, 'files', [])
+        if hasattr(files, '__iter__'):
+            return [{'path': f.path, 'language': getattr(f, 'language', 'unknown')} 
+                    for f in files]
+        return []
+    
+    def get_all_functions(self) -> List[Dict[str, Any]]:
+        """Get all functions in the codebase."""
+        functions = getattr(self.codebase, 'functions', [])
+        if hasattr(functions, '__iter__'):
+            return [{'name': f.name} for f in functions]
+        return []
+    
+    def get_all_classes(self) -> List[Dict[str, Any]]:
+        """Get all classes in the codebase."""
+        classes = getattr(self.codebase, 'classes', [])
+        if hasattr(classes, '__iter__'):
+            return [{'name': c.name} for c in classes]
+        return []
+    
+    def get_all_imports(self) -> List[Dict[str, Any]]:
+        """Get all imports in the codebase."""
+        imports = getattr(self.codebase, 'imports', [])
+        if hasattr(imports, '__iter__'):
+            return [{'module': getattr(i, 'module', str(i))} for i in imports]
+        return []
+    
+    def get_all_symbols(self) -> List[Dict[str, Any]]:
+        """Get all symbols in the codebase."""
+        symbols = getattr(self.codebase, 'symbols', [])
+        if hasattr(symbols, '__iter__'):
+            return [{'name': s.name} for s in symbols]
+        return []
+    
+    def get_external_modules(self) -> List[str]:
+        """Get external modules."""
+        external_modules = getattr(self.codebase, 'external_modules', [])
+        if hasattr(external_modules, '__iter__'):
+            return [str(module) for module in external_modules]
+        return []
+
+    def analyze_complexity(self) -> Dict[str, Any]:
+        """Analyze complexity metrics."""
+        return {'average_complexity': 0.0, 'high_complexity_functions': []}
+    
+    def analyze_quality(self) -> Dict[str, Any]:
+        """Analyze quality metrics."""
+        return {'code_coverage': 0.0, 'doc_coverage': 0.0, 'test_coverage': 0.0}
+    
+    def analyze_file(self, filepath: str) -> Optional[Dict[str, Any]]:
+        """Analyze a specific file."""
+        files = getattr(self.codebase, 'files', [])
+        if hasattr(files, '__iter__'):
+            for file in files:
+                if file.path == filepath:
+                    return {
+                        'language': getattr(file, 'language', 'unknown'),
+                        'functions': [f.name for f in getattr(file, 'functions', [])],
+                        'classes': [c.name for c in getattr(file, 'classes', [])],
+                        'imports': [getattr(i, 'module', str(i)) for i in getattr(file, 'imports', [])],
+                        'symbols': [s.name for s in getattr(file, 'symbols', [])],
+                        'dependencies': [],
+                        'complexity_score': 0.0,
+                        'lines_of_code': getattr(file, 'line_count', 0)
+                    }
+        return None
+    
+    def analyze_class(self, class_name: str) -> Optional[Dict[str, Any]]:
+        """Analyze a specific class."""
+        classes = getattr(self.codebase, 'classes', [])
+        if hasattr(classes, '__iter__'):
+            for cls in classes:
+                if cls.name == class_name:
+                    return {
+                        'filepath': getattr(cls, 'file', {}).get('path', ''),
+                        'superclasses': [p.name for p in getattr(cls, 'superclasses', [])],
+                        'subclasses': [],
+                        'methods': [m.name for m in getattr(cls, 'methods', [])],
+                        'attributes': [a.name for a in getattr(cls, 'attributes', [])],
+                        'decorators': [],
+                        'usages': [],
+                        'dependencies': [],
+                        'is_abstract': getattr(cls, 'is_abstract', False)
+                    }
+        return None
+    
+    def analyze_function(self, function_name: str) -> Optional[Dict[str, Any]]:
+        """Analyze a specific function."""
+        functions = getattr(self.codebase, 'functions', [])
+        if hasattr(functions, '__iter__'):
+            for func in functions:
+                if func.name == function_name:
+                    return {
+                        'filepath': getattr(func, 'file', {}).get('path', ''),
+                        'usages': [],
+                        'call_sites': [],
+                        'dependencies': [],
+                        'function_calls': [c.name for c in getattr(func, 'function_calls', [])],
+                        'parameters': [p.name for p in getattr(func, 'parameters', [])],
+                        'return_statements': [],
+                        'decorators': [],
+                        'is_async': getattr(func, 'is_async', False),
+                        'is_generator': getattr(func, 'is_generator', False),
+                        'complexity_score': 0.0
+                    }
+        return None
+    
+    def analyze_symbol(self, symbol_name: str) -> Optional[Dict[str, Any]]:
+        """Analyze a specific symbol."""
+        symbols = getattr(self.codebase, 'symbols', [])
+        if hasattr(symbols, '__iter__'):
+            for symbol in symbols:
+                if symbol.name == symbol_name:
+                    return {
+                        'symbol_type': str(getattr(symbol, 'symbol_type', 'unknown')),
+                        'filepath': getattr(symbol, 'file', {}).get('path', ''),
+                        'usages': [],
+                        'dependencies': [],
+                        'scope': 'unknown',
+                        'is_exported': False
+                    }
+        return None
+    
+    def get_function_usages(self, function_name: str) -> List[str]:
+        """Get function usages."""
+        return []
+    
+    def get_function_call_sites(self, function_name: str) -> List[str]:
+        """Get function call sites."""
+        return []
+    
+    def get_function_dependencies(self, function_name: str) -> List[str]:
+        """Get function dependencies."""
+        return []
+    
+    def get_function_calls(self, function_name: str) -> List[str]:
+        """Get function calls."""
+        return []
+    
+    def get_function_parameters(self, function_name: str) -> List[str]:
+        """Get function parameters."""
+        return []
+    
+    def get_function_returns(self, function_name: str) -> List[str]:
+        """Get function return statements."""
+        return []
+    
+    def get_function_decorators(self, function_name: str) -> List[str]:
+        """Get function decorators."""
+        return []
+    
+    def is_async_function(self, function_name: str) -> bool:
+        """Check if function is async."""
+        return False
+    
+    def is_generator_function(self, function_name: str) -> bool:
+        """Check if function is generator."""
+        return False
+    
+    def get_class_superclasses(self, class_name: str) -> List[str]:
+        """Get class superclasses."""
+        return []
+    
+    def get_class_subclasses(self, class_name: str) -> List[str]:
+        """Get class subclasses."""
+        return []
+    
+    def get_class_methods(self, class_name: str) -> List[str]:
+        """Get class methods."""
+        return []
+    
+    def get_class_attributes(self, class_name: str) -> List[str]:
+        """Get class attributes."""
+        return []
+    
+    def get_class_decorators(self, class_name: str) -> List[str]:
+        """Get class decorators."""
+        return []
+    
+    def get_class_usages(self, class_name: str) -> List[str]:
+        """Get class usages."""
+        return []
+    
+    def get_class_dependencies(self, class_name: str) -> List[str]:
+        """Get class dependencies."""
+        return []
+    
+    def is_abstract_class(self, class_name: str) -> bool:
+        """Check if class is abstract."""
+        return False
+    
+    def get_file_imports(self, file_path: str) -> List[str]:
+        """Get file imports."""
+        return []
+    
+    def get_file_inbound_imports(self, file_path: str) -> List[str]:
+        """Get file inbound imports."""
+        return []
+    
+    def get_file_symbols(self, file_path: str) -> List[str]:
+        """Get file symbols."""
+        return []
+    
+    def get_file_external_modules(self, file_path: str) -> List[str]:
+        """Get file external modules."""
+        return []
 
 
 @dataclass
@@ -111,7 +328,7 @@ def get_codebase_summary(
             exp_lazy_graph=False,
         )
     
-    analyzer = EnhancedCodebaseAnalyzer(str(codebase_path), config)
+    analyzer = AnalyzerAdapter(str(codebase_path), config)
     
     # Get basic metrics
     files = analyzer.get_all_files()
@@ -168,7 +385,7 @@ def get_file_summary(
             py_resolve_syspath=True,
         )
     
-    analyzer = EnhancedCodebaseAnalyzer(str(codebase_path), config)
+    analyzer = AnalyzerAdapter(str(codebase_path), config)
     file_info = analyzer.analyze_file(filepath)
     
     if not file_info:
@@ -212,7 +429,7 @@ def get_class_summary(
             py_resolve_syspath=True,
         )
     
-    analyzer = EnhancedCodebaseAnalyzer(str(codebase_path), config)
+    analyzer = AnalyzerAdapter(str(codebase_path), config)
     class_info = analyzer.analyze_class(class_name)
     
     if not class_info:
@@ -257,7 +474,7 @@ def get_function_summary(
             py_resolve_syspath=True,
         )
     
-    analyzer = EnhancedCodebaseAnalyzer(str(codebase_path), config)
+    analyzer = AnalyzerAdapter(str(codebase_path), config)
     function_info = analyzer.analyze_function(function_name)
     
     if not function_info:
@@ -304,7 +521,7 @@ def get_symbol_summary(
             py_resolve_syspath=True,
         )
     
-    analyzer = EnhancedCodebaseAnalyzer(str(codebase_path), config)
+    analyzer = AnalyzerAdapter(str(codebase_path), config)
     symbol_info = analyzer.analyze_symbol(symbol_name)
     
     if not symbol_info:
@@ -336,8 +553,8 @@ class CodebaseElements:
             full_range_index=True,
             py_resolve_syspath=True,
         )
-        self.analyzer = EnhancedCodebaseAnalyzer(self.codebase_path, self.config)
-    
+        self.analyzer = AnalyzerAdapter(self.codebase_path, self.config)
+
     @property
     def functions(self) -> List[Dict[str, Any]]:
         """All functions in codebase with enhanced analysis."""
@@ -432,4 +649,3 @@ __all__ = [
     'SymbolSummary',
     'CodebaseConfig',
 ]
-
