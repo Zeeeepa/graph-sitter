@@ -10,8 +10,20 @@ export interface Project {
   flowEnabled: boolean;
   flowStatus: 'running' | 'stopped' | 'error';
   lastActivity: Date;
+  tags: string[];
+  metrics: ProjectMetrics;
   requirements?: string;
   plan?: Plan;
+}
+
+export interface ProjectMetrics {
+  commits: number;
+  contributors: number;
+  openPRs: number;
+  closedPRs: number;
+  issues: number;
+  tests: number;
+  coverage: number;
 }
 
 export interface Plan {
@@ -158,4 +170,3 @@ export interface WorkflowMonitorProps {
   projects: Project[];
   events?: WorkflowEvent[];
 }
-
