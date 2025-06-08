@@ -8,246 +8,249 @@ import {
   TextField,
   FormControlLabel,
   Switch,
-  Box,
+  Grid,
   Typography,
-  Tabs,
-  Tab,
-  Alert
+  Alert,
+  Box,
+  Divider,
 } from '@mui/material';
-import {
-  Save as SaveIcon
-} from '@mui/icons-material';
+import { Settings } from '../types/dashboard';
 
 interface SettingsDialogProps {
   open: boolean;
+  settings: Settings;
   onClose: () => void;
+  onSave: (settings: Settings) => void;
 }
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+const SettingsDialog: React.FC<SettingsDialogProps> = ({
+  open,
+  settings,
+  onClose,
+  onSave,
+}) => {
+  const [formData, setFormData] = useState<Settings>(settings);
+  const [testStatus, setTestStatus] = useState<{
+    github?: boolean;
+    linear?: boolean;
+    slack?: boolean;
+    postgresql?: boolean;
+  }>({});
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`settings-tabpanel-${index}`}
-      aria-labelledby={`settings-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
-
-const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
-  const [tabValue, setTabValue] = useState(0);
-  const [showTokens, setShowTokens] = useState(false);
-  const [settings, setSettings] = useState({
-    githubToken: '',
-    linearToken: '',
-    codegenOrgId: '',
-    codegenToken: '',
-    postgresqlUrl: '',
-    slackToken: '',
-    autoStartFlows: true,
-    enableNotifications: true,
-    enableAnalytics: true
-  });
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+  const handleChange = (field: keyof Settings) => (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSettingChange = (key: string, value: string | boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  const handleTestConnection = async (type: 'github' | 'linear' | 'slack' | 'postgresql') => {
+    // Simulate testing connection
+    setTestStatus((prev) => ({ ...prev, [type]: undefined }));
+    try {
+      // In a real app, this would make an API call to test the connection
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setTestStatus((prev) => ({ ...prev, [type]: true }));
+    } catch (error) {
+      setTestStatus((prev) => ({ ...prev, [type]: false }));
+    }
   };
 
   const handleSave = () => {
-    // Mock save functionality
-    console.log('Saving settings:', settings);
+    onSave(formData);
     onClose();
-  };
-
-  const validateSettings = () => {
-    const required = ['githubToken', 'linearToken', 'codegenOrgId', 'codegenToken'];
-    return required.every(key => settings[key as keyof typeof settings]);
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        <Typography variant="h5">Settings</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Configure API keys and system preferences
-        </Typography>
-      </DialogTitle>
-      
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
-          <Tab label="API Configuration" />
-          <Tab label="Preferences" />
-          <Tab label="Advanced" />
-        </Tabs>
-      </Box>
-      
-      <DialogContent sx={{ minHeight: 400 }}>
-        <TabPanel value={tabValue} index={0}>
-          <Typography variant="h6" gutterBottom>
-            API Keys & Tokens
-          </Typography>
-          
-          <Alert severity="info" sx={{ mb: 3 }}>
-            These credentials are required for the dashboard to function properly. 
-            All tokens are stored securely and never shared.
-          </Alert>
-          
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="GitHub Token"
-              type={showTokens ? 'text' : 'password'}
-              value={settings.githubToken}
-              onChange={(e) => handleSettingChange('githubToken', e.target.value)}
-              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-              helperText="Personal access token for GitHub API access"
-            />
-            
-            <TextField
-              fullWidth
-              label="Linear Token"
-              type={showTokens ? 'text' : 'password'}
-              value={settings.linearToken}
-              onChange={(e) => handleSettingChange('linearToken', e.target.value)}
-              placeholder="lin_api_xxxxxxxxxxxxxxxxxxxx"
-              helperText="API key for Linear integration"
-            />
-            
-            <TextField
-              fullWidth
-              label="Codegen Organization ID"
-              value={settings.codegenOrgId}
-              onChange={(e) => handleSettingChange('codegenOrgId', e.target.value)}
-              placeholder="org_xxxxxxxxxxxxxxxxxxxx"
-              helperText="Your Codegen organization identifier"
-            />
-            
-            <TextField
-              fullWidth
-              label="Codegen Token"
-              type={showTokens ? 'text' : 'password'}
-              value={settings.codegenToken}
-              onChange={(e) => handleSettingChange('codegenToken', e.target.value)}
-              placeholder="cg_xxxxxxxxxxxxxxxxxxxx"
-              helperText="API token for Codegen SDK"
-            />
-            
-            <TextField
-              fullWidth
-              label="PostgreSQL URL (Optional)"
-              value={settings.postgresqlUrl}
-              onChange={(e) => handleSettingChange('postgresqlUrl', e.target.value)}
-              placeholder="postgresql://user:password@localhost:5432/dashboard"
-              helperText="Database connection string for persistence"
-            />
-            
-            <TextField
-              fullWidth
-              label="Slack Token (Optional)"
-              type={showTokens ? 'text' : 'password'}
-              value={settings.slackToken}
-              onChange={(e) => handleSettingChange('slackToken', e.target.value)}
-              placeholder="xoxb-xxxxxxxxxxxxxxxxxxxx"
-              helperText="Bot token for Slack notifications"
-            />
-            
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={showTokens}
-                  onChange={(e) => setShowTokens(e.target.checked)}
+      <DialogTitle>Settings</DialogTitle>
+      <DialogContent>
+        <Grid container spacing={3} sx={{ mt: 1 }}>
+          {/* GitHub Section */}
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              GitHub Integration
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="GitHub Token"
+                type="password"
+                value={formData.githubToken}
+                onChange={handleChange('githubToken')}
+                sx={{ mb: 2 }}
+              />
+              <Button
+                variant="outlined"
+                onClick={() => handleTestConnection('github')}
+                sx={{ mr: 2 }}
+              >
+                Test Connection
+              </Button>
+              {testStatus.github !== undefined && (
+                <Alert severity={testStatus.github ? 'success' : 'error'} sx={{ mt: 1 }}>
+                  {testStatus.github
+                    ? 'Successfully connected to GitHub'
+                    : 'Failed to connect to GitHub'}
+                </Alert>
+              )}
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+
+          {/* Linear Section */}
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              Linear Integration
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="Linear Token"
+                type="password"
+                value={formData.linearToken}
+                onChange={handleChange('linearToken')}
+                sx={{ mb: 2 }}
+              />
+              <Button
+                variant="outlined"
+                onClick={() => handleTestConnection('linear')}
+                sx={{ mr: 2 }}
+              >
+                Test Connection
+              </Button>
+              {testStatus.linear !== undefined && (
+                <Alert severity={testStatus.linear ? 'success' : 'error'} sx={{ mt: 1 }}>
+                  {testStatus.linear
+                    ? 'Successfully connected to Linear'
+                    : 'Failed to connect to Linear'}
+                </Alert>
+              )}
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+
+          {/* Slack Section */}
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              Slack Integration
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="Slack Token"
+                type="password"
+                value={formData.slackToken || ''}
+                onChange={handleChange('slackToken')}
+                sx={{ mb: 2 }}
+              />
+              <Button
+                variant="outlined"
+                onClick={() => handleTestConnection('slack')}
+                sx={{ mr: 2 }}
+              >
+                Test Connection
+              </Button>
+              {testStatus.slack !== undefined && (
+                <Alert severity={testStatus.slack ? 'success' : 'error'} sx={{ mt: 1 }}>
+                  {testStatus.slack
+                    ? 'Successfully connected to Slack'
+                    : 'Failed to connect to Slack'}
+                </Alert>
+              )}
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+
+          {/* Database Section */}
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              Database Configuration
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="PostgreSQL URL"
+                value={formData.postgresqlUrl || ''}
+                onChange={handleChange('postgresqlUrl')}
+                sx={{ mb: 2 }}
+              />
+              <Button
+                variant="outlined"
+                onClick={() => handleTestConnection('postgresql')}
+                sx={{ mr: 2 }}
+              >
+                Test Connection
+              </Button>
+              {testStatus.postgresql !== undefined && (
+                <Alert severity={testStatus.postgresql ? 'success' : 'error'} sx={{ mt: 1 }}>
+                  {testStatus.postgresql
+                    ? 'Successfully connected to PostgreSQL'
+                    : 'Failed to connect to PostgreSQL'}
+                </Alert>
+              )}
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+
+          {/* General Settings */}
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              General Settings
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.autoStartFlows}
+                      onChange={handleChange('autoStartFlows')}
+                    />
+                  }
+                  label="Auto-start flows for new projects"
                 />
-              }
-              label="Show tokens"
-            />
-          </Box>
-        </TabPanel>
-        
-        <TabPanel value={tabValue} index={1}>
-          <Typography variant="h6" gutterBottom>
-            System Preferences
-          </Typography>
-          
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.autoStartFlows}
-                  onChange={(e) => handleSettingChange('autoStartFlows', e.target.checked)}
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.enableNotifications}
+                      onChange={handleChange('enableNotifications')}
+                    />
+                  }
+                  label="Enable notifications"
                 />
-              }
-              label="Auto-start workflows when plans are generated"
-            />
-            
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.enableNotifications}
-                  onChange={(e) => handleSettingChange('enableNotifications', e.target.checked)}
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.enableAnalytics}
+                      onChange={handleChange('enableAnalytics')}
+                    />
+                  }
+                  label="Enable analytics"
                 />
-              }
-              label="Enable desktop notifications"
-            />
-            
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.enableAnalytics}
-                  onChange={(e) => handleSettingChange('enableAnalytics', e.target.checked)}
-                />
-              }
-              label="Enable analytics and usage tracking"
-            />
-          </Box>
-        </TabPanel>
-        
-        <TabPanel value={tabValue} index={2}>
-          <Typography variant="h6" gutterBottom>
-            Advanced Configuration
-          </Typography>
-          
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Advanced settings should only be modified by experienced users.
-          </Alert>
-          
-          <Typography variant="body2" color="text.secondary">
-            Advanced configuration options will be available in future releases.
-            This includes custom webhook endpoints, advanced workflow settings,
-            and integration with external monitoring systems.
-          </Typography>
-        </TabPanel>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </DialogContent>
-      
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          onClick={handleSave} 
-          variant="contained"
-          startIcon={<SaveIcon />}
-          disabled={!validateSettings()}
-        >
+        <Button onClick={handleSave} variant="contained" color="primary">
           Save Settings
         </Button>
       </DialogActions>
@@ -256,3 +259,4 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
 };
 
 export default SettingsDialog;
+
