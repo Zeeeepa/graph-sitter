@@ -43,6 +43,9 @@ class ContextenApp:
         self._startup_complete = False
         self._shutdown_complete = False
 
+        # Auto-register available extensions
+        self._auto_register_extensions()
+
     @property
     def current_time(self) -> datetime:
         """Get current time in UTC.
@@ -51,6 +54,69 @@ class ContextenApp:
             Current UTC datetime
         """
         return datetime.now(timezone.utc)
+
+    def _auto_register_extensions(self) -> None:
+        """Auto-register available extensions."""
+        try:
+            # GitHub Extension
+            from .extensions.github.github import GitHubExtension
+            github_config = self.config.get('github', {})
+            if github_config.get('token'):
+                self.register_extension(GitHubExtension, github_config)
+        except ImportError:
+            logger.warning("GitHub extension not available")
+
+        try:
+            # Linear Extension
+            from .extensions.linear.linear import LinearExtension
+            linear_config = self.config.get('linear', {})
+            if linear_config.get('api_key'):
+                self.register_extension(LinearExtension, linear_config)
+        except ImportError:
+            logger.warning("Linear extension not available")
+
+        try:
+            # Codegen Extension
+            from .extensions.codegen.codegen import CodegenExtension
+            codegen_config = self.config.get('codegen', {})
+            if codegen_config.get('org_id') and codegen_config.get('token'):
+                self.register_extension(CodegenExtension, codegen_config)
+        except ImportError:
+            logger.warning("Codegen extension not available")
+
+        try:
+            # Flow Orchestrator Extension
+            from .extensions.flows.orchestrator import FlowOrchestrator
+            flow_config = self.config.get('flows', {})
+            self.register_extension(FlowOrchestrator, flow_config)
+        except ImportError:
+            logger.warning("Flow orchestrator extension not available")
+
+        try:
+            # Dashboard Extension
+            from .extensions.dashboard.dashboard_extension import DashboardExtension
+            dashboard_config = self.config.get('dashboard', {})
+            self.register_extension(DashboardExtension, dashboard_config)
+        except ImportError:
+            logger.warning("Dashboard extension not available")
+
+        try:
+            # Slack Extension
+            from .extensions.slack.slack import SlackExtension
+            slack_config = self.config.get('slack', {})
+            if slack_config.get('token'):
+                self.register_extension(SlackExtension, slack_config)
+        except ImportError:
+            logger.warning("Slack extension not available")
+
+        try:
+            # CircleCI Extension
+            from .extensions.circleci.circleci import CircleCIExtension
+            circleci_config = self.config.get('circleci', {})
+            if circleci_config.get('token'):
+                self.register_extension(CircleCIExtension, circleci_config)
+        except ImportError:
+            logger.warning("CircleCI extension not available")
 
     def register_extension(
         self,
@@ -109,6 +175,17 @@ class ContextenApp:
         """
         return self.extension_registry.get_extension(name) is not None
 
+    def get_extension(self, name: str) -> Optional[Extension]:
+        """Get an extension instance.
+        
+        Args:
+            name: Name of extension
+            
+        Returns:
+            Extension instance or None
+        """
+        return self.extension_registry.get_extension(name)
+
     async def start(self) -> None:
         """Start the application.
         
@@ -138,7 +215,11 @@ class ContextenApp:
             await self.extension_registry.start_extensions()
 
             self._startup_complete = True
-            logger.info("Contexten application started")
+            logger.info("Contexten application started successfully")
+
+            # Log registered extensions
+            extensions = list(self.extension_registry._extensions.keys())
+            logger.info(f"Active extensions: {', '.join(extensions)}")
 
         except Exception as e:
             logger.error(f"Failed to start application: {e}", exc_info=True)
@@ -193,7 +274,7 @@ class ContextenApp:
 
             # Determine overall status
             for component in components.values():
-                if component["status"] != "healthy":
+                if isinstance(component, dict) and component.get("status") != "healthy":
                     status = "degraded"
                     break
 
@@ -209,4 +290,3 @@ class ContextenApp:
             "components": components,
             "timestamp": self.current_time.isoformat(),
         }
-
