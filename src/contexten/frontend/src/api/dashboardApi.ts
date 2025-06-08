@@ -68,7 +68,7 @@ const mockProjects: Project[] = [
     repository: 'https://github.com/Zeeeepa/contexten',
     progress: 70,
     flowEnabled: true,
-    flowStatus: 'idle',
+    flowStatus: 'stopped',
     lastActivity: new Date(),
     tags: ['ai', 'agents', 'python'],
     metrics: {
@@ -82,11 +82,11 @@ const mockProjects: Project[] = [
     id: '3',
     name: 'Dashboard UI',
     description: 'React dashboard interface with real-time updates',
-    status: 'development',
+    status: 'paused',
     repository: 'https://github.com/Zeeeepa/dashboard',
     progress: 60,
     flowEnabled: false,
-    flowStatus: 'disabled',
+    flowStatus: 'stopped',
     lastActivity: new Date(),
     tags: ['frontend', 'react', 'dashboard'],
     metrics: {
@@ -99,13 +99,12 @@ const mockProjects: Project[] = [
 ];
 
 const mockStats: DashboardStats = {
-  totalProjects: 3,
-  activeProjects: 2,
-  flowEnabled: 2,
-  totalCommits: 312,
-  totalPRs: 43,
-  totalContributors: 16,
-  totalIssues: 83
+  total_projects: 3,
+  active_workflows: 2,
+  completed_tasks: 2,
+  pending_prs: 43,
+  quality_score: 16,
+  last_updated: new Date().toISOString()
 };
 
 export const dashboardApi = {
