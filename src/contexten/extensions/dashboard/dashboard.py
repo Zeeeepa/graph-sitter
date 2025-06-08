@@ -1,390 +1,496 @@
 """
-Dashboard Extension Main Class
+Main Dashboard for Single-User System
 
-Central orchestration class that integrates all Contexten extensions into a unified dashboard system.
+Central orchestrator that manages all components and provides the main interface.
+Integrates all 11 extensions into a cohesive, functional system.
 """
 
 import logging
-import os
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
-from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+import asyncio
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+from pathlib import Path
 
-# Use TYPE_CHECKING to avoid circular imports
-if TYPE_CHECKING:
-    from contexten.extensions.contexten_app.contexten_app import ContextenApp
+from fastapi import FastAPI, WebSocket, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
-from contexten.extensions.modal.interface import EventHandlerManagerProtocol
 from graph_sitter.shared.logging.get_logger import get_logger
-
-from .models import (
-    DashboardProject, DashboardPlan, DashboardTask, WorkflowEvent, 
-    QualityGateResult, DashboardSettings, DashboardStats
-)
+from .models import DashboardConfig, ProjectStatus, FlowStatus
+from .settings_manager import SettingsManager
 from .project_manager import ProjectManager
 from .planning_engine import PlanningEngine
 from .workflow_engine import WorkflowEngine
 from .quality_manager import QualityManager
 from .event_coordinator import EventCoordinator
-from .settings_manager import SettingsManager
 
 logger = get_logger(__name__)
-logger.setLevel(logging.DEBUG)
-
-
-class DashboardEventHandler(EventHandlerManagerProtocol):
-    """Event handler for dashboard-specific events"""
-    
-    def __init__(self, dashboard: 'Dashboard'):
-        self.dashboard = dashboard
-        self.registered_handlers = {}
-    
-    def register_handler(self, event_type: str, handler):
-        """Register an event handler"""
-        if event_type not in self.registered_handlers:
-            self.registered_handlers[event_type] = []
-        self.registered_handlers[event_type].append(handler)
-    
-    async def handle_event(self, event_type: str, data: Dict[str, Any]):
-        """Handle incoming events"""
-        logger.info(f"Dashboard handling event: {event_type}")
-        
-        # Route to event coordinator
-        await self.dashboard.event_coordinator.handle_event(event_type, data)
-        
-        # Execute registered handlers
-        if event_type in self.registered_handlers:
-            for handler in self.registered_handlers[event_type]:
-                try:
-                    await handler(data)
-                except Exception as e:
-                    logger.error(f"Error in event handler for {event_type}: {e}")
 
 
 class Dashboard:
     """
-    Main Dashboard class that orchestrates all Contexten extensions.
+    Main dashboard that orchestrates all components.
     
-    Provides:
-    - Project discovery and management
-    - Automated planning via Codegen SDK
-    - Workflow execution and monitoring
-    - Quality gates and PR validation
-    - Real-time event coordination
+    Features:
+    - Central coordination of all 11 extensions
+    - FastAPI web interface
+    - Real-time WebSocket updates
+    - Project lifecycle management
     - Settings and configuration management
     """
     
-    def __init__(self, contexten_app):
-        self.app = contexten_app
-        self.event_handler = DashboardEventHandler(self)
-        
-        # Initialize managers
+    def __init__(self, config_file: str = "dashboard_config.json"):
+        # Core components
+        self.settings_manager = SettingsManager(config_file)
         self.project_manager = ProjectManager(self)
         self.planning_engine = PlanningEngine(self)
         self.workflow_engine = WorkflowEngine(self)
         self.quality_manager = QualityManager(self)
         self.event_coordinator = EventCoordinator(self)
-        self.settings_manager = SettingsManager(self)
         
-        # WebSocket connections
-        self.websocket_connections: List[WebSocket] = []
+        # FastAPI app
+        self.app = FastAPI(title="Contexten Dashboard", version="1.0.0")
+        self.templates = None
         
-        # Register API routes
-        self._register_routes()
+        # State
+        self.initialized = False
+        self.startup_time = None
         
-        logger.info("Dashboard initialized successfully")
-    
-    def _register_routes(self):
-        """Register FastAPI routes for the dashboard"""
+        # Setup routes
+        self._setup_routes()
         
-        # Project management routes
-        @self.app.app.get("/dashboard/projects")
+    async def initialize(self):
+        """Initialize all dashboard components"""
+        if self.initialized:
+            logger.warning("Dashboard already initialized")
+            return
+            
+        logger.info("Initializing Dashboard...")
+        self.startup_time = datetime.now()
+        
+        try:
+            # Initialize components in order
+            await self.event_coordinator.initialize()
+            await self.project_manager.initialize()
+            await self.planning_engine.initialize()
+            await self.workflow_engine.initialize()
+            await self.quality_manager.initialize()
+            
+            # Setup templates if frontend exists
+            frontend_path = Path("src/contexten/frontend")
+            if frontend_path.exists():
+                self.templates = Jinja2Templates(directory=str(frontend_path))
+                self.app.mount("/static", StaticFiles(directory=str(frontend_path / "static")), name="static")
+                
+            self.initialized = True
+            logger.info("Dashboard initialization complete")
+            
+            # Emit startup event
+            await self.event_coordinator.emit_event(
+                "dashboard_started",
+                "dashboard",
+                data={"startup_time": self.startup_time.isoformat()}
+            )
+            
+        except Exception as e:
+            logger.error(f"Dashboard initialization failed: {e}")
+            raise
+            
+    def _setup_routes(self):
+        """Setup FastAPI routes"""
+        
+        # Main dashboard page
+        @self.app.get("/", response_class=HTMLResponse)
+        async def dashboard_home(request: Request):
+            if self.templates:
+                return self.templates.TemplateResponse("index.html", {"request": request})
+            else:
+                return HTMLResponse(self._get_simple_html())
+                
+        # API Routes
+        
+        # Projects
+        @self.app.get("/api/projects")
         async def get_projects():
-            """Get all pinned projects"""
-            try:
-                projects = await self.project_manager.get_all_projects()
-                return {"projects": [project.dict() for project in projects]}
-            except Exception as e:
-                logger.error(f"Error getting projects: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.get("/dashboard/projects/discover")
-        async def discover_repositories(organization: Optional[str] = None):
-            """Discover GitHub repositories"""
-            try:
-                repositories = await self.project_manager.discover_github_repositories(organization)
-                return {"repositories": repositories}
-            except Exception as e:
-                logger.error(f"Error discovering repositories: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.post("/dashboard/projects/pin")
-        async def pin_project(request: Request):
-            """Pin a project to the dashboard"""
-            try:
-                data = await request.json()
-                repository_identifier = data.get("repository")
-                if not repository_identifier:
-                    raise HTTPException(status_code=400, detail="Repository identifier is required")
-                
-                # Extract additional configuration
-                config = {k: v for k, v in data.items() if k != "repository"}
-                
-                project = await self.project_manager.pin_project(repository_identifier, **config)
-                return {"project": project.dict()}
-            except ValueError as e:
-                raise HTTPException(status_code=400, detail=str(e))
-            except Exception as e:
-                logger.error(f"Error pinning project: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.delete("/dashboard/projects/{project_id}")
-        async def unpin_project(project_id: str):
-            """Unpin a project from the dashboard"""
-            try:
-                success = await self.project_manager.unpin_project(project_id)
-                if not success:
-                    raise HTTPException(status_code=404, detail="Project not found")
-                return {"message": "Project unpinned successfully"}
-            except Exception as e:
-                logger.error(f"Error unpinning project: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.get("/dashboard/projects/{project_id}")
+            projects = await self.project_manager.get_all_projects()
+            return [self._serialize_project(p) for p in projects]
+            
+        @self.app.get("/api/projects/pinned")
+        async def get_pinned_projects():
+            projects = await self.project_manager.get_pinned_projects()
+            return [self._serialize_project(p) for p in projects]
+            
+        @self.app.get("/api/projects/{project_id}")
         async def get_project(project_id: str):
-            """Get a specific project"""
-            try:
-                project = await self.project_manager.get_project(project_id)
-                if not project:
-                    raise HTTPException(status_code=404, detail="Project not found")
-                return {"project": project.dict()}
-            except Exception as e:
-                logger.error(f"Error getting project: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.put("/dashboard/projects/{project_id}")
-        async def update_project(project_id: str, request: Request):
-            """Update a project's configuration"""
-            try:
-                data = await request.json()
-                project = await self.project_manager.update_project(project_id, **data)
-                if not project:
-                    raise HTTPException(status_code=404, detail="Project not found")
-                return {"project": project.dict()}
-            except Exception as e:
-                logger.error(f"Error updating project: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.post("/dashboard/projects/{project_id}/flow/start")
-        async def start_project_flow(project_id: str):
-            """Start the automated workflow for a project"""
-            try:
-                success = await self.project_manager.start_project_flow(project_id)
-                if not success:
-                    raise HTTPException(status_code=404, detail="Project not found")
-                return {"message": "Workflow started successfully"}
-            except Exception as e:
-                logger.error(f"Error starting workflow: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.post("/dashboard/projects/{project_id}/flow/stop")
-        async def stop_project_flow(project_id: str):
-            """Stop the automated workflow for a project"""
-            try:
-                success = await self.project_manager.stop_project_flow(project_id)
-                if not success:
-                    raise HTTPException(status_code=404, detail="Project not found")
-                return {"message": "Workflow stopped successfully"}
-            except Exception as e:
-                logger.error(f"Error stopping workflow: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.get("/dashboard/projects/{project_id}/metrics")
-        async def get_project_metrics(project_id: str):
-            """Get metrics for a specific project"""
-            try:
-                metrics = await self.project_manager.get_project_metrics(project_id)
-                return {"metrics": metrics}
-            except Exception as e:
-                logger.error(f"Error getting project metrics: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.post("/dashboard/projects/{project_id}/sync")
-        async def sync_project_with_github(project_id: str):
-            """Synchronize project with GitHub"""
-            try:
-                success = await self.project_manager.sync_project_with_github(project_id)
-                if not success:
-                    raise HTTPException(status_code=404, detail="Project not found or sync failed")
-                return {"message": "Project synchronized successfully"}
-            except Exception as e:
-                logger.error(f"Error synchronizing project: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        # Plans endpoints
-        @self.app.app.post("/api/dashboard/projects/{project_id}/plan")
-        async def generate_plan(project_id: str, request: Dict[str, str]):
-            """Generate plan for project using Codegen SDK"""
-            try:
-                requirements = request.get("requirements")
-                if not requirements:
-                    raise HTTPException(status_code=400, detail="requirements required")
+            project = await self.project_manager.get_project(project_id)
+            if not project:
+                raise HTTPException(status_code=404, detail="Project not found")
+            return self._serialize_project(project)
+            
+        @self.app.post("/api/projects/pin")
+        async def pin_project(request: Dict[str, str]):
+            repo_url = request.get("repo_url")
+            if not repo_url:
+                raise HTTPException(status_code=400, detail="repo_url required")
                 
-                plan = await self.planning_engine.generate_plan(project_id, requirements)
-                return {"success": True, "data": plan}
-            except Exception as e:
-                logger.error(f"Error generating plan for {project_id}: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.get("/api/dashboard/plans/{plan_id}")
-        async def get_plan(plan_id: str):
-            """Get specific plan"""
-            try:
-                plan = await self.planning_engine.get_plan(plan_id)
-                if not plan:
-                    raise HTTPException(status_code=404, detail="Plan not found")
-                return {"success": True, "data": plan}
-            except HTTPException:
-                raise
-            except Exception as e:
-                logger.error(f"Error getting plan {plan_id}: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        # Workflow endpoints
-        @self.app.app.post("/api/dashboard/projects/{project_id}/workflow/start")
+            project = await self.project_manager.pin_project(repo_url)
+            if not project:
+                raise HTTPException(status_code=400, detail="Failed to pin project")
+                
+            return self._serialize_project(project)
+            
+        @self.app.post("/api/projects/{project_id}/unpin")
+        async def unpin_project(project_id: str):
+            success = await self.project_manager.unpin_project(project_id)
+            if not success:
+                raise HTTPException(status_code=404, detail="Project not found")
+            return {"success": True}
+            
+        # Repository discovery
+        @self.app.get("/api/repositories")
+        async def discover_repositories(force_refresh: bool = False):
+            repos = await self.project_manager.discover_repositories(force_refresh)
+            return repos
+            
+        # Planning
+        @self.app.post("/api/projects/{project_id}/plan")
+        async def generate_plan(project_id: str, request: Dict[str, str]):
+            requirements = request.get("requirements")
+            if not requirements:
+                raise HTTPException(status_code=400, detail="requirements required")
+                
+            # Get analysis if available
+            analysis = await self.quality_manager.get_analysis(project_id)
+            
+            plan = await self.planning_engine.generate_plan(project_id, requirements, analysis)
+            if not plan:
+                raise HTTPException(status_code=400, detail="Failed to generate plan")
+                
+            return self._serialize_plan(plan)
+            
+        @self.app.get("/api/projects/{project_id}/plans")
+        async def get_project_plans(project_id: str):
+            plans = await self.planning_engine.get_project_plans(project_id)
+            return [self._serialize_plan(p) for p in plans]
+            
+        # Workflows
+        @self.app.post("/api/projects/{project_id}/workflow/start")
         async def start_workflow(project_id: str):
-            """Start workflow for project"""
-            try:
-                await self.workflow_engine.start_workflow(project_id)
-                return {"success": True}
-            except Exception as e:
-                logger.error(f"Error starting workflow for {project_id}: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.post("/api/dashboard/projects/{project_id}/workflow/stop")
+            success = await self.workflow_engine.start_workflow(project_id)
+            if not success:
+                raise HTTPException(status_code=400, detail="Failed to start workflow")
+            return {"success": True}
+            
+        @self.app.post("/api/projects/{project_id}/workflow/stop")
         async def stop_workflow(project_id: str):
-            """Stop workflow for project"""
-            try:
-                await self.workflow_engine.stop_workflow(project_id)
-                return {"success": True}
-            except Exception as e:
-                logger.error(f"Error stopping workflow for {project_id}: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        # Stats endpoint
-        @self.app.app.get("/api/dashboard/stats")
-        async def get_stats():
-            """Get dashboard statistics"""
-            try:
-                stats = await self._calculate_stats()
-                return {"success": True, "data": stats}
-            except Exception as e:
-                logger.error(f"Error getting stats: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        # Settings endpoints
-        @self.app.app.get("/api/dashboard/settings")
+            success = await self.workflow_engine.stop_workflow(project_id)
+            if not success:
+                raise HTTPException(status_code=400, detail="Failed to stop workflow")
+            return {"success": True}
+            
+        @self.app.get("/api/projects/{project_id}/workflow/status")
+        async def get_workflow_status(project_id: str):
+            status = await self.workflow_engine.get_workflow_status(project_id)
+            return status or {"status": "inactive"}
+            
+        # Analysis
+        @self.app.post("/api/projects/{project_id}/analyze")
+        async def analyze_project(project_id: str, force_refresh: bool = False):
+            analysis = await self.quality_manager.analyze_project(project_id, force_refresh)
+            if not analysis:
+                raise HTTPException(status_code=400, detail="Analysis failed")
+            return self._serialize_analysis(analysis)
+            
+        @self.app.get("/api/projects/{project_id}/analysis")
+        async def get_project_analysis(project_id: str):
+            analysis = await self.quality_manager.get_analysis(project_id)
+            if not analysis:
+                raise HTTPException(status_code=404, detail="No analysis found")
+            return self._serialize_analysis(analysis)
+            
+        # Deployment
+        @self.app.post("/api/projects/{project_id}/deploy")
+        async def deploy_project(project_id: str, request: Dict[str, str] = None):
+            environment_type = (request or {}).get("environment_type", "development")
+            deployment = await self.quality_manager.deploy_to_sandbox(project_id, environment_type)
+            if not deployment:
+                raise HTTPException(status_code=400, detail="Deployment failed")
+            return self._serialize_deployment(deployment)
+            
+        @self.app.get("/api/projects/{project_id}/deployment")
+        async def get_project_deployment(project_id: str):
+            deployment = await self.quality_manager.get_project_deployment(project_id)
+            if not deployment:
+                raise HTTPException(status_code=404, detail="No deployment found")
+            return self._serialize_deployment(deployment)
+            
+        # Quality summary
+        @self.app.get("/api/projects/{project_id}/quality")
+        async def get_quality_summary(project_id: str):
+            summary = await self.quality_manager.get_quality_summary(project_id)
+            return summary
+            
+        # Events
+        @self.app.get("/api/events")
+        async def get_recent_events(limit: int = 50, event_type: str = None, project_id: str = None):
+            events = await self.event_coordinator.get_recent_events(limit, event_type, project_id)
+            return [self._serialize_event(e) for e in events]
+            
+        @self.app.get("/api/events/statistics")
+        async def get_event_statistics():
+            return await self.event_coordinator.get_event_statistics()
+            
+        # Settings
+        @self.app.get("/api/settings")
         async def get_settings():
-            """Get dashboard settings"""
-            try:
-                settings = await self.settings_manager.get_settings()
-                return {"success": True, "data": settings}
-            except Exception as e:
-                logger.error(f"Error getting settings: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        @self.app.app.post("/api/dashboard/settings")
-        async def update_settings(settings: DashboardSettings):
-            """Update dashboard settings"""
-            try:
-                updated_settings = await self.settings_manager.update_settings(settings)
-                return {"success": True, "data": updated_settings}
-            except Exception as e:
-                logger.error(f"Error updating settings: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
-        
-        # WebSocket endpoint
-        @self.app.app.websocket("/api/dashboard/ws")
+            return {
+                "setup_status": self.settings_manager.get_setup_status(),
+                "notification_settings": await self.event_coordinator.get_notification_settings(),
+                "extensions": {
+                    name: {
+                        "enabled": self.settings_manager.is_extension_enabled(name),
+                        "config": self.settings_manager.get_extension_config(name).config
+                    }
+                    for name in ["github", "linear", "codegen", "slack", "circleci", 
+                               "grainchain", "graph_sitter", "prefect", "controlflow", "modal"]
+                }
+            }
+            
+        @self.app.post("/api/settings/notifications")
+        async def update_notification_settings(settings: Dict[str, bool]):
+            await self.event_coordinator.update_notification_settings(settings)
+            return {"success": True}
+            
+        @self.app.post("/api/settings/test-slack")
+        async def test_slack():
+            success = await self.event_coordinator.test_slack_integration()
+            return {"success": success}
+            
+        # System status
+        @self.app.get("/api/status")
+        async def get_system_status():
+            return {
+                "initialized": self.initialized,
+                "startup_time": self.startup_time.isoformat() if self.startup_time else None,
+                "uptime_seconds": (datetime.now() - self.startup_time).total_seconds() if self.startup_time else 0,
+                "project_statistics": await self.project_manager.get_project_statistics(),
+                "active_workflows": len(await self.workflow_engine.get_active_workflows()),
+                "event_statistics": await self.event_coordinator.get_event_statistics()
+            }
+            
+        # WebSocket for real-time updates
+        @self.app.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
-            """WebSocket endpoint for real-time updates"""
             await websocket.accept()
-            self.websocket_connections.append(websocket)
+            await self.event_coordinator.add_websocket_connection(websocket)
             
             try:
                 while True:
                     # Keep connection alive
                     await websocket.receive_text()
-            except WebSocketDisconnect:
-                self.websocket_connections.remove(websocket)
-    
-    async def _calculate_stats(self) -> DashboardStats:
-        """Calculate dashboard statistics"""
-        projects = await self.project_manager.get_all_projects()
+            except Exception as e:
+                logger.info(f"WebSocket disconnected: {e}")
+            finally:
+                await self.event_coordinator.remove_websocket_connection(websocket)
+                
+    def _serialize_project(self, project) -> Dict[str, Any]:
+        """Serialize project for API response"""
+        return {
+            "project_id": project.project_id,
+            "name": project.name,
+            "github_repo": project.github_repo,
+            "github_owner": project.github_owner,
+            "status": project.status.value,
+            "flow_status": project.flow_status.value,
+            "pinned": project.pinned,
+            "pinned_at": project.pinned_at.isoformat() if project.pinned_at else None,
+            "created_at": project.created_at.isoformat(),
+            "updated_at": project.updated_at.isoformat(),
+            "current_plan_id": project.current_plan_id,
+            "active_workflow_id": project.active_workflow_id,
+            "linear_project_id": project.linear_project_id,
+            "has_analysis": bool(project.analysis),
+            "has_deployment": bool(project.deployment),
+            "github_data": project.github_data
+        }
         
-        stats = DashboardStats()
-        stats.total_projects = len(projects)
-        stats.active_projects = len([p for p in projects if p.status.value == "active"])
-        stats.completed_projects = len([p for p in projects if p.status.value == "completed"])
+    def _serialize_plan(self, plan) -> Dict[str, Any]:
+        """Serialize plan for API response"""
+        return {
+            "plan_id": plan.plan_id,
+            "project_id": plan.project_id,
+            "title": plan.title,
+            "description": plan.description,
+            "requirements": plan.requirements,
+            "status": plan.status,
+            "created_at": plan.created_at.isoformat(),
+            "estimated_duration": plan.estimated_duration,
+            "task_count": len(plan.tasks),
+            "tasks": [self._serialize_task(task) for task in plan.tasks]
+        }
         
-        # Calculate other stats
-        total_progress = sum(p.progress for p in projects)
-        stats.average_project_progress = total_progress / len(projects) if projects else 0
+    def _serialize_task(self, task) -> Dict[str, Any]:
+        """Serialize task for API response"""
+        return {
+            "task_id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "task_type": task.task_type,
+            "status": task.status.value,
+            "progress": task.progress,
+            "estimated_duration": task.estimated_duration,
+            "linear_issue_id": task.linear_issue_id,
+            "github_pr_id": task.github_pr_id,
+            "codegen_task_id": task.codegen_task_id,
+            "created_at": task.created_at.isoformat(),
+            "started_at": task.started_at.isoformat() if task.started_at else None,
+            "completed_at": task.completed_at.isoformat() if task.completed_at else None,
+            "error_message": task.error_message
+        }
         
-        stats.running_flows = len([p for p in projects if p.flow_status.value == "running"])
+    def _serialize_analysis(self, analysis) -> Dict[str, Any]:
+        """Serialize analysis for API response"""
+        return {
+            "project_id": analysis.project_id,
+            "analysis_timestamp": analysis.analysis_timestamp.isoformat(),
+            "quality_score": analysis.quality_score,
+            "complexity_score": analysis.complexity_score,
+            "maintainability_score": analysis.maintainability_score,
+            "test_coverage": analysis.test_coverage,
+            "error_count": len(analysis.errors),
+            "missing_features_count": len(analysis.missing_features),
+            "config_issues_count": len(analysis.config_issues),
+            "errors": [
+                {
+                    "file_path": e.file_path,
+                    "line_number": e.line_number,
+                    "error_type": e.error_type,
+                    "message": e.message,
+                    "severity": e.severity,
+                    "suggestion": e.suggestion
+                }
+                for e in analysis.errors[:10]  # Limit to first 10
+            ],
+            "missing_features": [
+                {
+                    "feature_name": f.feature_name,
+                    "description": f.description,
+                    "priority": f.priority
+                }
+                for f in analysis.missing_features[:5]  # Limit to first 5
+            ],
+            "config_issues": [
+                {
+                    "config_file": i.config_file,
+                    "issue_type": i.issue_type,
+                    "message": i.message
+                }
+                for i in analysis.config_issues[:5]  # Limit to first 5
+            ]
+        }
         
-        return stats
-    
-    async def broadcast_event(self, event: WorkflowEvent):
-        """Broadcast event to all WebSocket connections"""
-        if not self.websocket_connections:
-            return
+    def _serialize_deployment(self, deployment) -> Dict[str, Any]:
+        """Serialize deployment for API response"""
+        return {
+            "deployment_id": deployment.deployment_id,
+            "project_id": deployment.project_id,
+            "status": deployment.status.value,
+            "sandbox": {
+                "sandbox_id": deployment.sandbox.sandbox_id,
+                "environment_type": deployment.sandbox.environment_type,
+                "status": deployment.sandbox.status,
+                "url": deployment.sandbox.url,
+                "created_at": deployment.sandbox.created_at.isoformat()
+            },
+            "test_results": [
+                {
+                    "test_name": t.test_name,
+                    "status": t.status,
+                    "duration": t.duration,
+                    "message": t.message
+                }
+                for t in deployment.test_results
+            ],
+            "snapshots": [
+                {
+                    "snapshot_id": s.snapshot_id,
+                    "created_at": s.created_at.isoformat(),
+                    "description": s.description,
+                    "status": s.status
+                }
+                for s in deployment.snapshots
+            ],
+            "created_at": deployment.created_at.isoformat(),
+            "completed_at": deployment.completed_at.isoformat() if deployment.completed_at else None
+        }
         
-        event_data = {
-            "type": "workflow_event",
-            "payload": event.dict(),
+    def _serialize_event(self, event) -> Dict[str, Any]:
+        """Serialize event for API response"""
+        return {
+            "event_id": event.event_id,
+            "event_type": event.event_type,
+            "source": event.source,
+            "project_id": event.project_id,
+            "task_id": event.task_id,
+            "data": event.data,
             "timestamp": event.timestamp.isoformat()
         }
         
-        # Send to all connected clients
-        disconnected = []
-        for websocket in self.websocket_connections:
-            try:
-                await websocket.send_json(event_data)
-            except Exception:
-                disconnected.append(websocket)
+    def _get_simple_html(self) -> str:
+        """Get simple HTML page when templates not available"""
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Contexten Dashboard</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                .container { max-width: 800px; margin: 0 auto; }
+                .status { padding: 20px; background: #f0f0f0; border-radius: 5px; margin: 20px 0; }
+                .api-link { display: block; margin: 10px 0; padding: 10px; background: #e0e0e0; text-decoration: none; border-radius: 3px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Contexten Dashboard</h1>
+                <div class="status">
+                    <h2>System Status</h2>
+                    <p>Dashboard is running and ready to use.</p>
+                    <p>Frontend templates not found - using simple interface.</p>
+                </div>
+                <h2>API Endpoints</h2>
+                <a href="/api/status" class="api-link">System Status</a>
+                <a href="/api/projects" class="api-link">Projects</a>
+                <a href="/api/repositories" class="api-link">Discover Repositories</a>
+                <a href="/api/settings" class="api-link">Settings</a>
+                <a href="/api/events" class="api-link">Recent Events</a>
+                <h2>Setup</h2>
+                <p>Configure your environment variables and start using the dashboard:</p>
+                <ul>
+                    <li>GITHUB_TOKEN - GitHub personal access token</li>
+                    <li>CODEGEN_ORG_ID - Your Codegen organization ID</li>
+                    <li>CODEGEN_TOKEN - Your Codegen API token</li>
+                    <li>LINEAR_API_KEY - Linear API key (optional)</li>
+                    <li>SLACK_WEBHOOK - Slack webhook URL (optional)</li>
+                </ul>
+            </div>
+        </body>
+        </html>
+        """
         
-        # Remove disconnected clients
-        for websocket in disconnected:
-            self.websocket_connections.remove(websocket)
-    
-    async def start(self):
-        """Start the dashboard system"""
-        logger.info("Starting dashboard system...")
+    async def shutdown(self):
+        """Shutdown the dashboard"""
+        logger.info("Shutting down Dashboard...")
         
-        # Initialize all managers
-        await self.project_manager.initialize()
-        await self.planning_engine.initialize()
-        await self.workflow_engine.initialize()
-        await self.quality_manager.initialize()
-        await self.event_coordinator.initialize()
-        await self.settings_manager.initialize()
-        
-        logger.info("Dashboard system started successfully")
-    
-    async def stop(self):
-        """Stop the dashboard system"""
-        logger.info("Stopping dashboard system...")
-        
-        # Stop all managers
-        await self.workflow_engine.stop()
-        await self.event_coordinator.stop()
-        
-        # Close WebSocket connections
-        for websocket in self.websocket_connections:
-            try:
-                await websocket.close()
-            except Exception:
-                pass
-        
-        logger.info("Dashboard system stopped")
+        if self.event_coordinator:
+            await self.event_coordinator.shutdown()
+            
+        logger.info("Dashboard shutdown complete")
+
+
+# Factory function for creating dashboard instance
+def create_dashboard(config_file: str = "dashboard_config.json") -> Dashboard:
+    """Create and return a dashboard instance"""
+    return Dashboard(config_file)
+

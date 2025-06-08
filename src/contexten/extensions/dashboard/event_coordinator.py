@@ -1,229 +1,298 @@
 """
-Event Coordinator
+Event Coordinator for Single-User Dashboard
 
-Central event bus for cross-extension communication.
-Enhanced with sophisticated event routing and loop prevention.
+Coordinates events between all extensions and manages event flow.
+Handles event routing, filtering, and integration with external services.
 """
 
 import logging
-from typing import Dict, Any, List, Callable, Optional
+import asyncio
+from typing import Dict, Any, Optional
 from datetime import datetime
+import uuid
 
 from graph_sitter.shared.logging.get_logger import get_logger
 from .models import WorkflowEvent
-from .event_bus import EventBus, EventPriority, EventRule
+from .event_bus import EventBus
+from ..slack.slack import Slack
 
 logger = get_logger(__name__)
 
 
 class EventCoordinator:
     """
-    Enhanced event coordinator that uses the central event bus for 
-    sophisticated cross-extension communication.
+    Coordinates events across all dashboard components.
+    
+    Features:
+    - Event creation and routing
+    - Integration with Slack for notifications
+    - Event filtering and processing
+    - System health monitoring
+    - Automated responses to events
     """
     
     def __init__(self, dashboard):
         self.dashboard = dashboard
-        self.event_bus = EventBus(dashboard)
-        self.event_history: List[WorkflowEvent] = []
+        self.event_bus = EventBus()
+        self.slack: Optional[Slack] = None
+        self.notification_settings = {
+            "workflow_started": True,
+            "workflow_completed": True,
+            "workflow_failed": True,
+            "task_completed": False,
+            "task_failed": True,
+            "analysis_completed": True,
+            "deployment_completed": True,
+            "project_pinned": False,
+            "project_unpinned": False
+        }
         
     async def initialize(self):
         """Initialize the event coordinator"""
         logger.info("Initializing EventCoordinator...")
         
-        # Register dashboard extension with event bus
-        self.event_bus.register_extension("dashboard", self.dashboard)
+        # Initialize event bus
+        await self.event_bus.initialize()
         
-        # Setup dashboard-specific event handlers
-        self._setup_dashboard_handlers()
+        # Initialize Slack integration
+        if self.dashboard.settings_manager.is_extension_enabled("slack"):
+            slack_webhook = self.dashboard.settings_manager.get_api_credential("slack")
+            if slack_webhook:
+                self.slack = Slack({"webhook_url": slack_webhook})
+                await self.slack.initialize()
+                logger.info("Slack integration initialized")
+            else:
+                logger.warning("Slack webhook not configured")
+                
+        # Set up event handlers
+        await self._setup_event_handlers()
         
-        # Start the event bus
-        await self.event_bus.start()
-        
-    def _setup_dashboard_handlers(self):
-        """Setup dashboard-specific event handlers"""
-        
-        # Project events
-        self.event_bus.subscribe("project.created", self._handle_project_created)
-        self.event_bus.subscribe("project.updated", self._handle_project_updated)
-        self.event_bus.subscribe("project.pinned", self._handle_project_pinned)
-        
-        # Plan events
-        self.event_bus.subscribe("plan.generated", self._handle_plan_generated)
-        self.event_bus.subscribe("plan.updated", self._handle_plan_updated)
+    async def _setup_event_handlers(self):
+        """Set up event handlers for different event types"""
         
         # Workflow events
-        self.event_bus.subscribe("workflow.started", self._handle_workflow_started)
-        self.event_bus.subscribe("workflow.stopped", self._handle_workflow_stopped)
-        self.event_bus.subscribe("task.completed", self._handle_task_completed)
+        await self.event_bus.subscribe("workflow_started", self._handle_workflow_started)
+        await self.event_bus.subscribe("workflow_completed", self._handle_workflow_completed)
+        await self.event_bus.subscribe("workflow_failed", self._handle_workflow_failed)
         
-        # Quality gate events
-        self.event_bus.subscribe("quality_gate.completed", self._handle_quality_gate_completed)
+        # Task events
+        await self.event_bus.subscribe("task_completed", self._handle_task_completed)
+        await self.event_bus.subscribe("task_failed", self._handle_task_failed)
         
-    async def _handle_project_created(self, data: Dict[str, Any], context):
-        """Handle project creation events"""
-        logger.info(f"Project created: {data.get('project_id')}")
+        # Analysis events
+        await self.event_bus.subscribe("analysis_completed", self._handle_analysis_completed)
         
-        # Emit follow-up events
-        await self.event_bus.emit(
-            "project.setup_required",
-            data,
-            source="dashboard",
-            priority=EventPriority.HIGH,
-            correlation_id=context.correlation_id
-        )
-    
-    async def _handle_project_updated(self, data: Dict[str, Any], context):
-        """Handle project update events"""
-        logger.info(f"Project updated: {data.get('project_id')}")
-    
-    async def _handle_project_pinned(self, data: Dict[str, Any], context):
-        """Handle project pinning events"""
-        logger.info(f"Project pinned: {data.get('project_id')}")
+        # Deployment events
+        await self.event_bus.subscribe("deployment_completed", self._handle_deployment_completed)
         
-        # Trigger initial project analysis
-        await self.event_bus.emit(
-            "project.analyze_required",
-            data,
-            source="dashboard",
-            priority=EventPriority.NORMAL,
-            correlation_id=context.correlation_id
-        )
-    
-    async def _handle_plan_generated(self, data: Dict[str, Any], context):
-        """Handle plan generation events"""
-        logger.info(f"Plan generated: {data.get('plan_id')} for project {data.get('project_id')}")
+        # Project events
+        await self.event_bus.subscribe("project_pinned", self._handle_project_pinned)
         
-        # Notify relevant extensions
-        await self.event_bus.emit(
-            "linear.create_issues",
-            data,
-            source="dashboard",
-            priority=EventPriority.HIGH,
-            correlation_id=context.correlation_id
-        )
-    
-    async def _handle_plan_updated(self, data: Dict[str, Any], context):
-        """Handle plan update events"""
-        logger.info(f"Plan updated: {data.get('plan_id')}")
-    
-    async def _handle_workflow_started(self, data: Dict[str, Any], context):
-        """Handle workflow start events"""
-        logger.info(f"Workflow started for project: {data.get('project_id')}")
+        logger.info("Event handlers set up")
         
-        # Notify Slack if configured
-        await self.event_bus.emit(
-            "slack.notify",
-            {
-                **data,
-                "message": f"Workflow started for project {data.get('project_name', data.get('project_id'))}"
-            },
-            source="dashboard",
-            priority=EventPriority.NORMAL,
-            correlation_id=context.correlation_id
-        )
-    
-    async def _handle_workflow_stopped(self, data: Dict[str, Any], context):
-        """Handle workflow stop events"""
-        logger.info(f"Workflow stopped for project: {data.get('project_id')}")
-    
-    async def _handle_task_completed(self, data: Dict[str, Any], context):
-        """Handle task completion events"""
-        logger.info(f"Task completed: {data.get('task_id')}")
+    async def emit_event(self, event_type: str, source: str, project_id: Optional[str] = None,
+                        task_id: Optional[str] = None, data: Optional[Dict[str, Any]] = None):
+        """
+        Emit an event to the event bus
         
-        # Update Linear issue status
-        await self.event_bus.emit(
-            "linear.update_issue",
-            {
-                **data,
-                "status": "completed"
-            },
-            source="dashboard",
-            priority=EventPriority.HIGH,
-            correlation_id=context.correlation_id
-        )
-        
-        # Trigger quality gates if this was a code task
-        if data.get("task_type") == "code":
-            await self.event_bus.emit(
-                "quality_gate.run",
-                data,
-                source="dashboard",
-                priority=EventPriority.HIGH,
-                correlation_id=context.correlation_id
+        Args:
+            event_type: Type of event
+            source: Source component that generated the event
+            project_id: Optional project ID
+            task_id: Optional task ID
+            data: Optional event data
+        """
+        try:
+            event = WorkflowEvent(
+                event_id=str(uuid.uuid4()),
+                event_type=event_type,
+                source=source,
+                project_id=project_id,
+                task_id=task_id,
+                data=data or {},
+                timestamp=datetime.now()
             )
-    
-    async def _handle_quality_gate_completed(self, data: Dict[str, Any], context):
-        """Handle quality gate completion events"""
-        logger.info(f"Quality gate completed: {data.get('gate_name')} - {data.get('status')}")
-        
-        if data.get("status") == "failed":
-            # Notify about quality gate failure
-            await self.event_bus.emit(
-                "slack.notify",
-                {
-                    **data,
-                    "message": f"Quality gate {data.get('gate_name')} failed for {data.get('project_id')}"
-                },
-                source="dashboard",
-                priority=EventPriority.CRITICAL,
-                correlation_id=context.correlation_id
+            
+            await self.event_bus.publish(event)
+            
+        except Exception as e:
+            logger.error(f"Failed to emit event: {e}")
+            
+    async def _handle_workflow_started(self, event: WorkflowEvent):
+        """Handle workflow started event"""
+        try:
+            if self.notification_settings.get("workflow_started", True):
+                await self._send_slack_notification(
+                    f"🚀 Workflow started for project {event.project_id}",
+                    event.data
+                )
+                
+        except Exception as e:
+            logger.error(f"Failed to handle workflow_started event: {e}")
+            
+    async def _handle_workflow_completed(self, event: WorkflowEvent):
+        """Handle workflow completed event"""
+        try:
+            data = event.data
+            completed_tasks = data.get("completed_tasks", 0)
+            failed_tasks = data.get("failed_tasks", 0)
+            
+            if self.notification_settings.get("workflow_completed", True):
+                message = f"✅ Workflow completed for project {event.project_id}\n"
+                message += f"Tasks completed: {completed_tasks}, Failed: {failed_tasks}"
+                
+                await self._send_slack_notification(message, data)
+                
+        except Exception as e:
+            logger.error(f"Failed to handle workflow_completed event: {e}")
+            
+    async def _handle_workflow_failed(self, event: WorkflowEvent):
+        """Handle workflow failed event"""
+        try:
+            if self.notification_settings.get("workflow_failed", True):
+                await self._send_slack_notification(
+                    f"❌ Workflow failed for project {event.project_id}",
+                    event.data
+                )
+                
+        except Exception as e:
+            logger.error(f"Failed to handle workflow_failed event: {e}")
+            
+    async def _handle_task_completed(self, event: WorkflowEvent):
+        """Handle task completed event"""
+        try:
+            if self.notification_settings.get("task_completed", False):
+                task_title = event.data.get("task_title", "Unknown task")
+                await self._send_slack_notification(
+                    f"✅ Task completed: {task_title}",
+                    event.data
+                )
+                
+        except Exception as e:
+            logger.error(f"Failed to handle task_completed event: {e}")
+            
+    async def _handle_task_failed(self, event: WorkflowEvent):
+        """Handle task failed event"""
+        try:
+            if self.notification_settings.get("task_failed", True):
+                task_title = event.data.get("task_title", "Unknown task")
+                await self._send_slack_notification(
+                    f"❌ Task failed: {task_title}",
+                    event.data
+                )
+                
+        except Exception as e:
+            logger.error(f"Failed to handle task_failed event: {e}")
+            
+    async def _handle_analysis_completed(self, event: WorkflowEvent):
+        """Handle analysis completed event"""
+        try:
+            if self.notification_settings.get("analysis_completed", True):
+                data = event.data
+                quality_score = data.get("quality_score", 0.0)
+                error_count = data.get("error_count", 0)
+                
+                message = f"🔍 Code analysis completed for project {event.project_id}\n"
+                message += f"Quality Score: {quality_score:.1f}/10, Errors: {error_count}"
+                
+                await self._send_slack_notification(message, data)
+                
+        except Exception as e:
+            logger.error(f"Failed to handle analysis_completed event: {e}")
+            
+    async def _handle_deployment_completed(self, event: WorkflowEvent):
+        """Handle deployment completed event"""
+        try:
+            if self.notification_settings.get("deployment_completed", True):
+                data = event.data
+                sandbox_id = data.get("sandbox_id", "unknown")
+                
+                message = f"🚀 Deployment completed for project {event.project_id}\n"
+                message += f"Sandbox: {sandbox_id}"
+                
+                await self._send_slack_notification(message, data)
+                
+        except Exception as e:
+            logger.error(f"Failed to handle deployment_completed event: {e}")
+            
+    async def _handle_project_pinned(self, event: WorkflowEvent):
+        """Handle project pinned event"""
+        try:
+            if self.notification_settings.get("project_pinned", False):
+                repo_url = event.data.get("repo_url", "unknown")
+                await self._send_slack_notification(
+                    f"📌 Project pinned: {repo_url}",
+                    event.data
+                )
+                
+        except Exception as e:
+            logger.error(f"Failed to handle project_pinned event: {e}")
+            
+    async def _send_slack_notification(self, message: str, data: Dict[str, Any]):
+        """Send notification to Slack"""
+        try:
+            if not self.slack:
+                logger.debug("Slack not configured, skipping notification")
+                return
+                
+            # Get notification level setting
+            notification_level = self.dashboard.settings_manager.get_extension_setting(
+                "slack", "notification_level", "normal"
             )
-    
-    async def handle_event(self, event_type: str, data: Dict[str, Any]):
-        """Handle incoming events from external sources"""
-        logger.info(f"Handling external event: {event_type}")
+            
+            if notification_level == "minimal":
+                # Only send critical notifications
+                if "failed" not in message.lower() and "error" not in message.lower():
+                    return
+                    
+            await self.slack.send_message(message)
+            logger.debug(f"Sent Slack notification: {message[:50]}...")
+            
+        except Exception as e:
+            logger.error(f"Failed to send Slack notification: {e}")
+            
+    async def add_websocket_connection(self, websocket):
+        """Add WebSocket connection for real-time updates"""
+        await self.event_bus.add_websocket(websocket)
         
-        # Route through event bus for proper coordination
-        await self.event_bus.emit(
-            event_type,
-            data,
-            source=data.get("source", "external"),
-            priority=EventPriority.NORMAL
-        )
-    
-    def register_handler(self, event_type: str, handler: Callable):
-        """Register an event handler"""
-        self.event_bus.subscribe(event_type, handler)
-    
-    async def emit_event(self, event_type: str, project_id: str, message: str, 
-                        source: str = "dashboard", priority: str = "normal", **kwargs):
-        """Emit a new event"""
-        priority_enum = getattr(EventPriority, priority.upper(), EventPriority.NORMAL)
+    async def remove_websocket_connection(self, websocket):
+        """Remove WebSocket connection"""
+        await self.event_bus.remove_websocket(websocket)
         
-        data = {
-            "project_id": project_id,
-            "source": source,
-            "message": message,
-            **kwargs
-        }
+    async def get_recent_events(self, limit: int = 50, event_type: Optional[str] = None,
+                               project_id: Optional[str] = None):
+        """Get recent events with filtering"""
+        return self.event_bus.get_recent_events(limit, event_type, project_id)
         
-        await self.event_bus.emit(event_type, data, source=source, priority=priority_enum)
-    
-    def get_recent_events(self, project_id: Optional[str] = None, limit: int = 50) -> List[WorkflowEvent]:
-        """Get recent events, optionally filtered by project"""
-        events = self.event_history
+    async def get_event_statistics(self):
+        """Get event statistics"""
+        return self.event_bus.get_event_statistics()
         
-        if project_id:
-            events = [e for e in events if e.project_id == project_id]
+    async def update_notification_settings(self, settings: Dict[str, bool]):
+        """Update notification settings"""
+        self.notification_settings.update(settings)
+        logger.info(f"Updated notification settings: {settings}")
         
-        # Return most recent events
-        return sorted(events, key=lambda e: e.timestamp, reverse=True)[:limit]
-    
-    def add_routing_rule(self, rule: EventRule):
-        """Add a custom event routing rule"""
-        self.event_bus.add_rule(rule)
-    
-    def register_extension(self, name: str, extension: Any):
-        """Register an extension with the event bus"""
-        self.event_bus.register_extension(name, extension)
-    
-    def get_metrics(self) -> Dict[str, Any]:
-        """Get event coordination metrics"""
-        return self.event_bus.get_metrics()
-    
-    async def stop(self):
-        """Stop the event coordinator"""
-        logger.info("Stopping EventCoordinator...")
-        await self.event_bus.stop()
+    async def get_notification_settings(self):
+        """Get current notification settings"""
+        return self.notification_settings.copy()
+        
+    async def test_slack_integration(self) -> bool:
+        """Test Slack integration"""
+        try:
+            if not self.slack:
+                return False
+                
+            await self.slack.send_message("🧪 Dashboard test message - Slack integration working!")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Slack test failed: {e}")
+            return False
+            
+    async def shutdown(self):
+        """Shutdown the event coordinator"""
+        logger.info("Shutting down EventCoordinator...")
+        await self.event_bus.shutdown()
+        logger.info("EventCoordinator shutdown complete")
 

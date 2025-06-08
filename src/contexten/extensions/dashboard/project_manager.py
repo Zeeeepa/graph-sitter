@@ -1,16 +1,19 @@
 """
-Project Manager
+Direct GitHub Project Manager for Single-User Dashboard
 
 Handles project discovery, pinning, and lifecycle management.
-Integrates with GitHub for repository discovery and management.
+Integrates directly with GitHub for repository discovery and management.
 """
 
 import logging
+import asyncio
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from .models import DashboardProject, ProjectStatus, FlowStatus
+from .models import DashboardProject, ProjectStatus, FlowStatus, create_project_from_github
+from ..github.github import GitHub
+from ..linear.linear import Linear
 
 logger = get_logger(__name__)
 
@@ -24,449 +27,336 @@ class ProjectManager:
     - Project pinning and unpinning
     - Project status management
     - Integration with Linear for project tracking
-    - Automated project setup and configuration
+    - Simple in-memory caching for performance
     """
     
     def __init__(self, dashboard):
         self.dashboard = dashboard
-        self.pinned_projects: Dict[str, DashboardProject] = {}
+        self.projects: Dict[str, DashboardProject] = {}
+        self.github: Optional[GitHub] = None
+        self.linear: Optional[Linear] = None
+        self._cache_timeout = 300  # 5 minutes
+        self._last_repo_fetch = None
+        self._cached_repos = []
         
     async def initialize(self):
         """Initialize the project manager"""
         logger.info("Initializing ProjectManager...")
         
-        # Load any existing pinned projects from storage
-        await self._load_pinned_projects()
+        # Get GitHub integration
+        if self.dashboard.settings_manager.is_extension_enabled("github"):
+            github_token = self.dashboard.settings_manager.get_api_credential("github")
+            if github_token:
+                self.github = GitHub({"api_token": github_token})
+                await self.github.initialize()
+                logger.info("GitHub integration initialized")
+            else:
+                logger.warning("GitHub token not configured")
         
-    async def _load_pinned_projects(self):
-        """Load pinned projects from persistent storage"""
-        # In a real implementation, this would load from database
-        # For now, we'll start with an empty state
-        logger.info("Loading pinned projects from storage...")
-        
-    async def discover_github_repositories(self, organization: Optional[str] = None) -> List[Dict[str, Any]]:
+        # Get Linear integration
+        if self.dashboard.settings_manager.is_extension_enabled("linear"):
+            linear_key = self.dashboard.settings_manager.get_api_credential("linear")
+            if linear_key:
+                self.linear = Linear({"api_key": linear_key})
+                await self.linear.initialize()
+                logger.info("Linear integration initialized")
+            else:
+                logger.warning("Linear API key not configured")
+                
+    async def discover_repositories(self, force_refresh: bool = False) -> List[Dict[str, Any]]:
         """
-        Discover GitHub repositories available to the user.
+        Discover GitHub repositories for the authenticated user
         
         Args:
-            organization: Optional organization to filter repositories
+            force_refresh: Force refresh of cached repositories
             
         Returns:
-            List of repository information dictionaries
+            List of repository data
         """
-        logger.info(f"Discovering GitHub repositories (org: {organization})")
-        
+        if not self.github:
+            logger.error("GitHub integration not available")
+            return []
+            
+        # Check cache first
+        now = datetime.now()
+        if (not force_refresh and 
+            self._last_repo_fetch and 
+            self._cached_repos and
+            (now - self._last_repo_fetch).seconds < self._cache_timeout):
+            logger.info("Returning cached repositories")
+            return self._cached_repos
+            
         try:
-            # Get GitHub client from the GitHub extension
-            github_extension = getattr(self.dashboard.app, 'github', None)
-            if not github_extension:
-                logger.error("GitHub extension not available")
-                return []
+            logger.info("Fetching repositories from GitHub...")
             
-            github_client = github_extension.client
+            # Get user's repositories
+            repos = await self.github.get_user_repositories()
             
-            # Get repositories
-            repositories = []
-            
-            if organization:
-                # Get organization repositories
-                org = github_client.get_organization(organization)
-                for repo in org.get_repos():
-                    repositories.append(self._format_repository_info(repo))
-            else:
-                # Get user repositories
-                user = github_client.get_user()
-                for repo in user.get_repos():
-                    repositories.append(self._format_repository_info(repo))
+            # Format repository data
+            formatted_repos = []
+            for repo in repos:
+                formatted_repos.append({
+                    "id": repo.get("id"),
+                    "name": repo.get("name"),
+                    "full_name": repo.get("full_name"),
+                    "description": repo.get("description"),
+                    "private": repo.get("private", False),
+                    "html_url": repo.get("html_url"),
+                    "clone_url": repo.get("clone_url"),
+                    "language": repo.get("language"),
+                    "stargazers_count": repo.get("stargazers_count", 0),
+                    "forks_count": repo.get("forks_count", 0),
+                    "updated_at": repo.get("updated_at"),
+                    "topics": repo.get("topics", [])
+                })
                 
-                # Also get repositories from organizations the user belongs to
-                for org in user.get_orgs():
-                    for repo in org.get_repos():
-                        repositories.append(self._format_repository_info(repo))
+            # Update cache
+            self._cached_repos = formatted_repos
+            self._last_repo_fetch = now
             
-            logger.info(f"Discovered {len(repositories)} repositories")
-            return repositories
+            logger.info(f"Discovered {len(formatted_repos)} repositories")
+            return formatted_repos
             
         except Exception as e:
-            logger.error(f"Error discovering GitHub repositories: {e}")
+            logger.error(f"Failed to discover repositories: {e}")
             return []
-    
-    def _format_repository_info(self, repo) -> Dict[str, Any]:
-        """Format repository information for the dashboard"""
-        return {
-            "id": str(repo.id),
-            "name": repo.name,
-            "full_name": repo.full_name,
-            "description": repo.description or "",
-            "url": repo.html_url,
-            "clone_url": repo.clone_url,
-            "ssh_url": repo.ssh_url,
-            "private": repo.private,
-            "owner": {
-                "login": repo.owner.login,
-                "type": repo.owner.type
-            },
-            "default_branch": repo.default_branch,
-            "language": repo.language,
-            "topics": repo.get_topics(),
-            "created_at": repo.created_at.isoformat() if repo.created_at else None,
-            "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
-            "stars": repo.stargazers_count,
-            "forks": repo.forks_count,
-            "open_issues": repo.open_issues_count,
-            "size": repo.size,
-            "archived": repo.archived,
-            "disabled": repo.disabled
-        }
-    
-    async def pin_project(self, repository_identifier: str, **kwargs) -> DashboardProject:
+            
+    async def pin_project(self, repo_url: str) -> Optional[DashboardProject]:
         """
-        Pin a project to the dashboard.
+        Pin a GitHub repository as a project
         
         Args:
-            repository_identifier: Repository full name (owner/repo) or URL
-            **kwargs: Additional project configuration
+            repo_url: GitHub repository URL or full_name (owner/repo)
             
         Returns:
-            Created DashboardProject instance
+            Created project or None if failed
         """
-        logger.info(f"Pinning project: {repository_identifier}")
-        
         try:
-            # Parse repository identifier
-            if repository_identifier.startswith(('http://', 'https://')):
-                # Extract owner/repo from URL
-                parts = repository_identifier.rstrip('/').split('/')
-                if len(parts) >= 2:
-                    owner, repo_name = parts[-2], parts[-1]
-                    full_name = f"{owner}/{repo_name}"
-                else:
-                    raise ValueError(f"Invalid repository URL: {repository_identifier}")
-            else:
-                # Assume it's already in owner/repo format
-                full_name = repository_identifier
-                owner, repo_name = full_name.split('/', 1)
+            # Normalize repo URL
+            if not repo_url.startswith("https://"):
+                repo_url = f"https://github.com/{repo_url}"
+                
+            # Extract owner and repo name
+            parts = repo_url.replace("https://github.com/", "").split("/")
+            if len(parts) != 2:
+                logger.error(f"Invalid repository URL: {repo_url}")
+                return None
+                
+            owner, repo_name = parts[0], parts[1]
+            project_id = f"{owner}_{repo_name}"
             
             # Check if already pinned
-            if full_name in self.pinned_projects:
-                logger.info(f"Project {full_name} is already pinned")
-                return self.pinned_projects[full_name]
+            if project_id in self.projects:
+                logger.warning(f"Project already pinned: {project_id}")
+                return self.projects[project_id]
+                
+            # Get repository data from GitHub
+            if self.github:
+                repo_data = await self.github.get_repository(owner, repo_name)
+                if not repo_data:
+                    logger.error(f"Repository not found: {owner}/{repo_name}")
+                    return None
+            else:
+                # Create minimal repo data if GitHub not available
+                repo_data = {
+                    "name": repo_name,
+                    "full_name": f"{owner}/{repo_name}",
+                    "html_url": repo_url
+                }
+                
+            # Create project
+            project = create_project_from_github(repo_url, repo_data)
+            project.pinned = True
+            project.pinned_at = datetime.now()
+            project.update_status(ProjectStatus.PINNED)
             
-            # Get repository information from GitHub
-            repo_info = await self._get_repository_info(owner, repo_name)
-            if not repo_info:
-                raise ValueError(f"Repository {full_name} not found or not accessible")
+            # Store project
+            self.projects[project_id] = project
             
-            # Create dashboard project
-            project = DashboardProject(
-                id=full_name,
-                name=kwargs.get('name', repo_info['name']),
-                description=kwargs.get('description', repo_info['description']),
-                repository=repo_info['url'],
-                github_owner=owner,
-                github_repo=repo_name,
-                default_branch=repo_info['default_branch'],
-                tags=kwargs.get('tags', repo_info.get('topics', [])),
-                **kwargs
-            )
-            
-            # Store the pinned project
-            self.pinned_projects[full_name] = project
-            
-            # Emit project pinned event
+            # Create Linear project if available
+            if self.linear:
+                await self._create_linear_project(project)
+                
+            # Emit event
             await self.dashboard.event_coordinator.emit_event(
-                "project.pinned",
-                project_id=project.id,
-                message=f"Project {project.name} has been pinned",
-                repository=project.repository,
-                github_owner=owner,
-                github_repo=repo_name
+                "project_pinned",
+                "project_manager",
+                project_id=project_id,
+                data={"repo_url": repo_url}
             )
             
-            # Save to persistent storage
-            await self._save_pinned_projects()
-            
-            logger.info(f"Successfully pinned project: {full_name}")
+            logger.info(f"Pinned project: {project_id}")
             return project
             
         except Exception as e:
-            logger.error(f"Error pinning project {repository_identifier}: {e}")
-            raise
-    
-    async def _get_repository_info(self, owner: str, repo_name: str) -> Optional[Dict[str, Any]]:
-        """Get repository information from GitHub"""
-        try:
-            github_extension = getattr(self.dashboard.app, 'github', None)
-            if not github_extension:
-                return None
-            
-            github_client = github_extension.client
-            repo = github_client.get_repo(f"{owner}/{repo_name}")
-            
-            return self._format_repository_info(repo)
-            
-        except Exception as e:
-            logger.error(f"Error getting repository info for {owner}/{repo_name}: {e}")
+            logger.error(f"Failed to pin project {repo_url}: {e}")
             return None
-    
+            
     async def unpin_project(self, project_id: str) -> bool:
         """
-        Unpin a project from the dashboard.
+        Unpin a project
         
         Args:
-            project_id: Project identifier
+            project_id: Project ID to unpin
             
         Returns:
-            True if successfully unpinned, False otherwise
+            True if successful
         """
-        logger.info(f"Unpinning project: {project_id}")
-        
-        if project_id not in self.pinned_projects:
-            logger.warning(f"Project {project_id} is not pinned")
-            return False
-        
         try:
-            project = self.pinned_projects[project_id]
-            
-            # Stop any running workflows
-            if project.flow_status == FlowStatus.RUNNING:
-                await self.stop_project_flow(project_id)
-            
-            # Remove from pinned projects
-            del self.pinned_projects[project_id]
-            
-            # Emit project unpinned event
-            await self.dashboard.event_coordinator.emit_event(
-                "project.unpinned",
-                project_id=project_id,
-                message=f"Project {project.name} has been unpinned"
-            )
-            
-            # Save to persistent storage
-            await self._save_pinned_projects()
-            
-            logger.info(f"Successfully unpinned project: {project_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error unpinning project {project_id}: {e}")
-            return False
-    
-    async def get_project(self, project_id: str) -> Optional[DashboardProject]:
-        """Get a specific pinned project"""
-        return self.pinned_projects.get(project_id)
-    
-    async def get_all_projects(self) -> List[DashboardProject]:
-        """Get all pinned projects"""
-        return list(self.pinned_projects.values())
-    
-    async def update_project(self, project_id: str, **updates) -> Optional[DashboardProject]:
-        """
-        Update a project's configuration.
-        
-        Args:
-            project_id: Project identifier
-            **updates: Fields to update
-            
-        Returns:
-            Updated project or None if not found
-        """
-        if project_id not in self.pinned_projects:
-            return None
-        
-        try:
-            project = self.pinned_projects[project_id]
-            
-            # Update fields
-            for field, value in updates.items():
-                if hasattr(project, field):
-                    setattr(project, field, value)
-            
-            # Update timestamp
-            project.updated_at = datetime.utcnow()
-            
-            # Emit project updated event
-            await self.dashboard.event_coordinator.emit_event(
-                "project.updated",
-                project_id=project_id,
-                message=f"Project {project.name} has been updated",
-                updates=updates
-            )
-            
-            # Save to persistent storage
-            await self._save_pinned_projects()
-            
-            logger.info(f"Updated project {project_id}: {list(updates.keys())}")
-            return project
-            
-        except Exception as e:
-            logger.error(f"Error updating project {project_id}: {e}")
-            return None
-    
-    async def start_project_flow(self, project_id: str) -> bool:
-        """
-        Start the automated workflow for a project.
-        
-        Args:
-            project_id: Project identifier
-            
-        Returns:
-            True if successfully started, False otherwise
-        """
-        project = await self.get_project(project_id)
-        if not project:
-            return False
-        
-        try:
-            # Update project status
-            project.flow_enabled = True
-            project.flow_status = FlowStatus.RUNNING
-            project.updated_at = datetime.utcnow()
-            
-            # Emit workflow started event
-            await self.dashboard.event_coordinator.emit_event(
-                "workflow.started",
-                project_id=project_id,
-                message=f"Workflow started for project {project.name}",
-                project_name=project.name
-            )
-            
-            # Save changes
-            await self._save_pinned_projects()
-            
-            logger.info(f"Started workflow for project: {project_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error starting workflow for project {project_id}: {e}")
-            return False
-    
-    async def stop_project_flow(self, project_id: str) -> bool:
-        """
-        Stop the automated workflow for a project.
-        
-        Args:
-            project_id: Project identifier
-            
-        Returns:
-            True if successfully stopped, False otherwise
-        """
-        project = await self.get_project(project_id)
-        if not project:
-            return False
-        
-        try:
-            # Update project status
-            project.flow_enabled = False
-            project.flow_status = FlowStatus.STOPPED
-            project.updated_at = datetime.utcnow()
-            
-            # Emit workflow stopped event
-            await self.dashboard.event_coordinator.emit_event(
-                "workflow.stopped",
-                project_id=project_id,
-                message=f"Workflow stopped for project {project.name}",
-                project_name=project.name
-            )
-            
-            # Save changes
-            await self._save_pinned_projects()
-            
-            logger.info(f"Stopped workflow for project: {project_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error stopping workflow for project {project_id}: {e}")
-            return False
-    
-    async def sync_project_with_github(self, project_id: str) -> bool:
-        """
-        Synchronize project information with GitHub.
-        
-        Args:
-            project_id: Project identifier
-            
-        Returns:
-            True if successfully synchronized, False otherwise
-        """
-        project = await self.get_project(project_id)
-        if not project:
-            return False
-        
-        try:
-            # Get latest repository information
-            repo_info = await self._get_repository_info(project.github_owner, project.github_repo)
-            if not repo_info:
-                logger.error(f"Could not fetch repository info for {project_id}")
+            if project_id not in self.projects:
+                logger.warning(f"Project not found: {project_id}")
                 return False
+                
+            project = self.projects[project_id]
+            project.pinned = False
+            project.pinned_at = None
+            project.update_status(ProjectStatus.DISCOVERED)
             
-            # Update project with latest information
-            updates = {
-                'description': repo_info['description'],
-                'default_branch': repo_info['default_branch'],
-                'last_activity': datetime.utcnow()
-            }
+            # Emit event
+            await self.dashboard.event_coordinator.emit_event(
+                "project_unpinned",
+                "project_manager",
+                project_id=project_id
+            )
             
-            # Update tags with topics if not manually set
-            if not project.tags or project.tags == repo_info.get('topics', []):
-                updates['tags'] = repo_info.get('topics', [])
-            
-            await self.update_project(project_id, **updates)
-            
-            logger.info(f"Synchronized project {project_id} with GitHub")
+            logger.info(f"Unpinned project: {project_id}")
             return True
             
         except Exception as e:
-            logger.error(f"Error synchronizing project {project_id} with GitHub: {e}")
+            logger.error(f"Failed to unpin project {project_id}: {e}")
             return False
-    
-    async def _save_pinned_projects(self):
-        """Save pinned projects to persistent storage"""
-        # In a real implementation, this would save to database
-        logger.debug(f"Saving {len(self.pinned_projects)} pinned projects to storage")
-    
-    async def get_project_metrics(self, project_id: str) -> Dict[str, Any]:
-        """
-        Get metrics for a specific project.
-        
-        Args:
-            project_id: Project identifier
             
-        Returns:
-            Dictionary of project metrics
-        """
-        project = await self.get_project(project_id)
-        if not project:
-            return {}
+    async def get_project(self, project_id: str) -> Optional[DashboardProject]:
+        """Get a project by ID"""
+        return self.projects.get(project_id)
         
+    async def get_pinned_projects(self) -> List[DashboardProject]:
+        """Get all pinned projects"""
+        return [p for p in self.projects.values() if p.pinned]
+        
+    async def get_all_projects(self) -> List[DashboardProject]:
+        """Get all projects"""
+        return list(self.projects.values())
+        
+    async def update_project_status(self, project_id: str, status: ProjectStatus) -> bool:
+        """Update project status"""
         try:
-            # Get repository metrics from GitHub
-            repo_info = await self._get_repository_info(project.github_owner, project.github_repo)
-            if not repo_info:
-                return {}
+            if project_id not in self.projects:
+                logger.warning(f"Project not found: {project_id}")
+                return False
+                
+            project = self.projects[project_id]
+            old_status = project.status
+            project.update_status(status)
             
-            metrics = {
-                "stars": repo_info.get("stars", 0),
-                "forks": repo_info.get("forks", 0),
-                "open_issues": repo_info.get("open_issues", 0),
-                "size": repo_info.get("size", 0),
-                "language": repo_info.get("language"),
-                "last_updated": repo_info.get("updated_at"),
-                "created_at": repo_info.get("created_at")
-            }
+            # Emit event
+            await self.dashboard.event_coordinator.emit_event(
+                "project_status_changed",
+                "project_manager",
+                project_id=project_id,
+                data={"old_status": old_status, "new_status": status}
+            )
             
-            # Add dashboard-specific metrics
-            metrics.update({
-                "flow_enabled": project.flow_enabled,
-                "flow_status": project.flow_status.value,
-                "progress": project.progress,
-                "pinned_at": project.created_at.isoformat(),
-                "last_dashboard_update": project.updated_at.isoformat()
-            })
-            
-            return metrics
+            logger.info(f"Updated project {project_id} status: {old_status} -> {status}")
+            return True
             
         except Exception as e:
-            logger.error(f"Error getting metrics for project {project_id}: {e}")
-            return {}
+            logger.error(f"Failed to update project status: {e}")
+            return False
+            
+    async def update_flow_status(self, project_id: str, flow_status: FlowStatus) -> bool:
+        """Update project flow status"""
+        try:
+            if project_id not in self.projects:
+                logger.warning(f"Project not found: {project_id}")
+                return False
+                
+            project = self.projects[project_id]
+            old_status = project.flow_status
+            project.flow_status = flow_status
+            project.updated_at = datetime.now()
+            
+            # Emit event
+            await self.dashboard.event_coordinator.emit_event(
+                "project_flow_status_changed",
+                "project_manager",
+                project_id=project_id,
+                data={"old_status": old_status, "new_status": flow_status}
+            )
+            
+            logger.info(f"Updated project {project_id} flow status: {old_status} -> {flow_status}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to update flow status: {e}")
+            return False
+            
+    async def _create_linear_project(self, project: DashboardProject):
+        """Create corresponding Linear project"""
+        try:
+            if not self.linear:
+                return
+                
+            # Create Linear project
+            linear_project = await self.linear.create_project(
+                name=project.name,
+                description=f"Project for GitHub repository: {project.github_owner}/{project.github_repo}"
+            )
+            
+            if linear_project:
+                project.linear_project_id = linear_project.get("id")
+                project.linear_team_id = linear_project.get("team_id")
+                logger.info(f"Created Linear project for {project.project_id}")
+                
+        except Exception as e:
+            logger.error(f"Failed to create Linear project: {e}")
+            
+    async def sync_with_github(self, project_id: str) -> bool:
+        """Sync project data with GitHub"""
+        try:
+            if not self.github or project_id not in self.projects:
+                return False
+                
+            project = self.projects[project_id]
+            
+            # Get latest repository data
+            repo_data = await self.github.get_repository(
+                project.github_owner, 
+                project.github_repo
+            )
+            
+            if repo_data:
+                project.github_data = repo_data
+                project.updated_at = datetime.now()
+                logger.info(f"Synced project {project_id} with GitHub")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Failed to sync with GitHub: {e}")
+            
+        return False
+        
+    async def get_project_statistics(self) -> Dict[str, Any]:
+        """Get project statistics"""
+        total_projects = len(self.projects)
+        pinned_projects = len([p for p in self.projects.values() if p.pinned])
+        
+        status_counts = {}
+        for project in self.projects.values():
+            status = project.status.value
+            status_counts[status] = status_counts.get(status, 0) + 1
+            
+        flow_status_counts = {}
+        for project in self.projects.values():
+            status = project.flow_status.value
+            flow_status_counts[status] = flow_status_counts.get(status, 0) + 1
+            
+        return {
+            "total_projects": total_projects,
+            "pinned_projects": pinned_projects,
+            "status_distribution": status_counts,
+            "flow_status_distribution": flow_status_counts,
+            "github_connected": bool(self.github),
+            "linear_connected": bool(self.linear)
+        }
 

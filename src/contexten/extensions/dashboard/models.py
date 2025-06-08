@@ -1,300 +1,357 @@
 """
-Dashboard Data Models
+Enhanced Data Models for Single-User Dashboard System
 
-Comprehensive data models for the dashboard system that integrate with all Contexten extensions.
+Simplified models that connect all 11 extensions effectively:
+- Modal: Infrastructure scaling
+- Contexten App: Main orchestrator  
+- Prefect: Workflow orchestration
+- ControlFlow: Agent orchestration
+- Codegen: AI planning and execution
+- GitHub: Repository management
+- Linear: Task management
+- Slack: Notifications
+- CircleCI: CI/CD monitoring
+- GrainChain: Sandboxed deployments
+- Graph-sitter: Code analysis
 """
 
+import json
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Literal
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, field
+from pathlib import Path
 
-
+# Core Status Enums
 class ProjectStatus(str, Enum):
-    """Project status enumeration"""
-    ACTIVE = "active"
-    PAUSED = "paused"
+    DISCOVERED = "discovered"
+    PINNED = "pinned"
+    ANALYZING = "analyzing"
+    ANALYZED = "analyzed"
+    PLANNING = "planning"
+    PLANNED = "planned"
+    EXECUTING = "executing"
+    DEPLOYED = "deployed"
     COMPLETED = "completed"
-    ERROR = "error"
-
+    FAILED = "failed"
 
 class FlowStatus(str, Enum):
-    """Flow status enumeration"""
+    INACTIVE = "inactive"
+    STARTING = "starting"
     RUNNING = "running"
-    STOPPED = "stopped"
-    ERROR = "error"
-
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 class TaskStatus(str, Enum):
-    """Task status enumeration"""
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
-    ERROR = "error"
-
-
-class PlanStatus(str, Enum):
-    """Plan status enumeration"""
-    DRAFT = "draft"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-
-
-class QualityGateStatus(str, Enum):
-    """Quality gate status enumeration"""
-    PENDING = "pending"
-    RUNNING = "running"
-    PASSED = "passed"
     FAILED = "failed"
-    ERROR = "error"
+    SKIPPED = "skipped"
 
+class DeploymentStatus(str, Enum):
+    NOT_DEPLOYED = "not_deployed"
+    DEPLOYING = "deploying"
+    DEPLOYED = "deployed"
+    TESTING = "testing"
+    VALIDATED = "validated"
+    FAILED = "failed"
 
-class DashboardProject(BaseModel):
-    """Enhanced project model for dashboard"""
-    id: str
+# Graph-sitter Analysis Models
+@dataclass
+class CodeError:
+    """Represents a code error found by Graph-sitter analysis"""
+    file_path: str
+    line_number: int
+    column: int
+    error_type: str  # syntax, logic, type, etc.
+    message: str
+    severity: str  # error, warning, info
+    suggestion: Optional[str] = None
+
+@dataclass
+class MissingFeature:
+    """Represents a missing feature detected by analysis"""
+    feature_name: str
+    description: str
+    file_path: str
+    suggested_implementation: Optional[str] = None
+    priority: str = "medium"  # high, medium, low
+
+@dataclass
+class ConfigIssue:
+    """Represents configuration issues found in the codebase"""
+    config_file: str
+    issue_type: str  # missing_key, wrong_value, deprecated, etc.
+    message: str
+    suggested_fix: Optional[str] = None
+
+@dataclass
+class GraphSitterAnalysis:
+    """Complete Graph-sitter analysis results"""
+    project_id: str
+    analysis_timestamp: datetime
+    errors: List[CodeError] = field(default_factory=list)
+    missing_features: List[MissingFeature] = field(default_factory=list)
+    config_issues: List[ConfigIssue] = field(default_factory=list)
+    quality_score: float = 0.0
+    complexity_score: float = 0.0
+    maintainability_score: float = 0.0
+    test_coverage: float = 0.0
+    dependencies: Dict[str, List[str]] = field(default_factory=dict)
+    security_issues: List[Dict[str, Any]] = field(default_factory=list)
+    performance_issues: List[Dict[str, Any]] = field(default_factory=list)
+
+# GrainChain Deployment Models
+@dataclass
+class TestResult:
+    """Test result from GrainChain sandbox"""
+    test_name: str
+    status: str  # passed, failed, skipped
+    duration: float
+    message: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
+
+@dataclass
+class SandboxEnvironment:
+    """GrainChain sandbox environment details"""
+    sandbox_id: str
+    environment_type: str  # development, staging, production
+    resources: Dict[str, Any]  # CPU, memory, storage
+    status: str  # creating, ready, running, stopped, destroyed
+    created_at: datetime
+    url: Optional[str] = None
+
+@dataclass
+class DeploymentSnapshot:
+    """GrainChain deployment snapshot"""
+    snapshot_id: str
+    deployment_id: str
+    created_at: datetime
+    description: str
+    size_mb: float
+    status: str  # creating, ready, restoring, failed
+
+@dataclass
+class GrainChainDeployment:
+    """Complete GrainChain deployment information"""
+    deployment_id: str
+    project_id: str
+    sandbox: SandboxEnvironment
+    status: DeploymentStatus
+    test_results: List[TestResult] = field(default_factory=list)
+    snapshots: List[DeploymentSnapshot] = field(default_factory=list)
+    deployment_logs: List[str] = field(default_factory=list)
+    created_at: datetime = field(default_factory=datetime.now)
+    completed_at: Optional[datetime] = None
+
+# Core Project Models
+@dataclass
+class DashboardProject:
+    """Main project entity connecting all extensions"""
+    # Core identification
+    project_id: str
     name: str
-    description: str
-    repository: str
-    status: ProjectStatus = ProjectStatus.ACTIVE
-    progress: float = Field(default=0.0, ge=0.0, le=100.0)
-    flow_enabled: bool = False
-    flow_status: FlowStatus = FlowStatus.STOPPED
-    last_activity: datetime = Field(default_factory=datetime.utcnow)
-    tags: List[str] = Field(default_factory=list)
+    github_repo: str
+    github_owner: str
     
-    # Metrics
-    metrics: Optional[Dict[str, Any]] = None
+    # Status tracking
+    status: ProjectStatus = ProjectStatus.DISCOVERED
+    flow_status: FlowStatus = FlowStatus.INACTIVE
     
-    # Configuration
-    requirements: Optional[str] = None
-    plan_id: Optional[str] = None
+    # Extension integrations
+    github_data: Dict[str, Any] = field(default_factory=dict)  # GitHub API data
+    linear_project_id: Optional[str] = None  # Linear project ID
+    linear_team_id: Optional[str] = None  # Linear team ID
     
-    # GitHub integration
-    github_owner: Optional[str] = None
-    github_repo: Optional[str] = None
-    default_branch: str = "main"
+    # Analysis and deployment
+    analysis: Optional[GraphSitterAnalysis] = None
+    deployment: Optional[GrainChainDeployment] = None
     
-    # Linear integration
-    linear_team_id: Optional[str] = None
-    linear_project_id: Optional[str] = None
-    
-    # Quality settings
-    quality_gates_enabled: bool = True
-    auto_merge_enabled: bool = False
-    
-    # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-
-
-class DashboardTask(BaseModel):
-    """Enhanced task model for dashboard"""
-    id: str
-    plan_id: str
-    title: str
-    description: str
-    status: TaskStatus = TaskStatus.PENDING
-    
-    # Assignment
-    assignee: Optional[str] = None
-    assignee_type: Literal["human", "codegen", "agent"] = "codegen"
-    
-    # Estimation and tracking
-    estimated_hours: float = 0.0
-    actual_hours: Optional[float] = None
-    
-    # Dependencies
-    dependencies: List[str] = Field(default_factory=list)
-    blocks: List[str] = Field(default_factory=list)
-    
-    # Integration IDs
-    linear_issue_id: Optional[str] = None
-    github_pr_id: Optional[str] = None
-    codegen_task_id: Optional[str] = None
-    
-    # Quality gates
-    quality_checks: List[str] = Field(default_factory=list)
-    quality_status: QualityGateStatus = QualityGateStatus.PENDING
+    # Workflow tracking
+    current_plan_id: Optional[str] = None
+    active_workflow_id: Optional[str] = None
     
     # Metadata
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    pinned: bool = False
+    pinned_at: Optional[datetime] = None
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
     
-    # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    # Configuration
+    settings: Dict[str, Any] = field(default_factory=dict)
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    def update_status(self, new_status: ProjectStatus):
+        """Update project status with timestamp"""
+        self.status = new_status
+        self.updated_at = datetime.now()
 
-
-class DashboardPlan(BaseModel):
-    """Enhanced plan model for dashboard"""
-    id: str
+@dataclass
+class DashboardTask:
+    """Task entity connecting Linear, Codegen, and workflow execution"""
+    # Core identification
+    task_id: str
     project_id: str
+    plan_id: str
+    
+    # Task details
     title: str
     description: str
-    status: PlanStatus = PlanStatus.DRAFT
+    task_type: str  # code_change, deployment, analysis, etc.
+    
+    # Status and progress
+    status: TaskStatus = TaskStatus.PENDING
+    progress: float = 0.0  # 0.0 to 1.0
+    
+    # Extension integrations
+    linear_issue_id: Optional[str] = None  # Linear issue ID
+    github_pr_id: Optional[str] = None  # GitHub PR ID
+    codegen_task_id: Optional[str] = None  # Codegen SDK task ID
+    circleci_pipeline_id: Optional[str] = None  # CircleCI pipeline ID
+    
+    # Execution details
+    assigned_agent: Optional[str] = None  # ControlFlow agent
+    execution_logs: List[str] = field(default_factory=list)
+    error_message: Optional[str] = None
+    
+    # Dependencies
+    depends_on: List[str] = field(default_factory=list)  # Other task IDs
+    blocks: List[str] = field(default_factory=list)  # Tasks blocked by this
+    
+    # Metadata
+    created_at: datetime = field(default_factory=datetime.now)
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    estimated_duration: Optional[int] = None  # minutes
+
+@dataclass
+class DashboardPlan:
+    """Plan entity from Codegen SDK with task breakdown"""
+    # Core identification
+    plan_id: str
+    project_id: str
+    
+    # Plan details
+    title: str
+    description: str
+    requirements: str  # Original user requirements
+    
+    # Status
+    status: str = "draft"  # draft, approved, executing, completed, failed
     
     # Tasks
-    tasks: List[DashboardTask] = Field(default_factory=list)
+    tasks: List[DashboardTask] = field(default_factory=list)
     
-    # Generation metadata
-    generated_by: Literal["codegen", "manual"] = "codegen"
-    codegen_prompt: Optional[str] = None
-    codegen_response: Optional[Dict[str, Any]] = None
+    # Codegen integration
+    codegen_response: Dict[str, Any] = field(default_factory=dict)
     
-    # Progress tracking
-    total_tasks: int = 0
-    completed_tasks: int = 0
-    progress_percentage: float = 0.0
+    # Analysis integration
+    based_on_analysis: Optional[str] = None  # Analysis ID used for planning
     
-    # Estimation
-    estimated_total_hours: float = 0.0
-    actual_total_hours: float = 0.0
-    
-    # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    # Metadata
+    created_at: datetime = field(default_factory=datetime.now)
+    created_by: str = "user"  # Single user system
+    estimated_duration: Optional[int] = None  # Total estimated minutes
 
-
-class WorkflowEvent(BaseModel):
-    """Workflow event model for tracking system events"""
-    id: str
-    project_id: str
-    task_id: Optional[str] = None
-    plan_id: Optional[str] = None
-    
-    # Event details
+# Workflow and Event Models
+@dataclass
+class WorkflowEvent:
+    """Event in the workflow system"""
+    event_id: str
     event_type: str
-    source: str  # github, linear, codegen, grainchain, etc.
-    message: str
-    
-    # Event data
-    data: Dict[str, Any] = Field(default_factory=dict)
-    
-    # Severity
-    severity: Literal["info", "warning", "error", "success"] = "info"
-    
-    # Timestamp
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-
-
-class QualityGateResult(BaseModel):
-    """Quality gate result model"""
-    id: str
-    project_id: str
+    source: str  # Which extension generated the event
+    project_id: Optional[str] = None
     task_id: Optional[str] = None
-    pr_id: Optional[str] = None
-    
-    # Gate details
-    gate_type: str  # grainchain, graph_sitter, circleci, etc.
-    gate_name: str
-    status: QualityGateStatus
-    
-    # Results
-    score: Optional[float] = None
-    max_score: Optional[float] = None
-    passed: bool = False
-    
-    # Details
-    details: Dict[str, Any] = Field(default_factory=dict)
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    suggestions: List[str] = Field(default_factory=list)
-    
-    # Execution info
-    execution_time: Optional[float] = None
-    
-    # Timestamp
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    data: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
 
+@dataclass
+class SystemHealth:
+    """System health status for all extensions"""
+    extension_status: Dict[str, str] = field(default_factory=dict)  # extension_name -> status
+    last_check: datetime = field(default_factory=datetime.now)
+    issues: List[str] = field(default_factory=list)
 
-class DashboardSettings(BaseModel):
-    """Dashboard settings model"""
-    # API Keys and tokens
-    github_token: Optional[str] = None
-    linear_token: Optional[str] = None
-    codegen_org_id: Optional[str] = None
-    codegen_token: Optional[str] = None
-    slack_token: Optional[str] = None
+# Configuration Models
+@dataclass
+class ExtensionConfig:
+    """Configuration for individual extensions"""
+    extension_name: str
+    enabled: bool = True
+    config: Dict[str, Any] = field(default_factory=dict)
+    api_keys: Dict[str, str] = field(default_factory=dict)
+
+@dataclass
+class DashboardConfig:
+    """Main dashboard configuration"""
+    # Extension configurations
+    extensions: Dict[str, ExtensionConfig] = field(default_factory=dict)
+    
+    # Global settings
+    auto_deploy: bool = True
+    auto_analyze: bool = True
+    notification_level: str = "normal"  # minimal, normal, verbose
     
     # Database
-    postgresql_url: Optional[str] = None
+    database_url: str = "sqlite:///dashboard.db"
     
-    # Feature flags
-    auto_start_flows: bool = False
-    enable_notifications: bool = True
-    enable_analytics: bool = True
-    enable_quality_gates: bool = True
-    
-    # Quality gate settings
-    quality_gate_timeout: int = 300  # seconds
-    auto_merge_on_quality_pass: bool = False
-    
-    # Workflow settings
-    max_concurrent_tasks: int = 5
-    task_timeout: int = 3600  # seconds
-    
-    # Notification settings
-    slack_notifications: bool = False
-    email_notifications: bool = False
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    # Paths
+    workspace_path: str = "./workspace"
+    logs_path: str = "./logs"
 
+# Utility functions for model management
+def create_project_from_github(repo_url: str, repo_data: Dict[str, Any]) -> DashboardProject:
+    """Create a project from GitHub repository data"""
+    # Extract owner and repo name from URL
+    parts = repo_url.replace("https://github.com/", "").split("/")
+    owner, repo_name = parts[0], parts[1]
+    
+    project_id = f"{owner}_{repo_name}"
+    
+    return DashboardProject(
+        project_id=project_id,
+        name=repo_data.get("name", repo_name),
+        github_repo=repo_name,
+        github_owner=owner,
+        github_data=repo_data,
+        status=ProjectStatus.DISCOVERED
+    )
 
-class DashboardStats(BaseModel):
-    """Dashboard statistics model"""
-    total_projects: int = 0
-    active_projects: int = 0
-    completed_projects: int = 0
+def create_analysis_from_graph_sitter(project_id: str, analysis_data: Dict[str, Any]) -> GraphSitterAnalysis:
+    """Create analysis object from Graph-sitter results"""
+    return GraphSitterAnalysis(
+        project_id=project_id,
+        analysis_timestamp=datetime.now(),
+        errors=[CodeError(**error) for error in analysis_data.get("errors", [])],
+        missing_features=[MissingFeature(**feature) for feature in analysis_data.get("missing_features", [])],
+        config_issues=[ConfigIssue(**issue) for issue in analysis_data.get("config_issues", [])],
+        quality_score=analysis_data.get("quality_score", 0.0),
+        complexity_score=analysis_data.get("complexity_score", 0.0),
+        maintainability_score=analysis_data.get("maintainability_score", 0.0),
+        test_coverage=analysis_data.get("test_coverage", 0.0),
+        dependencies=analysis_data.get("dependencies", {}),
+        security_issues=analysis_data.get("security_issues", []),
+        performance_issues=analysis_data.get("performance_issues", [])
+    )
+
+def create_deployment_for_project(project_id: str, sandbox_config: Dict[str, Any]) -> GrainChainDeployment:
+    """Create a new deployment for a project"""
+    deployment_id = f"deploy_{project_id}_{int(datetime.now().timestamp())}"
+    sandbox_id = f"sandbox_{deployment_id}"
     
-    total_plans: int = 0
-    active_plans: int = 0
-    completed_plans: int = 0
+    sandbox = SandboxEnvironment(
+        sandbox_id=sandbox_id,
+        environment_type=sandbox_config.get("type", "development"),
+        resources=sandbox_config.get("resources", {}),
+        status="creating",
+        created_at=datetime.now()
+    )
     
-    total_tasks: int = 0
-    pending_tasks: int = 0
-    in_progress_tasks: int = 0
-    completed_tasks: int = 0
-    
-    running_flows: int = 0
-    quality_gates_passed: int = 0
-    quality_gates_failed: int = 0
-    
-    average_project_progress: float = 0.0
-    average_quality_score: float = 0.0
-    
-    last_updated: datetime = Field(default_factory=datetime.utcnow)
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    return GrainChainDeployment(
+        deployment_id=deployment_id,
+        project_id=project_id,
+        sandbox=sandbox,
+        status=DeploymentStatus.NOT_DEPLOYED
+    )
 
