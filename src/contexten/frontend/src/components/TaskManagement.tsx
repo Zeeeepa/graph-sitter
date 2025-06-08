@@ -213,7 +213,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({
                   <Select
                     value={formData.status}
                     label="Status"
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'pending' | 'in_progress' | 'completed' | 'error' })}
                   >
                     <MenuItem value="pending">Pending</MenuItem>
                     <MenuItem value="in_progress">In Progress</MenuItem>
@@ -254,4 +254,3 @@ const TaskManagement: React.FC<TaskManagementProps> = ({
 };
 
 export default TaskManagement;
-
