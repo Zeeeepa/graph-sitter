@@ -6,7 +6,7 @@ across different programming languages and frameworks.
 """
 
 # Import core codemod functionality
-from .codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 
 __all__ = [
     'Codemod'
