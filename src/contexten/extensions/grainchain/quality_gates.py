@@ -7,12 +7,19 @@ testing and comprehensive reporting.
 import asyncio
 import logging
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Set
 
 from .config import GrainchainIntegrationConfig, get_grainchain_config
-from .grainchain_types import QualityGateType, SandboxConfig, SandboxSession
+from .grainchain_types import (
+    QualityGateResult,
+    QualityGateStatus,
+    QualityGateType,
+    SandboxConfig,
+    SandboxProvider,
+    SandboxSession,
+)
 from .sandbox_manager import SandboxManager
 
 logger = logging.getLogger(__name__)
@@ -24,11 +31,11 @@ class QualityGateDefinition:
     gate_type: QualityGateType
     name: str
     description: str
-    provider: SandboxProvider | None = None
+    provider: Optional[SandboxProvider] = None
     timeout: int = 1800
     parallel: bool = True
-    dependencies: List[QualityGateType] = None
-    thresholds: Dict[str, Any] = None
+    dependencies: List[QualityGateType] = field(default_factory=list)
+    thresholds: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.dependencies is None:

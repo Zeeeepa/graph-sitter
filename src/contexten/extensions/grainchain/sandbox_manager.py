@@ -12,7 +12,12 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Set, cast
 
 from .config import GrainchainIntegrationConfig
 from .grainchain_client import GrainchainClient, SandboxSession
-from .grainchain_types import IntegrationStatus, SandboxConfig, SandboxMetrics, SandboxProvider
+from .grainchain_types import (
+    IntegrationStatus,
+    SandboxConfig,
+    SandboxMetrics,
+    SandboxProvider,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -213,37 +218,40 @@ class SandboxManager:
 
             # Calculate overall health
             total_providers = len(self.config.get_enabled_providers())
-            healthy_providers = len(available_providers)
-            health_ratio = healthy_providers / total_providers if total_providers > 0 else 0
+            available_count = len(available_providers)
+            health_ratio = available_count / total_providers
 
             issues = []
+
             if health_ratio < 0.5:
                 issues.append("More than half of providers are unavailable")
 
-            if len(self._active_sessions) > self._resource_limits['max_concurrent_sandboxes']:
+            if len(self._active_sessions) > self._resource_limits["max_concurrent_sandboxes"]:
                 issues.append("Session limit exceeded")
 
             status = IntegrationStatus.HEALTHY if health_ratio >= 0.8 and not issues else IntegrationStatus.DEGRADED
-            if health_ratio < 0.5:
-                status = IntegrationStatus.UNHEALTHY
 
-            now = datetime.now(UTC)
             return {
-                'status': status.value,
-                'healthy_providers': healthy_providers,
-                'total_providers': total_providers,
-                'active_sessions': len(self._active_sessions),
-                'issues': issues,
-                'last_check': now
+                "status": status,
+                "available_providers": [p.value for p in available_providers],
+                "total_providers": total_providers,
+                "active_sessions": len(self._active_sessions),
+                "issues": issues,
+                "provider_metrics": {
+                    p.value: {
+                        "active_sandboxes": m.active_sandboxes,
+                        "success_rate": m.success_rate,
+                        "error_count": m.error_count
+                    } for p, m in provider_metrics.items()
+                }
             }
 
         except Exception as e:
-            logger.exception(f"Health check failed: {e}")
-            now = datetime.now(UTC)
+            logger.exception("Failed to get health status")
             return {
-                'status': IntegrationStatus.UNHEALTHY.value,
-                'error': str(e),
-                'last_check': now
+                "status": IntegrationStatus.ERROR,
+                "error": str(e),
+                "issues": ["Failed to get health status"]
             }
 
     async def shutdown(self):
