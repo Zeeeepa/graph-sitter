@@ -175,23 +175,38 @@ const App: React.FC = () => {
   };
 
   const handleStartFlow = async (projectId: string) => {
-    setProjects(prev =>
-      prev.map(p =>
-        p.id === projectId
-          ? { ...p, flowStatus: 'running', flowEnabled: true }
-          : p
-      )
-    );
+    try {
+      await api.flowService.startProjectFlow(projectId, {
+        repository: projects.find(p => p.id === projectId)?.repository || '',
+        settings,
+      });
+      setProjects(prev =>
+        prev.map(p =>
+          p.id === projectId
+            ? { ...p, flowStatus: 'running' }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error('Error starting flow:', err);
+      // Show error notification
+    }
   };
 
   const handleStopFlow = async (projectId: string) => {
-    setProjects(prev =>
-      prev.map(p =>
-        p.id === projectId
-          ? { ...p, flowStatus: 'stopped', flowEnabled: false }
-          : p
-      )
-    );
+    try {
+      await api.flowService.stopProjectFlow(projectId);
+      setProjects(prev =>
+        prev.map(p =>
+          p.id === projectId
+            ? { ...p, flowStatus: 'stopped' }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error('Error stopping flow:', err);
+      // Show error notification
+    }
   };
 
   const handleRefreshStatus = async (projectId: string) => {
@@ -295,6 +310,9 @@ const App: React.FC = () => {
                 onSelect={() => handleProjectSelect(project)}
                 onPin={() => handleProjectPin(project.id)}
                 onUnpin={() => handleProjectUnpin(project.id)}
+                onStartFlow={() => handleStartFlow(project.id)}
+                onStopFlow={() => handleStopFlow(project.id)}
+                workflowEvents={workflowEvents.filter(e => e.projectId === project.id)}
               />
             </Grid>
           ))}
