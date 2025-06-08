@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -21,24 +21,30 @@ import TaskManagement from './components/TaskManagement';
 import WorkflowControl from './components/WorkflowControl';
 import RealTimeMetrics from './components/RealTimeMetrics';
 import websocketService from './services/websocketService';
+import { mockProjects } from './api/mockData';
+import DashboardAPI from './services/dashboardAPI';
 
 const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
+  const [openProjectDialog, setOpenProjectDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [workflowEvents, setWorkflowEvents] = useState<WorkflowEvent[]>([]);
-
   const [settings, setSettings] = useState<Settings>({
-    githubToken: '',
-    linearToken: '',
-    codegenOrgId: '',
-    codegenToken: '',
-    autoStartFlows: false,
-    enableNotifications: true,
-    enableAnalytics: true,
+    githubToken: process.env.REACT_APP_GITHUB_TOKEN || '',
+    linearToken: process.env.REACT_APP_LINEAR_TOKEN || '',
+    codegenOrgId: process.env.REACT_APP_CODEGEN_ORG_ID || '',
+    codegenToken: process.env.REACT_APP_CODEGEN_TOKEN || '',
+    prefectToken: process.env.REACT_APP_PREFECT_TOKEN || '',
+    controlFlowToken: process.env.REACT_APP_CONTROL_FLOW_TOKEN || '',
+    agentFlowToken: process.env.REACT_APP_AGENT_FLOW_TOKEN || '',
+    webhookBaseUrl: process.env.REACT_APP_WEBHOOK_BASE_URL || 'https://api.dashboard.example.com',
   });
+
+  // Initialize API
+  const api = useMemo(() => new DashboardAPI(settings), [settings]);
 
   useEffect(() => {
     // Load initial data
@@ -66,6 +72,24 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      const fetchedProjects = await api.getProjects();
+      setProjects(fetchedProjects);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch projects');
+      console.error('Error fetching projects:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [api]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleWebSocketEvent = (event: WebSocketEvent) => {
     switch (event.type) {
@@ -96,6 +120,7 @@ const App: React.FC = () => {
     } else {
       setProjects(prev => [...prev, project]);
     }
+    setOpenProjectDialog(false);
   };
 
   const handleTaskUpdate = (projectId: string, task: Task) => {
@@ -150,23 +175,38 @@ const App: React.FC = () => {
   };
 
   const handleStartFlow = async (projectId: string) => {
-    setProjects(prev =>
-      prev.map(p =>
-        p.id === projectId
-          ? { ...p, flowStatus: 'running', flowEnabled: true }
-          : p
-      )
-    );
+    try {
+      await api.flowService.startProjectFlow(projectId, {
+        repository: projects.find(p => p.id === projectId)?.repository || '',
+        settings,
+      });
+      setProjects(prev =>
+        prev.map(p =>
+          p.id === projectId
+            ? { ...p, flowStatus: 'running' }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error('Error starting flow:', err);
+      // Show error notification
+    }
   };
 
   const handleStopFlow = async (projectId: string) => {
-    setProjects(prev =>
-      prev.map(p =>
-        p.id === projectId
-          ? { ...p, flowStatus: 'stopped', flowEnabled: false }
-          : p
-      )
-    );
+    try {
+      await api.flowService.stopProjectFlow(projectId);
+      setProjects(prev =>
+        prev.map(p =>
+          p.id === projectId
+            ? { ...p, flowStatus: 'stopped' }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error('Error stopping flow:', err);
+      // Show error notification
+    }
   };
 
   const handleRefreshStatus = async (projectId: string) => {
@@ -176,11 +216,49 @@ const App: React.FC = () => {
 
   const handleDialogClose = () => {
     setSelectedProject(null);
+    setOpenProjectDialog(false);
   };
 
   const handleSettingsSave = (newSettings: Settings) => {
     setSettings(newSettings);
     setOpenSettings(false);
+  };
+
+  const handleProjectPin = async (projectId: string) => {
+    try {
+      await api.pinProject({ projectId });
+      setProjects(prev =>
+        prev.map(p =>
+          p.id === projectId
+            ? { ...p, pinned: true }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error('Error pinning project:', err);
+      // Show error notification
+    }
+  };
+
+  const handleProjectUnpin = async (projectId: string) => {
+    try {
+      await api.unpinProject({ projectId });
+      setProjects(prev =>
+        prev.map(p =>
+          p.id === projectId
+            ? { ...p, pinned: false }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error('Error unpinning project:', err);
+      // Show error notification
+    }
+  };
+
+  const handleProjectSelect = (project: Project) => {
+    setSelectedProject(project);
+    setOpenProjectDialog(true);
   };
 
   if (loading) {
@@ -229,7 +307,12 @@ const App: React.FC = () => {
             <Grid item xs={12} sm={6} md={4} key={project.id}>
               <ProjectCard
                 project={project}
-                onSelect={() => setSelectedProject(project)}
+                onSelect={() => handleProjectSelect(project)}
+                onPin={() => handleProjectPin(project.id)}
+                onUnpin={() => handleProjectUnpin(project.id)}
+                onStartFlow={() => handleStartFlow(project.id)}
+                onStopFlow={() => handleStopFlow(project.id)}
+                workflowEvents={workflowEvents.filter(e => e.projectId === project.id)}
               />
             </Grid>
           ))}
@@ -263,7 +346,7 @@ const App: React.FC = () => {
 
         {/* Dialogs */}
         <ProjectDialog
-          open={selectedProject !== null}
+          open={openProjectDialog}
           project={selectedProject}
           onClose={handleDialogClose}
           onSave={handleSaveProject}
