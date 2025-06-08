@@ -17,6 +17,9 @@ try:
     from .analysis.dependency_analyzer import analyze_dependencies
     from .analysis.security_analyzer import analyze_security
     from .analysis.call_graph_analyzer import analyze_call_graph
+    from .analysis.enhanced_analyzer import enhanced_comprehensive_analysis
+    from .analysis.config_manager import ConfigurationManager
+    from .analysis.advanced_config import analyze_with_advanced_config
 except ImportError as e:
     print(f"Error importing graph_sitter: {e}")
     print("Please install graph_sitter: pip install graph-sitter")
@@ -34,6 +37,8 @@ Examples:
   %(prog)s ./my_project --analysis dead   # Run only dead code analysis
   %(prog)s ./my_project --fix-dead-code   # Remove dead code automatically
   %(prog)s ./my_project --output report.json  # Save detailed report
+  %(prog)s ./my_project --enhanced --mode performance  # Enhanced analysis with performance mode
+  %(prog)s ./my_project --config-recommend  # Get configuration recommendations
         """
     )
     
@@ -47,6 +52,32 @@ Examples:
         choices=["comprehensive", "dead", "complexity", "dependencies", "security", "calls"],
         default="comprehensive",
         help="Type of analysis to run (default: comprehensive)"
+    )
+    
+    parser.add_argument(
+        "--enhanced",
+        action="store_true",
+        help="Use enhanced analysis with advanced graph-sitter configuration"
+    )
+    
+    parser.add_argument(
+        "--mode",
+        choices=["comprehensive", "performance", "debug", "typescript", "ast_only"],
+        default="comprehensive",
+        help="Analysis mode for enhanced analysis (default: comprehensive)"
+    )
+    
+    parser.add_argument(
+        "--config-recommend",
+        action="store_true",
+        help="Get configuration recommendations for the codebase"
+    )
+    
+    parser.add_argument(
+        "--config-compare",
+        nargs="+",
+        choices=["minimal", "performance", "comprehensive", "debug", "typescript"],
+        help="Compare multiple configurations"
     )
     
     parser.add_argument(
@@ -83,7 +114,10 @@ Examples:
         
         # Run analysis based on type
         if args.analysis == "comprehensive":
-            results = comprehensive_analysis(codebase)
+            if args.enhanced:
+                results = enhanced_comprehensive_analysis(codebase, mode=args.mode)
+            else:
+                results = comprehensive_analysis(codebase)
             if not args.quiet:
                 print_analysis_summary(results)
         
@@ -116,6 +150,22 @@ Examples:
                 print("📞 Running call graph analysis...")
             results = analyze_call_graph(codebase)
             print_call_graph_results(results)
+
+        # Handle configuration recommendations
+        if args.config_recommend:
+            if not args.quiet:
+                print("\n🎯 Getting configuration recommendations...")
+            manager = ConfigurationManager()
+            recommendations = manager.get_config_recommendations(str(codebase_path))
+            print_config_recommendations(recommendations)
+        
+        # Handle configuration comparison
+        if args.config_compare:
+            if not args.quiet:
+                print(f"\n⚖️ Comparing configurations: {", ".join(args.config_compare)}")
+            manager = ConfigurationManager()
+            comparison = manager.compare_configurations(str(codebase_path), args.config_compare)
+            print_config_comparison(comparison)
         
         # Handle dead code removal
         if args.fix_dead_code:
@@ -201,6 +251,22 @@ def print_security_results(results):
 
 
 def print_call_graph_results(results):
+
+        # Handle configuration recommendations
+        if args.config_recommend:
+            if not args.quiet:
+                print("\n🎯 Getting configuration recommendations...")
+            manager = ConfigurationManager()
+            recommendations = manager.get_config_recommendations(str(codebase_path))
+            print_config_recommendations(recommendations)
+        
+        # Handle configuration comparison
+        if args.config_compare:
+            if not args.quiet:
+                print(f"\n⚖️ Comparing configurations: {", ".join(args.config_compare)}")
+            manager = ConfigurationManager()
+            comparison = manager.compare_configurations(str(codebase_path), args.config_compare)
+            print_config_comparison(comparison)
     """Print call graph analysis results."""
     summary = results.get('summary', {})
     print(f"\n📞 Call Graph Analysis Results:")
@@ -214,3 +280,80 @@ def print_call_graph_results(results):
 if __name__ == "__main__":
     main()
 
+
+def print_config_recommendations(recommendations):
+    """Print configuration recommendations."""
+    print(f"\n📊 Codebase Characteristics:")
+    characteristics = recommendations.get('codebase_characteristics', {})
+    for category, data in characteristics.items():
+        if isinstance(data, dict):
+            print(f"  {category}:")
+            for key, value in data.items():
+                print(f"    {key}: {value}")
+        else:
+            print(f"  {category}: {data}")
+    
+    print(f"\n💡 Recommended Configuration:")
+    rec = recommendations.get('recommended_config', {})
+    print(f"  Config: {rec.get('config_name', 'N/A')}")
+    print(f"  Reason: {rec.get('reasoning', 'N/A')}")
+    
+    alternatives = recommendations.get('alternative_configs', [])
+    if alternatives:
+        print(f"\n🔄 Alternative Configurations:")
+        for alt in alternatives:
+            print(f"  • {alt.get('config_name', 'N/A')}: {alt.get('reason', 'N/A')}")
+    
+    performance = recommendations.get('performance_considerations', [])
+    if performance:
+        print(f"\n⚡ Performance Considerations:")
+        for consideration in performance:
+            print(f"  • {consideration}")
+
+
+def print_config_comparison(comparison):
+    """Print configuration comparison results."""
+    print(f"\n📊 Configuration Comparison Results:")
+    
+    configs = comparison.get('configurations', {})
+    successful_configs = {name: result for name, result in configs.items() if result.get('success')}
+    
+    if successful_configs:
+        print(f"Successful configurations: {len(successful_configs)}")
+        
+        # Show initialization times
+        print(f"\n⏱️ Initialization Times:")
+        for name, result in successful_configs.items():
+            time_taken = result.get('initialization_time', 0)
+            print(f"  {name}: {time_taken:.3f} seconds")
+        
+        # Show performance comparison
+        perf_comparison = comparison.get('performance_comparison', {})
+        if perf_comparison:
+            print(f"\n🏃 Performance Analysis:")
+            print(f"  Fastest: {perf_comparison.get('fastest_config', 'N/A')}")
+            print(f"  Slowest: {perf_comparison.get('slowest_config', 'N/A')}")
+            speed_diff = perf_comparison.get('speed_difference', 0)
+            if speed_diff > 0:
+                print(f"  Speed difference: {speed_diff:.3f} seconds")
+        
+        # Show capability comparison
+        cap_comparison = comparison.get('capability_comparison', {})
+        if cap_comparison:
+            print(f"\n🔧 Capability Analysis:")
+            most_capable = cap_comparison.get('most_capable_config', 'N/A')
+            print(f"  Most capable: {most_capable}")
+            
+            capability_matrix = cap_comparison.get('capability_matrix', {})
+            if capability_matrix:
+                print(f"  Capability matrix:")
+                for config_name, capabilities in capability_matrix.items():
+                    enabled_caps = [cap for cap, enabled in capabilities.items() if enabled]
+                    print(f"    {config_name}: {len(enabled_caps)} capabilities enabled")
+    
+    # Show recommendations
+    recommendations = comparison.get('recommendations', [])
+    if recommendations:
+        print(f"\n💡 Recommendations:")
+        for rec in recommendations:
+            print(f"  • {rec}")
