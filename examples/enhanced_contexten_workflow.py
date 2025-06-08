@@ -22,13 +22,37 @@ logger = logging.getLogger(__name__)
 async def main():
     """Demonstrate enhanced Contexten workflow system."""
     print("🚀 Enhanced Contexten Workflow System Demo")
+async def main():
+    """Demonstrate enhanced Contexten workflow system."""
+    print("🚀 Enhanced Contexten Workflow System Demo")
     print("=" * 60)
     
     # Configuration
-    config = {
-        'project_id': 'demo_project_001',
-        'requirements': '''
-        Create a Python web API with the following features:
+    config = load_configuration()
+    
+    try:
+        # Step 1: Initialize ContextenApp with enhanced orchestration
+        app = await initialize_app(config)
+        
+        # Step 2: Execute comprehensive workflow pipeline
+        workflow_result = await execute_workflow(app, config)
+        
+        # Step 3: Display results
+        display_results(workflow_result)
+        
+        # Step 4: Demonstrate individual component capabilities
+        await demonstrate_components(app, config)
+        
+        return workflow_result
+        
+    except ImportError as e:
+        logger.error(f"Required module not found: {e}")
+        print(f"\n❌ Required module not found: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Demo failed: {e}")
+        print(f"\n❌ Demo failed: {e}")
+        return None
         1. FastAPI-based REST API with authentication
         2. User management with CRUD operations
         3. Database integration with SQLAlchemy
