@@ -6,7 +6,7 @@ testing and comprehensive reporting.
 
 import asyncio
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Awaitable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Set
@@ -59,7 +59,7 @@ class QualityGateManager:
         self.config = config or get_grainchain_config()
         self._sandbox_manager = SandboxManager(self.config)
         self._gate_definitions: Dict[QualityGateType, QualityGateDefinition] = {}
-        self._custom_gates: Dict[str, Callable[[SandboxSession], Dict[str, Any]]] = {}
+        self._custom_gates: Dict[str, Callable[[SandboxSession], Awaitable[Dict[str, Any]]]] = {}
         self._event_handlers: List[Callable[[GrainchainEvent], Any]] = []
         self._active_executions: Dict[str, QualityGateExecution] = {}
         self._execution_history: List[QualityGateExecution] = []
@@ -94,7 +94,7 @@ class QualityGateManager:
     def register_custom_gate(
         self,
         name: str,
-        gate_func: Callable[[SandboxSession], Dict[str, Any]]
+        gate_func: Callable[[SandboxSession], Awaitable[Dict[str, Any]]]
     ) -> None:
         """Register a custom quality gate."""
         self._custom_gates[name] = gate_func
