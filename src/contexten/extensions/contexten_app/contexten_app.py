@@ -1,6 +1,12 @@
-import os
-from typing import Any, Optional
+#!/usr/bin/env python3
+"""
+ContextenApp - Unified Contexten System with 11 Extensions
+A FastAPI-based application for handling various code-related events and orchestrating all contexten extensions.
+"""
 
+import os
+import time
+from typing import Optional, Dict, Any
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 
@@ -17,28 +23,67 @@ from ..slack.slack import Slack
 from ..circleci.circleci import CircleCI
 from ..modal.base import CodebaseEventsApp
 
-# Import existing prefect components
-from ..prefect.flow import PrefectFlow
-from ..prefect.workflow_pipeline import PrefectWorkflowPipeline
+# Import existing prefect components with error handling
+try:
+    from ..prefect.flow import PrefectFlow
+    from ..prefect.workflow_pipeline import PrefectWorkflowPipeline
+    PREFECT_AVAILABLE = True
+except ImportError as e:
+    logger = get_logger(__name__)
+    logger.warning(f"Prefect components not available: {e}")
+    PrefectFlow = None
+    PrefectWorkflowPipeline = None
+    PREFECT_AVAILABLE = False
 
-# Import existing controlflow components
-from ..controlflow.orchestrator import FlowOrchestrator
+# Import existing controlflow components with error handling
+try:
+    from ..controlflow.orchestrator import FlowOrchestrator
+    CONTROLFLOW_AVAILABLE = True
+except ImportError as e:
+    logger = get_logger(__name__)
+    logger.warning(f"ControlFlow components not available: {e}")
+    FlowOrchestrator = None
+    CONTROLFLOW_AVAILABLE = False
 
-# Import existing codegen components
-from ..codegen.workflow_integration import CodegenWorkflowClient
-from ..codegen.apply_overlay import OverlayApplicator
+# Import existing codegen components with error handling
+try:
+    from ..codegen.workflow_integration import CodegenWorkflowClient
+    from ..codegen.apply_overlay import OverlayApplicator
+    CODEGEN_AVAILABLE = True
+except ImportError as e:
+    logger = get_logger(__name__)
+    logger.warning(f"Codegen components not available: {e}")
+    CodegenWorkflowClient = None
+    OverlayApplicator = None
+    CODEGEN_AVAILABLE = False
 
-# Import existing grainchain components
-from ..grainchain.quality_gates import QualityGateManager
-from ..grainchain.sandbox_manager import SandboxManager
-from ..grainchain.graph_sitter_integration import GraphSitterQualityGates
+# Import existing grainchain components with error handling
+try:
+    from ..grainchain.quality_gates import QualityGateManager
+    from ..grainchain.sandbox_manager import SandboxManager
+    from ..grainchain.graph_sitter_integration import GraphSitterQualityGates
+    GRAINCHAIN_AVAILABLE = True
+except ImportError as e:
+    logger = get_logger(__name__)
+    logger.warning(f"Grainchain components not available: {e}")
+    QualityGateManager = None
+    SandboxManager = None
+    GraphSitterQualityGates = None
+    GRAINCHAIN_AVAILABLE = False
 
-# Import existing graph_sitter analysis components
-from ..graph_sitter.analysis.main_analyzer import comprehensive_analysis
-from ..graph_sitter.code_analysis import CodeAnalysisEngine
+# Import existing graph_sitter analysis components with error handling
+try:
+    from ..graph_sitter.analysis.main_analyzer import comprehensive_analysis
+    from ..graph_sitter.code_analysis import CodeAnalysisEngine
+    GRAPH_SITTER_ANALYSIS_AVAILABLE = True
+except ImportError as e:
+    logger = get_logger(__name__)
+    logger.warning(f"Graph_sitter analysis components not available: {e}")
+    comprehensive_analysis = None
+    CodeAnalysisEngine = None
+    GRAPH_SITTER_ANALYSIS_AVAILABLE = False
 
 logger = get_logger(__name__)
-
 
 class ContextenApp:
     """A FastAPI-based application for handling various code-related events and orchestrating all 11 contexten extensions."""
@@ -51,18 +96,18 @@ class ContextenApp:
     modal: CodebaseEventsApp
     
     # Orchestration extension attributes (enhanced)
-    prefect_extension: Prefect
+    prefect_extension: PrefectFlow
     prefect_flow: Optional[PrefectFlow]
     prefect_pipeline: Optional[PrefectWorkflowPipeline]
-    controlflow_extension: ControlFlow
+    controlflow_extension: FlowOrchestrator
     controlflow_orchestrator: Optional[FlowOrchestrator]
-    codegen_extension: Codegen
-    codegen_integration: Optional[CodegenFlowIntegration]
+    codegen_extension: CodegenWorkflowClient
+    codegen_integration: Optional[OverlayApplicator]
     codegen_client: Optional[CodegenWorkflowClient]
-    grainchain_extension: Grainchain
+    grainchain_extension: QualityGateManager
     grainchain_quality_gates: Optional[QualityGateManager]
     grainchain_sandbox: Optional[SandboxManager]
-    graph_sitter_extension: GraphSitter
+    graph_sitter_extension: GraphSitterQualityGates
     graph_sitter_quality: Optional[GraphSitterQualityGates]
     graph_sitter_analysis: Optional[CodeAnalysisEngine]
 
@@ -106,48 +151,102 @@ class ContextenApp:
     def _initialize_orchestration_extensions(self):
         """Initialize the 6 orchestration extensions (Prefect, ControlFlow, Codegen, Grainchain, Graph_sitter)."""
         try:
-            # Initialize Prefect extension (Top Layer - System Watch Flows) - Lazy loading
-            self.prefect_extension = None  # Will be loaded when needed
-            self.prefect_flow = PrefectFlow(app=self)
-            self.prefect_pipeline = PrefectWorkflowPipeline(name=f"{self.name}_pipeline")
+            # Validate required environment variables for Codegen
+            required_env_vars = ['CODEGEN_ORG_ID', 'CODEGEN_API_TOKEN']
+            missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+            if missing_vars:
+                logger.warning(f"Missing required environment variables: {missing_vars}")
+                logger.warning("Codegen integration will be limited without proper credentials")
             
-            # Initialize ControlFlow extension (Agent Orchestrator) - Lazy loading
-            self.controlflow_extension = None  # Will be loaded when needed
-            self.controlflow_orchestrator = FlowOrchestrator(app=self)
+            # Initialize Prefect extension (Top Layer - System Watch Flows)
+            if PREFECT_AVAILABLE and PrefectFlow and PrefectWorkflowPipeline:
+                self.prefect_extension = None  # Will be lazy loaded
+                self.prefect_flow = PrefectFlow(app=self)
+                self.prefect_pipeline = PrefectWorkflowPipeline(name=f"{self.name}_pipeline")
+                logger.info("✅ Prefect components initialized")
+            else:
+                self.prefect_extension = None
+                self.prefect_flow = None
+                self.prefect_pipeline = None
+                logger.warning("⚠️ Prefect components not available")
             
-            # Initialize Codegen extension (Task Completion with API token/org_id) - Lazy loading
-            self.codegen_extension = None  # Will be loaded when needed
-            self.codegen_integration = None  # Will be loaded when needed
-            self.codegen_client = CodegenWorkflowClient(
-                org_id=os.getenv('CODEGEN_ORG_ID'),
-                token=os.getenv('CODEGEN_API_TOKEN'),
-                base_url=os.getenv('CODEGEN_BASE_URL', 'https://api.codegen.com')
-            )
+            # Initialize ControlFlow extension (Agent Orchestrator)
+            if CONTROLFLOW_AVAILABLE and FlowOrchestrator:
+                self.controlflow_extension = None  # Will be lazy loaded
+                self.controlflow_orchestrator = FlowOrchestrator(app=self)
+                logger.info("✅ ControlFlow components initialized")
+            else:
+                self.controlflow_extension = None
+                self.controlflow_orchestrator = None
+                logger.warning("⚠️ ControlFlow components not available")
             
-            # Initialize Grainchain extension (Sandboxed Deployment + Snapshot saving) - Lazy loading
-            from ..grainchain.config import GrainchainIntegrationConfig
-            grainchain_config = GrainchainIntegrationConfig()
-            self.grainchain_extension = None  # Will be loaded when needed
-            self.grainchain_quality_gates = QualityGateManager(grainchain_config)
-            self.grainchain_sandbox = SandboxManager(grainchain_config)
+            # Initialize Codegen extension (Task Completion with API token/org_id)
+            if CODEGEN_AVAILABLE and CodegenWorkflowClient and not missing_vars:
+                self.codegen_extension = None  # Will be lazy loaded
+                self.codegen_integration = None  # Will be lazy loaded
+                self.codegen_client = CodegenWorkflowClient(
+                    org_id=os.getenv('CODEGEN_ORG_ID'),
+                    token=os.getenv('CODEGEN_API_TOKEN'),
+                    base_url=os.getenv('CODEGEN_BASE_URL', 'https://api.codegen.com')
+                )
+                logger.info("✅ Codegen components initialized")
+            else:
+                self.codegen_extension = None
+                self.codegen_integration = None
+                self.codegen_client = None
+                logger.warning("⚠️ Codegen components not available or missing credentials")
             
-            # Initialize Graph_sitter extension (Analysis for PR validation) - Lazy loading
-            self.graph_sitter_extension = None  # Will be loaded when needed
-            self.graph_sitter_quality = GraphSitterQualityGates(
-                quality_manager=self.grainchain_quality_gates,
-                sandbox_manager=self.grainchain_sandbox
-            )
-            self.graph_sitter_analysis = CodeAnalysisEngine()
+            # Initialize Grainchain extension (Sandboxed Deployment + Snapshot saving)
+            if GRAINCHAIN_AVAILABLE and QualityGateManager and SandboxManager:
+                try:
+                    from ..grainchain.config import GrainchainIntegrationConfig
+                    grainchain_config = GrainchainIntegrationConfig()
+                    self.grainchain_extension = None  # Will be lazy loaded
+                    self.grainchain_quality_gates = QualityGateManager(grainchain_config)
+                    self.grainchain_sandbox = SandboxManager(grainchain_config)
+                    logger.info("✅ Grainchain components initialized")
+                except ImportError:
+                    self.grainchain_extension = None
+                    self.grainchain_quality_gates = None
+                    self.grainchain_sandbox = None
+                    logger.warning("⚠️ Grainchain config not available")
+            else:
+                self.grainchain_extension = None
+                self.grainchain_quality_gates = None
+                self.grainchain_sandbox = None
+                logger.warning("⚠️ Grainchain components not available")
             
-            logger.info("✅ Orchestration extensions (Prefect, ControlFlow, Codegen, Grainchain, Graph_sitter) initialized")
+            # Initialize Graph_sitter extension (Analysis for PR validation)
+            if GRAPH_SITTER_ANALYSIS_AVAILABLE and GraphSitterQualityGates and CodeAnalysisEngine:
+                self.graph_sitter_extension = None  # Will be lazy loaded
+                if self.grainchain_quality_gates and self.grainchain_sandbox:
+                    self.graph_sitter_quality = GraphSitterQualityGates(
+                        quality_manager=self.grainchain_quality_gates,
+                        sandbox_manager=self.grainchain_sandbox
+                    )
+                else:
+                    self.graph_sitter_quality = None
+                self.graph_sitter_analysis = CodeAnalysisEngine()
+                logger.info("✅ Graph_sitter components initialized")
+            else:
+                self.graph_sitter_extension = None
+                self.graph_sitter_quality = None
+                self.graph_sitter_analysis = None
+                logger.warning("⚠️ Graph_sitter analysis components not available")
+            
+            logger.info("🔧 Orchestration extensions initialization completed")
+            
         except Exception as e:
             logger.error(f"❌ Failed to initialize orchestration extensions: {e}")
             # Continue with partial initialization
-            self._initialize_fallback_orchestration()
+            self._initialize_fallback_orchestration(failed_extension=str(e))
 
-    def _initialize_fallback_orchestration(self):
+    def _initialize_fallback_orchestration(self, failed_extension: Optional[str] = None):
         """Initialize fallback orchestration components if full initialization fails."""
         try:
+            if failed_extension:
+                logger.warning(f"Extension {failed_extension} failed, using fallback")
+            
             # Set None for failed components
             self.prefect_extension = None
             self.prefect_flow = None
@@ -170,7 +269,7 @@ class ContextenApp:
 
     def _get_prefect_extension(self):
         """Lazy load Prefect extension."""
-        if self.prefect_extension is None:
+        if self.prefect_extension is None and PREFECT_AVAILABLE:
             try:
                 from ..prefect.prefect import Prefect
                 self.prefect_extension = Prefect(self)
@@ -181,7 +280,7 @@ class ContextenApp:
 
     def _get_controlflow_extension(self):
         """Lazy load ControlFlow extension."""
-        if self.controlflow_extension is None:
+        if self.controlflow_extension is None and CONTROLFLOW_AVAILABLE:
             try:
                 from ..controlflow.controlflow import ControlFlow
                 self.controlflow_extension = ControlFlow(self)
@@ -192,7 +291,7 @@ class ContextenApp:
 
     def _get_codegen_extension(self):
         """Lazy load Codegen extension."""
-        if self.codegen_extension is None:
+        if self.codegen_extension is None and CODEGEN_AVAILABLE:
             try:
                 from ..codegen.codegen import Codegen
                 self.codegen_extension = Codegen(self)
@@ -203,7 +302,7 @@ class ContextenApp:
 
     def _get_grainchain_extension(self):
         """Lazy load Grainchain extension."""
-        if self.grainchain_extension is None:
+        if self.grainchain_extension is None and GRAINCHAIN_AVAILABLE:
             try:
                 from ..grainchain.grainchain import Grainchain
                 self.grainchain_extension = Grainchain(self)
@@ -214,7 +313,7 @@ class ContextenApp:
 
     def _get_graph_sitter_extension(self):
         """Lazy load Graph_sitter extension."""
-        if self.graph_sitter_extension is None:
+        if self.graph_sitter_extension is None and GRAPH_SITTER_ANALYSIS_AVAILABLE:
             try:
                 from ..graph_sitter.graph_sitter import GraphSitter
                 self.graph_sitter_extension = GraphSitter(self)
@@ -225,6 +324,7 @@ class ContextenApp:
 
     async def execute_comprehensive_workflow(self, project_id: str, requirements: str) -> dict:
         """Execute the complete workflow using all 11 extensions in proper hierarchy."""
+        start_time = time.time()
         logger.info(f"🚀 Starting comprehensive workflow for project {project_id} using all 11 extensions")
         
         workflow_result = {
@@ -238,70 +338,122 @@ class ContextenApp:
                 'integration_services': {'status': 'pending'},
                 'quality_validation': {'status': 'pending'}
             },
-            'results': {}
+            'results': {},
+            'start_time': start_time
         }
         
         try:
             # Stage 1: Prefect (Top Layer) - System Watch Flows
+            stage_start = time.time()
             if self.prefect_flow and self.prefect_pipeline:
                 logger.info("📊 Stage 1: Prefect orchestration")
                 workflow_result['extensions_used'].append('prefect')
                 
                 # Create pipeline context using existing components
-                from ..prefect.workflow_pipeline import PipelineContext
-                context = PipelineContext(
-                    project_id=project_id,
-                    requirements=requirements,
-                    config={'validation_level': 'comprehensive'},
-                    variables={'codebase_path': self.repo or '.'}
-                )
-                
-                prefect_result = await self.prefect_pipeline.execute_pipeline(context)
+                try:
+                    from ..prefect.workflow_pipeline import PipelineContext
+                    context = PipelineContext(
+                        project_id=project_id,
+                        requirements=requirements,
+                        config={'validation_level': 'comprehensive'},
+                        variables={'codebase_path': self.repo or '.'}
+                    )
+                    
+                    prefect_result = await self.prefect_pipeline.execute_pipeline(context)
+                    workflow_result['stages']['prefect_orchestration'] = {
+                        'status': 'completed',
+                        'result': prefect_result,
+                        'duration': time.time() - stage_start
+                    }
+                    workflow_result['results']['prefect'] = prefect_result
+                except Exception as e:
+                    logger.warning(f"Prefect pipeline execution failed: {e}")
+                    workflow_result['stages']['prefect_orchestration'] = {
+                        'status': 'failed',
+                        'error': str(e),
+                        'duration': time.time() - stage_start
+                    }
+            else:
+                logger.info("⚠️ Prefect components not available, skipping stage 1")
                 workflow_result['stages']['prefect_orchestration'] = {
-                    'status': 'completed',
-                    'result': prefect_result
+                    'status': 'skipped',
+                    'reason': 'components_not_available',
+                    'duration': time.time() - stage_start
                 }
-                workflow_result['results']['prefect'] = prefect_result
             
             # Stage 2: ControlFlow (Agent Orchestrator)
+            stage_start = time.time()
             if self.controlflow_orchestrator:
-                logger.info("��� Stage 2: ControlFlow agent orchestration")
+                logger.info("🎯 Stage 2: ControlFlow agent orchestration")
                 workflow_result['extensions_used'].append('controlflow')
                 
-                # Register Codegen agents with ControlFlow
-                if self.codegen_client:
-                    await self.controlflow_orchestrator.register_codegen_agent(
-                        agent_id="primary_agent",
-                        name="Primary Codegen Agent",
-                        client=self.codegen_client
+                try:
+                    # Register Codegen agents with ControlFlow
+                    if self.codegen_client:
+                        await self.controlflow_orchestrator.register_codegen_agent(
+                            agent_id="primary_agent",
+                            name="Primary Codegen Agent",
+                            client=self.codegen_client
+                        )
+                    
+                    controlflow_result = await self.controlflow_orchestrator.orchestrate_workflow(
+                        project_id=project_id,
+                        requirements=requirements
                     )
-                
-                controlflow_result = await self.controlflow_orchestrator.orchestrate_workflow(
-                    project_id=project_id,
-                    requirements=requirements
-                )
+                    workflow_result['stages']['controlflow_coordination'] = {
+                        'status': 'completed',
+                        'result': controlflow_result,
+                        'duration': time.time() - stage_start
+                    }
+                    workflow_result['results']['controlflow'] = controlflow_result
+                except Exception as e:
+                    logger.warning(f"ControlFlow orchestration failed: {e}")
+                    workflow_result['stages']['controlflow_coordination'] = {
+                        'status': 'failed',
+                        'error': str(e),
+                        'duration': time.time() - stage_start
+                    }
+            else:
+                logger.info("⚠️ ControlFlow components not available, skipping stage 2")
                 workflow_result['stages']['controlflow_coordination'] = {
-                    'status': 'completed',
-                    'result': controlflow_result
+                    'status': 'skipped',
+                    'reason': 'components_not_available',
+                    'duration': time.time() - stage_start
                 }
-                workflow_result['results']['controlflow'] = controlflow_result
-            
+
             # Stage 3: Codegen (Task Completion with API token/org_id)
+            stage_start = time.time()
             if self.codegen_client:
                 logger.info("🤖 Stage 3: Codegen task execution")
                 workflow_result['extensions_used'].append('codegen')
                 
                 # Execute tasks using Codegen SDK with Strands workflow integration
-                codegen_result = await self.codegen_client.execute_workflow_tasks(
-                    project_id=project_id,
-                    requirements=requirements,
-                    context=workflow_result.get('results', {})
-                )
+                try:
+                    codegen_result = await self.codegen_client.execute_workflow_tasks(
+                        project_id=project_id,
+                        requirements=requirements,
+                        context=workflow_result.get('results', {})
+                    )
+                    workflow_result['stages']['codegen_execution'] = {
+                        'status': 'completed',
+                        'result': codegen_result,
+                        'duration': time.time() - stage_start
+                    }
+                    workflow_result['results']['codegen'] = codegen_result
+                except Exception as e:
+                    logger.warning(f"Codegen task execution failed: {e}")
+                    workflow_result['stages']['codegen_execution'] = {
+                        'status': 'failed',
+                        'error': str(e),
+                        'duration': time.time() - stage_start
+                    }
+            else:
+                logger.info("⚠️ Codegen components not available, skipping stage 3")
                 workflow_result['stages']['codegen_execution'] = {
-                    'status': 'completed',
-                    'result': codegen_result
+                    'status': 'skipped',
+                    'reason': 'components_not_available',
+                    'duration': time.time() - stage_start
                 }
-                workflow_result['results']['codegen'] = codegen_result
             
             # Stage 4: Integration Services (GitHub, Linear, Slack, CircleCI)
             logger.info("🔗 Stage 4: Integration services coordination")
@@ -359,16 +511,26 @@ class ContextenApp:
             }
             workflow_result['results']['quality'] = quality_results
             
-            # Final status
+            # Final status and performance metrics
+            total_duration = time.time() - start_time
             workflow_result['status'] = 'completed'
             workflow_result['extensions_used'] = list(set(workflow_result['extensions_used']))  # Remove duplicates
+            workflow_result['execution_time'] = total_duration
+            workflow_result['performance_metrics'] = {
+                'total_duration': total_duration,
+                'extensions_count': len(workflow_result['extensions_used']),
+                'stages_completed': len([s for s in workflow_result['stages'].values() if s['status'] == 'completed']),
+                'stages_failed': len([s for s in workflow_result['stages'].values() if s['status'] == 'failed']),
+                'stages_skipped': len([s for s in workflow_result['stages'].values() if s['status'] == 'skipped'])
+            }
             
-            logger.info(f"🎉 Comprehensive workflow completed using {len(workflow_result['extensions_used'])} extensions: {workflow_result['extensions_used']}")
+            logger.info(f"🎉 Comprehensive workflow completed in {total_duration:.2f}s using {len(workflow_result['extensions_used'])} extensions: {workflow_result['extensions_used']}")
             
         except Exception as e:
             logger.error(f"❌ Workflow execution failed: {e}")
             workflow_result['status'] = 'failed'
             workflow_result['error'] = str(e)
+            workflow_result['execution_time'] = time.time() - start_time
         
         return workflow_result
 
@@ -567,14 +729,35 @@ class ContextenApp:
                     'slack': 'healthy' if self.slack else 'unavailable',
                     'circleci': 'healthy' if self.circleci else 'unavailable',
                     'modal': 'healthy' if self.modal else 'unavailable',
-                    # Orchestration extensions
-                    'prefect': 'healthy' if self.prefect_flow else 'unavailable',
-                    'controlflow': 'healthy' if self.controlflow_orchestrator else 'unavailable',
-                    'codegen': 'healthy' if self.codegen_client else 'unavailable',
-                    'grainchain': 'healthy' if self.grainchain_quality_gates else 'unavailable',
-                    'graph_sitter': 'healthy' if self.graph_sitter_analysis else 'unavailable'
+                    # Orchestration extensions with availability flags
+                    'prefect': 'healthy' if PREFECT_AVAILABLE and self.prefect_flow else 'unavailable',
+                    'controlflow': 'healthy' if CONTROLFLOW_AVAILABLE and self.controlflow_orchestrator else 'unavailable',
+                    'codegen': 'healthy' if CODEGEN_AVAILABLE and self.codegen_client else 'unavailable',
+                    'grainchain': 'healthy' if GRAINCHAIN_AVAILABLE and self.grainchain_quality_gates else 'unavailable',
+                    'graph_sitter': 'healthy' if GRAPH_SITTER_ANALYSIS_AVAILABLE and self.graph_sitter_analysis else 'unavailable'
+                },
+                'availability_flags': {
+                    'PREFECT_AVAILABLE': PREFECT_AVAILABLE,
+                    'CONTROLFLOW_AVAILABLE': CONTROLFLOW_AVAILABLE,
+                    'CODEGEN_AVAILABLE': CODEGEN_AVAILABLE,
+                    'GRAINCHAIN_AVAILABLE': GRAINCHAIN_AVAILABLE,
+                    'GRAPH_SITTER_ANALYSIS_AVAILABLE': GRAPH_SITTER_ANALYSIS_AVAILABLE
+                },
+                'environment_variables': {
+                    'CODEGEN_ORG_ID': 'set' if os.getenv('CODEGEN_ORG_ID') else 'missing',
+                    'CODEGEN_API_TOKEN': 'set' if os.getenv('CODEGEN_API_TOKEN') else 'missing',
+                    'GITHUB_ACCESS_TOKEN': 'set' if os.getenv('GITHUB_ACCESS_TOKEN') else 'missing',
+                    'LINEAR_ACCESS_TOKEN': 'set' if os.getenv('LINEAR_ACCESS_TOKEN') else 'missing'
                 }
             }
+            
+            # Determine overall health status
+            unhealthy_extensions = [name for name, status in health_status['extensions'].items() if status == 'unavailable']
+            if len(unhealthy_extensions) > 5:  # More than half unavailable
+                health_status['status'] = 'degraded'
+            elif len(unhealthy_extensions) > 8:  # Most unavailable
+                health_status['status'] = 'unhealthy'
+            
             return health_status
         
         @self.app.post("/workflow/comprehensive")
