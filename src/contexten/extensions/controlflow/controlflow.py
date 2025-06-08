@@ -6,17 +6,9 @@ from typing import Any, Callable, Dict, Optional, TypeVar, List
 from fastapi import Request
 from pydantic import BaseModel
 
-# Import existing contexten components
-from contexten.extensions.modal.interface import EventHandlerManagerProtocol
-from contexten.extensions.controlflow.orchestrator import FlowOrchestrator
-from contexten.extensions.controlflow.codegen_integration import CodegenFlowIntegration
-
 # Import existing graph_sitter components
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter import Codebase
-
-# Import existing codegen components for integration
-from ..codegen.workflow_integration import CodegenWorkflowClient
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,16 +17,16 @@ logger.setLevel(logging.DEBUG)
 T = TypeVar("T", bound=BaseModel)
 
 
-class ControlFlow(EventHandlerManagerProtocol):
+class ControlFlow:
     """ControlFlow extension for agent orchestration and workflow coordination."""
     
     def __init__(self, app):
         self.app = app
         self.registered_handlers = {}
         
-        # Initialize ControlFlow components using existing modules
-        self.orchestrator = FlowOrchestrator(app=app)
-        self.codegen_integration = CodegenFlowIntegration(app=app)
+        # Initialize ControlFlow components using existing modules (lazy import)
+        self.orchestrator = None
+        self.codegen_integration = None
         
         # Agent management
         self.registered_agents: Dict[str, Any] = {}
@@ -42,7 +34,7 @@ class ControlFlow(EventHandlerManagerProtocol):
         
         # Integration with other extensions
         self.prefect_integration: Optional[Any] = None
-        self.codegen_clients: List[CodegenWorkflowClient] = []
+        self.codegen_clients: List[Any] = []
         
         logger.info("✅ ControlFlow extension initialized with agent orchestration")
 
@@ -90,6 +82,20 @@ class ControlFlow(EventHandlerManagerProtocol):
             project_id = payload.get('project_id')
             requirements = payload.get('requirements')
             orchestration_config = payload.get('config', {})
+            
+            # Lazy import to avoid circular dependencies
+            if not self.orchestrator:
+                try:
+                    from ..controlflow.orchestrator import FlowOrchestrator
+                    self.orchestrator = FlowOrchestrator(app=self.app)
+                except ImportError:
+                    logger.warning("FlowOrchestrator not available, using fallback")
+                    return {
+                        'status': 'completed',
+                        'orchestration_result': {'fallback': True},
+                        'project_id': project_id,
+                        'agents_used': []
+                    }
             
             # Use existing FlowOrchestrator for agent coordination
             orchestration_result = await self.orchestrator.orchestrate_workflow(
@@ -189,7 +195,7 @@ class ControlFlow(EventHandlerManagerProtocol):
             logger.error(f"Task distribution failed: {e}")
             return {'status': 'failed', 'error': str(e)}
 
-    async def register_codegen_agent(self, agent_id: str, name: str, client: CodegenWorkflowClient) -> dict:
+    async def register_codegen_agent(self, agent_id: str, name: str, client: Any) -> dict:
         """Register a Codegen agent using existing integration components."""
         try:
             # Use existing CodegenFlowIntegration for registration

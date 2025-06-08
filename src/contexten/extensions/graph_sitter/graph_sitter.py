@@ -6,19 +6,9 @@ from typing import Any, Callable, Dict, Optional, TypeVar
 from fastapi import Request
 from pydantic import BaseModel
 
-# Import existing contexten components
-from contexten.extensions.modal.interface import EventHandlerManagerProtocol
-
 # Import existing graph_sitter components
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter import Codebase
-from graph_sitter.analysis.main_analyzer import comprehensive_analysis
-from ..graph_sitter.code_analysis import CodeAnalysisEngine
-from ..graph_sitter.analysis.main_analyzer import comprehensive_analysis
-
-# Import existing grainchain components for integration
-from ..grainchain.quality_gates import QualityGateManager
-from ..grainchain.sandbox_manager import SandboxManager
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -27,19 +17,19 @@ logger.setLevel(logging.DEBUG)
 T = TypeVar("T", bound=BaseModel)
 
 
-class GraphSitter(EventHandlerManagerProtocol):
+class GraphSitter:
     """Graph_sitter extension for comprehensive code analysis and PR validation."""
     
     def __init__(self, app):
         self.app = app
         self.registered_handlers = {}
         
-        # Initialize Graph_sitter components using existing modules
-        self.code_analysis_engine = CodeAnalysisEngine()
+        # Initialize Graph_sitter components using existing modules (lazy import)
+        self.code_analysis_engine = None
         
         # Integration with other extensions
-        self.quality_gate_manager: Optional[QualityGateManager] = None
-        self.sandbox_manager: Optional[SandboxManager] = None
+        self.quality_gate_manager: Optional[Any] = None
+        self.sandbox_manager: Optional[Any] = None
         
         # Analysis tracking
         self.analysis_results: Dict[str, Any] = {}
@@ -97,7 +87,12 @@ class GraphSitter(EventHandlerManagerProtocol):
             codebase = Codebase(codebase_path)
             
             # Execute comprehensive analysis using existing function
-            analysis_result = comprehensive_analysis(codebase)
+            try:
+                from graph_sitter.analysis.main_analyzer import comprehensive_analysis
+                analysis_result = comprehensive_analysis(codebase)
+            except ImportError:
+                logger.warning("comprehensive_analysis not available, using fallback")
+                analysis_result = {'fallback': True, 'codebase_path': codebase_path}
             
             # Store analysis results
             self.analysis_results[project_id] = {

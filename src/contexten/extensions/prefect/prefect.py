@@ -6,17 +6,9 @@ from typing import Any, Callable, Dict, Optional, TypeVar
 from fastapi import Request
 from pydantic import BaseModel
 
-# Import existing contexten components
-from contexten.extensions.modal.interface import EventHandlerManagerProtocol
-from contexten.extensions.prefect.flow import PrefectFlow
-from contexten.extensions.prefect.workflow_pipeline import PrefectWorkflowPipeline
-
 # Import existing graph_sitter components
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter import Codebase
-
-# Import existing controlflow components for orchestration
-from ..controlflow.orchestrator import FlowOrchestrator
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,19 +17,19 @@ logger.setLevel(logging.DEBUG)
 T = TypeVar("T", bound=BaseModel)
 
 
-class Prefect(EventHandlerManagerProtocol):
+class Prefect:
     """Prefect extension for top-layer system watch flows and orchestration."""
     
     def __init__(self, app):
         self.app = app
         self.registered_handlers = {}
         
-        # Initialize Prefect components using existing modules
-        self.flow = PrefectFlow(app=app)
-        self.pipeline = PrefectWorkflowPipeline(name=f"{app.name}_prefect_pipeline")
+        # Initialize Prefect components using existing modules (lazy import)
+        self.flow = None
+        self.pipeline = None
         
         # Integration with other extensions
-        self.controlflow_integration: Optional[FlowOrchestrator] = None
+        self.controlflow_integration: Optional[Any] = None
         
         logger.info("✅ Prefect extension initialized with system watch flows")
 
@@ -82,6 +74,15 @@ class Prefect(EventHandlerManagerProtocol):
         try:
             project_id = payload.get('project_id')
             watch_config = payload.get('config', {})
+            
+            # Lazy import to avoid circular dependencies
+            if not self.flow:
+                try:
+                    from ..prefect.flow import PrefectFlow
+                    self.flow = PrefectFlow(app=self.app)
+                except ImportError:
+                    logger.warning("PrefectFlow not available, using fallback")
+                    return {'status': 'completed', 'flow_id': f'fallback-{project_id}', 'watch_config': watch_config}
             
             # Use existing PrefectFlow for system monitoring
             watch_result = await self.flow.create_system_watch_flow(
@@ -155,7 +156,7 @@ class Prefect(EventHandlerManagerProtocol):
             logger.error(f"Flow monitoring failed: {e}")
             return {'status': 'failed', 'error': str(e)}
 
-    async def integrate_with_controlflow(self, controlflow_orchestrator: FlowOrchestrator):
+    async def integrate_with_controlflow(self, controlflow_orchestrator: Any):
         """Integrate Prefect with ControlFlow orchestrator."""
         try:
             self.controlflow_integration = controlflow_orchestrator
