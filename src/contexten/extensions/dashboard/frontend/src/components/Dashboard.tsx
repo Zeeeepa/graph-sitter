@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   Paper,
@@ -17,12 +17,12 @@ import { dashboardApi, DashboardStats } from '../api/dashboardApi';
 import { Project } from '../types/dashboard';
 
 const Dashboard: React.FC = () => {
-  const { projects, setProjects } = useDashboardStore();
-
+  const [projects, setProjects] = useState<Project[]>([]);
+  
   // Fetch projects
-  const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useQuery(
-    'projects',
-    dashboardApi.getProjects,
+  const { data: fetchedProjects, isLoading } = useQuery<Project[]>(
+    ['projects'],
+    () => dashboardApi.getProjects(),
     {
       onSuccess: (data: Project[]) => {
         setProjects(data);
@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (projectsLoading) {
+  if (isLoading) {
     return (
       <Container maxWidth="xl">
         <Box
@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  if (projectsError) {
+  if (fetchedProjects && fetchedProjects.length === 0) {
     return (
       <Container maxWidth="xl">
         <Box sx={{ textAlign: 'center', py: 8 }}>

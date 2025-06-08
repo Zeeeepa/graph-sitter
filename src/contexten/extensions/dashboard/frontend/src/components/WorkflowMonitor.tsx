@@ -23,10 +23,23 @@ interface WorkflowMonitorProps {
 }
 
 const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
-  // Filter projects by workflow status
+  // Filter workflows by status
   const runningWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'running');
   const stoppedWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'stopped');
-  const completedWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'completed');
+  const errorWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'error');
+
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'running':
+        return 'success.main';
+      case 'stopped':
+        return 'warning.main';
+      case 'error':
+        return 'error.main';
+      default:
+        return 'text.secondary';
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -34,23 +47,10 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
         return <PlayIcon color="success" />;
       case 'stopped':
         return <PauseIcon color="warning" />;
-      case 'completed':
-        return <CheckIcon color="primary" />;
+      case 'error':
+        return <ErrorIcon color="error" />;
       default:
         return <ErrorIcon color="error" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'running':
-        return 'success';
-      case 'stopped':
-        return 'warning';
-      case 'completed':
-        return 'primary';
-      default:
-        return 'error';
     }
   };
 
@@ -126,15 +126,15 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Completed Workflows
+              Error Workflows
             </Typography>
             <Chip 
-              label={completedWorkflows.length} 
-              color="primary" 
+              label={errorWorkflows.length} 
+              color="error" 
               sx={{ mb: 2 }}
             />
             <List dense>
-              {completedWorkflows.slice(0, 3).map((project) => (
+              {errorWorkflows.slice(0, 3).map((project) => (
                 <ListItem key={project.id}>
                   <ListItemIcon>
                     {getStatusIcon(project.flowStatus)}
@@ -145,9 +145,9 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
                   />
                 </ListItem>
               ))}
-              {completedWorkflows.length === 0 && (
+              {errorWorkflows.length === 0 && (
                 <Typography variant="body2" color="text.secondary">
-                  No completed workflows
+                  No error workflows
                 </Typography>
               )}
             </List>
