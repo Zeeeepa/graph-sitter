@@ -20,11 +20,11 @@ export class DashboardAPI {
       token: settings.codegenToken,
     });
     this.flowService = new FlowService({
-      prefectUrl: 'https://api.prefect.io',
+      prefectUrl: settings.prefectUrl || 'https://api.prefect.io',
       prefectToken: settings.prefectToken || '',
-      controlFlowUrl: 'https://api.controlflow.dev',
+      controlFlowUrl: settings.controlFlowUrl || 'https://api.controlflow.dev',
       controlFlowToken: settings.controlFlowToken || '',
-      agentFlowUrl: 'https://api.agentflow.dev',
+      agentFlowUrl: settings.agentFlowUrl || 'https://api.agentflow.dev',
       agentFlowToken: settings.agentFlowToken || '',
     });
   }
@@ -36,26 +36,33 @@ export class DashboardAPI {
       
       // Convert to projects
       const projects = await Promise.all(
-        repos.map(repo => this.githubService.convertToProject(repo))
-      );
+        repos.map(async repo => {
+          const project = await this.githubService.convertToProject(repo);
+          
+          // Get Linear project info if available
+          try {
+            const linearProject = await this.linearService.getProjectByName(project.name);
+            if (linearProject) {
+              project.linearId = linearProject.id;
+              project.progress = linearProject.progress;
+            }
+          } catch (error) {
+            console.warn(`Error getting Linear info for ${project.name}:`, error);
+          }
 
-      // Get flow status for each project
-      const projectsWithStatus = await Promise.all(
-        projects.map(async project => {
+          // Get flow status
           try {
             const status = await this.flowService.getProjectFlowStatus(project.id);
-            return {
-              ...project,
-              flowStatus: this.determineOverallStatus(status),
-            };
+            project.flowStatus = this.determineOverallStatus(status);
           } catch (error) {
-            console.error(`Error getting flow status for project ${project.id}:`, error);
-            return project;
+            console.warn(`Error getting flow status for ${project.name}:`, error);
           }
+
+          return project;
         })
       );
 
-      return projectsWithStatus;
+      return projects;
     } catch (error) {
       console.error('Failed to fetch projects:', error);
       throw error;
@@ -83,22 +90,19 @@ export class DashboardAPI {
       // Get projects
       const projects = await this.getProjects();
 
-      // Get flow metrics for all projects
-      const flowMetrics = await Promise.all(
-        projects.map(project => this.flowService.getFlowMetrics(project.id))
-      );
+      // Get metrics from different services
+      const [flowMetrics, linearMetrics, githubMetrics] = await Promise.all([
+        this.getFlowMetrics(projects),
+        this.getLinearMetrics(projects),
+        this.getGithubMetrics(projects)
+      ]);
 
       // Calculate overall stats
       const stats: DashboardStats = {
         total_projects: projects.length,
-        active_workflows: projects.filter(p => p.flowStatus === 'running').length,
-        completed_tasks: flowMetrics.reduce((sum, metrics) => {
-          const completed = (metrics.prefectMetrics?.successfulRuns || 0) +
-            (metrics.controlMetrics?.successfulRuns || 0) +
-            (metrics.agentMetrics?.successfulRuns || 0);
-          return sum + completed;
-        }, 0),
-        pending_prs: await this.countPendingPRs(projects),
+        active_workflows: flowMetrics.activeFlows,
+        completed_tasks: linearMetrics.completedTasks,
+        pending_prs: githubMetrics.pendingPRs,
         quality_score: await this.calculateQualityScore(projects),
         last_updated: new Date().toISOString(),
       };
@@ -110,21 +114,45 @@ export class DashboardAPI {
     }
   }
 
-  private async countPendingPRs(projects: Project[]): Promise<number> {
-    try {
-      const prCounts = await Promise.all(
-        projects.map(async project => {
-          const [owner, repo] = project.repository.split('/').slice(-2);
-          const prs = await this.githubService.getPullRequests(owner, repo, 'open');
-          return prs.length;
-        })
-      );
+  private async getFlowMetrics(projects: Project[]) {
+    const metrics = await Promise.all(
+      projects.map(project => this.flowService.getFlowMetrics(project.id))
+    );
 
-      return prCounts.reduce((sum, count) => sum + count, 0);
-    } catch (error) {
-      console.error('Error counting pending PRs:', error);
-      return 0;
-    }
+    return {
+      activeFlows: metrics.filter(m => m.status === 'running').length,
+      totalRuns: metrics.reduce((sum, m) => sum + m.totalRuns, 0),
+      successfulRuns: metrics.reduce((sum, m) => sum + m.successfulRuns, 0),
+    };
+  }
+
+  private async getLinearMetrics(projects: Project[]) {
+    const metrics = await Promise.all(
+      projects.map(async project => {
+        if (!project.linearId) return null;
+        return this.linearService.getProjectMetrics(project.linearId);
+      })
+    );
+
+    return {
+      completedTasks: metrics.reduce((sum, m) => sum + (m?.completedTasks || 0), 0),
+      totalTasks: metrics.reduce((sum, m) => sum + (m?.totalTasks || 0), 0),
+    };
+  }
+
+  private async getGithubMetrics(projects: Project[]) {
+    const metrics = await Promise.all(
+      projects.map(project => {
+        const [owner, repo] = project.repository.split('/').slice(-2);
+        return this.githubService.getRepositoryMetrics(owner, repo);
+      })
+    );
+
+    return {
+      pendingPRs: metrics.reduce((sum, m) => sum + m.openPRs, 0),
+      totalIssues: metrics.reduce((sum, m) => sum + m.totalIssues, 0),
+      contributors: metrics.reduce((sum, m) => sum + m.contributors, 0),
+    };
   }
 
   private async calculateQualityScore(projects: Project[]): Promise<number> {
@@ -132,7 +160,6 @@ export class DashboardAPI {
       const scores = await Promise.all(
         projects.map(async project => {
           try {
-            const [owner, repo] = project.repository.split('/').slice(-2);
             const analysis = await this.codegenService.analyzeCode(
               project.repository,
               'main'
@@ -161,22 +188,24 @@ export class DashboardAPI {
         throw new Error('Project not found');
       }
 
-      // Create Linear team if needed
+      // Create or get Linear team
       const teams = await this.linearService.getTeams();
       let teamId = teams.find(t => t.name === project.name)?.id;
       if (!teamId) {
-        // Create team in Linear
-        // Note: Linear API doesn't support team creation via API
-        throw new Error('Please create a Linear team manually first');
+        teamId = await this.linearService.createTeam({
+          name: project.name,
+          description: project.description,
+        });
       }
 
-      // Set up webhooks
+      // Set up webhooks and integrations
       await this.setupProjectWebhooks(project);
 
       // Initialize flows
       await this.flowService.startProjectFlow(project.id, {
         repository: project.repository,
         teamId,
+        settings: this.settings,
       });
 
     } catch (error) {
@@ -189,6 +218,12 @@ export class DashboardAPI {
     try {
       // Stop all flows
       await this.flowService.stopProjectFlow(request.projectId);
+
+      // Remove webhooks
+      const project = await this.getProjectById(request.projectId);
+      if (project) {
+        await this.removeProjectWebhooks(project);
+      }
     } catch (error) {
       console.error('Failed to unpin project:', error);
       throw error;
@@ -208,16 +243,45 @@ export class DashboardAPI {
       await this.githubService.createWebhook(
         owner,
         repo,
-        'https://api.dashboard.example.com/webhooks/github'
+        `${this.settings.webhookBaseUrl}/webhooks/github`
       );
 
-      // Note: Linear webhooks would need to be set up via their UI
-      // as their API doesn't support webhook creation
+      // Set up Linear webhook if we have a team
+      if (project.linearId) {
+        await this.linearService.createWebhook(
+          project.linearId,
+          `${this.settings.webhookBaseUrl}/webhooks/linear`
+        );
+      }
 
     } catch (error) {
       console.error('Error setting up webhooks:', error);
       throw error;
     }
   }
-}
 
+  private async removeProjectWebhooks(project: Project): Promise<void> {
+    try {
+      const [owner, repo] = project.repository.split('/').slice(-2);
+
+      // Remove GitHub webhook
+      await this.githubService.removeWebhook(
+        owner,
+        repo,
+        `${this.settings.webhookBaseUrl}/webhooks/github`
+      );
+
+      // Remove Linear webhook if we have a team
+      if (project.linearId) {
+        await this.linearService.removeWebhook(
+          project.linearId,
+          `${this.settings.webhookBaseUrl}/webhooks/linear`
+        );
+      }
+
+    } catch (error) {
+      console.error('Error removing webhooks:', error);
+      throw error;
+    }
+  }
+}

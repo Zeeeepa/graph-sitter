@@ -2,49 +2,49 @@ import { Project } from '../types/dashboard';
 
 export const mockProjects: Project[] = [
   {
-    id: '1',
-    name: 'AI Dashboard System',
-    description: 'Complete dashboard for AI-powered development workflows',
+    id: 'graph-sitter',
+    name: 'Graph Sitter',
+    description: 'Code analysis and manipulation engine using tree-sitter with graph-based queries',
     repository: 'https://github.com/Zeeeepa/graph-sitter',
     status: 'active',
     progress: 75,
     flowEnabled: true,
     flowStatus: 'running',
     lastActivity: new Date(),
-    tags: ['dashboard', 'react', 'typescript'],
+    tags: ['analysis', 'tree-sitter', 'typescript', 'graph-queries'],
     metrics: {
       commits: 156,
       prs: 23,
       contributors: 8,
       issues: 45
     },
-    requirements: 'Build a comprehensive dashboard system with React and Material-UI',
+    requirements: 'Build a robust code analysis engine with tree-sitter integration',
     plan: {
       id: 'plan-1',
-      projectId: '1',
-      title: 'Dashboard Implementation Plan',
-      description: 'Complete implementation of the dashboard system',
+      projectId: 'graph-sitter',
+      title: 'Graph Sitter Implementation',
+      description: 'Complete implementation of the graph-based code analysis system',
       tasks: [
         {
           id: 'task-1',
-          title: 'Setup React Frontend',
-          description: 'Initialize React app with Material-UI',
+          title: 'Tree-sitter Integration',
+          description: 'Set up tree-sitter parsers and basic query functionality',
           status: 'completed',
           assignee: 'AI Agent',
-          estimatedHours: 4,
-          actualHours: 3,
+          estimatedHours: 8,
+          actualHours: 7,
           dependencies: [],
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 'task-2',
-          title: 'Implement Dashboard Components',
-          description: 'Create all necessary UI components',
+          title: 'Graph Query Engine',
+          description: 'Implement graph-based code query system',
           status: 'in_progress',
           assignee: 'AI Agent',
-          estimatedHours: 8,
-          actualHours: 6,
+          estimatedHours: 12,
+          actualHours: 8,
           dependencies: ['task-1'],
           createdAt: new Date(),
           updatedAt: new Date()
@@ -56,60 +56,61 @@ export const mockProjects: Project[] = [
     }
   },
   {
-    id: '2',
-    name: 'Code Analysis Engine',
-    description: 'Advanced code analysis and manipulation system',
-    repository: 'https://github.com/Zeeeepa/graph-sitter',
-    status: 'paused',
-    progress: 45,
-    flowEnabled: false,
-    flowStatus: 'stopped',
-    lastActivity: new Date(Date.now() - 86400000), // 1 day ago
-    tags: ['analysis', 'tree-sitter', 'typescript'],
+    id: 'contexten',
+    name: 'Contexten',
+    description: 'Agentic orchestrator with chat-agent, langchain, github, and linear integrations',
+    repository: 'https://github.com/Zeeeepa/contexten',
+    status: 'active',
+    progress: 60,
+    flowEnabled: true,
+    flowStatus: 'running',
+    lastActivity: new Date(),
+    tags: ['agent', 'langchain', 'integrations', 'typescript'],
     metrics: {
       commits: 89,
       prs: 12,
       contributors: 5,
       issues: 28
     },
-    requirements: 'Implement graph-sitter based code analysis'
+    requirements: 'Create a powerful agent orchestration system with multiple integrations'
   },
   {
-    id: '3',
-    name: 'Workflow Orchestrator',
-    description: 'Orchestration system for development workflows',
-    repository: 'https://github.com/Zeeeepa/contexten',
-    status: 'completed',
-    progress: 100,
+    id: 'voltagent',
+    name: 'Voltagent',
+    description: 'Open Source TypeScript AI Agent Framework',
+    repository: 'https://github.com/Zeeeepa/voltagent',
+    status: 'active',
+    progress: 85,
     flowEnabled: true,
-    flowStatus: 'stopped',
-    lastActivity: new Date(Date.now() - 172800000), // 2 days ago
-    tags: ['workflow', 'automation', 'typescript'],
+    flowStatus: 'running',
+    lastActivity: new Date(Date.now() - 86400000), // 1 day ago
+    tags: ['agent', 'framework', 'typescript', 'open-source'],
     metrics: {
       commits: 234,
       prs: 45,
       contributors: 12,
       issues: 67
     },
-    requirements: 'Create workflow orchestration with webhook integrations'
+    requirements: 'Build an extensible TypeScript framework for AI agents'
   },
   {
-    id: '4',
-    name: 'Code Analysis Engine',
-    description: 'Pinned project: Code Analysis Engine',
-    repository: 'https://github.com/Zeeeepa/graph-sitter',
+    id: 'deep-research',
+    name: 'Deep Research',
+    description: 'Codebase exploration with AI research agents',
+    repository: 'https://github.com/Zeeeepa/deep-research',
     status: 'active',
-    progress: 0,
-    flowEnabled: false,
-    flowStatus: 'stopped',
+    progress: 40,
+    flowEnabled: true,
+    flowStatus: 'running',
     lastActivity: new Date(),
-    tags: ['pinned'],
+    tags: ['research', 'ai', 'codebase-analysis'],
     metrics: {
-      commits: 0,
-      prs: 0,
-      contributors: 1,
-      issues: 0
-    }
+      commits: 45,
+      prs: 8,
+      contributors: 3,
+      issues: 15
+    },
+    requirements: 'Develop AI-powered codebase research and exploration capabilities'
   }
 ];
 
