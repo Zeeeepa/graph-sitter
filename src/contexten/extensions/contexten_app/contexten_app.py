@@ -14,7 +14,6 @@ from ..linear.linear import Linear
 from ..slack.slack import Slack
 from ..circleci.circleci import CircleCI
 from ..modal.base import CodebaseEventsApp
-from ..dashboard.dashboard import setup_dashboard
 
 logger = get_logger(__name__)
 
@@ -48,9 +47,6 @@ class ContextenApp:
         
         # Initialize codebase cache
         self._codebase_cache = {}
-
-        # Setup dashboard extension
-        self.dashboard = setup_dashboard(self)
 
         # Setup webhook routes for all services
         self._setup_webhook_routes()

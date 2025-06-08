@@ -11,24 +11,18 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from src.contexten.extensions.dashboard.main import app
+    from src.contexten.extensions.contexten_app.contexten_app import ContextenApp
     import uvicorn
     
-    print("✅ Successfully imported dashboard app")
+    print("✅ Successfully imported contexten app")
     print("🚀 Starting test server...")
     
     if __name__ == "__main__":
-        uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+        app_instance = ContextenApp(name="Test Contexten App")
+        uvicorn.run(app_instance.app, host="0.0.0.0", port=8000, log_level="info")
         
 except ImportError as e:
     print(f"❌ Import error: {e}")
-    print("Trying alternative import...")
-    
-    try:
-        # Alternative: Use the simple main.py
-        import subprocess
-        subprocess.run([sys.executable, "./src/contexten/extensions/dashboard/main.py"])
-    except Exception as e2:
-        print(f"❌ Alternative failed: {e2}")
-        sys.exit(1)
+    print("❌ Failed to start test server")
+    sys.exit(1)
 
