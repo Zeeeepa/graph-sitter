@@ -21,7 +21,7 @@ from graph_sitter.configs.models.codebase import CodebaseConfig
 from graph_sitter import Codebase
 
 # Import our new extensions
-from contexten.extensions.graph_sitter import Analysis, Visualize, Resolve
+from contexten.extensions.graph_sitter_ext import Analysis, Visualize, Resolve
 
 
 def main():
@@ -143,4 +143,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

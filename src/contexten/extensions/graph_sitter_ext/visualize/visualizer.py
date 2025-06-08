@@ -1,46 +1,55 @@
 """
 Visualize class for graph-sitter code visualization
 
-This module provides visualization capabilities for code relationships,
-dependency graphs, and other codebase insights using the actual graph-sitter API.
+This module provides visualization capabilities for codebases including
+dependency graphs, call graphs, and class hierarchies.
 """
 
 from graph_sitter import Codebase
-import json
 from typing import Dict, List, Any, Optional, Set
-import matplotlib.pyplot as plt
-import networkx as nx
-from graph_sitter.configs.models.codebase import CodebaseConfig
+import json
+from pathlib import Path
+
+# Optional dependencies for visualization
+try:
+    import matplotlib.pyplot as plt
+    import networkx as nx
+    _viz_available = True
+except ImportError:
+    _viz_available = False
 
 
 class Visualize:
     """
-    Visualize class providing code visualization and graph representation.
+    Visualize class providing code visualization capabilities.
     
     Usage example:
     
     from graph_sitter import Codebase
-    from contexten.extensions.graph_sitter.visualize import Visualize
+    from .visualizer import Visualize
     
-    codebase = Codebase("path/to/repo")
+    codebase = Codebase.from_path("./my_project")
     visualizer = Visualize(codebase)
     
     # Generate dependency graph
-    dep_graph = visualizer.dependency_graph()
+    dep_graph = visualizer.generate_dependency_graph()
     
     # Generate call graph
-    call_graph = visualizer.call_graph()
+    call_graph = visualizer.generate_call_graph()
     
-    # Generate class hierarchy
-    class_hierarchy = visualizer.class_hierarchy()
+    # Export visualization
+    visualizer.export_html("output.html")
     """
     
     def __init__(self, codebase: Codebase):
         """Initialize Visualize with a Codebase instance."""
         self.codebase = codebase
     
-    def dependency_graph(self, output_path: str = "dependency_graph.png"):
+    def generate_dependency_graph(self, output_path: str = "dependency_graph.png"):
         """Generate a dependency graph visualization."""
+        if not _viz_available:
+            return {"error": "Visualization dependencies not available. Install matplotlib and networkx."}
+            
         G = nx.DiGraph()
         
         # Add nodes for each file
@@ -75,7 +84,7 @@ class Visualize:
             'circular_dependencies': len(list(nx.simple_cycles(G)))
         }
     
-    def call_graph(self, function_name: Optional[str] = None, output_path: str = "call_graph.png"):
+    def generate_call_graph(self, function_name: Optional[str] = None, output_path: str = "call_graph.png"):
         """Generate a function call graph visualization."""
         G = nx.DiGraph()
         
@@ -122,7 +131,7 @@ class Visualize:
             'focus_function': function_name
         }
     
-    def class_hierarchy(self, output_path: str = "class_hierarchy.png"):
+    def generate_class_hierarchy(self, output_path: str = "class_hierarchy.png"):
         """Generate a class hierarchy visualization."""
         G = nx.DiGraph()
         
@@ -232,6 +241,16 @@ class Visualize:
                 f.write("}\n")
         else:
             raise ValueError(f"Unsupported export format: {format}")
+    
+    def export_html(self, filename: str):
+        """
+        Export visualization to HTML.
+        
+        Args:
+            filename: Output filename
+        """
+        # Implement HTML export logic here
+        pass
     
     def generate_summary_report(self, output_path: str = "codebase_report.json") -> Dict[str, Any]:
         """Generate a comprehensive summary report of the codebase."""

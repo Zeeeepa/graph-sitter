@@ -6,7 +6,7 @@ Demonstrates the new consolidated graph-sitter API based on the official
 graph-sitter.com documentation and features.
 """
 
-from contexten.extensions.graph_sitter import (
+from contexten.extensions.graph_sitter_ext import (
     # Main API functions
     get_codebase_summary,
     get_file_summary,
@@ -274,4 +274,3 @@ if __name__ == "__main__":
     
     print("Demo completed!")
     print("\nFor more information, visit: https://graph-sitter.com")
-

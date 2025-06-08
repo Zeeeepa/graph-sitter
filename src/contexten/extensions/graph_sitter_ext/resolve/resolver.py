@@ -18,19 +18,19 @@ class Resolve:
     Usage example:
     
     from graph_sitter import Codebase
-    from contexten.extensions.graph_sitter.resolve import Resolve
+    from .resolver import Resolve
     
-    codebase = Codebase("path/to/repo")
+    codebase = Codebase.from_path("./my_project")
     resolver = Resolve(codebase)
     
+    # Get all symbols in the codebase
+    symbols = resolver.get_all_symbols()
+    
+    # Resolve a specific symbol
+    resolved = resolver.resolve_symbol("MyClass")
+    
     # Analyze import relationships
-    import_analysis = resolver.analyze_imports()
-    
-    # Detect import loops
-    loops = resolver.detect_import_loops()
-    
-    # Resolve symbol usages
-    usages = resolver.resolve_symbol_usages("MyClass")
+    imports = resolver.analyze_imports()
     """
     
     def __init__(self, codebase: Codebase):
@@ -332,3 +332,26 @@ class Resolve:
         dep_info["external_modules"] = list(external_modules)
         
         return dep_info
+    
+    def get_all_symbols(self) -> List[Dict[str, Any]]:
+        """Get all symbols in the codebase."""
+        symbols = []
+        files_attr = getattr(self.codebase, 'files', [])
+        files = list(files_attr) if hasattr(files_attr, '__iter__') else []
+        
+        for file in files:
+            symbols.extend(getattr(file, 'symbols', []))
+        
+        return symbols
+    
+    def resolve_symbol(self, symbol_name: str) -> Dict[str, Any]:
+        """Resolve a specific symbol."""
+        symbol = self.codebase.get_symbol(symbol_name)
+        if not symbol:
+            return {"error": f"Symbol not found: {symbol_name}"}
+        
+        return {
+            "name": symbol.name,
+            "line": getattr(symbol, 'line', 0),
+            "type": getattr(symbol, 'symbol_type', 'unknown')
+        }

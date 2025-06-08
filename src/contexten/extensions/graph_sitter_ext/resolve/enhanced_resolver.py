@@ -10,7 +10,12 @@ import ast
 import os
 from dataclasses import dataclass
 
-from ..core.config import CodebaseConfig
+# Import CodebaseConfig directly to avoid relative import issues
+try:
+    from graph_sitter.configs.models.codebase import CodebaseConfig
+except ImportError:
+    # Fallback if graph_sitter is not available
+    CodebaseConfig = None
 
 
 @dataclass
