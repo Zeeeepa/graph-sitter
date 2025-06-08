@@ -14,28 +14,40 @@ export interface ProjectPinRequest {
 
 export interface DashboardStats {
   total_projects: number;
-  active_workflows: number;
+  active_projects: number;
+  completed_projects: number;
+  running_flows: number;
+  average_progress: number;
+  total_tasks: number;
   completed_tasks: number;
-  pending_prs: number;
   quality_score: number;
+}
+
+// Helper function to convert ISO string to Date
+function toDate(isoString: string): Date {
+  return new Date(isoString);
 }
 
 const mockProjects: Project[] = [
   {
     id: '1',
-    name: 'Core Engine',
-    description: 'Main processing engine',
+    name: 'Graph Sitter',
+    description: 'Tree-sitter based code analysis',
+    repository: 'https://github.com/example/graph-sitter',
     status: 'active',
-    repository: 'https://github.com/example/core',
-    progress: 75,
+    progress: 85,
     flowEnabled: true,
     flowStatus: 'running',
-    lastActivity: new Date(),
+    lastActivity: new Date(), // Direct Date object instead of conversion
     tags: ['core', 'typescript'],
     metrics: {
       commits: 156,
-      prs: 23,
-      issues: 45
+      contributors: 8,
+      openPRs: 12,
+      closedPRs: 45,
+      issues: 23,
+      tests: 342,
+      coverage: 89
     }
   },
   {
@@ -47,12 +59,16 @@ const mockProjects: Project[] = [
     progress: 60,
     flowEnabled: false,
     flowStatus: 'stopped',
-    lastActivity: new Date(),
+    lastActivity: new Date(), // Direct Date object instead of conversion
     tags: ['frontend', 'react'],
     metrics: {
       commits: 89,
-      prs: 12,
-      issues: 34
+      contributors: 5,
+      openPRs: 8,
+      closedPRs: 32,
+      issues: 15,
+      tests: 156,
+      coverage: 76
     }
   }
 ];
@@ -60,14 +76,51 @@ const mockProjects: Project[] = [
 export const dashboardApi = {
   // Get all projects
   getProjects: async (): Promise<Project[]> => {
-    try {
-      const response = await api.get('/projects');
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch projects:', error);
-      // Return mock data for development
-      return mockProjects;
-    }
+    // Mock data for now
+    return [
+      {
+        id: '1',
+        name: 'Graph Sitter',
+        description: 'Tree-sitter based code analysis',
+        repository: 'https://github.com/example/graph-sitter',
+        status: 'active',
+        progress: 85,
+        flowEnabled: true,
+        flowStatus: 'running',
+        lastActivity: new Date(), // Direct Date object instead of conversion
+        tags: ['core', 'typescript'],
+        metrics: {
+          commits: 156,
+          contributors: 8,
+          openPRs: 12,
+          closedPRs: 45,
+          issues: 23,
+          tests: 342,
+          coverage: 89
+        }
+      },
+      {
+        id: '2',
+        name: 'Dashboard UI',
+        description: 'React dashboard interface',
+        status: 'active',
+        repository: 'https://github.com/example/dashboard',
+        progress: 60,
+        flowEnabled: false,
+        flowStatus: 'stopped',
+        lastActivity: new Date(), // Direct Date object instead of conversion
+        tags: ['frontend', 'react'],
+        metrics: {
+          commits: 89,
+          contributors: 5,
+          openPRs: 8,
+          closedPRs: 32,
+          issues: 15,
+          tests: 156,
+          coverage: 76
+        }
+      }
+    ];
   },
 
   // Get dashboard statistics
@@ -80,9 +133,12 @@ export const dashboardApi = {
       // Return mock data for development
       return {
         total_projects: 12,
-        active_workflows: 8,
+        active_projects: 8,
+        completed_projects: 156,
+        running_flows: 5,
+        average_progress: 75,
+        total_tasks: 100,
         completed_tasks: 156,
-        pending_prs: 23,
         quality_score: 87
       };
     }

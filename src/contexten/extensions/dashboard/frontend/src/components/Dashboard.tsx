@@ -16,16 +16,61 @@ import { useDashboardStore } from '../store/dashboardStore';
 import { dashboardApi, DashboardStats } from '../api/dashboardApi';
 import { Project } from '../types/dashboard';
 
+// Type conversion function
+function convertToDashboardProject(project: BaseProject): DashboardProject {
+  return {
+    id: project.id,
+    name: project.name,
+    description: project.description || '',
+    repository: project.url,
+    status: project.status === 'active' ? 'active' : 
+           project.status === 'error' ? 'error' : 'paused',
+    progress: 0,
+    flowEnabled: false,
+    flowStatus: 'stopped',
+    lastActivity: new Date(project.updated_at),
+    tags: [],
+    metrics: {
+      commits: 0,
+      contributors: 0,
+      openPRs: 0,
+      closedPRs: 0,
+      issues: 0,
+      tests: 0,
+      coverage: 0
+    }
+  };
+}
+
 const Dashboard: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  
+  const { projects, setProjects } = useDashboardStore();
+
   // Fetch projects
-  const { data: fetchedProjects, isLoading } = useQuery<Project[]>(
-    ['projects'],
-    () => dashboardApi.getProjects(),
+  const { isLoading: projectsLoading, error: projectsError } = useQuery(
+    'projects',
+    dashboardApi.getProjects,
     {
-      onSuccess: (data: Project[]) => {
-        setProjects(data);
+      onSuccess: (data: DashboardProject[]) => {
+        setProjects(data.map(project => ({
+          ...project,
+          // Ensure all required fields are present
+          description: project.description || '',
+          status: project.status || 'active',
+          progress: project.progress || 0,
+          flowEnabled: project.flowEnabled || false,
+          flowStatus: project.flowStatus || 'stopped',
+          lastActivity: project.lastActivity || new Date(),
+          tags: project.tags || [],
+          metrics: project.metrics || {
+            commits: 0,
+            contributors: 0,
+            openPRs: 0,
+            closedPRs: 0,
+            issues: 0,
+            tests: 0,
+            coverage: 0
+          }
+        })));
       },
       refetchInterval: 30000, // Refresh every 30 seconds
     }
@@ -60,7 +105,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (projectsLoading) {
     return (
       <Container maxWidth="xl">
         <Box
@@ -75,7 +120,7 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  if (fetchedProjects && fetchedProjects.length === 0) {
+  if (projectsError) {
     return (
       <Container maxWidth="xl">
         <Box sx={{ textAlign: 'center', py: 8 }}>
