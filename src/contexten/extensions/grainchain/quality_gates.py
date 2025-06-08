@@ -59,8 +59,11 @@ class QualityGateManager:
         self.config = config or get_grainchain_config()
         self._sandbox_manager = SandboxManager(self.config)
         self._gate_definitions: Dict[QualityGateType, QualityGateDefinition] = {}
-        self._custom_gates: Dict[str, Callable[[SandboxSession], Any]] = {}
+        self._custom_gates: Dict[str, Callable[[SandboxSession], Dict[str, Any]]] = {}
         self._event_handlers: List[Callable[[GrainchainEvent], Any]] = []
+        self._active_executions: Dict[str, QualityGateExecution] = {}
+        self._execution_history: List[QualityGateExecution] = []
+        self._gate_metrics: Dict[QualityGateType, Dict[str, float]] = {}
         self._initialize_gates()
 
     def _initialize_gates(self) -> None:
@@ -72,6 +75,12 @@ class QualityGateManager:
                 name=gate_type.value,
                 description=f"Standard {gate_type.value} gate"
             )
+            self._gate_metrics[gate_type] = {
+                "success_rate": 0.0,
+                "average_duration": 0.0,
+                "total_executions": 0,
+                "total_failures": 0
+            }
 
         # Set up dependencies
         self._gate_definitions[QualityGateType.INTEGRATION_TESTS].dependencies = [
@@ -85,10 +94,62 @@ class QualityGateManager:
     def register_custom_gate(
         self,
         name: str,
-        gate_func: Callable[[SandboxSession], Any]
+        gate_func: Callable[[SandboxSession], Dict[str, Any]]
     ) -> None:
         """Register a custom quality gate."""
         self._custom_gates[name] = gate_func
+        self._gate_metrics[QualityGateType.CUSTOM] = {
+            "success_rate": 0.0,
+            "average_duration": 0.0,
+            "total_executions": 0,
+            "total_failures": 0
+        }
+
+    def get_gate_metrics(self, gate_type: QualityGateType) -> Dict[str, float]:
+        """Get metrics for a specific gate type."""
+        return self._gate_metrics.get(gate_type, {}).copy()
+
+    def get_execution_history(self, limit: int = 100) -> List[QualityGateExecution]:
+        """Get recent execution history."""
+        return sorted(
+            self._execution_history,
+            key=lambda x: x.started_at or datetime.min,
+            reverse=True
+        )[:limit]
+
+    def get_active_executions(self) -> List[QualityGateExecution]:
+        """Get currently active executions."""
+        return list(self._active_executions.values())
+
+    def _update_gate_metrics(self, execution: QualityGateExecution) -> None:
+        """Update metrics for gates in an execution."""
+        for gate_type, result in execution.results.items():
+            metrics = self._gate_metrics.get(gate_type, {
+                "success_rate": 0.0,
+                "average_duration": 0.0,
+                "total_executions": 0,
+                "total_failures": 0
+            })
+
+            # Update metrics
+            metrics["total_executions"] += 1
+            if not result.passed:
+                metrics["total_failures"] += 1
+
+            # Update success rate
+            metrics["success_rate"] = (
+                (metrics["total_executions"] - metrics["total_failures"]) /
+                metrics["total_executions"] * 100.0
+            )
+
+            # Update average duration
+            old_avg = metrics["average_duration"]
+            metrics["average_duration"] = (
+                (old_avg * (metrics["total_executions"] - 1) + result.duration) /
+                metrics["total_executions"]
+            )
+
+            self._gate_metrics[gate_type] = metrics
 
     async def run_quality_gates(
         self,
@@ -460,7 +521,7 @@ class QualityGateExecution:
     fail_fast: bool = True
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    status: str = "pending"
+    status: QualityGateStatus = QualityGateStatus.PENDING
     error_message: Optional[str] = None
     results: Dict[QualityGateType, QualityGateResult] = field(default_factory=dict)
 
@@ -477,3 +538,28 @@ class QualityGateExecution:
         """Check if all gates passed."""
         return all(result.passed for result in self.results.values())
 
+    @property
+    def failed_gates(self) -> List[QualityGateType]:
+        """Get list of failed gates."""
+        return [gate for gate, result in self.results.items() if not result.passed]
+
+    @property
+    def passed_gates(self) -> List[QualityGateType]:
+        """Get list of passed gates."""
+        return [gate for gate, result in self.results.items() if result.passed]
+
+    @property
+    def is_complete(self) -> bool:
+        """Check if execution is complete."""
+        return self.status in [QualityGateStatus.PASSED, QualityGateStatus.FAILED, QualityGateStatus.ERROR]
+
+    @property
+    def success_rate(self) -> float:
+        """Get success rate of executed gates."""
+        if not self.results:
+            return 0.0
+        return len(self.passed_gates) / len(self.results) * 100.0
+
+    def get_gate_result(self, gate: QualityGateType) -> Optional[QualityGateResult]:
+        """Get result for a specific gate."""
+        return self.results.get(gate)
