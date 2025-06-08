@@ -97,8 +97,8 @@ class CodegenFlowOrchestrator(FlowOrchestrator):
         org_id: str,
         token: str,
         base_url: str = "https://api.codegen.com",
-        capabilities: List[AgentCapability] = None
-    ) -> CodegenAgent:
+        capabilities: Optional[List[AgentCapability]] = None
+    ) -> Optional[CodegenAgent]:
         """Register a Codegen agent with the orchestrator."""
         if capabilities is None:
             capabilities = [
@@ -133,7 +133,7 @@ class CodegenFlowOrchestrator(FlowOrchestrator):
     async def execute_workflow_with_codegen(
         self,
         workflow_definition: Dict[str, Any],
-        context: Dict[str, Any] = None
+        context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Execute workflow with intelligent Codegen agent coordination."""
         logger.info(f"Starting workflow execution: {workflow_definition.get('name', 'unnamed')}")
@@ -654,7 +654,7 @@ class LoadBalancer:
         agents: List[CodegenAgent],
         task: Dict[str, Any],
         performance_tracker: PerformanceTracker
-    ) -> CodegenAgent:
+    ) -> Optional[CodegenAgent]:
         """Select the best agent for a task based on multiple factors."""
         if not agents:
             return None

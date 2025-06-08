@@ -38,7 +38,10 @@ class ControlFlowExecutor(BaseExtension):
                 payload.get("task_config", {})
             )
         elif action == "get_task_status":
-            return await self.get_task_status(payload.get("task_id"))
+            task_id = payload.get("task_id")
+            if not task_id:
+                return {"error": "task_id is required", "status": "failed"}
+            return await self.get_task_status(task_id)
         else:
             return {"error": f"Unknown action: {action}", "status": "failed"}
         

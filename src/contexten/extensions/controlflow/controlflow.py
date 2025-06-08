@@ -87,7 +87,7 @@ class ControlFlow:
             if not self.orchestrator:
                 try:
                     from ..controlflow.orchestrator import FlowOrchestrator
-                    self.orchestrator = FlowOrchestrator(app=self.app)
+                    self.orchestrator = FlowOrchestrator()
                 except ImportError:
                     logger.warning("FlowOrchestrator not available, using fallback")
                     return {

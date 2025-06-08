@@ -42,7 +42,10 @@ class ControlFlowScheduler(BaseExtension):
         elif action == "get_scheduled_tasks":
             return {"scheduled_tasks": list(self.scheduled_tasks.values())}
         elif action == "cancel_task":
-            return await self.cancel_task(payload.get("task_id"))
+            task_id = payload.get("task_id")
+            if not task_id:
+                return {"error": "task_id is required", "status": "failed"}
+            return await self.cancel_task(task_id)
         else:
             return {"error": f"Unknown action: {action}", "status": "failed"}
         

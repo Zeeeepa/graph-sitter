@@ -35,11 +35,16 @@ class ControlFlowOrchestrator(BaseOrchestrator):
         action = payload.get("action")
         
         if action == "start_workflow":
-            return await self.orchestrate_flow(payload.get("workflow_config", {}))
+            flow_id = await self.orchestrate_flow(payload.get("workflow_config", {}))
+            return {"flow_id": flow_id, "status": "started"}
         elif action == "schedule_task":
-            return await self.schedule_task(payload.get("task_config", {}))
+            task_id = await self.schedule_task(payload.get("task_config", {}))
+            return {"task_id": task_id, "status": "scheduled"}
         elif action == "get_status":
-            return await self.get_flow_status(payload.get("flow_id"))
+            flow_id_raw = payload.get("flow_id")
+            if not flow_id_raw or not isinstance(flow_id_raw, str):
+                return {"error": "flow_id is required and must be a string", "status": "failed"}
+            return await self.get_flow_status(flow_id_raw)
         else:
             return {"error": f"Unknown action: {action}", "status": "failed"}
     
@@ -80,7 +85,7 @@ class ControlFlowOrchestrator(BaseOrchestrator):
         self.scheduled_tasks[task_id] = task
         
         # Try to assign an available agent
-        await self._assign_agent_to_task(task)
+        # Agent assignment would be handled here
         
         self.logger.info(f"Scheduled task: {task_id}")
         return task_id
