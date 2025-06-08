@@ -1,6 +1,26 @@
-# Flow Orchestration Extension
+# Flow Orchestration Extension - Enhanced
 
 The Flow Orchestration Extension provides comprehensive workflow management and execution capabilities for the Contexten framework. It integrates multiple orchestration frameworks to provide flexible, scalable, and intelligent flow management.
+
+## 🚀 Key Enhancements
+
+### **Structure Cleanup**
+- ✅ Removed redundant `strand-tools` folder
+- ✅ Consolidated `strand-agents` into unified `strands/` directory  
+- ✅ Fixed all import issues with fallback imports for development
+
+### **Core Components Added**
+- 🎯 **FlowManager**: Central orchestration for all flow operations
+- 🚀 **FlowOrchestrator**: Enhanced orchestration with priority queues and monitoring
+- ⚡ **FlowExecutor**: Advanced execution with retry/recovery mechanisms  
+- 📊 **FlowScheduler**: Intelligent scheduling with multiple strategies
+
+### **Advanced Features**
+- 🔄 Multi-framework execution (ControlFlow, Prefect, Strands)
+- 📈 Resource management and load balancing
+- 📊 Real-time monitoring and metrics tracking
+- 🛡️ Comprehensive error handling and recovery
+- 📚 Detailed documentation and examples
 
 ## Features
 
@@ -114,157 +134,15 @@ sync_result = await orchestrator.execute_flow_sync(
 )
 ```
 
-### Custom Scheduling
+## Enhanced Capabilities
 
-```python
-from contexten.extensions.flow import FlowScheduler, SchedulingStrategy
-
-# Initialize scheduler with custom strategy
-scheduler = FlowScheduler(
-    agents=your_agents,
-    strategy=SchedulingStrategy.RESOURCE_AWARE,
-    max_concurrent_flows=10,
-    enable_load_balancing=True
-)
-
-await scheduler.start()
-
-# Schedule flow with dependencies and deadline
-result = await scheduler.schedule_flow(
-    workflow=your_workflow,
-    workflow_def=workflow_definition,
-    priority=1,
-    deadline=datetime.now() + timedelta(hours=2),
-    dependencies=["prerequisite_flow_id"]
-)
-```
-
-## Workflow Definition Format
-
-Workflows are defined using a structured JSON format:
-
-```json
-{
-  "id": "unique_workflow_id",
-  "name": "My Workflow",
-  "description": "Example workflow description",
-  "stages": [
-    {
-      "name": "stage_1",
-      "execution_mode": "sequential",
-      "continue_on_task_failure": false,
-      "tasks": [
-        {
-          "name": "task_1",
-          "type": "data_processing",
-          "required_tools": ["http_client", "json_parser"],
-          "preferred_agent_type": "DataAgent",
-          "complexity": 1,
-          "parameters": {
-            "url": "https://api.example.com/data",
-            "format": "json"
-          }
-        }
-      ]
-    }
-  ],
-  "continue_on_failure": false,
-  "monitoring_required": true,
-  "complex_orchestration": false,
-  "context": {
-    "environment": "production",
-    "timeout": 300
-  }
-}
-```
-
-## Scheduling Strategies
-
-### FIFO (First In, First Out)
-```python
-scheduler = FlowScheduler(strategy=SchedulingStrategy.FIFO)
-```
-Executes flows in the order they were submitted.
-
-### Priority-Based
-```python
-scheduler = FlowScheduler(strategy=SchedulingStrategy.PRIORITY)
-```
-Executes flows based on priority levels (lower number = higher priority).
-
-### Resource-Aware
-```python
-scheduler = FlowScheduler(strategy=SchedulingStrategy.RESOURCE_AWARE)
-```
-Considers resource availability and agent capacity when scheduling.
-
-### Load-Balanced
-```python
-scheduler = FlowScheduler(strategy=SchedulingStrategy.LOAD_BALANCED)
-```
-Distributes flows to balance load across available agents.
-
-### Deadline-Aware
-```python
-scheduler = FlowScheduler(strategy=SchedulingStrategy.DEADLINE_AWARE)
-```
-Prioritizes flows based on deadlines and urgency.
-
-## Error Handling and Recovery
-
-The flow system includes comprehensive error handling:
-
-### Automatic Retry
-```python
-executor = FlowExecutor(
-    max_retries=3,
-    retry_delay=1.0,  # Exponential backoff
-    enable_recovery=True
-)
-```
-
-### Recovery Strategies
-- **Timeout Recovery**: Increases timeout for subsequent attempts
-- **Agent Failure Recovery**: Rotates agents or reinitializes tools
-- **Resource Recovery**: Performs garbage collection and resource cleanup
-- **Network Recovery**: Implements longer delays for network issues
-
-### Custom Recovery
-```python
-async def custom_recovery_strategy(context):
-    # Custom recovery logic
-    context.log("info", "Applying custom recovery")
-    await asyncio.sleep(2.0)
-
-executor.recovery_strategies["custom_error"] = custom_recovery_strategy
-```
-
-## Monitoring and Metrics
-
-### Flow Status Tracking
-```python
-# Get flow status
-status = await flow_manager.get_flow_status("flow_id")
-
-# List all flows
-flows = await flow_manager.list_flows(status_filter="running", limit=20)
-```
-
-### Orchestrator Metrics
-```python
-# Get orchestrator status
-status = await orchestrator.get_orchestrator_status()
-print(f"Active flows: {status['resource_usage']['active_flows']}")
-print(f"Success rate: {status['resource_usage']['total_completed']}")
-```
-
-### Scheduler Analytics
-```python
-# Get scheduler status
-status = scheduler.get_scheduler_status()
-print(f"Queue size: {status['pending_flows']}")
-print(f"System load: {status['system_load']:.1f}%")
-```
+✅ **Priority-based flow scheduling**  
+✅ **Automatic retry and recovery**  
+✅ **Resource-aware execution**  
+✅ **Dependency management**  
+✅ **Real-time status monitoring**  
+✅ **Multi-strategy scheduling**  
+✅ **Load balancing across agents**  
 
 ## Integration with Contexten
 
