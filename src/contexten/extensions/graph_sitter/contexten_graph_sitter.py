@@ -353,7 +353,7 @@ class GraphSitter:
             logger.error(f"Quality analysis failed for project {project_id}: {e}")
             return {'status': 'failed', 'error': str(e)}
 
-    async def integrate_with_grainchain(self, quality_gate_manager: QualityGateManager, sandbox_manager: SandboxManager):
+    async def integrate_with_grainchain(self, quality_gate_manager: "QualityGateManager", sandbox_manager: "SandboxManager"):
         """Integrate Graph_sitter with Grainchain components."""
         try:
             self.quality_gate_manager = quality_gate_manager
