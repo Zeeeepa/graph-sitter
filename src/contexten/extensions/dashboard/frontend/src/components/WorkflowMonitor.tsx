@@ -1,20 +1,18 @@
 import React from 'react';
 import {
-  Box,
+  Grid,
   Paper,
   Typography,
-  Grid,
-  Chip,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
+  Chip,
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
-  CheckCircle as CheckIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 
@@ -27,19 +25,6 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({ projects }) => {
   const runningWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'running');
   const stoppedWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'stopped');
   const errorWorkflows = projects.filter(p => p.flowEnabled && p.flowStatus === 'error');
-
-  const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'running':
-        return 'success.main';
-      case 'stopped':
-        return 'warning.main';
-      case 'error':
-        return 'error.main';
-      default:
-        return 'text.secondary';
-    }
-  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
