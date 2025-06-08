@@ -2,194 +2,151 @@ import React from 'react';
 import {
   Card,
   CardContent,
+  CardActions,
   Typography,
+  LinearProgress,
+  Chip,
   Box,
   IconButton,
-  Chip,
-  LinearProgress,
-  CardActions,
-  Button,
-  Tooltip,
+  Stack,
 } from '@mui/material';
 import {
-  PlayArrow as PlayIcon,
-  Pause as PauseIcon,
-  GitHub as GitHubIcon,
-  Timeline as TimelineIcon,
   Star as StarIcon,
   StarBorder as StarBorderIcon,
-  Settings as SettingsIcon,
-  BugReport as BugIcon,
-  People as PeopleIcon,
-  Commit as CommitIcon,
-  MergeType as PRIcon
+  PlayArrow as PlayIcon,
+  Stop as StopIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 
 interface ProjectCardProps {
   project: Project;
+  onSelect?: (project: Project) => void;
   onPin?: (projectId: string) => void;
   onUnpin?: (projectId: string) => void;
 }
 
-const getFlowStatusColor = (status: string): 'success' | 'warning' | 'error' | 'default' => {
-  switch (status) {
-    case 'running':
-      return 'success';
-    case 'stopped':
-      return 'warning';
-    case 'error':
-      return 'error';
-    default:
-      return 'default';
-  }
-};
-
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPin, onUnpin }) => {
-  const handlePin = () => {
-    if (onPin) {
-      onPin(project.id);
+const ProjectCard: React.FC<ProjectCardProps> = ({
+  project,
+  onSelect,
+  onPin,
+  onUnpin,
+}) => {
+  const getStatusColor = (status: string): 'success' | 'error' | 'warning' | 'default' => {
+    switch (status) {
+      case 'active':
+        return 'success';
+      case 'error':
+        return 'error';
+      case 'paused':
+        return 'warning';
+      default:
+        return 'default';
     }
   };
 
-  const handleUnpin = () => {
-    if (onUnpin) {
-      onUnpin(project.id);
+  const getFlowStatusColor = (status: string): 'success' | 'error' | 'warning' | 'default' => {
+    switch (status) {
+      case 'running':
+        return 'success';
+      case 'error':
+        return 'error';
+      case 'stopped':
+        return 'warning';
+      default:
+        return 'default';
     }
   };
 
   return (
-    <Card>
-      <CardContent>
-        {/* Header */}
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        cursor: onSelect ? 'pointer' : 'default',
+        '&:hover': {
+          boxShadow: 3,
+        },
+      }}
+      onClick={() => onSelect?.(project)}
+    >
+      <CardContent sx={{ flexGrow: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Typography variant="h6" component="div">
+          <Typography variant="h6" component="div" gutterBottom>
             {project.name}
           </Typography>
-          <IconButton 
-            onClick={project.flowEnabled ? handleUnpin : handlePin} 
+          <IconButton
             size="small"
-            color={project.flowEnabled ? 'primary' : 'default'}
+            onClick={(e) => {
+              e.stopPropagation();
+              project.pinned ? onUnpin?.(project.id) : onPin?.(project.id);
+            }}
           >
-            {project.flowEnabled ? <StarIcon /> : <StarBorderIcon />}
+            {project.pinned ? <StarIcon color="primary" /> : <StarBorderIcon />}
           </IconButton>
         </Box>
 
-        {/* Description */}
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {project.description}
         </Typography>
 
-        {/* Progress */}
+        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+          <Chip
+            size="small"
+            label={project.status}
+            color={getStatusColor(project.status)}
+          />
+          {project.flowEnabled && (
+            <Chip
+              size="small"
+              label={project.flowStatus}
+              color={getFlowStatusColor(project.flowStatus)}
+              icon={project.flowStatus === 'running' ? <PlayIcon /> : <StopIcon />}
+            />
+          )}
+        </Stack>
+
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary" gutterBottom>
             Progress
           </Typography>
-          <LinearProgress 
-            variant="determinate" 
-            value={project.progress} 
-            sx={{ mb: 1 }}
-            color={project.progress >= 80 ? 'success' : project.progress >= 40 ? 'primary' : 'warning'}
+          <LinearProgress
+            variant="determinate"
+            value={project.progress}
+            sx={{ height: 8, borderRadius: 1 }}
           />
-          <Typography variant="body2" color="text.secondary">
-            {`${Math.round(project.progress)}%`}
-          </Typography>
         </Box>
 
-        {/* Status and Tags */}
-        <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <Chip
-            icon={project.flowStatus === 'running' ? <PlayIcon /> : <PauseIcon />}
-            label={project.flowStatus}
-            size="small"
-            color={getFlowStatusColor(project.flowStatus)}
-          />
-          {project.tags.map((tag: string) => (
-            <Chip 
-              key={tag} 
-              size="small" 
-              label={tag}
-              variant="outlined"
-            />
+        <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 0.5 }}>
+          {project.tags?.map((tag) => (
+            <Chip key={tag} label={tag} size="small" />
           ))}
-        </Box>
+        </Stack>
 
-        {/* Metrics */}
         {project.metrics && (
-          <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-            <Tooltip title="Commits">
-              <Chip
-                icon={<CommitIcon />}
-                label={project.metrics.commits}
-                size="small"
-                variant="outlined"
-              />
-            </Tooltip>
-            <Tooltip title="Pull Requests">
-              <Chip
-                icon={<PRIcon />}
-                label={project.metrics.prs}
-                size="small"
-                variant="outlined"
-              />
-            </Tooltip>
-            <Tooltip title="Contributors">
-              <Chip
-                icon={<PeopleIcon />}
-                label={project.metrics.contributors}
-                size="small"
-                variant="outlined"
-              />
-            </Tooltip>
-            {project.metrics.issues && (
-              <Tooltip title="Issues">
-                <Chip
-                  icon={<BugIcon />}
-                  label={project.metrics.issues}
-                  size="small"
-                  variant="outlined"
-                />
-              </Tooltip>
-            )}
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Typography variant="caption" color="text.secondary">
+              Commits: {project.metrics.commits}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              PRs: {project.metrics.prs}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Contributors: {project.metrics.contributors}
+            </Typography>
           </Box>
         )}
-
-        {/* Action Icons */}
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="View Repository">
-            <IconButton size="small" href={project.repository} target="_blank">
-              <GitHubIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="View Timeline">
-            <IconButton size="small">
-              <TimelineIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Settings">
-            <IconButton size="small">
-              <SettingsIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
       </CardContent>
 
-      {/* Card Actions */}
-      <CardActions>
-        <Button 
-          size="small" 
-          startIcon={<GitHubIcon />} 
-          href={project.repository} 
-          target="_blank"
-        >
-          Repository
-        </Button>
-        <Button 
-          size="small" 
-          startIcon={<TimelineIcon />}
-        >
-          Timeline
-        </Button>
+      <CardActions sx={{ justifyContent: 'flex-end' }}>
+        <IconButton size="small" onClick={(e) => {
+          e.stopPropagation();
+          onSelect?.(project);
+        }}>
+          <InfoIcon />
+        </IconButton>
       </CardActions>
     </Card>
   );
