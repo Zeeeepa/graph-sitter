@@ -9,10 +9,20 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Callable
 
 from .config import GrainchainIntegrationConfig, get_grainchain_config
-from .grainchain_types import GrainchainEvent, GrainchainEventType, IntegrationStatus, QualityGateType, SandboxProvider
+from .grainchain_types import (
+    GrainchainEvent,
+    GrainchainEventType,
+    IntegrationStatus,
+    QualityGateType,
+    QualityGateStatus,
+    QualityGateResult,
+    SandboxProvider
+)
+from .quality_gates import QualityGateManager, QualityGateExecution
+from .sandbox_manager import SandboxManager
 
 if TYPE_CHECKING:
     from .grainchain_client import GrainchainClient
@@ -26,37 +36,27 @@ logger = logging.getLogger(__name__)
 class IntegrationHealth:
     """Health status of the integration."""
     status: IntegrationStatus
-    components: dict[str, str]
-    issues: list[str]
+    components: Dict[str, bool]
+    issues: List[str]
     last_check: datetime
     uptime: float
 
 
 class GrainchainIntegrationAgent:
-    """Main integration agent for Grainchain.
+    """Integration agent for Grainchain."""
 
-    Orchestrates all Grainchain components and provides the main interface
-    for integration with the Contexten ecosystem.
-    """
+    def __init__(self, config: Optional[GrainchainIntegrationConfig] = None):
+        """Initialize the integration agent.
 
-    def __init__(self, config: GrainchainIntegrationConfig | None = None):
-        """Initialize the integration agent."""
+        Args:
+            config: Integration configuration
+        """
         self.config = config or get_grainchain_config()
-
-        # Core components
-        self._grainchain_client: GrainchainClient | None = None
-        self._sandbox_manager: SandboxManager | None = None
-        self._quality_gate_manager: QualityGateManager | None = None
-
-        # State management
-        self._is_running: bool = False
-        self._started_at: datetime | None = None
-        self._event_handlers: list[Callable] = []
-
-        # Event handling
-        self._background_tasks: list[asyncio.Task] = []
-
-        # Health monitoring
+        self._event_handlers: Dict[GrainchainEventType, List[Callable[..., Any]]] = {}
+        self._quality_gate_manager = QualityGateManager(self.config)
+        self._sandbox_manager = SandboxManager(self.config)
+        self._is_running = False
+        self._started_at: Optional[datetime] = None
         self._health_status = IntegrationHealth(
             status=IntegrationStatus.HEALTHY,
             components={},
@@ -65,266 +65,203 @@ class GrainchainIntegrationAgent:
             uptime=0.0
         )
 
-    async def start(self):
-        """Start the integration agent."""
-        if self._is_running:
-            return
-
-        logger.info("Starting Grainchain integration agent")
-
-        self._started_at = datetime.now(UTC)
-        self._is_running = True
-
-        # Validate configuration
-        config_issues = self.config.validate()
-        if config_issues:
-            logger.warning(f"Configuration issues: {config_issues}")
-
-        # Start background tasks
-        if self.config.monitoring.enabled:
-            self._background_tasks.append(
-                asyncio.create_task(self._health_monitoring_loop())
-            )
-
-        if self.config.cost_optimization:
-            self._background_tasks.append(
-                asyncio.create_task(self._cost_optimization_loop())
-            )
-
-        if self.config.performance_benchmarking:
-            self._background_tasks.append(
-                asyncio.create_task(self._performance_monitoring_loop())
-            )
-
-        # Setup event handlers with components
-        self.client.add_event_handler(self._handle_grainchain_event)
-
-        logger.info("Grainchain integration agent started successfully")
-
-    async def stop(self):
-        """Stop the integration agent."""
-        if not self._is_running:
-            return
-
-        logger.info("Stopping Grainchain integration agent")
-
-        self._is_running = False
-
-        # Cancel background tasks
-        for task in self._background_tasks:
-            task.cancel()
-
-        # Wait for tasks to complete
-        if self._background_tasks:
-            await asyncio.gather(*self._background_tasks, return_exceptions=True)
-
-        # Shutdown components
-        await self.sandbox_manager.shutdown()
-
-        logger.info("Grainchain integration agent stopped")
-
-    def _setup_event_handlers(self):
-        """Setup default event handlers."""
+        # Register event handlers
         self.on_event(GrainchainEventType.SANDBOX_CREATED)(self._handle_sandbox_created)
+        self.on_event(GrainchainEventType.SANDBOX_DESTROYED)(self._handle_sandbox_destroyed)
         self.on_event(GrainchainEventType.QUALITY_GATE_FAILED)(self._handle_quality_gate_failed)
         self.on_event(GrainchainEventType.COST_THRESHOLD_EXCEEDED)(self._handle_cost_threshold_exceeded)
         self.on_event(GrainchainEventType.PERFORMANCE_DEGRADED)(self._handle_performance_degraded)
 
-    def on_event(self, event_type: GrainchainEventType):
+    async def _handle_grainchain_event(self, event: GrainchainEvent) -> None:
+        """Handle a Grainchain event.
+
+        Args:
+            event: The event to handle
+        """
+        handlers = self._event_handlers.get(event.event_type, [])
+        for handler in handlers:
+            try:
+                await handler(event)
+            except Exception as e:
+                logger.exception(f"Event handler failed: {e}")
+
+    def on_event(self, event_type: GrainchainEventType) -> Callable:
         """Decorator for registering event handlers."""
         def decorator(handler: Callable[[GrainchainEvent], None]):
             if event_type not in self._event_handlers:
-                self._event_handlers.append(handler)
+                self._event_handlers[event_type] = []
+            self._event_handlers[event_type].append(handler)
             return handler
         return decorator
 
-    async def _handle_grainchain_event(self, event: GrainchainEvent):
-        """Handle Grainchain events."""
-        handlers = self._event_handlers.get(event.event_type, [])
+    async def _handle_sandbox_created(self, event: GrainchainEvent) -> None:
+        """Handle sandbox creation event."""
+        logger.info(f"Sandbox created: {event.data}")
 
-        for handler in handlers:
-            try:
-                if asyncio.iscoroutinefunction(handler):
-                    await handler(event)
-                else:
-                    handler(event)
-            except Exception as e:
-                logger.exception(f"Event handler failed for {event.event_type.value}: {e}")
+    async def _handle_sandbox_destroyed(self, event: GrainchainEvent) -> None:
+        """Handle sandbox destruction event."""
+        logger.info(f"Sandbox destroyed: {event.data}")
 
-    async def _handle_sandbox_created(self, event: GrainchainEvent):
-        """Handle sandbox creation events."""
-        logger.info(f"Sandbox created: {event.data.get('sandbox_id')} on {event.data.get('provider')}")
-
-    async def _handle_quality_gate_failed(self, event: GrainchainEvent):
-        """Handle quality gate failure events."""
+    async def _handle_quality_gate_failed(self, event: GrainchainEvent) -> None:
+        """Handle quality gate failure event."""
         logger.warning(f"Quality gate failed: {event.data}")
 
-        # Could trigger notifications, create debug snapshots, etc.
-        if self.config.ci_integration.notification_channels:
-            await self._send_notification(
-                f"Quality gate failed for execution {event.data.get('execution_id')}",
-                event.data
-            )
-
-    async def _handle_cost_threshold_exceeded(self, event: GrainchainEvent):
-        """Handle cost threshold exceeded events."""
+    async def _handle_cost_threshold_exceeded(self, event: GrainchainEvent) -> None:
+        """Handle cost threshold exceeded event."""
         logger.warning(f"Cost threshold exceeded: {event.data}")
 
-        # Trigger cost optimization
-        if self.config.cost_optimization:
-            await self._trigger_cost_optimization()
-
-    async def _handle_performance_degraded(self, event: GrainchainEvent):
-        """Handle performance degradation events."""
+    async def _handle_performance_degraded(self, event: GrainchainEvent) -> None:
+        """Handle performance degradation event."""
         logger.warning(f"Performance degraded: {event.data}")
 
-        # Could trigger provider switching, scaling, etc.
-
-    async def _health_monitoring_loop(self):
+    async def _health_monitoring_loop(self) -> None:
         """Background health monitoring loop."""
-        while self._is_running:
+        while True:
             try:
-                await self._update_health_status()
-                await asyncio.sleep(self.config.monitoring.health_check_interval)
-            except asyncio.CancelledError:
-                break
+                await self._check_health()
+                await asyncio.sleep(300)  # Check every 5 minutes
             except Exception as e:
                 logger.exception(f"Health monitoring error: {e}")
                 await asyncio.sleep(60)  # Retry in 1 minute
 
-    async def _cost_optimization_loop(self):
-        """Background cost optimization loop."""
-        while self._is_running:
-            try:
-                await self._run_cost_optimization()
-                await asyncio.sleep(3600)  # Run every hour
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.exception(f"Cost optimization error: {e}")
-                await asyncio.sleep(300)  # Retry in 5 minutes
-
-    async def _performance_monitoring_loop(self):
-        """Background performance monitoring loop."""
-        while self._is_running:
-            try:
-                await self._run_performance_monitoring()
-                await asyncio.sleep(1800)  # Run every 30 minutes
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.exception(f"Performance monitoring error: {e}")
-                await asyncio.sleep(300)  # Retry in 5 minutes
-
-    async def _update_health_status(self):
-        """Update the health status of all components."""
-        components = {}
-        issues = []
-
+    async def _check_health(self) -> None:
+        """Check the health of all components."""
         try:
-            # Check sandbox manager
-            sandbox_health = await self.sandbox_manager.get_health_status()
-            components["sandbox_manager"] = sandbox_health["status"]
-            if sandbox_health.get("issues"):
-                issues.extend(sandbox_health["issues"])
+            # Check provider health
+            providers = await self._sandbox_manager._grainchain_client.get_available_providers()
+            healthy_providers = len(providers)
+            total_providers = len(SandboxProvider)
+            health_ratio = healthy_providers / total_providers
 
-            # Check provider manager
-            provider_health = await self.provider_manager.get_health_status()
-            components["provider_manager"] = provider_health["status"]
-            if provider_health.get("issues"):
-                issues.extend(provider_health["issues"])
+            # Check resource utilization
+            utilization = await self._sandbox_manager.get_resource_utilization()
 
-            # Check quality gate manager
-            components["quality_gate_manager"] = "healthy"  # Simplified
+            # Identify issues
+            issues = []
 
-            # Check snapshot manager
-            components["snapshot_manager"] = "healthy"  # Simplified
+            if health_ratio < 0.5:
+                issues.append("More than half of providers are unavailable")
 
-            # Determine overall status
-            if any(status == "unhealthy" for status in components.values()):
-                overall_status = IntegrationStatus.UNHEALTHY
-            elif any(status == "degraded" for status in components.values()):
-                overall_status = IntegrationStatus.DEGRADED
-            else:
-                overall_status = IntegrationStatus.HEALTHY
+            if utilization['total_active_sandboxes'] > self._sandbox_manager._resource_limits['max_concurrent_sessions']:
+                issues.append("Session limit exceeded")
 
-            # Calculate uptime
-            uptime = 0.0
-            if self._started_at:
-                uptime = (datetime.now(UTC) - self._started_at).total_seconds()
+            # Update health status
+            status = IntegrationStatus.HEALTHY if health_ratio >= 0.8 and not issues else IntegrationStatus.DEGRADED
 
             self._health_status = IntegrationHealth(
-                status=overall_status,
-                components=components,
+                status=status,
+                components={
+                    'providers': health_ratio >= 0.8,
+                    'sandbox_manager': True,
+                    'quality_gates': True
+                },
                 issues=issues,
                 last_check=datetime.now(UTC),
-                uptime=uptime
+                uptime=self._get_uptime()
             )
 
         except Exception as e:
-            logger.exception(f"Health status update failed: {e}")
-            self._health_status.status = IntegrationStatus.UNHEALTHY
-            self._health_status.issues.append(f"Health check failed: {e}")
+            logger.exception(f"Health check failed: {e}")
+            self._health_status = IntegrationHealth(
+                status=IntegrationStatus.DEGRADED,
+                components={},
+                issues=[str(e)],
+                last_check=datetime.now(UTC),
+                uptime=self._get_uptime()
+            )
 
-    async def _run_cost_optimization(self):
+    def _get_uptime(self) -> float:
+        """Get uptime in seconds."""
+        if not self._started_at:
+            return 0.0
+        return (datetime.now(UTC) - self._started_at).total_seconds()
+
+    async def _run_cost_optimization(self) -> None:
         """Run cost optimization analysis."""
         try:
-            optimization_result = await self.sandbox_manager.optimize_resources()
+            # Get current resource utilization
+            utilization = await self._sandbox_manager.get_resource_utilization()
 
-            if optimization_result["potential_monthly_savings"] > 100:  # $100 threshold
-                logger.info(f"Cost optimization opportunity: ${optimization_result['potential_monthly_savings']:.2f}/month")
+            # Check for cost optimization opportunities
+            if utilization['total_active_sandboxes'] > 0:
+                # Get optimization recommendations
+                recommendations = await self._sandbox_manager.optimize_resources()
 
-                # Could automatically implement optimizations
-                for recommendation in optimization_result["recommendations"]:
-                    logger.info(f"Recommendation: {recommendation['description']}")
+                # Log recommendations
+                for recommendation in recommendations['recommendations']:
+                    logger.info(f"Cost optimization recommendation: {recommendation}")
+
+                # Trigger cost threshold exceeded event if needed
+                if recommendations['potential_savings'] > 100.0:  # $100 threshold
+                    await self._handle_grainchain_event(GrainchainEvent(
+                        event_type=GrainchainEventType.COST_THRESHOLD_EXCEEDED,
+                        data={
+                            'potential_savings': recommendations['potential_savings'],
+                            'recommendations': recommendations['recommendations']
+                        },
+                        timestamp=datetime.now(UTC),
+                        source='cost_optimization'
+                    ))
 
         except Exception as e:
             logger.exception(f"Cost optimization failed: {e}")
 
-    async def _run_performance_monitoring(self):
-        """Run performance monitoring and benchmarking."""
+    async def _run_performance_monitoring(self) -> None:
+        """Run performance monitoring analysis."""
         try:
-            # Run benchmarks
-            benchmark_results = await self.client.benchmark_providers(
-                test_suite="performance_monitoring"
-            )
+            # Get current metrics
+            utilization = await self._sandbox_manager.get_resource_utilization()
 
-            # Analyze results for degradation
-            for provider, results in benchmark_results.items():
-                if "error" in results:
-                    continue
-
-                startup_time = results.get("startup_time", 0)
-                if startup_time > 30:  # 30 second threshold
-                    await self._emit_event(GrainchainEventType.PERFORMANCE_DEGRADED, {
-                        "provider": provider.value,
-                        "metric": "startup_time",
-                        "value": startup_time,
-                        "threshold": 30
-                    })
+            # Check for performance issues
+            for provider, metrics in utilization['provider_breakdown'].items():
+                if metrics.get('success_rate', 1.0) < 0.8:
+                    await self._handle_grainchain_event(GrainchainEvent(
+                        event_type=GrainchainEventType.PERFORMANCE_DEGRADED,
+                        data={
+                            'provider': provider,
+                            'success_rate': metrics['success_rate'],
+                            'error_count': metrics.get('error_count', 0)
+                        },
+                        timestamp=datetime.now(UTC),
+                        source='performance_monitoring'
+                    ))
 
         except Exception as e:
             logger.exception(f"Performance monitoring failed: {e}")
 
-    async def _trigger_cost_optimization(self):
+    async def _trigger_cost_optimization(self) -> None:
         """Trigger immediate cost optimization."""
         logger.info("Triggering cost optimization")
         await self._run_cost_optimization()
 
-    async def _send_notification(self, message: str, data: dict[str, Any]):
-        """Send notification to configured channels."""
-        # This would integrate with notification systems
+    async def _trigger_performance_monitoring(self) -> None:
+        """Trigger immediate performance monitoring."""
+        logger.info("Triggering performance monitoring")
+        await self._run_performance_monitoring()
+
+    async def _trigger_health_check(self) -> None:
+        """Trigger immediate health check."""
+        logger.info("Triggering health check")
+        await self._check_health()
+
+    async def _send_notification(self, message: str, data: dict[str, Any]) -> None:
+        """Send notification to configured channels.
+
+        Args:
+            message: Notification message
+            data: Additional data to include
+        """
+        # Log notification
         logger.info(f"Notification: {message}")
 
-    async def _emit_event(self, event_type: GrainchainEventType, data: dict[str, Any]):
+    async def _emit_event(self, event_type: GrainchainEventType, data: dict[str, Any]) -> None:
         """Emit an event."""
         event = GrainchainEvent(
             event_type=event_type,
+            data=data,
             timestamp=datetime.now(UTC),
-            source="integration_agent",
-            data=data
+            source="integration_agent"
         )
-
         await self._handle_grainchain_event(event)
 
     # Public API methods
@@ -335,16 +272,20 @@ class GrainchainIntegrationAgent:
 
     async def run_quality_gates(
         self,
-        pr_number: int | None = None,
-        commit_sha: str | None = None,
-        gates: list[QualityGateType] | None = None
-    ):
-        """Run quality gates."""
-        return await self.quality_gate_manager.run_quality_gates(
-            pr_number=pr_number,
-            commit_sha=commit_sha,
-            gates=gates
-        )
+        execution: QualityGateExecution
+    ) -> None:
+        """Run quality gates for a given execution.
+
+        Args:
+            execution: The quality gate execution
+        """
+        try:
+            # Run quality gates with default settings
+            await self._quality_gate_manager.run_quality_gates(execution.pr_number)
+        except Exception as e:
+            logger.exception(f"Failed to run quality gates: {e}")
+            execution.error = str(e)
+            execution.status = "error"
 
     async def create_pr_environment(
         self,
