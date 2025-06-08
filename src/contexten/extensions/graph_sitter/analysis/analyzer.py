@@ -7,6 +7,7 @@ Codebase functionality to provide the exact API shown in the documentation.
 
 from graph_sitter import Codebase
 from graph_sitter.configs.models.codebase import CodebaseConfig
+from typing import Dict, Any, Optional
 
 
 class Analysis:
@@ -108,58 +109,70 @@ class Analysis:
         """External dependencies imported by the codebase."""
         return self.codebase.external_modules
     
-    def get_function_analysis(self, function_name: str):
+    def get_function_analysis(self, function_name: str) -> Dict[str, Any]:
         """Get detailed analysis for a specific function."""
-        func = self.codebase.get_function(function_name)
-        if not func:
-            return None
-            
-        return {
-            'name': func.name,
-            'usages': len(func.usages),
-            'call_sites': len(func.call_sites),
-            'dependencies': len(func.dependencies),
-            'function_calls': len(func.function_calls),
-            'parameters': len(func.parameters),
-            'return_statements': len(func.return_statements),
-            'decorators': len(func.decorators),
-            'is_async': func.is_async,
-            'is_generator': func.is_generator
-        }
+        functions_attr = getattr(self.codebase, 'functions', [])
+        functions = list(functions_attr) if hasattr(functions_attr, '__iter__') else []
+        
+        for func in functions:
+            if func.name == function_name:
+                code_block = getattr(func, 'code_block', None)
+                line_count = 0
+                if code_block:
+                    lines = getattr(code_block, 'lines', [])
+                    line_count = len(lines) if hasattr(lines, '__len__') else 0
+                
+                return {
+                    'name': func.name,
+                    'parameters': [p.name for p in func.parameters],
+                    'return_type': getattr(func, 'return_type', None),
+                    'decorators': [d.name for d in func.decorators],
+                    'is_async': func.is_async,
+                    'is_generator': getattr(func, 'is_generator', False),
+                    'complexity': getattr(func, 'complexity', 0),
+                    'line_count': line_count,
+                    'usages': len(func.usages) if hasattr(func, 'usages') else 0
+                }
+        return {}
     
-    def get_class_analysis(self, class_name: str):
+    def get_class_analysis(self, class_name: str) -> Dict[str, Any]:
         """Get detailed analysis for a specific class."""
-        cls = self.codebase.get_class(class_name)
-        if not cls:
-            return None
-            
-        return {
-            'name': cls.name,
-            'superclasses': cls.parent_class_names,
-            'methods': len(cls.methods),
-            'attributes': len(cls.attributes),
-            'decorators': len(cls.decorators),
-            'usages': len(cls.usages),
-            'dependencies': len(cls.dependencies)
-        }
+        classes_attr = getattr(self.codebase, 'classes', [])
+        classes = list(classes_attr) if hasattr(classes_attr, '__iter__') else []
+        
+        for cls in classes:
+            if cls.name == class_name:
+                methods = getattr(cls, 'methods', [])
+                methods_list = list(methods) if hasattr(methods, '__iter__') else []
+                return {
+                    'name': cls.name,
+                    'methods': len(methods_list),
+                    'attributes': len(getattr(cls, 'attributes', [])),
+                    'superclasses': [sc.name for sc in getattr(cls, 'superclasses', [])],
+                    'subclasses': [sc.name for sc in getattr(cls, 'subclasses', [])],
+                    'decorators': [d.name for d in getattr(cls, 'decorators', [])],
+                    'is_abstract': getattr(cls, 'is_abstract', False)
+                }
+        return {}
     
-    def get_import_analysis(self, file_path: str = None):
-        """Get import relationship analysis for a file or entire codebase."""
+    def get_import_analysis(self, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Get import analysis for a file or entire codebase."""
         if file_path:
             file = self.codebase.get_file(file_path)
             if not file:
-                return None
+                return {"error": f"File not found: {file_path}"}
+            
             return {
-                'file': file.name,
-                'imports': len(file.imports),
-                'symbols': len(file.symbols),
-                'external_modules': len([imp for imp in file.imports if imp.imported_symbol and hasattr(imp.imported_symbol, 'is_external')])
+                "file": file.path,
+                "imports": len(getattr(file, 'imports', [])),
+                "external_imports": len([imp for imp in getattr(file, 'imports', []) if getattr(imp, 'is_external', False)])
             }
         else:
-            # Codebase-wide import analysis
+            files_attr = getattr(self.codebase, 'files', [])
+            files = list(files_attr) if hasattr(files_attr, '__iter__') else []
+            total_imports = sum(len(getattr(f, 'imports', [])) for f in files)
             return {
-                'total_imports': len(self.imports),
-                'total_external_modules': len(self.external_modules),
-                'files_with_imports': len([f for f in self.files if f.imports])
+                "total_files": len(files),
+                "total_imports": total_imports,
+                "average_imports_per_file": total_imports / len(files) if files else 0
             }
-

@@ -7,7 +7,10 @@ dependency graphs, and other codebase insights using the actual graph-sitter API
 
 from graph_sitter import Codebase
 import json
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional, Set
+import matplotlib.pyplot as plt
+import networkx as nx
+from graph_sitter.configs.models.codebase import CodebaseConfig
 
 
 class Visualize:
@@ -36,148 +39,130 @@ class Visualize:
         """Initialize Visualize with a Codebase instance."""
         self.codebase = codebase
     
-    def dependency_graph(self, format: str = "json") -> Dict[str, Any]:
-        """
-        Generate a dependency graph showing relationships between files and modules.
+    def dependency_graph(self, output_path: str = "dependency_graph.png"):
+        """Generate a dependency graph visualization."""
+        G = nx.DiGraph()
         
-        Args:
-            format: Output format ("json", "networkx", "graphviz")
-            
-        Returns:
-            Dictionary representation of the dependency graph
-        """
-        nodes = []
-        edges = []
+        # Add nodes for each file
+        files_attr = getattr(self.codebase, 'files', [])
+        files = list(files_attr) if hasattr(files_attr, '__iter__') else []
         
-        # Add file nodes
-        for file in self.codebase.files:
-            nodes.append({
-                "id": file.name,
-                "type": "file",
-                "label": file.name,
-                "symbols_count": len(file.symbols),
-                "imports_count": len(file.imports)
-            })
+        for file in files:
+            G.add_node(file.path, type='file')
         
-        # Add external module nodes
-        for ext_mod in self.codebase.external_modules:
-            nodes.append({
-                "id": ext_mod.name,
-                "type": "external_module", 
-                "label": ext_mod.name
-            })
+        # Add edges for dependencies
+        for file in files:
+            imports = getattr(file, 'imports', [])
+            if hasattr(imports, '__iter__'):
+                imports_list = list(imports)
+                for imp in imports_list:
+                    if hasattr(imp, 'target_file') and imp.target_file:
+                        G.add_edge(file.path, imp.target_file)
         
-        # Add import edges
-        for file in self.codebase.files:
-            for import_stmt in file.imports:
-                if import_stmt.imported_symbol:
-                    target = import_stmt.imported_symbol.name if hasattr(import_stmt.imported_symbol, 'name') else str(import_stmt.imported_symbol)
-                    edges.append({
-                        "source": file.name,
-                        "target": target,
-                        "type": "imports",
-                        "import_type": import_stmt.import_type if hasattr(import_stmt, 'import_type') else "unknown"
-                    })
+        # Create visualization
+        plt.figure(figsize=(12, 8))
+        pos = nx.spring_layout(G)
+        nx.draw(G, pos, with_labels=True, node_color='lightblue', 
+                node_size=500, font_size=8, arrows=True)
+        plt.title("Codebase Dependency Graph")
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
         
         return {
-            "nodes": nodes,
-            "edges": edges,
-            "metadata": {
-                "total_files": len(self.codebase.files),
-                "total_external_modules": len(self.codebase.external_modules),
-                "total_imports": len(self.codebase.imports)
-            }
+            'graph_file': output_path,
+            'total_files': len(files),
+            'total_dependencies': G.number_of_edges(),
+            'circular_dependencies': len(list(nx.simple_cycles(G)))
         }
     
-    def call_graph(self, function_name: str = None) -> Dict[str, Any]:
-        """
-        Generate a call graph showing function call relationships.
-        
-        Args:
-            function_name: If specified, generate call graph for specific function
-            
-        Returns:
-            Dictionary representation of the call graph
-        """
-        nodes = []
-        edges = []
-        
-        functions = [self.codebase.get_function(function_name)] if function_name else self.codebase.functions
-        functions = [f for f in functions if f is not None]
+    def call_graph(self, function_name: Optional[str] = None, output_path: str = "call_graph.png"):
+        """Generate a function call graph visualization."""
+        G = nx.DiGraph()
         
         # Add function nodes
+        functions_attr = getattr(self.codebase, 'functions', [])
+        functions = list(functions_attr) if hasattr(functions_attr, '__iter__') else []
+        
         for func in functions:
-            nodes.append({
-                "id": func.name,
-                "type": "function",
-                "label": func.name,
-                "file": func.file.name if hasattr(func, 'file') else "unknown",
-                "call_sites_count": len(func.call_sites),
-                "function_calls_count": len(func.function_calls),
-                "is_async": func.is_async,
-                "is_generator": func.is_generator
-            })
+            G.add_node(func.name, 
+                      type='function',
+                      is_async=func.is_async,
+                      is_generator=getattr(func, 'is_generator', False),
+                      complexity=getattr(func, 'complexity', 0))
         
         # Add call edges
         for func in functions:
-            for called_func in func.function_calls:
-                if hasattr(called_func, 'name'):
-                    edges.append({
-                        "source": func.name,
-                        "target": called_func.name,
-                        "type": "calls"
-                    })
+            calls = getattr(func, 'function_calls', [])
+            if hasattr(calls, '__iter__'):
+                calls_list = list(calls)
+                for call in calls_list:
+                    if hasattr(call, 'name'):
+                        G.add_edge(func.name, call.name)
+        
+        # Filter to specific function if requested
+        if function_name and function_name in G:
+            subgraph_nodes = set([function_name])
+            subgraph_nodes.update(G.successors(function_name))
+            subgraph_nodes.update(G.predecessors(function_name))
+            G = G.subgraph(subgraph_nodes)
+        
+        # Create visualization
+        plt.figure(figsize=(12, 8))
+        pos = nx.spring_layout(G)
+        nx.draw(G, pos, with_labels=True, node_color='lightgreen', 
+                node_size=500, font_size=8, arrows=True)
+        plt.title(f"Function Call Graph{' for ' + function_name if function_name else ''}")
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
         
         return {
-            "nodes": nodes,
-            "edges": edges,
-            "metadata": {
-                "total_functions": len(functions),
-                "total_calls": len(edges)
-            }
+            'graph_file': output_path,
+            'total_functions': len(functions),
+            'total_calls': G.number_of_edges(),
+            'focus_function': function_name
         }
     
-    def class_hierarchy(self) -> Dict[str, Any]:
-        """
-        Generate a class hierarchy visualization.
-        
-        Returns:
-            Dictionary representation of the class hierarchy
-        """
-        nodes = []
-        edges = []
+    def class_hierarchy(self, output_path: str = "class_hierarchy.png"):
+        """Generate a class hierarchy visualization."""
+        G = nx.DiGraph()
         
         # Add class nodes
-        for cls in self.codebase.classes:
-            nodes.append({
-                "id": cls.name,
-                "type": "class",
-                "label": cls.name,
-                "file": cls.file.name if hasattr(cls, 'file') else "unknown",
-                "methods_count": len(cls.methods),
-                "attributes_count": len(cls.attributes),
-                "parent_classes": cls.parent_class_names
-            })
+        classes_attr = getattr(self.codebase, 'classes', [])
+        classes = list(classes_attr) if hasattr(classes_attr, '__iter__') else []
+        
+        for cls in classes:
+            methods = getattr(cls, 'methods', [])
+            methods_list = list(methods) if hasattr(methods, '__iter__') else []
+            G.add_node(cls.name, 
+                      type='class',
+                      methods_count=len(methods_list),
+                      is_abstract=getattr(cls, 'is_abstract', False))
         
         # Add inheritance edges
-        for cls in self.codebase.classes:
-            for parent_name in cls.parent_class_names:
-                edges.append({
-                    "source": parent_name,
-                    "target": cls.name,
-                    "type": "inherits"
-                })
+        for cls in classes:
+            superclasses = getattr(cls, 'superclasses', [])
+            if hasattr(superclasses, '__iter__'):
+                superclasses_list = list(superclasses)
+                for parent in superclasses_list:
+                    if hasattr(parent, 'name'):
+                        G.add_edge(parent.name, cls.name)
+        
+        # Create visualization
+        plt.figure(figsize=(12, 8))
+        pos = nx.spring_layout(G)
+        nx.draw(G, pos, with_labels=True, node_color='lightcoral', 
+                node_size=500, font_size=8, arrows=True)
+        plt.title("Class Hierarchy")
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
         
         return {
-            "nodes": nodes,
-            "edges": edges,
-            "metadata": {
-                "total_classes": len(self.codebase.classes),
-                "inheritance_relationships": len(edges)
-            }
+            'graph_file': output_path,
+            'total_classes': len(classes),
+            'inheritance_relationships': G.number_of_edges()
         }
     
-    def symbol_usage_graph(self, symbol_name: str = None) -> Dict[str, Any]:
+    def symbol_usage_graph(self, symbol_name: Optional[str] = None, output_path: str = "symbol_usage.png"):
         """
         Generate a symbol usage graph showing where symbols are used.
         
@@ -248,32 +233,57 @@ class Visualize:
         else:
             raise ValueError(f"Unsupported export format: {format}")
     
-    def generate_summary_report(self) -> Dict[str, Any]:
-        """
-        Generate a comprehensive summary report of the codebase.
+    def generate_summary_report(self, output_path: str = "codebase_report.json") -> Dict[str, Any]:
+        """Generate a comprehensive summary report of the codebase."""
+        files_attr = getattr(self.codebase, 'files', [])
+        files = list(files_attr) if hasattr(files_attr, '__iter__') else []
         
-        Returns:
-            Dictionary containing various codebase metrics and insights
-        """
-        return {
-            "files": {
-                "total": len(self.codebase.files),
-                "with_classes": len([f for f in self.codebase.files if f.classes]),
-                "with_functions": len([f for f in self.codebase.files if f.functions]),
-                "with_imports": len([f for f in self.codebase.files if f.imports])
+        functions_attr = getattr(self.codebase, 'functions', [])
+        functions = list(functions_attr) if hasattr(functions_attr, '__iter__') else []
+        
+        classes_attr = getattr(self.codebase, 'classes', [])
+        classes = list(classes_attr) if hasattr(classes_attr, '__iter__') else []
+        
+        imports_attr = getattr(self.codebase, 'imports', [])
+        imports = list(imports_attr) if hasattr(imports_attr, '__iter__') else []
+        
+        # Calculate metrics
+        total_lines = sum(getattr(f, 'line_count', 0) for f in files)
+        avg_file_size = total_lines / len(files) if files else 0
+        
+        # Function metrics
+        async_functions = [f for f in functions if getattr(f, 'is_async', False)]
+        generator_functions = [f for f in functions if getattr(f, 'is_generator', False)]
+        
+        # Class metrics
+        abstract_classes = [c for c in classes if getattr(c, 'is_abstract', False)]
+        
+        report = {
+            'summary': {
+                'total_files': len(files),
+                'total_functions': len(functions),
+                'total_classes': len(classes),
+                'total_imports': len(imports),
+                'total_lines': total_lines,
+                'average_file_size': avg_file_size
             },
-            "symbols": {
-                "total": len(self.codebase.symbols),
-                "classes": len(self.codebase.classes),
-                "functions": len(self.codebase.functions)
+            'function_analysis': {
+                'async_functions': len(async_functions),
+                'generator_functions': len(generator_functions),
+                'regular_functions': len(functions) - len(async_functions) - len(generator_functions)
             },
-            "dependencies": {
-                "total_imports": len(self.codebase.imports),
-                "external_modules": len(self.codebase.external_modules)
+            'class_analysis': {
+                'abstract_classes': len(abstract_classes),
+                'concrete_classes': len(classes) - len(abstract_classes)
             },
-            "complexity": {
-                "avg_functions_per_file": len(self.codebase.functions) / len(self.codebase.files) if self.codebase.files else 0,
-                "avg_classes_per_file": len(self.codebase.classes) / len(self.codebase.files) if self.codebase.files else 0
+            'file_analysis': {
+                'python_files': len([f for f in files if f.path.endswith('.py')]) if files else 0,
+                'other_files': len([f for f in files if not f.path.endswith('.py')]) if files else 0
             }
         }
-
+        
+        # Save report
+        with open(output_path, 'w') as f:
+            json.dump(report, f, indent=2)
+        
+        return report
