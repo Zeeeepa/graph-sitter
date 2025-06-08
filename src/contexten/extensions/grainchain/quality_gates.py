@@ -434,7 +434,11 @@ class QualityGateManager:
             msg = f"No custom gate found with name: {gate_name}"
             raise ValueError(msg)
 
-        result = await self._custom_gates[gate_name](session)
+        gate_func = self._custom_gates[gate_name]
+        result = await gate_func(session)
+        if not isinstance(result, dict):
+            msg = f"Custom gate {gate_name} returned invalid result type: {type(result)}"
+            raise ValueError(msg)
         return result
 
     def _topological_sort(self, gates: List[QualityGateType]) -> List[QualityGateType]:
