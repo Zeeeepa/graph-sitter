@@ -21,11 +21,13 @@ import TaskManagement from './components/TaskManagement';
 import WorkflowControl from './components/WorkflowControl';
 import RealTimeMetrics from './components/RealTimeMetrics';
 import websocketService from './services/websocketService';
+import { mockProjects } from './api/mockData';
 
 const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
+  const [openProjectDialog, setOpenProjectDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [workflowEvents, setWorkflowEvents] = useState<WorkflowEvent[]>([]);
@@ -96,6 +98,7 @@ const App: React.FC = () => {
     } else {
       setProjects(prev => [...prev, project]);
     }
+    setOpenProjectDialog(false);
   };
 
   const handleTaskUpdate = (projectId: string, task: Task) => {
@@ -176,11 +179,36 @@ const App: React.FC = () => {
 
   const handleDialogClose = () => {
     setSelectedProject(null);
+    setOpenProjectDialog(false);
   };
 
   const handleSettingsSave = (newSettings: Settings) => {
     setSettings(newSettings);
     setOpenSettings(false);
+  };
+
+  const handleProjectSelect = (project: Project) => {
+    setSelectedProject(project);
+  };
+
+  const handleProjectPin = (projectId: string) => {
+    setProjects(prev =>
+      prev.map(p =>
+        p.id === projectId
+          ? { ...p, pinned: true }
+          : p
+      )
+    );
+  };
+
+  const handleProjectUnpin = (projectId: string) => {
+    setProjects(prev =>
+      prev.map(p =>
+        p.id === projectId
+          ? { ...p, pinned: false }
+          : p
+      )
+    );
   };
 
   if (loading) {
@@ -229,7 +257,9 @@ const App: React.FC = () => {
             <Grid item xs={12} sm={6} md={4} key={project.id}>
               <ProjectCard
                 project={project}
-                onSelect={() => setSelectedProject(project)}
+                onSelect={() => handleProjectSelect(project)}
+                onPin={() => handleProjectPin(project.id)}
+                onUnpin={() => handleProjectUnpin(project.id)}
               />
             </Grid>
           ))}
@@ -263,7 +293,7 @@ const App: React.FC = () => {
 
         {/* Dialogs */}
         <ProjectDialog
-          open={selectedProject !== null}
+          open={openProjectDialog}
           project={selectedProject}
           onClose={handleDialogClose}
           onSave={handleSaveProject}
@@ -281,3 +311,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
