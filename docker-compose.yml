@@ -6,9 +6,9 @@ services:
     image: postgres:15-alpine
     container_name: cicd_postgres
     environment:
-      POSTGRES_DB: cicd_platform
-      POSTGRES_USER: cicd_user
-      POSTGRES_PASSWORD: cicd_password
+      POSTGRES_DB: ${DB_NAME:-cicd_platform}
+      POSTGRES_USER: ${DB_USER:-cicd_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cicd_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -17,7 +17,7 @@ services:
     networks:
       - cicd_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cicd_user -d cicd_platform"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-cicd_user} -d ${DB_NAME:-cicd_platform}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile.backend
     container_name: cicd_backend
     environment:
-      - DATABASE_URL=postgresql://cicd_user:cicd_password@postgres:5432/cicd_platform
+      - DATABASE_URL=postgresql://${DB_USER:-cicd_user}:${DB_PASSWORD:-cicd_password}@postgres:5432/${DB_NAME:-cicd_platform}
       - REDIS_URL=redis://redis:6379
       - CODEGEN_TOKEN=${CODEGEN_TOKEN}
       - CODEGEN_ORG_ID=${CODEGEN_ORG_ID}
@@ -170,4 +170,3 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
-
