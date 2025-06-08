@@ -11,8 +11,17 @@ from pathlib import Path
 import json
 
 from ..core.config import CodebaseConfig
-from .analyzer import CodebaseAnalyzer
-from .enhanced_analyzer import EnhancedCodebaseAnalyzer
+
+# Import analyzers with fallbacks
+try:
+    from .analyzer import CodebaseAnalyzer  # type: ignore[attr-defined]
+except ImportError:
+    CodebaseAnalyzer = None
+
+try:
+    from .enhanced_analyzer import EnhancedCodebaseAnalyzer  # type: ignore[attr-defined]
+except ImportError:
+    EnhancedCodebaseAnalyzer = None
 
 
 @dataclass
@@ -432,4 +441,3 @@ __all__ = [
     'SymbolSummary',
     'CodebaseConfig',
 ]
-

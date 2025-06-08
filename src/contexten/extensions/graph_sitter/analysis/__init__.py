@@ -27,12 +27,17 @@ DOCUMENTATION API:
 - Advanced function and class analysis
 """
 
+from typing import Union, Optional, Any, TYPE_CHECKING
+from pathlib import Path
+
 # Import the Analysis class that provides the documentation API
 from .analyzer import Analysis
-try:
-    from .enhanced_analyzer import EnhancedCodebaseAnalyzer
-except ImportError:
-    EnhancedCodebaseAnalyzer = None
+
+# Use TYPE_CHECKING to avoid runtime import issues
+if TYPE_CHECKING:
+    from graph_sitter.configs.models.codebase import CodebaseConfig
+else:
+    CodebaseConfig = Any
 
 try:
     from .codebase_analysis import (
@@ -48,49 +53,74 @@ try:
         FunctionSummary,
         SymbolSummary,
     )
+    CODEBASE_ANALYSIS_AVAILABLE = True
 except ImportError:
-    # Provide stub functions if not available
-    def get_codebase_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_file_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_class_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_function_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_symbol_summary(*args, **kwargs):
+    CODEBASE_ANALYSIS_AVAILABLE = False
+    
+    def get_codebase_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        config: Optional[Any] = None
+    ) -> Any:
         raise NotImplementedError("codebase_analysis module not available")
     
-    CodebaseElements = None
-    CodebaseSummary = None
-    FileSummary = None
-    ClassSummary = None
-    FunctionSummary = None
-    SymbolSummary = None
+    def get_file_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        filepath: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_class_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        class_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_function_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        function_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_symbol_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        symbol_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    CodebaseElements = None  # type: ignore[misc,assignment]
+    CodebaseSummary = None  # type: ignore[misc,assignment]
+    FileSummary = None  # type: ignore[misc,assignment]
+    ClassSummary = None  # type: ignore[misc,assignment]
+    FunctionSummary = None  # type: ignore[misc,assignment]
+    SymbolSummary = None  # type: ignore[misc,assignment]
 
 # Import optional analyzers with fallbacks
 try:
-    from .complexity_analyzer import ComplexityAnalyzer
+    from .complexity_analyzer import ComplexityAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     ComplexityAnalyzer = None
 
 try:
-    from .dependency_analyzer import DependencyAnalyzer
+    from .dependency_analyzer import DependencyAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     DependencyAnalyzer = None
 
 try:
-    from .security_analyzer import SecurityAnalyzer
+    from .security_analyzer import SecurityAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     SecurityAnalyzer = None
 
 try:
-    from .call_graph_analyzer import CallGraphAnalyzer
+    from .call_graph_analyzer import CallGraphAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     CallGraphAnalyzer = None
 
 try:
-    from .dead_code_detector import DeadCodeDetector
+    from .dead_code_detector import DeadCodeDetector  # type: ignore[attr-defined]
 except ImportError:
     DeadCodeDetector = None
 
@@ -136,7 +166,7 @@ except ImportError:
 
 # Phase 2 exports - Visualization
 try:
-    from .visualization import (
+    from .visualization import (  # type: ignore[attr-defined]
         InteractiveReportGenerator,
         ReportConfig,
         create_interactive_report,
