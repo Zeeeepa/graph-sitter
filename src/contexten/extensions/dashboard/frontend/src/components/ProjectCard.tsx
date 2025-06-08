@@ -21,12 +21,33 @@ import { Project } from '../types/dashboard';
 
 interface ProjectCardProps {
   project: Project;
-  onClick?: () => void;
   onPin?: (projectId: string) => void;
   onUnpin?: (projectId: string) => void;
+  onClick?: () => void;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUnpin }) => {
+  const handlePin = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onPin) {
+      onPin(project.id);
+    }
+  };
+
+  const handleUnpin = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onUnpin) {
+      onUnpin(project.id);
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick();
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -52,19 +73,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUn
   };
 
   return (
-    <Card 
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
         cursor: 'pointer',
         '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: 3
-        },
-        transition: 'all 0.2s ease-in-out'
+          boxShadow: 6
+        }
       }}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <CardContent sx={{ flexGrow: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -116,15 +135,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUn
         </Typography>
       </CardContent>
       
-      <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+      <CardActions sx={{ justifyContent: 'space-between', px: 2, py: 1 }}>
+        <Box>
           <Tooltip title={project.flowEnabled ? 'Pause Flow' : 'Start Flow'}>
-            <IconButton 
-              size="small" 
+            <IconButton
+              size="small"
               color={project.flowEnabled ? 'warning' : 'success'}
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle flow toggle
+                if (onClick) {
+                  onClick();
+                }
               }}
             >
               {project.flowEnabled ? <PauseIcon /> : <PlayIcon />}
