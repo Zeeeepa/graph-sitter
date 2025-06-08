@@ -1,16 +1,4 @@
-import axios from 'axios';
-import { Project } from '../types/dashboard';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-});
-
-export interface ProjectPinRequest {
-  projectId: string;
-}
+import { Project, DashboardStats, ProjectPinRequest } from '../types/dashboard';
 
 export interface DashboardStats {
   total_projects: number;
@@ -18,6 +6,7 @@ export interface DashboardStats {
   completed_tasks: number;
   pending_prs: number;
   quality_score: number;
+  last_updated: string;
 }
 
 const mockProjects: Project[] = [
@@ -35,7 +24,7 @@ const mockProjects: Project[] = [
     metrics: {
       commits: 156,
       prs: 23,
-      issues: 45
+      contributors: 8
     }
   },
   {
@@ -52,7 +41,7 @@ const mockProjects: Project[] = [
     metrics: {
       commits: 89,
       prs: 12,
-      issues: 34
+      contributors: 5
     }
   }
 ];
@@ -61,8 +50,8 @@ export const dashboardApi = {
   // Get all projects
   getProjects: async (): Promise<Project[]> => {
     try {
-      const response = await api.get('/projects');
-      return response.data;
+      const response = await fetch('/api/projects');
+      return await response.json();
     } catch (error) {
       console.error('Failed to fetch projects:', error);
       // Return mock data for development
@@ -70,20 +59,21 @@ export const dashboardApi = {
     }
   },
 
-  // Get dashboard statistics
+  // Get dashboard stats
   getStats: async (): Promise<DashboardStats> => {
     try {
-      const response = await api.get('/stats');
-      return response.data;
+      const response = await fetch('/api/stats');
+      return await response.json();
     } catch (error) {
       console.error('Failed to fetch stats:', error);
       // Return mock data for development
       return {
-        total_projects: 12,
-        active_workflows: 8,
-        completed_tasks: 156,
-        pending_prs: 23,
-        quality_score: 87
+        total_projects: 10,
+        active_workflows: 3,
+        completed_tasks: 25,
+        pending_prs: 5,
+        quality_score: 85,
+        last_updated: new Date().toISOString()
       };
     }
   },
@@ -91,31 +81,35 @@ export const dashboardApi = {
   // Pin a project
   pinProject: async (request: ProjectPinRequest): Promise<void> => {
     try {
-      await api.post('/projects/pin', request);
+      await fetch('/api/projects/pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
     } catch (error) {
       console.error('Failed to pin project:', error);
-      throw error;
+      // For development, just log the action
+      console.log('Pinned project:', request.projectId);
     }
   },
 
   // Unpin a project
   unpinProject: async (request: ProjectPinRequest): Promise<void> => {
     try {
-      await api.post('/projects/unpin', request);
+      await fetch('/api/projects/unpin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
     } catch (error) {
       console.error('Failed to unpin project:', error);
-      throw error;
-    }
-  },
-
-  // Get project details
-  getProject: async (projectId: string): Promise<Project> => {
-    try {
-      const response = await api.get(`/projects/${projectId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch project:', error);
-      throw error;
+      // For development, just log the action
+      console.log('Unpinned project:', request.projectId);
     }
   }
 };
+
