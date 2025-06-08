@@ -15,6 +15,7 @@ from .config import GrainchainIntegrationConfig, get_grainchain_config
 from .grainchain_types import (
     GrainchainEvent,
     GrainchainEventType,
+    IntegrationStatus,
     QualityGateResult,
     QualityGateStatus,
     QualityGateType,
@@ -59,6 +60,7 @@ class QualityGateManager:
         self._sandbox_manager = SandboxManager(self.config)
         self._gate_definitions: Dict[QualityGateType, QualityGateDefinition] = {}
         self._custom_gates: Dict[str, Callable[[SandboxSession], Any]] = {}
+        self._event_handlers: List[Callable[[GrainchainEvent], Any]] = []
         self._initialize_gates()
 
     def _initialize_gates(self) -> None:
@@ -364,31 +366,86 @@ class QualityGateManager:
             }
         }
 
-    def _topological_sort(self, gates: list[QualityGateType]) -> list[QualityGateType]:
+    def _topological_sort(self, gates: List[QualityGateType]) -> List[QualityGateType]:
         """Sort gates topologically based on dependencies."""
         graph = self._build_dependency_graph(gates)
-        visited = set()
-        result = []
+        sorted_gates: List[QualityGateType] = []
+        visited: Set[QualityGateType] = set()
+        temp_visited: Set[QualityGateType] = set()
 
-        def visit(gate):
-            if gate in visited:
-                return
-            visited.add(gate)
+        def visit(gate: QualityGateType) -> None:
+            """Visit a gate in the dependency graph."""
+            if gate in temp_visited:
+                msg = f"Circular dependency detected: {gate}"
+                raise ValueError(msg)
 
-            for dep in graph.get(gate, []):
-                visit(dep)
-
-            result.append(gate)
+            if gate not in visited:
+                temp_visited.add(gate)
+                for dep in graph.get(gate, []):
+                    visit(dep)
+                temp_visited.remove(gate)
+                visited.add(gate)
+                sorted_gates.append(gate)
 
         for gate in gates:
-            visit(gate)
+            if gate not in visited:
+                visit(gate)
 
-        return result
+        return sorted_gates
 
-    async def _emit_event(self, event_type: GrainchainEventType, data: dict[str, Any]):
-        """Emit a quality gate event."""
-        # This would integrate with the event system
-        pass
+    async def _emit_event(self, event_type: GrainchainEventType, data: Dict[str, Any]) -> None:
+        """Emit an event."""
+        event = GrainchainEvent(
+            event_type=event_type,
+            timestamp=datetime.now(UTC),
+            source="quality_gates",
+            data=data
+        )
+
+        # Emit event to handlers
+        for handler in self._event_handlers:
+            try:
+                await handler(event)
+            except Exception as e:
+                logger.exception(f"Event handler failed: {e}")
+
+    def _get_gate_definition(self, gate: QualityGateType) -> QualityGateDefinition:
+        """Get gate definition with validation."""
+        gate_def = self._gate_definitions.get(gate)
+        if not gate_def:
+            msg = f"No definition found for gate: {gate}"
+            raise ValueError(msg)
+        return gate_def
+
+    async def get_health_status(self) -> Dict[str, Any]:
+        """Get health status of the quality gate manager."""
+        try:
+            # Get component health
+            sandbox_health = await self._sandbox_manager.get_health_status()
+
+            # Calculate overall health
+            issues = []
+            if sandbox_health["status"] != IntegrationStatus.HEALTHY:
+                issues.extend(sandbox_health["issues"])
+
+            status = IntegrationStatus.HEALTHY if not issues else IntegrationStatus.DEGRADED
+
+            return {
+                "status": status,
+                "components": {
+                    "sandbox_manager": sandbox_health
+                },
+                "issues": issues,
+                "last_check": datetime.now(UTC)
+            }
+
+        except Exception as e:
+            logger.exception("Failed to get health status")
+            return {
+                "status": IntegrationStatus.ERROR,
+                "error": str(e),
+                "issues": ["Failed to get health status"]
+            }
 
 
 @dataclass
