@@ -20,28 +20,22 @@ from ..modal.base import CodebaseEventsApp
 # Import existing prefect components
 from ..prefect.flow import PrefectFlow
 from ..prefect.workflow_pipeline import PrefectWorkflowPipeline
-from ..prefect.prefect import Prefect
 
 # Import existing controlflow components
 from ..controlflow.orchestrator import FlowOrchestrator
-from ..controlflow.codegen_integration import CodegenFlowIntegration
-from ..controlflow.controlflow import ControlFlow
 
 # Import existing codegen components
 from ..codegen.workflow_integration import CodegenWorkflowClient
 from ..codegen.apply_overlay import OverlayApplicator
-from ..codegen.codegen import Codegen
 
 # Import existing grainchain components
 from ..grainchain.quality_gates import QualityGateManager
 from ..grainchain.sandbox_manager import SandboxManager
 from ..grainchain.graph_sitter_integration import GraphSitterQualityGates
-from ..grainchain.grainchain import Grainchain
 
 # Import existing graph_sitter analysis components
 from ..graph_sitter.analysis.main_analyzer import comprehensive_analysis
 from ..graph_sitter.code_analysis import CodeAnalysisEngine
-from ..graph_sitter.graph_sitter import GraphSitter
 
 logger = get_logger(__name__)
 
@@ -112,33 +106,33 @@ class ContextenApp:
     def _initialize_orchestration_extensions(self):
         """Initialize the 6 orchestration extensions (Prefect, ControlFlow, Codegen, Grainchain, Graph_sitter)."""
         try:
-            # Initialize Prefect extension (Top Layer - System Watch Flows)
-            self.prefect_extension = Prefect(app=self)
+            # Initialize Prefect extension (Top Layer - System Watch Flows) - Lazy loading
+            self.prefect_extension = None  # Will be loaded when needed
             self.prefect_flow = PrefectFlow(app=self)
             self.prefect_pipeline = PrefectWorkflowPipeline(name=f"{self.name}_pipeline")
             
-            # Initialize ControlFlow extension (Agent Orchestrator)
-            self.controlflow_extension = ControlFlow(app=self)
+            # Initialize ControlFlow extension (Agent Orchestrator) - Lazy loading
+            self.controlflow_extension = None  # Will be loaded when needed
             self.controlflow_orchestrator = FlowOrchestrator(app=self)
             
-            # Initialize Codegen extension (Task Completion with API token/org_id)
-            self.codegen_extension = Codegen(app=self)
-            self.codegen_integration = CodegenFlowIntegration(app=self)
+            # Initialize Codegen extension (Task Completion with API token/org_id) - Lazy loading
+            self.codegen_extension = None  # Will be loaded when needed
+            self.codegen_integration = None  # Will be loaded when needed
             self.codegen_client = CodegenWorkflowClient(
                 org_id=os.getenv('CODEGEN_ORG_ID'),
                 token=os.getenv('CODEGEN_API_TOKEN'),
                 base_url=os.getenv('CODEGEN_BASE_URL', 'https://api.codegen.com')
             )
             
-            # Initialize Grainchain extension (Sandboxed Deployment + Snapshot saving)
+            # Initialize Grainchain extension (Sandboxed Deployment + Snapshot saving) - Lazy loading
             from ..grainchain.config import GrainchainIntegrationConfig
             grainchain_config = GrainchainIntegrationConfig()
-            self.grainchain_extension = Grainchain(app=self)
+            self.grainchain_extension = None  # Will be loaded when needed
             self.grainchain_quality_gates = QualityGateManager(grainchain_config)
             self.grainchain_sandbox = SandboxManager(grainchain_config)
             
-            # Initialize Graph_sitter extension (Analysis for PR validation)
-            self.graph_sitter_extension = GraphSitter(app=self)
+            # Initialize Graph_sitter extension (Analysis for PR validation) - Lazy loading
+            self.graph_sitter_extension = None  # Will be loaded when needed
             self.graph_sitter_quality = GraphSitterQualityGates(
                 quality_manager=self.grainchain_quality_gates,
                 sandbox_manager=self.grainchain_sandbox
@@ -155,19 +149,79 @@ class ContextenApp:
         """Initialize fallback orchestration components if full initialization fails."""
         try:
             # Set None for failed components
+            self.prefect_extension = None
             self.prefect_flow = None
             self.prefect_pipeline = None
+            self.controlflow_extension = None
             self.controlflow_orchestrator = None
+            self.codegen_extension = None
             self.codegen_integration = None
             self.codegen_client = None
+            self.grainchain_extension = None
             self.grainchain_quality_gates = None
             self.grainchain_sandbox = None
+            self.graph_sitter_extension = None
             self.graph_sitter_quality = None
             self.graph_sitter_analysis = None
             
             logger.warning("⚠️ Using fallback orchestration - some features may be limited")
         except Exception as e:
             logger.error(f"❌ Even fallback initialization failed: {e}")
+
+    def _get_prefect_extension(self):
+        """Lazy load Prefect extension."""
+        if self.prefect_extension is None:
+            try:
+                from ..prefect.prefect import Prefect
+                self.prefect_extension = Prefect(self)
+                logger.info("✅ Prefect extension lazy loaded")
+            except ImportError as e:
+                logger.warning(f"Failed to lazy load Prefect extension: {e}")
+        return self.prefect_extension
+
+    def _get_controlflow_extension(self):
+        """Lazy load ControlFlow extension."""
+        if self.controlflow_extension is None:
+            try:
+                from ..controlflow.controlflow import ControlFlow
+                self.controlflow_extension = ControlFlow(self)
+                logger.info("✅ ControlFlow extension lazy loaded")
+            except ImportError as e:
+                logger.warning(f"Failed to lazy load ControlFlow extension: {e}")
+        return self.controlflow_extension
+
+    def _get_codegen_extension(self):
+        """Lazy load Codegen extension."""
+        if self.codegen_extension is None:
+            try:
+                from ..codegen.codegen import Codegen
+                self.codegen_extension = Codegen(self)
+                logger.info("✅ Codegen extension lazy loaded")
+            except ImportError as e:
+                logger.warning(f"Failed to lazy load Codegen extension: {e}")
+        return self.codegen_extension
+
+    def _get_grainchain_extension(self):
+        """Lazy load Grainchain extension."""
+        if self.grainchain_extension is None:
+            try:
+                from ..grainchain.grainchain import Grainchain
+                self.grainchain_extension = Grainchain(self)
+                logger.info("✅ Grainchain extension lazy loaded")
+            except ImportError as e:
+                logger.warning(f"Failed to lazy load Grainchain extension: {e}")
+        return self.grainchain_extension
+
+    def _get_graph_sitter_extension(self):
+        """Lazy load Graph_sitter extension."""
+        if self.graph_sitter_extension is None:
+            try:
+                from ..graph_sitter.graph_sitter import GraphSitter
+                self.graph_sitter_extension = GraphSitter(self)
+                logger.info("✅ Graph_sitter extension lazy loaded")
+            except ImportError as e:
+                logger.warning(f"Failed to lazy load Graph_sitter extension: {e}")
+        return self.graph_sitter_extension
 
     async def execute_comprehensive_workflow(self, project_id: str, requirements: str) -> dict:
         """Execute the complete workflow using all 11 extensions in proper hierarchy."""
