@@ -14,7 +14,7 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { Project, Settings, Task, WorkflowEvent, WebSocketEvent } from './types/dashboard';
-import { fetchProjects } from './api/dashboardApi';
+import { dashboardApi } from './api/dashboardApi';
 import ProjectCard from './components/ProjectCard';
 import ProjectDialog from './components/ProjectDialog';
 import SettingsDialog from './components/SettingsDialog';
@@ -61,7 +61,7 @@ const App: React.FC = () => {
   const loadProjects = async () => {
     setLoading(true);
     try {
-      const projectsData = await fetchProjects();
+      const projectsData = await dashboardApi.getProjects();
       setProjects(projectsData);
       setLoading(false);
     } catch (err) {
