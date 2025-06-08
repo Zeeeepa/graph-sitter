@@ -13,6 +13,8 @@ from typing import Any, Dict, List, Optional, Set
 
 from .config import GrainchainIntegrationConfig, get_grainchain_config
 from .grainchain_types import (
+    GrainchainEvent,
+    GrainchainEventType,
     QualityGateResult,
     QualityGateStatus,
     QualityGateType,
@@ -28,6 +30,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class QualityGateDefinition:
     """Definition of a quality gate."""
+
     gate_type: QualityGateType
     name: str
     description: str
@@ -37,7 +40,8 @@ class QualityGateDefinition:
     dependencies: List[QualityGateType] = field(default_factory=list)
     thresholds: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        """Initialize default values."""
         if self.dependencies is None:
             self.dependencies = []
         if self.thresholds is None:

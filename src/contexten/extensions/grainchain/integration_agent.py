@@ -9,7 +9,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, TypeVar, cast
 
 from .config import GrainchainIntegrationConfig, get_grainchain_config
 from .grainchain_types import (
@@ -27,6 +27,8 @@ if TYPE_CHECKING:
     from .sandbox_manager import SandboxManager
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar('T')
 
 
 @dataclass
@@ -72,9 +74,9 @@ class GrainchainIntegrationAgent:
             fail_fast=fail_fast
         )
 
-    def on_event(self, event_type: GrainchainEventType) -> Callable:
+    def on_event(self, event_type: GrainchainEventType) -> Callable[[Callable[[GrainchainEvent], T]], Callable[[GrainchainEvent], T]]:
         """Decorator for registering event handlers."""
-        def decorator(handler: Callable[[GrainchainEvent], Any]) -> Callable[[GrainchainEvent], Any]:
+        def decorator(handler: Callable[[GrainchainEvent], T]) -> Callable[[GrainchainEvent], T]:
             if event_type not in self._event_handlers:
                 self._event_handlers[event_type] = []
             self._event_handlers[event_type].append(handler)
