@@ -318,7 +318,7 @@ class TrackedSandboxSession:
         self._manager._session_metrics[self.session_id]["metrics"]["commands_executed"] = (
             self._manager._session_metrics[self.session_id]["metrics"].get("commands_executed", 0) + 1
         )
-        return result
+        return cast(Dict[str, Any], result)
 
     async def upload_file(self, local_path: str, remote_path: str) -> None:
         """Upload a file to the sandbox."""
