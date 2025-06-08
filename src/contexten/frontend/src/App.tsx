@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline, Box } from '@mui/material';
 
 // Components
 import Dashboard from './components/Dashboard';
 import ProjectSelectionDialog from './components/ProjectSelectionDialog';
+import ErrorBoundary from './components/ErrorBoundary';
 import ConnectionStatus from './components/ConnectionStatus';
 
 // Services
@@ -22,6 +25,36 @@ const queryClient = new QueryClient({
       retry: 2,
       staleTime: 5 * 60 * 1000, // 5 minutes
       cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#007bff',
+    },
+    secondary: {
+      main: '#6c757d',
+    },
+    error: {
+      main: '#dc3545',
+    },
+    success: {
+      main: '#28a745',
+    },
+    warning: {
+      main: '#ffc107',
+    },
+    info: {
+      main: '#17a2b8',
+    },
+    background: {
+      default: '#f8f9fa',
+    },
+    text: {
+      primary: '#343a40',
+      secondary: '#6c757d',
     },
   },
 });
@@ -124,23 +157,33 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="App" style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh' }}>
-          {/* Connection Status Indicator */}
-          <ConnectionStatus />
-          
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/projects" element={<ProjectSelectionDialog />} />
-          </Routes>
-        </div>
-      </Router>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+              {/* Connection Status Indicator */}
+              <ConnectionStatus />
+              
+              <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/projects" element={
+                  <ProjectSelectionDialog 
+                    open={true}
+                    onClose={() => window.history.back()}
+                    repositories={[]}
+                  />
+                } />
+              </Routes>
+            </Box>
+          </Router>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 }
 
 export default App;
-
