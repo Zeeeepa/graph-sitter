@@ -83,69 +83,52 @@ from .analysis.codebase_analysis import (
     FileMetrics
 )
 
-# Import main analysis functions for easy access
-from .analysis.main_analyzer import comprehensive_analysis, print_analysis_summary, save_analysis_report
-
-# Import individual analyzers
-from .analysis.dead_code_detector import detect_dead_code, remove_dead_code
-from .analysis.complexity_analyzer import analyze_complexity, find_complex_functions, find_large_functions
-from .analysis.dependency_analyzer import analyze_dependencies, detect_circular_dependencies, analyze_module_coupling
-from .analysis.security_analyzer import analyze_security, check_import_security
-from .analysis.call_graph_analyzer import analyze_call_graph, find_hotspot_functions
-
-# Import advanced configuration features
-from .analysis.advanced_config import (
-    AdvancedCodebaseConfig,
-    create_debug_config,
-    create_performance_config,
-    create_comprehensive_analysis_config,
-    create_typescript_analysis_config,
-    create_ast_only_config,
-    analyze_with_advanced_config
-)
-from .analysis.enhanced_analyzer import enhanced_comprehensive_analysis
-from .analysis.config_manager import ConfigurationManager
-
+# Export all main components
 __all__ = [
-    # Main analysis functions
-    'comprehensive_analysis',
-    'print_analysis_summary', 
-    'save_analysis_report',
+    # Main classes
+    'Analysis',
+    'Visualize', 
+    'Resolve',
     
-    # Dead code analysis
-    'detect_dead_code',
-    'remove_dead_code',
+    # Analysis functions
+    'get_codebase_summary',
+    'get_file_summary',
+    'get_class_summary', 
+    'get_function_summary',
+    'get_symbol_summary',
+    'get_optimized_config',
     
-    # Complexity analysis
-    'analyze_complexity',
-    'find_complex_functions',
-    'find_large_functions',
-    
-    # Dependency analysis
-    'analyze_dependencies',
-    'detect_circular_dependencies',
-    'analyze_module_coupling',
-    
-    # Security analysis
-    'analyze_security',
-    'check_import_security',
-    
-    # Call graph analysis
-    'analyze_call_graph',
-    'find_hotspot_functions',
-    
-    # Advanced configuration
-    'AdvancedCodebaseConfig',
-    'create_debug_config',
-    'create_performance_config',
-    'create_comprehensive_analysis_config',
-    'create_typescript_analysis_config',
-    'create_ast_only_config',
-    'analyze_with_advanced_config',
-    'enhanced_comprehensive_analysis',
-    'ConfigurationManager'
+    # Data classes
+    'CodebaseMetrics',
+    'FunctionMetrics',
+    'ClassMetrics',
+    'FileMetrics'
 ]
 
 # Version info
 __version__ = "1.0.0"
-__description__ = "Comprehensive codebase analysis using graph_sitter API"
+__author__ = "Graph-Sitter Extensions"
+__description__ = """
+Consolidated Tree-sitter analysis, visualization, and resolution features.
+
+This module provides comprehensive codebase analysis capabilities using Tree-sitter
+parsing with advanced graph-based insights, interactive visualizations, and 
+sophisticated symbol resolution.
+
+Key Features:
+- Pre-computed graph element access (functions, classes, imports, files, symbols)
+- Advanced function analysis (usages, call sites, dependencies, decorators)
+- Class hierarchy analysis (inheritance, methods, attributes)
+- Import relationship analysis (inbound/outbound imports, external modules)
+- Interactive visualizations (charts, dependency graphs, heatmaps)
+- Symbol resolution and dependency tracking
+- Comprehensive reporting (HTML, JSON, text formats)
+- Performance-optimized configuration
+- Tree-sitter best practices implementation
+
+Based on official Tree-sitter documentation and patterns from:
+- https://tree-sitter.github.io/tree-sitter/
+- https://tree-sitter.github.io/tree-sitter/creating-parsers
+- https://tree-sitter.github.io/tree-sitter/using-parsers
+"""
+
