@@ -3,85 +3,40 @@ import {
   Grid,
   Paper,
   Typography,
+  Container,
   Box,
   CircularProgress,
-  Container,
-  Chip
+  Alert,
+  Chip,
 } from '@mui/material';
 import { useQuery } from 'react-query';
 import ProjectCard from './ProjectCard';
 import RealTimeMetrics from './RealTimeMetrics';
 import WorkflowMonitor from './WorkflowMonitor';
-import { useDashboardStore } from '../store/dashboardStore';
-import { dashboardApi, DashboardStats } from '../api/dashboardApi';
-import { Project } from '../types/dashboard';
-
-// Type conversion function
-function convertToDashboardProject(project: BaseProject): DashboardProject {
-  return {
-    id: project.id,
-    name: project.name,
-    description: project.description || '',
-    repository: project.url,
-    status: project.status === 'active' ? 'active' : 
-           project.status === 'error' ? 'error' : 'paused',
-    progress: 0,
-    flowEnabled: false,
-    flowStatus: 'stopped',
-    lastActivity: new Date(project.updated_at),
-    tags: [],
-    metrics: {
-      commits: 0,
-      contributors: 0,
-      openPRs: 0,
-      closedPRs: 0,
-      issues: 0,
-      tests: 0,
-      coverage: 0
-    }
-  };
-}
+import { dashboardApi } from '../api/dashboardApi';
+import { Project, DashboardStats } from '../types/dashboard';
 
 const Dashboard: React.FC = () => {
-  const { projects, setProjects } = useDashboardStore();
+  const [projects, setProjects] = useState<Project[]>([]);
 
   // Fetch projects
-  const { isLoading: projectsLoading, error: projectsError } = useQuery(
+  const { isLoading: projectsLoading, error: projectsError } = useQuery<Project[]>(
     'projects',
     dashboardApi.getProjects,
     {
-      onSuccess: (data: DashboardProject[]) => {
-        setProjects(data.map(project => ({
-          ...project,
-          // Ensure all required fields are present
-          description: project.description || '',
-          status: project.status || 'active',
-          progress: project.progress || 0,
-          flowEnabled: project.flowEnabled || false,
-          flowStatus: project.flowStatus || 'stopped',
-          lastActivity: project.lastActivity || new Date(),
-          tags: project.tags || [],
-          metrics: project.metrics || {
-            commits: 0,
-            contributors: 0,
-            openPRs: 0,
-            closedPRs: 0,
-            issues: 0,
-            tests: 0,
-            coverage: 0
-          }
-        })));
+      onSuccess: (data: Project[]) => {
+        setProjects(data);
       },
       refetchInterval: 30000, // Refresh every 30 seconds
     }
   );
 
-  // Fetch dashboard stats
+  // Fetch stats
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>(
-    'dashboard-stats',
+    'stats',
     dashboardApi.getStats,
     {
-      refetchInterval: 60000, // Refresh every minute
+      refetchInterval: 30000, // Refresh every 30 seconds
     }
   );
 
@@ -105,16 +60,18 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (projectsLoading) {
+  if (projectsLoading || statsLoading) {
     return (
       <Container maxWidth="xl">
         <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="400px"
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '60vh',
+          }}
         >
-          <CircularProgress size={60} />
+          <CircularProgress />
         </Box>
       </Container>
     );
@@ -124,12 +81,9 @@ const Dashboard: React.FC = () => {
     return (
       <Container maxWidth="xl">
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="error" gutterBottom>
-            Failed to load dashboard data
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Please try refreshing the page or contact support if the issue persists.
-          </Typography>
+          <Alert severity="error">
+            Failed to load projects. Please try again later.
+          </Alert>
         </Box>
       </Container>
     );
@@ -137,59 +91,50 @@ const Dashboard: React.FC = () => {
 
   return (
     <Container maxWidth="xl">
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
-          Project Dashboard
+      {/* Stats Overview */}
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h5" gutterBottom>
+          Dashboard Overview
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Monitor and manage your development projects
-        </Typography>
-
-        {/* Dashboard Stats */}
-        {stats && (
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
-            <Chip
-              label={`${stats.total_projects} Projects`}
-              color="primary"
-              variant="outlined"
-            />
-            <Chip
-              label={`${stats.active_workflows} Active Workflows`}
-              color="success"
-              variant="outlined"
-            />
-            <Chip
-              label={`${stats.completed_tasks} Completed Tasks`}
-              color="info"
-              variant="outlined"
-            />
-            <Chip
-              label={`${stats.pending_prs} Pending PRs`}
-              color="warning"
-              variant="outlined"
-            />
-            <Chip
-              label={`${stats.quality_score}% Quality Score`}
-              color={stats.quality_score >= 80 ? 'success' : 'warning'}
-              variant="outlined"
-            />
-          </Box>
-        )}
-      </Box>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Chip
+            label={`${stats?.total_projects || 0} Total Projects`}
+            color="primary"
+            variant="outlined"
+          />
+          <Chip
+            label={`${stats?.active_workflows || 0} Active Workflows`}
+            color="success"
+            variant="outlined"
+          />
+          <Chip
+            label={`${stats?.completed_tasks || 0} Completed Tasks`}
+            color="info"
+            variant="outlined"
+          />
+          <Chip
+            label={`${stats?.pending_prs || 0} Pending PRs`}
+            color="warning"
+            variant="outlined"
+          />
+          <Chip
+            label={`Quality Score: ${stats?.quality_score || 0}%`}
+            color="secondary"
+            variant="outlined"
+          />
+        </Box>
+      </Paper>
 
       {/* Projects Grid */}
-      {!projects || projects.length === 0 ? (
-        <Paper sx={{ p: 6, textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>
+      {projects.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" color="text.secondary">
             No projects found
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Start by creating your first project or check your connection.
-          </Typography>
-        </Paper>
+        </Box>
       ) : (
         <Grid container spacing={3}>
-          {projects.map((project: Project) => (
+          {projects.map((project) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
               <ProjectCard
                 project={project}
@@ -202,15 +147,15 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Real Time Metrics */}
-      <RealTimeMetrics projects={projects || []} />
+      <RealTimeMetrics projects={projects} />
 
       {/* Workflow Monitor */}
-      <WorkflowMonitor projects={projects || []} />
+      <WorkflowMonitor projects={projects} />
 
       {/* Footer Info */}
       <Box sx={{ mt: 6, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography variant="body2" color="text.secondary" align="center">
-          Graph Sitter Dashboard - Real-time project monitoring and management
+          Last updated: {stats?.last_updated ? new Date(stats.last_updated).toLocaleString() : 'Never'}
         </Typography>
       </Box>
     </Container>
@@ -218,3 +163,4 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
