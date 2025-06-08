@@ -20,8 +20,17 @@ PHASE 2 FEATURES:
 
 This module consolidates all analysis functionality into a unified system
 while maintaining backward compatibility and clean architecture.
+
+DOCUMENTATION API:
+- Analysis class providing the exact API from graph-sitter documentation
+- Direct access to pre-computed graph elements
+- Advanced function and class analysis
 """
 
+# Import the Analysis class that provides the documentation API
+from .analyzer import Analysis
+
+# Import existing comprehensive analysis functionality
 from .core.engine import (
     ComprehensiveAnalysisEngine,
     AnalysisConfig,
@@ -86,6 +95,9 @@ except ImportError:
     ADVANCED_CONFIG_AVAILABLE = False
 
 __all__ = [
+    # Documentation API
+    'Analysis',
+    
     # Core analysis
     'ComprehensiveAnalysisEngine',
     'AnalysisConfig',
@@ -220,4 +232,3 @@ def print_feature_status():
 
 if __name__ == "__main__":
     print_feature_status()
-
