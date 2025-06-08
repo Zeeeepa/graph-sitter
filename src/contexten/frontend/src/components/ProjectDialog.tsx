@@ -16,6 +16,7 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  SelectChangeEvent,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -79,7 +80,7 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
   }, [project]);
 
   const handleChange = (field: keyof Project) => (
-    event: React.ChangeEvent<HTMLInputElement> | { target: { value: unknown } }
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent
   ) => {
     setFormData((prev) => ({ ...prev, [field]: event.target.value }));
   };
@@ -162,7 +163,7 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
               <Select
                 value={formData.status}
                 label="Status"
-                onChange={handleSelectChange('status')}
+                onChange={handleChange('status')}
               >
                 <MenuItem value="active">Active</MenuItem>
                 <MenuItem value="paused">Paused</MenuItem>
