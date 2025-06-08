@@ -40,33 +40,46 @@ try:
         get_file_summary,
         get_class_summary,
         get_function_summary,
-        get_symbol_summary,
-        CodebaseElements,
-        CodebaseSummary,
-        FileSummary,
-        ClassSummary,
-        FunctionSummary,
-        SymbolSummary,
+        get_symbol_summary
     )
 except ImportError:
-    # Provide stub functions if not available
-    def get_codebase_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_file_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_class_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_function_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_symbol_summary(*args, **kwargs):
+    # Provide stub functions with identical signatures if not available
+    from typing import Any, Optional, Union
+    from pathlib import Path
+    
+    def get_codebase_summary(
+        codebase_path: Union[str, Path],
+        config: Optional[Any] = None
+    ) -> Any:
         raise NotImplementedError("codebase_analysis module not available")
     
-    CodebaseElements = None
-    CodebaseSummary = None
-    FileSummary = None
-    ClassSummary = None
-    FunctionSummary = None
-    SymbolSummary = None
+    def get_file_summary(
+        codebase_path: Union[str, Path],
+        filepath: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_class_summary(
+        codebase_path: Union[str, Path],
+        class_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_function_summary(
+        codebase_path: Union[str, Path],
+        function_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_symbol_summary(
+        codebase_path: Union[str, Path],
+        symbol_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
 
 # Import optional analyzers with fallbacks
 try:
@@ -179,12 +192,6 @@ __all__ = [
     'get_class_summary',
     'get_function_summary',
     'get_symbol_summary',
-    'CodebaseElements',
-    'CodebaseSummary',
-    'FileSummary',
-    'ClassSummary',
-    'FunctionSummary',
-    'SymbolSummary',
     
     # Specialized analyzers
     'ComplexityAnalyzer',
