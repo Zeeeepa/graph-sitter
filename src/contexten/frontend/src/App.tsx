@@ -133,7 +133,13 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/projects" element={<ProjectSelectionDialog />} />
+            <Route path="/projects" element={
+              <ProjectSelectionDialog 
+                open={true}
+                onClose={() => window.history.back()}
+                repositories={[]}
+              />
+            } />
           </Routes>
         </div>
       </Router>
@@ -143,4 +149,3 @@ function App() {
 }
 
 export default App;
-
