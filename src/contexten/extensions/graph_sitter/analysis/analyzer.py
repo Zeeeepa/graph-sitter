@@ -1,7 +1,8 @@
 """
 Main Analysis Interface
 
-Unified interface for all codebase analysis operations.
+Unified interface for all codebase analysis operations using official tree-sitter patterns.
+This module has been updated to use the new consolidated analysis system.
 """
 
 import logging
@@ -10,9 +11,14 @@ from typing import Dict, List, Any, Optional, Union
 from pathlib import Path
 
 from .config.analysis_config import AnalysisConfig
-from .core.codebase_analyzer import CodebaseAnalyzer as CoreCodebaseAnalyzer
-from .core.analysis_engine import AnalysisResult
-from .visualization.html_reporter import HTMLReporter
+from .unified_analyzer import UnifiedAnalyzer, AnalysisResult as UnifiedAnalysisResult, CodebaseAnalysisResult
+from .core.tree_sitter_core import get_tree_sitter_core
+
+# Visualization components (keep if they exist)
+try:
+    from .visualization.html_reporter import HTMLReporter
+except ImportError:
+    HTMLReporter = None
 
 
 class CodebaseAnalyzer:
@@ -20,7 +26,7 @@ class CodebaseAnalyzer:
     Main interface for comprehensive codebase analysis.
     
     This is the primary entry point for all analysis operations,
-    providing a unified interface that orchestrates all analysis modules.
+    now using the unified tree-sitter-based analysis system.
     """
     
     def __init__(self, config: Optional[AnalysisConfig] = None):
@@ -31,7 +37,8 @@ class CodebaseAnalyzer:
             config: Analysis configuration. If None, uses default configuration.
         """
         self.config = config or AnalysisConfig()
-        self.analyzer = CoreCodebaseAnalyzer(self.config)
+        self.tree_sitter_core = get_tree_sitter_core()
+        self.unified_analyzer = UnifiedAnalyzer(self.tree_sitter_core)
         self.html_reporter = HTMLReporter()
         self.logger = logging.getLogger(__name__)
         
@@ -51,9 +58,9 @@ class CodebaseAnalyzer:
         codebase_path: Union[str, Path],
         output_dir: Optional[str] = None,
         **kwargs
-    ) -> AnalysisResult:
+    ) -> CodebaseAnalysisResult:
         """
-        Perform comprehensive codebase analysis.
+        Perform comprehensive codebase analysis using unified tree-sitter system.
         
         Args:
             codebase_path: Path to the codebase to analyze
@@ -61,38 +68,57 @@ class CodebaseAnalyzer:
             **kwargs: Additional configuration overrides
             
         Returns:
-            AnalysisResult containing all analysis data
+            CodebaseAnalysisResult containing all analysis data
         """
-        self.logger.info(f"Starting analysis of codebase: {codebase_path}")
+        self.logger.info(f"Starting unified analysis of codebase: {codebase_path}")
         
-        # Perform analysis
-        result = self.analyzer.analyze(codebase_path, **kwargs)
+        # Extract analysis options from kwargs
+        include_patterns = kwargs.get('include_patterns')
+        exclude_patterns = kwargs.get('exclude_patterns')
+        
+        # Perform analysis using unified analyzer
+        result = self.unified_analyzer.analyze_codebase(
+            codebase_path, 
+            include_patterns=include_patterns,
+            exclude_patterns=exclude_patterns
+        )
         
         # Generate outputs if output directory specified
         if output_dir:
             self._generate_outputs(result, output_dir)
         
-        self.logger.info("Analysis completed successfully")
+        self.logger.info("Unified analysis completed successfully")
         return result
     
     def quick_analyze(
         self, 
         codebase_path: Union[str, Path],
         output_file: Optional[str] = None
-    ) -> AnalysisResult:
+    ) -> CodebaseAnalysisResult:
         """
-        Perform quick analysis with minimal features.
+        Perform quick analysis with minimal features using unified system.
         
         Args:
             codebase_path: Path to the codebase to analyze
             output_file: Optional file to save results
             
         Returns:
-            AnalysisResult with basic analysis data
+            CodebaseAnalysisResult with basic analysis data
         """
-        self.logger.info(f"Starting quick analysis of codebase: {codebase_path}")
+        self.logger.info(f"Starting quick unified analysis of codebase: {codebase_path}")
         
-        result = self.analyzer.quick_analysis(codebase_path)
+        # For quick analysis, limit to common file types
+        include_patterns = ['*.py', '*.js', '*.ts', '*.jsx', '*.tsx']
+        exclude_patterns = [
+            '*test*', '*spec*', '*__pycache__*', '*node_modules*', 
+            '*.min.js', '*build*', '*dist*'
+        ]
+        
+        result = self.unified_analyzer.analyze_codebase(
+            codebase_path,
+            include_patterns=include_patterns,
+            exclude_patterns=exclude_patterns
+        )
         
         if output_file:
             self._save_result(result, output_file)
@@ -103,7 +129,7 @@ class CodebaseAnalyzer:
         self, 
         codebase_path: Union[str, Path],
         output_dir: str
-    ) -> AnalysisResult:
+    ) -> CodebaseAnalysisResult:
         """
         Perform comprehensive analysis with all features enabled.
         
@@ -112,11 +138,11 @@ class CodebaseAnalyzer:
             output_dir: Directory to save comprehensive outputs
             
         Returns:
-            AnalysisResult with comprehensive analysis data
+            CodebaseAnalysisResult with comprehensive analysis data
         """
         self.logger.info(f"Starting comprehensive analysis of codebase: {codebase_path}")
         
-        result = self.analyzer.comprehensive_analysis(codebase_path)
+        result = self.unified_analyzer.analyze_codebase(codebase_path)
         
         # Generate comprehensive outputs
         self._generate_comprehensive_outputs(result, output_dir)
@@ -128,7 +154,7 @@ class CodebaseAnalyzer:
         codebase_path: Union[str, Path],
         output_dir: str,
         languages: Optional[List[str]] = None
-    ) -> AnalysisResult:
+    ) -> CodebaseAnalysisResult:
         """
         Perform analysis with tree-sitter integration enabled.
         
@@ -138,7 +164,7 @@ class CodebaseAnalyzer:
             languages: List of languages to analyze with tree-sitter
             
         Returns:
-            AnalysisResult with tree-sitter analysis data
+            CodebaseAnalysisResult with tree-sitter analysis data
         """
         # Enable tree-sitter features
         config = AnalysisConfig()
@@ -261,7 +287,7 @@ class CodebaseAnalyzer:
             self.logger.error(f"Failed to detect issues: {e}")
             return [{"type": "analysis_error", "message": str(e), "severity": "critical"}]
     
-    def _generate_outputs(self, result: AnalysisResult, output_dir: str):
+    def _generate_outputs(self, result: CodebaseAnalysisResult, output_dir: str):
         """Generate standard analysis outputs."""
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
@@ -280,7 +306,7 @@ class CodebaseAnalyzer:
         summary_file = output_path / "summary.html"
         self.html_reporter.generate_summary_report(result, str(summary_file))
     
-    def _generate_comprehensive_outputs(self, result: AnalysisResult, output_dir: str):
+    def _generate_comprehensive_outputs(self, result: CodebaseAnalysisResult, output_dir: str):
         """Generate comprehensive analysis outputs."""
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
@@ -307,7 +333,7 @@ class CodebaseAnalyzer:
     
     def _generate_tree_sitter_outputs(
         self, 
-        result: AnalysisResult, 
+        result: CodebaseAnalysisResult, 
         output_dir: str,
         languages: Optional[List[str]]
     ):
@@ -324,7 +350,7 @@ class CodebaseAnalyzer:
             # pattern matching results, etc.
             pass
     
-    def _save_result(self, result: AnalysisResult, output_file: str):
+    def _save_result(self, result: CodebaseAnalysisResult, output_file: str):
         """Save analysis result to file."""
         output_path = Path(output_file)
         
