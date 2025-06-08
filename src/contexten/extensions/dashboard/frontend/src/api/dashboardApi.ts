@@ -87,7 +87,7 @@ export const dashboardApi = {
         progress: 85,
         flowEnabled: true,
         flowStatus: 'running',
-        lastActivity: new Date(), // Direct Date object instead of conversion
+        lastActivity: new Date(),
         tags: ['core', 'typescript'],
         metrics: {
           commits: 156,
@@ -108,7 +108,7 @@ export const dashboardApi = {
         progress: 60,
         flowEnabled: false,
         flowStatus: 'stopped',
-        lastActivity: new Date(), // Direct Date object instead of conversion
+        lastActivity: new Date(),
         tags: ['frontend', 'react'],
         metrics: {
           commits: 89,
@@ -123,55 +123,18 @@ export const dashboardApi = {
     ];
   },
 
-  // Get dashboard statistics
+  // Get dashboard stats
   getStats: async (): Promise<DashboardStats> => {
-    try {
-      const response = await api.get('/stats');
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
-      // Return mock data for development
-      return {
-        total_projects: 12,
-        active_projects: 8,
-        completed_projects: 156,
-        running_flows: 5,
-        average_progress: 75,
-        total_tasks: 100,
-        completed_tasks: 156,
-        quality_score: 87
-      };
-    }
-  },
-
-  // Pin a project
-  pinProject: async (request: ProjectPinRequest): Promise<void> => {
-    try {
-      await api.post('/projects/pin', request);
-    } catch (error) {
-      console.error('Failed to pin project:', error);
-      throw error;
-    }
-  },
-
-  // Unpin a project
-  unpinProject: async (request: ProjectPinRequest): Promise<void> => {
-    try {
-      await api.post('/projects/unpin', request);
-    } catch (error) {
-      console.error('Failed to unpin project:', error);
-      throw error;
-    }
-  },
-
-  // Get project details
-  getProject: async (projectId: string): Promise<Project> => {
-    try {
-      const response = await api.get(`/projects/${projectId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch project:', error);
-      throw error;
-    }
+    // Mock data for now
+    return {
+      total_projects: 12,
+      active_projects: 8,
+      completed_projects: 4,
+      running_flows: 3,
+      average_progress: 65,
+      total_tasks: 156,
+      completed_tasks: 89,
+      quality_score: 87
+    };
   }
 };

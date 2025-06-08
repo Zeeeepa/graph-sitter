@@ -15,7 +15,10 @@ import {
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
   GitHub as GitHubIcon,
-  Timeline as TimelineIcon
+  Timeline as TimelineIcon,
+  StarIcon,
+  StarBorderIcon,
+  SettingsIcon
 } from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 
@@ -42,6 +45,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUn
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick();
+    }
+  };
+
+  const handleFlowToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onClick) {
       onClick();
@@ -86,91 +96,92 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUn
       onClick={handleClick}
     >
       <CardContent sx={{ flexGrow: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Typography variant="h6" component="h2" gutterBottom>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6" component="div" noWrap>
             {project.name}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Chip 
-              label={project.status} 
-              color={getStatusColor(project.status) as any}
-              size="small"
-            />
-            {project.flowEnabled && (
-              <Chip 
-                label={project.flowStatus} 
-                color={getFlowStatusColor(project.flowStatus) as any}
-                size="small"
-                variant="outlined"
-              />
-            )}
-          </Box>
+          <IconButton
+            size="small"
+            onClick={project.flowEnabled ? handleUnpin : handlePin}
+          >
+            {project.flowEnabled ? <StarIcon color="warning" /> : <StarBorderIcon />}
+          </IconButton>
         </Box>
-        
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            mb: 2,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}
+        >
           {project.description}
         </Typography>
-        
+
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2">Progress</Typography>
             <Typography variant="body2">{project.progress}%</Typography>
           </Box>
-          <LinearProgress 
-            variant="determinate" 
-            value={project.progress} 
-            sx={{ height: 8, borderRadius: 4 }}
+          <LinearProgress
+            variant="determinate"
+            value={project.progress}
+            sx={{ height: 8, borderRadius: 2 }}
           />
         </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <GitHubIcon fontSize="small" color="action" />
-          <Typography variant="body2" color="text.secondary" className="text-truncate">
-            {project.repository}
-          </Typography>
+
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+          <Chip
+            size="small"
+            label={project.status}
+            color={getStatusColor(project.status) as any}
+          />
+          <Chip
+            size="small"
+            label={project.flowStatus}
+            color={getFlowStatusColor(project.flowStatus) as any}
+          />
+          {project.tags.map((tag) => (
+            <Chip key={tag} size="small" label={tag} />
+          ))}
         </Box>
-        
+
         <Typography variant="caption" color="text.secondary">
-          Last activity: {project.lastActivity.toLocaleDateString()}
+          Last activity: {project.lastActivity.toLocaleString()}
         </Typography>
       </CardContent>
-      
+
       <CardActions sx={{ justifyContent: 'space-between', px: 2, py: 1 }}>
         <Box>
           <Tooltip title={project.flowEnabled ? 'Pause Flow' : 'Start Flow'}>
             <IconButton
               size="small"
               color={project.flowEnabled ? 'warning' : 'success'}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onClick) {
-                  onClick();
-                }
-              }}
+              onClick={handleFlowToggle}
             >
               {project.flowEnabled ? <PauseIcon /> : <PlayIcon />}
             </IconButton>
           </Tooltip>
-          
-          <Tooltip title="View Timeline">
-            <IconButton size="small" color="primary">
-              <TimelineIcon />
+          <Tooltip title="View on GitHub">
+            <IconButton
+              size="small"
+              href={project.repository}
+              target="_blank"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GitHubIcon />
             </IconButton>
           </Tooltip>
         </Box>
-        
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onClick) {
-              onClick();
-            }
-          }}
-        >
-          Manage
-        </Button>
+        <Tooltip title="Project Settings">
+          <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+            <SettingsIcon />
+          </IconButton>
+        </Tooltip>
       </CardActions>
     </Card>
   );
