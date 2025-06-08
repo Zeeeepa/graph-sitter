@@ -1,415 +1,329 @@
-# 🚀 Enhanced Graph-Sitter Codebase Analysis Tool
+# Graph_Sitter Extension for Contexten
 
-This enhanced version of the codebase analysis tool leverages graph-sitter's pre-computed graph elements and advanced features for comprehensive code analysis.
+Comprehensive codebase analysis using the actual [graph_sitter](https://graph-sitter.com) API. This extension provides real issue detection, complexity analysis, security scanning, and actionable insights for code improvement.
 
-## 🌟 New Features
+## Features
 
-### 1. **Pre-computed Graph Element Access**
-Access all codebase elements through graph-sitter's optimized graph structure:
+### 🔍 **Comprehensive Analysis**
+- **Dead Code Detection**: Find unused functions, variables, imports, and classes
+- **Complexity Analysis**: Cyclomatic complexity, Halstead metrics, maintainability index
+- **Dependency Analysis**: Import relationships, circular dependencies, coupling metrics
+- **Security Analysis**: SQL injection, hardcoded secrets, unsafe eval usage, command injection
+- **Call Graph Analysis**: Function call relationships, hotspots, recursive functions
+
+### ✅ **Real Issue Detection**
+Unlike simple static analysis tools, this extension uses graph_sitter's semantic understanding to detect:
+- Actually unused code (not just unreferenced)
+- Real security vulnerabilities in context
+- Performance bottlenecks based on call patterns
+- Architectural issues like circular dependencies
+
+### 🛠️ **Actionable Results**
+- Specific file locations and line numbers
+- Severity levels (critical, high, medium, low)
+- Concrete recommendations for fixes
+- Automated dead code removal
+
+## Installation
+
+```bash
+# Install graph_sitter
+pip install graph-sitter
+
+# The extension is already included in contexten
+```
+
+## Usage
+
+### Python API
 
 ```python
-# Access pre-computed graph elements
-codebase.functions    # All functions in codebase
-codebase.classes      # All classes
-codebase.imports      # All import statements
-codebase.files        # All files
-codebase.symbols      # All symbols
-codebase.external_modules  # External dependencies
+from graph_sitter import Codebase
+from contexten.extensions.graph_sitter import comprehensive_analysis
+
+# Run comprehensive analysis
+codebase = Codebase("./my_project")
+results = comprehensive_analysis(codebase)
+
+# Print summary
+from contexten.extensions.graph_sitter import print_analysis_summary
+print_analysis_summary(results)
+
+# Save detailed report
+from contexten.extensions.graph_sitter import save_analysis_report
+save_analysis_report(results, "analysis_report.json")
 ```
 
-### 2. **Advanced Function Analysis**
-Enhanced function metrics using graph-sitter:
+### Individual Analyzers
 
 ```python
-for function in codebase.functions:
-    function.usages           # All usage sites
-    function.call_sites       # All call locations
-    function.dependencies     # Function dependencies
-    function.function_calls   # Functions this function calls
-    function.parameters       # Function parameters
-    function.return_statements # Return statements
-    function.decorators       # Function decorators
-    function.is_async         # Async function detection
-    function.is_generator     # Generator function detection
-```
-
-### 3. **Class Hierarchy Analysis**
-Comprehensive class analysis:
-
-```python
-for cls in codebase.classes:
-    cls.superclasses         # Parent classes
-    cls.subclasses          # Child classes
-    cls.methods             # Class methods
-    cls.attributes          # Class attributes
-    cls.decorators          # Class decorators
-    cls.usages              # Class usage sites
-    cls.dependencies        # Class dependencies
-    cls.is_abstract         # Abstract class detection
-```
-
-### 4. **Import Relationship Analysis**
-Advanced import analysis and loop detection:
-
-```python
-for file in codebase.files:
-    file.imports            # Outbound imports
-    file.inbound_imports    # Files that import this file
-    file.symbols            # Symbols defined in file
-    file.external_modules   # External dependencies
-```
-
-### 5. **Training Data Generation for LLMs**
-Generate structured training data for machine learning models:
-
-```bash
-python analyze_codebase_enhanced.py . --training-data --output training.json
-```
-
-Features:
-- Function implementation extraction
-- Dependency context analysis
-- Usage pattern identification
-- Metadata generation for ML training
-
-### 6. **Import Loop Detection**
-Detect and analyze circular import dependencies:
-
-```bash
-python analyze_codebase_enhanced.py . --import-loops --output loops.json
-```
-
-Features:
-- Static vs dynamic import detection
-- Severity classification (critical/warning/info)
-- Strongly connected component analysis
-- Fix recommendations
-
-### 7. **Dead Code Detection**
-Identify unused functions, classes, and variables:
-
-```bash
-python analyze_codebase_enhanced.py . --dead-code --output dead_code.json
-```
-
-Features:
-- Usage-based analysis
-- Confidence scoring
-- Safe removal recommendations
-- Special method exclusions
-
-### 8. **Graph Structure Analysis**
-Comprehensive graph analysis:
-
-```bash
-python analyze_codebase_enhanced.py . --graph-analysis --output graph.json
-```
-
-Features:
-- Node and edge counting
-- Edge type classification
-- Connectivity analysis
-- Architectural insights
-
-### 9. **Enhanced Metrics**
-Advanced function and class metrics:
-
-```bash
-python analyze_codebase_enhanced.py . --enhanced-metrics --output metrics.json
-```
-
-Features:
-- Graph-sitter enhanced complexity metrics
-- Dependency analysis
-- Usage pattern identification
-- Inheritance depth calculation
-
-### 10. **Advanced Configuration**
-Use enhanced CodebaseConfig options:
-
-```bash
-python analyze_codebase_enhanced.py . --advanced-config --graph-analysis
-```
-
-Configuration options:
-- Method usage resolution
-- Generic type resolution
-- Full range indexing
-- Lazy graph construction
-- Debug and validation modes
-
-## 📋 Usage Examples
-
-### Basic Enhanced Analysis
-```bash
-# Comprehensive enhanced analysis
-python analyze_codebase_enhanced.py /path/to/code --enhanced-metrics --output results.json
-
-# Remote repository analysis
-python analyze_codebase_enhanced.py --repo fastapi/fastapi --training-data --output fastapi_training.json
-```
-
-### Specific Analysis Types
-```bash
-# Generate training data for LLMs
-python analyze_codebase_enhanced.py . --training-data --output training.json
-
-# Detect import loops
-python analyze_codebase_enhanced.py . --import-loops --visualize-graph
-
-# Find dead code
-python analyze_codebase_enhanced.py . --dead-code --output dead_code.json
-
-# Analyze graph structure
-python analyze_codebase_enhanced.py . --graph-analysis --advanced-config
-
-# Enhanced function/class metrics
-python analyze_codebase_enhanced.py . --enhanced-metrics --output metrics.json
-```
-
-### Combined Analysis
-```bash
-# Run multiple analyses together
-python analyze_codebase_enhanced.py . \
-    --training-data \
-    --import-loops \
-    --dead-code \
-    --enhanced-metrics \
-    --advanced-config \
-    --output comprehensive_analysis.json
-```
-
-## 🔧 Configuration Options
-
-### Advanced CodebaseConfig
-The enhanced analyzer supports advanced configuration:
-
-```python
-config = CodebaseConfig(
-    # Performance optimizations
-    method_usages=True,          # Enable method usage resolution
-    generics=True,               # Enable generic type resolution
-    sync_enabled=True,           # Enable graph sync during commits
-    
-    # Advanced analysis
-    full_range_index=True,       # Full range-to-node mapping
-    py_resolve_syspath=True,     # Resolve sys.path imports
-    
-    # Experimental features
-    exp_lazy_graph=False,        # Lazy graph construction
+from graph_sitter import Codebase
+from contexten.extensions.graph_sitter import (
+    detect_dead_code,
+    analyze_complexity, 
+    analyze_security,
+    analyze_dependencies,
+    analyze_call_graph
 )
+
+codebase = Codebase("./my_project")
+
+# Dead code analysis
+dead_code = detect_dead_code(codebase)
+print(f"Found {dead_code['summary']['total_dead_functions']} unused functions")
+
+# Security analysis
+security = analyze_security(codebase)
+print(f"Found {security['summary']['critical_issues']} critical security issues")
+
+# Complexity analysis
+complexity = analyze_complexity(codebase)
+print(f"Average maintainability: {complexity['summary']['avg_maintainability']:.1f}")
 ```
 
-### Command Line Options
+### Command Line Interface
+
 ```bash
-# Enhanced analysis options
---training-data          # Generate training data for LLMs
---import-loops          # Detect circular import dependencies
---dead-code             # Detect unused code
---graph-analysis        # Perform graph structure analysis
---enhanced-metrics      # Use enhanced function/class metrics
---visualize-graph       # Generate graph visualizations
---advanced-config       # Use advanced CodebaseConfig
+# Run comprehensive analysis
+python -m contexten.extensions.graph_sitter.cli ./my_project
 
-# Traditional options (still supported)
---comprehensive         # Traditional comprehensive analysis
---tree-sitter          # Tree-sitter specific features
---visualize            # Traditional visualizations
---export-html          # HTML export
+# Run specific analysis
+python -m contexten.extensions.graph_sitter.cli ./my_project --analysis security
+
+# Save detailed report
+python -m contexten.extensions.graph_sitter.cli ./my_project --output report.json
+
+# Automatically remove dead code (use with caution)
+python -m contexten.extensions.graph_sitter.cli ./my_project --fix-dead-code
 ```
 
-## 📊 Output Formats
+## Analysis Types
 
-### Training Data Output
-```json
-{
-  "training_data": [
-    {
-      "implementation": {
-        "source": "def process_data(input: str) -> dict: ...",
-        "filepath": "src/processor.py"
-      },
-      "dependencies": [
-        {
-          "source": "def validate_input(data: str) -> bool: ...",
-          "filepath": "src/validators.py",
-          "name": "validate_input",
-          "type": "Function"
-        }
-      ],
-      "usages": [
-        {
-          "source": "result = process_data(user_input)",
-          "filepath": "src/api.py",
-          "name": "api_handler",
-          "type": "Function"
-        }
-      ],
-      "metadata": {
-        "name": "process_data",
-        "line_start": 15,
-        "line_end": 25,
-        "is_async": false,
-        "parameter_count": 1
-      }
+### 1. Dead Code Detection
+
+Finds truly unused code elements:
+
+```python
+from contexten.extensions.graph_sitter import detect_dead_code, remove_dead_code
+
+# Detect dead code
+results = detect_dead_code(codebase)
+
+# Automatically remove (use with caution)
+removed_count = remove_dead_code(codebase)
+codebase.commit()  # Save changes
+```
+
+**Detects:**
+- Functions with no call sites
+- Variables with no usages
+- Imports that are never used
+- Classes that are never instantiated
+
+### 2. Complexity Analysis
+
+Analyzes code complexity using multiple metrics:
+
+```python
+from contexten.extensions.graph_sitter import analyze_complexity, find_complex_functions
+
+results = analyze_complexity(codebase)
+complex_funcs = find_complex_functions(codebase, complexity_threshold=10)
+```
+
+**Metrics:**
+- Cyclomatic complexity
+- Halstead volume and metrics
+- Maintainability index (0-100)
+- Lines of code per function
+
+### 3. Security Analysis
+
+Detects real security vulnerabilities:
+
+```python
+from contexten.extensions.graph_sitter import analyze_security
+
+results = analyze_security(codebase)
+```
+
+**Detects:**
+- SQL injection vulnerabilities
+- Hardcoded passwords/API keys
+- Unsafe eval/exec usage
+- Insecure random number generation
+- Command injection risks
+- Path traversal vulnerabilities
+
+### 4. Dependency Analysis
+
+Analyzes import relationships and dependencies:
+
+```python
+from contexten.extensions.graph_sitter import analyze_dependencies, detect_circular_dependencies
+
+deps = analyze_dependencies(codebase)
+circular = detect_circular_dependencies(codebase)
+```
+
+**Analyzes:**
+- Import relationships
+- Circular dependencies
+- Module coupling
+- External vs internal dependencies
+- Unused imports
+
+### 5. Call Graph Analysis
+
+Analyzes function call relationships:
+
+```python
+from contexten.extensions.graph_sitter import analyze_call_graph, find_hotspot_functions
+
+calls = analyze_call_graph(codebase)
+hotspots = find_hotspot_functions(codebase)
+```
+
+**Provides:**
+- Most called functions
+- Functions making most calls
+- Recursive function detection
+- Call frequency analysis
+- Function hotspots
+
+## Example Output
+
+```
+📊 COMPREHENSIVE CODEBASE ANALYSIS REPORT
+============================================================
+📅 Analysis Date: 2024-01-15T10:30:00
+⏱️  Duration: 2.34 seconds
+📁 Files: 45
+⚡ Functions: 234
+🏗️  Classes: 12
+
+📈 QUALITY SCORES
+Overall Code Quality: 78/100
+Maintainability: 82/100
+Security: 65/100
+
+🚨 ISSUES FOUND
+Total Issues: 23
+Critical Issues: 2
+High Priority: 8
+
+💡 TOP RECOMMENDATIONS
+1. 🔴 Fix 2 critical security issues
+   Address critical security vulnerabilities immediately
+2. 🟠 Refactor 5 complex functions
+   Break down complex functions to improve readability
+3. 🟠 Resolve 3 circular dependencies
+   Break circular dependencies to improve code architecture
+```
+
+## Integration with Frontend
+
+The analysis results are designed for frontend consumption:
+
+```python
+# Get dashboard data
+dashboard_data = {
+    'summary': results['summary'],
+    'issues_by_category': {
+        'security': len(results['security']['sql_injection_risks']),
+        'complexity': results['complexity']['summary']['high_complexity_functions'],
+        'dead_code': results['dead_code']['summary']['total_dead_functions']
+    },
+    'recommendations': results['recommendations'][:10],
+    'trends': {
+        'quality_score': results['summary']['code_quality_score'],
+        'issue_count': results['summary']['total_issues']
     }
-  ],
-  "metadata": {
-    "total_functions": 150,
-    "processed_functions": 120,
-    "coverage_percentage": 80.0,
-    "avg_dependencies_per_function": 2.5,
-    "avg_usages_per_function": 3.2
-  }
 }
 ```
 
-### Import Loop Output
-```json
-{
-  "import_loops": [
-    {
-      "files": ["src/module_a.py", "src/module_b.py"],
-      "loop_type": "static",
-      "severity": "warning",
-      "imports": [
-        {
-          "import_statement": "from module_b import helper",
-          "is_dynamic": false,
-          "line_number": 5
-        }
-      ]
-    }
-  ],
-  "summary": {
-    "total_loops": 3,
-    "critical_loops": 1,
-    "warning_loops": 2,
-    "info_loops": 0
-  },
-  "recommendations": [
-    "🔄 Consider moving shared code to separate modules",
-    "💡 Use lazy imports where appropriate"
-  ]
-}
+## Real-World Examples
+
+### Finding Security Issues
+
+```python
+# Find SQL injection vulnerabilities
+security_results = analyze_security(codebase)
+for risk in security_results['sql_injection_risks']:
+    print(f"SQL injection risk in {risk['function']} at {risk['file']}:{risk['line']}")
+    print(f"Recommendation: {risk['recommendation']}")
 ```
 
-### Dead Code Output
-```json
-{
-  "dead_code_items": [
-    {
-      "type": "function",
-      "name": "unused_helper",
-      "file_path": "src/utils.py",
-      "line_start": 45,
-      "line_end": 52,
-      "reason": "No usages found",
-      "confidence": 0.8
-    }
-  ],
-  "summary": {
-    "total_dead_code_items": 15,
-    "dead_functions": 10,
-    "dead_classes": 3,
-    "dead_variables": 2
-  },
-  "recommendations": [
-    "🗑️ 12 high-confidence dead code items can be safely removed",
-    "🔍 Review dead code items before removal - some may be used dynamically"
-  ]
-}
+### Identifying Performance Bottlenecks
+
+```python
+# Find complex functions that might be slow
+complexity_results = analyze_complexity(codebase)
+for func in complexity_results['functions']:
+    if func['cyclomatic_complexity'] > 15:
+        print(f"Complex function: {func['name']} (complexity: {func['cyclomatic_complexity']})")
 ```
 
-## 🎯 Integration with Existing Tools
+### Cleaning Up Dead Code
 
-The enhanced analyzer is fully compatible with the existing analyze_codebase.py functionality:
+```python
+# Safe dead code removal
+dead_code = detect_dead_code(codebase)
+print(f"Found {len(dead_code['dead_functions'])} unused functions")
 
-- All existing command line options work
-- Traditional analysis modes are preserved
-- Enhanced features are additive
-- Backward compatibility maintained
+# Review before removing
+for func in dead_code['dead_functions']:
+    print(f"Unused: {func['name']} in {func['file']}")
 
-## 🚀 Performance Optimizations
-
-### Lazy Graph Construction
-```bash
-python analyze_codebase_enhanced.py . --advanced-config --graph-analysis
+# Remove if confirmed
+if input("Remove dead code? (y/N): ").lower() == 'y':
+    removed = remove_dead_code(codebase)
+    codebase.commit()
+    print(f"Removed {removed} dead code elements")
 ```
 
-### Incremental Analysis
-The enhanced analyzer supports incremental analysis for large codebases:
-- Pre-computed graph elements for fast access
-- Optimized dependency resolution
-- Efficient memory usage
+## Best Practices
 
-### Caching
-- Graph structure caching
-- Symbol resolution caching
-- Import relationship caching
+1. **Run Regular Analysis**: Include analysis in CI/CD pipelines
+2. **Address Critical Issues First**: Focus on security and high-complexity issues
+3. **Review Before Auto-fixing**: Always review dead code before removal
+4. **Track Trends**: Save reports to track code quality over time
+5. **Use Specific Analyzers**: Run targeted analysis for specific concerns
 
-## 🔍 Advanced Use Cases
+## API Reference
 
-### 1. Code Quality Assessment
-```bash
-# Comprehensive quality analysis
-python analyze_codebase_enhanced.py . \
-    --enhanced-metrics \
-    --dead-code \
-    --import-loops \
-    --advanced-config
-```
+### Main Functions
 
-### 2. ML Training Data Generation
-```bash
-# Generate training data for code completion models
-python analyze_codebase_enhanced.py . \
-    --training-data \
-    --enhanced-metrics \
-    --output ml_training_data.json
-```
+- `comprehensive_analysis(codebase)` - Run all analyzers
+- `print_analysis_summary(results)` - Print formatted summary
+- `save_analysis_report(results, filename)` - Save JSON report
 
-### 3. Architecture Analysis
-```bash
-# Analyze codebase architecture
-python analyze_codebase_enhanced.py . \
-    --graph-analysis \
-    --import-loops \
-    --visualize-graph \
-    --advanced-config
-```
+### Individual Analyzers
 
-### 4. Refactoring Support
-```bash
-# Identify refactoring opportunities
-python analyze_codebase_enhanced.py . \
-    --dead-code \
-    --import-loops \
-    --enhanced-metrics \
-    --output refactoring_analysis.json
-```
+- `detect_dead_code(codebase)` - Find unused code
+- `analyze_complexity(codebase)` - Complexity metrics
+- `analyze_security(codebase)` - Security vulnerabilities
+- `analyze_dependencies(codebase)` - Import analysis
+- `analyze_call_graph(codebase)` - Call relationships
 
-## 📚 Dependencies
+### Utility Functions
 
-### Required
-- `graph-sitter` - Core graph-sitter library
-- `networkx` - For import loop detection and graph analysis
+- `remove_dead_code(codebase)` - Remove unused code
+- `find_complex_functions(codebase, threshold)` - Find complex functions
+- `find_hotspot_functions(codebase)` - Find frequently called functions
+- `detect_circular_dependencies(codebase)` - Find circular imports
 
-### Optional
-- `graphviz` - For graph visualizations
-- `plotly` - For interactive charts
-- `matplotlib` - For static visualizations
+## Contributing
 
-## 🤝 Contributing
+This extension uses the official graph_sitter API patterns. When adding new analyzers:
 
-The enhanced analyzer is designed to be extensible:
+1. Use `@graph_sitter.function("analyzer-name")` decorator
+2. Work with `codebase.functions`, `codebase.classes`, `codebase.files`
+3. Use actual properties like `function.usages`, `function.call_sites`
+4. Follow the existing result format patterns
+5. Add comprehensive error handling
 
-1. Add new analysis functions to `graph_sitter_enhancements.py`
-2. Extend the `EnhancedCodebaseAnalyzer` class
-3. Add new command line options
-4. Update documentation
+## License
 
-## 📄 License
-
-Same license as the main graph-sitter project.
+This extension is part of the Contexten project and follows the same license terms.
 
