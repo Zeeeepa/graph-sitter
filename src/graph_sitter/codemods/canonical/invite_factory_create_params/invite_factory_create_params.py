@@ -1,4 +1,4 @@
-from .codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.detached_symbols.function_call import FunctionCall
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage

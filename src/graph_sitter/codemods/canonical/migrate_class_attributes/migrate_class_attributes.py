@@ -1,7 +1,7 @@
 import logging
 import textwrap
 
-from .codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 from graph_sitter.core.codebase import PyCodebaseType
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.writer_decorators import canonical

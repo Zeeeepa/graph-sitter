@@ -9,7 +9,7 @@ from pathlib import Path
 import emoji
 from loguru import logger
 
-from codemods.codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 from graph_sitter.gscli.generate.runner_imports import get_runner_imports
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from tests.shared.codemod.constants import DIFF_FILEPATH

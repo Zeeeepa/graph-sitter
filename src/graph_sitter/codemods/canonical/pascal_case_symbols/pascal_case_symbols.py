@@ -1,4 +1,4 @@
-from .codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.interface import Interface
