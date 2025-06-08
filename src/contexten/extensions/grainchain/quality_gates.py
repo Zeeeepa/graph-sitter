@@ -6,12 +6,22 @@ testing and comprehensive reporting.
 
 import asyncio
 import logging
-from collections.abc import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Set
 
 from .config import GrainchainIntegrationConfig, get_grainchain_config
+from .error_handling import (
+    CircuitBreakerConfig,
+    ErrorCategory,
+    ErrorContext,
+    ErrorHandler,
+    ErrorSeverity,
+    RetryConfig,
+    RetryableError,
+    with_retry,
+)
 from .grainchain_types import (
     GrainchainEvent,
     GrainchainEventType,
@@ -27,6 +37,17 @@ from .sandbox_manager import SandboxManager
 
 logger = logging.getLogger(__name__)
 
+class QualityGateError(Exception, RetryableError):
+    """Base exception for quality gate errors."""
+    pass
+
+class GateExecutionError(QualityGateError):
+    """Raised when a quality gate execution fails."""
+    pass
+
+class DependencyError(QualityGateError):
+    """Raised when gate dependencies cannot be satisfied."""
+    pass
 
 @dataclass
 class QualityGateDefinition:
@@ -48,14 +69,11 @@ class QualityGateDefinition:
         if self.thresholds is None:
             self.thresholds = {}
 
-
 class QualityGateManager:
     """Quality gate management with parallel execution and reporting."""
 
     def __init__(self, config: Optional[GrainchainIntegrationConfig] = None) -> None:
         """Initialize the quality gate manager."""
-        from .config import get_grainchain_config
-
         self.config = config or get_grainchain_config()
         self._sandbox_manager = SandboxManager(self.config)
         self._gate_definitions: Dict[QualityGateType, QualityGateDefinition] = {}
@@ -64,7 +82,131 @@ class QualityGateManager:
         self._active_executions: Dict[str, QualityGateExecution] = {}
         self._execution_history: List[QualityGateExecution] = []
         self._gate_metrics: Dict[QualityGateType, Dict[str, float]] = {}
+        self._error_handler = ErrorHandler()
         self._initialize_gates()
+        self._setup_error_handling()
+
+    def _setup_error_handling(self) -> None:
+        """Set up error handling and circuit breakers."""
+        # Create circuit breaker for gate execution
+        self._error_handler.create_circuit_breaker(
+            "gate_execution",
+            CircuitBreakerConfig(
+                failure_threshold=3,
+                reset_timeout=300.0,  # 5 minutes
+                half_open_timeout=60.0
+            )
+        )
+
+        # Register error handlers
+        self._error_handler.register_error_handler(
+            ErrorCategory.VALIDATION,
+            self._handle_validation_error
+        )
+        self._error_handler.register_error_handler(
+            ErrorCategory.TIMEOUT,
+            self._handle_timeout_error
+        )
+
+        # Register recovery procedures
+        self._error_handler.register_recovery_procedure(
+            ErrorCategory.VALIDATION,
+            self._recover_validation
+        )
+
+    def _handle_validation_error(self, context: ErrorContext) -> None:
+        """Handle validation-related errors."""
+        logger.error(
+            f"Validation error in gate execution: {context.error}",
+            extra={
+                "operation": context.operation,
+                "gate_type": context.metadata.get("gate_type"),
+                "execution_id": context.resource_id
+            }
+        )
+
+    def _handle_timeout_error(self, context: ErrorContext) -> None:
+        """Handle timeout-related errors."""
+        logger.error(
+            f"Timeout error in gate execution: {context.error}",
+            extra={
+                "operation": context.operation,
+                "gate_type": context.metadata.get("gate_type"),
+                "execution_id": context.resource_id,
+                "timeout": context.metadata.get("timeout")
+            }
+        )
+
+    def _recover_validation(self) -> None:
+        """Attempt to recover from validation errors."""
+        # Implementation depends on validation error type
+        pass
+
+    @with_retry(
+        retry_config=RetryConfig(max_attempts=2),
+        retryable_errors=[QualityGateError]
+    )
+    async def run_quality_gates(
+        self,
+        gates: Optional[List[QualityGateType]] = None,
+        parallel: bool = True,
+        fail_fast: bool = True
+    ) -> List[QualityGateResult]:
+        """Run quality gates with dependency resolution."""
+        if gates is None:
+            gates = list(QualityGateType)
+
+        try:
+            # Build dependency graph
+            dependency_graph = self._build_dependency_graph(gates)
+
+            # Track execution state
+            results: List[QualityGateResult] = []
+            failed_gates: Set[QualityGateType] = set()
+
+            if parallel:
+                # Execute gates in parallel with dependency resolution
+                results = await self._execute_gates_parallel(
+                    gates=gates,
+                    dependency_graph=dependency_graph,
+                    fail_fast=fail_fast
+                )
+            else:
+                # Execute gates sequentially
+                for gate in gates:
+                    # Check dependencies
+                    dependencies = dependency_graph.get(gate, [])
+                    if any(dep in failed_gates for dep in dependencies):
+                        context = ErrorContext(
+                            error=DependencyError(f"Dependencies failed for gate {gate}"),
+                            severity=ErrorSeverity.ERROR,
+                            category=ErrorCategory.VALIDATION,
+                            operation="check_dependencies",
+                            metadata={"gate_type": gate.value}
+                        )
+                        self._error_handler.handle_error(context.error, context)
+                        continue
+
+                    result = await self._execute_single_gate(gate)
+                    results.append(result)
+
+                    if not result.passed and fail_fast:
+                        break
+
+                    if not result.passed:
+                        failed_gates.add(gate)
+
+            return results
+
+        except Exception as e:
+            context = ErrorContext(
+                error=e,
+                severity=ErrorSeverity.ERROR,
+                category=ErrorCategory.VALIDATION,
+                operation="run_quality_gates"
+            )
+            self._error_handler.handle_error(e, context)
+            raise QualityGateError("Failed to run quality gates") from e
 
     def _initialize_gates(self) -> None:
         """Initialize default quality gates."""
@@ -150,50 +292,6 @@ class QualityGateManager:
             )
 
             self._gate_metrics[gate_type] = metrics
-
-    async def run_quality_gates(
-        self,
-        gates: Optional[List[QualityGateType]] = None,
-        parallel: bool = True,
-        fail_fast: bool = True
-    ) -> List[QualityGateResult]:
-        """Run quality gates with dependency resolution."""
-        if gates is None:
-            gates = list(QualityGateType)
-
-        # Build dependency graph
-        dependency_graph = self._build_dependency_graph(gates)
-
-        # Track execution state
-        results: List[QualityGateResult] = []
-        failed_gates: Set[QualityGateType] = set()
-
-        if parallel:
-            # Execute gates in parallel with dependency resolution
-            results = await self._execute_gates_parallel(
-                gates=gates,
-                dependency_graph=dependency_graph,
-                fail_fast=fail_fast
-            )
-        else:
-            # Execute gates sequentially
-            for gate in gates:
-                # Check dependencies
-                dependencies = dependency_graph.get(gate, [])
-                if any(dep in failed_gates for dep in dependencies):
-                    logger.warning(f"Skipping {gate} due to failed dependencies")
-                    continue
-
-                result = await self._execute_single_gate(gate)
-                results.append(result)
-
-                if not result.passed and fail_fast:
-                    break
-
-                if not result.passed:
-                    failed_gates.add(gate)
-
-        return results
 
     async def _execute_gates_parallel(
         self,
