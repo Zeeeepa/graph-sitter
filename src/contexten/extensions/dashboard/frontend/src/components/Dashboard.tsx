@@ -40,15 +40,6 @@ const Dashboard: React.FC = () => {
     }
   );
 
-  const handleFlowToggle = async (projectId: string, enabled: boolean) => {
-    try {
-      // TODO: Implement flow toggle API call
-      console.log(`Toggle flow for project ${projectId}: ${enabled}`);
-    } catch (error) {
-      console.error('Failed to toggle flow:', error);
-    }
-  };
-
   const handlePin = async (projectId: string) => {
     try {
       await dashboardApi.pinProject({ projectId });
@@ -101,7 +92,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <Container maxWidth="xl">
-      {/* Dashboard Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
           Project Dashboard
