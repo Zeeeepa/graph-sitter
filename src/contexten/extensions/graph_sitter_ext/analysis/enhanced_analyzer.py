@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Enhanced Analyzer with Advanced Graph-Sitter Settings
-
-Uses the exact advanced configuration flags from graph-sitter.com to provide
-enhanced codebase analysis with optimized performance and comprehensive insights.
+Enhanced analyzer with comprehensive analysis capabilities.
 """
 
+import os
+import json
+from typing import Dict, Any, Optional, List
+from pathlib import Path
+
+# Import from the correct path
+from graph_sitter.configs.models.codebase import CodebaseConfig
 import graph_sitter
 from graph_sitter import Codebase
-from graph_sitter.configs import CodebaseConfig
-from typing import Dict, List, Any, Optional
-import time
-from datetime import datetime
 
 from .advanced_config import (
     AdvancedCodebaseConfig,
@@ -691,4 +691,3 @@ if __name__ == "__main__":
         print(f"❌ Error during enhanced analysis: {e}")
         import traceback
         traceback.print_exc()
-
