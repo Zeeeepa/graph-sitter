@@ -12,6 +12,9 @@ import ConnectionStatus from './components/ConnectionStatus';
 import websocketService from './services/websocketService';
 import { dashboardApi } from './api/dashboardApi';
 
+// Types
+import { GitHubRepository } from './types';
+
 // Styles
 import './index.css';
 
@@ -25,6 +28,42 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Wrapper component for ProjectSelectionDialog route
+const ProjectSelectionPage: React.FC = () => {
+  const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
+  const [isOpen, setIsOpen] = useState(true);
+
+  useEffect(() => {
+    // Load repositories when component mounts
+    const loadRepositories = async () => {
+      try {
+        // This would typically come from an API call
+        // For now, we'll use an empty array as fallback
+        setRepositories([]);
+      } catch (error) {
+        console.error('Failed to load repositories:', error);
+        setRepositories([]);
+      }
+    };
+
+    loadRepositories();
+  }, []);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    // Navigate back to dashboard
+    window.location.href = '/dashboard';
+  };
+
+  return (
+    <ProjectSelectionDialog
+      open={isOpen}
+      onClose={handleClose}
+      repositories={repositories}
+    />
+  );
+};
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -133,7 +172,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/projects" element={<ProjectSelectionDialog />} />
+            <Route path="/projects" element={<ProjectSelectionPage />} />
           </Routes>
         </div>
       </Router>
@@ -143,4 +182,3 @@ function App() {
 }
 
 export default App;
-
