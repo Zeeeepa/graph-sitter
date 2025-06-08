@@ -22,9 +22,50 @@ import WorkflowControl from './components/WorkflowControl';
 import RealTimeMetrics from './components/RealTimeMetrics';
 import websocketService from './services/websocketService';
 
+// Mock data for development
+const mockProjects: Project[] = [
+  {
+    id: '1',
+    name: 'Core Engine',
+    description: 'Main processing engine',
+    status: 'active',
+    repository: 'https://github.com/example/core',
+    progress: 75,
+    flowEnabled: true,
+    flowStatus: 'running',
+    lastActivity: new Date(),
+    tags: ['core', 'typescript'],
+    metrics: {
+      commits: 156,
+      prs: 23,
+      contributors: 8,
+      issues: 45
+    }
+  },
+  {
+    id: '2',
+    name: 'Dashboard UI',
+    description: 'React dashboard interface',
+    status: 'active',
+    repository: 'https://github.com/example/dashboard',
+    progress: 60,
+    flowEnabled: false,
+    flowStatus: 'stopped',
+    lastActivity: new Date(),
+    tags: ['frontend', 'react'],
+    metrics: {
+      commits: 89,
+      prs: 12,
+      contributors: 5,
+      issues: 28
+    }
+  }
+];
+
 const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [openProjectDialog, setOpenProjectDialog] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +108,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleWebSocketEvent = (event: WebSocketEvent) => {
+  const handleWebSocketEvent = (event: any) => {
     switch (event.type) {
       case 'project_updated':
         setProjects(prev => 
@@ -176,6 +217,7 @@ const App: React.FC = () => {
 
   const handleDialogClose = () => {
     setSelectedProject(null);
+    setOpenProjectDialog(false);
   };
 
   const handleSettingsSave = (newSettings: Settings) => {
@@ -229,7 +271,8 @@ const App: React.FC = () => {
             <Grid item xs={12} sm={6} md={4} key={project.id}>
               <ProjectCard
                 project={project}
-                onSelect={() => setSelectedProject(project)}
+                onPin={(projectId) => console.log('Pin project:', projectId)}
+                onUnpin={(projectId) => console.log('Unpin project:', projectId)}
               />
             </Grid>
           ))}
@@ -263,7 +306,7 @@ const App: React.FC = () => {
 
         {/* Dialogs */}
         <ProjectDialog
-          open={selectedProject !== null}
+          open={openProjectDialog}
           project={selectedProject}
           onClose={handleDialogClose}
           onSave={handleSaveProject}

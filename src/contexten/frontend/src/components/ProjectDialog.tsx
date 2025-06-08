@@ -16,6 +16,7 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  SelectChangeEvent,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -79,7 +80,7 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
   }, [project]);
 
   const handleChange = (field: keyof Project) => (
-    event: React.ChangeEvent<HTMLInputElement | { value: unknown }>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent
   ) => {
     setFormData((prev) => ({ ...prev, [field]: event.target.value }));
   };
@@ -230,7 +231,12 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), commits: Number(e.target.value) },
+                        metrics: { 
+                          issues: prev.metrics?.issues || 0,
+                          commits: Number(e.target.value) || 0,
+                          prs: prev.metrics?.prs || 0,
+                          contributors: prev.metrics?.contributors || 0
+                        },
                       }))
                     }
                   />
@@ -244,7 +250,12 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), prs: Number(e.target.value) },
+                        metrics: { 
+                          issues: prev.metrics?.issues || 0,
+                          commits: prev.metrics?.commits || 0,
+                          prs: Number(e.target.value) || 0,
+                          contributors: prev.metrics?.contributors || 0
+                        },
                       }))
                     }
                   />
@@ -258,7 +269,12 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), contributors: Number(e.target.value) },
+                        metrics: { 
+                          issues: prev.metrics?.issues || 0,
+                          commits: prev.metrics?.commits || 0,
+                          prs: prev.metrics?.prs || 0,
+                          contributors: Number(e.target.value) || 0
+                        },
                       }))
                     }
                   />
@@ -272,7 +288,12 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        metrics: { ...(prev.metrics || {}), issues: Number(e.target.value) },
+                        metrics: { 
+                          issues: Number(e.target.value) || 0,
+                          commits: prev.metrics?.commits || 0,
+                          prs: prev.metrics?.prs || 0,
+                          contributors: prev.metrics?.contributors || 0
+                        },
                       }))
                     }
                   />
@@ -298,4 +319,3 @@ const ProjectDialog: React.FC<ProjectDialogProps> = ({
 };
 
 export default ProjectDialog;
-
