@@ -1,153 +1,223 @@
-import { Project, DashboardStats, ProjectPinRequest, ApiResponse } from '../types/dashboard';
+import { Project, DashboardStats, ProjectPinRequest, ApiResponse, Settings } from '../types/dashboard';
+import { GitHubService } from '../services/githubService';
+import { LinearService } from '../services/linearService';
+import { CodegenService } from '../services/codegenService';
+import { FlowService } from '../services/flowService';
 
-// Mock data for development
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    name: 'Core Engine',
-    description: 'Main processing engine',
-    status: 'active',
-    repository: 'https://github.com/example/core',
-    progress: 75,
-    flowEnabled: true,
-    flowStatus: 'running',
-    lastActivity: new Date(),
-    tags: ['core', 'typescript'],
-    metrics: {
-      commits: 156,
-      prs: 23,
-      contributors: 8,
-      issues: 45
-    }
-  },
-  {
-    id: '2',
-    name: 'Dashboard UI',
-    description: 'React dashboard interface',
-    status: 'active',
-    repository: 'https://github.com/example/dashboard',
-    progress: 60,
-    flowEnabled: false,
-    flowStatus: 'stopped',
-    lastActivity: new Date(),
-    tags: ['frontend', 'react'],
-    metrics: {
-      commits: 89,
-      prs: 12,
-      contributors: 5,
-      issues: 28
-    }
+export class DashboardAPI {
+  private githubService: GitHubService;
+  private linearService: LinearService;
+  private codegenService: CodegenService;
+  private flowService: FlowService;
+  private settings: Settings;
+
+  constructor(settings: Settings) {
+    this.settings = settings;
+    this.githubService = new GitHubService(settings.githubToken);
+    this.linearService = new LinearService(settings.linearToken);
+    this.codegenService = new CodegenService({
+      orgId: settings.codegenOrgId,
+      token: settings.codegenToken,
+    });
+    this.flowService = new FlowService({
+      prefectUrl: 'https://api.prefect.io',
+      prefectToken: settings.prefectToken || '',
+      controlFlowUrl: 'https://api.controlflow.dev',
+      controlFlowToken: settings.controlFlowToken || '',
+      agentFlowUrl: 'https://api.agentflow.dev',
+      agentFlowToken: settings.agentFlowToken || '',
+    });
   }
-];
 
-const mockStats: DashboardStats = {
-  total_projects: 10,
-  active_workflows: 3,
-  completed_tasks: 25,
-  pending_prs: 5,
-  quality_score: 85,
-  last_updated: new Date().toISOString()
-};
-
-/**
- * Dashboard API client
- * Handles all interactions with the dashboard backend
- */
-export const dashboardApi = {
-  /**
-   * Get all projects
-   * @returns Promise<Project[]>
-   */
-  getProjects: async (): Promise<Project[]> => {
+  async getProjects(): Promise<Project[]> {
     try {
-      const response = await fetch('/api/projects');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data: ApiResponse<Project[]> = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch projects');
-      }
-      return data.data || mockProjects;
+      // Get GitHub repositories
+      const repos = await this.githubService.listRepositories();
+      
+      // Convert to projects
+      const projects = await Promise.all(
+        repos.map(repo => this.githubService.convertToProject(repo))
+      );
+
+      // Get flow status for each project
+      const projectsWithStatus = await Promise.all(
+        projects.map(async project => {
+          try {
+            const status = await this.flowService.getProjectFlowStatus(project.id);
+            return {
+              ...project,
+              flowStatus: this.determineOverallStatus(status),
+            };
+          } catch (error) {
+            console.error(`Error getting flow status for project ${project.id}:`, error);
+            return project;
+          }
+        })
+      );
+
+      return projectsWithStatus;
     } catch (error) {
       console.error('Failed to fetch projects:', error);
-      return mockProjects;
+      throw error;
     }
-  },
+  }
 
-  /**
-   * Get dashboard statistics
-   * @returns Promise<DashboardStats>
-   */
-  getStats: async (): Promise<DashboardStats> => {
+  private determineOverallStatus(status: {
+    prefectStatus?: any;
+    controlStatus?: any;
+    agentStatus?: any;
+  }): 'running' | 'stopped' | 'error' {
+    const statuses = [
+      status.prefectStatus?.status,
+      status.controlStatus?.status,
+      status.agentStatus?.status,
+    ].filter(Boolean);
+
+    if (statuses.includes('failed')) return 'error';
+    if (statuses.includes('running')) return 'running';
+    return 'stopped';
+  }
+
+  async getStats(): Promise<DashboardStats> {
     try {
-      const response = await fetch('/api/stats');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data: ApiResponse<DashboardStats> = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch stats');
-      }
-      return data.data || mockStats;
+      // Get projects
+      const projects = await this.getProjects();
+
+      // Get flow metrics for all projects
+      const flowMetrics = await Promise.all(
+        projects.map(project => this.flowService.getFlowMetrics(project.id))
+      );
+
+      // Calculate overall stats
+      const stats: DashboardStats = {
+        total_projects: projects.length,
+        active_workflows: projects.filter(p => p.flowStatus === 'running').length,
+        completed_tasks: flowMetrics.reduce((sum, metrics) => {
+          const completed = (metrics.prefectMetrics?.successfulRuns || 0) +
+            (metrics.controlMetrics?.successfulRuns || 0) +
+            (metrics.agentMetrics?.successfulRuns || 0);
+          return sum + completed;
+        }, 0),
+        pending_prs: await this.countPendingPRs(projects),
+        quality_score: await this.calculateQualityScore(projects),
+        last_updated: new Date().toISOString(),
+      };
+
+      return stats;
     } catch (error) {
       console.error('Failed to fetch stats:', error);
-      return mockStats;
+      throw error;
     }
-  },
+  }
 
-  /**
-   * Pin a project
-   * @param request ProjectPinRequest
-   * @returns Promise<void>
-   */
-  pinProject: async (request: ProjectPinRequest): Promise<void> => {
+  private async countPendingPRs(projects: Project[]): Promise<number> {
     try {
-      const response = await fetch('/api/projects/pin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
+      const prCounts = await Promise.all(
+        projects.map(async project => {
+          const [owner, repo] = project.repository.split('/').slice(-2);
+          const prs = await this.githubService.getPullRequests(owner, repo, 'open');
+          return prs.length;
+        })
+      );
+
+      return prCounts.reduce((sum, count) => sum + count, 0);
+    } catch (error) {
+      console.error('Error counting pending PRs:', error);
+      return 0;
+    }
+  }
+
+  private async calculateQualityScore(projects: Project[]): Promise<number> {
+    try {
+      const scores = await Promise.all(
+        projects.map(async project => {
+          try {
+            const [owner, repo] = project.repository.split('/').slice(-2);
+            const analysis = await this.codegenService.analyzeCode(
+              project.repository,
+              'main'
+            );
+            return analysis.score;
+          } catch (error) {
+            console.error(`Error analyzing project ${project.id}:`, error);
+            return 0;
+          }
+        })
+      );
+
+      const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+      return Math.round(averageScore);
+    } catch (error) {
+      console.error('Error calculating quality score:', error);
+      return 0;
+    }
+  }
+
+  async pinProject(request: ProjectPinRequest): Promise<void> {
+    try {
+      // Get project details
+      const project = await this.getProjectById(request.projectId);
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      // Create Linear team if needed
+      const teams = await this.linearService.getTeams();
+      let teamId = teams.find(t => t.name === project.name)?.id;
+      if (!teamId) {
+        // Create team in Linear
+        // Note: Linear API doesn't support team creation via API
+        throw new Error('Please create a Linear team manually first');
+      }
+
+      // Set up webhooks
+      await this.setupProjectWebhooks(project);
+
+      // Initialize flows
+      await this.flowService.startProjectFlow(project.id, {
+        repository: project.repository,
+        teamId,
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data: ApiResponse<void> = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to pin project');
-      }
+
     } catch (error) {
       console.error('Failed to pin project:', error);
       throw error;
     }
-  },
+  }
 
-  /**
-   * Unpin a project
-   * @param request ProjectPinRequest
-   * @returns Promise<void>
-   */
-  unpinProject: async (request: ProjectPinRequest): Promise<void> => {
+  async unpinProject(request: ProjectPinRequest): Promise<void> {
     try {
-      const response = await fetch('/api/projects/unpin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data: ApiResponse<void> = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to unpin project');
-      }
+      // Stop all flows
+      await this.flowService.stopProjectFlow(request.projectId);
     } catch (error) {
       console.error('Failed to unpin project:', error);
       throw error;
     }
   }
-};
+
+  private async getProjectById(projectId: string): Promise<Project | null> {
+    const projects = await this.getProjects();
+    return projects.find(p => p.id === projectId) || null;
+  }
+
+  private async setupProjectWebhooks(project: Project): Promise<void> {
+    try {
+      const [owner, repo] = project.repository.split('/').slice(-2);
+
+      // Set up GitHub webhook
+      await this.githubService.createWebhook(
+        owner,
+        repo,
+        'https://api.dashboard.example.com/webhooks/github'
+      );
+
+      // Note: Linear webhooks would need to be set up via their UI
+      // as their API doesn't support webhook creation
+
+    } catch (error) {
+      console.error('Error setting up webhooks:', error);
+      throw error;
+    }
+  }
+}
 
