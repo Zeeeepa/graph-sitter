@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-Advanced Graph-Sitter Configuration
-
-Implements the exact advanced settings from graph-sitter.com/introduction/advanced-settings
-to enhance codebase analysis capabilities with proper configuration flags.
+Advanced configuration management for graph-sitter analysis.
 """
 
+import os
+import json
+from typing import Dict, Any, Optional, List
+from pathlib import Path
+from graph_sitter.configs.models.codebase import CodebaseConfig
 import graph_sitter
 from graph_sitter import Codebase
-from graph_sitter.configs import CodebaseConfig
-from typing import List, Dict, Optional, Any
-from pathlib import Path
 
 
 class AdvancedCodebaseConfig:
@@ -510,4 +509,3 @@ if __name__ == "__main__":
         print(f"❌ Error during analysis: {e}")
         import traceback
         traceback.print_exc()
-
