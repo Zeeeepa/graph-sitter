@@ -31,8 +31,8 @@ try:
 except ImportError as e:
     logger = get_logger(__name__)
     logger.warning(f"Prefect components not available: {e}")
-    PrefectFlow = None
-    PrefectWorkflowPipeline = None
+    PrefectFlow = None  # type: ignore
+    PrefectWorkflowPipeline = None  # type: ignore
     PREFECT_AVAILABLE = False
 
 # Import existing controlflow components with error handling
@@ -42,7 +42,7 @@ try:
 except ImportError as e:
     logger = get_logger(__name__)
     logger.warning(f"ControlFlow components not available: {e}")
-    FlowOrchestrator = None
+    FlowOrchestrator = None  # type: ignore
     CONTROLFLOW_AVAILABLE = False
 
 # Import existing codegen components with error handling
@@ -53,8 +53,8 @@ try:
 except ImportError as e:
     logger = get_logger(__name__)
     logger.warning(f"Codegen components not available: {e}")
-    CodegenWorkflowClient = None
-    OverlayApplicator = None
+    CodegenWorkflowClient = None  # type: ignore
+    OverlayApplicator = None  # type: ignore
     CODEGEN_AVAILABLE = False
 
 # Import existing grainchain components with error handling
@@ -66,9 +66,9 @@ try:
 except ImportError as e:
     logger = get_logger(__name__)
     logger.warning(f"Grainchain components not available: {e}")
-    QualityGateManager = None
-    SandboxManager = None
-    GraphSitterQualityGates = None
+    QualityGateManager = None  # type: ignore
+    SandboxManager = None  # type: ignore
+    GraphSitterQualityGates = None  # type: ignore
     GRAINCHAIN_AVAILABLE = False
 
 # Import existing graph_sitter analysis components with error handling
@@ -79,8 +79,8 @@ try:
 except ImportError as e:
     logger = get_logger(__name__)
     logger.warning(f"Graph_sitter analysis components not available: {e}")
-    comprehensive_analysis = None
-    CodeAnalysisEngine = None
+    comprehensive_analysis = None  # type: ignore
+    CodeAnalysisEngine = None  # type: ignore
     GRAPH_SITTER_ANALYSIS_AVAILABLE = False
 
 logger = get_logger(__name__)
@@ -95,21 +95,21 @@ class ContextenApp:
     circleci: CircleCI
     modal: CodebaseEventsApp
     
-    # Orchestration extension attributes (enhanced)
-    prefect_extension: PrefectFlow
-    prefect_flow: Optional[PrefectFlow]
-    prefect_pipeline: Optional[PrefectWorkflowPipeline]
-    controlflow_extension: FlowOrchestrator
-    controlflow_orchestrator: Optional[FlowOrchestrator]
-    codegen_extension: CodegenWorkflowClient
-    codegen_integration: Optional[OverlayApplicator]
-    codegen_client: Optional[CodegenWorkflowClient]
-    grainchain_extension: QualityGateManager
-    grainchain_quality_gates: Optional[QualityGateManager]
-    grainchain_sandbox: Optional[SandboxManager]
-    graph_sitter_extension: GraphSitterQualityGates
-    graph_sitter_quality: Optional[GraphSitterQualityGates]
-    graph_sitter_analysis: Optional[CodeAnalysisEngine]
+    # Orchestration extension attributes (enhanced) - using Optional for proper typing
+    prefect_extension: Optional[Any]  # Will be lazy loaded
+    prefect_flow: Optional[Any]
+    prefect_pipeline: Optional[Any]
+    controlflow_extension: Optional[Any]  # Will be lazy loaded
+    controlflow_orchestrator: Optional[Any]
+    codegen_extension: Optional[Any]  # Will be lazy loaded
+    codegen_integration: Optional[Any]
+    codegen_client: Optional[Any]
+    grainchain_extension: Optional[Any]  # Will be lazy loaded
+    grainchain_quality_gates: Optional[Any]
+    grainchain_sandbox: Optional[Any]
+    graph_sitter_extension: Optional[Any]  # Will be lazy loaded
+    graph_sitter_quality: Optional[Any]
+    graph_sitter_analysis: Optional[Any]
 
     def __init__(self, name: str, repo: Optional[str] = None, tmp_dir: str = "/tmp/contexten", commit: str | None = "latest"):
         self.name = name
@@ -161,8 +161,8 @@ class ContextenApp:
             # Initialize Prefect extension (Top Layer - System Watch Flows)
             if PREFECT_AVAILABLE and PrefectFlow and PrefectWorkflowPipeline:
                 self.prefect_extension = None  # Will be lazy loaded
-                self.prefect_flow = PrefectFlow(app=self)
-                self.prefect_pipeline = PrefectWorkflowPipeline(name=f"{self.name}_pipeline")
+                self.prefect_flow = PrefectFlow(app=self)  # type: ignore
+                self.prefect_pipeline = PrefectWorkflowPipeline(name=f"{self.name}_pipeline")  # type: ignore
                 logger.info("✅ Prefect components initialized")
             else:
                 self.prefect_extension = None
@@ -173,7 +173,7 @@ class ContextenApp:
             # Initialize ControlFlow extension (Agent Orchestrator)
             if CONTROLFLOW_AVAILABLE and FlowOrchestrator:
                 self.controlflow_extension = None  # Will be lazy loaded
-                self.controlflow_orchestrator = FlowOrchestrator(app=self)
+                self.controlflow_orchestrator = FlowOrchestrator(app=self)  # type: ignore
                 logger.info("✅ ControlFlow components initialized")
             else:
                 self.controlflow_extension = None
@@ -184,7 +184,7 @@ class ContextenApp:
             if CODEGEN_AVAILABLE and CodegenWorkflowClient and not missing_vars:
                 self.codegen_extension = None  # Will be lazy loaded
                 self.codegen_integration = None  # Will be lazy loaded
-                self.codegen_client = CodegenWorkflowClient(
+                self.codegen_client = CodegenWorkflowClient(  # type: ignore
                     org_id=os.getenv('CODEGEN_ORG_ID'),
                     token=os.getenv('CODEGEN_API_TOKEN'),
                     base_url=os.getenv('CODEGEN_BASE_URL', 'https://api.codegen.com')
@@ -199,11 +199,11 @@ class ContextenApp:
             # Initialize Grainchain extension (Sandboxed Deployment + Snapshot saving)
             if GRAINCHAIN_AVAILABLE and QualityGateManager and SandboxManager:
                 try:
-                    from ..grainchain.config import GrainchainIntegrationConfig
-                    grainchain_config = GrainchainIntegrationConfig()
+                    from ..grainchain.config import GrainchainIntegrationConfig  # type: ignore
+                    grainchain_config = GrainchainIntegrationConfig()  # type: ignore
                     self.grainchain_extension = None  # Will be lazy loaded
-                    self.grainchain_quality_gates = QualityGateManager(grainchain_config)
-                    self.grainchain_sandbox = SandboxManager(grainchain_config)
+                    self.grainchain_quality_gates = QualityGateManager(grainchain_config)  # type: ignore
+                    self.grainchain_sandbox = SandboxManager(grainchain_config)  # type: ignore
                     logger.info("✅ Grainchain components initialized")
                 except ImportError:
                     self.grainchain_extension = None
@@ -220,13 +220,13 @@ class ContextenApp:
             if GRAPH_SITTER_ANALYSIS_AVAILABLE and GraphSitterQualityGates and CodeAnalysisEngine:
                 self.graph_sitter_extension = None  # Will be lazy loaded
                 if self.grainchain_quality_gates and self.grainchain_sandbox:
-                    self.graph_sitter_quality = GraphSitterQualityGates(
+                    self.graph_sitter_quality = GraphSitterQualityGates(  # type: ignore
                         quality_manager=self.grainchain_quality_gates,
                         sandbox_manager=self.grainchain_sandbox
                     )
                 else:
                     self.graph_sitter_quality = None
-                self.graph_sitter_analysis = CodeAnalysisEngine()
+                self.graph_sitter_analysis = CodeAnalysisEngine()  # type: ignore
                 logger.info("✅ Graph_sitter components initialized")
             else:
                 self.graph_sitter_extension = None
@@ -728,7 +728,7 @@ class ContextenApp:
                     'linear': 'healthy' if self.linear else 'unavailable',
                     'slack': 'healthy' if self.slack else 'unavailable',
                     'circleci': 'healthy' if self.circleci else 'unavailable',
-                    'modal': 'healthy' if self.modal else 'unavailable',
+                    'modal': 'healthy' if self.modal else 'inactive',
                     # Orchestration extensions with availability flags
                     'prefect': 'healthy' if PREFECT_AVAILABLE and self.prefect_flow else 'unavailable',
                     'controlflow': 'healthy' if CONTROLFLOW_AVAILABLE and self.controlflow_orchestrator else 'unavailable',
@@ -947,43 +947,11 @@ class ContextenApp:
         async def _root():
             return await self.root()
 
-        # @self.app.post("/{org}/{repo}/slack/events")
-        @self.app.post("/slack/events")
-        async def _handle_slack_event(request: Request):
-            return await self.handle_slack_event(request)
-
-        # @self.app.post("/{org}/{repo}/github/events")
-        @self.app.post("/github/events")
-        async def _handle_github_event(request: Request):
-            return await self.handle_github_event(request)
-
         # @self.app.post("/{org}/{repo}/linear/events")
         @self.app.post("/linear/events")
-        async def handle_linear_event(request: Request):
+        async def _handle_linear_event(request: Request):
             return await self.handle_linear_event(request)
 
-    def _setup_webhook_routes(self):
-        """Setup webhook routes for all integrated services."""
-        
-        @self.app.post("/webhooks/github")
-        async def github_webhook(request: Request):
-            payload = await request.json()
-            return await self.github.handle(payload, request)
-
-        @self.app.post("/webhooks/linear")
-        async def linear_webhook(request: Request):
-            payload = await request.json()
-            return await self.linear.handle(payload, request)
-
-        @self.app.post("/webhooks/slack")
-        async def slack_webhook(request: Request):
-            payload = await request.json()
-            return await self.slack.handle(payload, request)
-
-        @self.app.post("/webhooks/circleci")
-        async def circleci_webhook(request: Request):
-            payload = await request.json()
-            return await self.circleci.handle(payload, request)
 
     async def initialize_services(self):
         """Initialize all services with proper error handling."""
