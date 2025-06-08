@@ -1,18 +1,10 @@
+#!/usr/bin/env python3
 """
 Slack Extension for Contexten
-
-Provides Slack integration with webhook handling and message processing.
+Provides Slack integration capabilities for messaging, notifications, and team communication.
 """
 
-from .slack import Slack
-from .types import SlackWebhookPayload, SlackMessage, SlackUser, SlackChannel
+from .slack_integration import SlackIntegration
 
-__version__ = "1.0.0"
-__all__ = [
-    "Slack",
-    "SlackWebhookPayload", 
-    "SlackMessage",
-    "SlackUser",
-    "SlackChannel"
-]
+__all__ = ["SlackIntegration"]
 

@@ -56,24 +56,35 @@ from .resolve import Resolve
 # Import main analysis functions for easy access
 from .analysis.main_analyzer import comprehensive_analysis, print_analysis_summary, save_analysis_report
 
-# Import individual analyzers
-from .analysis.dead_code_detector import detect_dead_code, remove_dead_code
-from .analysis.complexity_analyzer import analyze_complexity, find_complex_functions, find_large_functions
-from .analysis.dependency_analyzer import analyze_dependencies, detect_circular_dependencies, analyze_module_coupling
-from .analysis.security_analyzer import analyze_security, check_import_security
-from .analysis.call_graph_analyzer import analyze_call_graph, find_hotspot_functions
+# Import legacy compatibility
+from .code_analysis import ComprehensiveAnalysisEngine, CodeAnalysisEngine
 
 # Import advanced configuration features
 from .analysis.advanced_config import (
-    AdvancedCodebaseConfig,
-    create_debug_config,
-    create_performance_config,
-    create_comprehensive_analysis_config,
-    create_typescript_analysis_config,
-    create_ast_only_config,
-    analyze_with_advanced_config
+    AdvancedAnalysisConfig,
+    PerformanceConfig,
+    SecurityConfig,
+    QualityConfig,
+    create_custom_config,
+    load_config_from_file,
+    save_config_to_file,
+    validate_config,
+    merge_configs,
+    get_default_config,
+    get_performance_config,
+    get_security_config,
+    get_quality_config,
+    ADVANCED_CONFIG_AVAILABLE,
 )
-from .analysis.enhanced_analyzer import enhanced_comprehensive_analysis
+
+# Import individual analyzers for granular control
+from .analysis.dead_code_detector import detect_dead_code, DeadCodeDetector
+from .analysis.complexity_analyzer import analyze_complexity, ComplexityAnalyzer
+from .analysis.dependency_analyzer import analyze_dependencies, DependencyAnalyzer
+from .analysis.security_analyzer import analyze_security, SecurityAnalyzer
+from .analysis.call_graph_analyzer import analyze_call_graph, CallGraphAnalyzer
+
+# Import configuration manager
 from .analysis.config_manager import ConfigurationManager
 
 __all__ = [
@@ -126,40 +137,49 @@ __all__ = [
     'print_analysis_summary', 
     'save_analysis_report',
     
-    # Dead code analysis
+    # Legacy compatibility
+    'ComprehensiveAnalysisEngine',
+    'CodeAnalysisEngine',
+    
+    # Individual analyzers
     'detect_dead_code',
-    'remove_dead_code',
-    
-    # Complexity analysis
     'analyze_complexity',
-    'find_complex_functions',
-    'find_large_functions',
-    
-    # Dependency analysis
     'analyze_dependencies',
-    'detect_circular_dependencies',
-    'analyze_module_coupling',
-    
-    # Security analysis
     'analyze_security',
-    'check_import_security',
-    
-    # Call graph analysis
     'analyze_call_graph',
-    'find_hotspot_functions',
     
     # Advanced configuration
-    'AdvancedCodebaseConfig',
-    'create_debug_config',
-    'create_performance_config',
-    'create_comprehensive_analysis_config',
-    'create_typescript_analysis_config',
-    'create_ast_only_config',
-    'analyze_with_advanced_config',
-    'enhanced_comprehensive_analysis',
-    'ConfigurationManager'
+    'AdvancedAnalysisConfig',
+    'PerformanceConfig',
+    'SecurityConfig',
+    'QualityConfig',
+    'create_custom_config',
+    'load_config_from_file',
+    'save_config_to_file',
+    'validate_config',
+    'merge_configs',
+    'get_default_config',
+    'get_performance_config',
+    'get_security_config',
+    'get_quality_config',
+    'ADVANCED_CONFIG_AVAILABLE',
+    
+    # Configuration management
+    'ConfigurationManager',
 ]
+
+# Convenience functions for quick access
+def quick_analysis(path: str, **kwargs):
+    """Quick analysis with default configuration."""
+    return comprehensive_analysis(path, **kwargs)
+
+def create_analyzer(path: str, config=None):
+    """Create a comprehensive analyzer instance."""
+    if config is None:
+        config = get_default_config()
+    return ComprehensiveAnalysisEngine(path, config)
 
 # Version info
 __version__ = "1.0.0"
 __description__ = "Comprehensive codebase analysis using graph_sitter API"
+
