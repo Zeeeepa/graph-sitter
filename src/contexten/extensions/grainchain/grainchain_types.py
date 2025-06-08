@@ -7,8 +7,42 @@ throughout the Grainchain integration system.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
+# Add comprehensive exports
+__all__ = [
+    'SandboxProvider',
+    'ProviderStatus',
+    'QualityGateType',
+    'QualityGateStatus',
+    'IntegrationStatus',
+    'GrainchainEventType',
+    'SandboxConfig',
+    'ExecutionResult',
+    'SnapshotInfo',
+    'SnapshotMetadata',
+    'ProviderInfo',
+    'QualityGateResult',
+    'GrainchainEvent',
+    'SandboxMetrics',
+    'IntegrationMetrics',
+    'WorkflowTask',
+    'SandboxWorkflow',
+    'PipelineStage',
+    'PipelineResult',
+    'PREnvironment',
+    'CostAnalysis',
+    'PerformanceBenchmark',
+    'HealthCheck',
+    'SystemHealth',
+    'SandboxId',
+    'SnapshotId',
+    'ProviderId',
+    'WorkflowId',
+    'PipelineId',
+    'ConfigValue',
+    'ProviderConfig',
+]
 
 class SandboxProvider(Enum):
     """Supported sandbox providers."""
@@ -74,16 +108,16 @@ class GrainchainEventType(Enum):
 @dataclass
 class SandboxConfig:
     """Configuration for sandbox creation."""
-    provider: SandboxProvider | None = None
+    provider: Optional[SandboxProvider] = None
     timeout: int = 1800  # 30 minutes default
     memory_limit: str = "2GB"
     cpu_limit: float = 2.0
     disk_limit: str = "10GB"
-    environment_vars: dict[str, str] = field(default_factory=dict)
+    environment_vars: Dict[str, str] = field(default_factory=dict)
     working_directory: str = "/workspace"
     network_isolation: bool = False
     auto_cleanup: bool = True
-    provider_config: dict[str, Any] = field(default_factory=dict)
+    provider_config: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -107,22 +141,22 @@ class SnapshotInfo:
     provider: SandboxProvider
     size_bytes: int
     created_at: datetime
-    metadata: dict[str, Any]
-    parent_snapshot: str | None = None
-    tags: list[str] = field(default_factory=list)
-    retention_policy: str | None = None
+    metadata: Dict[str, Any]
+    parent_snapshot: Optional[str] = None
+    tags: List[str] = field(default_factory=list)
+    retention_policy: Optional[str] = None
 
 
 @dataclass
 class SnapshotMetadata:
     """Metadata for snapshot creation."""
     name: str
-    description: str | None = None
-    tags: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
-    retention_days: int | None = None
+    description: Optional[str] = None
+    tags: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    retention_days: Optional[int] = None
     is_delta: bool = False
-    parent_snapshot: str | None = None
+    parent_snapshot: Optional[str] = None
 
 
 @dataclass
@@ -131,15 +165,15 @@ class ProviderInfo:
     name: SandboxProvider
     status: ProviderStatus
     available: bool
-    capabilities: list[str]
-    performance_metrics: dict[str, float]
-    cost_per_hour: float | None = None
-    startup_time_ms: float | None = None
-    max_memory: str | None = None
-    max_cpu: float | None = None
-    supported_features: list[str] = field(default_factory=list)
-    last_health_check: datetime | None = None
-    error_message: str | None = None
+    capabilities: List[str]
+    performance_metrics: Dict[str, float]
+    cost_per_hour: Optional[float] = None
+    startup_time_ms: Optional[float] = None
+    max_memory: Optional[str] = None
+    max_cpu: Optional[float] = None
+    supported_features: List[str] = field(default_factory=list)
+    last_health_check: Optional[datetime] = None
+    error_message: Optional[str] = None
 
 
 @dataclass
@@ -151,11 +185,11 @@ class QualityGateResult:
     duration: float
     timestamp: datetime
     sandbox_id: str
-    snapshot_id: str | None = None
-    results: dict[str, Any] = field(default_factory=dict)
-    artifacts: dict[str, str] = field(default_factory=dict)
-    error_message: str | None = None
-    recommendations: list[str] = field(default_factory=list)
+    snapshot_id: Optional[str] = None
+    results: Dict[str, Any] = field(default_factory=dict)
+    artifacts: Dict[str, str] = field(default_factory=dict)
+    error_message: Optional[str] = None
+    recommendations: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -164,8 +198,8 @@ class GrainchainEvent:
     event_type: GrainchainEventType
     timestamp: datetime
     source: str
-    data: dict[str, Any]
-    correlation_id: str | None = None
+    data: Dict[str, Any]
+    correlation_id: Optional[str] = None
     severity: str = "info"  # info, warning, error, critical
 
 
@@ -180,7 +214,7 @@ class SandboxMetrics:
     success_rate: float
     cost_total: float
     cost_per_hour: float
-    resource_utilization: dict[str, float]
+    resource_utilization: Dict[str, float]
     error_count: int
     last_updated: datetime
 
@@ -193,7 +227,7 @@ class IntegrationMetrics:
     quality_gate_success_rate: float
     average_deployment_time: float
     monthly_cost: float
-    provider_metrics: dict[SandboxProvider, SandboxMetrics]
+    provider_metrics: Dict[SandboxProvider, SandboxMetrics]
     health_status: IntegrationStatus
     uptime_percentage: float
     last_updated: datetime
@@ -204,12 +238,12 @@ class WorkflowTask:
     """A task within a workflow."""
     name: str
     task_type: str
-    config: dict[str, Any]
-    dependencies: list[str] = field(default_factory=list)
+    config: Dict[str, Any]
+    dependencies: List[str] = field(default_factory=list)
     timeout: int = 1800
     retry_count: int = 0
     max_retries: int = 3
-    condition: str | None = None
+    condition: Optional[str] = None
     parallel: bool = False
 
 
@@ -218,11 +252,11 @@ class SandboxWorkflow:
     """A workflow definition for sandbox operations."""
     name: str
     description: str
-    tasks: list[WorkflowTask]
-    global_config: dict[str, Any] = field(default_factory=dict)
+    tasks: List[WorkflowTask]
+    global_config: Dict[str, Any] = field(default_factory=dict)
     timeout: int = 7200  # 2 hours default
     on_failure: str = "stop"  # stop, continue, retry
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -231,11 +265,11 @@ class PipelineStage:
     name: str
     provider: SandboxProvider
     config: SandboxConfig
-    quality_gates: list[QualityGateType]
+    quality_gates: List[QualityGateType]
     parallel: bool = False
     timeout: int = 1800
-    depends_on: list[str] = field(default_factory=list)
-    artifacts: list[str] = field(default_factory=list)
+    depends_on: List[str] = field(default_factory=list)
+    artifacts: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -243,14 +277,14 @@ class PipelineResult:
     """Result of pipeline execution."""
     pipeline_id: str
     status: str
-    stages: dict[str, dict[str, Any]]
+    stages: Dict[str, Dict[str, Any]]
     total_duration: float
     cost: float
-    artifacts: dict[str, str]
-    snapshots: list[str]
+    artifacts: Dict[str, str]
+    snapshots: List[str]
     started_at: datetime
-    completed_at: datetime | None = None
-    error_message: str | None = None
+    completed_at: Optional[datetime] = None
+    error_message: Optional[str] = None
 
 
 @dataclass
@@ -266,17 +300,17 @@ class PREnvironment:
     created_at: datetime
     last_updated: datetime
     cost: float
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class CostAnalysis:
     """Cost analysis results."""
     total_cost: float
-    cost_by_provider: dict[SandboxProvider, float]
-    cost_by_project: dict[str, float]
-    cost_trends: dict[str, list[float]]
-    recommendations: list[dict[str, Any]]
+    cost_by_provider: Dict[SandboxProvider, float]
+    cost_by_project: Dict[str, float]
+    cost_trends: Dict[str, List[float]]
+    recommendations: List[Dict[str, Any]]
     potential_savings: float
     period_start: datetime
     period_end: datetime
@@ -304,18 +338,18 @@ class HealthCheck:
     status: str
     message: str
     timestamp: datetime
-    details: dict[str, Any] = field(default_factory=dict)
-    response_time: float | None = None
+    details: Dict[str, Any] = field(default_factory=dict)
+    response_time: Optional[float] = None
 
 
 @dataclass
 class SystemHealth:
     """Overall system health status."""
     overall_status: IntegrationStatus
-    components: list[HealthCheck]
+    components: List[HealthCheck]
     uptime: float
     last_check: datetime
-    issues: list[dict[str, str]] = field(default_factory=list)
+    issues: List[Dict[str, str]] = field(default_factory=list)
 
 
 # Type aliases for common use cases
@@ -326,5 +360,5 @@ WorkflowId = str
 PipelineId = str
 
 # Configuration type unions
-ConfigValue = str | int | float | bool | dict[str, Any] | list[Any]
-ProviderConfig = dict[str, ConfigValue]
+ConfigValue = Union[str, int, float, bool, Dict[str, Any], List[Any]]
+ProviderConfig = Dict[str, ConfigValue]
