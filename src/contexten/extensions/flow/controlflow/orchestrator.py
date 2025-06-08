@@ -4,7 +4,7 @@ ControlFlow Orchestrator Implementation
 
 from typing import Dict, List, Any, Optional
 from controlflow import Orchestrator as BaseOrchestrator
-from ..strand-agents import StrandAgent, StrandWorkflow
+from ..strands import StrandAgent, StrandWorkflow
 from .executor import FlowExecutor
 from .scheduler import FlowScheduler
 
@@ -108,4 +108,3 @@ class FlowOrchestrator(BaseOrchestrator):
                 return agent
                 
         return None
-

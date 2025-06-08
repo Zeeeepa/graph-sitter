@@ -4,7 +4,7 @@ ControlFlow Scheduler Implementation
 
 from typing import Dict, List, Any
 from controlflow import Scheduler as BaseScheduler
-from ..strand-agents import StrandAgent, StrandWorkflow
+from ..strands import StrandAgent, StrandWorkflow
 
 class FlowScheduler(BaseScheduler):
     async def schedule_workflow(
@@ -259,4 +259,3 @@ class FlowScheduler(BaseScheduler):
             task.get("estimated_duration", self._estimate_task_duration(task))
             for task in tasks
         )
-

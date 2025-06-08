@@ -5,7 +5,7 @@ Prefect Flow Integration
 from typing import Dict, List, Any, Optional
 from prefect import flow, get_run_logger
 from prefect.context import get_run_context
-from ..strand-agents import StrandWorkflow
+from ..strands import StrandWorkflow
 
 class PrefectFlow:
     def __init__(
@@ -65,4 +65,3 @@ class PrefectFlow:
         for key, value in metrics.items():
             logger.info(f"Metric - {key}: {value}")
             # Could also use Prefect's metrics API when available
-

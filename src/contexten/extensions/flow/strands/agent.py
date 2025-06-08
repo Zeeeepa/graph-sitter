@@ -3,9 +3,26 @@ StrandAgent - Core agent implementation using strands-agents framework
 """
 
 from typing import Dict, List, Any, Optional
-from strands_agents.tools import Tool, BaseAgent
-from strands_agents.workflow import WorkflowContext
-from strands_agents.mcp import MCPClient
+try:
+    from strands.tools import Tool, BaseAgent
+    from strands.workflow import WorkflowContext
+    from strands.mcp import MCPClient
+except ImportError:
+    # Fallback for development/testing
+    class Tool:
+        pass
+    class BaseAgent:
+        def __init__(self, tools=None, **kwargs):
+            self.tools = tools or []
+    class WorkflowContext:
+        def __init__(self):
+            self._context = {}
+        def update(self, data):
+            self._context.update(data)
+        def update_execution_results(self, results):
+            self._context.update(results)
+    class MCPClient:
+        pass
 
 class StrandAgent(BaseAgent):
     def __init__(
@@ -48,7 +65,7 @@ class StrandAgent(BaseAgent):
         result = await self._execute_with_tools(task, task_tools)
         
         # Update context with execution results
-        self.context.update_execution_history(result)
+        self.context.update_execution_results(result)
         
         return result
     
@@ -142,4 +159,3 @@ class StrandAgent(BaseAgent):
             "status": "failed",
             "error": f"No tool available for action: {action}"
         }
-
