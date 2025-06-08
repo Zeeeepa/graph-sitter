@@ -27,12 +27,17 @@ DOCUMENTATION API:
 - Advanced function and class analysis
 """
 
+from typing import Union, Optional, Any, TYPE_CHECKING
+from pathlib import Path
+
 # Import the Analysis class that provides the documentation API
 from .analyzer import Analysis
-try:
-    from .enhanced_analyzer import EnhancedCodebaseAnalyzer
-except ImportError:
-    EnhancedCodebaseAnalyzer = None
+
+# Use TYPE_CHECKING to avoid runtime import issues
+if TYPE_CHECKING:
+    from graph_sitter.configs.models.codebase import CodebaseConfig
+else:
+    CodebaseConfig = Any
 
 try:
     from .codebase_analysis import (
@@ -48,79 +53,129 @@ try:
         FunctionSummary,
         SymbolSummary,
     )
+    CODEBASE_ANALYSIS_AVAILABLE = True
 except ImportError:
-    # Provide stub functions if not available
-    def get_codebase_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_file_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_class_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_function_summary(*args, **kwargs):
-        raise NotImplementedError("codebase_analysis module not available")
-    def get_symbol_summary(*args, **kwargs):
+    CODEBASE_ANALYSIS_AVAILABLE = False
+    
+    def get_codebase_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        config: Optional[Any] = None
+    ) -> Any:
         raise NotImplementedError("codebase_analysis module not available")
     
-    CodebaseElements = None
-    CodebaseSummary = None
-    FileSummary = None
-    ClassSummary = None
-    FunctionSummary = None
-    SymbolSummary = None
+    def get_file_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        filepath: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_class_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        class_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_function_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        function_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    def get_symbol_summary(  # type: ignore[misc]
+        codebase_path: Union[str, Path],
+        symbol_name: str,
+        config: Optional[Any] = None
+    ) -> Any:
+        raise NotImplementedError("codebase_analysis module not available")
+    
+    CodebaseElements = None  # type: ignore
+    CodebaseSummary = None  # type: ignore
+    FileSummary = None  # type: ignore
+    ClassSummary = None  # type: ignore
+    FunctionSummary = None  # type: ignore
+    SymbolSummary = None  # type: ignore
 
 # Import optional analyzers with fallbacks
 try:
-    from .complexity_analyzer import ComplexityAnalyzer
+    from .complexity_analyzer import ComplexityAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     ComplexityAnalyzer = None
 
 try:
-    from .dependency_analyzer import DependencyAnalyzer
+    from .dependency_analyzer import DependencyAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     DependencyAnalyzer = None
 
 try:
-    from .security_analyzer import SecurityAnalyzer
+    from .security_analyzer import SecurityAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     SecurityAnalyzer = None
 
 try:
-    from .call_graph_analyzer import CallGraphAnalyzer
+    from .call_graph_analyzer import CallGraphAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     CallGraphAnalyzer = None
 
 try:
-    from .dead_code_detector import DeadCodeDetector
+    from .dead_code_detector import DeadCodeDetector  # type: ignore[attr-defined]
 except ImportError:
     DeadCodeDetector = None
 
 # Import existing comprehensive analysis functionality
-from .core.engine import (
-    ComprehensiveAnalysisEngine,
-    AnalysisConfig,
-    AnalysisResult,
-    AnalysisMetrics,
-    QualityMetrics,
-    SecurityMetrics,
-    PerformanceMetrics,
-    MaintainabilityMetrics,
-    ComplexityMetrics,
-    DependencyMetrics,
-    TestCoverageMetrics,
-    DocumentationMetrics,
-    CodeStyleMetrics,
-    ArchitecturalMetrics,
-    TechnicalDebtMetrics,
-    analyze_codebase,
-    
-    # Data classes
-    ImportLoop,
-    DeadCodeItem,
-    TrainingDataItem,
-    GraphAnalysisResult,
-    EnhancedFunctionMetrics,
-    EnhancedClassMetrics
-)
+try:
+    from .core.engine import (
+        ComprehensiveAnalysisEngine,
+        AnalysisConfig,
+        AnalysisResult,
+        AnalysisMetrics,
+        QualityMetrics,
+        SecurityMetrics,
+        PerformanceMetrics,
+        MaintainabilityMetrics,
+        ComplexityMetrics,
+        DependencyMetrics,
+        TestCoverageMetrics,
+        DocumentationMetrics,
+        CodeStyleMetrics,
+        ArchitecturalMetrics,
+        TechnicalDebtMetrics,
+        analyze_codebase,
+        
+        # Data classes
+        ImportLoop,
+        DeadCodeItem,
+        TrainingDataItem,
+        GraphAnalysisResult,
+        EnhancedFunctionMetrics,
+        EnhancedClassMetrics
+    )
+except ImportError:
+    # Provide None for missing components
+    ComprehensiveAnalysisEngine = None
+    AnalysisConfig = None
+    AnalysisResult = None
+    AnalysisMetrics = None
+    QualityMetrics = None
+    SecurityMetrics = None
+    PerformanceMetrics = None
+    MaintainabilityMetrics = None
+    ComplexityMetrics = None
+    DependencyMetrics = None
+    TestCoverageMetrics = None
+    DocumentationMetrics = None
+    CodeStyleMetrics = None
+    ArchitecturalMetrics = None
+    TechnicalDebtMetrics = None
+    analyze_codebase = None
+    ImportLoop = None
+    DeadCodeItem = None
+    TrainingDataItem = None
+    GraphAnalysisResult = None
+    EnhancedFunctionMetrics = None
+    EnhancedClassMetrics = None
 
 # Phase 2 exports - Tree-sitter queries
 try:
@@ -133,10 +188,14 @@ try:
     TREE_SITTER_QUERIES_AVAILABLE = True
 except ImportError:
     TREE_SITTER_QUERIES_AVAILABLE = False
+    TreeSitterQueryEngine = None
+    QueryPattern = None
+    QueryResult = None
+    analyze_with_queries = None
 
 # Phase 2 exports - Visualization
 try:
-    from .visualization import (
+    from .visualization import (  # type: ignore[attr-defined]
         InteractiveReportGenerator,
         ReportConfig,
         create_interactive_report,
@@ -145,6 +204,10 @@ try:
     VISUALIZATION_AVAILABLE = True
 except ImportError:
     VISUALIZATION_AVAILABLE = False
+    InteractiveReportGenerator = None  # type: ignore[assignment,misc]
+    ReportConfig = None
+    create_interactive_report = None  # type: ignore[assignment]
+    generate_html_report = None  # type: ignore[assignment]
 
 # Phase 2 exports - Performance optimization
 try:
@@ -156,6 +219,9 @@ try:
     PERFORMANCE_AVAILABLE = True
 except ImportError:
     PERFORMANCE_AVAILABLE = False
+    PerformanceOptimizer = None
+    PerformanceConfig = None
+    create_optimizer = None
 
 # Phase 2 exports - Advanced configuration
 try:
@@ -168,6 +234,10 @@ try:
     ADVANCED_CONFIG_AVAILABLE = True
 except ImportError:
     ADVANCED_CONFIG_AVAILABLE = False
+    AdvancedCodebaseConfig = None
+    create_optimized_config = None
+    create_debug_config = None
+    create_production_config = None
 
 __all__ = [
     # Documentation API
