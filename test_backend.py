@@ -11,7 +11,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from src.contexten.extensions.contexten_app.contexten_app import ContextenApp
+    from contexten.extensions.contexten_app.contexten_app import ContextenApp
     import uvicorn
     
     print("✅ Successfully imported contexten app")

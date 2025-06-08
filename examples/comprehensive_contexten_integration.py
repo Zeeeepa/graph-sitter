@@ -42,17 +42,29 @@ logger = get_logger(__name__)
 # COMPREHENSIVE CONTEXTEN INTEGRATION EXAMPLE
 ########################################################################################################################
 
-async def main():
-    """Main function demonstrating comprehensive Contexten integration."""
-    logger.info("🚀 Starting Comprehensive Contexten Integration Example")
-    
-    # Initialize ContextenApp with all 11 extensions
-    logger.info("📦 Initializing ContextenApp with all 11 extensions...")
-    
-    app = ContextenApp(
-        name="comprehensive-contexten-demo",
-        repo="Zeeeepa/graph-sitter",
-        commit="develop"
+# Set up logging
+logging.basicConfig(level=logging.INFO, force=True)
+logger = get_logger(__name__)
+
+# Check if all required extensions are available
+REQUIRED_EXTENSIONS = [
+    'graph_sitter', 'contexten.extensions.github', 'contexten.extensions.linear',
+    'contexten.extensions.slack', 'contexten.extensions.circleci',
+    'contexten.extensions.prefect', 'contexten.extensions.controlflow',
+    'contexten.extensions.codegen', 'contexten.extensions.grainchain'
+]
+
+def check_extensions():
+    """Check if all required extensions are available."""
+    missing = []
+    for ext in REQUIRED_EXTENSIONS:
+        try:
+            __import__(ext)
+        except ImportError:
+            missing.append(ext)
+    return missing
+
+########################################################################################################################
     )
     
     # Verify all extensions are initialized

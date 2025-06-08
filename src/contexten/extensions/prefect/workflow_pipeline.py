@@ -566,6 +566,7 @@ class PrefectWorkflowPipeline:
         """Initialize Prefect workflow pipeline."""
         self.name = name
         self.monitoring = PrefectMonitor()  # Fix: Use correct class name
+
         self.stage_callbacks: Dict[PipelineStage, List[Callable]] = {}
         self.global_callbacks: List[Callable] = []
         
@@ -606,6 +607,7 @@ class PrefectWorkflowPipeline:
     async def execute_pipeline(
         self,
         context: PipelineContext,
+        codegen_config: Dict[str, Any],
         controlflow_config: Optional[Dict[str, Any]] = None,
         grainchain_config: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
@@ -725,8 +727,11 @@ class PrefectWorkflowPipeline:
         })
         
         try:
-            # Initialize components and validate dependencies
+            # Initialize pipeline components
             initialization_data: Dict[str, Any] = {
+                'project_id': context.project_id,
+                'requirements': context.requirements,
+                'config_validated': True,
                 'components_initialized': [],
                 'dependencies_validated': [],
                 'configuration_loaded': True,
