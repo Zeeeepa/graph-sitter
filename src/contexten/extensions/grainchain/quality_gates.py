@@ -298,6 +298,7 @@ class QualityGateManager:
 
         try:
             # Execute gate-specific logic
+            result: Dict[str, Any]
             if gate == QualityGateType.CODE_QUALITY:
                 result = await self._execute_code_quality_gate(session)
             elif gate == QualityGateType.UNIT_TESTS:
@@ -313,11 +314,7 @@ class QualityGateManager:
             else:
                 # Try custom gate
                 gate_name = str(gate)
-                if gate_name in self._custom_gates:
-                    result = await self._custom_gates[gate_name](session)
-                else:
-                    msg = f"Unsupported gate type: {gate}"
-                    raise ValueError(msg)
+                result = await self._execute_custom_gate(gate_name, session)
 
             return QualityGateResult(
                 gate=gate,
@@ -426,6 +423,19 @@ class QualityGateManager:
                 "stderr": result.stderr
             }
         }
+
+    async def _execute_custom_gate(
+        self,
+        gate_name: str,
+        session: SandboxSession
+    ) -> Dict[str, Any]:
+        """Execute a custom gate."""
+        if gate_name not in self._custom_gates:
+            msg = f"No custom gate found with name: {gate_name}"
+            raise ValueError(msg)
+
+        result = await self._custom_gates[gate_name](session)
+        return result
 
     def _topological_sort(self, gates: List[QualityGateType]) -> List[QualityGateType]:
         """Sort gates topologically based on dependencies."""
