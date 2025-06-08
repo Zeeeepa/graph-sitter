@@ -40,14 +40,24 @@ class Dashboard:
     - Settings and configuration management
     """
     
-    def __init__(self, config_file: str = "dashboard_config.json"):
-        # Core components
-        self.settings_manager = SettingsManager(config_file)
-        self.project_manager = ProjectManager(self)
-        self.planning_engine = PlanningEngine(self)
-        self.workflow_engine = WorkflowEngine(self)
-        self.quality_manager = QualityManager(self)
-        self.event_coordinator = EventCoordinator(self)
+class Dashboard:
+    """Main dashboard that orchestrates all components."""
+    
+    def __init__(self, 
+                 config_file: str = "dashboard_config.json",
+                 settings_manager = None,
+                 project_manager = None,
+                 planning_engine = None,
+                 workflow_engine = None,
+                 quality_manager = None,
+                 event_coordinator = None):
+        # Core components with dependency injection for testability
+        self.settings_manager = settings_manager or SettingsManager(config_file)
+        self.project_manager = project_manager or ProjectManager(self)
+        self.planning_engine = planning_engine or PlanningEngine(self)
+        self.workflow_engine = workflow_engine or WorkflowEngine(self)
+        self.quality_manager = quality_manager or QualityManager(self)
+        self.event_coordinator = event_coordinator or EventCoordinator(self)
         
         # FastAPI app
         self.app = FastAPI(title="Contexten Dashboard", version="1.0.0")
@@ -58,6 +68,7 @@ class Dashboard:
         self.startup_time = None
         
         # Setup routes
+        self._setup_routes()
         self._setup_routes()
         
     async def initialize(self):
