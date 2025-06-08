@@ -7,9 +7,9 @@ import asyncio
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from contexten.extensions.circleci.integration_agent import CircleCIIntegrationAgent
-from contexten.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
-from contexten.extensions.circleci.types import (
+from graph_sitter.extensions.circleci.integration_agent import CircleCIIntegrationAgent
+from graph_sitter.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
+from graph_sitter.extensions.circleci.types import (
     CircleCIEventType, BuildStatus, FailureType, FixConfidence
 )
 

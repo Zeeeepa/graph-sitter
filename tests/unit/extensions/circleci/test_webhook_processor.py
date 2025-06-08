@@ -10,14 +10,13 @@ import hashlib
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from contexten.extensions.circleci.webhook_processor import (
+from graph_sitter.extensions.circleci.webhook_processor import (
     WebhookProcessor,
     WebhookValidationError,
     WebhookProcessingError
 )
-from contexten.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
-from contexten.extensions.circleci.types import CircleCIEventType, BuildStatus
-
+from graph_sitter.extensions.circleci.config import CircleCIIntegrationConfig, APIConfig, WebhookConfig
+from graph_sitter.extensions.circleci.types import CircleCIEventType, BuildStatus
 
 @pytest.fixture
 def config():

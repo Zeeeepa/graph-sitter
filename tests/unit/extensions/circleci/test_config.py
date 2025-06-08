@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timedelta
 
-from contexten.extensions.circleci.config import (
+from graph_sitter.extensions.circleci.config import (
     CircleCIIntegrationConfig,
     APIConfig,
     WebhookConfig,
