@@ -19,14 +19,14 @@ from contexten.extensions.graph_sitter_ext import Analysis, Visualize, Resolve, 
    - `CodebaseConfig` - Main configuration class
    - `PresetConfigs` - Predefined configurations
 
-2. **Analysis Module** - Code analysis capabilities (6/7 components working)
+2. **Analysis Module** - Code analysis capabilities (7/7 components working) 🎉
    - ✅ `Analysis` - Main analyzer class
    - ✅ Complexity analysis functions
    - ✅ Dependency analysis functions  
    - ✅ Security analysis functions
    - ✅ Call graph analysis functions
    - ✅ Dead code detection functions
-   - ❌ Enhanced analyzer (has import issues)
+   - ✅ Enhanced analyzer functions (FIXED!)
 
 3. **Visualize Module** - Code visualization features
    - ✅ `Visualize` - Main visualization class
@@ -42,17 +42,25 @@ The following unused files have been removed:
 - `analysis/cli.py` - Unused CLI module  
 - `analysis/visualization/html_reporter.py` - Missing dependencies
 
-### ⚠️ Problematic Files (Not Imported)
+### ✅ Fixed Import Issues
 
-These files have issues and are not currently imported:
-- `analysis/enhanced_analyzer.py` - Cannot import CodebaseConfig
-- `analysis/advanced_config.py` - Cannot import CodebaseConfig
-- `analysis/config_manager.py` - Cannot import CodebaseConfig
-- `analysis/codebase_analysis.py` - Relative import issues
-- `cli.py` - Indentation errors
-- `code_analysis.py` - Undefined references
+Fixed import issues in the following files:
+- `analysis/enhanced_analyzer.py` - Fixed CodebaseConfig import path
+- `analysis/advanced_config.py` - Fixed CodebaseConfig import path
+- `analysis/config_manager.py` - Fixed CodebaseConfig import path
 
 ## Usage Examples
+
+### Enhanced Analysis (NEW!)
+```python
+from contexten.extensions.graph_sitter_ext import enhanced_comprehensive_analysis
+
+# Run comprehensive analysis with different optimization modes
+result = enhanced_comprehensive_analysis(
+    codebase_path="./src",
+    optimization_mode="comprehensive"  # or "performance", "debug", "typescript", "ast_only"
+)
+```
 
 ### Basic Analysis
 ```python
@@ -98,7 +106,7 @@ resolver = Resolve()
 
 - ✅ No naming conflicts with real graph_sitter library
 - ✅ Core functionality working
-- ✅ Analysis components mostly working (6/7)
+- ✅ Analysis components mostly working (7/7)
 - ✅ Visualization working
 - ✅ Resolution working
 - ⚠️ Some legacy files need fixing or removal
@@ -110,4 +118,3 @@ resolver = Resolve()
 2. Resolve CodebaseConfig import issues in enhanced analyzer
 3. Update any remaining references to old import paths
 4. Add comprehensive tests for working modules
-

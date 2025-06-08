@@ -82,13 +82,14 @@ except ImportError as e:
     _dead_code_available = False
     print(f"Warning: Dead code detector not available: {e}")
 
-# Enhanced analyzer - check if it has a class
+# Enhanced analyzer functions
 try:
-    from .enhanced_analyzer import EnhancedCodebaseAnalyzer
+    from .enhanced_analyzer import enhanced_comprehensive_analysis
     _enhanced_available = True
 except ImportError as e:
-    _enhanced_available = False
     print(f"Warning: Enhanced analyzer not available: {e}")
+    enhanced_comprehensive_analysis = None
+    _enhanced_available = False
 
 # Export what's actually available
 __all__ = []
@@ -131,7 +132,7 @@ if _enhanced_available:
 CodebaseAnalyzer = Analysis if _analyzer_available else None
 
 def get_analysis_status():
-    """Get the status of all analysis modules for debugging."""
+    """Get the status of all analysis components."""
     return {
         'analyzer': _analyzer_available,
         'complexity': _complexity_available,

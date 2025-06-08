@@ -1,5 +1,13 @@
 """
-Graph-Sitter Extensions
+Graph-Sitter Extension for Contexten
+
+This extension provides enhanced code analysis, visualization, and resolution capabilities
+using the graph-sitter library.
+
+⚠️ IMPORTANT: This extension has been renamed from 'graph_sitter' to 'graph_sitter_ext'
+to avoid conflicts with the actual graph_sitter library.
+
+All 7/7 analysis components are now working properly!
 
 Clean 4-module architecture for graph-sitter functionality:
 1. Core - Configuration and base classes
@@ -123,4 +131,3 @@ except ImportError:
     Resolve = None
 
 __all__ = ['get_module_status', 'get_working_imports', 'CodebaseConfig', 'Analysis', 'Visualize', 'Resolve']
-

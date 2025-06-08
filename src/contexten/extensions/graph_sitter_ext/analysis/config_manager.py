@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Configuration Manager for Advanced Graph-Sitter Settings
-
-Provides utilities to manage and demonstrate all advanced configuration flags
-from https://graph-sitter.com/introduction/advanced-settings
+Configuration manager for graph-sitter analysis.
 """
 
+import os
+import json
+from typing import Dict, Any, Optional, List
+from pathlib import Path
+
+# Import from the correct path
+from graph_sitter.configs.models.codebase import CodebaseConfig
 import graph_sitter
 from graph_sitter import Codebase
-from graph_sitter.configs import CodebaseConfig
-from typing import Dict, List, Any, Optional, Tuple
-import json
-from pathlib import Path
 
 from .advanced_config import AdvancedCodebaseConfig
 
@@ -671,4 +671,3 @@ if __name__ == "__main__":
     else:
         print(f"❌ Unknown action: {action}")
         print("Available actions: recommend, compare, demonstrate")
-
