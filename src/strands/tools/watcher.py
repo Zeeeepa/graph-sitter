@@ -13,8 +13,30 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler, FileSystemEvent
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
+    # Create dummy classes for when watchdog is not available
+    class FileSystemEventHandler:
+        pass
+    
+    class FileSystemEvent:
+        def __init__(self):
+            self.src_path = ""
+            self.is_directory = False
+    
+    class Observer:
+        def schedule(self, *args, **kwargs):
+            pass
+        def start(self):
+            pass
+        def stop(self):
+            pass
+        def join(self):
+            pass
 
 logger = logging.getLogger(__name__)
 
@@ -225,6 +247,10 @@ class Watcher:
         Returns:
             True if watching started successfully
         """
+        if not WATCHDOG_AVAILABLE:
+            logger.warning("Watchdog not available, file watching disabled")
+            return False
+        
         path = os.path.abspath(path)
         
         if not os.path.exists(path):
@@ -460,4 +486,3 @@ class Watcher:
                 "ignore_patterns": list(self.config.ignore_patterns)
             }
         }
-
