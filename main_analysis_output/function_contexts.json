@@ -1,0 +1,41 @@
+[
+  {
+    "implementation": {
+      "source": "def hello_world():\n    \"\"\"A simple test function.\"\"\"\n    print(\"Hello, World!\")\n    return \"success\"",
+      "filepath": "simple_test/test.py",
+      "line_start": null,
+      "line_end": null,
+      "name": "hello_world",
+      "parameters": [],
+      "return_type": "PyReturnTypePlaceholder",
+      "is_async": false,
+      "has_decorators": false,
+      "docstring": "\"\"\"A simple test function.\"\"\""
+    },
+    "dependencies": [],
+    "usages": [
+      {
+        "source": "def hello_world():\n    \"\"\"A simple test function.\"\"\"\n    print(\"Hello, World!\")\n    return \"success\"\n\nclass TestClass:\n    def __init__(self):\n        self.value = 42\n    \n    def get_value(self):\n        return self.value\n\nif __name__ == \"__main__\":\n    hello_world()\n    test = TestClass()\n    print(test.get_value())\n",
+        "filepath": "simple_test/test.py",
+        "line": null,
+        "context": null
+      }
+    ],
+    "call_sites": [
+      {
+        "source": "hello_world()",
+        "filepath": "simple_test/test.py",
+        "line": null,
+        "caller": null
+      }
+    ],
+    "metrics": {
+      "line_count": 4,
+      "parameter_count": 0,
+      "dependency_count": 0,
+      "usage_count": 1,
+      "call_site_count": 1,
+      "complexity_estimate": 1
+    }
+  }
+]

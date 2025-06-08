@@ -1,0 +1,22 @@
+[
+  {
+    "name": "UsedClass",
+    "filepath": "simple_codebase/main.py",
+    "has_usages": true,
+    "usage_count": 2,
+    "methods": [
+      "method"
+    ],
+    "source_preview": "class UsedClass:\n    def method(self):\n        return used_function()"
+  },
+  {
+    "name": "UnusedClass",
+    "filepath": "simple_codebase/main.py",
+    "has_usages": false,
+    "usage_count": 0,
+    "methods": [
+      "method"
+    ],
+    "source_preview": "class UnusedClass:\n    def method(self):\n        return \"Never instantiated\""
+  }
+]

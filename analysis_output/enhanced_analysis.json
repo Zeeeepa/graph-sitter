@@ -1,0 +1,291 @@
+{
+  "codebase_id": "codebase_20250605_140326",
+  "timestamp": "2025-06-05T14:03:26.129067",
+  "summary": {
+    "total_files": 1,
+    "total_functions": 1,
+    "total_classes": 1,
+    "total_symbols": 2,
+    "total_imports": 0,
+    "total_lines": 14,
+    "average_complexity": 1.0,
+    "average_maintainability": 50.0,
+    "documentation_coverage": 0.0,
+    "test_coverage_estimate": 0.0,
+    "dead_code_percentage": 1.0,
+    "technical_debt_score": 0.5,
+    "health_score": 0.22499999999999998
+  },
+  "metrics": {
+    "codebase": {
+      "total_files": 1,
+      "total_functions": 1,
+      "total_classes": 1,
+      "total_symbols": 2,
+      "total_imports": 0,
+      "total_lines": 14,
+      "average_complexity": 1.0,
+      "average_maintainability": 50.0,
+      "documentation_coverage": 0.0,
+      "test_coverage_estimate": 0.0,
+      "dead_code_percentage": 1.0,
+      "technical_debt_score": 0.5,
+      "health_score": 0.22499999999999998
+    },
+    "call_graph": {
+      "patterns": {
+        "total_functions": 1,
+        "total_calls": 0,
+        "average_calls_per_function": 0.0,
+        "max_call_depth": 0,
+        "strongly_connected_components": 1,
+        "entry_points": 0,
+        "leaf_functions": 1,
+        "hub_functions": 0,
+        "call_distribution": {
+          "min": 0,
+          "max": 0,
+          "median": 0,
+          "functions_with_no_calls": 1,
+          "functions_with_many_calls": 0
+        }
+      },
+      "most_called_function": null,
+      "most_calling_function": null,
+      "unused_functions": [
+        "hello_world"
+      ],
+      "recursive_functions": [],
+      "call_chains": {
+        "total_chains": 0,
+        "average_chain_length": 0,
+        "longest_chain": null,
+        "chains": []
+      }
+    },
+    "dependencies": {
+      "import_analysis": {
+        "total_imports": 0,
+        "external_imports": 0,
+        "internal_imports": 0,
+        "unused_imports": 0,
+        "circular_imports": 0,
+        "import_depth_avg": 0,
+        "most_imported_modules": [],
+        "import_complexity_score": 0.0
+      },
+      "circular_dependencies": [],
+      "optimization_suggestions": {
+        "unused_imports": [],
+        "circular_imports": [],
+        "redundant_imports": [],
+        "missing_imports": [],
+        "optimization_score": 0.0
+      }
+    },
+    "dead_code": {
+      "dead_code_items": [
+        {
+          "name": "hello_world",
+          "type": "function",
+          "filepath": "test_repo/main.py",
+          "reason": "No call sites or usages found",
+          "confidence": 0.39999999999999997,
+          "safe_to_remove": false
+        },
+        {
+          "name": "Calculator",
+          "type": "class",
+          "filepath": "test_repo/main.py",
+          "reason": "No instantiations or method usages found",
+          "confidence": 0.3,
+          "safe_to_remove": false
+        }
+      ],
+      "cleanup_impact": {
+        "estimated_lines_saved": 30,
+        "files_affected": 1,
+        "risk_level": "high",
+        "risk_factors": [
+          "Low confidence for hello_world",
+          "Low confidence for Calculator",
+          "High impact for Calculator"
+        ],
+        "items_by_type": {
+          "functions": 1,
+          "classes": 1,
+          "imports": 0,
+          "variables": 0,
+          "unreachable": 0
+        }
+      },
+      "removal_plan": {
+        "items_count": 0,
+        "estimated_lines_saved": 0,
+        "risk_assessment": "low",
+        "warnings": [
+          "2 items require manual review"
+        ]
+      }
+    }
+  },
+  "call_graph_analysis": {
+    "patterns": {
+      "total_functions": 1,
+      "total_calls": 0,
+      "average_calls_per_function": 0.0,
+      "max_call_depth": 0,
+      "strongly_connected_components": 1,
+      "entry_points": 0,
+      "leaf_functions": 1,
+      "hub_functions": 0,
+      "call_distribution": {
+        "min": 0,
+        "max": 0,
+        "median": 0,
+        "functions_with_no_calls": 1,
+        "functions_with_many_calls": 0
+      }
+    },
+    "most_called_function": null,
+    "most_calling_function": null,
+    "unused_functions": [
+      "hello_world"
+    ],
+    "recursive_functions": [],
+    "call_chains": {
+      "total_chains": 0,
+      "average_chain_length": 0,
+      "longest_chain": null,
+      "chains": []
+    }
+  },
+  "dependency_analysis": {
+    "import_analysis": {
+      "total_imports": 0,
+      "external_imports": 0,
+      "internal_imports": 0,
+      "unused_imports": 0,
+      "circular_imports": 0,
+      "import_depth_avg": 0,
+      "most_imported_modules": [],
+      "import_complexity_score": 0.0
+    },
+    "circular_dependencies": [],
+    "optimization_suggestions": {
+      "unused_imports": [],
+      "circular_imports": [],
+      "redundant_imports": [],
+      "missing_imports": [],
+      "optimization_score": 0.0
+    }
+  },
+  "dead_code_analysis": {
+    "dead_code_items": [
+      {
+        "name": "hello_world",
+        "type": "function",
+        "filepath": "test_repo/main.py",
+        "reason": "No call sites or usages found",
+        "confidence": 0.39999999999999997,
+        "safe_to_remove": false
+      },
+      {
+        "name": "Calculator",
+        "type": "class",
+        "filepath": "test_repo/main.py",
+        "reason": "No instantiations or method usages found",
+        "confidence": 0.3,
+        "safe_to_remove": false
+      }
+    ],
+    "cleanup_impact": {
+      "estimated_lines_saved": 30,
+      "files_affected": 1,
+      "risk_level": "high",
+      "risk_factors": [
+        "Low confidence for hello_world",
+        "Low confidence for Calculator",
+        "High impact for Calculator"
+      ],
+      "items_by_type": {
+        "functions": 1,
+        "classes": 1,
+        "imports": 0,
+        "variables": 0,
+        "unreachable": 0
+      }
+    },
+    "removal_plan": {
+      "items_count": 0,
+      "estimated_lines_saved": 0,
+      "risk_assessment": "low",
+      "warnings": [
+        "2 items require manual review"
+      ]
+    }
+  },
+  "function_analysis": [
+    {
+      "name": "hello_world",
+      "filepath": "test_repo/main.py",
+      "line_count": 0,
+      "parameter_count": 0,
+      "return_statement_count": 0,
+      "call_site_count": 0,
+      "function_call_count": 0,
+      "cyclomatic_complexity": 1,
+      "maintainability_index": 50.0,
+      "documentation_coverage": 0.0,
+      "test_coverage_estimate": 0.0,
+      "is_async": false,
+      "has_decorators": false,
+      "has_docstring": false,
+      "has_type_annotations": false,
+      "dependency_count": 0,
+      "usage_count": 0,
+      "impact_score": 0.0
+    }
+  ],
+  "class_analysis": [],
+  "file_analysis": [
+    {
+      "filepath": "test_repo/main.py",
+      "line_count": 14,
+      "function_count": 1,
+      "class_count": 1,
+      "import_count": 0,
+      "symbol_count": 2,
+      "complexity_score": 1.0,
+      "maintainability_index": 100.0,
+      "documentation_coverage": 0.5,
+      "test_coverage_estimate": 1.0,
+      "is_test_file": true,
+      "language": "python"
+    }
+  ],
+  "issues": [
+    {
+      "type": "poor_documentation",
+      "severity": "medium",
+      "symbol": "codebase",
+      "description": "Low documentation coverage: 0.0%",
+      "suggestion": "Add docstrings to functions and classes"
+    },
+    {
+      "type": "dead_code",
+      "severity": "low",
+      "symbol": "codebase",
+      "description": "High dead code percentage: 100.0%",
+      "suggestion": "Remove unused functions and classes"
+    }
+  ],
+  "recommendations": [
+    "Improve code maintainability by reducing complexity and adding documentation",
+    "Increase documentation coverage by adding docstrings to functions and classes",
+    "Improve test coverage by adding unit tests for critical functions",
+    "Remove 2 dead code items to improve codebase cleanliness"
+  ],
+  "health_score": 0.2,
+  "visualization_data": null
+}

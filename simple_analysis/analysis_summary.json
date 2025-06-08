@@ -1,0 +1,39 @@
+{
+  "codebase_id": "analysis_simple_analysis",
+  "health_score": 0.5,
+  "total_functions": 2,
+  "total_classes": 2,
+  "total_files": 1,
+  "dead_code_count": 2,
+  "issues": [
+    {
+      "type": "dead_code",
+      "severity": "low",
+      "description": "Found 2 unused symbols",
+      "suggestion": "Consider removing unused functions and classes"
+    },
+    {
+      "type": "code_quality",
+      "severity": "medium",
+      "description": "Low health score: 0.50",
+      "suggestion": "Review and clean up codebase"
+    }
+  ],
+  "recommendations": [
+    "Remove 2 unused symbols to improve codebase cleanliness"
+  ],
+  "dead_code_items": [
+    {
+      "name": "unused_function",
+      "type": "function",
+      "filepath": "simple_codebase/main.py",
+      "reason": "No usages found"
+    },
+    {
+      "name": "UnusedClass",
+      "type": "class",
+      "filepath": "simple_codebase/main.py",
+      "reason": "No usages found"
+    }
+  ]
+}

@@ -213,9 +213,9 @@ class Codebase(
         self.ctx = CodebaseContext(projects, config=config, secrets=secrets, io=io, progress=progress)
         self.console = Console(record=True, soft_wrap=True)
         if self.ctx.config.use_pink != PinkMode.OFF:
-            import sdk_pink
+            import contexten_sdk_pink
 
-            self._pink_codebase = sdk_pink.Codebase(self.repo_path)
+            self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
 
     @noapidoc
     def __str__(self) -> str:
@@ -1569,37 +1569,35 @@ class Codebase(
         """
         return self._op.create_pr_review_comment(pr_number, body, commit_sha, path, line, side, start_line)
 
-    def Analysis(self, output_dir: str = "analysis_output") -> 'AnalysisResult':
+    def Analysis(self, output_dir: str = "analysis_output") -> "ComprehensiveAnalysisResult":
         """
-        Run comprehensive analysis on the codebase using Graph-Sitter's built-in capabilities.
-        
-        This method leverages Graph-Sitter's pre-computed relationships and indexes
-        for fast, reliable analysis without complex processing pipelines.
+        Perform comprehensive analysis of the codebase.
         
         Args:
-            output_dir: Directory to save analysis results
+            output_dir: Directory to save analysis outputs
             
         Returns:
-            AnalysisResult containing all analysis data
+            ComprehensiveAnalysisResult with all analysis components
         """
-        from ..analysis import analyze_codebase
-        return analyze_codebase(self, output_dir)
+        from graph_sitter.analysis.unified_analyzer import UnifiedCodebaseAnalyzer
+        
+        analyzer = UnifiedCodebaseAnalyzer(self, output_dir=output_dir)
+        return analyzer.analyze_comprehensive()
 
     @classmethod
-    def AnalysisFromPath(cls, repo_path: str, output_dir: str = "analysis_output") -> "AnalysisResult":
+    def AnalysisFromPath(cls, repo_path: str, output_dir: str = "analysis_output") -> "ComprehensiveAnalysisResult":
         """
-        Create a codebase from a path and run analysis using Graph-Sitter's built-in capabilities.
+        Create codebase from path and perform comprehensive analysis.
         
         Args:
             repo_path: Path to the repository
             output_dir: Directory to save analysis outputs
             
         Returns:
-            AnalysisResult with comprehensive analysis data
+            ComprehensiveAnalysisResult with all analysis components
         """
-        from ..analysis import analyze_codebase
-        codebase = cls(repo_path)
-        return analyze_codebase(codebase, output_dir)
+        codebase = cls.from_files(repo_path)
+        return codebase.Analysis(output_dir)
 
 
 # The last 2 lines of code are added to the runner. See codegen-backend/cli/generate/utils.py

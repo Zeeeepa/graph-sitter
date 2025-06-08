@@ -1,0 +1,70 @@
+[
+  {
+    "implementation": {
+      "source": "def calculate_total(items):\n    \"\"\"Calculate total price of items.\"\"\"\n    total = 0\n    for item in items:\n        if hasattr(item, 'price'):\n            total += item.price\n        else:\n            print(f\"Warning: {item} has no price attribute\")\n    return total",
+      "filepath": "example_codebase/sample.py",
+      "line_start": null,
+      "line_end": null,
+      "name": "calculate_total",
+      "parameters": [
+        "items"
+      ],
+      "return_type": "PyReturnTypePlaceholder",
+      "is_async": false,
+      "has_decorators": false,
+      "docstring": "\"\"\"Calculate total price of items.\"\"\""
+    },
+    "dependencies": [],
+    "usages": [
+      {
+        "source": "def get_total(self):\n        return calculate_total(self.items)",
+        "filepath": "example_codebase/sample.py",
+        "line": null,
+        "context": null
+      }
+    ],
+    "call_sites": [
+      {
+        "source": "calculate_total(self.items)",
+        "filepath": "example_codebase/sample.py",
+        "line": null,
+        "caller": null
+      }
+    ],
+    "metrics": {
+      "line_count": 9,
+      "parameter_count": 1,
+      "dependency_count": 0,
+      "usage_count": 1,
+      "call_site_count": 1,
+      "complexity_estimate": 4
+    }
+  },
+  {
+    "implementation": {
+      "source": "def process_order(cart):\n    \"\"\"Process a shopping cart order.\"\"\"\n    if not cart.items:\n        raise ValueError(\"Cannot process empty cart\")\n    \n    total = cart.get_total()\n    if total <= 0:\n        raise ValueError(\"Invalid cart total\")\n    \n    # Simulate payment processing\n    print(f\"Processing payment for ${total:.2f}\")\n    return {\"status\": \"success\", \"total\": total}",
+      "filepath": "example_codebase/sample.py",
+      "line_start": null,
+      "line_end": null,
+      "name": "process_order",
+      "parameters": [
+        "cart"
+      ],
+      "return_type": "PyReturnTypePlaceholder",
+      "is_async": false,
+      "has_decorators": false,
+      "docstring": "\"\"\"Process a shopping cart order.\"\"\""
+    },
+    "dependencies": [],
+    "usages": [],
+    "call_sites": [],
+    "metrics": {
+      "line_count": 12,
+      "parameter_count": 1,
+      "dependency_count": 0,
+      "usage_count": 0,
+      "call_site_count": 0,
+      "complexity_estimate": 3
+    }
+  }
+]
