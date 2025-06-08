@@ -1,61 +1,64 @@
-// Dashboard Type Definitions
-
-export interface BaseProject {
+export interface Project {
   id: string;
   name: string;
   description: string;
-  status: 'active' | 'paused' | 'completed' | 'error';
-}
-
-export interface Project extends BaseProject {
   repository: string;
+  status: 'active' | 'paused' | 'completed' | 'error';
   progress: number;
   flowEnabled: boolean;
   flowStatus: 'running' | 'stopped' | 'error';
   lastActivity: Date;
   tags: string[];
-  metrics?: {
+  pinned?: boolean;
+  linearId?: string;
+  metrics: {
     commits: number;
     prs: number;
     contributors: number;
-    issues?: number;
+    issues: number;
   };
   requirements?: string;
-  plan?: Plan;
+  plan?: ProjectPlan;
 }
 
-export interface Plan {
+export interface ProjectPlan {
   id: string;
   projectId: string;
   title: string;
   description: string;
-  tasks: Task[];
-  status: 'draft' | 'in_progress' | 'completed';
+  tasks: ProjectTask[];
+  status: 'not_started' | 'in_progress' | 'completed' | 'error';
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface Task {
+export interface ProjectTask {
   id: string;
   title: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'error';
-  assignee?: string;
+  status: 'not_started' | 'in_progress' | 'completed' | 'error';
+  assignee: string;
   estimatedHours: number;
-  actualHours?: number;
+  actualHours: number;
   dependencies: string[];
   createdAt: Date;
   updatedAt: Date;
+  subTasks?: ProjectTask[];
 }
 
 export interface WorkflowEvent {
   id: string;
   projectId: string;
-  taskId?: string;
-  type: 'task_created' | 'task_updated' | 'task_completed' | 'flow_started' | 'flow_stopped';
-  message: string;
+  type: 'flow_start' | 'flow_stop' | 'flow_error' | 'flow_success' | 'flow_retry' | 'code_change' | 'issue_update' | 'pr_merge' | 'build' | 'task';
+  title: string;
+  description: string;
   timestamp: Date;
   metadata?: Record<string, any>;
+  tags?: string[];
+  links?: {
+    title: string;
+    url: string;
+  }[];
 }
 
 export interface Settings {
@@ -63,11 +66,23 @@ export interface Settings {
   linearToken: string;
   codegenOrgId: string;
   codegenToken: string;
-  postgresqlUrl?: string;
-  slackToken?: string;
-  autoStartFlows: boolean;
-  enableNotifications: boolean;
-  enableAnalytics: boolean;
+  prefectToken: string;
+  controlFlowToken: string;
+  agentFlowToken: string;
+  webhookBaseUrl: string;
+  prefectUrl?: string;
+  controlFlowUrl?: string;
+  agentFlowUrl?: string;
+}
+
+export interface ProjectPinRequest {
+  projectId: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
 export interface DashboardStats {
@@ -79,108 +94,67 @@ export interface DashboardStats {
   last_updated: string;
 }
 
-export interface Metrics {
-  totalProjects: number;
-  activeProjects: number;
-  completedProjects: number;
-  runningFlows: number;
-  averageProgress: number;
-  totalTasks: number;
-  completedTasks: number;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
-
-export interface ProjectPinRequest {
-  projectId: string;
-}
-
-// API Endpoints
-export interface ApiEndpoints {
-  projects: {
-    list: () => Promise<ApiResponse<Project[]>>;
-    get: (id: string) => Promise<ApiResponse<Project>>;
-    create: (project: Partial<Project>) => Promise<ApiResponse<Project>>;
-    update: (id: string, project: Partial<Project>) => Promise<ApiResponse<Project>>;
-    delete: (id: string) => Promise<ApiResponse<void>>;
-    pin: (request: ProjectPinRequest) => Promise<ApiResponse<void>>;
-    unpin: (request: ProjectPinRequest) => Promise<ApiResponse<void>>;
+export interface FlowMetrics {
+  status: 'running' | 'stopped' | 'error';
+  totalRuns: number;
+  successfulRuns: number;
+  codeAnalysis: {
+    successful: number;
+    failed: number;
   };
-  plans: {
-    generate: (projectId: string, requirements: string) => Promise<ApiResponse<Plan>>;
-    get: (id: string) => Promise<ApiResponse<Plan>>;
-    update: (id: string, plan: Partial<Plan>) => Promise<ApiResponse<Plan>>;
+  tests: {
+    successful: number;
+    failed: number;
   };
-  workflows: {
-    start: (projectId: string) => Promise<ApiResponse<void>>;
-    stop: (projectId: string) => Promise<ApiResponse<void>>;
-    status: (projectId: string) => Promise<ApiResponse<{ status: string }>>;
-  };
-  metrics: {
-    get: () => Promise<ApiResponse<Metrics>>;
+  deployments: {
+    successful: number;
+    failed: number;
   };
 }
 
-// WebSocket Events
+export interface ProjectMetrics {
+  codeQuality: number;
+  workflowSuccessRate: number;
+  activeContributors: number;
+  openIssues: number;
+  activityTimeline: Array<{
+    date: string;
+    commits: number;
+    prs: number;
+  }>;
+  workflowPerformance: Array<{
+    name: string;
+    successful: number;
+    failed: number;
+  }>;
+  codeAnalysis: {
+    linesOfCode: number;
+    testCoverage: number;
+    technicalDebt: number;
+    duplication: number;
+  };
+  teamPerformance: {
+    avgPRReviewTime: number;
+    avgIssueResolutionTime: number;
+    sprintVelocity: number;
+    teamSatisfaction: number;
+  };
+}
+
 export interface WebSocketEvent {
-  type: 'project_updated' | 'task_updated' | 'workflow_event' | 'metrics_updated';
-  payload: any;
-  timestamp: Date;
+  type: string;
+  data: any;
 }
 
-// Component Props
-export interface DashboardProps {
-  initialProjects?: Project[];
-  settings?: Partial<Settings>;
-}
-
-export interface ProjectCardProps {
-  project: Project;
-  onPin?: (projectId: string) => void;
-  onUnpin?: (projectId: string) => void;
-}
-
-export interface ProjectDialogProps {
-  open: boolean;
-  project: Project | null;
-  onClose: () => void;
-  onSave: (project: Project) => void;
-}
-
-export interface SettingsDialogProps {
-  open: boolean;
-  settings: Settings;
-  onClose: () => void;
-  onSave: (settings: Settings) => void;
-}
-
-export interface TopBarProps {
-  onProjectPin: (projectName: string) => void;
-  onSettingsOpen: () => void;
-  projects?: Project[];
-}
-
-export interface RealTimeMetricsProps {
-  projects: Project[];
-  metrics?: Metrics;
-}
-
-export interface WorkflowMonitorProps {
-  projects: Project[];
-  events?: WorkflowEvent[];
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  assignee: string;
+  dueDate?: Date;
+  priority: number;
+  projectId: string;
+  parentTaskId?: string;
 }
 

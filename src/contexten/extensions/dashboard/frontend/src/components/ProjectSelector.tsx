@@ -16,6 +16,9 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  InputAdornment,
+  Tooltip,
+  Divider,
 } from '@mui/material';
 import {
   Star as StarIcon,
@@ -23,21 +26,22 @@ import {
   GitHub as GitHubIcon,
   Code as CodeIcon,
   Timeline as TimelineIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 import { useProject } from '../hooks/useProject';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface ProjectSelectorProps {
   open: boolean;
   onClose: () => void;
-  onSelect: (project: Project) => void;
 }
 
 export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   open,
   onClose,
-  onSelect,
 }) => {
+  const { settings } = useSettings();
   const { projects, loading, error, pinProject, getProjectMetrics } = useProject();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
@@ -48,33 +52,67 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     activity: number;
     issues: number;
   } | null>(null);
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setSearchTerm('');
+      setSelectedProject(null);
+      setMetrics(null);
+    }
+  }, [open]);
 
   useEffect(() => {
     setFilteredProjects(
       projects.filter(project =>
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        project.description.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
-  }, [projects, searchTerm]);
+  }, [searchTerm, projects]);
 
   const handleProjectSelect = async (project: Project) => {
     setSelectedProject(project);
-    const projectMetrics = await getProjectMetrics(project.id);
-    setMetrics(projectMetrics);
-  };
-
-  const handleConfirm = () => {
-    if (selectedProject) {
-      onSelect(selectedProject);
-      onClose();
+    setLoadingMetrics(true);
+    try {
+      const projectMetrics = await getProjectMetrics(project.id);
+      setMetrics({
+        codeQuality: projectMetrics.codeQuality,
+        performance: projectMetrics.workflowSuccessRate,
+        activity: projectMetrics.activeContributors,
+        issues: projectMetrics.openIssues,
+      });
+    } catch (err) {
+      console.error('Error fetching project metrics:', err);
+    } finally {
+      setLoadingMetrics(false);
     }
   };
 
-  const handlePin = async (project: Project) => {
-    await pinProject(project.id);
+  const handlePin = async () => {
+    if (!selectedProject) return;
+    try {
+      await pinProject(selectedProject.id);
+      onClose();
+    } catch (err) {
+      console.error('Error pinning project:', err);
+    }
   };
+
+  if (!settings.githubToken) {
+    return (
+      <Dialog open={open} onClose={onClose}>
+        <DialogContent>
+          <Alert severity="warning">
+            Please configure your GitHub token in settings first.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog
@@ -84,6 +122,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
       fullWidth
       PaperProps={{
         sx: {
+          borderRadius: 2,
           height: '80vh',
           display: 'flex',
           flexDirection: 'column',
@@ -91,36 +130,47 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
       }}
     >
       <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box display="flex" alignItems="center" gap={1}>
           <GitHubIcon />
           <Typography variant="h6">Select Project to Pin</Typography>
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <TextField
-          fullWidth
-          placeholder="Search projects..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+      <DialogContent sx={{ display: 'flex', p: 0 }}>
+        <Box
+          sx={{
+            width: '40%',
+            borderRight: theme => `1px solid ${theme.palette.divider}`,
+            display: 'flex',
+            flexDirection: 'column',
           }}
-        />
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
+        >
+          <Box sx={{ p: 2 }}>
+            <TextField
+              fullWidth
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Box>
-        ) : (
-          <Box sx={{ display: 'flex', gap: 2, height: '100%' }}>
-            <List sx={{ flex: 1, overflow: 'auto' }}>
+
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={4}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error" sx={{ m: 2 }}>
+              {error}
+            </Alert>
+          ) : (
+            <List sx={{ overflow: 'auto', flex: 1 }}>
               {filteredProjects.map((project) => (
                 <ListItem
                   key={project.id}
@@ -130,107 +180,110 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                 >
                   <ListItemText
                     primary={project.name}
-                    secondary={
-                      <Box sx={{ mt: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          {project.description}
-                        </Typography>
-                        <Box sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          {project.tags.map((tag) => (
-                            <Chip
-                              key={tag}
-                              label={tag}
-                              size="small"
-                              variant="outlined"
-                            />
-                          ))}
-                        </Box>
-                      </Box>
-                    }
+                    secondary={project.description}
                   />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      onClick={() => handlePin(project)}
-                      color={project.pinned ? 'primary' : 'default'}
-                    >
-                      <StarIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
+                  {project.pinned && (
+                    <ListItemSecondaryAction>
+                      <Tooltip title="Already pinned">
+                        <StarIcon color="primary" />
+                      </Tooltip>
+                    </ListItemSecondaryAction>
+                  )}
                 </ListItem>
               ))}
             </List>
+          )}
+        </Box>
 
-            {selectedProject && (
-              <Box
-                sx={{
-                  width: 300,
-                  p: 2,
-                  borderLeft: 1,
-                  borderColor: 'divider',
-                  overflow: 'auto',
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Project Details
-                </Typography>
+        <Box
+          sx={{
+            width: '60%',
+            p: 3,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {selectedProject ? (
+            <>
+              <Typography variant="h6" gutterBottom>
+                {selectedProject.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                {selectedProject.description}
+              </Typography>
 
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Repository
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <GitHubIcon fontSize="small" />
-                    <Typography variant="body2">
-                      {selectedProject.repository}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {metrics && (
-                  <>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Metrics
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <CodeIcon fontSize="small" />
-                        <Typography variant="body2">
-                          Code Quality: {metrics.codeQuality}%
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <TimelineIcon fontSize="small" />
-                        <Typography variant="body2">
-                          Performance: {metrics.performance}%
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <StarIcon fontSize="small" />
-                        <Typography variant="body2">
-                          Activity: {metrics.activity}%
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </>
-                )}
+              <Box display="flex" gap={1} mb={2}>
+                {selectedProject.tags.map((tag) => (
+                  <Chip key={tag} label={tag} size="small" />
+                ))}
               </Box>
-            )}
-          </Box>
-        )}
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="subtitle2" gutterBottom>
+                Repository Information
+              </Typography>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <GitHubIcon fontSize="small" />
+                <Typography variant="body2">
+                  {selectedProject.repository}
+                </Typography>
+              </Box>
+
+              {loadingMetrics ? (
+                <Box display="flex" justifyContent="center" p={4}>
+                  <CircularProgress />
+                </Box>
+              ) : metrics ? (
+                <>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Project Metrics
+                  </Typography>
+                  <Box display="flex" gap={2} mb={2}>
+                    <Chip
+                      icon={<CodeIcon />}
+                      label={`Code Quality: ${metrics.codeQuality}%`}
+                    />
+                    <Chip
+                      icon={<TimelineIcon />}
+                      label={`Performance: ${metrics.performance}%`}
+                    />
+                    <Chip
+                      icon={<InfoIcon />}
+                      label={`Open Issues: ${metrics.issues}`}
+                    />
+                  </Box>
+                </>
+              ) : null}
+            </>
+          ) : (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              height="100%"
+              color="text.secondary"
+            >
+              <Typography>Select a project to view details</Typography>
+            </Box>
+          )}
+        </Box>
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button
-          onClick={handleConfirm}
           variant="contained"
-          disabled={!selectedProject}
+          onClick={handlePin}
+          disabled={!selectedProject || selectedProject.pinned}
+          startIcon={<StarIcon />}
         >
-          Select Project
+          Pin Project
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
+
+export default ProjectSelector;
 
