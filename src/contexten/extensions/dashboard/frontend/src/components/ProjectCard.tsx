@@ -2,23 +2,27 @@ import React from 'react';
 import {
   Card,
   CardContent,
-  CardActions,
   Typography,
-  Button,
-  LinearProgress,
   Box,
-  Chip,
   IconButton,
-  Tooltip
+  Chip,
+  LinearProgress,
+  CardActions,
+  Button,
+  Tooltip,
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
   GitHub as GitHubIcon,
   Timeline as TimelineIcon,
-  StarIcon,
-  StarBorderIcon,
-  SettingsIcon
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  Settings as SettingsIcon,
+  BugReport as BugIcon,
+  People as PeopleIcon,
+  Commit as CommitIcon,
+  MergeType as PRIcon
 } from '@mui/icons-material';
 import { Project } from '../types/dashboard';
 
@@ -26,165 +30,170 @@ interface ProjectCardProps {
   project: Project;
   onPin?: (projectId: string) => void;
   onUnpin?: (projectId: string) => void;
-  onClick?: () => void;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onPin, onUnpin }) => {
-  const handlePin = (e: React.MouseEvent) => {
-    e.stopPropagation();
+const getFlowStatusColor = (status: string): 'success' | 'warning' | 'error' | 'default' => {
+  switch (status) {
+    case 'running':
+      return 'success';
+    case 'stopped':
+      return 'warning';
+    case 'error':
+      return 'error';
+    default:
+      return 'default';
+  }
+};
+
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPin, onUnpin }) => {
+  const handlePin = () => {
     if (onPin) {
       onPin(project.id);
     }
   };
 
-  const handleUnpin = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleUnpin = () => {
     if (onUnpin) {
       onUnpin(project.id);
     }
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onClick) {
-      onClick();
-    }
-  };
-
-  const handleFlowToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onClick) {
-      onClick();
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'success';
-      case 'paused':
-        return 'warning';
-      case 'completed':
-        return 'info';
-      default:
-        return 'default';
-    }
-  };
-
-  const getFlowStatusColor = (flowStatus: string) => {
-    switch (flowStatus) {
-      case 'running':
-        return 'success';
-      case 'stopped':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
   return (
-    <Card
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: 'pointer',
-        '&:hover': {
-          boxShadow: 6
-        }
-      }}
-      onClick={handleClick}
-    >
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6" component="div" noWrap>
+    <Card>
+      <CardContent>
+        {/* Header */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Typography variant="h6" component="div">
             {project.name}
           </Typography>
-          <IconButton
+          <IconButton 
+            onClick={project.flowEnabled ? handleUnpin : handlePin} 
             size="small"
-            onClick={project.flowEnabled ? handleUnpin : handlePin}
+            color={project.flowEnabled ? 'primary' : 'default'}
           >
-            {project.flowEnabled ? <StarIcon color="warning" /> : <StarBorderIcon />}
+            {project.flowEnabled ? <StarIcon /> : <StarBorderIcon />}
           </IconButton>
         </Box>
 
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mb: 2,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}
-        >
+        {/* Description */}
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {project.description}
         </Typography>
 
+        {/* Progress */}
         <Box sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2">Progress</Typography>
-            <Typography variant="body2">{project.progress}%</Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={project.progress}
-            sx={{ height: 8, borderRadius: 2 }}
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Progress
+          </Typography>
+          <LinearProgress 
+            variant="determinate" 
+            value={project.progress} 
+            sx={{ mb: 1 }}
+            color={project.progress >= 80 ? 'success' : project.progress >= 40 ? 'primary' : 'warning'}
           />
+          <Typography variant="body2" color="text.secondary">
+            {`${Math.round(project.progress)}%`}
+          </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+        {/* Status and Tags */}
+        <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
           <Chip
-            size="small"
-            label={project.status}
-            color={getStatusColor(project.status) as any}
-          />
-          <Chip
-            size="small"
+            icon={project.flowStatus === 'running' ? <PlayIcon /> : <PauseIcon />}
             label={project.flowStatus}
-            color={getFlowStatusColor(project.flowStatus) as any}
+            size="small"
+            color={getFlowStatusColor(project.flowStatus)}
           />
-          {project.tags.map((tag) => (
-            <Chip key={tag} size="small" label={tag} />
+          {project.tags.map((tag: string) => (
+            <Chip 
+              key={tag} 
+              size="small" 
+              label={tag}
+              variant="outlined"
+            />
           ))}
         </Box>
 
-        <Typography variant="caption" color="text.secondary">
-          Last activity: {project.lastActivity.toLocaleString()}
-        </Typography>
-      </CardContent>
+        {/* Metrics */}
+        {project.metrics && (
+          <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+            <Tooltip title="Commits">
+              <Chip
+                icon={<CommitIcon />}
+                label={project.metrics.commits}
+                size="small"
+                variant="outlined"
+              />
+            </Tooltip>
+            <Tooltip title="Pull Requests">
+              <Chip
+                icon={<PRIcon />}
+                label={project.metrics.prs}
+                size="small"
+                variant="outlined"
+              />
+            </Tooltip>
+            <Tooltip title="Contributors">
+              <Chip
+                icon={<PeopleIcon />}
+                label={project.metrics.contributors}
+                size="small"
+                variant="outlined"
+              />
+            </Tooltip>
+            {project.metrics.issues && (
+              <Tooltip title="Issues">
+                <Chip
+                  icon={<BugIcon />}
+                  label={project.metrics.issues}
+                  size="small"
+                  variant="outlined"
+                />
+              </Tooltip>
+            )}
+          </Box>
+        )}
 
-      <CardActions sx={{ justifyContent: 'space-between', px: 2, py: 1 }}>
-        <Box>
-          <Tooltip title={project.flowEnabled ? 'Pause Flow' : 'Start Flow'}>
-            <IconButton
-              size="small"
-              color={project.flowEnabled ? 'warning' : 'success'}
-              onClick={handleFlowToggle}
-            >
-              {project.flowEnabled ? <PauseIcon /> : <PlayIcon />}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="View on GitHub">
-            <IconButton
-              size="small"
-              href={project.repository}
-              target="_blank"
-              onClick={(e) => e.stopPropagation()}
-            >
+        {/* Action Icons */}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Tooltip title="View Repository">
+            <IconButton size="small" href={project.repository} target="_blank">
               <GitHubIcon />
             </IconButton>
           </Tooltip>
+          <Tooltip title="View Timeline">
+            <IconButton size="small">
+              <TimelineIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Settings">
+            <IconButton size="small">
+              <SettingsIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
-        <Tooltip title="Project Settings">
-          <IconButton size="small" onClick={(e) => e.stopPropagation()}>
-            <SettingsIcon />
-          </IconButton>
-        </Tooltip>
+      </CardContent>
+
+      {/* Card Actions */}
+      <CardActions>
+        <Button 
+          size="small" 
+          startIcon={<GitHubIcon />} 
+          href={project.repository} 
+          target="_blank"
+        >
+          Repository
+        </Button>
+        <Button 
+          size="small" 
+          startIcon={<TimelineIcon />}
+        >
+          Timeline
+        </Button>
       </CardActions>
     </Card>
   );
 };
 
 export default ProjectCard;
+
