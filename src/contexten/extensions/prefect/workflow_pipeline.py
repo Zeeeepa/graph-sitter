@@ -18,7 +18,7 @@ from prefect.context import get_run_context
 from prefect.states import State, Completed, Failed
 
 from .flow import PrefectFlow
-from .monitoring import PrefectMonitoring
+from .monitoring import PrefectMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class PrefectWorkflowPipeline:
     def __init__(self, name: str = "contexten_pipeline"):
         """Initialize Prefect workflow pipeline."""
         self.name = name
-        self.monitoring = PrefectMonitoring()
+        self.monitoring = PrefectMonitor()
         self.stage_callbacks: Dict[PipelineStage, List[Callable]] = {}
         self.global_callbacks: List[Callable] = []
         
@@ -111,14 +111,14 @@ class PrefectWorkflowPipeline:
         self,
         context: PipelineContext,
         codegen_config: Dict[str, Any],
-        controlflow_config: Dict[str, Any] = None,
-        grainchain_config: Dict[str, Any] = None
+        controlflow_config: Optional[Dict[str, Any]] = None,
+        grainchain_config: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Execute complete workflow pipeline with Prefect orchestration."""
         logger = get_run_logger()
         logger.info(f"Starting Contexten workflow pipeline for project {context.project_id}")
         
-        pipeline_result = {
+        pipeline_result: Dict[str, Any] = {
             'project_id': context.project_id,
             'pipeline_name': self.name,
             'status': PipelineStatus.RUNNING,
@@ -231,7 +231,7 @@ class PrefectWorkflowPipeline:
         
         try:
             # Initialize pipeline components
-            initialization_data = {
+            initialization_data: Dict[str, Any] = {
                 'project_id': context.project_id,
                 'requirements': context.requirements,
                 'config_validated': True,
