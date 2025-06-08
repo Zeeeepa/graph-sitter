@@ -19,10 +19,10 @@ interface RealTimeMetricsProps {
 
 const RealTimeMetrics: React.FC<RealTimeMetricsProps> = ({ projects }) => {
   // Calculate metrics from projects
-  const totalCommits = projects.reduce((sum, project) => sum + (project.metrics?.commits || 0), 0);
-  const totalPRs = projects.reduce((sum, project) => sum + (project.metrics?.prs || 0), 0);
-  const averageProgress = projects.length > 0 
-    ? projects.reduce((sum, project) => sum + project.progress, 0) / projects.length 
+  const totalCommits = projects.reduce((sum, project) => sum + ((project as any).metrics?.commits || 0), 0);
+  const totalPRs = projects.reduce((sum, project) => sum + ((project as any).metrics?.prs || 0), 0);
+  const averageProgress = projects.length > 0
+    ? projects.reduce((sum, project) => sum + project.progress, 0) / projects.length
     : 0;
 
   return (

@@ -20,6 +20,43 @@ export interface DashboardStats {
   quality_score: number;
 }
 
+const mockProjects: Project[] = [
+  {
+    id: '1',
+    name: 'Core Engine',
+    description: 'Main processing engine',
+    status: 'active',
+    repository: 'https://github.com/example/core',
+    progress: 75,
+    flowEnabled: true,
+    flowStatus: 'running',
+    lastActivity: new Date(),
+    tags: ['core', 'typescript'],
+    metrics: {
+      commits: 156,
+      prs: 23,
+      issues: 45
+    }
+  },
+  {
+    id: '2',
+    name: 'Dashboard UI',
+    description: 'React dashboard interface',
+    status: 'active',
+    repository: 'https://github.com/example/dashboard',
+    progress: 60,
+    flowEnabled: false,
+    flowStatus: 'stopped',
+    lastActivity: new Date(),
+    tags: ['frontend', 'react'],
+    metrics: {
+      commits: 89,
+      prs: 12,
+      issues: 34
+    }
+  }
+];
+
 export const dashboardApi = {
   // Get all projects
   getProjects: async (): Promise<Project[]> => {
@@ -29,44 +66,7 @@ export const dashboardApi = {
     } catch (error) {
       console.error('Failed to fetch projects:', error);
       // Return mock data for development
-      return [
-        {
-          id: '1',
-          name: 'Graph Sitter Core',
-          description: 'Core graph-sitter functionality',
-          status: 'active',
-          repository: 'https://github.com/example/graph-sitter',
-          progress: 85,
-          flowEnabled: true,
-          flowStatus: 'running',
-          lastActivity: new Date().toISOString(),
-          tags: ['core', 'typescript'],
-          metrics: {
-            commits: 156,
-            prs: 23,
-            issues: 8,
-            contributors: 5
-          }
-        },
-        {
-          id: '2',
-          name: 'Dashboard UI',
-          description: 'React dashboard interface',
-          status: 'in_progress',
-          repository: 'https://github.com/example/dashboard',
-          progress: 60,
-          flowEnabled: false,
-          flowStatus: 'stopped',
-          lastActivity: new Date().toISOString(),
-          tags: ['frontend', 'react'],
-          metrics: {
-            commits: 89,
-            prs: 12,
-            issues: 15,
-            contributors: 3
-          }
-        }
-      ];
+      return mockProjects;
     }
   },
 
@@ -119,4 +119,3 @@ export const dashboardApi = {
     }
   }
 };
-
