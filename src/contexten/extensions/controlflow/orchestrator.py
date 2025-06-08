@@ -1,111 +1,73 @@
+#!/usr/bin/env python3
 """
-ControlFlow Orchestrator Implementation
+ControlFlow Orchestrator Module
+Handles orchestration and coordination of multiple agents and workflows.
 """
 
 from typing import Dict, List, Any, Optional
-from controlflow import Orchestrator as BaseOrchestrator
-from ..strand-agents import StrandAgent, StrandWorkflow
-from .executor import FlowExecutor
-from .scheduler import FlowScheduler
+import asyncio
+import logging
 
-class FlowOrchestrator(BaseOrchestrator):
-    def __init__(
-        self,
-        agents: List[StrandAgent],
-        executor: Optional[FlowExecutor] = None,
-        scheduler: Optional[FlowScheduler] = None,
-        **kwargs
-    ):
-        """
-        Initialize flow orchestrator.
+logger = logging.getLogger(__name__)
+
+
+class ControlFlowOrchestrator:
+    """Orchestrator for ControlFlow workflows."""
+    
+    def __init__(self):
+        self.active_workflows: Dict[str, Any] = {}
+        self.agents: Dict[str, Any] = {}
         
-        Args:
-            agents: List of available agents
-            executor: Optional custom flow executor
-            scheduler: Optional custom flow scheduler
-            **kwargs: Additional orchestrator configuration
-        """
-        super().__init__(**kwargs)
-        self.agents = agents
-        self.executor = executor or FlowExecutor()
-        self.scheduler = scheduler or FlowScheduler()
+    async def register_agent(self, agent_id: str, agent_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Register an agent with the orchestrator."""
+        logger.info(f"Registering agent: {agent_id}")
         
-    async def execute_workflow(
-        self,
-        workflow: StrandWorkflow,
-        workflow_def: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Execute a workflow using available agents.
+        agent = {
+            "agent_id": agent_id,
+            "config": agent_config,
+            "status": "available",
+            "capabilities": agent_config.get("capabilities", [])
+        }
         
-        Args:
-            workflow: Workflow to execute
-            workflow_def: Workflow definition
+        self.agents[agent_id] = agent
+        return agent
+    
+    async def start_workflow(self, workflow_id: str, workflow_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Start a new workflow."""
+        logger.info(f"Starting workflow: {workflow_id}")
+        
+        workflow = {
+            "workflow_id": workflow_id,
+            "config": workflow_config,
+            "status": "running",
+            "tasks": workflow_config.get("tasks", []),
+            "assigned_agents": []
+        }
+        
+        self.active_workflows[workflow_id] = workflow
+        
+        # Assign agents to tasks
+        await self._assign_agents_to_workflow(workflow)
+        
+        return workflow
+    
+    async def _assign_agents_to_workflow(self, workflow: Dict[str, Any]) -> None:
+        """Assign available agents to workflow tasks."""
+        available_agents = [agent for agent in self.agents.values() 
+                          if agent["status"] == "available"]
+        
+        for task in workflow["tasks"]:
+            required_capabilities = task.get("required_capabilities", [])
             
-        Returns:
-            Dict containing execution results
-        """
-        # Schedule workflow execution
-        execution_plan = await self.scheduler.schedule_workflow(
-            workflow=workflow,
-            workflow_def=workflow_def,
-            available_agents=self.agents
-        )
-        
-        # Execute workflow according to plan
-        return await self.executor.execute_workflow(
-            workflow=workflow,
-            execution_plan=execution_plan,
-            available_agents=self.agents
-        )
-        
-    async def execute_task(
-        self,
-        task: Dict[str, Any],
-        agent: Optional[StrandAgent] = None
-    ) -> Dict[str, Any]:
-        """
-        Execute a single task using an appropriate agent.
-        
-        Args:
-            task: Task definition
-            agent: Optional specific agent to use
-            
-        Returns:
-            Dict containing execution results
-        """
-        # Select agent if not specified
-        if not agent:
-            agent = self._select_agent(task)
-            if not agent:
-                return {
-                    "status": "failed",
-                    "error": "No suitable agent found"
-                }
-                
-        # Execute task
-        return await agent.execute(task)
-        
-    def _select_agent(
-        self,
-        task: Dict[str, Any]
-    ) -> Optional[StrandAgent]:
-        """
-        Select most suitable agent for task.
-        
-        Args:
-            task: Task definition
-            
-        Returns:
-            Selected agent or None if no suitable agent found
-        """
-        required_tools = task.get("required_tools", [])
-        
-        # Find agent with all required tools
-        for agent in self.agents:
-            agent_tools = {tool.name for tool in agent.tools}
-            if all(tool in agent_tools for tool in required_tools):
-                return agent
-                
-        return None
+            # Find suitable agent
+            for agent in available_agents:
+                agent_capabilities = agent["capabilities"]
+                if all(cap in agent_capabilities for cap in required_capabilities):
+                    workflow["assigned_agents"].append(agent["agent_id"])
+                    agent["status"] = "busy"
+                    break
+    
+    async def get_workflow_status(self, workflow_id: str) -> Optional[Dict[str, Any]]:
+        """Get the status of a workflow."""
+        return self.active_workflows.get(workflow_id)
 

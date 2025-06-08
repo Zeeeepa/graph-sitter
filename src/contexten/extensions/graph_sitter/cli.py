@@ -8,6 +8,7 @@ Command-line interface for running codebase analysis using graph_sitter.
 import argparse
 import sys
 from pathlib import Path
+from typing import Dict, Any
 
 try:
     from graph_sitter import Codebase
@@ -162,7 +163,7 @@ Examples:
         # Handle configuration comparison
         if args.config_compare:
             if not args.quiet:
-                print(f"\n⚖️ Comparing configurations: {", ".join(args.config_compare)}")
+                print(f"\n⚖️ Comparing configurations: {', '.join(args.config_compare)}")
             manager = ConfigurationManager()
             comparison = manager.compare_configurations(str(codebase_path), args.config_compare)
             print_config_comparison(comparison)
@@ -250,23 +251,7 @@ def print_security_results(results):
         print(f"Hardcoded secrets: {len(results['hardcoded_secrets'])}")
 
 
-def print_call_graph_results(results):
-
-        # Handle configuration recommendations
-        if args.config_recommend:
-            if not args.quiet:
-                print("\n🎯 Getting configuration recommendations...")
-            manager = ConfigurationManager()
-            recommendations = manager.get_config_recommendations(str(codebase_path))
-            print_config_recommendations(recommendations)
-        
-        # Handle configuration comparison
-        if args.config_compare:
-            if not args.quiet:
-                print(f"\n⚖️ Comparing configurations: {", ".join(args.config_compare)}")
-            manager = ConfigurationManager()
-            comparison = manager.compare_configurations(str(codebase_path), args.config_compare)
-            print_config_comparison(comparison)
+def print_call_graph_results(results: Dict[str, Any]) -> None:
     """Print call graph analysis results."""
     summary = results.get('summary', {})
     print(f"\n📞 Call Graph Analysis Results:")
