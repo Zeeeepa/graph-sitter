@@ -1,15 +1,25 @@
 // Dashboard Type Definitions
 
-export interface Project {
+export interface BaseProject {
   id: string;
   name: string;
   description: string;
-  repository: string;
   status: 'active' | 'paused' | 'completed' | 'error';
+}
+
+export interface Project extends BaseProject {
+  repository: string;
   progress: number;
   flowEnabled: boolean;
   flowStatus: 'running' | 'stopped' | 'error';
   lastActivity: Date;
+  tags: string[];
+  metrics?: {
+    commits: number;
+    prs: number;
+    contributors: number;
+    issues?: number;
+  };
   requirements?: string;
   plan?: Plan;
 }
@@ -60,6 +70,15 @@ export interface Settings {
   enableAnalytics: boolean;
 }
 
+export interface DashboardStats {
+  total_projects: number;
+  active_workflows: number;
+  completed_tasks: number;
+  pending_prs: number;
+  quality_score: number;
+  last_updated: string;
+}
+
 export interface Metrics {
   totalProjects: number;
   activeProjects: number;
@@ -86,6 +105,10 @@ export interface PaginatedResponse<T> {
   hasPrev: boolean;
 }
 
+export interface ProjectPinRequest {
+  projectId: string;
+}
+
 // API Endpoints
 export interface ApiEndpoints {
   projects: {
@@ -94,6 +117,8 @@ export interface ApiEndpoints {
     create: (project: Partial<Project>) => Promise<ApiResponse<Project>>;
     update: (id: string, project: Partial<Project>) => Promise<ApiResponse<Project>>;
     delete: (id: string) => Promise<ApiResponse<void>>;
+    pin: (request: ProjectPinRequest) => Promise<ApiResponse<void>>;
+    unpin: (request: ProjectPinRequest) => Promise<ApiResponse<void>>;
   };
   plans: {
     generate: (projectId: string, requirements: string) => Promise<ApiResponse<Plan>>;
@@ -125,8 +150,8 @@ export interface DashboardProps {
 
 export interface ProjectCardProps {
   project: Project;
-  onClick: () => void;
-  onFlowToggle?: (projectId: string, enabled: boolean) => void;
+  onPin?: (projectId: string) => void;
+  onUnpin?: (projectId: string) => void;
 }
 
 export interface ProjectDialogProps {
