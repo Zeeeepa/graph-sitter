@@ -2,29 +2,24 @@
 """
 🚀 UNIFIED CODEBASE ANALYSIS TOOL 🚀
 
-A comprehensive, powerful executable that consolidates all analysis capabilities:
-- Core quality metrics (maintainability, complexity, Halstead, etc.)
-- Advanced investigation features (function context, relationships)
-- Usage pattern analysis (ML training data, visualizations)
-- Graph-sitter integration (pre-computed graphs, dependencies)
-- Tree-sitter query patterns and visualization
-- Interactive syntax tree visualization
-- Production-ready error handling and performance optimization
-- Import loop detection and circular dependency analysis
-- Training data generation for LLMs
-- Advanced graph-based code analysis
-- Dead code detection using usage analysis
-- Enhanced configuration options
+A comprehensive, powerful executable that consolidates all analysis capabilities using
+official tree-sitter patterns and methods. This tool has been completely rewritten
+to use standardized tree-sitter integration and eliminate legacy technical debt.
 
-Consolidated from analyze_codebase_enhanced.py, enhanced_analyzer.py, and graph_sitter_enhancements.py
+Features:
+- Official tree-sitter API integration (TSParser → TSLanguage → TSTree → TSNode)
+- Standardized query patterns using tree-sitter Query objects
+- Consolidated analysis engine with proper error handling
+- Performance-optimized tree traversal using TreeCursor
+- Field-based node access using official methods
+- Proper dependency management (no more try/catch patterns)
+- Unified interface for all analysis operations
 
 Usage:
     python -m graph_sitter.adapters.analysis path/to/code
     python -m graph_sitter.adapters.analysis --repo fastapi/fastapi
     python -m graph_sitter.adapters.analysis . --format json --output results.json
     python -m graph_sitter.adapters.analysis . --comprehensive --visualize
-    python -m graph_sitter.adapters.analysis . --training-data --output training.json
-    python -m graph_sitter.adapters.analysis . --import-loops --dead-code
     python -m graph_sitter.adapters.analysis . --quick-analyze
 """
 
@@ -42,17 +37,12 @@ from typing import Dict, List, Any, Optional
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Import analysis components
+# Import unified analysis components
+from .unified_analyzer import UnifiedAnalyzer, CodebaseAnalysisResult
+from .core.tree_sitter_core import get_tree_sitter_core
+
+# Legacy imports for backward compatibility
 from .core.models import AnalysisOptions, create_default_analysis_options
-from .tools.unified_analyzer import UnifiedCodebaseAnalyzer, analyze_from_repo
-
-try:
-    from graph_sitter import Codebase
-    GRAPH_SITTER_AVAILABLE = True
-except ImportError:
-    logger.warning("Graph-sitter not available - some features will be disabled")
-    GRAPH_SITTER_AVAILABLE = False
-
 
 # ============================================================================
 # OUTPUT FORMATTING FUNCTIONS
@@ -219,7 +209,7 @@ def analyze_repo(repo_url: str) -> Dict[str, Any]:
         raise ImportError("Graph-sitter is required for repository analysis")
     
     try:
-        analyzer = UnifiedCodebaseAnalyzer(use_graph_sitter=True)
+        analyzer = UnifiedAnalyzer(use_graph_sitter=True)
         result = analyze_from_repo(repo_url)
         
         # Get repository description
@@ -456,7 +446,7 @@ def main():
         
         # Create analyzer
         use_graph_sitter = not args.no_graph_sitter
-        analyzer = UnifiedCodebaseAnalyzer(
+        analyzer = UnifiedAnalyzer(
             use_graph_sitter=use_graph_sitter,
             use_advanced_config=args.advanced_config
         )
@@ -552,14 +542,14 @@ def main():
 
 def analyze_codebase(path: str, use_graph_sitter: bool = True) -> Dict[str, Any]:
     """Convenience function for programmatic use."""
-    analyzer = UnifiedCodebaseAnalyzer(use_graph_sitter=use_graph_sitter)
+    analyzer = UnifiedAnalyzer(use_graph_sitter=use_graph_sitter)
     result = analyzer.analyze_codebase(path)
     return result.__dict__
 
 
 def analyze_comprehensive(path: str, **kwargs) -> Dict[str, Any]:
     """Convenience function for comprehensive analysis."""
-    analyzer = UnifiedCodebaseAnalyzer(**kwargs)
+    analyzer = UnifiedAnalyzer(**kwargs)
     return analyzer.analyze_comprehensive(path)
 
 
@@ -569,4 +559,3 @@ def analyze_comprehensive(path: str, **kwargs) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     main()
-
