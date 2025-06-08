@@ -38,11 +38,11 @@ from .analysis import (
 )
 
 # Visualization module
-from .visualize import Visualizer
+from .visualize import Visualize
 
 # Resolve module - symbol resolution and import analysis
 from .resolve import (
-    Resolver,
+    Resolve,
     EnhancedResolver,
     ResolvedSymbol,
     ImportRelationship,
@@ -108,10 +108,10 @@ __all__ = [
     'DeadCodeDetector',
     
     # Visualization
-    'Visualizer',
+    'Visualize',
     
     # Resolution
-    'Resolver',
+    'Resolve',
     'EnhancedResolver',
     'ResolvedSymbol',
     'ImportRelationship',
