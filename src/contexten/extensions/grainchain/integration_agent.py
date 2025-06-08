@@ -1,7 +1,7 @@
-"""Main integration agent for Grainchain extension.
+"""Integration agent for Grainchain.
 
-This module provides the central orchestrator that coordinates all Grainchain
-components and integrates with the Contexten ecosystem.
+This module provides the main orchestrator for Grainchain integration,
+coordinating sandbox management, quality gates, and event handling.
 """
 
 import asyncio
@@ -9,7 +9,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, cast
 
 from .config import GrainchainIntegrationConfig, get_grainchain_config
 from .grainchain_types import GrainchainEvent, GrainchainEventType, IntegrationStatus, QualityGateType, SandboxProvider
@@ -33,188 +33,37 @@ class IntegrationHealth:
 
 
 class GrainchainIntegrationAgent:
-    """Main integration agent for Grainchain.
+    """Main orchestrator for Grainchain integration."""
 
-    Orchestrates all Grainchain components and provides the main interface
-    for integration with the Contexten ecosystem.
-    """
-
-    def __init__(self, config: GrainchainIntegrationConfig | None = None):
+    def __init__(self, config: Optional[GrainchainIntegrationConfig] = None) -> None:
         """Initialize the integration agent."""
+        from .config import get_grainchain_config
+
         self.config = config or get_grainchain_config()
+        self._quality_gate_manager = QualityGateManager(self.config)
+        self._event_handlers: Dict[GrainchainEventType, List[Callable[[GrainchainEvent], Any]]] = {}
 
-        # Core components
-        self._grainchain_client: GrainchainClient | None = None
-        self._sandbox_manager: SandboxManager | None = None
-        self._quality_gate_manager: QualityGateManager | None = None
+    async def _handle_grainchain_event(self, event: GrainchainEvent) -> None:
+        """Handle a Grainchain event."""
+        handlers = self._event_handlers.get(event.event_type, [])
+        for handler in handlers:
+            try:
+                await handler(event)
+            except Exception as e:
+                logger.exception(f"Event handler failed: {e}")
 
-        # State management
-        self._is_running: bool = False
-        self._started_at: datetime | None = None
-        self._event_handlers: list[Callable] = []
-
-        # Event handling
-        self._background_tasks: list[asyncio.Task] = []
-
-        # Health monitoring
-        self._health_status = IntegrationHealth(
-            status=IntegrationStatus.HEALTHY,
-            components={},
-            issues=[],
-            last_check=datetime.now(UTC),
-            uptime=0.0
-        )
-
-    async def start(self):
-        """Start the integration agent."""
-        if self._is_running:
-            return
-
-        logger.info("Starting Grainchain integration agent")
-
-        self._started_at = datetime.now(UTC)
-        self._is_running = True
-
-        # Validate configuration
-        config_issues = self.config.validate()
-        if config_issues:
-            logger.warning(f"Configuration issues: {config_issues}")
-
-        # Start background tasks
-        if self.config.monitoring.enabled:
-            self._background_tasks.append(
-                asyncio.create_task(self._health_monitoring_loop())
-            )
-
-        if self.config.cost_optimization:
-            self._background_tasks.append(
-                asyncio.create_task(self._cost_optimization_loop())
-            )
-
-        if self.config.performance_benchmarking:
-            self._background_tasks.append(
-                asyncio.create_task(self._performance_monitoring_loop())
-            )
-
-        # Setup event handlers with components
-        self.client.add_event_handler(self._handle_grainchain_event)
-
-        logger.info("Grainchain integration agent started successfully")
-
-    async def stop(self):
-        """Stop the integration agent."""
-        if not self._is_running:
-            return
-
-        logger.info("Stopping Grainchain integration agent")
-
-        self._is_running = False
-
-        # Cancel background tasks
-        for task in self._background_tasks:
-            task.cancel()
-
-        # Wait for tasks to complete
-        if self._background_tasks:
-            await asyncio.gather(*self._background_tasks, return_exceptions=True)
-
-        # Shutdown components
-        await self.sandbox_manager.shutdown()
-
-        logger.info("Grainchain integration agent stopped")
-
-    def _setup_event_handlers(self):
-        """Setup default event handlers."""
-        self.on_event(GrainchainEventType.SANDBOX_CREATED)(self._handle_sandbox_created)
-        self.on_event(GrainchainEventType.QUALITY_GATE_FAILED)(self._handle_quality_gate_failed)
-        self.on_event(GrainchainEventType.COST_THRESHOLD_EXCEEDED)(self._handle_cost_threshold_exceeded)
-        self.on_event(GrainchainEventType.PERFORMANCE_DEGRADED)(self._handle_performance_degraded)
+    async def run_quality_gates(self, *args: Any, **kwargs: Any) -> List[QualityGateResult]:
+        """Run quality gates."""
+        return await self._quality_gate_manager.run_quality_gates(*args, **kwargs)
 
     def on_event(self, event_type: GrainchainEventType):
         """Decorator for registering event handlers."""
         def decorator(handler: Callable[[GrainchainEvent], None]):
             if event_type not in self._event_handlers:
-                self._event_handlers.append(handler)
+                self._event_handlers[event_type] = []
+            self._event_handlers[event_type].append(handler)
             return handler
         return decorator
-
-    async def _handle_grainchain_event(self, event: GrainchainEvent):
-        """Handle Grainchain events."""
-        handlers = self._event_handlers.get(event.event_type, [])
-
-        for handler in handlers:
-            try:
-                if asyncio.iscoroutinefunction(handler):
-                    await handler(event)
-                else:
-                    handler(event)
-            except Exception as e:
-                logger.exception(f"Event handler failed for {event.event_type.value}: {e}")
-
-    async def _handle_sandbox_created(self, event: GrainchainEvent):
-        """Handle sandbox creation events."""
-        logger.info(f"Sandbox created: {event.data.get('sandbox_id')} on {event.data.get('provider')}")
-
-    async def _handle_quality_gate_failed(self, event: GrainchainEvent):
-        """Handle quality gate failure events."""
-        logger.warning(f"Quality gate failed: {event.data}")
-
-        # Could trigger notifications, create debug snapshots, etc.
-        if self.config.ci_integration.notification_channels:
-            await self._send_notification(
-                f"Quality gate failed for execution {event.data.get('execution_id')}",
-                event.data
-            )
-
-    async def _handle_cost_threshold_exceeded(self, event: GrainchainEvent):
-        """Handle cost threshold exceeded events."""
-        logger.warning(f"Cost threshold exceeded: {event.data}")
-
-        # Trigger cost optimization
-        if self.config.cost_optimization:
-            await self._trigger_cost_optimization()
-
-    async def _handle_performance_degraded(self, event: GrainchainEvent):
-        """Handle performance degradation events."""
-        logger.warning(f"Performance degraded: {event.data}")
-
-        # Could trigger provider switching, scaling, etc.
-
-    async def _health_monitoring_loop(self):
-        """Background health monitoring loop."""
-        while self._is_running:
-            try:
-                await self._update_health_status()
-                await asyncio.sleep(self.config.monitoring.health_check_interval)
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.exception(f"Health monitoring error: {e}")
-                await asyncio.sleep(60)  # Retry in 1 minute
-
-    async def _cost_optimization_loop(self):
-        """Background cost optimization loop."""
-        while self._is_running:
-            try:
-                await self._run_cost_optimization()
-                await asyncio.sleep(3600)  # Run every hour
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.exception(f"Cost optimization error: {e}")
-                await asyncio.sleep(300)  # Retry in 5 minutes
-
-    async def _performance_monitoring_loop(self):
-        """Background performance monitoring loop."""
-        while self._is_running:
-            try:
-                await self._run_performance_monitoring()
-                await asyncio.sleep(1800)  # Run every 30 minutes
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.exception(f"Performance monitoring error: {e}")
-                await asyncio.sleep(300)  # Retry in 5 minutes
 
     async def _update_health_status(self):
         """Update the health status of all components."""
@@ -340,7 +189,7 @@ class GrainchainIntegrationAgent:
         gates: list[QualityGateType] | None = None
     ):
         """Run quality gates."""
-        return await self.quality_gate_manager.run_quality_gates(
+        return await self._quality_gate_manager.run_quality_gates(
             pr_number=pr_number,
             commit_sha=commit_sha,
             gates=gates

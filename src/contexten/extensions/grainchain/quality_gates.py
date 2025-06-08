@@ -1,7 +1,7 @@
-"""Quality gates implementation for Grainchain integration.
+"""Quality gate management for Grainchain integration.
 
-This module provides comprehensive quality gate automation with snapshot-based
-reproducible environments and parallel execution capabilities.
+This module provides quality gate automation with snapshot-based
+testing and comprehensive reporting.
 """
 
 import asyncio
@@ -9,10 +9,10 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Dict, List, Optional, Set
 
-from .config import GrainchainIntegrationConfig
-from .grainchain_types import GrainchainEventType, QualityGateResult, QualityGateStatus, QualityGateType, SandboxConfig, SandboxProvider
+from .config import GrainchainIntegrationConfig, get_grainchain_config
+from .grainchain_types import QualityGateType, SandboxConfig, SandboxSession
 from .sandbox_manager import SandboxManager
 
 logger = logging.getLogger(__name__)
@@ -27,491 +27,253 @@ class QualityGateDefinition:
     provider: SandboxProvider | None = None
     timeout: int = 1800
     parallel: bool = True
-    dependencies: list[QualityGateType] = None
-    config: dict[str, Any] = None
+    dependencies: List[QualityGateType] = None
+    thresholds: Dict[str, Any] = None
 
     def __post_init__(self):
         if self.dependencies is None:
             self.dependencies = []
-        if self.config is None:
-            self.config = {}
+        if self.thresholds is None:
+            self.thresholds = {}
 
 
 class QualityGateManager:
-    """Manages quality gate execution with snapshot-based reproducible environments.
+    """Quality gate management with parallel execution and reporting."""
 
-    Provides automated quality gate execution, parallel processing,
-    and comprehensive reporting for CI/CD integration.
-    """
-
-    def __init__(self, config: GrainchainIntegrationConfig):
+    def __init__(self, config: Optional[GrainchainIntegrationConfig] = None) -> None:
         """Initialize the quality gate manager."""
-        self.config = config
-        self._sandbox_manager = SandboxManager(config)
+        from .config import get_grainchain_config
 
-        # Gate management
-        self._registered_gates: dict[str, QualityGateDefinition] = {}
-        self._execution_history: list[QualityGateResult] = []
-        self._active_executions: dict[str, asyncio.Task] = {}
+        self.config = config or get_grainchain_config()
+        self._sandbox_manager = SandboxManager(self.config)
+        self._gate_definitions: Dict[QualityGateType, QualityGateDefinition] = {}
+        self._custom_gates: Dict[str, Callable[[SandboxSession], Any]] = {}
+        self._initialize_gates()
 
-        # Performance tracking
-        self._metrics: dict[str, Any] = {
-            'total_executions': 0,
-            'success_rate': 0.0,
-            'average_duration': 0.0,
-            'last_execution': None
-        }
+    def _initialize_gates(self) -> None:
+        """Initialize default quality gates."""
+        # Initialize standard gates
+        for gate_type in QualityGateType:
+            self._gate_definitions[gate_type] = QualityGateDefinition()
 
-    def _create_default_gates(self) -> dict[QualityGateType, QualityGateDefinition]:
-        """Create default quality gate definitions."""
-        return {
-            QualityGateType.CODE_QUALITY: QualityGateDefinition(
-                gate_type=QualityGateType.CODE_QUALITY,
-                name="Code Quality",
-                description="Static code analysis, linting, and complexity checks",
-                provider=SandboxProvider.LOCAL,  # Fast for static analysis
-                timeout=600,
-                parallel=True,
-                config={
-                    "tools": ["ruff", "mypy", "bandit", "radon"],
-                    "thresholds": {
-                        "complexity": 10,
-                        "coverage": 80,
-                        "security_issues": 0
-                    }
-                }
-            ),
-
-            QualityGateType.UNIT_TESTS: QualityGateDefinition(
-                gate_type=QualityGateType.UNIT_TESTS,
-                name="Unit Tests",
-                description="Fast unit test execution with coverage analysis",
-                provider=SandboxProvider.LOCAL,  # Fast for unit tests
-                timeout=900,
-                parallel=True,
-                config={
-                    "test_command": "python -m pytest tests/unit/ -v --cov=. --cov-report=json",
-                    "coverage_threshold": 80
-                }
-            ),
-
-            QualityGateType.INTEGRATION_TESTS: QualityGateDefinition(
-                gate_type=QualityGateType.INTEGRATION_TESTS,
-                name="Integration Tests",
-                description="Integration tests with external services",
-                provider=SandboxProvider.E2B,  # Cloud for integration
-                timeout=1800,
-                parallel=True,
-                dependencies=[QualityGateType.UNIT_TESTS],
-                config={
-                    "test_command": "python -m pytest tests/integration/ -v",
-                    "services": ["postgres", "redis"],
-                    "setup_script": "docker-compose up -d"
-                }
-            ),
-
-            QualityGateType.SECURITY_SCAN: QualityGateDefinition(
-                gate_type=QualityGateType.SECURITY_SCAN,
-                name="Security Scan",
-                description="Comprehensive security analysis",
-                provider=SandboxProvider.DAYTONA,  # Isolated for security
-                timeout=2400,
-                parallel=True,
-                config={
-                    "tools": ["semgrep", "safety", "trivy", "checkov"],
-                    "thresholds": {
-                        "critical_issues": 0,
-                        "high_issues": 2
-                    }
-                }
-            ),
-
-            QualityGateType.PERFORMANCE_TEST: QualityGateDefinition(
-                gate_type=QualityGateType.PERFORMANCE_TEST,
-                name="Performance Tests",
-                description="Performance and load testing",
-                provider=SandboxProvider.MORPH,  # Fast startup for perf tests
-                timeout=3600,
-                parallel=False,  # Resource intensive
-                dependencies=[QualityGateType.INTEGRATION_TESTS],
-                config={
-                    "load_test_command": "locust -f locustfile.py --headless -u 50 -r 10 -t 60s",
-                    "benchmark_command": "python -m pytest tests/performance/ --benchmark-json=results.json",
-                    "thresholds": {
-                        "response_time_p95": 500,  # ms
-                        "error_rate": 0.01  # 1%
-                    }
-                }
-            ),
-
-            QualityGateType.DEPLOYMENT_TEST: QualityGateDefinition(
-                gate_type=QualityGateType.DEPLOYMENT_TEST,
-                name="Deployment Test",
-                description="End-to-end deployment validation",
-                provider=SandboxProvider.E2B,
-                timeout=1800,
-                parallel=False,
-                dependencies=[QualityGateType.INTEGRATION_TESTS],
-                config={
-                    "deploy_command": "./deploy-test.sh",
-                    "health_check_url": "http://localhost:8000/health",
-                    "smoke_tests": "python -m pytest tests/smoke/ -v"
-                }
-            )
-        }
+        # Set up dependencies
+        self._gate_definitions[QualityGateType.INTEGRATION_TESTS].dependencies = [
+            QualityGateType.UNIT_TESTS
+        ]
+        self._gate_definitions[QualityGateType.DEPLOYMENT_TEST].dependencies = [
+            QualityGateType.INTEGRATION_TESTS,
+            QualityGateType.SECURITY_SCAN
+        ]
 
     def register_custom_gate(
         self,
-        gate_type: QualityGateType,
-        executor: Callable,
-        definition: QualityGateDefinition
-    ):
+        name: str,
+        gate_func: Callable[[SandboxSession], Any]
+    ) -> None:
         """Register a custom quality gate."""
-        self._custom_gates[gate_type] = {
-            'definition': definition,
-            'executor': executor
-        }
+        self._custom_gates[name] = gate_func
 
     async def run_quality_gates(
         self,
-        pr_number: int | None = None,
-        commit_sha: str | None = None,
-        base_snapshot: str | None = None,
-        gates: list[QualityGateType] | None = None,
-        fail_fast: bool | None = None
-    ) -> 'QualityGateExecution':
-        """Run quality gates with snapshot-based isolation.
-
-        Args:
-            pr_number: PR number for tracking
-            commit_sha: Commit SHA for tracking
-            base_snapshot: Base snapshot to restore from
-            gates: Specific gates to run (defaults to configured gates)
-            fail_fast: Stop on first failure (defaults to config)
-
-        Returns:
-            QualityGateExecution with results
-        """
+        gates: Optional[List[QualityGateType]] = None,
+        parallel: bool = True,
+        fail_fast: bool = True
+    ) -> List[QualityGateResult]:
+        """Run quality gates with dependency resolution."""
         if gates is None:
-            gates = self.config.quality_gates.gates
+            gates = list(QualityGateType)
 
-        if fail_fast is None:
-            fail_fast = self.config.quality_gates.fail_fast
-
-        execution_id = f"qg_{datetime.now(UTC).timestamp()}"
-
-        execution = QualityGateExecution(
-            execution_id=execution_id,
-            pr_number=pr_number,
-            commit_sha=commit_sha,
-            base_snapshot=base_snapshot,
-            gates=gates,
-            fail_fast=fail_fast,
-            started_at=datetime.now(UTC)
-        )
-
-        # Track execution
-        self._active_executions[execution_id] = execution
-
-        try:
-            # Emit start event
-            await self._emit_event(GrainchainEventType.QUALITY_GATE_STARTED, {
-                'execution_id': execution_id,
-                'pr_number': pr_number,
-                'commit_sha': commit_sha,
-                'gates': [g.value for g in gates]
-            })
-
-            # Execute gates
-            if self.config.quality_gates.parallel_execution:
-                await self._execute_gates_parallel(execution)
-            else:
-                await self._execute_gates_sequential(execution)
-
-            execution.completed_at = datetime.now(UTC)
-            execution.status = "completed"
-
-            # Emit completion event
-            await self._emit_event(GrainchainEventType.QUALITY_GATE_COMPLETED, {
-                'execution_id': execution_id,
-                'status': execution.status,
-                'passed': execution.all_passed,
-                'duration': execution.duration
-            })
-
-            return execution
-
-        except Exception as e:
-            execution.status = "error"
-            execution.error_message = str(e)
-            execution.completed_at = datetime.now(UTC)
-
-            logger.exception(f"Quality gate execution failed: {e}")
-
-            # Emit failure event
-            await self._emit_event(GrainchainEventType.QUALITY_GATE_FAILED, {
-                'execution_id': execution_id,
-                'error': str(e)
-            })
-
-            raise
-
-        finally:
-            # Move to history
-            self._execution_history.append(execution)
-            self._active_executions.pop(execution_id, None)
-
-    async def _execute_gates_parallel(self, execution: 'QualityGateExecution'):
-        """Execute gates in parallel with dependency management."""
         # Build dependency graph
-        dependency_graph = self._build_dependency_graph(execution.gates)
+        dependency_graph = self._build_dependency_graph(gates)
 
-        # Execute in waves based on dependencies
-        completed_gates = set()
+        # Track execution state
+        results: List[QualityGateResult] = []
+        failed_gates: Set[QualityGateType] = set()
 
-        while len(completed_gates) < len(execution.gates):
-            # Find gates that can run (dependencies satisfied)
-            ready_gates = [
-                gate for gate in execution.gates
-                if gate not in completed_gates and
-                all(dep in completed_gates for dep in dependency_graph.get(gate, []))
-            ]
+        if parallel:
+            # Execute gates in parallel with dependency resolution
+            results = await self._execute_gates_parallel(
+                gates=gates,
+                dependency_graph=dependency_graph,
+                fail_fast=fail_fast
+            )
+        else:
+            # Execute gates sequentially
+            for gate in gates:
+                # Check dependencies
+                dependencies = dependency_graph.get(gate, [])
+                if any(dep in failed_gates for dep in dependencies):
+                    logger.warning(f"Skipping {gate} due to failed dependencies")
+                    continue
 
-            if not ready_gates:
-                msg = "Circular dependency detected in quality gates"
-                raise Exception(msg)
+                result = await self._execute_single_gate(gate)
+                results.append(result)
 
-            # Execute ready gates in parallel
-            tasks = []
-            for gate in ready_gates:
-                task = asyncio.create_task(self._execute_single_gate(execution, gate))
-                tasks.append((gate, task))
+                if not result.passed and fail_fast:
+                    break
 
-            # Wait for completion
-            for gate, task in tasks:
-                try:
-                    result = await task
-                    execution.results[gate] = result
-                    completed_gates.add(gate)
+                if not result.passed:
+                    failed_gates.add(gate)
 
-                    # Check for fail-fast
-                    if execution.fail_fast and not result.passed:
-                        # Cancel remaining tasks
-                        for _, remaining_task in tasks:
-                            if not remaining_task.done():
-                                remaining_task.cancel()
-                        return
+        return results
 
-                except Exception as e:
-                    logger.exception(f"Gate {gate.value} failed: {e}")
-                    execution.results[gate] = QualityGateResult(
-                        gate_type=gate,
-                        status=QualityGateStatus.ERROR,
-                        passed=False,
-                        duration=0,
-                        timestamp=datetime.now(UTC),
-                        sandbox_id="",
-                        error_message=str(e)
-                    )
-                    completed_gates.add(gate)
-
-                    if execution.fail_fast:
-                        return
-
-    async def _execute_gates_sequential(self, execution: 'QualityGateExecution'):
-        """Execute gates sequentially."""
-        # Sort gates by dependencies
-        sorted_gates = self._topological_sort(execution.gates)
-
-        for gate in sorted_gates:
-            try:
-                result = await self._execute_single_gate(execution, gate)
-                execution.results[gate] = result
-
-                # Check for fail-fast
-                if execution.fail_fast and not result.passed:
-                    return
-
-            except Exception as e:
-                logger.exception(f"Gate {gate.value} failed: {e}")
-                execution.results[gate] = QualityGateResult(
-                    gate_type=gate,
-                    status=QualityGateStatus.ERROR,
-                    passed=False,
-                    duration=0,
-                    timestamp=datetime.now(UTC),
-                    sandbox_id="",
-                    error_message=str(e)
-                )
-
-                if execution.fail_fast:
-                    return
-
-    async def _execute_single_gate(
+    async def _execute_gates_parallel(
         self,
-        execution: 'QualityGateExecution',
-        gate_type: QualityGateType
-    ) -> QualityGateResult:
+        gates: List[QualityGateType],
+        dependency_graph: Dict[QualityGateType, List[QualityGateType]],
+        fail_fast: bool = True
+    ) -> List[QualityGateResult]:
+        """Execute gates in parallel with dependency resolution."""
+        results: List[QualityGateResult] = []
+        completed_gates: Set[QualityGateType] = set()
+        failed_gates: Set[QualityGateType] = set()
+
+        # Create tasks for gates without dependencies
+        pending_tasks: Dict[QualityGateType, asyncio.Task[QualityGateResult]] = {}
+        for gate in gates:
+            if not dependency_graph.get(gate, []):
+                task = asyncio.create_task(self._execute_single_gate(gate))
+                pending_tasks[gate] = task
+
+        while pending_tasks:
+            # Wait for any task to complete
+            done, _ = await asyncio.wait(
+                pending_tasks.values(),
+                return_when=asyncio.FIRST_COMPLETED
+            )
+
+            # Process completed tasks
+            for task in done:
+                result = await task
+                completed_gate = next(
+                    gate for gate, t in pending_tasks.items()
+                    if t == task
+                )
+                completed_gates.add(completed_gate)
+                results.append(result)
+
+                if not result.passed:
+                    failed_gates.add(completed_gate)
+                    if fail_fast:
+                        # Cancel remaining tasks
+                        for t in pending_tasks.values():
+                            if not t.done():
+                                t.cancel()
+                        return results
+
+                # Remove completed task
+                pending_tasks.pop(completed_gate)
+
+            # Schedule new tasks whose dependencies are met
+            for gate in gates:
+                if (
+                    gate not in completed_gates
+                    and gate not in pending_tasks
+                    and all(dep in completed_gates for dep in dependency_graph.get(gate, []))
+                    and not any(dep in failed_gates for dep in dependency_graph.get(gate, []))
+                ):
+                    task = asyncio.create_task(self._execute_single_gate(gate))
+                    pending_tasks[gate] = task
+
+        return results
+
+    async def _execute_single_gate(self, gate: QualityGateType) -> QualityGateResult:
         """Execute a single quality gate."""
+        logger.info(f"Executing quality gate: {gate}")
         start_time = datetime.now(UTC)
 
-        # Get gate definition
-        definition = self._gate_definitions.get(gate_type)
-        if not definition:
-            msg = f"Unknown gate type: {gate_type}"
-            raise ValueError(msg)
+        try:
+            # Get gate definition
+            gate_def = self._gate_definitions.get(gate)
+            if not gate_def:
+                msg = f"No definition found for gate: {gate}"
+                raise ValueError(msg)
 
-        # Check for custom executor
-        if gate_type in self._custom_gates:
-            custom_gate = self._custom_gates[gate_type]
-            return await custom_gate['executor'](execution, definition)
+            # Create sandbox for gate execution
+            config = SandboxConfig(
+                provider=gate_def.provider,
+                timeout=gate_def.timeout
+            )
 
-        # Create sandbox configuration
-        sandbox_config = SandboxConfig(
-            provider=definition.provider,
-            timeout=definition.timeout,
-            memory_limit="4GB",
-            environment_vars={
-                "CI": "true",
-                "QUALITY_GATE": gate_type.value,
-                "PR_NUMBER": str(execution.pr_number) if execution.pr_number else "",
-                "COMMIT_SHA": execution.commit_sha or ""
-            }
-        )
-
-        # Execute gate in sandbox
-        async with self._sandbox_manager.create_session(sandbox_config) as session:
-            try:
-                # Restore base snapshot if provided
-                if execution.base_snapshot:
-                    await session.restore_snapshot(execution.base_snapshot)
-
-                # Execute gate-specific logic
-                result = await self._execute_gate_logic(session, gate_type, definition)
-
-                # Create snapshot of gate execution
-                snapshot_id = await session.create_snapshot(
-                    name=f"gate_{gate_type.value}_{execution.execution_id}",
-                    metadata={
-                        "gate_type": gate_type.value,
-                        "execution_id": execution.execution_id,
-                        "status": result.status.value,
-                        "passed": result.passed
-                    }
-                )
-                result.snapshot_id = snapshot_id
-
+            async with self._sandbox_manager.create_session(config=config) as session:
+                # Execute gate logic
+                result = await self._execute_gate_logic(gate, session)
                 return result
 
-            except Exception as e:
-                duration = (datetime.now(UTC) - start_time).total_seconds()
-                return QualityGateResult(
-                    gate_type=gate_type,
-                    status=QualityGateStatus.ERROR,
-                    passed=False,
-                    duration=duration,
-                    timestamp=start_time,
-                    sandbox_id=session.sandbox_id,
-                    error_message=str(e)
-                )
+        except Exception as e:
+            logger.exception(f"Failed to execute gate {gate}: {e}")
+            return QualityGateResult(
+                gate=gate,
+                passed=False,
+                error=str(e),
+                duration=(datetime.now(UTC) - start_time).total_seconds(),
+                metrics={}
+            )
 
     async def _execute_gate_logic(
         self,
-        session,
-        gate_type: QualityGateType,
-        definition: QualityGateDefinition
+        gate: QualityGateType,
+        session: SandboxSession
     ) -> QualityGateResult:
-        """Execute the specific logic for a gate type."""
+        """Execute the specific logic for a quality gate."""
         start_time = datetime.now(UTC)
 
-        if gate_type == QualityGateType.CODE_QUALITY:
-            return await self._execute_code_quality_gate(session, definition)
-        elif gate_type == QualityGateType.UNIT_TESTS:
-            return await self._execute_unit_tests_gate(session, definition)
-        elif gate_type == QualityGateType.INTEGRATION_TESTS:
-            return await self._execute_integration_tests_gate(session, definition)
-        elif gate_type == QualityGateType.SECURITY_SCAN:
-            return await self._execute_security_scan_gate(session, definition)
-        elif gate_type == QualityGateType.PERFORMANCE_TEST:
-            return await self._execute_performance_test_gate(session, definition)
-        elif gate_type == QualityGateType.DEPLOYMENT_TEST:
-            return await self._execute_deployment_test_gate(session, definition)
-        else:
-            msg = f"Unsupported gate type: {gate_type}"
-            raise ValueError(msg)
+        try:
+            # Execute gate-specific logic
+            if gate == QualityGateType.CODE_QUALITY:
+                result = await self._execute_code_quality_gate(session)
+            elif gate == QualityGateType.UNIT_TESTS:
+                result = await self._execute_unit_tests_gate(session)
+            elif gate == QualityGateType.INTEGRATION_TESTS:
+                result = await self._execute_integration_tests_gate(session)
+            elif gate == QualityGateType.SECURITY_SCAN:
+                result = await self._execute_security_scan_gate(session)
+            elif gate == QualityGateType.PERFORMANCE_TEST:
+                result = await self._execute_performance_test_gate(session)
+            elif gate == QualityGateType.DEPLOYMENT_TEST:
+                result = await self._execute_deployment_test_gate(session)
+            else:
+                # Try custom gate
+                gate_name = str(gate)
+                if gate_name in self._custom_gates:
+                    result = await self._custom_gates[gate_name](session)
+                else:
+                    msg = f"Unsupported gate type: {gate}"
+                    raise ValueError(msg)
 
-    async def _execute_code_quality_gate(self, session, definition) -> QualityGateResult:
-        """Execute code quality checks."""
-        start_time = datetime.now(UTC)
-        results = {}
+            return QualityGateResult(
+                gate=gate,
+                passed=result.get("passed", False),
+                metrics=result.get("metrics", {}),
+                duration=(datetime.now(UTC) - start_time).total_seconds(),
+                error=result.get("error")
+            )
 
-        # Run linting
-        lint_result = await session.execute("ruff check . --output-format=json")
-        results["lint"] = lint_result
+        except Exception as e:
+            logger.exception(f"Failed to execute gate logic for {gate}: {e}")
+            return QualityGateResult(
+                gate=gate,
+                passed=False,
+                error=str(e),
+                duration=(datetime.now(UTC) - start_time).total_seconds(),
+                metrics={}
+            )
 
-        # Run type checking
-        type_result = await session.execute("mypy . --json-report")
-        results["types"] = type_result
-
-        # Run security linting
-        security_result = await session.execute("bandit -r . -f json")
-        results["security"] = security_result
-
-        # Run complexity analysis
-        complexity_result = await session.execute("radon cc . --json")
-        results["complexity"] = complexity_result
-
-        # Evaluate results
-        passed = (
-            lint_result.exit_code == 0 and
-            type_result.exit_code == 0 and
-            security_result.exit_code == 0
-        )
-
-        duration = (datetime.now(UTC) - start_time).total_seconds()
-
-        return QualityGateResult(
-            gate_type=QualityGateType.CODE_QUALITY,
-            status=QualityGateStatus.PASSED if passed else QualityGateStatus.FAILED,
-            passed=passed,
-            duration=duration,
-            timestamp=start_time,
-            sandbox_id=session.sandbox_id,
-            results=results
-        )
-
-    async def _execute_unit_tests_gate(self, session, definition) -> QualityGateResult:
-        """Execute unit tests."""
-        start_time = datetime.now(UTC)
-
-        test_command = definition.config.get("test_command", "python -m pytest tests/unit/ -v")
-        test_result = await session.execute(test_command)
-
-        passed = test_result.exit_code == 0
-        duration = (datetime.now(UTC) - start_time).total_seconds()
-
-        return QualityGateResult(
-            gate_type=QualityGateType.UNIT_TESTS,
-            status=QualityGateStatus.PASSED if passed else QualityGateStatus.FAILED,
-            passed=passed,
-            duration=duration,
-            timestamp=start_time,
-            sandbox_id=session.sandbox_id,
-            results={"test_output": test_result.stdout}
-        )
-
-    # Additional gate implementations would follow similar patterns...
-
-    def _build_dependency_graph(self, gates: list[QualityGateType]) -> dict[QualityGateType, list[QualityGateType]]:
-        """Build dependency graph for gates."""
-        graph = {}
+    def _build_dependency_graph(
+        self,
+        gates: List[QualityGateType]
+    ) -> Dict[QualityGateType, List[QualityGateType]]:
+        """Build a dependency graph for the specified gates."""
+        graph: Dict[QualityGateType, List[QualityGateType]] = {}
 
         for gate in gates:
-            definition = self._gate_definitions.get(gate)
-            if definition:
-                graph[gate] = [dep for dep in definition.dependencies if dep in gates]
-            else:
-                graph[gate] = []
+            gate_def = self._gate_definitions.get(gate)
+            if gate_def:
+                # Only include dependencies that are in the requested gates
+                graph[gate] = [
+                    dep for dep in gate_def.dependencies
+                    if dep in gates
+                ]
 
         return graph
 

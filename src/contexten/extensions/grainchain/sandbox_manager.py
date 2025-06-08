@@ -1,14 +1,14 @@
-"""High-level sandbox management for Grainchain integration.
+"""Sandbox management for Grainchain integration.
 
-This module provides advanced sandbox lifecycle management, session handling,
-and resource optimization for the Grainchain integration system.
+This module provides high-level sandbox management functionality
+including session handling, resource optimization, and metrics.
 """
 
 import asyncio
 import logging
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, AsyncIterator, Dict, List, Optional, Set, cast
 
 from .config import GrainchainIntegrationConfig
 from .grainchain_client import GrainchainClient, SandboxSession
@@ -18,282 +18,198 @@ logger = logging.getLogger(__name__)
 
 
 class SandboxManager:
-    """High-level sandbox management with advanced features.
+    """High-level sandbox management.
 
-    Provides session management, resource optimization, auto-scaling,
-    and intelligent provider selection for sandbox operations.
+    Handles sandbox lifecycle, resource optimization, and metrics
+    across multiple providers.
     """
 
-    def __init__(self, config: GrainchainIntegrationConfig):
+    def __init__(self, config: Optional[GrainchainIntegrationConfig] = None) -> None:
         """Initialize the sandbox manager."""
-        self.config = config
-        self._grainchain_client = GrainchainClient(config)
+        from .config import get_grainchain_config
 
-        # Session management
-        self._active_sessions: dict[str, dict[str, Any]] = {}
-        self._session_metrics: dict[str, SandboxMetrics] = {}
-        self._cleanup_tasks: list[asyncio.Task] = []
-
-        # Resource management
-        self._resource_limits: dict[str, Any] = {
-            'max_concurrent_sessions': config.max_concurrent_sandboxes,
-            'session_timeout': config.sandbox_timeout,
-            'cleanup_interval': 300  # 5 minutes
+        self.config = config or get_grainchain_config()
+        self._client = GrainchainClient(self.config)
+        self._active_sessions: Dict[str, SandboxSession] = {}
+        self._session_metrics: Dict[str, Dict[str, Any]] = {}
+        self._resource_limits: Dict[str, Any] = {
+            "max_concurrent_sandboxes": getattr(self.config, "max_concurrent_sandboxes", 10),
+            "sandbox_timeout": getattr(self.config, "sandbox_timeout", 3600),
+            "memory_limit": "4GB",
+            "cpu_limit": 2.0
         }
-
-        # Auto-cleanup
-        if self.config.snapshots.cleanup_enabled:
-            self._start_cleanup_task()
-
-    def _start_cleanup_task(self):
-        """Start the automatic cleanup task."""
-        async def cleanup_loop():
-            while True:
-                try:
-                    await self._cleanup_expired_resources()
-                    await asyncio.sleep(3600)  # Run every hour
-                except Exception as e:
-                    logger.exception(f"Cleanup task error: {e}")
-                    await asyncio.sleep(300)  # Retry in 5 minutes
-
-        self._cleanup_tasks.append(asyncio.create_task(cleanup_loop()))
 
     @asynccontextmanager
     async def create_session(
         self,
-        config: SandboxConfig | None = None,
-        session_id: str | None = None,
+        config: Optional[SandboxConfig] = None,
+        provider_id: Optional[str] = None,
         auto_cleanup: bool = True
-    ) -> AbstractAsyncContextManager[SandboxSession]:
-        """Create a managed sandbox session.
+    ) -> AsyncIterator[SandboxSession]:
+        """Create a new sandbox session.
 
         Args:
-            config: Sandbox configuration
-            session_id: Optional session identifier for tracking
-            auto_cleanup: Whether to automatically cleanup on exit
+            config: Optional sandbox configuration
+            provider_id: Optional specific provider to use
+            auto_cleanup: Whether to automatically cleanup the sandbox
 
         Returns:
-            Managed sandbox session
+            SandboxSession context manager
         """
-        if config is None:
-            config = SandboxConfig()
-
-        session_id = session_id or f"session_{datetime.now(UTC).timestamp()}"
+        if len(self._active_sessions) >= self._resource_limits["max_concurrent_sandboxes"]:
+            await self.optimize_resources()
 
         # Select optimal provider
-        provider = await self._select_optimal_provider(config)
-        config.provider = provider
+        selected_provider = await self._select_optimal_provider(
+            provider_id=provider_id,
+            config=config
+        )
 
         # Create sandbox session
-        async with self._grainchain_client.create_sandbox(config, provider) as session:
-            # Track session
-            self._active_sessions[session_id] = {
-                'session': session,
-                'created_at': datetime.now(UTC),
-                'config': config,
-                'metrics': {
-                    'commands_executed': 0,
-                    'files_uploaded': 0,
-                    'files_downloaded': 0,
-                    'snapshots_created': 0
+        try:
+            async with self._client.create_sandbox(config, selected_provider) as session:
+                session_id = session.sandbox_id
+                self._active_sessions[session_id] = session
+                self._session_metrics[session_id] = {
+                    "created_at": datetime.now(UTC),
+                    "provider": selected_provider,
+                    "config": config.__dict__ if config else {},
+                    "metrics": {}
                 }
-            }
 
-            # Wrap session with tracking
-            tracked_session = TrackedSandboxSession(
-                session=session,
-                session_id=session_id,
-                manager=self
-            )
+                try:
+                    yield session
+                finally:
+                    if auto_cleanup:
+                        self._active_sessions.pop(session_id, None)
+                        self._session_metrics.pop(session_id, None)
 
-            try:
-                yield tracked_session
-            finally:
-                # Cleanup session tracking
-                self._active_sessions.pop(session_id, None)
+        except Exception as e:
+            logger.exception(f"Failed to create sandbox session: {e}")
+            raise
 
-    async def _select_optimal_provider(self, config: SandboxConfig) -> SandboxProvider:
-        """Select the optimal provider based on current load and requirements."""
-        available_providers = await self._grainchain_client.get_available_providers()
+    async def _select_optimal_provider(
+        self,
+        provider_id: Optional[str] = None,
+        config: Optional[SandboxConfig] = None
+    ) -> SandboxProvider:
+        """Select the optimal provider based on current conditions."""
+        if provider_id:
+            return SandboxProvider(provider_id)
 
-        if not available_providers:
-            msg = "No providers available"
-            raise Exception(msg)
+        # Get provider metrics
+        metrics = await self._client.get_metrics()
 
-        # If provider is specified and available, use it
-        if config.provider and config.provider in available_providers:
-            return config.provider
+        # Calculate provider scores
+        scores: Dict[SandboxProvider, float] = {}
 
-        # Get current metrics for load balancing
-        provider_metrics = await self._grainchain_client.get_metrics()
+        for provider, provider_metrics in metrics.items():
+            # Base score
+            score: float = 100.0
 
-        # Score providers based on various factors
-        provider_scores = {}
+            # Adjust for resource utilization
+            utilization = provider_metrics.resource_utilization.get("cpu", 0.0)
+            score -= utilization * 20  # Penalize high utilization
 
-        for provider in available_providers:
-            score = 0
-            metrics = provider_metrics.get(provider)
+            # Adjust for error rate
+            error_rate = float(provider_metrics.error_count) / max(provider_metrics.total_sandboxes_created, 1)
+            score -= error_rate * 30  # Penalize high error rates
 
-            if metrics:
-                # Factor in current load (lower is better)
-                load_factor = metrics.active_sandboxes / max(1, metrics.total_sandboxes_created)
-                score += (1 - load_factor) * 30
+            # Adjust for cost
+            if provider_metrics.cost_per_hour:
+                score -= provider_metrics.cost_per_hour * 10  # Penalize high cost
 
-                # Factor in success rate (higher is better)
-                score += metrics.success_rate * 25
+            # Adjust for startup time
+            if provider_metrics.average_startup_time:
+                score -= provider_metrics.average_startup_time  # Penalize slow startup
 
-                # Factor in performance (faster startup is better)
-                startup_score = max(0, 10 - metrics.average_startup_time)
-                score += startup_score * 20
+            # Adjust for success rate
+            score += provider_metrics.success_rate * 20  # Reward high success rate
 
-                # Factor in cost (lower is better)
-                cost_score = max(0, 10 - metrics.cost_per_hour)
-                score += cost_score * 15
-
-                # Factor in resource utilization (moderate is better)
-                cpu_util = metrics.resource_utilization.get('cpu', 0.5)
-                memory_util = metrics.resource_utilization.get('memory', 0.5)
-                util_score = 10 - abs(0.7 - (cpu_util + memory_util) / 2) * 20
-                score += util_score * 10
-
-            provider_scores[provider] = score
+            scores[provider] = score
 
         # Select provider with highest score
-        best_provider = max(provider_scores.keys(), key=lambda p: provider_scores[p])
+        if not scores:
+            return self.config.default_provider
 
-        logger.info(f"Selected provider {best_provider.value} with score {provider_scores[best_provider]}")
-        return best_provider
+        return max(scores.items(), key=lambda x: x[1])[0]
 
-    async def get_session_metrics(self, session_id: str) -> dict[str, Any] | None:
-        """Get metrics for a specific session."""
-        session_info = self._active_sessions.get(session_id)
-        if not session_info:
-            return None
-
-        return {
-            'session_id': session_id,
-            'provider': session_info['session'].provider.value,
-            'created_at': session_info['created_at'],
-            'duration': (datetime.now(UTC) - session_info['created_at']).total_seconds(),
-            'metrics': session_info['metrics']
-        }
-
-    async def list_active_sessions(self) -> list[dict[str, Any]]:
-        """List all active sessions."""
+    async def get_active_sessions(self) -> List[Dict[str, Any]]:
+        """Get information about all active sessions."""
         sessions = []
 
-        for session_id, session_info in self._active_sessions.items():
+        for session_id, session in self._active_sessions.items():
+            metrics = self._session_metrics[session_id]
             sessions.append({
-                'session_id': session_id,
-                'provider': session_info['session'].provider.value,
-                'sandbox_id': session_info['session'].sandbox_id,
-                'created_at': session_info['created_at'],
-                'duration': (datetime.now(UTC) - session_info['created_at']).total_seconds(),
-                'metrics': session_info['metrics']
+                "session_id": session_id,
+                "provider": metrics["provider"],
+                "created_at": metrics["created_at"],
+                "config": metrics["config"],
+                "metrics": metrics["metrics"]
             })
 
         return sessions
 
-    async def terminate_session(self, session_id: str) -> bool:
-        """Terminate a specific session."""
-        session_info = self._active_sessions.get(session_id)
-        if not session_info:
-            return False
-
-        try:
-            # The session will be cleaned up automatically when the context exits
-            # For now, we just remove it from tracking
-            self._active_sessions.pop(session_id, None)
-            return True
-        except Exception as e:
-            logger.exception(f"Failed to terminate session {session_id}: {e}")
-            return False
-
-    async def get_resource_utilization(self) -> dict[str, Any]:
-        """Get current resource utilization across all providers."""
-        provider_metrics = await self._grainchain_client.get_metrics()
-
-        total_active = sum(m.active_sandboxes for m in provider_metrics.values())
-        total_cost = sum(m.cost_total for m in provider_metrics.values())
-
-        utilization = {
-            'total_active_sandboxes': total_active,
-            'total_sessions': len(self._active_sessions),
-            'total_cost': total_cost,
-            'provider_breakdown': {}
+    async def get_resource_utilization(self) -> Dict[str, Any]:
+        """Get current resource utilization metrics."""
+        utilization: Dict[str, Any] = {
+            "active_sessions": len(self._active_sessions),
+            "providers": {},
+            "total_memory": 0.0,
+            "total_cpu": 0.0
         }
 
-        for provider, metrics in provider_metrics.items():
-            utilization['provider_breakdown'][provider.value] = {
-                'active_sandboxes': metrics.active_sandboxes,
-                'success_rate': metrics.success_rate,
-                'cost_per_hour': metrics.cost_per_hour,
-                'resource_utilization': metrics.resource_utilization
-            }
+        # Get provider metrics
+        metrics = await self._client.get_metrics()
+
+        for provider, provider_metrics in metrics.items():
+            provider_util = provider_metrics.resource_utilization
+            utilization["providers"][provider.value] = provider_util
+            utilization["total_memory"] += float(provider_util.get("memory", 0.0))
+            utilization["total_cpu"] += float(provider_util.get("cpu", 0.0))
 
         return utilization
 
-    async def optimize_resources(self) -> dict[str, Any]:
-        """Analyze and optimize resource usage."""
+    async def optimize_resources(self) -> None:
+        """Optimize resource usage across providers."""
+        # Get current utilization
         utilization = await self.get_resource_utilization()
-        provider_metrics = await self._grainchain_client.get_metrics()
 
-        recommendations = []
-        potential_savings = 0
+        # Check if we need to optimize
+        if utilization["active_sessions"] < self._resource_limits["max_concurrent_sandboxes"]:
+            return
 
-        # Analyze provider efficiency
-        for provider, metrics in provider_metrics.items():
-            if metrics.active_sandboxes == 0 and metrics.cost_per_hour > 0:
-                recommendations.append({
-                    'type': 'idle_provider',
-                    'provider': provider.value,
-                    'description': f"Provider {provider.value} has no active sandboxes but incurs costs",
-                    'potential_savings': metrics.cost_per_hour * 24 * 30  # Monthly savings
-                })
-                potential_savings += metrics.cost_per_hour * 24 * 30
+        # Get session metrics
+        sessions = await self.get_active_sessions()
 
-        # Analyze session patterns
-        long_running_sessions = [
-            session_id for session_id, info in self._active_sessions.items()
-            if (datetime.now(UTC) - info['created_at']).total_seconds() > 3600  # 1 hour
-        ]
+        # Sort by age and resource usage
+        sorted_sessions = sorted(
+            sessions,
+            key=lambda x: (
+                x["created_at"],
+                float(x["metrics"].get("memory", 0.0)),
+                float(x["metrics"].get("cpu", 0.0))
+            )
+        )
 
-        if long_running_sessions:
-            recommendations.append({
-                'type': 'long_running_sessions',
-                'count': len(long_running_sessions),
-                'description': f"{len(long_running_sessions)} sessions running for over 1 hour",
-                'action': 'Review and consider terminating if no longer needed'
-            })
+        # Clean up oldest sessions until we're under limits
+        while utilization["active_sessions"] >= self._resource_limits["max_concurrent_sandboxes"]:
+            if not sorted_sessions:
+                break
 
-        return {
-            'current_utilization': utilization,
-            'recommendations': recommendations,
-            'potential_monthly_savings': potential_savings
-        }
+            oldest_session = sorted_sessions.pop(0)
+            session_id = oldest_session["session_id"]
 
-    async def _cleanup_expired_resources(self):
-        """Clean up expired resources and sessions."""
-        now = datetime.now(UTC)
+            if session_id in self._active_sessions:
+                self._active_sessions.pop(session_id, None)
+                self._session_metrics.pop(session_id, None)
+                utilization["active_sessions"] -= 1
 
-        # Clean up long-running sessions if configured
-        if hasattr(self.config, 'max_session_duration'):
-            max_duration = timedelta(seconds=self.config.max_session_duration)
-
-            expired_sessions = [
-                session_id for session_id, info in self._active_sessions.items()
-                if now - info['created_at'] > max_duration
-            ]
-
-            for session_id in expired_sessions:
-                logger.info(f"Cleaning up expired session: {session_id}")
-                await self.terminate_session(session_id)
-
-    async def get_health_status(self) -> dict[str, Any]:
+    async def get_health_status(self) -> Dict[str, Any]:
         """Get health status of the sandbox management system."""
         try:
-            available_providers = await self._grainchain_client.get_available_providers()
-            provider_metrics = await self._grainchain_client.get_metrics()
+            available_providers = await self._client.get_available_providers()
+            provider_metrics = await self._client.get_metrics()
 
             # Calculate overall health
             total_providers = len(self.config.get_enabled_providers())
@@ -304,7 +220,7 @@ class SandboxManager:
             if health_ratio < 0.5:
                 issues.append("More than half of providers are unavailable")
 
-            if len(self._active_sessions) > self._resource_limits['max_concurrent_sessions']:
+            if len(self._active_sessions) > self._resource_limits['max_concurrent_sandboxes']:
                 issues.append("Session limit exceeded")
 
             status = IntegrationStatus.HEALTHY if health_ratio >= 0.8 and not issues else IntegrationStatus.DEGRADED
