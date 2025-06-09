@@ -1,226 +1,294 @@
 # Enhanced Codebase Analytics 📊
 
-> Advanced code analysis with interactive issue detection powered by Graph-Sitter
+A comprehensive code analysis platform that provides detailed insights into repository structure, code quality, and potential issues. Built with FastAPI backend and Next.js frontend, featuring interactive visualizations and real-time analysis.
 
 ## 🚀 Features
 
-### 🔍 Advanced Code Analysis
-- **Graph-Sitter Integration**: Leverages the powerful graph-sitter library for precise code parsing and analysis
-- **Multi-Language Support**: Analyze Python, TypeScript, JavaScript, and more
-- **Real-time Processing**: Fast analysis using local graph-sitter instead of external APIs
+### Core Analysis Capabilities
+- **Repository Structure Visualization**: Interactive tree view of your codebase
+- **Issue Detection**: Identifies Critical, Functional, and Minor code issues
+- **Metrics Calculation**: Lines of code, complexity metrics, and maintainability scores
+- **Git History Analysis**: Commit activity and contribution patterns
+- **Multi-language Support**: Python, JavaScript, TypeScript, JSX, TSX
 
-### 🌳 Interactive Repository Structure
-- **Tree View Navigation**: Explore your codebase with an interactive file tree
-- **Issue Visualization**: See issue counts and severity levels at a glance
-- **Drill-down Analysis**: Click on files to view detailed issue information
+### Issue Detection Categories
+- **🔴 Critical Issues**: Implementation errors, misspelled functions, incorrect logic
+- **🟡 Functional Issues**: Missing validation, incomplete implementations, TODOs
+- **🔵 Minor Issues**: Unused parameters, redundant code, formatting issues
 
-### 🐛 Intelligent Issue Detection
-- **Critical Issues**: Implementation errors, misspelled functions, incorrect logic
-- **Functional Issues**: Missing validation, incomplete implementations, TODOs
-- **Minor Issues**: Unused parameters, redundant code, formatting issues
-- **Context-Aware**: Provides code context and suggestions for each issue
-
-### 📈 Comprehensive Metrics
-- **Line Metrics**: LOC, LLOC, SLOC, comments, comment density
-- **Complexity Metrics**: Cyclomatic complexity, Halstead metrics, maintainability index
-- **Inheritance Analysis**: Depth of inheritance tracking
-- **Commit Activity**: Monthly commit frequency visualization
+### Visualizations
+- Repository structure with issue counts
+- Complexity metrics charts
+- Commit activity timeline
+- Issue distribution analysis
 
 ## 🛠️ Technology Stack
 
 ### Backend
 - **FastAPI**: High-performance Python web framework
-- **Graph-Sitter**: Advanced code parsing and analysis
 - **Pydantic**: Data validation and serialization
-- **Uvicorn**: ASGI server for production deployment
+- **Git Integration**: Repository cloning and analysis
+- **Code Analysis**: Custom static analysis engine
 
 ### Frontend
 - **Next.js 14**: React framework with App Router
 - **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first CSS framework
+- **Tailwind CSS**: Utility-first styling
+- **Recharts**: Interactive data visualizations
 - **Radix UI**: Accessible component primitives
-- **Recharts**: Data visualization library
-- **Lucide React**: Beautiful icons
 
-## 🚀 Quick Start
+## 📦 Installation & Deployment
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.11+
 - Node.js 18+
-- npm or yarn
+- Git
+- Docker (optional, for containerized deployment)
 
-### Installation
+### Quick Start (Development)
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd enhanced-codebase-analytics
+   git clone https://github.com/Zeeeepa/codebase-analytics.git
+   cd codebase-analytics
    ```
 
-2. **Install dependencies**
+2. **Install backend dependencies**
    ```bash
-   # Install all dependencies
-   npm run install:all
-   
-   # Or install separately
-   npm run backend:install
-   npm run frontend:install
+   cd backend
+   pip install -r requirements.txt
+   cd ..
    ```
 
-3. **Start development servers**
+3. **Install frontend dependencies**
    ```bash
-   # Start both backend and frontend
-   npm run dev
-   
-   # Or start separately
-   npm run backend:dev  # Backend on http://localhost:8000
-   npm run frontend:dev # Frontend on http://localhost:3000
+   cd frontend
+   npm install
+   cd ..
    ```
 
-### Using Docker
+4. **Start development servers**
+   ```bash
+   # Option 1: Use the development deployment script
+   ./dev-deploy.sh --install-deps
+   
+   # Option 2: Start services manually
+   # Terminal 1 - Backend
+   cd backend && python api.py
+   
+   # Terminal 2 - Frontend
+   cd frontend && npm run dev
+   ```
 
+### Production Deployment
+
+#### Docker Deployment (Recommended)
 ```bash
 # Build and start all services
-docker-compose up --build
+./deploy.sh --env production --rebuild
 
-# Access the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000
+# Services will be available at:
+# - Frontend: http://localhost
+# - API: http://localhost/api
+# - API Docs: http://localhost/api/docs
 ```
 
-## 📖 Usage
+#### Manual Production Deployment
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+python api.py
 
-1. **Open the application** at `http://localhost:3000`
+# Frontend
+cd frontend
+npm install
+npm run build
+npm start
+```
 
-2. **Enter a repository URL** in the format:
-   - `owner/repo` (e.g., `facebook/react`)
-   - Full GitHub URL (e.g., `https://github.com/facebook/react`)
+## 🔧 Configuration
 
-3. **Click "Analyze Repository"** to start the analysis
+### Environment Variables
+```bash
+# Backend
+PYTHONUNBUFFERED=1
 
-4. **Explore the results** across four main tabs:
-   - **📊 Overview**: High-level metrics and charts
-   - **🌳 Repository Structure**: Interactive file tree with issue counts
-   - **🔍 Issues Analysis**: Detailed issue breakdown with context
-   - **📈 Detailed Metrics**: Comprehensive code quality metrics
+# Frontend
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## 🔧 API Endpoints
+### Docker Configuration
+The application includes comprehensive Docker setup:
+- **Backend Dockerfile**: Python 3.11 with security optimizations
+- **Frontend Dockerfile**: Multi-stage Node.js build
+- **Nginx Configuration**: Load balancing and security headers
+- **Docker Compose**: Orchestrated multi-service deployment
 
-### POST `/analyze_repo`
-Analyze a repository and return comprehensive metrics.
+## 📖 API Documentation
 
-**Request Body:**
-```json
+### Health Check
+```bash
+GET /health
+```
+
+### Repository Analysis
+```bash
+POST /analyze_repo
+Content-Type: application/json
+
 {
-  "repo_url": "owner/repo"
+  "repo_url": "https://github.com/owner/repo"
 }
 ```
 
-**Response:**
+**Response Structure:**
 ```json
 {
-  "repo_url": "owner/repo",
-  "description": "Repository description",
+  "repo_url": "string",
+  "description": "string",
   "basic_metrics": {
-    "files": 150,
-    "functions": 500,
-    "classes": 75,
-    "modules": 42
+    "files": 0,
+    "functions": 0,
+    "classes": 0,
+    "modules": 0
   },
   "line_metrics": {
     "total": {
-      "loc": 15000,
-      "lloc": 12000,
-      "sloc": 13000,
-      "comments": 2000,
-      "comment_density": 13.3
+      "loc": 0,
+      "lloc": 0,
+      "comments": 0,
+      "comment_density": 0.0
     }
   },
   "complexity_metrics": {
-    "cyclomatic_complexity": { "average": 3.2 },
-    "maintainability_index": { "average": 75 },
-    "halstead_metrics": { "total_volume": 50000, "average_volume": 100 }
+    "cyclomatic_complexity": {"average": 0.0},
+    "maintainability_index": {"average": 0.0}
   },
-  "repository_structure": { /* Interactive tree structure */ },
+  "repository_structure": {
+    "name": "string",
+    "type": "directory",
+    "children": []
+  },
   "issues_summary": {
-    "total": 25,
-    "critical": 3,
-    "functional": 12,
-    "minor": 10
+    "total": 0,
+    "critical": 0,
+    "functional": 0,
+    "minor": 0
   },
-  "detailed_issues": [ /* Array of issue details */ ]
+  "detailed_issues": [],
+  "monthly_commits": {}
 }
 ```
 
-### GET `/health`
-Health check endpoint.
+## 🎯 Usage Examples
 
-## 🎯 Issue Detection
-
-The system detects various types of code issues:
-
-### ⚠️ Critical Issues
-- **Misspelled function names**: `commiter` instead of `committer`
-- **Incorrect logic**: Checking `@staticmethod` instead of `@classmethod`
-- **Runtime type checking**: Using `assert` for type validation
-- **Null reference potential**: Calling methods without type checking
-
-### 🐞 Functional Issues
-- **Incomplete implementations**: TODO comments indicating unfinished work
-- **Missing validation**: Functions that don't validate input parameters
-- **Redundant decorators**: Using multiple caching decorators simultaneously
-
-### 🔍 Minor Issues
-- **Unused parameters**: Function parameters that aren't used in the implementation
-- **Redundant code**: Unnecessary variable initialization or duplicate logic
-- **Code style**: Formatting and style inconsistencies
-
-## 🏗️ Architecture
-
-```
-enhanced-codebase-analytics/
-├── backend/                 # FastAPI backend
-│   ├── api.py              # Main API application
-│   └── requirements.txt    # Python dependencies
-├── frontend/               # Next.js frontend
-│   ├── app/               # Next.js App Router
-│   ├── components/        # React components
-│   │   ├── ui/           # Reusable UI components
-│   │   └── repo-analytics-dashboard.tsx
-│   ├── lib/              # Utility functions
-│   └── package.json      # Node.js dependencies
-├── docker-compose.yml     # Docker configuration
-└── package.json          # Root package.json for scripts
+### Analyze a Repository
+```bash
+curl -X POST "http://localhost:8000/analyze_repo" \\
+     -H "Content-Type: application/json" \\
+     -d '{"repo_url": "https://github.com/facebook/react"}'
 ```
 
-## 🔮 Future Enhancements
+### Frontend Integration
+```typescript
+const analyzeRepository = async (repoUrl: string) => {
+  const response = await fetch('/api/analyze_repo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ repo_url: repoUrl })
+  });
+  return response.json();
+};
+```
 
-- **Multi-language Support**: Extend analysis to Java, C++, Go, and more
-- **Custom Rules**: Allow users to define custom issue detection rules
-- **Historical Analysis**: Track code quality metrics over time
-- **Team Collaboration**: Share analysis results and collaborate on improvements
-- **CI/CD Integration**: Integrate with GitHub Actions, GitLab CI, and other platforms
-- **Performance Optimization**: Caching and incremental analysis for large repositories
+## 🔍 Issue Detection Examples
+
+### Critical Issues
+- **Misspelled Functions**: `def commiter()` → Should be `committer`
+- **Incorrect Logic**: Checking `@staticmethod` instead of `@classmethod`
+- **Runtime Errors**: Using `assert` for type checking in production
+
+### Functional Issues
+- **Incomplete Work**: TODO comments indicating unfinished features
+- **Redundant Code**: Multiple caching decorators on same function
+- **Missing Validation**: Functions without input validation
+
+### Minor Issues
+- **Code Quality**: Unused function parameters
+- **Style Issues**: Inconsistent formatting
+- **Documentation**: Missing or incomplete docstrings
+
+## 🚀 Deployment Scripts
+
+### Development Deployment
+```bash
+# Start both services
+./dev-deploy.sh
+
+# Backend only
+./dev-deploy.sh --backend-only
+
+# Frontend only
+./dev-deploy.sh --frontend-only
+
+# Install dependencies first
+./dev-deploy.sh --install-deps
+```
+
+### Production Deployment
+```bash
+# Full production deployment
+./deploy.sh --env production
+
+# Force rebuild
+./deploy.sh --env production --rebuild
+
+# Show logs
+./deploy.sh --env production --logs
+```
+
+## 🔒 Security Features
+
+- **Rate Limiting**: API and frontend request throttling
+- **Security Headers**: XSS protection, content type validation
+- **CORS Configuration**: Controlled cross-origin requests
+- **Input Validation**: Comprehensive request validation
+- **Non-root Containers**: Security-hardened Docker images
+
+## 📊 Monitoring & Health Checks
+
+- **Health Endpoints**: `/health` for service monitoring
+- **Docker Health Checks**: Automated container health monitoring
+- **Service Dependencies**: Proper startup ordering
+- **Graceful Shutdown**: Clean service termination
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
+## 🆘 Support
 
-- **Graph-Sitter**: For providing the powerful code parsing foundation
-- **Codegen Team**: For the original modal repo analytics inspiration
-- **Open Source Community**: For the amazing tools and libraries that make this possible
+For issues and questions:
+- Create an issue on GitHub
+- Check the API documentation at `/docs`
+- Review the deployment logs
+
+## 🎉 Acknowledgments
+
+- Built with modern web technologies
+- Inspired by code quality tools
+- Community-driven development
 
 ---
 
-**Built with ❤️ by the Enhanced Analytics Team**
+**Ready to analyze your codebase? Start with the quick deployment guide above! 🚀**
 
