@@ -1,236 +1,226 @@
-# Graph-Sitter Dashboard
+# Enhanced Codebase Analytics 📊
 
-A modern, dark-themed dashboard for the Graph-Sitter code analysis framework with real-time WebSocket updates and comprehensive extension support.
+> Advanced code analysis with interactive issue detection powered by Graph-Sitter
 
 ## 🚀 Features
 
-- **Dark-Only Theme**: Beautiful, modern dark interface optimized for developer workflows
-- **Real-time Updates**: WebSocket-powered live project status and flow monitoring
-- **Extension Integration**: Seamless integration with Graph-Sitter analysis, visualization, and resolution extensions
-- **Responsive Design**: Works perfectly on desktop and mobile devices
-- **Connection Management**: Intelligent connection handling with automatic retry and fallback mechanisms
-- **Project Management**: Pin/unpin projects, track progress, and monitor flow status
+### 🔍 Advanced Code Analysis
+- **Graph-Sitter Integration**: Leverages the powerful graph-sitter library for precise code parsing and analysis
+- **Multi-Language Support**: Analyze Python, TypeScript, JavaScript, and more
+- **Real-time Processing**: Fast analysis using local graph-sitter instead of external APIs
 
-## 🏗️ Architecture
+### 🌳 Interactive Repository Structure
+- **Tree View Navigation**: Explore your codebase with an interactive file tree
+- **Issue Visualization**: See issue counts and severity levels at a glance
+- **Drill-down Analysis**: Click on files to view detailed issue information
 
-### Backend (FastAPI)
-- **WebSocket Support**: Real-time communication for live updates
-- **REST API**: Comprehensive endpoints for project management and statistics
-- **Extension API**: Dynamic extension loading and capability discovery
-- **Health Monitoring**: Built-in health checks and connection monitoring
+### 🐛 Intelligent Issue Detection
+- **Critical Issues**: Implementation errors, misspelled functions, incorrect logic
+- **Functional Issues**: Missing validation, incomplete implementations, TODOs
+- **Minor Issues**: Unused parameters, redundant code, formatting issues
+- **Context-Aware**: Provides code context and suggestions for each issue
 
-### Frontend (React + TypeScript)
-- **Modern React**: Hooks-based architecture with TypeScript
-- **React Query**: Intelligent data fetching with caching and error handling
-- **WebSocket Service**: Robust connection management with exponential backoff
-- **Component Library**: Reusable, themed components following design system
+### 📈 Comprehensive Metrics
+- **Line Metrics**: LOC, LLOC, SLOC, comments, comment density
+- **Complexity Metrics**: Cyclomatic complexity, Halstead metrics, maintainability index
+- **Inheritance Analysis**: Depth of inheritance tracking
+- **Commit Activity**: Monthly commit frequency visualization
 
-### Extensions
-- **Graph-Sitter Analysis**: Code complexity and dependency analysis
-- **Graph-Sitter Visualize**: Interactive code visualization and graph generation
-- **Graph-Sitter Resolve**: Symbol resolution and cross-reference analysis
+## 🛠️ Technology Stack
 
-## 🛠️ Development Setup
+### Backend
+- **FastAPI**: High-performance Python web framework
+- **Graph-Sitter**: Advanced code parsing and analysis
+- **Pydantic**: Data validation and serialization
+- **Uvicorn**: ASGI server for production deployment
+
+### Frontend
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **Radix UI**: Accessible component primitives
+- **Recharts**: Data visualization library
+- **Lucide React**: Beautiful icons
+
+## 🚀 Quick Start
 
 ### Prerequisites
+- Python 3.8+
+- Node.js 18+
+- npm or yarn
 
-- **Python 3.8+** (for backend)
-- **Node.js 16+** (for frontend)
-- **npm or yarn** (package manager)
+### Installation
 
-### Backend Setup
-
-1. **Install Python dependencies**:
+1. **Clone the repository**
    ```bash
-   pip install fastapi uvicorn websockets
+   git clone <repository-url>
+   cd enhanced-codebase-analytics
    ```
 
-2. **Start the backend server**:
+2. **Install dependencies**
    ```bash
-   python simple_backend.py
-   ```
+   # Install all dependencies
+   npm run install:all
    
-   The backend will start on `http://localhost:8000` with:
-   - REST API endpoints at `/api/*`
-   - WebSocket endpoint at `/ws`
-   - Health check at `/health`
-
-### Frontend Setup
-
-1. **Navigate to frontend directory**:
-   ```bash
-   cd src/contexten/frontend
+   # Or install separately
+   npm run backend:install
+   npm run frontend:install
    ```
 
-2. **Install dependencies**:
+3. **Start development servers**
    ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-3. **Start the development server**:
-   ```bash
-   npm start
-   # or
-   yarn start
-   ```
+   # Start both backend and frontend
+   npm run dev
    
-   The frontend will start on `http://localhost:3000`
-
-### Full Development Workflow
-
-1. **Start Backend** (Terminal 1):
-   ```bash
-   python simple_backend.py
+   # Or start separately
+   npm run backend:dev  # Backend on http://localhost:8000
+   npm run frontend:dev # Frontend on http://localhost:3000
    ```
 
-2. **Start Frontend** (Terminal 2):
-   ```bash
-   cd src/contexten/frontend
-   npm start
-   ```
+### Using Docker
 
-3. **Open Browser**:
-   Navigate to `http://localhost:3000`
+```bash
+# Build and start all services
+docker-compose up --build
 
-## 📡 API Endpoints
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000
+```
 
-### REST API
+## 📖 Usage
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/projects` | Get all projects |
-| `GET` | `/api/projects/{id}` | Get specific project |
-| `POST` | `/api/projects/{id}/pin` | Pin project to dashboard |
-| `POST` | `/api/projects/{id}/unpin` | Unpin project from dashboard |
-| `GET` | `/api/stats` | Get dashboard statistics |
-| `GET` | `/api/extensions` | Get available extensions |
-| `GET` | `/health` | Health check |
+1. **Open the application** at `http://localhost:3000`
 
-### WebSocket Events
+2. **Enter a repository URL** in the format:
+   - `owner/repo` (e.g., `facebook/react`)
+   - Full GitHub URL (e.g., `https://github.com/facebook/react`)
 
-| Event Type | Description |
-|------------|-------------|
-| `connection_established` | Initial connection confirmation |
-| `project_status_update` | Periodic project status updates |
-| `project_pinned` | Project pinned notification |
-| `project_unpinned` | Project unpinned notification |
+3. **Click "Analyze Repository"** to start the analysis
 
-## 🎨 Theme System
+4. **Explore the results** across four main tabs:
+   - **📊 Overview**: High-level metrics and charts
+   - **🌳 Repository Structure**: Interactive file tree with issue counts
+   - **🔍 Issues Analysis**: Detailed issue breakdown with context
+   - **📈 Detailed Metrics**: Comprehensive code quality metrics
 
-The dashboard uses a comprehensive dark-only theme with CSS custom properties:
+## 🔧 API Endpoints
 
-```css
-:root {
-  --bg-primary: #0d1117;      /* Main background */
-  --bg-secondary: #161b22;    /* Card backgrounds */
-  --bg-tertiary: #21262d;     /* Input backgrounds */
-  --text-primary: #f0f6fc;    /* Primary text */
-  --text-secondary: #8b949e;  /* Secondary text */
-  --accent-primary: #238636;  /* Success/active states */
-  --accent-secondary: #1f6feb; /* Links and buttons */
+### POST `/analyze_repo`
+Analyze a repository and return comprehensive metrics.
+
+**Request Body:**
+```json
+{
+  "repo_url": "owner/repo"
 }
 ```
 
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env` file in the frontend directory:
-
-```env
-REACT_APP_API_URL=http://localhost:8000
-REACT_APP_WS_URL=ws://localhost:8000/ws
+**Response:**
+```json
+{
+  "repo_url": "owner/repo",
+  "description": "Repository description",
+  "basic_metrics": {
+    "files": 150,
+    "functions": 500,
+    "classes": 75,
+    "modules": 42
+  },
+  "line_metrics": {
+    "total": {
+      "loc": 15000,
+      "lloc": 12000,
+      "sloc": 13000,
+      "comments": 2000,
+      "comment_density": 13.3
+    }
+  },
+  "complexity_metrics": {
+    "cyclomatic_complexity": { "average": 3.2 },
+    "maintainability_index": { "average": 75 },
+    "halstead_metrics": { "total_volume": 50000, "average_volume": 100 }
+  },
+  "repository_structure": { /* Interactive tree structure */ },
+  "issues_summary": {
+    "total": 25,
+    "critical": 3,
+    "functional": 12,
+    "minor": 10
+  },
+  "detailed_issues": [ /* Array of issue details */ ]
+}
 ```
 
-### Backend Configuration
+### GET `/health`
+Health check endpoint.
 
-The backend can be configured by modifying `simple_backend.py`:
+## 🎯 Issue Detection
 
-```python
-# CORS origins
-allow_origins=["http://localhost:3001", "http://localhost:3000"]
+The system detects various types of code issues:
 
-# Server settings
-uvicorn.run(app, host="0.0.0.0", port=8000)
+### ⚠️ Critical Issues
+- **Misspelled function names**: `commiter` instead of `committer`
+- **Incorrect logic**: Checking `@staticmethod` instead of `@classmethod`
+- **Runtime type checking**: Using `assert` for type validation
+- **Null reference potential**: Calling methods without type checking
+
+### 🐞 Functional Issues
+- **Incomplete implementations**: TODO comments indicating unfinished work
+- **Missing validation**: Functions that don't validate input parameters
+- **Redundant decorators**: Using multiple caching decorators simultaneously
+
+### 🔍 Minor Issues
+- **Unused parameters**: Function parameters that aren't used in the implementation
+- **Redundant code**: Unnecessary variable initialization or duplicate logic
+- **Code style**: Formatting and style inconsistencies
+
+## 🏗️ Architecture
+
+```
+enhanced-codebase-analytics/
+├── backend/                 # FastAPI backend
+│   ├── api.py              # Main API application
+│   └── requirements.txt    # Python dependencies
+├── frontend/               # Next.js frontend
+│   ├── app/               # Next.js App Router
+│   ├── components/        # React components
+│   │   ├── ui/           # Reusable UI components
+│   │   └── repo-analytics-dashboard.tsx
+│   ├── lib/              # Utility functions
+│   └── package.json      # Node.js dependencies
+├── docker-compose.yml     # Docker configuration
+└── package.json          # Root package.json for scripts
 ```
 
-## 🧪 Testing
+## 🔮 Future Enhancements
 
-### Frontend Testing
-```bash
-cd src/contexten/frontend
-npm test
-```
+- **Multi-language Support**: Extend analysis to Java, C++, Go, and more
+- **Custom Rules**: Allow users to define custom issue detection rules
+- **Historical Analysis**: Track code quality metrics over time
+- **Team Collaboration**: Share analysis results and collaborate on improvements
+- **CI/CD Integration**: Integrate with GitHub Actions, GitLab CI, and other platforms
+- **Performance Optimization**: Caching and incremental analysis for large repositories
 
-### Backend Testing
-```bash
-# Install test dependencies
-pip install pytest httpx
-
-# Run tests
-pytest
-```
-
-## 🚀 Production Deployment
-
-### Backend
-```bash
-# Install production dependencies
-pip install gunicorn
-
-# Run with gunicorn
-gunicorn simple_backend:app -w 4 -k uvicorn.workers.UvicornWorker
-```
-
-### Frontend
-```bash
-cd src/contexten/frontend
-npm run build
-```
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-1. **WebSocket Connection Failed**
-   - Ensure backend is running on port 8000
-   - Check firewall settings
-   - Verify CORS configuration
-
-2. **API Requests Failing**
-   - Check backend logs for errors
-   - Verify API endpoints are accessible
-   - Check network connectivity
-
-3. **Frontend Build Issues**
-   - Clear node_modules and reinstall
-   - Check Node.js version compatibility
-   - Verify all dependencies are installed
-
-### Debug Mode
-
-Enable debug logging by setting:
-```javascript
-localStorage.setItem('debug', 'true');
-```
-
-## 📝 Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Built with [FastAPI](https://fastapi.tiangolo.com/) and [React](https://reactjs.org/)
-- Inspired by modern developer tools and GitHub's design system
-- WebSocket implementation based on FastAPI WebSocket documentation
+- **Graph-Sitter**: For providing the powerful code parsing foundation
+- **Codegen Team**: For the original modal repo analytics inspiration
+- **Open Source Community**: For the amazing tools and libraries that make this possible
+
+---
+
+**Built with ❤️ by the Enhanced Analytics Team**
 
