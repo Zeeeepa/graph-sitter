@@ -197,7 +197,7 @@ class EnhancedCodebaseAnalyzer:
         quality_trends = self._generate_quality_trends()
         hotspot_analysis = self._generate_hotspot_analysis()
         
-        print(f"��� Enhanced analysis complete! Found {len(self.errors)} issues with comprehensive context")
+        print(f"���� Enhanced analysis complete! Found {len(self.errors)} issues with comprehensive context")
         
         return VisualizationData(
             dependency_graph=dependency_viz,
@@ -1044,18 +1044,47 @@ class EnhancedCodebaseAnalyzer:
     
     def _extract_function_parameters(self, func: Function) -> List[str]:
         """Extract function parameters from AST"""
-        if hasattr(func, 'function_calls'):
-            for call in func.function_calls:
-                if call.function_definition:
-                    return [call.name for call in call.function_definition.function_calls]
+        try:
+            if hasattr(func, 'parameters') and func.parameters:
+                return [param.name for param in func.parameters if hasattr(param, 'name')]
+            elif hasattr(func, 'function_calls'):
+                for call in func.function_calls:
+                    if hasattr(call, 'function_definition') and call.function_definition:
+                        return [call.name for call in call.function_definition.function_calls]
+        except Exception:
+            # Fallback: try to extract from source code if available
+            try:
+                if hasattr(func, 'source') and func.source:
+                    import re
+                    match = re.search(r'def\s+\w+\s*\(([^)]*)\)', func.source)
+                    if match:
+                        params = match.group(1).strip()
+                        if params:
+                            return [p.strip().split('=')[0].strip() for p in params.split(',') if p.strip()]
+            except Exception:
+                pass
         return []
     
     def _extract_return_type(self, func: Function) -> Optional[str]:
         """Extract return type from AST"""
-        if hasattr(func, 'function_calls'):
-            for call in func.function_calls:
-                if call.function_definition:
-                    return call.function_definition.return_type
+        try:
+            if hasattr(func, 'return_type') and func.return_type:
+                return str(func.return_type)
+            elif hasattr(func, 'function_calls'):
+                for call in func.function_calls:
+                    if hasattr(call, 'function_definition') and call.function_definition:
+                        if hasattr(call.function_definition, 'return_type'):
+                            return str(call.function_definition.return_type)
+        except Exception:
+            # Fallback: try to extract from source code if available
+            try:
+                if hasattr(func, 'source') and func.source:
+                    import re
+                    match = re.search(r'def\s+\w+\s*\([^)]*\)\s*->\s*([^:]+):', func.source)
+                    if match:
+                        return match.group(1).strip()
+            except Exception:
+                pass
         return None
     
     def _get_code_context(self, file_path: str, line_number: int) -> CodeContext:

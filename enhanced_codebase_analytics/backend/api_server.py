@@ -11,7 +11,11 @@ from pathlib import Path
 from dataclasses import asdict
 import traceback
 
-from enhanced_analytics import EnhancedCodebaseAnalyzer, analyze_codebase_enhanced
+try:
+    from .enhanced_analytics import EnhancedCodebaseAnalyzer, analyze_codebase_enhanced
+except ImportError:
+    from enhanced_analytics import EnhancedCodebaseAnalyzer, analyze_codebase_enhanced
+
 from graph_sitter import Codebase
 
 app = Flask(__name__)
@@ -418,4 +422,3 @@ if __name__ == '__main__':
     print("  GET  /api/health - Health check")
     
     app.run(host='0.0.0.0', port=5000, debug=True)
-
