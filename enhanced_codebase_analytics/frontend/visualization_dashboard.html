@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Codebase Analytics Dashboard</title>
+    
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 80px 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .metrics-summary {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .panel-content {
+            flex: 1;
+            position: relative;
+            min-height: 300px;
+        }
+        
+        .file-tree {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        
+        .tree-node {
+            padding: 5px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .tree-node:hover {
+            background-color: #f7fafc;
+            border-radius: 5px;
+        }
+        
+        .tree-node.directory {
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .tree-node.file {
+            color: #718096;
+            margin-left: 20px;
+        }
+        
+        .tree-node.has-errors {
+            color: #e53e3e;
+        }
+        
+        .tree-node.high-complexity {
+            color: #dd6b20;
+        }
+        
+        .tree-toggle {
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+            margin-right: 5px;
+        }
+        
+        .error-list {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        
+        .error-item {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .error-item.medium {
+            background: #feebc8;
+            border-color: #fbd38d;
+        }
+        
+        .error-item.low {
+            background: #f0fff4;
+            border-color: #9ae6b4;
+        }
+        
+        .error-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .error-type {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .error-severity {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .error-severity.critical {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .error-severity.high {
+            background: #dd6b20;
+            color: white;
+        }
+        
+        .error-severity.medium {
+            background: #d69e2e;
+            color: white;
+        }
+        
+        .error-severity.low {
+            background: #38a169;
+            color: white;
+        }
+        
+        .error-message {
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+        
+        .error-location {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        
+        .resolve-button {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .resolve-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+        
+        .resolve-button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .network-container {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .control-button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        
+        .control-button:hover {
+            background: #3182ce;
+        }
+        
+        .control-button.active {
+            background: #2b6cb0;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #718096;
+        }
+        
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4299e1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔍 Enhanced Codebase Analytics</h1>
+            <div class="metrics-summary" id="metrics-summary">
+                <!-- Metrics will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="panel-header">
+                <h3 class="panel-title">📁 File Tree</h3>
+            </div>
+            <div class="file-tree" id="file-tree">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading file tree...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dependency Graph -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">🔗 Dependency Graph</h3>
+                    <div class="controls">
+                        <button class="control-button active" onclick="showDependencyGraph()">Dependencies</button>
+                        <button class="control-button" onclick="showCallGraph()">Call Graph</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="dependency-graph" class="network-container"></div>
+                </div>
+            </div>
+            
+            <!-- Complexity Heatmap -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">🌡️ Complexity Heatmap</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="complexity-heatmap"></div>
+                </div>
+            </div>
+            
+            <!-- Error Blast Radius -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">💥 Error Blast Radius</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="error-blast-radius" class="network-container"></div>
+                </div>
+            </div>
+            
+            <!-- Error List -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">🚨 Detected Issues</h3>
+                    <button class="resolve-button" onclick="resolveAllErrors()">
+                        🔧 Resolve All Auto-fixable
+                    </button>
+                </div>
+                <div class="panel-content">
+                    <div class="error-list" id="error-list">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Detecting issues...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast notifications -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        // Global variables
+        let analysisData = null;
+        let dependencyNetwork = null;
+        let callNetwork = null;
+        let errorNetwork = null;
+        let currentGraphType = 'dependency';
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnalysisData();
+        });
+        
+        // Load analysis data (in real implementation, this would be an API call)
+        async function loadAnalysisData() {
+            try {
+                // Simulate API call
+                showToast('Loading analysis data...', 'info');
+                
+                // In real implementation, replace with actual API call
+                // const response = await fetch('/api/analyze');
+                // analysisData = await response.json();
+                
+                // Mock data for demonstration
+                analysisData = generateMockData();
+                
+                renderDashboard();
+                showToast('Analysis complete!', 'success');
+            } catch (error) {
+                console.error('Error loading analysis data:', error);
+                showToast('Error loading analysis data', 'error');
+            }
+        }
+        
+        // Render the complete dashboard
+        function renderDashboard() {
+            renderMetricsSummary();
+            renderFileTree();
+            renderDependencyGraph();
+            renderComplexityHeatmap();
+            renderErrorBlastRadius();
+            renderErrorList();
+        }
+        
+        // Render metrics summary
+        function renderMetricsSummary() {
+            const container = document.getElementById('metrics-summary');
+            const metrics = analysisData.metrics_summary;
+            
+            container.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.total_files}</div>
+                    <div class="metric-label">Files</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.total_functions}</div>
+                    <div class="metric-label">Functions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.total_errors}</div>
+                    <div class="metric-label">Issues</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.average_complexity}</div>
+                    <div class="metric-label">Avg Complexity</div>
+                </div>
+            `;
+        }
+        
+        // Render file tree
+        function renderFileTree() {
+            const container = document.getElementById('file-tree');
+            container.innerHTML = renderTreeNode(analysisData.file_tree);
+        }
+        
+        function renderTreeNode(node, level = 0) {
+            const indent = '  '.repeat(level);
+            const hasChildren = node.children && node.children.length > 0;
+            const toggle = hasChildren ? '▼' : '  ';
+            
+            let cssClass = node.type;
+            if (node.error_count > 0) cssClass += ' has-errors';
+            if (node.complexity_score > 15) cssClass += ' high-complexity';
+            
+            let html = `<div class="tree-node ${cssClass}" style="margin-left: ${level * 20}px">
+                <span class="tree-toggle">${toggle}</span>
+                ${node.name}`;
+            
+            if (node.type === 'file') {
+                html += ` <small>(${node.lines_of_code} lines`;
+                if (node.error_count > 0) html += `, ${node.error_count} issues`;
+                if (node.complexity_score) html += `, complexity: ${node.complexity_score.toFixed(1)}`;
+                html += ')</small>';
+            }
+            
+            html += '</div>';
+            
+            if (hasChildren) {
+                for (const child of node.children) {
+                    html += renderTreeNode(child, level + 1);
+                }
+            }
+            
+            return html;
+        }
+        
+        // Render dependency graph
+        function renderDependencyGraph() {
+            const container = document.getElementById('dependency-graph');
+            const data = analysisData.dependency_graph;
+            
+            const nodes = new vis.DataSet(data.nodes);
+            const edges = new vis.DataSet(data.edges);
+            
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 16,
+                    font: { size: 12 },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: true,
+                    arrows: { to: true }
+                },
+                physics: {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                },
+                layout: {
+                    hierarchical: {
+                        enabled: data.layout === 'hierarchical',
+                        direction: 'UD',
+                        sortMethod: 'directed'
+                    }
+                }
+            };
+            
+            dependencyNetwork = new vis.Network(container, { nodes, edges }, options);
+            
+            dependencyNetwork.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    showNodeDetails(node);
+                }
+            });
+        }
+        
+        // Show/hide different graph types
+        function showDependencyGraph() {
+            currentGraphType = 'dependency';
+            document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderDependencyGraph();
+        }
+        
+        function showCallGraph() {
+            currentGraphType = 'call';
+            document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCallGraph();
+        }
+        
+        function renderCallGraph() {
+            const container = document.getElementById('dependency-graph');
+            const data = analysisData.call_graph;
+            
+            const nodes = new vis.DataSet(data.nodes.map(node => ({
+                ...node,
+                color: node.color || '#4299e1',
+                size: node.size || 16
+            })));
+            const edges = new vis.DataSet(data.edges);
+            
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    font: { size: 12 },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: true,
+                    arrows: { to: true }
+                },
+                physics: {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                }
+            };
+            
+            callNetwork = new vis.Network(container, { nodes, edges }, options);
+        }
+        
+        // Render complexity heatmap
+        function renderComplexityHeatmap() {
+            const container = document.getElementById('complexity-heatmap');
+            const data = analysisData.complexity_heatmap.data;
+            
+            const trace = {
+                x: data.map(d => d.name),
+                y: data.map(d => d.avg_complexity),
+                type: 'bar',
+                marker: {
+                    color: data.map(d => d.color),
+                    line: { width: 1, color: '#333' }
+                },
+                text: data.map(d => `${d.avg_complexity} (max: ${d.max_complexity})`),
+                textposition: 'auto'
+            };
+            
+            const layout = {
+                title: 'Average Complexity by File',
+                xaxis: { title: 'Files' },
+                yaxis: { title: 'Complexity Score' },
+                margin: { t: 50, r: 50, b: 100, l: 50 }
+            };
+            
+            Plotly.newPlot(container, [trace], layout, { responsive: true });
+        }
+        
+        // Render error blast radius
+        function renderErrorBlastRadius() {
+            const container = document.getElementById('error-blast-radius');
+            const data = analysisData.error_blast_radius;
+            
+            const nodes = new vis.DataSet(data.nodes);
+            const edges = new vis.DataSet(data.edges);
+            
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    font: { size: 12 },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: true,
+                    arrows: { to: true }
+                },
+                physics: {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                }
+            };
+            
+            errorNetwork = new vis.Network(container, { nodes, edges }, options);
+            
+            errorNetwork.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    if (node.type === 'error') {
+                        showErrorDetails(node);
+                    }
+                }
+            });
+        }
+        
+        // Render error list
+        function renderErrorList() {
+            const container = document.getElementById('error-list');
+            const errors = generateMockErrors(); // In real implementation, get from analysisData
+            
+            if (errors.length === 0) {
+                container.innerHTML = '<div class="loading">No issues detected! 🎉</div>';
+                return;
+            }
+            
+            container.innerHTML = errors.map(error => `
+                <div class="error-item ${error.severity}">
+                    <div class="error-header">
+                        <span class="error-type">${error.error_type}</span>
+                        <span class="error-severity ${error.severity}">${error.severity}</span>
+                    </div>
+                    <div class="error-message">${error.message}</div>
+                    <div class="error-location">📁 ${error.file_path}${error.line_number ? `:${error.line_number}` : ''}</div>
+                    ${error.symbol_name ? `<div class="error-location">🔍 Symbol: ${error.symbol_name}</div>` : ''}
+                    <button class="resolve-button" ${!error.auto_fixable ? 'disabled' : ''} 
+                            onclick="resolveError('${error.error_type}', '${error.symbol_name || ''}')">
+                        ${error.auto_fixable ? '🔧 Auto-fix' : '📝 Manual fix required'}
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // Resolve individual error
+        async function resolveError(errorType, symbolName) {
+            try {
+                showToast(`Resolving ${errorType}...`, 'info');
+                
+                // Simulate API call to resolve error
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                showToast(`✅ Resolved ${errorType}`, 'success');
+                
+                // Refresh error list
+                renderErrorList();
+            } catch (error) {
+                showToast(`❌ Failed to resolve ${errorType}`, 'error');
+            }
+        }
+        
+        // Resolve all auto-fixable errors
+        async function resolveAllErrors() {
+            try {
+                showToast('Resolving all auto-fixable errors...', 'info');
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                showToast('✅ All auto-fixable errors resolved!', 'success');
+                
+                // Refresh dashboard
+                renderErrorList();
+                renderMetricsSummary();
+            } catch (error) {
+                showToast('❌ Failed to resolve some errors', 'error');
+            }
+        }
+        
+        // Show node details
+        function showNodeDetails(node) {
+            alert(`Node Details:\nType: ${node.type}\nLabel: ${node.label}\nPath: ${node.path || 'N/A'}`);
+        }
+        
+        // Show error details
+        function showErrorDetails(error) {
+            alert(`Error Details:\nType: ${error.type}\nSeverity: ${error.severity}\nMessage: ${error.message}\nFile: ${error.file_path}`);
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Generate mock data for demonstration
+        function generateMockData() {
+            return {
+                dependency_graph: {
+                    nodes: [
+                        { id: 'file:main.py', label: 'main.py', type: 'file', group: 'file' },
+                        { id: 'file:utils.py', label: 'utils.py', type: 'file', group: 'file' },
+                        { id: 'file:config.py', label: 'config.py', type: 'file', group: 'file' }
+                    ],
+                    edges: [
+                        { from: 'file:main.py', to: 'file:utils.py', type: 'import' },
+                        { from: 'file:main.py', to: 'file:config.py', type: 'import' }
+                    ],
+                    layout: 'hierarchical'
+                },
+                call_graph: {
+                    nodes: [
+                        { id: 'func:main', label: 'main()', type: 'function', complexity: 5, color: '#00ff00', size: 20 },
+                        { id: 'func:process_data', label: 'process_data()', type: 'function', complexity: 15, color: '#ffff00', size: 30 },
+                        { id: 'func:validate_input', label: 'validate_input()', type: 'function', complexity: 3, color: '#00ff00', size: 16 }
+                    ],
+                    edges: [
+                        { from: 'func:main', to: 'func:process_data', type: 'calls' },
+                        { from: 'func:process_data', to: 'func:validate_input', type: 'calls' }
+                    ]
+                },
+                complexity_heatmap: {
+                    data: [
+                        { name: 'main.py', avg_complexity: 8.5, max_complexity: 15, color: '#ffff00' },
+                        { name: 'utils.py', avg_complexity: 4.2, max_complexity: 8, color: '#00ff00' },
+                        { name: 'config.py', avg_complexity: 2.1, max_complexity: 3, color: '#00ff00' }
+                    ]
+                },
+                error_blast_radius: {
+                    nodes: [
+                        { id: 'error:ImportError:0', label: 'ImportError: missing_module', type: 'error', severity: 'high', color: '#ff4444', size: 20 },
+                        { id: 'file:main.py', label: 'main.py', type: 'affected_file', color: '#ffcccc' }
+                    ],
+                    edges: [
+                        { from: 'error:ImportError:0', to: 'file:main.py', type: 'affects' }
+                    ]
+                },
+                file_tree: {
+                    name: 'project',
+                    path: '',
+                    type: 'directory',
+                    children: [
+                        {
+                            name: 'src',
+                            path: 'src',
+                            type: 'directory',
+                            children: [
+                                { name: 'main.py', path: 'src/main.py', type: 'file', lines_of_code: 150, error_count: 2, complexity_score: 8.5 },
+                                { name: 'utils.py', path: 'src/utils.py', type: 'file', lines_of_code: 80, error_count: 0, complexity_score: 4.2 }
+                            ]
+                        },
+                        { name: 'config.py', path: 'config.py', type: 'file', lines_of_code: 25, error_count: 0, complexity_score: 2.1 }
+                    ]
+                },
+                metrics_summary: {
+                    total_files: 15,
+                    total_functions: 42,
+                    total_classes: 8,
+                    total_lines: 2150,
+                    average_complexity: 6.8,
+                    max_complexity: 25,
+                    total_errors: 7,
+                    error_breakdown: {
+                        'ImportError': 3,
+                        'ComplexityError': 2,
+                        'DeadCode': 2
+                    }
+                }
+            };
+        }
+        
+        // Generate mock errors
+        function generateMockErrors() {
+            return [
+                {
+                    error_type: 'ImportError',
+                    severity: 'high',
+                    message: 'Cannot resolve import: missing_module',
+                    file_path: 'src/main.py',
+                    line_number: 5,
+                    symbol_name: 'missing_module',
+                    auto_fixable: true
+                },
+                {
+                    error_type: 'ComplexityError',
+                    severity: 'medium',
+                    message: 'High cyclomatic complexity: 25',
+                    file_path: 'src/processor.py',
+                    line_number: 45,
+                    symbol_name: 'complex_function',
+                    auto_fixable: false
+                },
+                {
+                    error_type: 'DeadCode',
+                    severity: 'low',
+                    message: 'Unused function detected',
+                    file_path: 'src/utils.py',
+                    line_number: 120,
+                    symbol_name: 'unused_helper',
+                    auto_fixable: true
+                }
+            ];
+        }
+    </script>
+</body>
+</html>
+

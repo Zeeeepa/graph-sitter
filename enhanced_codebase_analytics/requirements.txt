@@ -1,0 +1,25 @@
+# Enhanced Codebase Analytics Requirements
+
+# Core dependencies
+graph-sitter>=0.5.0
+networkx>=3.0
+flask>=2.3.0
+flask-cors>=4.0.0
+
+# Data processing
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Visualization (optional - for server-side rendering)
+plotly>=5.15.0
+matplotlib>=3.7.0
+
+# Development dependencies
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Optional: For enhanced analysis
+scikit-learn>=1.3.0  # For clustering and analysis
+requests>=2.31.0     # For API calls
+
