@@ -1,105 +1,103 @@
-# PR Validation and Deployment System
+# Deployment Validation System
 
-A comprehensive system for validating and deploying Pull Requests using a combination of powerful tools:
-
-- [pr-agent](https://github.com/Zeeeepa/pr-agent) for PR analysis and GitHub integration
-- [grainchain](https://github.com/codegen-sh/grainchain) for sandbox environments
-- [codegen](https://github.com/codegen-sh/codegen) for code analysis
-- [graph-sitter](https://github.com/codegen-sh/graph-sitter) for static analysis
+A standalone application for managing deployment validations across GitHub repositories.
 
 ## Features
 
-- 🚀 Automatic PR validation on creation/update
-- 📋 Customizable command templates
-- 🔍 Feature validation with static analysis
-- 🖼️ UI testing with visual regression
-- 🔄 GitHub deployment synchronization
-- 🌍 Support for global variables
+- GitHub OAuth integration
+- Repository selection and pinning
+- Deployment validation workflows
+- Sandbox environments
+- Secure secrets management
+- Custom validation rules
 
 ## Setup
 
-1. Install dependencies:
-```bash
-pip install grainchain[all] pr-agent codegen graph-sitter
-```
+1. Create a GitHub OAuth App:
+   - Go to GitHub Developer Settings
+   - Create a new OAuth App
+   - Set callback URL to `http://localhost:8000/api/v1/auth/github/callback`
+   - Save the client ID and secret
 
-2. Configure environment variables:
-```bash
-export CODEGEN_ORG_ID="your-org-id"
-export CODEGEN_API_TOKEN="your-api-token"
-export GITHUB_TOKEN="your-github-token"
-```
+2. Create `.env` file:
+   ```env
+   # GitHub OAuth
+   GITHUB_CLIENT_ID=your_client_id
+   GITHUB_CLIENT_SECRET=your_client_secret
+   GITHUB_CALLBACK_URL=http://localhost:8000/api/v1/auth/github/callback
 
-3. Configure validation settings in `src/config/validation.yml`
+   # Security
+   SECRET_KEY=your_secret_key
+   ENCRYPTION_KEY=your_encryption_key
+
+   # Database
+   DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/validator
+   ```
+
+3. Start the application:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. Access the application:
+   - API: http://localhost:8000/api/docs
+   - Frontend: http://localhost:3000
 
 ## Usage
 
-The system automatically runs when a PR is created or updated. It performs:
+1. Log in with GitHub:
+   - Click "Login with GitHub"
+   - Authorize the application
 
-1. Command template execution
-2. Feature validation
-3. UI testing
-4. Deployment synchronization
+2. Select repositories:
+   - View your repositories
+   - Pin repositories you want to monitor
 
-## Configuration
+3. Configure validation workflows:
+   - Create workflow with setup commands
+   - Add environment variables and secrets
+   - Define validation rules
 
-### Command Templates
+4. Monitor validations:
+   - View workflow history
+   - Access sandbox environments
+   - Check validation results
 
-Define command templates in `src/config/validation.yml`:
+## API Documentation
 
-```yaml
-templates:
-  - name: setup
-    commands:
-      - npm install
-      - npm run build
-```
+Full API documentation is available at `/api/docs` when the application is running.
 
-### Global Variables
+Key endpoints:
 
-Set global variables in `src/config/validation.yml`:
-
-```yaml
-global_vars:
-  NODE_ENV: test
-  TEST_TIMEOUT: 30000
-```
-
-### Feature Validation
-
-Configure validation rules:
-
-```yaml
-feature_validation:
-  complexity_threshold: 10
-  coverage_threshold: 80
-```
-
-### UI Testing
-
-Configure UI test settings:
-
-```yaml
-ui_testing:
-  browsers:
-    - chromium
-    - firefox
-```
+- `/api/v1/auth/*` - Authentication endpoints
+- `/api/v1/repos/*` - Repository management
+- `/api/v1/validation/*` - Validation workflows
 
 ## Development
 
-1. Clone the repository
-2. Install development dependencies
-3. Run tests:
-```bash
-python -m pytest
-```
+1. Install dependencies:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+2. Run migrations:
+   ```bash
+   alembic upgrade head
+   ```
+
+3. Start development server:
+   ```bash
+   uvicorn src.app.main:app --reload
+   ```
 
 ## Contributing
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to contribute to this project.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## License
 
-MIT
+MIT License
 
