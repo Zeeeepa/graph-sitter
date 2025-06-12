@@ -20,29 +20,53 @@ jobs:
           python -m pip install --upgrade pip
           pip install grainchain[all] pr-agent codegen graph-sitter
           
+      - name: Validate secrets
+        run: |
+          python -m src.core.secrets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_API_TOKEN: ${{ secrets.CODEGEN_API_TOKEN }}
+          
       - name: Initialize validation environment
         run: |
           python -m src.core.initialize
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_API_TOKEN: ${{ secrets.CODEGEN_API_TOKEN }}
           
       - name: Run command templates
         run: |
           python -m src.core.template_runner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
           
       - name: Validate features
         run: |
           python -m src.validation.feature_validator
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_API_TOKEN: ${{ secrets.CODEGEN_API_TOKEN }}
           
       - name: Run UI tests
         run: |
           python -m src.validation.ui_tester
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          
+      - name: Run self-analysis
+        run: |
+          python -m src.validation.self_analyzer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_API_TOKEN: ${{ secrets.CODEGEN_API_TOKEN }}
           
       - name: Sync deployment status
         if: success()
@@ -50,4 +74,5 @@ jobs:
           python -m src.deployment.sync
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
