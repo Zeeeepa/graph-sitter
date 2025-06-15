@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -15,6 +15,9 @@ import {
   Divider,
 } from '@mui/material';
 import { Settings } from '../types/dashboard';
+import GitHubLoginButton from './GitHubLoginButton';
+import { isGitHubAuthenticated, getGitHubUser } from '../services/githubService';
+import { GitHubUser } from '../types/github';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -36,6 +39,26 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     slack?: boolean;
     postgresql?: boolean;
   }>({});
+  const [githubUser, setGithubUser] = useState<GitHubUser | null>(null);
+
+  useEffect(() => {
+    // Check GitHub authentication status when dialog opens
+    if (open && isGitHubAuthenticated()) {
+      fetchGitHubUser();
+    }
+  }, [open]);
+
+  const fetchGitHubUser = async () => {
+    try {
+      const user = await getGitHubUser();
+      setGithubUser(user);
+      setTestStatus(prev => ({ ...prev, github: true }));
+    } catch (error) {
+      console.error('Error fetching GitHub user:', error);
+      setGithubUser(null);
+      setTestStatus(prev => ({ ...prev, github: false }));
+    }
+  };
 
   const handleChange = (field: keyof Settings) => (
     event: React.ChangeEvent<HTMLInputElement>
@@ -44,7 +67,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleTestConnection = async (type: 'github' | 'linear' | 'slack' | 'postgresql') => {
+  const handleTestConnection = async (type: 'linear' | 'slack' | 'postgresql') => {
     // Simulate testing connection
     setTestStatus((prev) => ({ ...prev, [type]: undefined }));
     try {
@@ -54,6 +77,16 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     } catch (error) {
       setTestStatus((prev) => ({ ...prev, [type]: false }));
     }
+  };
+
+  const handleGitHubLoginSuccess = (user: GitHubUser) => {
+    setGithubUser(user);
+    setTestStatus(prev => ({ ...prev, github: true }));
+  };
+
+  const handleGitHubLoginError = (error: Error) => {
+    console.error('GitHub login error:', error);
+    setTestStatus(prev => ({ ...prev, github: false }));
   };
 
   const handleSave = () => {
@@ -72,21 +105,26 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               GitHub Integration
             </Typography>
             <Box sx={{ mb: 2 }}>
-              <TextField
+              {githubUser ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <img 
+                    src={githubUser.avatar_url} 
+                    alt={`${githubUser.login}'s avatar`} 
+                    style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 16 }}
+                  />
+                  <Typography>
+                    Logged in as <strong>{githubUser.login}</strong>
+                  </Typography>
+                </Box>
+              ) : null}
+              
+              <GitHubLoginButton 
+                variant="contained"
                 fullWidth
-                label="GitHub Token"
-                type="password"
-                value={formData.githubToken}
-                onChange={handleChange('githubToken')}
-                sx={{ mb: 2 }}
+                onSuccess={handleGitHubLoginSuccess}
+                onError={handleGitHubLoginError}
               />
-              <Button
-                variant="outlined"
-                onClick={() => handleTestConnection('github')}
-                sx={{ mr: 2 }}
-              >
-                Test Connection
-              </Button>
+              
               {testStatus.github !== undefined && (
                 <Alert severity={testStatus.github ? 'success' : 'error'} sx={{ mt: 1 }}>
                   {testStatus.github
@@ -259,4 +297,3 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 };
 
 export default SettingsDialog;
-

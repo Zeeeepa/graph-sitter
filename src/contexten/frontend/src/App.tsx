@@ -10,6 +10,7 @@ import Dashboard from './components/Dashboard';
 import ProjectSelectionDialog from './components/ProjectSelectionDialog';
 import ErrorBoundary from './components/ErrorBoundary';
 import ConnectionStatus from './components/ConnectionStatus';
+import GitHubCallback from './components/GitHubCallback';
 
 // Services
 import websocketService from './services/websocketService';
@@ -169,6 +170,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/github/callback" element={<GitHubCallback />} />
                 <Route path="/projects" element={
                   <ProjectSelectionDialog 
                     open={true}
