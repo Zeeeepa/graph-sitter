@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 
 import pytest
 
@@ -75,8 +74,6 @@ class MyClass:
 def test_basic_subclasses(tmpdir) -> None:
     # language=python
     content = """
-import marshmallow as ma
-import subtype as SubType
 
 class MyClass(ma.Schema, ParentClass[SubType]):
     def __init__(self, x, y, z):

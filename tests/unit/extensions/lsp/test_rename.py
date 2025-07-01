@@ -1,15 +1,11 @@
 import pytest
-from lsprotocol.types import (
     Position,
     RenameParams,
     TextDocumentIdentifier,
 )
-from pytest_lsp import (
     LanguageClient,
 )
 
-from graph_sitter.core.codebase import Codebase
-from tests.unit.extensions.lsp.utils import apply_edit
 
 
 @pytest.mark.parametrize(

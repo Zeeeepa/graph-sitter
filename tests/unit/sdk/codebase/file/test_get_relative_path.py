@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_get_relative_path_same_directory(tmpdir) -> None:

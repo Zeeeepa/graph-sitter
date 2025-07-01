@@ -1,6 +1,5 @@
 import pytest
 
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 @pytest.mark.skip("BROKEN! todo @edward")

@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_code_block_remove_multiple_element(tmpdir):

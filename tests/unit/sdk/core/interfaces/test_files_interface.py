@@ -2,7 +2,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from graph_sitter.core.interfaces.has_symbols import HasSymbols
 
 
 @pytest.fixture

@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session

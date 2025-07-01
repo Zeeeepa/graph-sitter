@@ -1,8 +1,6 @@
-from threading import Event
 
 import pytest
 
-from graph_sitter.compiled.utils import lru_cache, uncache_all
 
 
 def test_lru_cache_with_uncache_all():

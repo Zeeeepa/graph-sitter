@@ -1,10 +1,8 @@
 import io
 import logging
-from contextlib import redirect_stderr, redirect_stdout
 
 import pytest
 
-from graph_sitter.code_generation.current_code_codebase import import_all_codegen_sdk_modules
 
 
 @pytest.mark.skip("broken after repo split, fix or move over")

@@ -1,7 +1,5 @@
-from collections.abc import Callable
 
 import pytest
-from lsprotocol.types import (
     DidChangeTextDocumentParams,
     DidCloseTextDocumentParams,
     DidOpenTextDocumentParams,
@@ -15,10 +13,7 @@ from lsprotocol.types import (
     TextDocumentItem,
     VersionedTextDocumentIdentifier,
 )
-from pytest_lsp import LanguageClient
 
-from graph_sitter.core.codebase import Codebase
-from tests.unit.extensions.lsp.utils import apply_edit
 
 
 @pytest.fixture()

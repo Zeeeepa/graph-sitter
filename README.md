@@ -26,6 +26,19 @@
 
 ```python
 from graph_sitter import Codebase
+from codegen.agents.agent import Agent
+agent = Agent(
+    org_id="11",  # Your organization ID
+    token="your_api_token_here",  # Your API authentication token
+    base_url="https://codegen-sh-rest-api.modal.run",  # Optional - defaults to this URL
+)
+
+# Run an agent with a prompt
+task = agent.run(prompt="Which github repos can you currently access?")
+
+# Check the initial status
+print(task.status)  # Returns the current status of the task (e.g., "queued", "in_progress", etc.)
+
 
 # Graph-sitter builds a complete graph connecting
 # functions, classes, imports and their relationships
@@ -37,6 +50,15 @@ for function in codebase.functions:
     if not function.usages:
         # Auto-handles references and imports to maintain correctness
         function.move_to_file("deprecated.py")
+# Refresh the task to get updated status
+task.refresh()
+
+# Check the updated status
+print(task.status)
+
+# Once task is complete, you can access the result
+if task.status == "completed":
+    print(task.result)
 ```
 
 Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.

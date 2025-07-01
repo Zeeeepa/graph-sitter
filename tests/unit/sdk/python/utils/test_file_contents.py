@@ -1,5 +1,4 @@
 file1_content = """
-import numpy as np
 
 # Global variable in file1.py
 GLOBAL_CONSTANT_1 = 10

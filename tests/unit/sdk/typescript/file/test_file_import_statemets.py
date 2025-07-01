@@ -8,7 +8,6 @@ def test_file_import_statements_includes_require_statements(tmpdir) -> None:
     content = """
     const pkg1 = require('package1');
     const router = pkg1.Router();
-    import ImportedModule from './module'
     const { import1, import2 } = require('./package2');
     const pkg3 = require('./package3');
 

@@ -1,5 +1,4 @@
 import uuid
-from http import HTTPStatus
 
 import pytest
 

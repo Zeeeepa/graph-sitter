@@ -3,11 +3,8 @@ import inspect
 import json
 import os
 import textwrap
-from collections.abc import Generator, Iterator
-from pathlib import Path
 
 import emoji
-from loguru import logger
 
 from codemods.codemod import Codemod
 from graph_sitter.gscli.generate.runner_imports import get_runner_imports

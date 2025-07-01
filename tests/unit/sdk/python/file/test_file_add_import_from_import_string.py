@@ -1,6 +1,5 @@
 import pytest
 
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_file_add_symbol_import_from_string_adds_after_future(tmpdir) -> None:
@@ -45,7 +44,6 @@ def test_file_add_symbol_import_from_string_adds_after_future_before_non_future(
     # language=python
     content = """
 from __future__ import annotations
-from typing import List
 
 def foo():
     print("this is foo")
@@ -100,7 +98,6 @@ def test_file_add_symbol_import_from_string_adds_before_first_import(tmpdir) -> 
 # top level comment
 
 # adds new import here
-from typing import List
 
 def foo():
     print("this is foo")

@@ -1,5 +1,3 @@
-from os import PathLike
-from pathlib import Path
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
 from graph_sitter.codebase.transaction_manager import (

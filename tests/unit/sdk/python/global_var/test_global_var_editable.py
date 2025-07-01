@@ -1,5 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
-from tests.unit.sdk.python.utils.test_file_contents import file1_content, file2_content
 
 
 def test_global_var_source(tmpdir) -> None:
@@ -267,7 +265,6 @@ def test_edit_global_var(tmpdir) -> None:
 def test_edit_type_alias(tmpdir) -> None:
     # language=python
     content = """
-from typing import Union
 
 def foo(x: Union[int, str]) -> Union[int, str]:
     return x

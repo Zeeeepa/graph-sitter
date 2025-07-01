@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_class_definition_filter(tmpdir) -> None:

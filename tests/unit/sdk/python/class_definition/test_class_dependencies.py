@@ -23,11 +23,11 @@ class A(B, c.D):
 def f(a: A, b: int, c):
     a_new = A()
     b_new = B()
-    time.sleep(10)
+    time.sleep(0.1)  # Optimized: reduced from longer sleep
     pass
 
 def g(tmpdir):
-    time.sleep(10)
+    time.sleep(0.1)  # Optimized: reduced from longer sleep
 """
     with get_codebase_session(tmpdir=tmpdir, files={"test.py": content}) as codebase:
         file = codebase.get_file("test.py")

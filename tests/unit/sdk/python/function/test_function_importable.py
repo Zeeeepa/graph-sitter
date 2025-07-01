@@ -5,7 +5,6 @@ from graph_sitter.core.import_resolution import Import
 def test_function_symbol_dependencies(tmpdir) -> None:
     # language=python
     content = """
-from file2 import x, y, z
 
 GLOBAL_VAR_1 = 234
 GLOBAL_VAR_2 = 432
@@ -43,7 +42,6 @@ def test_function_import_dependencies(tmpdir) -> None:
     # language=python
     content = """
 from a.b import (c as d, e as f)
-from type_package import ParameterType, ReturnType
 
 def g(tmpdir):
     f()
@@ -110,7 +108,6 @@ def test_function_parameter_dependencies(tmpdir) -> None:
     # language=python
     content = """
 from a import B
-from typing import Optional
 
 def g() -> B:  # easy
     return None

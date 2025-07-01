@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 
 from graph_sitter.codebase.factory.get_session import get_codebase_graph_session
 from graph_sitter.core.import_resolution import Import

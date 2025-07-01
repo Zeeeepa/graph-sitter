@@ -39,9 +39,6 @@ def test_post_init_validation_imports_resolved(tmpdir) -> None:
     # source where only 0.125 imports will resolve
     # language=python
     bar_source = """
-from foo2 import f as f2
-from foo3 import f as f3
-from numpy import np
 
 def b():
     pass
@@ -49,10 +46,6 @@ def b():
     # language=python
     foo_source = """
 from bar import b
-from bar2 import b as b2
-from bar3 import b as b3
-from bar4 import b as b4
-from numpy import np
 
 def f():
     pass

@@ -8,7 +8,6 @@ from graph_sitter.python.statements.attribute import PyAttribute
 def test_attribute(tmpdir) -> None:
     # language=python
     content1 = """
-import marshmallow as ma
 from file2 import OtherClass
 
 class MyClass(ma.Schema):

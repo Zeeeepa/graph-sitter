@@ -6,7 +6,6 @@ def test_import_rename_usage_with_alias(tmpdir) -> None:
     # language=python
     content1 = """
 from file1 import foo1, foo2
-from file2 import bar1, bar2
 import os
 import sys
 

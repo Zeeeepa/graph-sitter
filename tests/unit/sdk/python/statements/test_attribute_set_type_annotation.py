@@ -1,10 +1,8 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_attribute_set_type_annotation_from_none(tmpdir) -> None:
     # language=python
     content = """
-import marshmallow as ma
 
 class MySchema(ma.Schema):
     id = fields.String(required=True)
@@ -36,7 +34,6 @@ class MySchema(ma.Schema):
         assert (
             file.content
             == """
-import marshmallow as ma
 
 class MySchema(ma.Schema):
     id: int = fields.String(required=True)
@@ -50,7 +47,6 @@ class MySchema(ma.Schema):
 def test_attribute_set_type_annotation_from_existing(tmpdir) -> None:
     # language=python
     content = """
-import marshmallow as ma
 
 class MySchema(ma.Schema):
     id: int = 0
@@ -75,7 +71,6 @@ class MySchema(ma.Schema):
         assert (
             file.content
             == """
-import marshmallow as ma
 
 class MySchema(ma.Schema):
     id: str = 0

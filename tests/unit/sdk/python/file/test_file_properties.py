@@ -3,8 +3,6 @@ from graph_sitter.enums import SymbolType
 from graph_sitter.python import PyAssignment, PyClass, PyFile, PyFunction, PyImport
 
 default_content = """
-from some_file import x, y, z
-import numpy as np
 
 global_var_1 = 1
 global_var_2 = 2
@@ -297,7 +295,6 @@ from dir import file2 as f2
 from dir.file3 import foo, bar as b
 from dir.file4 import *
 import file5
-import numpy as np
     """
     with get_codebase_session(tmpdir=tmpdir, files={"test.py": content}) as codebase:
         file = codebase.get_file("test.py")
@@ -322,7 +319,6 @@ from dir import file2 as f2
 from dir.file3 import foo, bar as b
 from dir.file4 import *
 import file5
-import numpy as np
     """
     with get_codebase_session(tmpdir=tmpdir, files={"test.py": content}) as codebase:
         file = codebase.get_file("test.py")

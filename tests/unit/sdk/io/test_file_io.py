@@ -1,6 +1,5 @@
 import pytest
 
-from graph_sitter.codebase.io.file_io import BadWriteError, FileIO
 
 
 @pytest.fixture

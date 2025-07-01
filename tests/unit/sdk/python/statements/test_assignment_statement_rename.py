@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_rename_local_variables_exact_match_no_change(tmpdir) -> None:

@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_graph_session
 
 
 def test_decorator_call_1(tmpdir) -> None:

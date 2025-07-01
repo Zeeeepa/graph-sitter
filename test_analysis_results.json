@@ -1,0 +1,2160 @@
+{
+  "skipped_tests": {
+    "skip_analysis": {
+      "skip": [
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 313,
+          "reason": "TODO",
+          "content": "# @pytest.mark.skip(\"TODO\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 327,
+          "reason": "TODO",
+          "content": "# @pytest.mark.skip(\"TODO\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 335,
+          "reason": "TODO: Github tests",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 343,
+          "reason": "TODO: Github tests",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 352,
+          "reason": "TODO: Github tests",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 361,
+          "reason": "TODO: Github tests",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/runner/sandbox/test_executor.py",
+          "line": 214,
+          "reason": "TODO: add max_prs as part of find_flag_groups",
+          "content": "@pytest.mark.skip(reason=\"TODO: add max_prs as part of find_flag_groups\")"
+        },
+        {
+          "file": "unit/sdk/code_generation/test_codemod_writer_decorators.py",
+          "line": 10,
+          "reason": "broken after repo split, fix or move over",
+          "content": "@pytest.mark.skip(\"broken after repo split, fix or move over\")"
+        },
+        {
+          "file": "unit/sdk/benchmark/codebase/test_codebase_reset.py",
+          "line": 39,
+          "reason": "Skipping this test for now",
+          "content": "@pytest.mark.skip(\"Skipping this test for now\")"
+        },
+        {
+          "file": "unit/sdk/benchmark/codebase/test_codebase_reset.py",
+          "line": 41,
+          "reason": "Test is timing out and needs investigation",
+          "content": "@pytest.mark.skip(reason=\"Test is timing out and needs investigation\")  # Skip this test for now"
+        },
+        {
+          "file": "unit/sdk/python/function/test_function_move_to_file.py",
+          "line": 1048,
+          "reason": "Broken!!!",
+          "content": "@pytest.mark.skip(reason=\"Broken!!!\")"
+        },
+        {
+          "file": "unit/sdk/python/class_definition/test_class_properties.py",
+          "line": 208,
+          "reason": "TODO: the bottom comment is not being captured (CG-8539)",
+          "content": "@pytest.mark.skip(reason=\"TODO: the bottom comment is not being captured (CG-8539)\")"
+        },
+        {
+          "file": "unit/sdk/python/codebase/test_codebase_auto_commit.py",
+          "line": 7,
+          "reason": "We are disabling auto commit for performance reasons",
+          "content": "@pytest.mark.skip(reason=\"We are disabling auto commit for performance reasons\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 8,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 63,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 118,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 130,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 131,
+          "reason": "wip",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 159,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 160,
+          "reason": "wip",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 186,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 187,
+          "reason": "wip",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 214,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 215,
+          "reason": "wip",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 244,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 245,
+          "reason": "Log propagate is off",
+          "content": "@pytest.mark.skip(\"Log propagate is off\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 261,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 262,
+          "reason": "wip",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 279,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 312,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 313,
+          "reason": "Log propagate is off",
+          "content": "@pytest.mark.skip(\"Log propagate is off\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 336,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 350,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 367,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 368,
+          "reason": "Log propagate is off",
+          "content": "@pytest.mark.skip(\"Log propagate is off\")"
+        },
+        {
+          "file": "unit/sdk/python/import_resolution/test_import_exportable.py",
+          "line": 61,
+          "reason": "Cycle detection is finicky",
+          "content": "@pytest.mark.skip(\"Cycle detection is finicky\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 159,
+          "reason": "CG-8883: Parenthesized expressions not implemented yet",
+          "content": "@pytest.mark.skip(reason=\"CG-8883: Parenthesized expressions not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 216,
+          "reason": "CG-8886: Mixed expression groups not implemented yet",
+          "content": "@pytest.mark.skip(reason=\"CG-8886: Mixed expression groups not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 240,
+          "reason": "CG-8883: Parenthesized expressions not implemented yet",
+          "content": "@pytest.mark.skip(reason=\"CG-8883: Parenthesized expressions not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 255,
+          "reason": "CG-8886: Mixed expression groups not implemented yet",
+          "content": "@pytest.mark.skip(reason=\"CG-8886: Mixed expression groups not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_value.py",
+          "line": 7,
+          "reason": "CG-9463: Fix resolved types to be start byte aware",
+          "content": "@pytest.mark.skip(reason=\"CG-9463: Fix resolved types to be start byte aware\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_value.py",
+          "line": 27,
+          "reason": "CG-9463: Fix resolved types to be start byte aware",
+          "content": "@pytest.mark.skip(reason=\"CG-9463: Fix resolved types to be start byte aware\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_value.py",
+          "line": 54,
+          "reason": "CG-9463: Fix resolved types to be start byte aware",
+          "content": "@pytest.mark.skip(reason=\"CG-9463: Fix resolved types to be start byte aware\")"
+        },
+        {
+          "file": "unit/sdk/python/file/test_ast_grep.py",
+          "line": 6,
+          "reason": "Not implementing AST Grep for now. Much better ways of doing this.",
+          "content": "@pytest.mark.skip(reason=\"Not implementing AST Grep for now. Much better ways of doing this.\")"
+        },
+        {
+          "file": "unit/sdk/python/file/test_file_statements.py",
+          "line": 6,
+          "reason": "TODO: @caroljung fix this once code block for file and symbols are unified",
+          "content": "@pytest.mark.skip(\"TODO: @caroljung fix this once code block for file and symbols are unified\")"
+        },
+        {
+          "file": "unit/sdk/python/detached_symbols/argument/test_argument_remove.py",
+          "line": 6,
+          "reason": "BROKEN! todo @edward",
+          "content": "@pytest.mark.skip(\"BROKEN! todo @edward\")"
+        },
+        {
+          "file": "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+          "line": 257,
+          "reason": "Ellen: why is this test empty?",
+          "content": "@pytest.mark.skip(reason=\"Ellen: why is this test empty?\")"
+        },
+        {
+          "file": "unit/sdk/typescript/namespace/test_namespace_modifications.py",
+          "line": 144,
+          "reason": "TODO: Symbol Animals is ambiguous in codebase - more than one instance",
+          "content": "@pytest.mark.skip(\"TODO: Symbol Animals is ambiguous in codebase - more than one instance\")"
+        },
+        {
+          "file": "unit/sdk/typescript/file/test_file_update_filepath.py",
+          "line": 89,
+          "reason": "This should be TODO to enable for all customers.",
+          "content": "@pytest.mark.skip(\"This should be TODO to enable for all customers.\")"
+        },
+        {
+          "file": "unit/sdk/typescript/file/test_file_statements.py",
+          "line": 7,
+          "reason": "TODO: @caroljung fix once file and symbol code block parse is unified",
+          "content": "@pytest.mark.skip(\"TODO: @caroljung fix once file and symbol code block parse is unified\")"
+        },
+        {
+          "file": "unit/sdk/typescript/class_definition/test_class_dependencies.py",
+          "line": 7,
+          "reason": "CG-9539 TODO @caroljung",
+          "content": "@pytest.mark.skip(reason=\"CG-9539 TODO @caroljung\")"
+        },
+        {
+          "file": "unit/sdk/typescript/comment_docstring/test_docstring_edit.py",
+          "line": 24,
+          "reason": "Corrupts output",
+          "content": "@pytest.mark.skip(\"Corrupts output\")"
+        },
+        {
+          "file": "unit/sdk/typescript/comment_docstring/test_comment_edit.py",
+          "line": 24,
+          "reason": "Corrupts output",
+          "content": "@pytest.mark.skip(\"Corrupts output\")"
+        },
+        {
+          "file": "unit/sdk/typescript/autocommit/test_autocommit.py",
+          "line": 7,
+          "reason": "No Autocommit",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/typescript/function/test_function_calls_from_symbol.py",
+          "line": 102,
+          "reason": "CG-9422 TS method decorator parsing needs to be fixed first",
+          "content": "@pytest.mark.skip(reason=\"CG-9422 TS method decorator parsing needs to be fixed first\")"
+        },
+        {
+          "file": "unit/sdk/typescript/language_engine/test_v8_engine.py",
+          "line": 7,
+          "reason": "V8 engine is not yet fully supported",
+          "content": "@pytest.mark.skip(reason=\"V8 engine is not yet fully supported\")"
+        },
+        {
+          "file": "unit/sdk/typescript/detached_symbols/function_call/test_function_call_get_function_definition.py",
+          "line": 8,
+          "reason": "TODO(CG-8779): get this test working",
+          "content": "@pytest.mark.skip(\"TODO(CG-8779): get this test working\")"
+        },
+        {
+          "file": "unit/sdk/typescript/statements/assignment_statement/test_assignment_statement_type_resolution.py",
+          "line": 19,
+          "reason": "Not yet implemented CG-10064",
+          "content": "@pytest.mark.skip(reason=\"Not yet implemented CG-10064\")"
+        },
+        {
+          "file": "unit/sdk/typescript/statements/assignment_statement/test_assignment_statement_type_resolution.py",
+          "line": 34,
+          "reason": "Not yet implemented CG-10064",
+          "content": "@pytest.mark.skip(reason=\"Not yet implemented CG-10064\")"
+        }
+      ],
+      "skip_no_reason": [
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 313,
+          "reason": "No reason provided",
+          "content": "# @pytest.mark.skip(\"TODO\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 327,
+          "reason": "No reason provided",
+          "content": "# @pytest.mark.skip(\"TODO\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 335,
+          "reason": "No reason provided",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 343,
+          "reason": "No reason provided",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 352,
+          "reason": "No reason provided",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/extensions/test_tools.py",
+          "line": 361,
+          "reason": "No reason provided",
+          "content": "# @pytest.mark.skip(\"TODO: Github tests\")"
+        },
+        {
+          "file": "unit/runner/sandbox/test_executor.py",
+          "line": 214,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"TODO: add max_prs as part of find_flag_groups\")"
+        },
+        {
+          "file": "unit/sdk/code_generation/test_codemod_writer_decorators.py",
+          "line": 10,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"broken after repo split, fix or move over\")"
+        },
+        {
+          "file": "unit/sdk/benchmark/codebase/test_codebase_reset.py",
+          "line": 39,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"Skipping this test for now\")"
+        },
+        {
+          "file": "unit/sdk/benchmark/codebase/test_codebase_reset.py",
+          "line": 41,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"Test is timing out and needs investigation\")  # Skip this test for now"
+        },
+        {
+          "file": "unit/sdk/python/function/test_function_move_to_file.py",
+          "line": 1048,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"Broken!!!\")"
+        },
+        {
+          "file": "unit/sdk/python/class_definition/test_class_properties.py",
+          "line": 208,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"TODO: the bottom comment is not being captured (CG-8539)\")"
+        },
+        {
+          "file": "unit/sdk/python/codebase/test_codebase_auto_commit.py",
+          "line": 7,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"We are disabling auto commit for performance reasons\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 8,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 63,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 118,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 130,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 131,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 159,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 160,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 186,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 187,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 214,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 215,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 244,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 245,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"Log propagate is off\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 261,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 262,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"wip\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 279,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 312,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 313,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"Log propagate is off\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 336,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 350,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 367,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/python/autocommit/test_autocommit.py",
+          "line": 368,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"Log propagate is off\")"
+        },
+        {
+          "file": "unit/sdk/python/import_resolution/test_import_exportable.py",
+          "line": 61,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"Cycle detection is finicky\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 159,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-8883: Parenthesized expressions not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 216,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-8886: Mixed expression groups not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 240,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-8883: Parenthesized expressions not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_binary_expression.py",
+          "line": 255,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-8886: Mixed expression groups not implemented yet\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_value.py",
+          "line": 7,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-9463: Fix resolved types to be start byte aware\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_value.py",
+          "line": 27,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-9463: Fix resolved types to be start byte aware\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_value.py",
+          "line": 54,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-9463: Fix resolved types to be start byte aware\")"
+        },
+        {
+          "file": "unit/sdk/python/file/test_ast_grep.py",
+          "line": 6,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"Not implementing AST Grep for now. Much better ways of doing this.\")"
+        },
+        {
+          "file": "unit/sdk/python/file/test_file_statements.py",
+          "line": 6,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"TODO: @caroljung fix this once code block for file and symbols are unified\")"
+        },
+        {
+          "file": "unit/sdk/python/detached_symbols/argument/test_argument_remove.py",
+          "line": 6,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"BROKEN! todo @edward\")"
+        },
+        {
+          "file": "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+          "line": 257,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"Ellen: why is this test empty?\")"
+        },
+        {
+          "file": "unit/sdk/typescript/namespace/test_namespace_modifications.py",
+          "line": 144,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"TODO: Symbol Animals is ambiguous in codebase - more than one instance\")"
+        },
+        {
+          "file": "unit/sdk/typescript/file/test_file_update_filepath.py",
+          "line": 89,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"This should be TODO to enable for all customers.\")"
+        },
+        {
+          "file": "unit/sdk/typescript/file/test_file_statements.py",
+          "line": 7,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"TODO: @caroljung fix once file and symbol code block parse is unified\")"
+        },
+        {
+          "file": "unit/sdk/typescript/class_definition/test_class_dependencies.py",
+          "line": 7,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-9539 TODO @caroljung\")"
+        },
+        {
+          "file": "unit/sdk/typescript/comment_docstring/test_docstring_edit.py",
+          "line": 24,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"Corrupts output\")"
+        },
+        {
+          "file": "unit/sdk/typescript/comment_docstring/test_comment_edit.py",
+          "line": 24,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"Corrupts output\")"
+        },
+        {
+          "file": "unit/sdk/typescript/autocommit/test_autocommit.py",
+          "line": 7,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"No Autocommit\")"
+        },
+        {
+          "file": "unit/sdk/typescript/function/test_function_calls_from_symbol.py",
+          "line": 102,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"CG-9422 TS method decorator parsing needs to be fixed first\")"
+        },
+        {
+          "file": "unit/sdk/typescript/function/test_function_move_to_file.py",
+          "line": 1324,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(condition=platform.system() != \"Linux\", reason=\"Only works on case-sensitive file systems\")"
+        },
+        {
+          "file": "unit/sdk/typescript/function/test_function_move_to_file.py",
+          "line": 1433,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(condition=platform.system() != \"Linux\", reason=\"Only works on case-sensitive file systems\")"
+        },
+        {
+          "file": "unit/sdk/typescript/language_engine/test_v8_engine.py",
+          "line": 7,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"V8 engine is not yet fully supported\")"
+        },
+        {
+          "file": "unit/sdk/typescript/detached_symbols/function_call/test_function_call_get_function_definition.py",
+          "line": 8,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(\"TODO(CG-8779): get this test working\")"
+        },
+        {
+          "file": "unit/sdk/typescript/statements/assignment_statement/test_assignment_statement_type_resolution.py",
+          "line": 19,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"Not yet implemented CG-10064\")"
+        },
+        {
+          "file": "unit/sdk/typescript/statements/assignment_statement/test_assignment_statement_type_resolution.py",
+          "line": 34,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skip(reason=\"Not yet implemented CG-10064\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 86,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 115,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 141,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 165,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 191,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 93,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 123,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 150,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        }
+      ],
+      "xfail": [
+        {
+          "file": "unit/shared/compilation/test_string_to_code.py",
+          "line": 107,
+          "reason": "TODO(CG-9581): fix codeblocks with return statements",
+          "content": "@pytest.mark.xfail(reason=\"TODO(CG-9581): fix codeblocks with return statements\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_string.py",
+          "line": 56,
+          "reason": "Empty string edit not implemented",
+          "content": "@pytest.mark.xfail(reason=\"Empty string edit not implemented\")"
+        },
+        {
+          "file": "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+          "line": 126,
+          "reason": "Broken by function call changes",
+          "content": "@pytest.mark.xfail(reason=\"Broken by function call changes\")"
+        },
+        {
+          "file": "unit/sdk/typescript/expressions/test_string.py",
+          "line": 62,
+          "reason": "Empty string edit not implemented",
+          "content": "@pytest.mark.xfail(reason=\"Empty string edit not implemented\")"
+        },
+        {
+          "file": "unit/sdk/typescript/expressions/test_dict.py",
+          "line": 396,
+          "reason": "Not implemented Yet",
+          "content": "@pytest.mark.xfail(reason=\"Not implemented Yet\")"
+        },
+        {
+          "file": "unit/sdk/typescript/import_resolution/test_import_resolution_resolve_import.py",
+          "line": 262,
+          "reason": "Currently dynamic imports not supported for type parameters",
+          "content": "@pytest.mark.xfail(reason=\"Currently dynamic imports not supported for type parameters\")"
+        },
+        {
+          "file": "unit/sdk/typescript/function/test_function_calls_from_symbol.py",
+          "line": 141,
+          "reason": "Broken by function call changes",
+          "content": "@pytest.mark.xfail(reason=\"Broken by function call changes\")"
+        },
+        {
+          "file": "unit/sdk/codebase/codebase_graph/test_codebase_reset.py",
+          "line": 269,
+          "reason": "Needs CG-10484",
+          "content": "@pytest.mark.xfail(reason=\"Needs CG-10484\")"
+        },
+        {
+          "file": "unit/sdk/codebase/codebase_graph/test_codebase_reset.py",
+          "line": 294,
+          "reason": "Needs CG-10484",
+          "content": "@pytest.mark.xfail(reason=\"Needs CG-10484\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 15,
+          "reason": "Blocked on CG-11949",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 49,
+          "reason": "Blocked on CG-11949",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 70,
+          "reason": "Blocked on CG-11949",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 94,
+          "reason": "Blocked on CG-11949",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 124,
+          "reason": "Blocked on CG-11949",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 151,
+          "reason": "Blocked on CG-11949",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        }
+      ],
+      "xfail_no_reason": [
+        {
+          "file": "unit/shared/compilation/test_string_to_code.py",
+          "line": 107,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"TODO(CG-9581): fix codeblocks with return statements\")"
+        },
+        {
+          "file": "unit/sdk/python/expressions/test_string.py",
+          "line": 56,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Empty string edit not implemented\")"
+        },
+        {
+          "file": "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+          "line": 126,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Broken by function call changes\")"
+        },
+        {
+          "file": "unit/sdk/typescript/expressions/test_string.py",
+          "line": 62,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Empty string edit not implemented\")"
+        },
+        {
+          "file": "unit/sdk/typescript/expressions/test_dict.py",
+          "line": 396,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Not implemented Yet\")"
+        },
+        {
+          "file": "unit/sdk/typescript/import_resolution/test_import_resolution_resolve_import.py",
+          "line": 262,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Currently dynamic imports not supported for type parameters\")"
+        },
+        {
+          "file": "unit/sdk/typescript/function/test_function_calls_from_symbol.py",
+          "line": 141,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Broken by function call changes\")"
+        },
+        {
+          "file": "unit/sdk/codebase/codebase_graph/test_codebase_reset.py",
+          "line": 269,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Needs CG-10484\")"
+        },
+        {
+          "file": "unit/sdk/codebase/codebase_graph/test_codebase_reset.py",
+          "line": 294,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Needs CG-10484\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 15,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 49,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 70,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 94,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 124,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 151,
+          "reason": "No reason provided",
+          "content": "@pytest.mark.xfail(reason=\"Blocked on CG-11949\")"
+        }
+      ],
+      "skipif": [
+        {
+          "file": "unit/sdk/typescript/function/test_function_move_to_file.py",
+          "line": 1324,
+          "reason": "Only works on case-sensitive file systems",
+          "content": "@pytest.mark.skipif(condition=platform.system() != \"Linux\", reason=\"Only works on case-sensitive file systems\")"
+        },
+        {
+          "file": "unit/sdk/typescript/function/test_function_move_to_file.py",
+          "line": 1433,
+          "reason": "Only works on case-sensitive file systems",
+          "content": "@pytest.mark.skipif(condition=platform.system() != \"Linux\", reason=\"Only works on case-sensitive file systems\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 86,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 115,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 141,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 165,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file.py",
+          "line": 191,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 93,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 123,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        },
+        {
+          "file": "unit/sdk/codebase/file/test_file_pink.py",
+          "line": 150,
+          "reason": "macOS is case-insensitive",
+          "content": "@pytest.mark.skipif(sys.platform == \"darwin\", reason=\"macOS is case-insensitive\")"
+        }
+      ]
+    },
+    "reason_counts": {
+      "TODO": 2,
+      "No reason provided": 84,
+      "TODO: Github tests": 4,
+      "TODO: add max_prs as part of find_flag_groups": 1,
+      "TODO(CG-9581): fix codeblocks with return statements": 1,
+      "broken after repo split, fix or move over": 1,
+      "Skipping this test for now": 1,
+      "Test is timing out and needs investigation": 1,
+      "Broken!!!": 1,
+      "TODO: the bottom comment is not being captured (CG-8539)": 1,
+      "We are disabling auto commit for performance reasons": 1,
+      "No Autocommit": 15,
+      "wip": 5,
+      "Log propagate is off": 3,
+      "Cycle detection is finicky": 1,
+      "CG-8883: Parenthesized expressions not implemented yet": 2,
+      "CG-8886: Mixed expression groups not implemented yet": 2,
+      "Empty string edit not implemented": 2,
+      "CG-9463: Fix resolved types to be start byte aware": 3,
+      "Not implementing AST Grep for now. Much better ways of doing this.": 1,
+      "TODO: @caroljung fix this once code block for file and symbols are unified": 1,
+      "BROKEN! todo @edward": 1,
+      "Broken by function call changes": 2,
+      "Ellen: why is this test empty?": 1,
+      "TODO: Symbol Animals is ambiguous in codebase - more than one instance": 1,
+      "Not implemented Yet": 1,
+      "Currently dynamic imports not supported for type parameters": 1,
+      "This should be TODO to enable for all customers.": 1,
+      "TODO: @caroljung fix once file and symbol code block parse is unified": 1,
+      "CG-9539 TODO @caroljung": 1,
+      "Corrupts output": 2,
+      "CG-9422 TS method decorator parsing needs to be fixed first": 1,
+      "Only works on case-sensitive file systems": 2,
+      "V8 engine is not yet fully supported": 1,
+      "TODO(CG-8779): get this test working": 1,
+      "Not yet implemented CG-10064": 2,
+      "Needs CG-10484": 2,
+      "macOS is case-insensitive": 8,
+      "Blocked on CG-11949": 6
+    },
+    "total_skipped": 168
+  },
+  "unused_utilities": {
+    "unused_utilities": [],
+    "unused_fixtures": [],
+    "total_utilities": 120,
+    "total_fixtures": 37
+  },
+  "performance_issues": {
+    "performance_issues": [
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 656,
+        "issue": "Large range iteration",
+        "content": "for _ in range(1000):"
+      },
+      {
+        "file": "unit/sdk/python/class_definition/test_class_dependencies.py",
+        "line": 26,
+        "issue": "Long sleep detected",
+        "content": "time.sleep(10)"
+      },
+      {
+        "file": "unit/sdk/python/class_definition/test_class_dependencies.py",
+        "line": 30,
+        "issue": "Long sleep detected",
+        "content": "time.sleep(10)"
+      },
+      {
+        "file": "unit/sdk/python/statements/test_while_statement.py",
+        "line": 13,
+        "issue": "Infinite loop potential",
+        "content": "while True:"
+      }
+    ],
+    "total_issues": 4
+  },
+  "test_isolation": {
+    "isolation_issues": [
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 17,
+        "issue": "sys.path modification",
+        "content": "sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))"
+      },
+      {
+        "file": "test_system_validation.py",
+        "line": 16,
+        "issue": "sys.path modification",
+        "content": "sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))"
+      },
+      {
+        "file": "unit/extensions/test_tools.py",
+        "line": 436,
+        "issue": "Global variable modification",
+        "content": "#     \"\"\"Test global regex-based replacement editing.\"\"\""
+      },
+      {
+        "file": "unit/extensions/test_tools.py",
+        "line": 455,
+        "issue": "Global variable modification",
+        "content": "#     # Test basic global replacement across files"
+      },
+      {
+        "file": "unit/shared/compilation/test_string_to_code.py",
+        "line": 25,
+        "issue": "Environment variable modification",
+        "content": "print(os.environ[\"ENV\"])"
+      },
+      {
+        "file": "unit/shared/compilation/test_codeblock_validation.py",
+        "line": 19,
+        "issue": "Environment variable modification",
+        "content": "print(os.environ[\"ENV\"])"
+      },
+      {
+        "file": "unit/sdk/typescript/file/test_file_get_global_var.py",
+        "line": 21,
+        "issue": "Global variable modification",
+        "content": "# a is not a global var and should not be found"
+      },
+      {
+        "file": "integration/codemod/test_verified_codemods.py",
+        "line": 31,
+        "issue": "Monkeypatch without proper cleanup",
+        "content": "monkeypatch.setattr(codebase, \"ai\", lambda *args, **kwargs: \"<ai-response>\")"
+      }
+    ],
+    "total_issues": 8
+  },
+  "coverage_gaps": {
+    "total_source_files": 720,
+    "total_test_files": 404,
+    "potentially_untested": [
+      "gsbuild/build.py",
+      "graph_sitter/_proxy.py",
+      "graph_sitter/tree_sitter_parser.py",
+      "graph_sitter/writer_decorators.py",
+      "graph_sitter/enums.py",
+      "graph_sitter/topological_sort.py",
+      "graph_sitter/types.py",
+      "contexten/agents/chat_agent.py",
+      "contexten/agents/data.py",
+      "contexten/agents/tracer.py",
+      "contexten/agents/loggers.py",
+      "contexten/agents/code_agent.py",
+      "contexten/cli/_env.py",
+      "contexten/extensions/client.py",
+      "contexten/extensions/contexten_app.py",
+      "contexten/dashboard/advanced_analytics.py",
+      "contexten/dashboard/app.py",
+      "contexten/dashboard/chat_manager.py",
+      "contexten/dashboard/orchestrator_integration.py",
+      "contexten/dashboard/workflow_automation.py",
+      "contexten/mcp/server.py",
+      "contexten/mcp/agent/docs_expert.py",
+      "contexten/mcp/codebase/codebase_agent.py",
+      "contexten/mcp/codebase/codebase_mods.py",
+      "contexten/mcp/codebase/codebase_tools.py",
+      "contexten/extensions/slack/types.py",
+      "contexten/extensions/slack/enhanced_agent.py",
+      "contexten/extensions/slack/slack.py",
+      "contexten/extensions/linear/types.py",
+      "contexten/extensions/linear/linear_client.py",
+      "contexten/extensions/linear/assignment_detector.py",
+      "contexten/extensions/linear/config.py",
+      "contexten/extensions/linear/enhanced_agent.py",
+      "contexten/extensions/linear/enhanced_client.py",
+      "contexten/extensions/linear/integration_agent.py",
+      "contexten/extensions/linear/linear.py",
+      "contexten/extensions/linear/linearclient.py",
+      "contexten/extensions/linear/linearevents.py",
+      "contexten/extensions/linear/mutations.py",
+      "contexten/extensions/linear/queries.py",
+      "contexten/extensions/linear/webhook_processor.py",
+      "contexten/extensions/linear/workflow_automation.py",
+      "contexten/extensions/github/enhanced_agent.py",
+      "contexten/extensions/github/enhanced_client.py",
+      "contexten/extensions/github/github.py",
+      "contexten/extensions/github/github_types.py",
+      "contexten/extensions/github/types.py",
+      "contexten/extensions/modal/base.py",
+      "contexten/extensions/modal/interface.py",
+      "contexten/extensions/modal/request_util.py",
+      "contexten/extensions/open_evolve/app.py",
+      "contexten/extensions/open_evolve/main.py",
+      "contexten/extensions/open_evolve/code_generator/agent.py",
+      "contexten/extensions/open_evolve/config/settings.py",
+      "contexten/extensions/open_evolve/core/interfaces.py",
+      "contexten/extensions/open_evolve/database_agent/agent.py",
+      "contexten/extensions/open_evolve/evaluator_agent/agent.py",
+      "contexten/extensions/open_evolve/prompt_designer/agent.py",
+      "contexten/extensions/open_evolve/selection_controller/agent.py",
+      "contexten/extensions/open_evolve/task_manager/agent.py",
+      "contexten/extensions/github/types/push.py",
+      "contexten/extensions/github/types/installation.py",
+      "contexten/extensions/github/types/enterprise.py",
+      "contexten/extensions/github/types/author.py",
+      "contexten/extensions/github/types/label.py",
+      "contexten/extensions/github/types/base.py",
+      "contexten/extensions/github/types/organization.py",
+      "contexten/extensions/github/types/pusher.py",
+      "contexten/extensions/github/types/commit.py",
+      "contexten/extensions/github/types/pull_request.py",
+      "contexten/extensions/github/events/manager.py",
+      "contexten/extensions/github/webhook/processor.py",
+      "contexten/extensions/github/workflow/automation.py",
+      "contexten/extensions/github/types/events/pull_request.py",
+      "contexten/extensions/github/types/events/push.py",
+      "contexten/extensions/linear/assignment/detector.py",
+      "contexten/extensions/linear/events/manager.py",
+      "contexten/extensions/linear/webhook/handlers.py",
+      "contexten/extensions/linear/webhook/processor.py",
+      "contexten/extensions/linear/webhook/validator.py",
+      "contexten/extensions/linear/workflow/automation.py",
+      "contexten/cli/auth/decorators.py",
+      "contexten/cli/auth/token_manager.py",
+      "contexten/cli/auth/login.py",
+      "contexten/cli/workspace/examples_workspace.py",
+      "contexten/cli/workspace/initialize_workspace.py",
+      "contexten/cli/workspace/docs_workspace.py",
+      "contexten/cli/utils/url.py",
+      "contexten/cli/env/enums.py",
+      "contexten/cli/env/global_env.py",
+      "contexten/cli/env/constants.py",
+      "contexten/cli/rich/pretty_print.py",
+      "contexten/cli/api/client.py",
+      "contexten/cli/api/endpoints.py",
+      "contexten/cli/api/schemas.py",
+      "contexten/cli/api/webapp_routes.py",
+      "contexten/cli/api/modal.py",
+      "contexten/cli/sdk/functions.py",
+      "contexten/cli/sdk/function.py",
+      "contexten/cli/sdk/pull_request.py",
+      "contexten/cli/commands/serve/main.py",
+      "contexten/cli/commands/login/main.py",
+      "contexten/cli/commands/create/main.py",
+      "contexten/cli/commands/expert/main.py",
+      "contexten/cli/commands/profile/main.py",
+      "contexten/cli/commands/logout/main.py",
+      "contexten/cli/commands/deploy/main.py",
+      "contexten/cli/commands/run_on_pr/main.py",
+      "contexten/cli/commands/agent/main.py",
+      "contexten/cli/commands/run/run_cloud.py",
+      "contexten/cli/commands/run/main.py",
+      "contexten/cli/commands/run/render.py",
+      "contexten/agents/langchain/agent.py",
+      "contexten/agents/langchain/graph.py",
+      "contexten/agents/langchain/llm.py",
+      "contexten/agents/langchain/prompts.py",
+      "contexten/agents/tools/bash.py",
+      "contexten/agents/tools/commit.py",
+      "contexten/agents/tools/create_file.py",
+      "contexten/agents/tools/delete_file.py",
+      "contexten/agents/tools/edit_file.py",
+      "contexten/agents/tools/global_replacement_edit.py",
+      "contexten/agents/tools/link_annotation.py",
+      "contexten/agents/tools/list_directory.py",
+      "contexten/agents/tools/move_symbol.py",
+      "contexten/agents/tools/observation.py",
+      "contexten/agents/tools/reflection.py",
+      "contexten/agents/tools/relace_edit.py",
+      "contexten/agents/tools/relace_edit_prompts.py",
+      "contexten/agents/tools/rename_file.py",
+      "contexten/agents/tools/replacement_edit.py",
+      "contexten/agents/tools/reveal_symbol.py",
+      "contexten/agents/tools/run_codemod.py",
+      "contexten/agents/tools/search.py",
+      "contexten/agents/tools/search_files_by_name.py",
+      "contexten/agents/tools/semantic_edit.py",
+      "contexten/agents/tools/semantic_edit_prompts.py",
+      "contexten/agents/tools/semantic_search.py",
+      "contexten/agents/tools/tool_output_types.py",
+      "contexten/agents/tools/view_file.py",
+      "contexten/agents/tools/github/checkout_pr.py",
+      "contexten/agents/tools/github/create_pr.py",
+      "contexten/agents/tools/github/create_pr_comment.py",
+      "contexten/agents/tools/github/create_pr_review_comment.py",
+      "contexten/agents/tools/github/search.py",
+      "contexten/agents/tools/github/view_pr.py",
+      "contexten/agents/tools/github/view_pr_checks.py",
+      "contexten/agents/tools/linear/linear.py",
+      "contexten/agents/langchain/utils/custom_tool_node.py",
+      "contexten/agents/langchain/utils/get_langsmith_url.py",
+      "graph_sitter/shared/path.py",
+      "graph_sitter/python/symbol.py",
+      "graph_sitter/python/function.py",
+      "graph_sitter/python/assignment.py",
+      "graph_sitter/python/class_definition.py",
+      "graph_sitter/ai/client.py",
+      "graph_sitter/ai/client_factory.py",
+      "graph_sitter/ai/context_gatherer.py",
+      "graph_sitter/typescript/type_alias.py",
+      "graph_sitter/typescript/assignment.py",
+      "graph_sitter/typescript/enums.py",
+      "graph_sitter/typescript/class_definition.py",
+      "graph_sitter/typescript/config_parser.py",
+      "graph_sitter/typescript/interface.py",
+      "graph_sitter/typescript/function.py",
+      "graph_sitter/typescript/symbol.py",
+      "graph_sitter/typescript/export.py",
+      "graph_sitter/typescript/ts_config.py",
+      "graph_sitter/typescript/enum_definition.py",
+      "graph_sitter/code_generation/enums.py",
+      "graph_sitter/code_generation/changelog_generation.py",
+      "graph_sitter/code_generation/mdx_docs_generation.py",
+      "graph_sitter/code_generation/codegen_sdk_codebase.py",
+      "graph_sitter/code_generation/current_code_codebase.py",
+      "graph_sitter/visualizations/enums.py",
+      "graph_sitter/visualizations/viz_utils.py",
+      "graph_sitter/visualizations/visualization_manager.py",
+      "graph_sitter/core/assignment.py",
+      "graph_sitter/core/class_definition.py",
+      "graph_sitter/core/node_id_factory.py",
+      "graph_sitter/core/symbol.py",
+      "graph_sitter/core/function.py",
+      "graph_sitter/core/external_module.py",
+      "graph_sitter/core/symbol_group.py",
+      "graph_sitter/core/parser.py",
+      "graph_sitter/core/interface.py",
+      "graph_sitter/core/export.py",
+      "graph_sitter/core/type_alias.py",
+      "graph_sitter/cli/errors.py",
+      "graph_sitter/cli/_env.py",
+      "graph_sitter/output/placeholder.py",
+      "graph_sitter/output/jsonable.py",
+      "graph_sitter/output/inspect.py",
+      "graph_sitter/output/constants.py",
+      "graph_sitter/codebase/multigraph.py",
+      "graph_sitter/codebase/range_index.py",
+      "graph_sitter/codebase/codebase_analysis.py",
+      "graph_sitter/codebase/codebase_context.py",
+      "graph_sitter/codebase/span.py",
+      "graph_sitter/codebase/diff_lite.py",
+      "graph_sitter/codebase/codebase_ai.py",
+      "graph_sitter/codebase/resolution_stack.py",
+      "graph_sitter/codebase/transactions.py",
+      "graph_sitter/codebase/config_parser.py",
+      "graph_sitter/codebase/config.py",
+      "graph_sitter/configs/session_manager.py",
+      "graph_sitter/configs/constants.py",
+      "graph_sitter/configs/user_config.py",
+      "graph_sitter/analysis/call_graph.py",
+      "graph_sitter/analysis/database.py",
+      "graph_sitter/analysis/dead_code.py",
+      "graph_sitter/analysis/dependency_analyzer.py",
+      "graph_sitter/analysis/enhanced_analysis.py",
+      "graph_sitter/analysis/metrics.py",
+      "graph_sitter/analytics/core/analysis_config.py",
+      "graph_sitter/configs/models/repository.py",
+      "graph_sitter/configs/models/base_config.py",
+      "graph_sitter/configs/models/secrets.py",
+      "graph_sitter/codebase/progress/stub_progress.py",
+      "graph_sitter/codebase/progress/task.py",
+      "graph_sitter/codebase/progress/stub_task.py",
+      "graph_sitter/codebase/factory/codebase_factory.py",
+      "graph_sitter/codebase/factory/get_session.py",
+      "graph_sitter/codebase/io/io.py",
+      "graph_sitter/codebase/flagging/group.py",
+      "graph_sitter/codebase/flagging/flags.py",
+      "graph_sitter/codebase/flagging/enums.py",
+      "graph_sitter/codebase/node_classes/node_classes.py",
+      "graph_sitter/codebase/node_classes/py_node_classes.py",
+      "graph_sitter/codebase/node_classes/generic_node_classes.py",
+      "graph_sitter/codebase/node_classes/ts_node_classes.py",
+      "graph_sitter/codebase/flagging/groupers/file_chunk_grouper.py",
+      "graph_sitter/codebase/flagging/groupers/app_grouper.py",
+      "graph_sitter/codebase/flagging/groupers/instance_grouper.py",
+      "graph_sitter/codebase/flagging/groupers/enums.py",
+      "graph_sitter/codebase/flagging/groupers/base_grouper.py",
+      "graph_sitter/codebase/flagging/groupers/constants.py",
+      "graph_sitter/codebase/flagging/groupers/codeowner_grouper.py",
+      "graph_sitter/codebase/flagging/groupers/all_grouper.py",
+      "graph_sitter/codebase/flagging/groupers/file_grouper.py",
+      "graph_sitter/git/configs/constants.py",
+      "graph_sitter/git/schemas/repo_config.py",
+      "graph_sitter/git/schemas/enums.py",
+      "graph_sitter/git/utils/codeowner_utils.py",
+      "graph_sitter/git/utils/format.py",
+      "graph_sitter/git/utils/language.py",
+      "graph_sitter/git/utils/file_utils.py",
+      "graph_sitter/git/utils/pr_review.py",
+      "graph_sitter/git/utils/remote_progress.py",
+      "graph_sitter/git/utils/clone.py",
+      "graph_sitter/git/clients/github_client.py",
+      "graph_sitter/git/clients/git_repo_client.py",
+      "graph_sitter/git/models/pull_request_context.py",
+      "graph_sitter/git/models/codemod_context.py",
+      "graph_sitter/git/models/pr_options.py",
+      "graph_sitter/git/models/github_named_user_context.py",
+      "graph_sitter/git/models/pr_part_context.py",
+      "graph_sitter/git/repo_operator/local_git_repo.py",
+      "graph_sitter/git/repo_operator/repo_operator.py",
+      "graph_sitter/cli/codemod/convert.py",
+      "graph_sitter/cli/workspace/decorators.py",
+      "graph_sitter/cli/workspace/venv_manager.py",
+      "graph_sitter/cli/git/patch.py",
+      "graph_sitter/cli/git/repo.py",
+      "graph_sitter/cli/git/folder.py",
+      "graph_sitter/cli/utils/count_functions_2.py",
+      "graph_sitter/cli/utils/function_finder.py",
+      "graph_sitter/cli/utils/count_functions.py",
+      "graph_sitter/cli/utils/notebooks.py",
+      "graph_sitter/cli/utils/schema.py",
+      "graph_sitter/cli/utils/codemod_manager.py",
+      "graph_sitter/cli/utils/default_code.py",
+      "graph_sitter/cli/utils/json_schema.py",
+      "graph_sitter/cli/rich/codeblocks.py",
+      "graph_sitter/cli/rich/spinners.py",
+      "graph_sitter/cli/sdk/decorator.py",
+      "graph_sitter/cli/sdk/models.py",
+      "graph_sitter/cli/auth/session.py",
+      "graph_sitter/cli/auth/constants.py",
+      "graph_sitter/cli/commands/lsp/lsp.py",
+      "graph_sitter/cli/commands/update/main.py",
+      "graph_sitter/cli/commands/reset/main.py",
+      "graph_sitter/cli/commands/notebook/main.py",
+      "graph_sitter/cli/commands/config/main.py",
+      "graph_sitter/cli/commands/style_debug/main.py",
+      "graph_sitter/cli/commands/start/docker_fleet.py",
+      "graph_sitter/cli/commands/start/docker_container.py",
+      "graph_sitter/cli/commands/start/main.py",
+      "graph_sitter/cli/commands/list/main.py",
+      "graph_sitter/cli/commands/init/render.py",
+      "graph_sitter/cli/commands/init/main.py",
+      "graph_sitter/cli/commands/run/run_local.py",
+      "graph_sitter/cli/commands/run/run_daemon.py",
+      "graph_sitter/cli/mcp/resources/system_prompt.py",
+      "graph_sitter/cli/mcp/resources/system_setup_instructions.py",
+      "graph_sitter/core/detached_symbols/parameter.py",
+      "graph_sitter/core/detached_symbols/decorator.py",
+      "graph_sitter/core/detached_symbols/argument.py",
+      "graph_sitter/core/dataclasses/usage.py",
+      "graph_sitter/core/interfaces/exportable.py",
+      "graph_sitter/core/interfaces/has_block.py",
+      "graph_sitter/core/interfaces/conditional_block.py",
+      "graph_sitter/core/interfaces/has_symbols.py",
+      "graph_sitter/core/interfaces/unwrappable.py",
+      "graph_sitter/core/interfaces/wrapper_expression.py",
+      "graph_sitter/core/interfaces/has_attribute.py",
+      "graph_sitter/core/interfaces/editable.py",
+      "graph_sitter/core/interfaces/parseable.py",
+      "graph_sitter/core/interfaces/supports_generic.py",
+      "graph_sitter/core/interfaces/typeable.py",
+      "graph_sitter/core/interfaces/resolvable.py",
+      "graph_sitter/core/interfaces/chainable.py",
+      "graph_sitter/core/interfaces/has_value.py",
+      "graph_sitter/core/interfaces/usable.py",
+      "graph_sitter/core/interfaces/has_name.py",
+      "graph_sitter/core/interfaces/inherits.py",
+      "graph_sitter/core/interfaces/callable.py",
+      "graph_sitter/core/interfaces/importable.py",
+      "graph_sitter/core/external/dependency_manager.py",
+      "graph_sitter/core/external/language_engine.py",
+      "graph_sitter/core/external/external_process.py",
+      "graph_sitter/core/symbol_groups/expression_group.py",
+      "graph_sitter/core/symbol_groups/collection.py",
+      "graph_sitter/core/symbol_groups/multi_line_collection.py",
+      "graph_sitter/core/symbol_groups/type_parameters.py",
+      "graph_sitter/core/symbol_groups/parents.py",
+      "graph_sitter/core/symbol_groups/comment_group.py",
+      "graph_sitter/core/placeholder/placeholder_type.py",
+      "graph_sitter/core/placeholder/placeholder.py",
+      "graph_sitter/core/placeholder/placeholder_stub.py",
+      "graph_sitter/core/expressions/chained_attribute.py",
+      "graph_sitter/core/expressions/parenthesized_expression.py",
+      "graph_sitter/core/expressions/named_type.py",
+      "graph_sitter/core/expressions/tuple_type.py",
+      "graph_sitter/core/expressions/subscript_expression.py",
+      "graph_sitter/core/expressions/none_type.py",
+      "graph_sitter/core/expressions/unary_expression.py",
+      "graph_sitter/core/expressions/name.py",
+      "graph_sitter/core/expressions/builtin.py",
+      "graph_sitter/core/expressions/comparison_expression.py",
+      "graph_sitter/core/expressions/placeholder_type.py",
+      "graph_sitter/core/expressions/ternary_expression.py",
+      "graph_sitter/core/expressions/defined_name.py",
+      "graph_sitter/core/expressions/multi_expression.py",
+      "graph_sitter/core/expressions/union_type.py",
+      "graph_sitter/core/expressions/generic_type.py",
+      "graph_sitter/core/expressions/await_expression.py",
+      "graph_sitter/core/expressions/unpack.py",
+      "graph_sitter/core/plugins/flask.py",
+      "graph_sitter/core/plugins/modal.py",
+      "graph_sitter/core/plugins/axios.py",
+      "graph_sitter/core/plugins/plugin.py",
+      "graph_sitter/core/statements/catch_statement.py",
+      "graph_sitter/core/statements/switch_case.py",
+      "graph_sitter/core/statements/if_block_statement.py",
+      "graph_sitter/core/statements/symbol_statement.py",
+      "graph_sitter/core/statements/expression_statement.py",
+      "graph_sitter/core/statements/statement.py",
+      "graph_sitter/core/statements/raise_statement.py",
+      "graph_sitter/core/statements/block_statement.py",
+      "graph_sitter/core/statements/return_statement.py",
+      "graph_sitter/core/statements/attribute.py",
+      "graph_sitter/core/statements/export_statement.py",
+      "graph_sitter/core/statements/assignment_statement.py",
+      "graph_sitter/core/autocommit/constants.py",
+      "graph_sitter/core/autocommit/decorators.py",
+      "graph_sitter/core/autocommit/manager.py",
+      "graph_sitter/gscli/generate/commands.py",
+      "graph_sitter/gscli/generate/runner_imports.py",
+      "graph_sitter/gscli/generate/system_prompt.py",
+      "graph_sitter/gscli/backend/typestub_utils.py",
+      "graph_sitter/code_generation/prompts/api_docs.py",
+      "graph_sitter/code_generation/doc_utils/generate_docs_json.py",
+      "graph_sitter/code_generation/doc_utils/schemas.py",
+      "graph_sitter/code_generation/doc_utils/parse_docstring.py",
+      "graph_sitter/typescript/detached_symbols/decorator.py",
+      "graph_sitter/typescript/detached_symbols/promise_chain.py",
+      "graph_sitter/typescript/detached_symbols/parameter.py",
+      "graph_sitter/typescript/interfaces/has_block.py",
+      "graph_sitter/typescript/statements/block_statement.py",
+      "graph_sitter/typescript/statements/attribute.py",
+      "graph_sitter/typescript/statements/assignment_statement.py",
+      "graph_sitter/typescript/statements/if_block_statement.py",
+      "graph_sitter/typescript/statements/labeled_statement.py",
+      "graph_sitter/typescript/statements/switch_case.py",
+      "graph_sitter/typescript/statements/catch_statement.py",
+      "graph_sitter/typescript/placeholder/placeholder_return_type.py",
+      "graph_sitter/typescript/external/mega_racer.py",
+      "graph_sitter/typescript/external/ts_analyzer_engine.py",
+      "graph_sitter/typescript/external/dependency_manager.py",
+      "graph_sitter/typescript/symbol_groups/comment_group.py",
+      "graph_sitter/typescript/expressions/generic_type.py",
+      "graph_sitter/typescript/expressions/chained_attribute.py",
+      "graph_sitter/typescript/expressions/lookup_type.py",
+      "graph_sitter/typescript/expressions/ternary_expression.py",
+      "graph_sitter/typescript/expressions/expression_type.py",
+      "graph_sitter/typescript/expressions/function_type.py",
+      "graph_sitter/typescript/expressions/readonly_type.py",
+      "graph_sitter/typescript/expressions/query_type.py",
+      "graph_sitter/typescript/expressions/array_type.py",
+      "graph_sitter/typescript/expressions/conditional_type.py",
+      "graph_sitter/typescript/expressions/undefined_type.py",
+      "graph_sitter/typescript/expressions/object_type.py",
+      "graph_sitter/typescript/expressions/union_type.py",
+      "graph_sitter/typescript/expressions/named_type.py",
+      "graph_sitter/typescript/detached_symbols/jsx/element.py",
+      "graph_sitter/typescript/detached_symbols/jsx/prop.py",
+      "graph_sitter/extensions/lsp/protocol.py",
+      "graph_sitter/extensions/lsp/server.py",
+      "graph_sitter/extensions/lsp/lsp.py",
+      "graph_sitter/extensions/lsp/completion.py",
+      "graph_sitter/extensions/lsp/io.py",
+      "graph_sitter/extensions/lsp/document_symbol.py",
+      "graph_sitter/extensions/lsp/execute.py",
+      "graph_sitter/extensions/lsp/range.py",
+      "graph_sitter/extensions/lsp/kind.py",
+      "graph_sitter/extensions/graph/neo4j_exporter.py",
+      "graph_sitter/extensions/graph/create_graph.py",
+      "graph_sitter/extensions/graph/main.py",
+      "graph_sitter/extensions/attribution/git_history.py",
+      "graph_sitter/extensions/attribution/main.py",
+      "graph_sitter/extensions/index/code_index.py",
+      "graph_sitter/extensions/index/file_index.py",
+      "graph_sitter/extensions/index/symbol_index.py",
+      "graph_sitter/extensions/swebench/tests.py",
+      "graph_sitter/extensions/swebench/harness.py",
+      "graph_sitter/extensions/swebench/success_rates.py",
+      "graph_sitter/extensions/swebench/enums.py",
+      "graph_sitter/extensions/swebench/subsets.py",
+      "graph_sitter/extensions/swebench/report.py",
+      "graph_sitter/extensions/attribution/3pp/cursor.py",
+      "graph_sitter/extensions/attribution/3pp/windsurf.py",
+      "graph_sitter/extensions/lsp/codemods/move_symbol_to_file.py",
+      "graph_sitter/extensions/lsp/codemods/split_tests.py",
+      "graph_sitter/extensions/lsp/codemods/base.py",
+      "graph_sitter/python/expressions/named_type.py",
+      "graph_sitter/python/expressions/generic_type.py",
+      "graph_sitter/python/expressions/union_type.py",
+      "graph_sitter/python/expressions/chained_attribute.py",
+      "graph_sitter/python/expressions/conditional_expression.py",
+      "graph_sitter/python/symbol_groups/comment_group.py",
+      "graph_sitter/python/statements/with_statement.py",
+      "graph_sitter/python/statements/match_case.py",
+      "graph_sitter/python/statements/pass_statement.py",
+      "graph_sitter/python/statements/if_block_statement.py",
+      "graph_sitter/python/statements/assignment_statement.py",
+      "graph_sitter/python/statements/break_statement.py",
+      "graph_sitter/python/statements/attribute.py",
+      "graph_sitter/python/statements/block_statement.py",
+      "graph_sitter/python/statements/catch_statement.py",
+      "graph_sitter/python/placeholder/placeholder_return_type.py",
+      "graph_sitter/python/interfaces/has_block.py",
+      "graph_sitter/python/detached_symbols/decorator.py",
+      "graph_sitter/python/detached_symbols/parameter.py",
+      "graph_sitter/shared/string/csv_utils.py",
+      "graph_sitter/shared/exceptions/api.py",
+      "graph_sitter/shared/exceptions/compilation.py",
+      "graph_sitter/shared/logging/get_logger.py",
+      "graph_sitter/shared/performance/stopwatch_utils.py",
+      "graph_sitter/shared/performance/memory_utils.py",
+      "graph_sitter/shared/performance/time_utils.py",
+      "graph_sitter/shared/compilation/exception_utils.py",
+      "graph_sitter/shared/compilation/function_imports.py",
+      "graph_sitter/shared/network/port.py",
+      "graph_sitter/shared/decorators/docs.py",
+      "graph_sitter/shared/enums/programming_language.py",
+      "graph_sitter/runner/sandbox/repo.py",
+      "graph_sitter/runner/sandbox/middlewares.py",
+      "graph_sitter/runner/sandbox/server.py",
+      "graph_sitter/runner/sandbox/ephemeral_server.py",
+      "graph_sitter/runner/servers/local_daemon.py",
+      "graph_sitter/runner/constants/envvars.py",
+      "graph_sitter/runner/clients/docker_client.py",
+      "graph_sitter/runner/clients/client.py",
+      "graph_sitter/runner/clients/codebase_client.py",
+      "graph_sitter/runner/models/apis.py",
+      "graph_sitter/runner/diff/get_raw_diff.py",
+      "graph_sitter/runner/enums/warmup_state.py",
+      "graph_sitter/runner/utils/exception_utils.py",
+      "codemods/canonical/classnames_to_backtick.py",
+      "codemods/eval/test_files/sample_py_2/expected/foo.py",
+      "codemods/eval/test_files/sample_py_6/original/unused_symbols.py",
+      "codemods/eval/test_files/sample_py_4/expected/main.py",
+      "codemods/eval/test_files/sample_py_4/original/main.py",
+      "codemods/eval/test_files/sample_py_3/expected/decorators.py",
+      "codemods/eval/test_files/sample_py_3/original/decorators.py",
+      "codemods/eval/test_files/sample_py_7/expected/bar/enums.py",
+      "codemods/eval/test_files/sample_py_7/expected/foo/enums.py",
+      "codemods/eval/test_files/sample_py_7/original/bar/enums.py",
+      "codemods/canonical/move_functions_to_new_file/move_functions_to_new_file.py",
+      "codemods/canonical/insert_arguments_to_decorator/insert_arguments_to_decorator.py",
+      "codemods/canonical/convert_array_type_to_square_bracket/convert_array_type_to_square_bracket.py",
+      "codemods/canonical/pivot_return_types/pivot_return_types.py",
+      "codemods/canonical/change_component_tag_names/change_component_tag_names.py",
+      "codemods/canonical/convert_docstring_to_google_style/convert_docstring_to_google_style.py",
+      "codemods/canonical/openapi_no_reference_request/openapi_no_reference_request.py",
+      "codemods/canonical/return_none_type_annotation/return_none_type_annotation.py",
+      "codemods/canonical/mark_internal_to_module/mark_internal_to_module.py",
+      "codemods/canonical/wrap_with_component/wrap_with_component.py",
+      "codemods/canonical/split_file_and_rename_symbols/split_file_and_rename_symbols.py",
+      "codemods/canonical/rename_local_variables/rename_local_variables.py",
+      "codemods/canonical/swap_call_site_imports/swap_call_site_imports.py",
+      "codemods/canonical/split_file/split_file.py",
+      "codemods/canonical/emojify_py_files_codemod/emojify_py_files_codemod.py",
+      "codemods/canonical/built_in_type_annotation/built_in_type_annotation.py",
+      "codemods/canonical/js_to_esm_codemod/js_to_esm_codemod.py",
+      "codemods/canonical/migrate_class_attributes/migrate_class_attributes.py",
+      "codemods/canonical/move_enums_codemod/move_enums_codemod.py",
+      "codemods/canonical/split_decorators/split_decorators.py",
+      "codemods/canonical/wrap_with_statement/wrap_with_statement.py",
+      "codemods/canonical/mark_as_internal_codemod/mark_as_internal_codemod.py",
+      "codemods/canonical/invite_factory_create_params/invite_factory_create_params.py",
+      "codemods/canonical/convert_attribute_to_decorator/convert_attribute_to_decorator.py",
+      "codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py",
+      "codemods/canonical/rename_function_parameters/rename_function_parameters.py",
+      "codemods/canonical/mark_is_boolean/mark_is_boolean.py",
+      "codemods/canonical/remove_indirect_imports/remove_indirect_imports.py",
+      "codemods/canonical/delete_unused_functions/delete_unused_functions.py",
+      "codemods/canonical/bang_bang_to_boolean/bang_bang_to_boolean.py",
+      "codemods/canonical/pascal_case_symbols/pascal_case_symbols.py",
+      "codemods/canonical/swap_class_attribute_usages/swap_class_attribute_usages.py",
+      "codemods/canonical/use_named_kwargs/use_named_kwargs.py",
+      "codemods/canonical/add_internal_to_non_exported_components/add_internal_to_non_exported_components.py",
+      "codemods/canonical/split_large_files/split_large_files.py",
+      "codemods/canonical/add_function_parameter_type_annotations/add_function_parameter_type_annotations.py",
+      "codemods/canonical/update_union_types/update_union_types.py",
+      "codemods/canonical/refactor_react_components_into_separate_files/refactor_react_components_into_separate_files.py",
+      "codemods/canonical/replace_prop_values/replace_prop_values.py",
+      "codemods/canonical/enum_mover/enum_mover.py",
+      "codemods/canonical/openapi_add_response_none/openapi_add_response_none.py",
+      "codemods/canonical/convert_comments_to_JSDoc_style/convert_comments_to_JSDoc_style.py"
+    ]
+  },
+  "flaky_tests": {
+    "flaky_indicators": [
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 217,
+        "indicator": "Has retry logic",
+        "content": "def test_task_retry_logic(self):"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 218,
+        "indicator": "Has retry logic",
+        "content": "\"\"\"Test task retry mechanism.\"\"\""
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 229,
+        "indicator": "Has retry logic",
+        "content": "self.assertTrue(task.can_retry)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 231,
+        "indicator": "Has retry logic",
+        "content": "# Schedule retry"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 232,
+        "indicator": "Has retry logic",
+        "content": "task.schedule_retry()"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 234,
+        "indicator": "Has retry logic",
+        "content": "self.assertEqual(task.retry_count, 1)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 240,
+        "indicator": "Has retry logic",
+        "content": "if task.can_retry:"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 241,
+        "indicator": "Has retry logic",
+        "content": "task.schedule_retry()"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 243,
+        "indicator": "Has retry logic",
+        "content": "self.assertFalse(task.can_retry)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 244,
+        "indicator": "Has retry logic",
+        "content": "self.assertEqual(task.retry_count, 3)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 512,
+        "indicator": "Has retry logic",
+        "content": "self.assertTrue(task.can_retry)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 514,
+        "indicator": "Has retry logic",
+        "content": "# Schedule retry"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 515,
+        "indicator": "Has retry logic",
+        "content": "task.schedule_retry()"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 517,
+        "indicator": "Has retry logic",
+        "content": "self.assertEqual(task.retry_count, 1)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 521,
+        "indicator": "Has retry logic",
+        "content": "task.schedule_retry()"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 522,
+        "indicator": "Has retry logic",
+        "content": "self.assertEqual(task.retry_count, 2)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 526,
+        "indicator": "Has retry logic",
+        "content": "self.assertFalse(task.can_retry)"
+      },
+      {
+        "file": "test_comprehensive_system.py",
+        "line": 680,
+        "indicator": "Uses sleep (timing dependent)",
+        "content": "time.sleep(0.01)  # Small delay"
+      },
+      {
+        "file": "unit/sdk/python/class_definition/test_class_dependencies.py",
+        "line": 26,
+        "indicator": "Uses sleep (timing dependent)",
+        "content": "time.sleep(10)"
+      },
+      {
+        "file": "unit/sdk/python/class_definition/test_class_dependencies.py",
+        "line": 30,
+        "indicator": "Uses sleep (timing dependent)",
+        "content": "time.sleep(10)"
+      },
+      {
+        "file": "unit/sdk/python/file/test_file_add_import.py",
+        "line": 13,
+        "indicator": "Uses current time",
+        "content": "return datetime.datetime.now()"
+      },
+      {
+        "file": "unit/sdk/python/detached_symbols/code_block/test_code_block.py",
+        "line": 195,
+        "indicator": "Uses random values",
+        "content": "assert len(random.get_variable_usages(obj_name)) == 0"
+      },
+      {
+        "file": "unit/sdk/python/detached_symbols/code_block/test_code_block.py",
+        "line": 196,
+        "indicator": "Uses random values",
+        "content": "assert len(random.get_variable_usages(z_name)) == 0"
+      },
+      {
+        "file": "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "line": 23,
+        "indicator": "Uses random values",
+        "content": "return random.randint(0, 100)"
+      },
+      {
+        "file": "unit/sdk/typescript/function/test_function_parameters.py",
+        "line": 122,
+        "indicator": "Has retry logic",
+        "content": "const [retrying, setRetrying] = useState(false)"
+      },
+      {
+        "file": "unit/sdk/typescript/function/test_function_parameters.py",
+        "line": 125,
+        "indicator": "Has retry logic",
+        "content": "if (error || retrying) {"
+      },
+      {
+        "file": "unit/sdk/typescript/function/test_function_parameters.py",
+        "line": 126,
+        "indicator": "Has retry logic",
+        "content": "return renderErrorNotice(error, renderError, retry, retrying)"
+      },
+      {
+        "file": "unit/sdk/typescript/function/test_function_parameters.py",
+        "line": 137,
+        "indicator": "Has retry logic",
+        "content": "async function retry() {"
+      },
+      {
+        "file": "unit/sdk/typescript/statements/assignment_statement/test_assignment_statement_get_variable_usages.py",
+        "line": 72,
+        "indicator": "Uses random values",
+        "content": "assert len(random.get_variable_usages(obj.name)) == 0"
+      },
+      {
+        "file": "unit/sdk/typescript/statements/assignment_statement/test_assignment_statement_get_variable_usages.py",
+        "line": 73,
+        "indicator": "Uses random values",
+        "content": "assert len(random.get_variable_usages(z.name)) == 0"
+      }
+    ],
+    "total_indicators": 30
+  },
+  "duplicate_tests": {
+    "duplicate_tests": {
+      "test_function": [
+        "test_enhanced_codebase_ai.py",
+        "unit/sdk/python/detached_symbols/function_call/test_function_call_from_usage.py",
+        "unit/sdk/python/detached_symbols/function_call/test_function_call_from_usage.py"
+      ],
+      "test_delete_file": [
+        "unit/extensions/test_tools.py",
+        "unit/sdk/io/test_file_io.py"
+      ],
+      "test_function_flag_with_message": [
+        "unit/sdk/python/function/test_function_flag.py",
+        "unit/sdk/typescript/function/test_function_flag.py"
+      ],
+      "test_function_is_async_basic": [
+        "unit/sdk/python/function/test_function_async.py",
+        "unit/sdk/typescript/function/test_function_async.py"
+      ],
+      "test_function_is_async_extended": [
+        "unit/sdk/python/function/test_function_async.py",
+        "unit/sdk/typescript/function/test_function_async.py"
+      ],
+      "test_parent_of_types_function": [
+        "unit/sdk/python/import_resolution/test_is_dynamic.py",
+        "unit/sdk/typescript/import_resolution/test_is_dynamic.py"
+      ],
+      "test_parent_of_types_if_statement": [
+        "unit/sdk/python/import_resolution/test_is_dynamic.py",
+        "unit/sdk/typescript/import_resolution/test_is_dynamic.py"
+      ],
+      "test_parent_of_types_multiple": [
+        "unit/sdk/python/import_resolution/test_is_dynamic.py",
+        "unit/sdk/typescript/import_resolution/test_is_dynamic.py"
+      ],
+      "test_parent_of_types_try_catch": [
+        "unit/sdk/python/import_resolution/test_is_dynamic.py",
+        "unit/sdk/typescript/import_resolution/test_is_dynamic.py"
+      ],
+      "test_parent_of_types_for_loop": [
+        "unit/sdk/python/import_resolution/test_is_dynamic.py",
+        "unit/sdk/typescript/import_resolution/test_is_dynamic.py"
+      ],
+      "test_reduce_condition_to_true_elif": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_to_false_elif": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_to_true_else": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_to_false_else": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_multiple_if_blocks": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_nested_if": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_else_if_to_true": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_else_if_to_false": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_else_statement_raises": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_to_true_single_if": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_reduce_condition_to_false_single_if": [
+        "unit/sdk/python/statements/test_if_block_reduce_block.py",
+        "unit/sdk/typescript/statements/if_block_statement/test_if_block_reduce_block.py"
+      ],
+      "test_chained_binary_expressions": [
+        "unit/sdk/python/expressions/test_binary_expression.py",
+        "unit/sdk/typescript/expressions/test_binary_expression.py"
+      ],
+      "test_number_parse": [
+        "unit/sdk/python/expressions/test_number.py",
+        "unit/sdk/typescript/expressions/test_number.py"
+      ],
+      "test_builtin_types": [
+        "unit/sdk/python/expressions/test_builtin_types.py",
+        "unit/sdk/typescript/expressions/test_builtin_types.py"
+      ],
+      "test_boolean_parse": [
+        "unit/sdk/python/expressions/test_boolean.py",
+        "unit/sdk/typescript/expressions/test_boolean.py"
+      ],
+      "test_reduce_binary_simple": [
+        "unit/sdk/python/expressions/test_binary_reduce_condition.py",
+        "unit/sdk/typescript/expressions/test_binary_reduce_condition.py"
+      ],
+      "test_reduce_binary_complex_condition": [
+        "unit/sdk/python/expressions/test_binary_reduce_condition.py",
+        "unit/sdk/typescript/expressions/test_binary_reduce_condition.py"
+      ],
+      "test_reduce_negation_condition": [
+        "unit/sdk/python/expressions/test_binary_reduce_condition.py",
+        "unit/sdk/typescript/expressions/test_binary_reduce_condition.py"
+      ],
+      "test_unwrap_flat_statements": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_unwrap.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_unwrap.py"
+      ],
+      "test_unwrap_nested_statements": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_unwrap.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_unwrap.py"
+      ],
+      "test_unwrap_sandwiched_statements": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_unwrap.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_unwrap.py"
+      ],
+      "test_unwrap_multiline_wrapper": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_unwrap.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_unwrap.py"
+      ],
+      "test_indent_left_exceed_limit": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_indent.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_indent.py"
+      ],
+      "test_indent_right_once": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_indent.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_indent.py"
+      ],
+      "test_indent_right_multiple": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_indent.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_indent.py"
+      ],
+      "test_indent_zero": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_indent.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_indent.py"
+      ],
+      "test_indent_nested_code_blocks": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_indent.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_indent.py"
+      ],
+      "test_indent_only_nested_block": [
+        "unit/sdk/python/detached_symbols/code_block/test_code_block_indent.py",
+        "unit/sdk/typescript/detached_symbols/code_block/test_code_block_indent.py"
+      ],
+      "test_function_calls_from_file": [
+        "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "unit/sdk/typescript/function/test_function_calls_from_symbol.py"
+      ],
+      "test_function_calls_from_class": [
+        "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "unit/sdk/typescript/function/test_function_calls_from_symbol.py"
+      ],
+      "test_function_calls_from_decorated_definitions": [
+        "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "unit/sdk/typescript/function/test_function_calls_from_symbol.py"
+      ],
+      "test_function_calls_from_datatypes": [
+        "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "unit/sdk/typescript/function/test_function_calls_from_symbol.py"
+      ],
+      "test_function_calls_from_function_parameters": [
+        "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "unit/sdk/typescript/function/test_function_calls_from_symbol.py"
+      ],
+      "test_function_calls_from_while_loop": [
+        "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "unit/sdk/typescript/function/test_function_calls_from_symbol.py"
+      ],
+      "test_function_calls_from_if_conditions": [
+        "unit/sdk/python/detached_symbols/function_call/test_function_calls_from_symbol.py",
+        "unit/sdk/typescript/function/test_function_calls_from_symbol.py"
+      ],
+      "test_main": [
+        "unit/sdk/codebase/codebase_graph/test_codebase_reset.py",
+        "unit/sdk/codebase/codebase_graph/test_codebase_reset.py",
+        "unit/sdk/codebase/codebase_graph/test_codebase_reset.py"
+      ],
+      "test_a": [
+        "unit/extensions/lsp/test_code_action.py",
+        "unit/extensions/lsp/test_code_action.py"
+      ],
+      "test_b": [
+        "unit/extensions/lsp/test_code_action.py",
+        "unit/extensions/lsp/test_code_action.py"
+      ]
+    },
+    "total_duplicates": 48
+  },
+  "fixture_usage": {
+    "fixture_definitions": {
+      "original": "unit/conftest.py",
+      "expected": "integration/codemod/conftest.py",
+      "programming_language": "unit/conftest.py",
+      "codebase": "integration/codegen/git/codebase/conftest.py",
+      "assert_expected": "unit/conftest.py",
+      "executor": "unit/runner/sandbox/conftest.py",
+      "runner": "integration/codegen/cli/commands/conftest.py",
+      "file_io": "unit/sdk/io/test_file_io.py",
+      "fake_files": "unit/sdk/core/test_codeowner.py",
+      "context_mock": "unit/sdk/core/test_codebase.py",
+      "fake_interface": "unit/sdk/core/interfaces/test_files_interface.py",
+      "mock_codebase_setup": "unit/sdk/python/file/test_file_reparse.py",
+      "ts_file": "unit/sdk/typescript/file/test_file_export_statements.py",
+      "export_check": "unit/sdk/typescript/file/test_file_export_statements.py",
+      "document_uri": "unit/extensions/lsp/test_workspace_sync.py",
+      "mock_request": "unit/cli/commands/update/test_update.py",
+      "mock_install_package": "unit/cli/commands/update/test_update.py",
+      "mock_distribution": "unit/cli/commands/update/test_update.py",
+      "auto_profile": "integration/codemod/conftest.py",
+      "db": "integration/codemod/conftest.py",
+      "repo": "integration/codemod/conftest.py",
+      "token": "integration/codemod/conftest.py",
+      "op": "integration/codegen/git/repo_operator/test_remote_repo_operator.py",
+      "_codebase": "integration/codemod/conftest.py",
+      "input_dir": "integration/codemod/conftest.py",
+      "diff_folder": "integration/codemod/conftest.py",
+      "codemod": "integration/codemod/conftest.py",
+      "verified_codemod": "integration/codemod/conftest.py",
+      "mock_config": "integration/codegen/git/conftest.py",
+      "repo_config": "integration/codegen/runner/conftest.py",
+      "git_repo_client": "integration/codegen/runner/conftest.py",
+      "codebase_client": "integration/codegen/runner/conftest.py",
+      "example_codeowners_file_contents": "integration/codegen/sdk/core/test_codeowners.py",
+      "sample_repository": "integration/codegen/cli/commands/conftest.py",
+      "initialized_repo": "integration/codegen/cli/commands/conftest.py",
+      "committed_state": "integration/codegen/cli/commands/test_reset.py",
+      "committed_repo": "integration/codegen/cli/commands/test_reset.py"
+    },
+    "fixture_usage": {
+      "original": 94,
+      "expected": 103,
+      "programming_language": 1153,
+      "codebase": 5256,
+      "assert_expected": 39,
+      "executor": 32,
+      "runner": 97,
+      "file_io": 40,
+      "fake_files": 18,
+      "context_mock": 5,
+      "fake_interface": 36,
+      "mock_codebase_setup": 16,
+      "ts_file": 5,
+      "export_check": 53,
+      "document_uri": 24,
+      "mock_request": 3,
+      "mock_install_package": 5,
+      "mock_distribution": 5,
+      "auto_profile": 1,
+      "db": 1,
+      "repo": 40,
+      "token": 5,
+      "op": 79,
+      "_codebase": 14,
+      "input_dir": 1,
+      "diff_folder": 5,
+      "codemod": 30,
+      "verified_codemod": 3,
+      "mock_config": 4,
+      "repo_config": 17,
+      "git_repo_client": 2,
+      "codebase_client": 2,
+      "example_codeowners_file_contents": 3,
+      "sample_repository": 4,
+      "initialized_repo": 6,
+      "committed_state": 40,
+      "committed_repo": 20
+    },
+    "unused_fixtures": [
+      "auto_profile",
+      "db",
+      "input_dir"
+    ]
+  }
+}

@@ -12,7 +12,7 @@ from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 Config = TestFlags.model_copy(update=dict(use_pink=PinkMode.ALL_FILES))
 
 
-@pytest.mark.xfail(reason="Blocked on CG-11949")
+@pytest.mark.xfail(reason="Blocked on CG-11949 - track completion and re-enable")
 def test_file(tmpdir) -> None:
     file1_source = "Hello world!"
     file2_source = "print(123)"
@@ -46,7 +46,7 @@ def test_file(tmpdir) -> None:
             codebase.get_directory("file4/")
 
 
-@pytest.mark.xfail(reason="Blocked on CG-11949")
+@pytest.mark.xfail(reason="Blocked on CG-11949 - track completion and re-enable")
 def test_codebase_files(tmpdir) -> None:
     with get_codebase_session(tmpdir=tmpdir, files={"file1.py": "print(123)", "file2.py": "print(456)", "file3.bin": b"\x89PNG", "file4": "Hello world!"}, config=Config) as codebase:
         file1 = codebase.get_file("file1.py")
@@ -67,7 +67,7 @@ def test_codebase_files(tmpdir) -> None:
         assert {f for f in codebase.files(extensions=[".bin"])} == {file3}
 
 
-@pytest.mark.xfail(reason="Blocked on CG-11949")
+@pytest.mark.xfail(reason="Blocked on CG-11949 - track completion and re-enable")
 def test_codebase_files_other_language(tmpdir) -> None:
     with get_codebase_session(
         tmpdir=tmpdir, files={"file1.py": "print(123)", "file2.py": "print(456)", "file3.bin": b"\x89PNG", "file4": "Hello world!"}, programming_language=ProgrammingLanguage.OTHER, config=Config
@@ -91,7 +91,7 @@ def test_codebase_files_other_language(tmpdir) -> None:
 
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="macOS is case-insensitive")
-@pytest.mark.xfail(reason="Blocked on CG-11949")
+@pytest.mark.xfail(reason="Blocked on CG-11949 - track completion and re-enable")
 def test_file_extensions_ignore_case(tmpdir) -> None:
     with get_codebase_session(tmpdir=tmpdir, files={"file1.py": "print(123)", "file2.py": "print(456)", "file3.bin": b"\x89PNG", "file4": "Hello world!"}, config=Config) as codebase:
         file1 = codebase.get_file("file1.py")
@@ -121,7 +121,7 @@ def test_file_extensions_ignore_case(tmpdir) -> None:
 
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="macOS is case-insensitive")
-@pytest.mark.xfail(reason="Blocked on CG-11949")
+@pytest.mark.xfail(reason="Blocked on CG-11949 - track completion and re-enable")
 def test_file_case_sensitivity_has_file(tmpdir) -> None:
     with get_codebase_session(tmpdir=tmpdir, files={"file1.py": "print(123)", "file2.py": "print(456)", "file3.bin": b"\x89PNG"}, config=Config) as codebase:
         # Test has_file with ignore_case=True
@@ -148,7 +148,7 @@ def test_file_case_sensitivity_has_file(tmpdir) -> None:
 
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="macOS is case-insensitive")
-@pytest.mark.xfail(reason="Blocked on CG-11949")
+@pytest.mark.xfail(reason="Blocked on CG-11949 - track completion and re-enable")
 def test_file_case_sensitivity_get_file(tmpdir) -> None:
     with get_codebase_session(tmpdir=tmpdir, files={"file1.py": "print(123)", "file2.py": "print(456)", "file3.bin": b"\x89PNG"}, config=Config) as codebase:
         file1 = codebase.get_file("file1.py")

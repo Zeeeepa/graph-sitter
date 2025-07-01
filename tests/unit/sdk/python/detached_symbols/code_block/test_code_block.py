@@ -1,5 +1,4 @@
 import re
-from typing import TYPE_CHECKING
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
 from graph_sitter.core.statements.statement import StatementType

@@ -1,0 +1,39 @@
+{
+  "skipped_tests": {
+    "skip_analysis": {},
+    "reason_counts": {},
+    "total_skipped": 0
+  },
+  "unused_utilities": {
+    "unused_utilities": [],
+    "unused_fixtures": [],
+    "total_utilities": 0,
+    "total_fixtures": 0
+  },
+  "performance_issues": {
+    "performance_issues": [],
+    "total_issues": 0
+  },
+  "test_isolation": {
+    "isolation_issues": [],
+    "total_issues": 0
+  },
+  "coverage_gaps": {
+    "total_source_files": 0,
+    "total_test_files": 0,
+    "potentially_untested": []
+  },
+  "flaky_tests": {
+    "flaky_indicators": [],
+    "total_indicators": 0
+  },
+  "duplicate_tests": {
+    "duplicate_tests": {},
+    "total_duplicates": 0
+  },
+  "fixture_usage": {
+    "fixture_definitions": {},
+    "fixture_usage": {},
+    "unused_fixtures": []
+  }
+}

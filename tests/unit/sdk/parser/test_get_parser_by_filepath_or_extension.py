@@ -1,4 +1,3 @@
-from graph_sitter.tree_sitter_parser import get_parser_by_filepath_or_extension
 
 
 def test_languages() -> None:

@@ -310,7 +310,7 @@
 #     assert not result.truncated
 
 
-# @pytest.mark.skip("TODO")
+# @pytest.mark.skip(reason="TODO: Implementation needed - track in backlog")
 # def test_semantic_edit(codebase):
 #     """Test semantic editing."""
 #     edit_spec = """
@@ -324,7 +324,7 @@
 #     assert "Hello from semantic edit!" in result.new_content
 
 
-# @pytest.mark.skip("TODO")
+# @pytest.mark.skip(reason="TODO: Implementation needed - track in backlog")
 # def test_semantic_search(codebase):
 #     """Test semantic search."""
 #     result = semantic_search(codebase, "function that prints hello")

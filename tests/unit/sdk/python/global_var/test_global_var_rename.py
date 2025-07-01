@@ -1,4 +1,3 @@
-from graph_sitter.codebase.factory.get_session import get_codebase_session
 
 
 def test_global_var_rename_updates_usages_in_method(tmpdir) -> None:

@@ -2,7 +2,6 @@ import uuid
 
 import pytest
 
-from graph_sitter.core.codebase import Codebase
 
 
 def test_codebase_create_pr_active_branch(codebase: Codebase):
