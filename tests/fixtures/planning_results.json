@@ -1,0 +1,42 @@
+{
+  "json_structured_plan": {
+    "plan": "```json\n{\n  \"tasks\": [\n    {\n      \"id\": \"setup_environment\",\n      \"name\": \"Development Environment Setup\",\n      \"description\": \"Configure development environment with necessary tools and dependencies\",\n      \"complexity\": \"simple\",\n      \"estimated_duration\": 900,\n      \"required_capabilities\": [\"environment_setup\", \"configuration\"],\n      \"dependencies\": [],\n      \"priority\": 3\n    },\n    {\n      \"id\": \"implement_auth\",\n      \"name\": \"Authentication System\",\n      \"description\": \"Implement user authentication with JWT tokens and session management\",\n      \"complexity\": \"moderate\",\n      \"estimated_duration\": 2400,\n      \"required_capabilities\": [\"security\", \"backend_development\"],\n      \"dependencies\": [\"setup_environment\"],\n      \"priority\": 3\n    },\n    {\n      \"id\": \"create_api\",\n      \"name\": \"REST API Development\",\n      \"description\": \"Create RESTful API endpoints for core functionality\",\n      \"complexity\": \"complex\",\n      \"estimated_duration\": 3600,\n      \"required_capabilities\": [\"api_development\", \"backend_development\"],\n      \"dependencies\": [\"implement_auth\"],\n      \"priority\": 3\n    }\n  ]\n}\n```",
+    "requirements": "Build a secure web application with authentication"
+  },
+  
+  "markdown_structured_plan": {
+    "plan": "# Web Application Development Plan\n\n## Task 1: Project Setup\nInitialize the project structure and configure build tools\n\n## Task 2: Database Design\nDesign and implement the database schema with proper relationships\n\n## Task 3: Backend API\nDevelop the backend API with proper error handling and validation\n\n## Task 4: Frontend Interface\nCreate responsive user interface with modern frameworks\n\n## Task 5: Testing Suite\nImplement comprehensive testing including unit and integration tests\n\n## Task 6: Deployment Pipeline\nSet up CI/CD pipeline for automated deployment",
+    "requirements": "Create a full-stack web application"
+  },
+  
+  "text_pattern_plan": {
+    "plan": "1. Set up development environment and tools\n2. Design database schema and relationships\n3. Implement user authentication and authorization\n4. Create core business logic and API endpoints\n5. Develop frontend user interface\n6. Add comprehensive testing coverage\n7. Implement error handling and logging\n8. Set up monitoring and analytics\n9. Deploy to staging environment\n10. Perform user acceptance testing\n11. Deploy to production environment\n12. Create documentation and user guides",
+    "requirements": "Build a production-ready web application"
+  },
+  
+  "natural_language_plan": {
+    "plan": "The development process will begin with establishing a solid foundation by setting up the development environment and configuring all necessary tools and dependencies. This includes version control, package managers, and development frameworks.\n\nOnce the foundation is in place, we'll focus on the core architecture by designing and implementing the database schema. This involves creating proper entity relationships, indexes, and constraints to ensure data integrity and performance.\n\nThe next phase involves implementing the business logic layer, starting with user authentication and authorization mechanisms. We'll create secure endpoints for user registration, login, and session management using industry best practices.\n\nAfter the authentication system is complete, we'll develop the main application features including the API endpoints for core functionality. This will involve proper input validation, error handling, and response formatting.\n\nThe frontend development will focus on creating an intuitive and responsive user interface that provides excellent user experience across different devices and browsers.\n\nTesting will be integrated throughout the development process, with comprehensive unit tests, integration tests, and end-to-end testing to ensure reliability and maintainability.\n\nFinally, we'll implement deployment automation and monitoring to ensure smooth production operations and quick issue resolution.",
+    "requirements": "Develop a comprehensive web application with modern architecture"
+  },
+  
+  "minimal_plan": {
+    "plan": "Build the app",
+    "requirements": "Simple application"
+  },
+  
+  "malformed_json_plan": {
+    "plan": "```json\n{\n  \"tasks\": [\n    {\n      \"id\": \"task_1\",\n      \"name\": \"Incomplete task\"\n      // Missing comma and closing brace\n    {\n      \"id\": \"task_2\",\n      \"name\": \"Another task\"\n    }\n  ]\n}\n```",
+    "requirements": "Test malformed JSON handling"
+  },
+  
+  "api_focused_plan": {
+    "plan": "Create a comprehensive API system with the following components:\n- Authentication endpoints for user management\n- CRUD operations for data entities\n- Real-time WebSocket connections\n- File upload and processing capabilities\n- Rate limiting and security measures\n- API documentation and testing tools",
+    "requirements": "Build a robust API system with real-time capabilities"
+  },
+  
+  "complex_enterprise_plan": {
+    "plan": "# Enterprise Application Development\n\n## Phase 1: Architecture & Planning\n### Task 1.1: System Architecture Design\nDesign scalable microservices architecture with proper service boundaries\n\n### Task 1.2: Technology Stack Selection\nEvaluate and select appropriate technologies for each service\n\n### Task 1.3: Database Design\nDesign distributed database architecture with proper sharding strategy\n\n## Phase 2: Core Infrastructure\n### Task 2.1: Service Mesh Setup\nImplement service mesh for inter-service communication\n\n### Task 2.2: Authentication & Authorization\nImplement enterprise-grade authentication with SSO integration\n\n### Task 2.3: API Gateway\nSet up API gateway with rate limiting and request routing\n\n## Phase 3: Business Services\n### Task 3.1: User Management Service\nImplement comprehensive user management with role-based access\n\n### Task 3.2: Data Processing Service\nCreate high-performance data processing pipeline\n\n### Task 3.3: Notification Service\nImplement multi-channel notification system\n\n## Phase 4: Integration & Testing\n### Task 4.1: Service Integration\nIntegrate all services with proper error handling\n\n### Task 4.2: Performance Testing\nConduct load testing and performance optimization\n\n### Task 4.3: Security Audit\nPerform comprehensive security testing and vulnerability assessment\n\n## Phase 5: Deployment & Monitoring\n### Task 5.1: Container Orchestration\nSet up Kubernetes cluster with auto-scaling\n\n### Task 5.2: Monitoring & Logging\nImplement comprehensive monitoring and centralized logging\n\n### Task 5.3: Disaster Recovery\nSet up backup and disaster recovery procedures",
+    "requirements": "Build enterprise-grade microservices application with high availability"
+  }
+}
+

@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Codebase Analytics Dashboard</title>
+    
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 80px 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .metrics-summary {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .panel-content {
+            flex: 1;
+            position: relative;
+            min-height: 300px;
+        }
+        
+        .file-tree {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        
+        .tree-node {
+            padding: 5px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .tree-node:hover {
+            background-color: #f7fafc;
+            border-radius: 5px;
+        }
+        
+        .tree-node.directory {
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .tree-node.file {
+            color: #718096;
+            margin-left: 20px;
+        }
+        
+        .tree-node.has-errors {
+            color: #e53e3e;
+        }
+        
+        .tree-node.high-complexity {
+            color: #dd6b20;
+        }
+        
+        .tree-toggle {
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+            margin-right: 5px;
+        }
+        
+        .error-list {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        
+        .error-item {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .error-item.medium {
+            background: #feebc8;
+            border-color: #fbd38d;
+        }
+        
+        .error-item.low {
+            background: #f0fff4;
+            border-color: #9ae6b4;
+        }
+        
+        .error-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .error-type {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .error-severity {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .error-severity.critical {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .error-severity.high {
+            background: #dd6b20;
+            color: white;
+        }
+        
+        .error-severity.medium {
+            background: #d69e2e;
+            color: white;
+        }
+        
+        .error-severity.low {
+            background: #38a169;
+            color: white;
+        }
+        
+        .error-message {
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+        
+        .error-location {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        
+        .resolve-button {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .resolve-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+        
+        .resolve-button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .network-container {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .control-button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        
+        .control-button:hover {
+            background: #3182ce;
+        }
+        
+        .control-button.active {
+            background: #2b6cb0;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #718096;
+        }
+        
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4299e1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: #e53e3e;
+        }
+        
+        .error-description {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin: 8px 0;
+            font-style: italic;
+        }
+        
+        .error-root-cause {
+            font-size: 0.85rem;
+            color: #2d3748;
+            margin: 6px 0;
+            padding: 4px 8px;
+            background: #f7fafc;
+            border-radius: 4px;
+        }
+        
+        .error-impact {
+            font-size: 0.85rem;
+            color: #744210;
+            margin: 6px 0;
+            padding: 4px 8px;
+            background: #fffbeb;
+            border-radius: 4px;
+        }
+        
+        .error-suggestions {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f0fff4;
+            border-radius: 6px;
+            border-left: 4px solid #38a169;
+        }
+        
+        .suggestion-item {
+            margin: 4px 0;
+            font-size: 0.85rem;
+        }
+        
+        .suggestion-type {
+            font-weight: 600;
+            text-transform: capitalize;
+            color: #2d3748;
+        }
+        
+        .confidence {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-left: 8px;
+        }
+        
+        .code-context {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f7fafc;
+            border-radius: 6px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .code-context pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            margin: 4px 0;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .info-button {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .info-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+        }
+        
+        .error-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            font-size: 2rem;
+            cursor: pointer;
+            color: white;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .close-modal:hover {
+            opacity: 1;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-body h3 {
+            color: #4a5568;
+            margin: 20px 0 10px 0;
+            font-size: 1.2rem;
+        }
+        
+        .modal-body h4 {
+            color: #2d3748;
+            margin: 15px 0 8px 0;
+            font-size: 1rem;
+        }
+        
+        .modal-body h5 {
+            color: #4a5568;
+            margin: 10px 0 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .error-severity-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .error-severity-badge.critical {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .error-severity-badge.high {
+            background: #dd6b20;
+            color: white;
+        }
+        
+        .error-severity-badge.medium {
+            background: #d69e2e;
+            color: white;
+        }
+        
+        .error-severity-badge.low {
+            background: #38a169;
+            color: white;
+        }
+        
+        .code-context-detail {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .code-context-detail pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            margin: 8px 0;
+        }
+        
+        .suggestions-detail {
+            background: #f0fff4;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #38a169;
+        }
+        
+        .suggestion-detail {
+            margin: 15px 0;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .suggestion-meta {
+            display: flex;
+            gap: 15px;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+        
+        .suggestion-meta .confidence {
+            color: #38a169;
+            font-weight: 600;
+        }
+        
+        .suggestion-meta .effort {
+            color: #d69e2e;
+            font-weight: 600;
+        }
+        
+        .prerequisites, .side-effects {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .prerequisites {
+            background: #fffbeb;
+            border-left: 3px solid #d69e2e;
+        }
+        
+        .side-effects {
+            background: #fed7d7;
+            border-left: 3px solid #e53e3e;
+        }
+        
+        .error-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .tag {
+            background: #e2e8f0;
+            color: #4a5568;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 20px;
+            border-top: 2px solid #e2e8f0;
+            background: #f7fafc;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .cancel-button {
+            background: #a0aec0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .cancel-button:hover {
+            background: #718096;
+        }
+        
+        .toast.error {
+            background: #e53e3e;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+            }
+            
+            .modal-content {
+                max-width: 95%;
+                margin: 10px;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+            
+            .suggestion-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔍 Enhanced Codebase Analytics</h1>
+            <div class="metrics-summary" id="metrics-summary">
+                <!-- Metrics will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="panel-header">
+                <h3 class="panel-title">📁 File Tree</h3>
+            </div>
+            <div class="file-tree" id="file-tree">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading file tree...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dependency Graph -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">🔗 Dependency Graph</h3>
+                    <div class="controls">
+                        <button class="control-button active" onclick="showDependencyGraph()">Dependencies</button>
+                        <button class="control-button" onclick="showCallGraph()">Call Graph</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="dependency-graph" class="network-container"></div>
+                </div>
+            </div>
+            
+            <!-- Complexity Heatmap -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">🌡️ Complexity Heatmap</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="complexity-heatmap"></div>
+                </div>
+            </div>
+            
+            <!-- Error Blast Radius -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">💥 Error Blast Radius</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="error-blast-radius" class="network-container"></div>
+                </div>
+            </div>
+            
+            <!-- Error List -->
+            <div class="visualization-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">🚨 Detected Issues</h3>
+                    <button class="resolve-button" onclick="resolveAllErrors()">
+                        🔧 Resolve All Auto-fixable
+                    </button>
+                </div>
+                <div class="panel-content">
+                    <div class="error-list" id="error-list">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Detecting issues...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast notifications -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        // Global variables
+        let analysisData = null;
+        let dependencyNetwork = null;
+        let callNetwork = null;
+        let errorNetwork = null;
+        let currentGraphType = 'dependency';
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnalysisData();
+        });
+        
+        // Load analysis data (in real implementation, this would be an API call)
+        async function loadAnalysisData() {
+            try {
+                // Simulate API call
+                showToast('Loading analysis data...', 'info');
+                
+                // Try to load from API first
+                try {
+                    const response = await fetch('/api/demo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            analysisData = data.data;
+                            renderDashboard();
+                            showToast('Analysis loaded from API!', 'success');
+                            return;
+                        }
+                    }
+                } catch (apiError) {
+                    console.log('API not available, using mock data');
+                }
+                
+                // Fallback to mock data
+                analysisData = generateMockData();
+                renderDashboard();
+                showToast('Analysis complete! (Using demo data)', 'success');
+                
+            } catch (error) {
+                console.error('Error loading analysis data:', error);
+                showToast('Error loading analysis data', 'error');
+            }
+        }
+        
+        // Render the complete dashboard
+        function renderDashboard() {
+            renderMetricsSummary();
+            renderFileTree();
+            renderDependencyGraph();
+            renderComplexityHeatmap();
+            renderErrorBlastRadius();
+            renderErrorList();
+        }
+        
+        // Render metrics summary
+        function renderMetricsSummary() {
+            const container = document.getElementById('metrics-summary');
+            const metrics = analysisData.metrics_summary;
+            
+            container.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.total_files}</div>
+                    <div class="metric-label">Files</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.total_functions}</div>
+                    <div class="metric-label">Functions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.total_errors}</div>
+                    <div class="metric-label">Issues</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${metrics.average_complexity}</div>
+                    <div class="metric-label">Avg Complexity</div>
+                </div>
+            `;
+        }
+        
+        // Render file tree
+        function renderFileTree() {
+            const container = document.getElementById('file-tree');
+            container.innerHTML = renderTreeNode(analysisData.file_tree);
+        }
+        
+        function renderTreeNode(node, level = 0) {
+            const indent = '  '.repeat(level);
+            const hasChildren = node.children && node.children.length > 0;
+            const toggle = hasChildren ? '▼' : '  ';
+            
+            let cssClass = node.type;
+            if (node.error_count > 0) cssClass += ' has-errors';
+            if (node.complexity_score > 15) cssClass += ' high-complexity';
+            
+            let html = `<div class="tree-node ${cssClass}" style="margin-left: ${level * 20}px">
+                <span class="tree-toggle">${toggle}</span>
+                ${node.name}`;
+            
+            if (node.type === 'file') {
+                html += ` <small>(${node.lines_of_code} lines`;
+                if (node.error_count > 0) html += `, ${node.error_count} issues`;
+                if (node.complexity_score) html += `, complexity: ${node.complexity_score.toFixed(1)}`;
+                html += ')</small>';
+            }
+            
+            html += '</div>';
+            
+            if (hasChildren) {
+                for (const child of node.children) {
+                    html += renderTreeNode(child, level + 1);
+                }
+            }
+            
+            return html;
+        }
+        
+        // Render dependency graph
+        function renderDependencyGraph() {
+            const container = document.getElementById('dependency-graph');
+            const data = analysisData.dependency_graph;
+            
+            const nodes = new vis.DataSet(data.nodes);
+            const edges = new vis.DataSet(data.edges);
+            
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 16,
+                    font: { size: 12 },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: true,
+                    arrows: { to: true }
+                },
+                physics: {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                },
+                layout: {
+                    hierarchical: {
+                        enabled: data.layout === 'hierarchical',
+                        direction: 'UD',
+                        sortMethod: 'directed'
+                    }
+                }
+            };
+            
+            dependencyNetwork = new vis.Network(container, { nodes, edges }, options);
+            
+            dependencyNetwork.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    showNodeDetails(node);
+                }
+            });
+        }
+        
+        // Show/hide different graph types
+        function showDependencyGraph() {
+            currentGraphType = 'dependency';
+            document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderDependencyGraph();
+        }
+        
+        function showCallGraph() {
+            currentGraphType = 'call';
+            document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCallGraph();
+        }
+        
+        function renderCallGraph() {
+            const container = document.getElementById('dependency-graph');
+            const data = analysisData.call_graph;
+            
+            const nodes = new vis.DataSet(data.nodes.map(node => ({
+                ...node,
+                color: node.color || '#4299e1',
+                size: node.size || 16
+            })));
+            const edges = new vis.DataSet(data.edges);
+            
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    font: { size: 12 },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: true,
+                    arrows: { to: true }
+                },
+                physics: {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                }
+            };
+            
+            callNetwork = new vis.Network(container, { nodes, edges }, options);
+        }
+        
+        // Render complexity heatmap
+        function renderComplexityHeatmap() {
+            const container = document.getElementById('complexity-heatmap');
+            const data = analysisData.complexity_heatmap.data;
+            
+            const trace = {
+                x: data.map(d => d.name),
+                y: data.map(d => d.avg_complexity),
+                type: 'bar',
+                marker: {
+                    color: data.map(d => d.color),
+                    line: { width: 1, color: '#333' }
+                },
+                text: data.map(d => `${d.avg_complexity} (max: ${d.max_complexity})`),
+                textposition: 'auto'
+            };
+            
+            const layout = {
+                title: 'Average Complexity by File',
+                xaxis: { title: 'Files' },
+                yaxis: { title: 'Complexity Score' },
+                margin: { t: 50, r: 50, b: 100, l: 50 }
+            };
+            
+            Plotly.newPlot(container, [trace], layout, { responsive: true });
+        }
+        
+        // Render error blast radius
+        function renderErrorBlastRadius() {
+            const container = document.getElementById('error-blast-radius');
+            const data = analysisData.error_blast_radius;
+            
+            const nodes = new vis.DataSet(data.nodes);
+            const edges = new vis.DataSet(data.edges);
+            
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    font: { size: 12 },
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: true,
+                    arrows: { to: true }
+                },
+                physics: {
+                    enabled: true,
+                    stabilization: { iterations: 100 }
+                }
+            };
+            
+            errorNetwork = new vis.Network(container, { nodes, edges }, options);
+            
+            errorNetwork.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodes.get(nodeId);
+                    if (node.type === 'error') {
+                        showErrorDetails(node);
+                    }
+                }
+            });
+        }
+        
+        // Enhanced render error list with comprehensive context
+        function renderErrorList() {
+            const container = document.getElementById('error-list');
+            const errors = analysisData.errors || generateMockErrors();
+            
+            if (errors.length === 0) {
+                container.innerHTML = '<div class="loading">No issues detected! 🎉</div>';
+                return;
+            }
+            
+            container.innerHTML = errors.map(error => `
+                <div class="error-item ${error.severity}" onclick="showErrorDetails('${error.error_type}', '${error.symbol_name || ''}')">
+                    <div class="error-header">
+                        <span class="error-type">${error.error_type}</span>
+                        <span class="error-severity ${error.severity}">${error.severity}</span>
+                    </div>
+                    <div class="error-message">${error.message}</div>
+                    ${error.detailed_description ? `<div class="error-description">${error.detailed_description}</div>` : ''}
+                    <div class="error-location">📁 ${error.file_path}${error.line_number ? `:${error.line_number}` : ''}</div>
+                    ${error.symbol_name ? `<div class="error-location">🔍 Symbol: ${error.symbol_name}</div>` : ''}
+                    ${error.root_cause ? `<div class="error-root-cause">🎯 Root Cause: ${error.root_cause}</div>` : ''}
+                    ${error.impact_analysis ? `<div class="error-impact">💥 Impact: ${error.impact_analysis}</div>` : ''}
+                    
+                    ${error.suggestions && error.suggestions.length > 0 ? `
+                        <div class="error-suggestions">
+                            <strong>💡 Suggestions:</strong>
+                            ${error.suggestions.map(suggestion => `
+                                <div class="suggestion-item">
+                                    <span class="suggestion-type">${suggestion.suggestion_type}</span>: 
+                                    ${suggestion.description}
+                                    ${suggestion.confidence_score ? `<span class="confidence">(${Math.round(suggestion.confidence_score * 100)}% confidence)</span>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${error.code_context ? `
+                        <div class="code-context">
+                            <strong>📝 Code Context:</strong>
+                            <pre><code>${error.code_context.source_code}</code></pre>
+                            ${error.code_context.function_context ? `<div>Function: ${error.code_context.function_context}</div>` : ''}
+                            ${error.code_context.class_context ? `<div>Class: ${error.code_context.class_context}</div>` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="error-actions">
+                        <button class="resolve-button" ${!error.auto_fixable ? 'disabled' : ''} 
+                                onclick="event.stopPropagation(); resolveError('${error.error_type}', '${error.symbol_name || ''}')">
+                            ${error.auto_fixable ? '🔧 Auto-fix' : '📝 Manual fix required'}
+                        </button>
+                        ${error.blast_radius && error.blast_radius.length > 0 ? `
+                            <button class="info-button" onclick="event.stopPropagation(); showBlastRadius('${error.error_type}', '${error.symbol_name || ''}')">
+                                💥 Show Impact (${error.blast_radius.length} files)
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Enhanced error details modal
+        function showErrorDetails(errorType, symbolName) {
+            const error = (analysisData.errors || generateMockErrors()).find(e => 
+                e.error_type === errorType && (e.symbol_name || '') === symbolName
+            );
+            
+            if (!error) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'error-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>${error.error_type}: ${error.symbol_name || 'Unknown'}</h2>
+                        <span class="close-modal" onclick="closeModal()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="error-severity-badge ${error.severity}">${error.severity.toUpperCase()}</div>
+                        
+                        <h3>📋 Description</h3>
+                        <p>${error.detailed_description || error.message}</p>
+                        
+                        ${error.root_cause ? `
+                            <h3>🎯 Root Cause</h3>
+                            <p>${error.root_cause}</p>
+                        ` : ''}
+                        
+                        ${error.impact_analysis ? `
+                            <h3>💥 Impact Analysis</h3>
+                            <p>${error.impact_analysis}</p>
+                        ` : ''}
+                        
+                        ${error.code_context ? `
+                            <h3>📝 Code Context</h3>
+                            <div class="code-context-detail">
+                                <p><strong>File:</strong> ${error.code_context.file_path}</p>
+                                <p><strong>Line:</strong> ${error.code_context.line_number}</p>
+                                ${error.code_context.function_context ? `<p><strong>Function:</strong> ${error.code_context.function_context}</p>` : ''}
+                                ${error.code_context.class_context ? `<p><strong>Class:</strong> ${error.code_context.class_context}</p>` : ''}
+                                
+                                <h4>Source Code:</h4>
+                                <pre><code>${error.code_context.source_code}</code></pre>
+                                
+                                ${error.code_context.surrounding_lines && error.code_context.surrounding_lines.length > 0 ? `
+                                    <h4>Surrounding Lines:</h4>
+                                    <pre><code>${error.code_context.surrounding_lines.join('\n')}</code></pre>
+                                ` : ''}
+                                
+                                ${error.code_context.scope_variables && error.code_context.scope_variables.length > 0 ? `
+                                    <h4>Variables in Scope:</h4>
+                                    <p>${error.code_context.scope_variables.join(', ')}</p>
+                                ` : ''}
+                                
+                                ${error.code_context.imports_in_scope && error.code_context.imports_in_scope.length > 0 ? `
+                                    <h4>Imports in Scope:</h4>
+                                    <p>${error.code_context.imports_in_scope.join(', ')}</p>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        ${error.suggestions && error.suggestions.length > 0 ? `
+                            <h3>💡 Fix Suggestions</h3>
+                            <div class="suggestions-detail">
+                                ${error.suggestions.map((suggestion, index) => `
+                                    <div class="suggestion-detail">
+                                        <h4>${suggestion.suggestion_type.replace('_', ' ').toUpperCase()}</h4>
+                                        <p>${suggestion.description}</p>
+                                        ${suggestion.code_example ? `
+                                            <h5>Code Example:</h5>
+                                            <pre><code>${suggestion.code_example}</code></pre>
+                                        ` : ''}
+                                        <div class="suggestion-meta">
+                                            <span class="confidence">Confidence: ${Math.round(suggestion.confidence_score * 100)}%</span>
+                                            <span class="effort">Effort: ${suggestion.estimated_effort}</span>
+                                        </div>
+                                        ${suggestion.prerequisites && suggestion.prerequisites.length > 0 ? `
+                                            <div class="prerequisites">
+                                                <strong>Prerequisites:</strong> ${suggestion.prerequisites.join(', ')}
+                                            </div>
+                                        ` : ''}
+                                        ${suggestion.side_effects && suggestion.side_effects.length > 0 ? `
+                                            <div class="side-effects">
+                                                <strong>Side Effects:</strong> ${suggestion.side_effects.join(', ')}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        ${error.blast_radius && error.blast_radius.length > 0 ? `
+                            <h3>💥 Blast Radius</h3>
+                            <p>This error affects ${error.blast_radius.length} files:</p>
+                            <ul>
+                                ${error.blast_radius.map(file => `<li>${file}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                        
+                        ${error.tags && error.tags.length > 0 ? `
+                            <h3>🏷️ Tags</h3>
+                            <div class="error-tags">
+                                ${error.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="resolve-button" ${!error.auto_fixable ? 'disabled' : ''} 
+                                onclick="resolveError('${error.error_type}', '${error.symbol_name || ''}'); closeModal()">
+                            ${error.auto_fixable ? '🔧 Apply Auto-fix' : '📝 Manual fix required'}
+                        </button>
+                        <button class="cancel-button" onclick="closeModal()">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function closeModal() {
+            const modal = document.querySelector('.error-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function showBlastRadius(errorType, symbolName) {
+            const error = (analysisData.errors || generateMockErrors()).find(e => 
+                e.error_type === errorType && (e.symbol_name || '') === symbolName
+            );
+            
+            if (!error || !error.blast_radius) return;
+            
+            alert(`Blast Radius for ${errorType}:\n\nAffected files:\n${error.blast_radius.join('\n')}`);
+        }
+        
+        // Resolve individual error
+        async function resolveError(errorType, symbolName) {
+            try {
+                showToast(`Resolving ${errorType}...`, 'info');
+                
+                // Simulate API call to resolve error
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                showToast(`✅ Resolved ${errorType}`, 'success');
+                
+                // Refresh error list
+                renderErrorList();
+            } catch (error) {
+                showToast(`❌ Failed to resolve ${errorType}`, 'error');
+            }
+        }
+        
+        // Resolve all auto-fixable errors
+        async function resolveAllErrors() {
+            try {
+                showToast('Resolving all auto-fixable errors...', 'info');
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                showToast('✅ All auto-fixable errors resolved!', 'success');
+                
+                // Refresh dashboard
+                renderErrorList();
+                renderMetricsSummary();
+            } catch (error) {
+                showToast('❌ Failed to resolve some errors', 'error');
+            }
+        }
+        
+        // Show node details
+        function showNodeDetails(node) {
+            alert(`Node Details:\nType: ${node.type}\nLabel: ${node.label}\nPath: ${node.path || 'N/A'}`);
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Generate mock data for demonstration
+        function generateMockData() {
+            return {
+                dependency_graph: {
+                    nodes: [
+                        { id: 'file:main.py', label: 'main.py', type: 'file', group: 'file' },
+                        { id: 'file:utils.py', label: 'utils.py', type: 'file', group: 'file' },
+                        { id: 'file:config.py', label: 'config.py', type: 'file', group: 'file' }
+                    ],
+                    edges: [
+                        { from: 'file:main.py', to: 'file:utils.py', type: 'import' },
+                        { from: 'file:main.py', to: 'file:config.py', type: 'import' }
+                    ],
+                    layout: 'hierarchical'
+                },
+                call_graph: {
+                    nodes: [
+                        { id: 'func:main', label: 'main()', type: 'function', complexity: 5, color: '#00ff00', size: 20 },
+                        { id: 'func:process_data', label: 'process_data()', type: 'function', complexity: 15, color: '#ffff00', size: 30 },
+                        { id: 'func:validate_input', label: 'validate_input()', type: 'function', complexity: 3, color: '#00ff00', size: 16 }
+                    ],
+                    edges: [
+                        { from: 'func:main', to: 'func:process_data', type: 'calls' },
+                        { from: 'func:process_data', to: 'func:validate_input', type: 'calls' }
+                    ]
+                },
+                complexity_heatmap: {
+                    data: [
+                        { name: 'main.py', avg_complexity: 8.5, max_complexity: 15, color: '#ffff00' },
+                        { name: 'utils.py', avg_complexity: 4.2, max_complexity: 8, color: '#00ff00' },
+                        { name: 'config.py', avg_complexity: 2.1, max_complexity: 3, color: '#00ff00' }
+                    ]
+                },
+                error_blast_radius: {
+                    nodes: [
+                        { id: 'error:ImportError:0', label: 'ImportError: missing_module', type: 'error', severity: 'high', color: '#ff4444', size: 20 },
+                        { id: 'file:main.py', label: 'main.py', type: 'affected_file', color: '#ffcccc' }
+                    ],
+                    edges: [
+                        { from: 'error:ImportError:0', to: 'file:main.py', type: 'affects' }
+                    ]
+                },
+                file_tree: {
+                    name: 'project',
+                    path: '',
+                    type: 'directory',
+                    children: [
+                        {
+                            name: 'src',
+                            path: 'src',
+                            type: 'directory',
+                            children: [
+                                { name: 'main.py', path: 'src/main.py', type: 'file', lines_of_code: 150, error_count: 2, complexity_score: 8.5 },
+                                { name: 'utils.py', path: 'src/utils.py', type: 'file', lines_of_code: 80, error_count: 0, complexity_score: 4.2 }
+                            ]
+                        },
+                        { name: 'config.py', path: 'config.py', type: 'file', lines_of_code: 25, error_count: 0, complexity_score: 2.1 }
+                    ]
+                },
+                metrics_summary: {
+                    total_files: 15,
+                    total_functions: 42,
+                    total_classes: 8,
+                    total_lines: 2150,
+                    average_complexity: 6.8,
+                    max_complexity: 25,
+                    total_errors: 7,
+                    error_breakdown: {
+                        'ImportError': 3,
+                        'ComplexityError': 2,
+                        'DeadCode': 2
+                    }
+                }
+            };
+        }
+        
+        // Generate mock errors with comprehensive context
+        function generateMockErrors() {
+            return [
+                {
+                    error_type: 'ImportError',
+                    severity: 'high',
+                    message: 'Cannot resolve import: missing_module',
+                    detailed_description: 'The import "missing_module" could not be resolved. This may indicate a missing dependency, incorrect module path, or circular import.',
+                    file_path: 'src/main.py',
+                    line_number: 5,
+                    symbol_name: 'missing_module',
+                    root_cause: 'Possible missing external dependency',
+                    impact_analysis: 'This import error affects 3 dependent files',
+                    auto_fixable: true,
+                    blast_radius: ['src/main.py', 'src/utils.py', 'tests/test_main.py'],
+                    tags: ['import', 'dependency', 'resolution'],
+                    code_context: {
+                        file_path: 'src/main.py',
+                        line_number: 5,
+                        source_code: 'import missing_module',
+                        surrounding_lines: [
+                            'import os',
+                            'import sys',
+                            'from pathlib import Path',
+                            '',
+                            'import missing_module  # <-- Error here',
+                            'from utils import helper_function',
+                            '',
+                            'def main():',
+                            '    print("Hello World")',
+                            '    return 0'
+                        ],
+                        function_context: null,
+                        class_context: null,
+                        module_context: 'main',
+                        scope_variables: ['os', 'sys', 'Path'],
+                        imports_in_scope: ['os', 'sys', 'pathlib.Path', 'utils.helper_function']
+                    },
+                    suggestions: [
+                        {
+                            suggestion_type: 'auto_fix',
+                            description: 'Install missing dependency: pip install missing_module',
+                            code_example: 'pip install missing_module',
+                            confidence_score: 0.8,
+                            estimated_effort: 'low',
+                            prerequisites: ['Package manager access'],
+                            side_effects: ['New dependency added to project']
+                        },
+                        {
+                            suggestion_type: 'manual_fix',
+                            description: 'Check if "missing_module" is the correct module name',
+                            confidence_score: 0.6,
+                            estimated_effort: 'medium',
+                            prerequisites: ['Documentation review'],
+                            side_effects: []
+                        }
+                    ]
+                },
+                {
+                    error_type: 'ComplexityError',
+                    severity: 'medium',
+                    message: 'High cyclomatic complexity: 25',
+                    detailed_description: 'The function "complex_function" has a cyclomatic complexity of 25, which exceeds the recommended threshold of 20. High complexity makes code harder to understand, test, and maintain.',
+                    file_path: 'src/processor.py',
+                    line_number: 45,
+                    symbol_name: 'complex_function',
+                    root_cause: 'Function contains too many decision points (if/else, loops, etc.)',
+                    impact_analysis: 'High complexity increases maintenance cost and bug probability',
+                    auto_fixable: false,
+                    blast_radius: ['src/processor.py', 'src/main.py'],
+                    tags: ['complexity', 'maintainability', 'refactor'],
+                    code_context: {
+                        file_path: 'src/processor.py',
+                        line_number: 45,
+                        source_code: 'def complex_function(data, options, config):',
+                        surrounding_lines: [
+                            'class DataProcessor:',
+                            '    def __init__(self, config):',
+                            '        self.config = config',
+                            '    ',
+                            '    def complex_function(data, options, config):  # <-- High complexity',
+                            '        if data is None:',
+                            '            return None',
+                            '        ',
+                            '        for item in data:',
+                            '            if item.type == "A":'
+                        ],
+                        function_context: 'complex_function',
+                        class_context: 'DataProcessor',
+                        module_context: 'processor',
+                        scope_variables: ['data', 'options', 'config', 'item'],
+                        imports_in_scope: ['typing', 'dataclasses', 'json']
+                    },
+                    suggestions: [
+                        {
+                            suggestion_type: 'refactor',
+                            description: 'Break down "complex_function" into smaller functions',
+                            code_example: `
+# Example refactoring:
+def complex_function(data, options, config):
+    validated_data = validate_data(data)
+    processed_data = process_data_items(validated_data, options)
+    return format_results(processed_data, config)
+
+def validate_data(data):
+    # Extract validation logic
+    pass
+
+def process_data_items(data, options):
+    # Extract processing logic
+    pass
+
+def format_results(data, config):
+    # Extract formatting logic
+    pass`,
+                            confidence_score: 0.8,
+                            estimated_effort: 'high',
+                            prerequisites: ['Understanding of function logic', 'Test coverage'],
+                            side_effects: ['Multiple new functions created', 'Potential API changes']
+                        },
+                        {
+                            suggestion_type: 'documentation',
+                            description: 'Add comprehensive documentation to "complex_function"',
+                            confidence_score: 0.9,
+                            estimated_effort: 'medium',
+                            prerequisites: ['Understanding of function behavior'],
+                            side_effects: ['Improved code readability']
+                        }
+                    ]
+                },
+                {
+                    error_type: 'DeadCode',
+                    severity: 'low',
+                    message: 'Unused function detected',
+                    detailed_description: 'The function "unused_helper" is defined but never called. This may indicate dead code that can be removed.',
+                    file_path: 'src/utils.py',
+                    line_number: 120,
+                    symbol_name: 'unused_helper',
+                    root_cause: 'Function is defined but never called',
+                    impact_analysis: 'Removing this function will reduce code complexity and maintenance burden',
+                    auto_fixable: true,
+                    blast_radius: ['src/utils.py'],
+                    tags: ['dead_code', 'unused', 'function'],
+                    code_context: {
+                        file_path: 'src/utils.py',
+                        line_number: 120,
+                        source_code: 'def unused_helper(value):',
+                        surrounding_lines: [
+                            'def active_helper(data):',
+                            '    """This function is actively used."""',
+                            '    return process_data(data)',
+                            '',
+                            'def unused_helper(value):  # <-- Never called',
+                            '    """This function is never used."""',
+                            '    return value * 2',
+                            '',
+                            'def another_active_function():',
+                            '    return "active"'
+                        ],
+                        function_context: 'unused_helper',
+                        class_context: null,
+                        module_context: 'utils',
+                        scope_variables: ['value'],
+                        imports_in_scope: ['typing', 'functools']
+                    },
+                    suggestions: [
+                        {
+                            suggestion_type: 'auto_fix',
+                            description: 'Remove unused function "unused_helper"',
+                            confidence_score: 0.9,
+                            estimated_effort: 'low',
+                            prerequisites: [],
+                            side_effects: ['Function will be permanently deleted']
+                        },
+                        {
+                            suggestion_type: 'manual_fix',
+                            description: 'Add usage of function "unused_helper" if it\'s needed',
+                            confidence_score: 0.7,
+                            estimated_effort: 'medium',
+                            prerequisites: ['Understanding of intended function purpose'],
+                            side_effects: ['New function calls added']
+                        }
+                    ]
+                },
+                {
+                    error_type: 'SecurityIssue',
+                    severity: 'high',
+                    message: 'Use of eval() can be dangerous',
+                    detailed_description: 'Potential security vulnerability detected: Use of eval() can be dangerous. The eval() function can execute arbitrary code and should be avoided.',
+                    file_path: 'src/config.py',
+                    line_number: 78,
+                    symbol_name: null,
+                    root_cause: 'Use of potentially dangerous function',
+                    impact_analysis: 'Security vulnerability that could allow code injection attacks',
+                    auto_fixable: false,
+                    blast_radius: ['src/config.py', 'src/main.py'],
+                    tags: ['security', 'vulnerability', 'dangerous_function'],
+                    code_context: {
+                        file_path: 'src/config.py',
+                        line_number: 78,
+                        source_code: 'result = eval(user_input)',
+                        surrounding_lines: [
+                            'def parse_config(user_input):',
+                            '    """Parse user configuration input."""',
+                            '    try:',
+                            '        # SECURITY ISSUE: eval is dangerous',
+                            '        result = eval(user_input)  # <-- Security vulnerability',
+                            '        return result',
+                            '    except Exception as e:',
+                            '        logger.error(f"Config parse error: {e}")',
+                            '        return None',
+                            ''
+                        ],
+                        function_context: 'parse_config',
+                        class_context: null,
+                        module_context: 'config',
+                        scope_variables: ['user_input', 'result'],
+                        imports_in_scope: ['json', 'logging', 'ast']
+                    },
+                    suggestions: [
+                        {
+                            suggestion_type: 'manual_fix',
+                            description: 'Replace eval() with safer alternatives like ast.literal_eval() or json.loads()',
+                            code_example: `
+# Safe alternatives:
+import ast
+import json
+
+# For literal expressions:
+result = ast.literal_eval(user_input)
+
+# For JSON data:
+result = json.loads(user_input)
+
+# For custom parsing:
+result = parse_safely(user_input)`,
+                            confidence_score: 0.9,
+                            estimated_effort: 'medium',
+                            prerequisites: ['Understanding of input format', 'Security review'],
+                            side_effects: ['Improved security', 'Possible input format restrictions']
+                        }
+                    ]
+                }
+            ];
+        }
+    </script>
+</body>
+</html>

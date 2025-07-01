@@ -1,0 +1,54 @@
+{
+  "analysis": {
+    "complexity_threshold": 20,
+    "max_depth": 5,
+    "detect_dead_code": true,
+    "detect_import_errors": true,
+    "detect_complexity_issues": true,
+    "detect_configuration_errors": false
+  },
+  "visualization": {
+    "color_palette": {
+      "low_complexity": "#00ff00",
+      "medium_complexity": "#ffff00",
+      "high_complexity": "#ff8800",
+      "critical_complexity": "#ff0000",
+      "error_critical": "#ff0000",
+      "error_high": "#ff4444",
+      "error_medium": "#ff8800",
+      "error_low": "#ffff00"
+    },
+    "node_sizes": {
+      "min_size": 10,
+      "max_size": 50,
+      "complexity_multiplier": 2
+    },
+    "layout_options": {
+      "dependency_graph": "hierarchical",
+      "call_graph": "force",
+      "error_graph": "force"
+    }
+  },
+  "api": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "debug": true,
+    "cors_enabled": true
+  },
+  "error_resolution": {
+    "auto_fix_enabled": true,
+    "backup_before_fix": true,
+    "max_fixes_per_batch": 10,
+    "supported_fix_types": [
+      "ImportError",
+      "DeadCode"
+    ]
+  },
+  "file_tree": {
+    "max_display_depth": 5,
+    "show_hidden_files": false,
+    "show_metrics_in_tree": true,
+    "collapse_large_directories": true
+  }
+}
+
