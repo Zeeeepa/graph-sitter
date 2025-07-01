@@ -24,7 +24,14 @@ from typing_extensions import TypeVar, deprecated
 
 from graph_sitter._proxy import proxy_property
 from graph_sitter.ai.client import get_openai_client
-from graph_sitter.codebase.codebase_ai import generate_system_prompt, generate_tools
+from graph_sitter.ai.client_factory import AIClientFactory
+from graph_sitter.codebase.codebase_ai import (
+    generate_system_prompt, 
+    generate_tools,
+    codebase_ai,
+    codebase_ai_sync,
+    AIResponse
+)
 from graph_sitter.codebase.codebase_context import (
     GLOBAL_FILE_IGNORE_LIST,
     CodebaseContext,
@@ -1193,29 +1200,94 @@ class Codebase(
             self._ai_helper = get_openai_client(key=self.ctx.secrets.openai_api_key)
         return self._ai_helper
 
-    def ai(
+    def set_ai_key(self, key: str) -> None:
+        """Sets the OpenAI key for the current Codebase instance."""
+        # Reset the AI client
+        self._ai_helper = None
+
+        # Set the AI key
+        self.ctx.secrets.openai_api_key = key
+
+    def set_codegen_credentials(self, org_id: str, token: str) -> None:
+        """Sets the Codegen SDK credentials for the current Codebase instance.
+        
+        Args:
+            org_id: Codegen organization ID
+            token: Codegen API token
+        """
+        # Reset the AI client
+        self._ai_helper = None
+        
+        # Set the Codegen credentials
+        self.ctx.secrets.codegen_org_id = org_id
+        self.ctx.secrets.codegen_token = token
+
+    async def ai(
+        self,
+        prompt: str,
+        target: Editable | None = None,
+        context: Editable | list[Editable] | dict[str, Editable | list[Editable]] | None = None,
+        model: str = "gpt-4o",
+        include_context: bool = True,
+        max_context_tokens: int = 8000
+    ) -> AIResponse:
+        """Enhanced async AI method with full context awareness.
+        
+        This is the primary AI method that leverages both Codegen SDK and OpenAI,
+        with automatic context gathering from GraphSitter analysis.
+        
+        Args:
+            prompt: The text prompt to send to the AI
+            target: Optional editable object that provides the main focus
+            context: Additional context to help inform the AI's response
+            model: The AI model to use for generating the response
+            include_context: Whether to automatically gather rich context
+            max_context_tokens: Maximum tokens to use for context
+            
+        Returns:
+            AIResponse object with structured response and metadata
+        """
+        return await codebase_ai(
+            self, prompt, target, context, model, include_context, max_context_tokens
+        )
+
+    def ai_sync(
+        self,
+        prompt: str,
+        target: Editable | None = None,
+        context: Editable | list[Editable] | dict[str, Editable | list[Editable]] | None = None,
+        model: str = "gpt-4o",
+        include_context: bool = True,
+        max_context_tokens: int = 8000
+    ) -> AIResponse:
+        """Sync convenience method for non-async contexts.
+        
+        Args:
+            prompt: The text prompt to send to the AI
+            target: Optional editable object that provides the main focus
+            context: Additional context to help inform the AI's response
+            model: The AI model to use for generating the response
+            include_context: Whether to automatically gather rich context
+            max_context_tokens: Maximum tokens to use for context
+            
+        Returns:
+            AIResponse object with structured response and metadata
+        """
+        return codebase_ai_sync(
+            self, prompt, target, context, model, include_context, max_context_tokens
+        )
+
+    def ai_legacy(
         self,
         prompt: str,
         target: Editable | None = None,
         context: Editable | list[Editable] | dict[str, Editable | list[Editable]] | None = None,
         model: str = "gpt-4o",
     ) -> str:
-        """Generates a response from the AI based on the provided prompt, target, and context.
-
-        A method that sends a prompt to the AI client along with optional target and context information to generate a response.
-        Used for tasks like code generation, refactoring suggestions, and documentation improvements.
-
-        Args:
-            prompt (str): The text prompt to send to the AI.
-            target (Editable | None): An optional editable object (like a function, class, etc.) that provides the main focus for the AI's response.
-            context (Editable | list[Editable] | dict[str, Editable | list[Editable]] | None): Additional context to help inform the AI's response.
-            model (str): The AI model to use for generating the response. Defaults to "gpt-4o".
-
-        Returns:
-            str: The generated response from the AI.
-
-        Raises:
-            MaxAIRequestsError: If the maximum number of allowed AI requests (default 150) has been exceeded.
+        """Legacy AI method for backward compatibility.
+        
+        This method maintains the original behavior for existing code.
+        For new code, use the async ai() method or ai_sync() method.
         """
         # Check max transactions
         logger.info("Creating call to OpenAI...")
@@ -1281,14 +1353,6 @@ class Codebase(
         response_answer = codecs.decode(response_answer, "unicode_escape")
         logger.info(f"OpenAI response: {response_answer}")
         return response_answer
-
-    def set_ai_key(self, key: str) -> None:
-        """Sets the OpenAI key for the current Codebase instance."""
-        # Reset the AI client
-        self._ai_helper = None
-
-        # Set the AI key
-        self.ctx.secrets.openai_api_key = key
 
     def find_by_span(self, span: Span) -> list[Editable]:
         """Finds editable objects that overlap with the given source code span.
