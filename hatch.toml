@@ -53,7 +53,8 @@ env = [
     "darwin",
   ] },
 ]
-cythonize_kwargs = { annotate = true, nthreads = 16, exclude_failures = false, cache = true }
+# Optimize Cython compilation for better performance
+cythonize_kwargs = { annotate = true, nthreads = 8, exclude_failures = false, cache = true }
 compiled_sdist = true
 compile_py = false
 compile_parallel = true
