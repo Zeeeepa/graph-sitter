@@ -28,6 +28,10 @@ class ChatAgent:
                 - top_k: Top-k sampling parameter (>= 1)
                 - max_tokens: Maximum number of tokens to generate
         """
+        # Parameter validation
+        if codebase is None:
+            raise ValueError("codebase parameter is required and cannot be None")
+        
         self.codebase = codebase
         self.agent = create_chat_agent(self.codebase, model_provider=model_provider, model_name=model_name, memory=memory, additional_tools=tools, **kwargs)
 
@@ -41,6 +45,10 @@ class ChatAgent:
         Returns:
             The agent's response
         """
+        # Parameter validation
+        if not prompt or not prompt.strip():
+            raise ValueError("prompt parameter is required and cannot be empty")
+        
         if thread_id is None:
             thread_id = str(uuid4())
 
@@ -69,6 +77,10 @@ class ChatAgent:
         Returns:
             A tuple of (response_content, thread_id) to allow continued conversation
         """
+        # Parameter validation
+        if not prompt or not prompt.strip():
+            raise ValueError("prompt parameter is required and cannot be empty")
+        
         if thread_id is None:
             thread_id = str(uuid4())
             print(f"Starting new chat thread: {thread_id}")
