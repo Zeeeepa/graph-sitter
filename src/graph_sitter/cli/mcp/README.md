@@ -1,6 +1,6 @@
-# Graph-sitter MCP server
+# Codegen MCP server
 
-A MCP server implementation that provides tools and resources for using and working with the graph_sitter.cli and SDK, enabling AI agents to iterate quickly on writing codemods with the codegen sdk.
+A MCP server implementation that provides tools and resources for using and working with the Codegen CLI and SDK, enabling AI agents to iterate quickly on writing codemods with the codegen sdk.
 
 ### Dependencies
 
@@ -17,11 +17,11 @@ Add this to your `cline_mcp_settings.json` file to get started:
 ```
 {
   "mcpServers": {
-    "graph_sitter.cli": {
+    "codegen-cli": {
         "command": "uv",
         "args": [
             "--directory",
-            "<path to codegen installation>/codegen-sdk/src/graph_sitter.cli/mcp",
+            "<path to codegen installation>/codegen-sdk/src/codegen/cli/mcp",
             "run",
             "server.py"
         ]
@@ -36,5 +36,5 @@ Under the `Settings` > `Feature` > `MCP Servers` section, click "Add New MCP Ser
 ```
 Name: codegen-mcp
 Type: Command
-Command: uv --directory <path to codegen installation>/codegen-sdk/src/graph_sitter.cli/mcp run server.py
+Command: uv --directory <path to codegen installation>/codegen-sdk/src/codegen/cli/mcp run server.py
 ```

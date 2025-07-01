@@ -10,8 +10,10 @@ version_tuple = {version_tuple!r}
 from graph_sitter.cli.sdk.decorator import function
 from graph_sitter.core.codebase import Codebase
 """
+
 [metadata]
 allow-direct-references = true
+
 [envs.hatch-build]
 installer = "uv"
 
@@ -25,6 +27,9 @@ matrix.tool.scripts = [
     "uv",
   ] },
 ]
+
+[envs.build.scripts]
+path = "src/graph_sitter/gsbuild/build.py"
 
 [version]
 source = "vcs"
@@ -99,7 +104,8 @@ Playground = "https://www.codegen.sh/"
 
 [build.targets.wheel.hooks.custom]
 enable-by-default = false
-path = "src/gsbuild/build.py"
+path = "src/graph_sitter/gsbuild/build.py"
 require-runtime-dependencies = true
+
 [envs.default]
 installer = "uv"

@@ -8,6 +8,7 @@ def example_codeowners_file_contents() -> str:
 
 /src/codemods   @user-a
 /src/codegen    @org/team1
+/src/graph_sitter/adapters/codemods   @user-a
 """
 
 
@@ -15,7 +16,7 @@ def test_codebase_codeowners(codebase, example_codeowners_file_contents):
     codebase.ctx.codeowners_parser = CodeOwners(example_codeowners_file_contents)
 
     assert isinstance(codebase.codeowners, list)
-    assert len(codebase.codeowners) == 2
+    assert len(codebase.codeowners) == 3
     codeowners_by_name = {codeowner.name: codeowner for codeowner in codebase.codeowners}
     assert codeowners_by_name["@user-a"].owner_type == "USERNAME"
     assert codeowners_by_name["@org/team1"].owner_type == "TEAM"
@@ -25,3 +26,4 @@ def test_codebase_codeowners(codebase, example_codeowners_file_contents):
 
     for _file in codeowners_by_name["@user-a"]:
         assert _file.filepath.startswith("src/codemods")
+        assert _file.filepath.startswith("src/graph_sitter/adapters/codemods")
