@@ -12,7 +12,7 @@ import uvicorn
 from rich.logging import RichHandler
 from rich.panel import Panel
 
-from contexten.extensions.events.codegen_app import CodegenApp
+from contexten.extensions.events.contexten_app import ContextenApp
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
@@ -34,17 +34,17 @@ def setup_logging(debug: bool):
     )
 
 
-def load_app_from_file(file_path: Path) -> CodegenApp:
-    """Load a CodegenApp instance from a Python file.
+def load_app_from_file(file_path: Path) -> ContextenApp:
+    """Load a ContextenApp instance from a Python file.
 
     Args:
-        file_path: Path to the Python file containing the CodegenApp
+        file_path: Path to the Python file containing the ContextenApp
 
     Returns:
-        The CodegenApp instance from the file
+        The ContextenApp instance from the file
 
     Raises:
-        click.ClickException: If no CodegenApp instance is found
+        click.ClickException: If no ContextenApp instance is found
     """
     try:
         # Import the module from file path
@@ -56,13 +56,13 @@ def load_app_from_file(file_path: Path) -> CodegenApp:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        # Find CodegenApp instance
+        # Find ContextenApp instance
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
-            if isinstance(attr, CodegenApp):
+            if isinstance(attr, ContextenApp):
                 return attr
 
-        msg = f"No CodegenApp instance found in {file_path}"
+        msg = f"No ContextenApp instance found in {file_path}"
         raise click.ClickException(msg)
 
     except Exception as e:
@@ -81,7 +81,7 @@ def create_app_module(file_path: Path) -> str:
     module_name = f"codegen_app_{file_path.stem}"
     module_code = f"""
 from {file_path.stem} import app
-app = app.app  # Get the FastAPI instance from the CodegenApp
+app = app.app  # Get the FastAPI instance from the ContextenApp
 """
     module_path = file_path.parent / f"{module_name}.py"
     module_path.write_text(module_code)
@@ -147,9 +147,9 @@ def find_available_port(start_port: int = 8000, max_tries: int = 100) -> int:
 @click.option("--workers", default=1, help="Number of worker processes")
 @click.option("--repos", multiple=True, help="GitHub repositories to analyze")
 def serve_command(file: Path, host: str = "127.0.0.1", port: int = 8000, debug: bool = False, public: bool = False, workers: int = 4, repos: list[str] = []):
-    """Run a CodegenApp server from a Python file.
+    """Run a ContextenApp server from a Python file.
 
-    FILE is the path to a Python file containing a CodegenApp instance
+    FILE is the path to a Python file containing a ContextenApp instance
     """
     # Configure rich logging
     setup_logging(debug)
@@ -173,7 +173,7 @@ def serve_command(file: Path, host: str = "127.0.0.1", port: int = 8000, debug: 
         # Print server info
         rich.print(
             Panel(
-                f"[green]Starting CodegenApp server[/green]\n"
+                f"[green]Starting ContextenApp server[/green]\n"
                 f"[dim]File:[/dim] {file}\n"
                 f"[dim]URL:[/dim] http://{host}:{port}\n"
                 f"[dim]Workers:[/dim] {workers}\n"
