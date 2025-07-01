@@ -1,0 +1,68 @@
+{
+  "total_implementations": 6,
+  "implementations": [
+    "Dead code cleanup: 10 files, 33 imports",
+    "Enhanced error handling for linear_agent",
+    "Enhanced error handling for github_agent",
+    "Enhanced error handling for slack_agent",
+    "Enhanced error handling for dashboard_app",
+    "Enhanced error handling for orchestrator"
+  ],
+  "websocket_active": false,
+  "error_stats": {
+    "total_errors": 0,
+    "retry_attempts": 0,
+    "successful_retries": 0
+  },
+  "cleanup_stats": {
+    "removed_files": 10,
+    "cleaned_imports": 33,
+    "files_list": [
+      "src/contexten/agents/tools/link_annotation.py",
+      "src/contexten/agents/tools/view_file.py",
+      "src/contexten/agents/langchain/utils/custom_tool_node.py",
+      "src/contexten/extensions/linear/workflow_automation.py",
+      "src/contexten/extensions/open_evolve/core/interfaces.py",
+      "src/contexten/cli/api/client.py",
+      "src/contexten/agents/tools/edit_file.py",
+      "src/contexten/agents/tools/move_symbol.py",
+      "src/contexten/cli/commands/logout/main.py",
+      "src/contexten/extensions/linear/config.py"
+    ],
+    "imports_list": [
+      "src/contexten/extensions/contexten_app.py: import json",
+      "src/contexten/dashboard/prefect_dashboard.py: import asyncio",
+      "src/contexten/dashboard/app.py: import hashlib",
+      "src/contexten/dashboard/orchestrator_integration.py: import json",
+      "src/contexten/dashboard/flow_manager.py: import asyncio",
+      "src/contexten/dashboard/workflow_automation.py: import json",
+      "src/contexten/dashboard/advanced_analytics.py: import json",
+      "src/contexten/cli/auth/login.py: import rich_click as click",
+      "src/contexten/cli/commands/deploy/main.py: import rich_click as click",
+      "src/contexten/cli/commands/expert/main.py: import rich_click as click",
+      "src/contexten/cli/commands/profile/main.py: import rich_click as click",
+      "src/contexten/cli/commands/logout/main.py: import rich_click as click",
+      "src/contexten/cli/commands/run/main.py: import rich_click as click",
+      "src/contexten/cli/commands/run/run_cloud.py: import rich_click as click",
+      "src/contexten/cli/commands/create/main.py: import rich_click as click",
+      "src/contexten/cli/commands/agent/main.py: import rich_click as click",
+      "src/contexten/cli/commands/serve/main.py: import rich_click as click",
+      "src/contexten/cli/commands/login/main.py: import rich_click as click",
+      "src/contexten/cli/commands/run_on_pr/main.py: import rich_click as click",
+      "src/contexten/extensions/linear/enhanced_agent.py: import json",
+      "src/contexten/extensions/prefect/client.py: import asyncio",
+      "src/contexten/extensions/prefect/tasks.py: import json",
+      "src/contexten/extensions/prefect/tasks.py: import logging",
+      "src/contexten/extensions/prefect/workflows.py: import asyncio",
+      "src/contexten/extensions/open_evolve/app.py: import gradio as gr",
+      "src/contexten/extensions/github/enhanced_agent.py: import json",
+      "src/contexten/extensions/open_evolve/database_agent/agent.py: import uuid",
+      "src/contexten/extensions/open_evolve/task_manager/agent.py: import uuid",
+      "src/contexten/extensions/linear/events/manager.py: import asyncio",
+      "src/contexten/extensions/linear/webhook/processor.py: import hashlib",
+      "src/contexten/extensions/linear/webhook/processor.py: import hmac",
+      "src/contexten/extensions/linear/webhook/processor.py: import json",
+      "src/contexten/extensions/linear/workflow/automation.py: import asyncio"
+    ]
+  }
+}

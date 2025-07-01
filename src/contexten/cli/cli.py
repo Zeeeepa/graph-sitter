@@ -1,56 +1,93 @@
 import rich_click as click
 from rich.traceback import install
 
+# Import contexten-specific commands
 from contexten.cli.commands.agent.main import agent_command
-from graph_sitter.cli.commands.config.main import config_command
-from graph_sitter.cli.commands.create.main import create_command
-from contexten.cli.commands.deploy.main import deploy_command
-from contexten.cli.commands.expert.main import expert_command
-from graph_sitter.cli.commands.init.main import init_command
-from graph_sitter.cli.commands.list.main import list_command
-from contexten.cli.commands.login.main import login_command
-from contexten.cli.commands.logout.main import logout_command
-from graph_sitter.cli.commands.lsp.lsp import lsp_command
-from graph_sitter.cli.commands.notebook.main import notebook_command
-from contexten.cli.commands.profile.main import profile_command
-from graph_sitter.cli.commands.reset.main import reset_command
-from graph_sitter.cli.commands.run.main import run_command
-from contexten.cli.commands.run_on_pr.main import run_on_pr_command
-from contexten.cli.commands.serve.main import serve_command
-from graph_sitter.cli.commands.start.main import start_command
-from graph_sitter.cli.commands.style_debug.main import style_debug_command
-from graph_sitter.cli.commands.update.main import update_command
+
+# Import available graph_sitter commands
+try:
+    from graph_sitter.cli.commands.config.main import config_command
+except ImportError:
+    config_command = None
+
+try:
+    from graph_sitter.cli.commands.init.main import init_command
+except ImportError:
+    init_command = None
+
+try:
+    from graph_sitter.cli.commands.list.main import list_command
+except ImportError:
+    list_command = None
+
+try:
+    from graph_sitter.cli.commands.lsp.lsp import lsp_command
+except ImportError:
+    lsp_command = None
+
+try:
+    from graph_sitter.cli.commands.notebook.main import notebook_command
+except ImportError:
+    notebook_command = None
+
+try:
+    from graph_sitter.cli.commands.reset.main import reset_command
+except ImportError:
+    reset_command = None
+
+try:
+    from graph_sitter.cli.commands.run.main import run_command
+except ImportError:
+    run_command = None
+
+try:
+    from graph_sitter.cli.commands.start.main import start_command
+except ImportError:
+    start_command = None
+
+try:
+    from graph_sitter.cli.commands.style_debug.main import style_debug_command
+except ImportError:
+    style_debug_command = None
+
+try:
+    from graph_sitter.cli.commands.update.main import update_command
+except ImportError:
+    update_command = None
 
 click.rich_click.USE_RICH_MARKUP = True
 install(show_locals=True)
 
 
 @click.group()
-@click.version_option(prog_name="codegen", message="%(version)s")
+@click.version_option(prog_name="contexten", package_name="graph-sitter", message="%(version)s")
 def main():
-    """Codegen CLI - Transform your code with AI."""
+    """Contexten CLI - AI agent orchestrator."""
 
 
-# Wrap commands with error handler
+# Add available commands
 main.add_command(agent_command)
-main.add_command(init_command)
-main.add_command(logout_command)
-main.add_command(login_command)
-main.add_command(run_command)
-main.add_command(profile_command)
-main.add_command(create_command)
-main.add_command(expert_command)
-main.add_command(list_command)
-main.add_command(deploy_command)
-main.add_command(style_debug_command)
-main.add_command(run_on_pr_command)
-main.add_command(notebook_command)
-main.add_command(reset_command)
-main.add_command(update_command)
-main.add_command(config_command)
-main.add_command(lsp_command)
-main.add_command(serve_command)
-main.add_command(start_command)
+
+if init_command:
+    main.add_command(init_command)
+if run_command:
+    main.add_command(run_command)
+if list_command:
+    main.add_command(list_command)
+if style_debug_command:
+    main.add_command(style_debug_command)
+if notebook_command:
+    main.add_command(notebook_command)
+if reset_command:
+    main.add_command(reset_command)
+if update_command:
+    main.add_command(update_command)
+if config_command:
+    main.add_command(config_command)
+if lsp_command:
+    main.add_command(lsp_command)
+if start_command:
+    main.add_command(start_command)
 
 
 if __name__ == "__main__":

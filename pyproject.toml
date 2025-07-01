@@ -70,6 +70,22 @@ dependencies = [
   "datasets",
   "colorlog>=6.9.0",
   "codegen-sdk-pink>=0.1.0",
+  "prefect>=3.0.0",
+  "prefect[kubernetes]>=3.0.0",
+  # Contexten agent dependencies
+  "langchain>=0.3.0",
+  "langchain-community>=0.3.0",
+  "langchain-openai>=0.2.0",
+  "langchain-anthropic>=0.3.0",
+  "langchain-xai>=0.1.0",
+  "langgraph>=0.2.0",
+  "slack-sdk>=3.33.0",
+  "anthropic>=0.40.0",
+  # Additional dashboard dependencies
+  "authlib>=1.3.0",
+  "itsdangerous>=2.1.0",
+  "jinja2>=3.1.0",
+  "python-multipart>=0.0.12",
 ]
 
 # renovate: datasource=python-version depName=python
@@ -109,7 +125,9 @@ keywords = [
   "code generation",
 ]
 [project.scripts]
-gs = "graph_sitter.cli.cli:main"
+gs = "graph_sitter.gscli.cli:main"
+contexten = "contexten.cli.cli:main"
+contexten-dashboard = "contexten.cli.commands.dashboard.main:dashboard_command"
 
 [project.optional-dependencies]
 pink = ["codegen-sdk-pink>=0.1.0"]
