@@ -1,3 +1,4 @@
+
 from abc import ABC, abstractmethod
 from functools import cached_property
 
@@ -12,7 +13,6 @@ from graph_sitter.shared.decorators.docs import noapidoc
 from graph_sitter.types import JSON
 
 BLACKLIST = ["json", "G", "viz", "autocommit_cache", "ts_node", "symbol_usages", "usages"]
-
 
 @noapidoc
 class JSONable(ABC):

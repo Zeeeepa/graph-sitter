@@ -1,17 +1,16 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from __future__ import annotations
 from graph_sitter.compiled.autocommit import reader
 from graph_sitter.core.statements.block_statement import BlockStatement
+from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 from graph_sitter.python.interfaces.has_block import PyHasBlock
 from graph_sitter.shared.decorators.docs import py_apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 
 Parent = TypeVar("Parent", bound="PyCodeBlock")
-
 
 @py_apidoc
 class PyBlockStatement(BlockStatement[Parent], PyHasBlock, Generic[Parent]):

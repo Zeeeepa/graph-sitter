@@ -1,3 +1,4 @@
+
 from abc import abstractmethod
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Self, final, override
@@ -10,11 +11,10 @@ from graph_sitter.core.expressions import Expression
 from graph_sitter.core.interfaces.chainable import Chainable
 from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.shared.decorators.docs import noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.importable import Importable
-
 
 class IWrapper(Chainable, Editable):
     """Any expression or statement that contains another expression.

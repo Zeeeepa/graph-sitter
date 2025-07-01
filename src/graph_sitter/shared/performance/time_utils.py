@@ -1,7 +1,7 @@
+
 import datetime as dt
 
 import humanize
-
 
 def humanize_duration(seconds: float) -> str:
     """Converts a duration in seconds to a human-readable string.

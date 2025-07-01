@@ -1,44 +1,42 @@
-from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Generator, Sequence
 from typing import TYPE_CHECKING, Generic, Self, override
-
 from typing_extensions import TypeVar
 
+from __future__ import annotations
 from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.compiled.sort import sort_editables
 from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import reader, writer
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.class_definition import Class
 from graph_sitter.core.detached_symbols.code_block import CodeBlock
 from graph_sitter.core.detached_symbols.decorator import Decorator
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
 from graph_sitter.core.detached_symbols.parameter import Parameter
+from graph_sitter.core.export import Export
 from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.file import File
+from graph_sitter.core.import_resolution import Import, WildcardImport
 from graph_sitter.core.interfaces.callable import Callable
 from graph_sitter.core.interfaces.chainable import Chainable
 from graph_sitter.core.interfaces.has_block import HasBlock
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.interfaces.supports_generic import SupportsGenerics
+from graph_sitter.core.statements.return_statement import ReturnStatement
 from graph_sitter.core.statements.statement import StatementType
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import SymbolType
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Sequence
-
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.export import Export
-    from graph_sitter.core.file import File
-    from graph_sitter.core.import_resolution import Import, WildcardImport
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.statements.return_statement import ReturnStatement
-    from graph_sitter.core.symbol import Symbol
-
 
 TDecorator = TypeVar("TDecorator", bound="Decorator", default=Decorator)
 TCodeBlock = TypeVar("TCodeBlock", bound="CodeBlock", default=CodeBlock)
 TParameter = TypeVar("TParameter", bound="Parameter", default=Parameter)
 TType = TypeVar("TType", bound="Type", default=Type)
-
 
 @apidoc
 class Function(
@@ -112,7 +110,6 @@ class Function(
         Returns:
             bool: True if the function is a method within a class, False otherwise.
         """
-        from graph_sitter.core.class_definition import Class
 
         return isinstance(self.parent.parent.parent, Class)
 
@@ -142,7 +139,6 @@ class Function(
     @noapidoc
     @reader
     def resolve_name(self, name: str, start_byte: int | None = None, strict: bool = True) -> Generator[Symbol | Import | WildcardImport]:
-        from graph_sitter.core.class_definition import Class
 
         for symbol in self.valid_symbol_names:
             if symbol.name == name and (start_byte is None or (symbol.start_byte if isinstance(symbol, Class | Function) else symbol.end_byte) <= start_byte):

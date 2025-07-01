@@ -1,6 +1,7 @@
+
+from rich.panel import Panel
 import rich
 import rich_click as click
-from rich.panel import Panel
 
 from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.commands.start.docker_container import DockerContainer
@@ -9,7 +10,6 @@ from graph_sitter.cli.rich.codeblocks import format_command
 from graph_sitter.cli.rich.spinners import create_spinner
 from graph_sitter.runner.clients.docker_client import DockerClient
 from graph_sitter.runner.enums.warmup_state import WarmupState
-
 
 def run_daemon(session: CliSession, function, diff_preview: int | None = None):
     """Run a function on the cloud service.
@@ -63,7 +63,6 @@ def run_daemon(session: CliSession, function, diff_preview: int | None = None):
         except ServerError as e:
             status.stop()
             raise click.ClickException(str(e))
-
 
 def _get_docker_client(session: CliSession) -> DockerClient:
     repo_name = session.config.repository.name

@@ -1,3 +1,4 @@
+
 from tree_sitter import Node as TSNode
 
 from graph_sitter.codebase.node_classes.node_classes import NodeClasses
@@ -38,12 +39,10 @@ from graph_sitter.python.statements.import_statement import PyImportStatement
 from graph_sitter.python.statements.match_case import PyMatchCase
 from graph_sitter.python.statements.with_statement import WithStatement
 
-
 def parse_subscript(node: TSNode, file_node_id, ctx, parent):
     if (node.prev_named_sibling and node.prev_named_sibling.text.decode("utf-8") == "TypeAlias") or isinstance(parent, Type):
         return PyGenericType(node, file_node_id, ctx, parent)
     return SubscriptExpression(node, file_node_id, ctx, parent)
-
 
 PyExpressionMap = {
     "string": PyString,

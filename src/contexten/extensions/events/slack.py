@@ -1,3 +1,4 @@
+
 import logging
 import os
 
@@ -9,7 +10,6 @@ from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
-
 
 class Slack(EventHandlerManagerProtocol):
     _client: WebClient | None = None

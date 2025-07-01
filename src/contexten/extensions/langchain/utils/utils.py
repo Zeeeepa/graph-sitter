@@ -1,5 +1,5 @@
-from langchain_core.language_models import LLM
 
+from langchain_core.language_models import LLM
 
 def get_max_model_input_tokens(llm: LLM) -> int:
     """Get the maximum input tokens for the current model.

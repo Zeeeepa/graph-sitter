@@ -1,8 +1,9 @@
-import datetime
+
 from typing import Optional
+import datetime
+import traceback
 
 from langsmith import Client
-
 
 def get_langsmith_url(client: Client, run_id: str, project_name: Optional[str] = None) -> str:
     """Get the URL for a run in LangSmith.
@@ -33,7 +34,6 @@ def get_langsmith_url(client: Client, run_id: str, project_name: Optional[str] =
         # If we can't get the project ID, construct a URL without it
         print(f"Could not get project ID for {project_name}: {e}")
         return f"{host_url}/o/{tenant_id}/r/{run_id}?poll=true"
-
 
 def find_and_print_langsmith_run_url(client: Client, project_name: Optional[str] = None) -> Optional[str]:
     """Find the most recent LangSmith run and print its URL.
@@ -94,7 +94,6 @@ def find_and_print_langsmith_run_url(client: Client, project_name: Optional[str]
                 return None
     except Exception as e:
         print(f"\n{separator}\nCould not retrieve LangSmith URL: {e}")
-        import traceback
 
         print(traceback.format_exc())
         print(separator)

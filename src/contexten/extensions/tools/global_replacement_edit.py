@@ -15,7 +15,6 @@ from .observation import Observation
 
 logger = logging.getLogger(__name__)
 
-
 class GlobalReplacementEditObservation(Observation):
     """Response from making regex-based replacements in a file."""
 
@@ -37,7 +36,6 @@ class GlobalReplacementEditObservation(Observation):
     )
 
     str_template: ClassVar[str] = "{message}" if "{message}" else "Edited file {filepath}"
-
 
 def generate_diff(original: str, modified: str, path: str) -> str:
     """Generate a unified diff between two strings.
@@ -61,7 +59,6 @@ def generate_diff(original: str, modified: str, path: str) -> str:
     )
 
     return "".join(diff)
-
 
 def replacement_edit_global(
     codebase: Codebase,

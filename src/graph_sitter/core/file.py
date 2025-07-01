@@ -1,27 +1,33 @@
-import os
-import re
-import resource
-import sys
+
 from abc import abstractmethod
 from collections.abc import Generator, Sequence
 from functools import cached_property
 from os import PathLike
 from pathlib import Path
 from typing import TYPE_CHECKING, Generic, Literal, Self, TypeVar, override
+from typing_extensions import deprecated
+import os
+import re
+import resource
+import sys
 
 from tree_sitter import Node as TSNode
-from typing_extensions import deprecated
 
 from graph_sitter._proxy import proxy_property
 from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.range_index import RangeIndex
 from graph_sitter.codebase.span import Range
 from graph_sitter.compiled.sort import sort_editables
+from graph_sitter.core.assignment import Assignment
 from graph_sitter.core.autocommit import commiter, mover, reader, remover, writer
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.dataclasses.usage import UsageType
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
 from graph_sitter.core.directory import Directory
+from graph_sitter.core.function import Function
+from graph_sitter.core.function import Function
 from graph_sitter.core.import_resolution import Import, WildcardImport
+from graph_sitter.core.interface import Interface
 from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
 from graph_sitter.core.interfaces.has_block import HasBlock
@@ -39,13 +45,8 @@ from graph_sitter.utils import is_minified_js
 from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
-    from graph_sitter.core.assignment import Assignment
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.interface import Interface
 
 logger = get_logger(__name__)
-
 
 @apidoc
 class File(Editable[None]):
@@ -399,14 +400,12 @@ class File(Editable[None]):
         """Returns a list of file extensions for the given programming language file."""
         return []  # By default, no extensions are "supported" for generic files
 
-
 TImport = TypeVar("TImport", bound="Import")
 TFunction = TypeVar("TFunction", bound="Function")
 TClass = TypeVar("TClass", bound="Class")
 TGlobalVar = TypeVar("TGlobalVar", bound="Assignment")
 TInterface = TypeVar("TInterface", bound="Interface")
 TCodeBlock = TypeVar("TCodeBlock", bound="CodeBlock")
-
 
 @apidoc
 class SourceFile(
@@ -898,7 +897,6 @@ class SourceFile(
             Symbol | Import | WildcardImport: The resolved symbol, import, or wildcard import that matches
                 the name and scope requirements. Yields at most one result.
         """
-        from graph_sitter.core.function import Function
 
         if resolved := self.valid_symbol_names.get(name):
             # If we have a start_byte and the resolved symbol is after it,

@@ -1,18 +1,17 @@
-from typing import TYPE_CHECKING, Generic, Self
 
+from typing import TYPE_CHECKING, Generic, Self
 from typing_extensions import TypeVar
 
 from graph_sitter.compiled.utils import cached_property
+from graph_sitter.core.expressions import Type
 from graph_sitter.core.expressions.named_type import NamedType
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.core.symbol_groups.type_parameters import TypeParameters
 from graph_sitter.shared.decorators.docs import noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.expressions import Type
 
 TType = TypeVar("TType", bound="Type")
-
 
 class SupportsGenerics(Symbol, Generic[TType]):
     """A symbol that supports generics.

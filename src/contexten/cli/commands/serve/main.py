@@ -1,22 +1,22 @@
+
+from pathlib import Path
+from typing import Optional
 import importlib.util
 import logging
 import socket
 import subprocess
 import sys
-from pathlib import Path
-from typing import Optional
 
+from rich.logging import RichHandler
+from rich.panel import Panel
 import rich
 import rich_click as click
 import uvicorn
-from rich.logging import RichHandler
-from rich.panel import Panel
 
 from contexten.extensions.events.codegen_app import CodegenApp
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 def setup_logging(debug: bool):
     """Configure rich logging with colors."""
@@ -32,7 +32,6 @@ def setup_logging(debug: bool):
             )
         ],
     )
-
 
 def load_app_from_file(file_path: Path) -> CodegenApp:
     """Load a CodegenApp instance from a Python file.
@@ -69,7 +68,6 @@ def load_app_from_file(file_path: Path) -> CodegenApp:
         msg = f"Error loading app from {file_path}: {e!s}"
         raise click.ClickException(msg)
 
-
 def create_app_module(file_path: Path) -> str:
     """Create a temporary module that exports the app for uvicorn."""
     # Add the file's directory to Python path
@@ -87,7 +85,6 @@ app = app.app  # Get the FastAPI instance from the CodegenApp
     module_path.write_text(module_code)
 
     return f"{module_name}:app"
-
 
 def start_ngrok(port: int) -> Optional[str]:
     """Start ngrok and return the public URL"""
@@ -124,7 +121,6 @@ def start_ngrok(port: int) -> Optional[str]:
         logger.exception("ngrok not found. Please install it first: https://ngrok.com/download")
         return None
 
-
 def find_available_port(start_port: int = 8000, max_tries: int = 100) -> int:
     """Find an available port starting from start_port."""
     for port in range(start_port, start_port + max_tries):
@@ -136,7 +132,6 @@ def find_available_port(start_port: int = 8000, max_tries: int = 100) -> int:
             continue
     msg = f"No available ports found between {start_port} and {start_port + max_tries}"
     raise click.ClickException(msg)
-
 
 @click.command(name="serve")
 @click.argument("file", type=click.Path(exists=True, path_type=Path))
@@ -207,7 +202,6 @@ def serve_command(file: Path, host: str = "127.0.0.1", port: int = 8000, debug: 
     except Exception as e:
         msg = f"Server error: {e!s}"
         raise click.ClickException(msg)
-
 
 if __name__ == "__main__":
     serve_command()

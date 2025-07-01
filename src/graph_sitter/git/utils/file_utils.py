@@ -1,6 +1,6 @@
-import os
-from pathlib import Path
 
+from pathlib import Path
+import os
 
 def create_file(file_path: str, content: str | bytes) -> str:
     # Define the file path, name, and content
@@ -32,11 +32,9 @@ def create_file(file_path: str, content: str | bytes) -> str:
         raise FileNotFoundError(msg)
     return file_path
 
-
 def create_files(base_dir: str, files: dict[str, str]) -> None:
     for filename, content in files.items():
         create_file(os.path.join(base_dir, filename), content)
-
 
 def split_git_path(filepath: str) -> tuple[str, str | None]:
     """Split a filepath into (git_root, base_path) tuple by finding .git directory.

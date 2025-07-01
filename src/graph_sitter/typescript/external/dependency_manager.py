@@ -1,11 +1,12 @@
+
+from dataclasses import dataclass
+from enum import Enum
 import concurrent.futures
 import json
 import os
 import shutil
 import subprocess
 import uuid
-from dataclasses import dataclass
-from enum import Enum
 
 import pyjson5
 import requests
@@ -16,20 +17,17 @@ from graph_sitter.utils import shadow_files
 
 logger = get_logger(__name__)
 
-
 class InstallerType(Enum):
     NPM = "npm"
     YARN = "yarn"
     PNPM = "pnpm"
     UNKNOWN = "unknown"
 
-
 @dataclass
 class PackageJsonData:
     dependencies: dict[str, str]
     dev_dependencies: dict[str, str]
     package_data: dict
-
 
 class TypescriptDependencyManager(DependencyManager):
     should_install_dependencies: bool

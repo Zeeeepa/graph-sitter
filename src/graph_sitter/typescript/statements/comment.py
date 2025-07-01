@@ -1,11 +1,10 @@
-from __future__ import annotations
 
 from enum import StrEnum
 
+from __future__ import annotations
 from graph_sitter.core.autocommit import commiter, reader
 from graph_sitter.core.statements.comment import Comment, lowest_indentation
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
-
 
 @ts_apidoc
 class TSCommentType(StrEnum):
@@ -24,7 +23,6 @@ class TSCommentType(StrEnum):
     DOUBLE_SLASH = "DOUBLE_SLASH"
     SLASH_STAR = "SLASH_STAR"
     UNKNOWN = "UNKNOWN"
-
 
 @ts_apidoc
 class TSComment(Comment):

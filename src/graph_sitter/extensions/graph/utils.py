@@ -1,19 +1,17 @@
-import uuid
+
 from dataclasses import dataclass, field
 from enum import Enum
-
+import uuid
 
 class NodeLabel(Enum):
     CLASS = "Class"
     METHOD = "Method"
     FUNCTION = "Func"
 
-
 class RelationLabel(Enum):
     DEFINES = "DEFINES"
     INHERITS_FROM = "INHERITS_FROM"
     CALLS = "CALLS"
-
 
 @dataclass(kw_only=True)
 class BaseNode:
@@ -31,14 +29,12 @@ class BaseNode:
             return NotImplemented
         return self.id == other.id
 
-
 @dataclass(kw_only=True)
 class Node(BaseNode):
     """Simple node class with label and properties."""
 
     name: str
     full_name: str
-
 
 @dataclass(kw_only=True)
 class Relation(BaseNode):
@@ -56,7 +52,6 @@ class Relation(BaseNode):
         if not isinstance(other, Relation):
             return NotImplemented
         return self.id == other.id
-
 
 class SimpleGraph:
     """Basic graph implementation using sets of nodes and relations."""

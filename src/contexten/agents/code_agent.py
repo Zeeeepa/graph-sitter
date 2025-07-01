@@ -1,6 +1,9 @@
-import os
+
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
+import os
+import traceback
+import traceback
 
 from langchain.tools import BaseTool
 from langchain_core.messages import AIMessage, HumanMessage
@@ -10,16 +13,15 @@ from langsmith import Client
 
 from contexten.agents.loggers import ExternalLogger
 from contexten.agents.tracer import MessageStreamTracer
+from contexten.agents.utils import AgentConfig
 from contexten.extensions.langchain.agent import create_codebase_agent
 from contexten.extensions.langchain.utils.get_langsmith_url import (
+from graph_sitter import Codebase
+
     find_and_print_langsmith_run_url,
 )
 
 if TYPE_CHECKING:
-    from graph_sitter import Codebase
-
-from contexten.agents.utils import AgentConfig
-
 
 class CodeAgent:
     """Agent for interacting with a codebase."""
@@ -172,7 +174,6 @@ class CodeAgent:
         except Exception as e:
             separator = "=" * 60
             print(f"\n{separator}\nCould not retrieve LangSmith URL: {e}")
-            import traceback
 
             print(traceback.format_exc())
             print(separator)
@@ -191,7 +192,6 @@ class CodeAgent:
         except Exception as e:
             separator = "=" * 60
             print(f"\n{separator}\nCould not retrieve LangSmith URL: {e}")
-            import traceback
 
             print(traceback.format_exc())
             print(separator)

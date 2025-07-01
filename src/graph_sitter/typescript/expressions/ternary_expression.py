@@ -1,13 +1,13 @@
+
 from typing import TYPE_CHECKING, TypeVar
 
 from graph_sitter.core.expressions.ternary_expression import TernaryExpression
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.shared.decorators.docs import ts_apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @ts_apidoc
 class TSTernaryExpression(TernaryExpression[Parent]):

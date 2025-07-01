@@ -1,3 +1,4 @@
+
 from graph_sitter.codebase.flagging.code_flag import CodeFlag
 from graph_sitter.codebase.flagging.group import Group
 from graph_sitter.codebase.flagging.groupers.base_grouper import BaseGrouper
@@ -9,7 +10,6 @@ from graph_sitter.shared.string.csv_utils import comma_separated_to_list, list_t
 logger = get_logger(__name__)
 
 DEFAULT_CHUNK_SIZE = 5
-
 
 class FileChunkGrouper(BaseGrouper):
     """Group flags by a chunk of files.
@@ -39,7 +39,6 @@ class FileChunkGrouper(BaseGrouper):
         if len(all_segment_flags) == 0:
             logger.warning(f"🤷‍♀️ No flags found for FILE_CHUNK segment: {segment_filepaths}")
         return Group(group_by=GroupBy.FILE_CHUNK, segment=segment, flags=all_segment_flags)
-
 
 def chunk_list(lst: list, chk_size: int) -> list[list[str]]:
     for index in range(0, len(lst), chk_size):

@@ -1,23 +1,22 @@
-from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING
+import re
 
 from docstring_parser import Docstring, DocstringStyle, parse
+from tree_sitter import Node as TSNode
 
+from __future__ import annotations
 from graph_sitter.core.autocommit import reader
 from graph_sitter.core.statements.statement import StatementType
 from graph_sitter.core.symbol_groups.comment_group import CommentGroup
 from graph_sitter.enums import SymbolType
+from graph_sitter.python.class_definition import PyClass
+from graph_sitter.python.function import PyFunction
 from graph_sitter.python.statements.comment import PyComment
+from graph_sitter.python.symbol import PySymbol
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.python.function import PyFunction
-    from graph_sitter.python.symbol import PySymbol
-
 
 @py_apidoc
 class PyCommentGroup(CommentGroup):
@@ -49,8 +48,6 @@ class PyCommentGroup(CommentGroup):
                     break  # Stop if there is a break in the comments
             else:
                 break  # Stop if a non-comment node is encountered
-
-        from graph_sitter.python.class_definition import PyClass
 
         # Check if the function node is a method
         if symbol.symbol_type == SymbolType.Function:

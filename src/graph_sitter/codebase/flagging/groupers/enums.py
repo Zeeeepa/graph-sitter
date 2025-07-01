@@ -1,5 +1,5 @@
-from enum import StrEnum
 
+from enum import StrEnum
 
 class GroupBy(StrEnum):
     ALL = "all"

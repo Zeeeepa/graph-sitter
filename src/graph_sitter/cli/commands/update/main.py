@@ -1,20 +1,19 @@
+
+from importlib.metadata import distribution
 import subprocess
 import sys
-from importlib.metadata import distribution
 
+from packaging.version import Version
 import requests
 import rich
 import rich_click as click
-from packaging.version import Version
 
 import graph_sitter
-
 
 def fetch_pypi_releases(package: str) -> list[str]:
     response = requests.get(f"https://pypi.org/pypi/{package}/json")
     response.raise_for_status()
     return response.json()["releases"].keys()
-
 
 def filter_versions(versions: list[Version], current_version: Version, num_prev_minor_version: int = 1) -> list[Version]:
     descending_minor_versions = [v_tuple for v_tuple in sorted(set(v.release[:2] for v in versions), reverse=True) if v_tuple < current_version.release[:2]]
@@ -25,10 +24,8 @@ def filter_versions(versions: list[Version], current_version: Version, num_prev_
 
     return [v for v in versions if (v.major, v.minor, v.micro) >= compare_tuple]  # v.release will only show major,minor if micro doesn't exist.
 
-
 def install_package(package: str, *args: str) -> None:
     subprocess.check_call([sys.executable, "-m", "pip", "install", package, *args])
-
 
 @click.command(name="update")
 @click.option(

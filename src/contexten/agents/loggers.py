@@ -1,7 +1,7 @@
+
 from typing import Protocol
 
 from .data import AgentRunMessage
-
 
 # Define the interface for ExternalLogger
 class ExternalLogger(Protocol):

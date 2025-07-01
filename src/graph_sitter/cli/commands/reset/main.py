@@ -1,17 +1,16 @@
+
 from pathlib import Path
 
-import click
 from pygit2.enums import FileStatus, ResetMode
 from pygit2.repository import Repository
+import click
 
 from graph_sitter.cli.auth.constants import CODEGEN_DIR
 from graph_sitter.cli.git.repo import get_git_repo
 
-
 def is_codegen_file(filepath: Path) -> bool:
     """Check if a file is in the .codegen directory."""
     return CODEGEN_DIR in filepath.parents
-
 
 def backup_codegen_files(repo: Repository) -> dict[str, tuple[bytes | None, bool]]:
     """Backup .codegen files and track if they were staged.
@@ -39,7 +38,6 @@ def backup_codegen_files(repo: Repository) -> dict[str, tuple[bytes | None, bool
 
     return codegen_changes
 
-
 def restore_codegen_files(repo: Repository, codegen_changes: dict[str, tuple[bytes | None, bool]]) -> None:
     """Restore backed up .codegen files and their staged status."""
     for filepath, (content, was_staged) in codegen_changes.items():
@@ -59,7 +57,6 @@ def restore_codegen_files(repo: Repository, codegen_changes: dict[str, tuple[byt
     if codegen_changes:
         repo.index.write()
 
-
 def remove_untracked_files(repo: Repository) -> None:
     """Remove untracked files except those in .codegen directory."""
     for filepath, status in repo.status().items():
@@ -70,7 +67,6 @@ def remove_untracked_files(repo: Repository) -> None:
                     file_path.unlink()
                 elif file_path.is_dir():
                     file_path.rmdir()
-
 
 @click.command(name="reset")
 def reset_command() -> None:
@@ -96,7 +92,6 @@ def reset_command() -> None:
         click.echo(f"Reset complete. Repository has been restored to HEAD (preserving {CODEGEN_DIR}) and untracked files have been removed (except {CODEGEN_DIR})")
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
-
 
 if __name__ == "__main__":
     reset_command()

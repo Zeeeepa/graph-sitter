@@ -1,3 +1,4 @@
+
 import logging
 import sys
 
@@ -23,16 +24,13 @@ formatter = colorlog.ColoredFormatter(
     },
 )
 
-
 class StdOutFilter(logging.Filter):
     def filter(self, record):
         return record.levelno < logging.ERROR
 
-
 class StdErrFilter(logging.Filter):
     def filter(self, record):
         return record.levelno >= logging.ERROR
-
 
 # Create handlers
 stdout_handler = logging.StreamHandler(sys.stdout)  # Logs to stdout
@@ -43,12 +41,10 @@ stderr_handler = logging.StreamHandler(sys.stderr)  # Logs to stderr
 stderr_handler.setFormatter(formatter)
 stderr_handler.addFilter(StdErrFilter())
 
-
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     logger = _setup_logger(name, level)
     _setup_exception_logging(logger)
     return logger
-
 
 def _setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     # Force configure the root logger with a NullHandler to prevent duplicate logs
@@ -66,7 +62,6 @@ def _setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     # Set the level on the logger itself
     logger.setLevel(level)
     return logger
-
 
 def _setup_exception_logging(logger: logging.Logger) -> None:
     def log_exception(exc_type, exc_value, exc_traceback):

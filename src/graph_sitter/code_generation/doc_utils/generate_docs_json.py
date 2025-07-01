@@ -1,3 +1,4 @@
+
 from tqdm import tqdm
 
 from graph_sitter.code_generation.doc_utils.parse_docstring import parse_docstring
@@ -22,7 +23,6 @@ ATTRIBUTES_TO_IGNORE = [
     "statement_type",
     "assignment_types",
 ]
-
 
 def generate_docs_json(codebase: Codebase, head_commit: str, raise_on_missing_docstring: bool = False) -> GSDocs:
     """Update documentation table for classes, methods and attributes in the codebase.

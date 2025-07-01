@@ -1,26 +1,24 @@
-from __future__ import annotations
 
 from collections import deque
 from typing import TYPE_CHECKING, Self
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import reader
 from graph_sitter.core.expressions.multi_expression import MultiExpression
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.assignment_statement import AssignmentStatement
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.typescript.assignment import TSAssignment
+from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
+from graph_sitter.typescript.interfaces.has_block import TSHasBlock
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
-    from graph_sitter.typescript.interfaces.has_block import TSHasBlock
-
 
 logger = get_logger(__name__)
-
 
 @ts_apidoc
 class TSAssignmentStatement(AssignmentStatement["TSCodeBlock", TSAssignment]):

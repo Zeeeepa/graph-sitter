@@ -1,6 +1,6 @@
-import os
-from pathlib import Path
 
+from pathlib import Path
+import os
 
 # TODO: move to graph_sitter.git module
 def get_git_folder(path: os.PathLike | None = None) -> Path | None:

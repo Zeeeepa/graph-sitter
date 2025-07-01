@@ -1,5 +1,6 @@
-import sys
+
 from pathlib import Path
+import sys
 
 import rich
 import rich_click as click
@@ -9,7 +10,6 @@ from graph_sitter.cli.commands.init.render import get_success_message
 from graph_sitter.cli.rich.codeblocks import format_command
 from graph_sitter.cli.workspace.initialize_workspace import initialize_codegen
 from graph_sitter.shared.path import get_git_root_path
-
 
 @click.command(name="init")
 @click.option("--path", type=str, help="Path within a git repository. Defaults to the current directory.")

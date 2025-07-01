@@ -1,12 +1,12 @@
+
 import json
 import os
 import re
 import shutil
 
-import click
 from termcolor import colored
+import click
 
-import graph_sitter as sdk
 from graph_sitter.ai.client import get_openai_client
 from graph_sitter.code_generation.changelog_generation import generate_changelog
 from graph_sitter.code_generation.codegen_sdk_codebase import get_codegen_sdk_codebase
@@ -16,18 +16,17 @@ from graph_sitter.gscli.generate.runner_imports import _generate_runner_imports
 from graph_sitter.gscli.generate.system_prompt import get_system_prompt
 from graph_sitter.gscli.generate.utils import LanguageType, generate_builtins_file
 from graph_sitter.shared.logging.get_logger import get_logger
+import graph_sitter as sdk
 
 logger = get_logger(__name__)
 
 AUTO_GENERATED_COMMENT = "THE CODE BELOW IS AUTO GENERATED. UPDATE THE SNIPPET BY UPDATING THE SKILL"
 CODE_SNIPPETS_REGEX = r"(?:```python\n(?:(?!```)[\s\S])*?\n```|<CodeGroup>(?:(?!</CodeGroup>)[\s\S])*?</CodeGroup>)"
 
-
 @click.group()
 def generate() -> None:
     """Commands for running auto-generate commands, currently for typestubs, imports to include in runners, and docs"""
     ...
-
 
 @generate.command()
 @click.argument("docs_dir", default="docs", required=False)
@@ -40,13 +39,11 @@ def docs(docs_dir: str) -> None:
     docs_dir = os.path.join(os.getcwd(), docs_dir)
     generate_docs(docs_dir)
 
-
 @generate.command()
 @click.argument("imports_file", default="function_imports.py", required=False)
 def runner_imports(imports_file: str) -> None:
     """Generate imports to include in runner execution environment"""
     _generate_runner_imports(imports_file)
-
 
 @generate.command()
 def typestubs() -> None:
@@ -58,7 +55,6 @@ def typestubs() -> None:
      - methods with `@noapidocs` decorator
     """
     _generate_codebase_typestubs()
-
 
 def _generate_codebase_typestubs() -> None:
     initial_dir = os.getcwd()
@@ -100,7 +96,6 @@ def _generate_codebase_typestubs() -> None:
         # remove typings dir if it exists
         shutil.rmtree(out_dir)
 
-
 def generate_docs(docs_dir: str) -> None:
     """Compile new .MDX files for the auto-generated docs pages and write them to the file system.
     To actually deploy these changes, you must commit and merge the changes into develop
@@ -108,7 +103,6 @@ def generate_docs(docs_dir: str) -> None:
     This will generate docs using the codebase locally, including any unstaged changes
     """
     generate_codegen_sdk_docs(docs_dir)
-
 
 @generate.command()
 @click.argument("filepath", default=sdk.__path__[0] + "/system-prompt.txt", required=False)
@@ -119,12 +113,10 @@ def system_prompt(filepath: str) -> None:
         f.write(new_system_prompt)
     print(f"Successfully wrote system prompt to {filepath}.")
 
-
 def get_snippet_pattern(target_name: str) -> str:
     pattern = rf"\[//\]: # \(--{re.escape(target_name)}--\)\s*(?:\[//\]: # \(--{re.escape(AUTO_GENERATED_COMMENT)}--\)\s*)?"
     pattern += CODE_SNIPPETS_REGEX
     return pattern
-
 
 def generate_codegen_sdk_docs(docs_dir: str) -> None:
     """Generate the docs for the codegen_sdk API and update the mint.json"""
@@ -197,7 +189,6 @@ def generate_codegen_sdk_docs(docs_dir: str) -> None:
         json.dump(mint_data, mint_file, indent=2)
 
     print(colored("Updated mint.json with new page sets", "green"))
-
 
 @generate.command()
 @click.option("--docs-dir", default="docs", required=False)

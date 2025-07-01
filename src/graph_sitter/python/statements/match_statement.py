@@ -1,18 +1,17 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as PyNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.switch_statement import SwitchStatement
+from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 from graph_sitter.python.statements.match_case import PyMatchCase
 from graph_sitter.shared.decorators.docs import py_apidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as PyNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
-
 
 @py_apidoc
 class PyMatchStatement(SwitchStatement["PyCodeBlock", "PyCodeBlock", PyMatchCase]):

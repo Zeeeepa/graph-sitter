@@ -6,6 +6,5 @@ SETUP_INSTRUCTIONS = """
     - This will create a virtual environment and install the dependencies.
 4. To run codemods ensure that the terminal has activated the virtual environment by running `source ./.codegen/.venv/bin/activate`.
 
-
 That's it! You're all set up.
 """

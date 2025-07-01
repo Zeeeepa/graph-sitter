@@ -1,7 +1,7 @@
+
 import os
 
 from graph_sitter.configs.models.base_config import BaseConfig
-
 
 class RepositoryConfig(BaseConfig):
     """Configuration for the repository context to run codegen.

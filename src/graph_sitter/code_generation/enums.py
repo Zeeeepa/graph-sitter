@@ -1,5 +1,5 @@
-from enum import StrEnum
 
+from enum import StrEnum
 
 class DocumentationDecorators(StrEnum):
     PYTHON = "py_apidoc"

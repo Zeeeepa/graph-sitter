@@ -1,10 +1,10 @@
+
 from functools import cached_property
 
-import docker
 from docker import DockerClient
 from docker.errors import APIError, NotFound
 from docker.models.containers import Container
-
+import docker
 
 class DockerContainer:
     _client: DockerClient

@@ -1,3 +1,4 @@
+
 from functools import cached_property
 from typing import Self, override
 
@@ -9,7 +10,8 @@ from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.interfaces.unwrappable import Unwrappable
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
-
+from graph_sitter.typescript.detached_symbols.jsx.element import JSXElement
+from graph_sitter.typescript.detached_symbols.jsx.prop import JSXProp
 
 @ts_apidoc
 class JSXExpression(Unwrappable["Function | JSXElement | JSXProp"]):
@@ -43,7 +45,6 @@ class JSXExpression(Unwrappable["Function | JSXElement | JSXProp"]):
     def reduce_condition(self, bool_condition: bool, node: Editable) -> None:
         """Simplifies a JSX expression by reducing it based on a boolean condition.
 
-
         Args:
             bool_condition (bool): The boolean value to reduce the condition to.
 
@@ -58,12 +59,9 @@ class JSXExpression(Unwrappable["Function | JSXElement | JSXProp"]):
     def unwrap(self, node: Expression | None = None) -> None:
         """Removes the brackets from a JSX expression.
 
-
         Returns:
             None
         """
-        from graph_sitter.typescript.detached_symbols.jsx.element import JSXElement
-        from graph_sitter.typescript.detached_symbols.jsx.prop import JSXProp
 
         if node is None:
             node = self

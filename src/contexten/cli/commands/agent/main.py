@@ -1,14 +1,17 @@
+
 import uuid
 import warnings
 
-import rich_click as click
 from langchain_core.messages import SystemMessage
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.prompt import Prompt
+import rich_click as click
 
 from contexten.extensions.langchain.agent import create_agent_with_tools
 from contexten.extensions.langchain.tools import (
+from graph_sitter import Codebase
+
     CreateFileTool,
     DeleteFileTool,
     EditFileTool,
@@ -19,7 +22,6 @@ from contexten.extensions.langchain.tools import (
     RipGrepTool,
     ViewFileTool,
 )
-from graph_sitter import Codebase
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", message=".*Helicone.*")
@@ -38,7 +40,6 @@ WELCOME_ART = r"""[bold blue]
 
 [/bold blue]
 """
-
 
 @click.command(name="agent")
 @click.option("--query", "-q", default=None, help="Initial query for the agent.")

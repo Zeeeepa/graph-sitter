@@ -1,3 +1,4 @@
+
 from typing import TypeVar
 
 from tree_sitter import Node as TSNode
@@ -6,7 +7,6 @@ from graph_sitter.core.expressions.named_type import NamedType
 from graph_sitter.shared.decorators.docs import ts_apidoc
 
 Parent = TypeVar("Parent")
-
 
 @ts_apidoc
 class TSNamedType(NamedType[Parent]):

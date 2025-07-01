@@ -1,15 +1,15 @@
-import os
+
 from functools import cached_property
 from pathlib import Path
+import os
 
-import giturlparse
 from git import Repo
 from git.remote import Remote
+import giturlparse
 
 from graph_sitter.git.clients.git_repo_client import GitRepoClient
 from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.git.utils.language import determine_project_language
-
 
 # TODO: merge this with RepoOperator
 class LocalGitRepo:

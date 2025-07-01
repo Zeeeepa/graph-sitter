@@ -1,21 +1,20 @@
+
 from collections import defaultdict
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-
 
 Child = TypeVar("Child", bound=Editable)
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class MultiLineCollection(Collection[Child, Parent], Generic[Child, Parent]):

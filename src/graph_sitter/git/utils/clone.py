@@ -1,3 +1,4 @@
+
 import os
 import subprocess
 
@@ -8,7 +9,6 @@ from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.shared.performance.stopwatch_utils import subprocess_with_stopwatch
 
 logger = get_logger(__name__)
-
 
 # TODO: move into RepoOperator
 def clone_repo(
@@ -28,7 +28,6 @@ def clone_repo(
     GitRepo.clone_from(url=clone_url, to_path=repo_path, depth=1 if shallow else None, progress=CustomRemoteProgress())
     return repo_path
 
-
 # TODO: update to use GitPython instead + move into RepoOperator
 def clone_or_pull_repo(
     repo_path: str,
@@ -42,7 +41,6 @@ def clone_or_pull_repo(
         logger.info(f"{repo_path} directory does not exist running git clone ...")
         clone_repo(repo_path=repo_path, clone_url=clone_url, shallow=shallow)
     return repo_path
-
 
 # TODO: update to use GitPython instead + move into RepoOperator
 def pull_repo(

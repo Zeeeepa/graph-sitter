@@ -1,23 +1,23 @@
-import json
-import os
+
 from dataclasses import asdict
 from typing import TYPE_CHECKING
+import json
+import os
 
-import networkx as nx
 from networkx import DiGraph, Graph
+import networkx as nx
 
 from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 from graph_sitter.output.utils import DeterministicJSONEncoder
 from graph_sitter.visualizations.enums import GraphJson, GraphType
 
 if TYPE_CHECKING:
-    from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 
 ####################################################################################################################
 # READING GRAPH VISUALIZATION DATA
 ####################################################################################################################
-
 
 def get_graph_json(op: "RepoOperator"):
     if os.path.exists(op.viz_file_path):
@@ -27,17 +27,14 @@ def get_graph_json(op: "RepoOperator"):
     else:
         return None
 
-
 ####################################################################################################################
 # NETWORKX GRAPH TO JSON
 ####################################################################################################################
-
 
 def get_node_options(node: Editable | str | int):
     if isinstance(node, Editable):
         return asdict(node.viz)
     return {}
-
 
 def get_node_id(node: Editable | str | int):
     if isinstance(node, Importable):
@@ -46,7 +43,6 @@ def get_node_id(node: Editable | str | int):
         return str(node.span)
     elif isinstance(node, str) or isinstance(node, int):
         return node
-
 
 def graph_to_json(G1: Graph, root: Editable | str | int | None = None):
     G2 = DiGraph()

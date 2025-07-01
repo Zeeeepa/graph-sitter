@@ -8,7 +8,6 @@ from graph_sitter import Codebase
 
 from .observation import Observation
 
-
 class CommitObservation(Observation):
     """Response from committing changes to disk."""
 
@@ -17,7 +16,6 @@ class CommitObservation(Observation):
     )
 
     str_template: ClassVar[str] = "{message}"
-
 
 def commit(codebase: Codebase) -> CommitObservation:
     """Commit any pending changes to disk.

@@ -8,7 +8,6 @@ from graph_sitter import Codebase
 
 from .observation import Observation
 
-
 class DeleteFileObservation(Observation):
     """Response from deleting a file."""
 
@@ -17,7 +16,6 @@ class DeleteFileObservation(Observation):
     )
 
     str_template: ClassVar[str] = "Deleted file {filepath}"
-
 
 def delete_file(codebase: Codebase, filepath: str) -> DeleteFileObservation:
     """Delete a file.

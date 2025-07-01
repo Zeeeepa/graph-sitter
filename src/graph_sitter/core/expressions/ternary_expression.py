@@ -1,6 +1,7 @@
-import itertools
+
 from collections.abc import Generator
 from typing import Generic, Self, TypeVar, override
+import itertools
 
 from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.compiled.autocommit import commiter, reader
@@ -15,7 +16,6 @@ from graph_sitter.core.interfaces.unwrappable import Unwrappable
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class TernaryExpression(Expression[Parent], Chainable, Generic[Parent]):

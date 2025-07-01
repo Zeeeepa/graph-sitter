@@ -1,8 +1,15 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self, Unpack
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.codebase.flagging.code_flag import CodeFlag
+from graph_sitter.codebase.flagging.enums import FlagKwargs
 from graph_sitter.core.autocommit import reader, writer
+from graph_sitter.core.interfaces.has_block import HasBlock
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import ImportType
 from graph_sitter.python.statements.comment import PyComment, PyCommentType
@@ -10,14 +17,6 @@ from graph_sitter.python.symbol_groups.comment_group import PyCommentGroup
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.codebase.flagging.code_flag import CodeFlag
-    from graph_sitter.codebase.flagging.enums import FlagKwargs
-    from graph_sitter.core.interfaces.has_block import HasBlock
-    from graph_sitter.core.node_id_factory import NodeId
-
 
 @py_apidoc
 class PySymbol(Symbol["PyHasBlock", "PyCodeBlock"]):

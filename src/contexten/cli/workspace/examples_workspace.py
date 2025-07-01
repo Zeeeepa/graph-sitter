@@ -1,12 +1,12 @@
-import shutil
+
 from pathlib import Path
+import shutil
 
 from rich.status import Status
 
 from contexten.cli.api.schemas import SerializedExample
 from graph_sitter.cli.auth.session import CodegenSession
 from graph_sitter.cli.codemod.convert import convert_to_cli
-
 
 def populate_examples(session: CodegenSession, dest: Path, examples: list[SerializedExample], status: Status):
     """Populate the examples folder with examples for the current repository."""
@@ -22,7 +22,6 @@ def populate_examples(session: CodegenSession, dest: Path, examples: list[Serial
         formatted = format_example(example, session.config.repository.language)
         dest_file.write_text(formatted)
 
-
 def format_section(title: str, content: str | None) -> str:
     """Format a section with a title and optional content."""
     if not content:
@@ -30,7 +29,6 @@ def format_section(title: str, content: str | None) -> str:
     lines = content.splitlines()
     formatted_lines = "\n    ".join(lines)
     return f"{title}:\n    {formatted_lines}"
-
 
 def format_example(example: SerializedExample, language: str) -> str:
     """Format a single example."""

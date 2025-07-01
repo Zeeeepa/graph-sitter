@@ -1,3 +1,4 @@
+
 import time
 
 from git import RemoteProgress
@@ -6,7 +7,6 @@ from graph_sitter.git.schemas.enums import FetchResult
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class CustomRemoteProgress(RemoteProgress):
     fetch_result: FetchResult | None = None

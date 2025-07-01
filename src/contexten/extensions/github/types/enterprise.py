@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 
+from pydantic import BaseModel
 
 class GitHubEnterprise(BaseModel):
     id: int

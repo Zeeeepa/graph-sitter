@@ -1,9 +1,9 @@
+
 from enum import IntEnum, auto
 from typing import NamedTuple
 
 from graph_sitter.core.dataclasses.usage import Usage
 from graph_sitter.shared.decorators.docs import apidoc
-
 
 class NodeType(IntEnum):
     """NodeType is an enumeration class that defines different types of nodes within the graph."""
@@ -16,17 +16,14 @@ class NodeType(IntEnum):
     EXTERNAL = auto()  # Node representing something external to the codebase, e.g. `datetime`
     EXPRESSION = auto()  # Node representing an expression within a statement.
 
-
 class FileGraphNodeType(IntEnum):
     # File graph nodes
     STATEMENT = auto()  # Node representing a statement in code block.
     EXPRESSION = auto()  # Node representing an expression within a statement.
 
-
 class FileGraphEdgeType(IntEnum):
     # File graph edges
     STATEMENT_CONTAINS_EXPRESSION = auto()  # Edge from statement to expression.
-
 
 class EdgeType(IntEnum):
     # === [ External Edges Between Files ] ===
@@ -39,7 +36,6 @@ class EdgeType(IntEnum):
     # Should be added by the parent symbol, only after all the file children node types have been added to the graph.
     SYMBOL_USAGE = auto()
 
-
 class SymbolType(IntEnum):
     """TODO: names should be all uppercase"""
 
@@ -50,7 +46,6 @@ class SymbolType(IntEnum):
     Type = auto()
     Enum = auto()
     Namespace = auto()
-
 
 @apidoc
 class ImportType(IntEnum):
@@ -78,7 +73,6 @@ class ImportType(IntEnum):
     # Resolves to the file.
     SIDE_EFFECT = auto()
     UNKNOWN = auto()  # TODO: get rid of this - mostly used to set default value. we should just set to None.
-
 
 class Edge(NamedTuple):
     type: EdgeType

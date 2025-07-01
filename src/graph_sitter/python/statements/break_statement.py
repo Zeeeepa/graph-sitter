@@ -1,15 +1,14 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, override
 
+from __future__ import annotations
 from graph_sitter.compiled.autocommit import commiter
+from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.statements.statement import Statement, StatementType
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.interfaces.has_name import HasName
-
 
 @py_apidoc
 class PyBreakStatement(Statement["PyCodeBlock"]):

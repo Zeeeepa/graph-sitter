@@ -8,7 +8,6 @@ from graph_sitter import Codebase
 
 from ..observation import Observation
 
-
 class PRCheckObservation(Observation):
     """Response from retrieving PR checks."""
 
@@ -21,7 +20,6 @@ class PRCheckObservation(Observation):
     summary: str | None = Field(
         description="Summary of the checks",
     )
-
 
 def view_pr_checks(codebase: Codebase, pr_number: int) -> PRCheckObservation:
     """Retrieve check information from a Github PR .

@@ -1,3 +1,4 @@
+
 from graph_sitter.core.autocommit import commiter, reader
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.interfaces.has_name import HasName
@@ -8,7 +9,6 @@ from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 from graph_sitter.typescript.interfaces.has_block import TSHasBlock
 from graph_sitter.typescript.statements.attribute import TSAttribute
 from graph_sitter.typescript.symbol import TSSymbol
-
 
 @ts_apidoc
 class TSTypeAlias(TypeAlias[TSCodeBlock, TSAttribute], TSSymbol, TSHasBlock):

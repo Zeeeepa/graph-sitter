@@ -1,5 +1,5 @@
-from graph_sitter.configs.models.base_config import BaseConfig
 
+from graph_sitter.configs.models.base_config import BaseConfig
 
 class SecretsConfig(BaseConfig):
     """Configuration for various API secrets and tokens.
@@ -14,3 +14,7 @@ class SecretsConfig(BaseConfig):
     github_token: str | None = None
     openai_api_key: str | None = None
     linear_api_key: str | None = None
+    
+    # Codegen SDK credentials
+    codegen_org_id: str | None = None
+    codegen_token: str | None = None

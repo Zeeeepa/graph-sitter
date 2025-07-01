@@ -9,7 +9,6 @@ from graph_sitter import Codebase
 from .observation import Observation
 from .view_file import ViewFileObservation, view_file
 
-
 class CreateFileObservation(Observation):
     """Response from creating a new file."""
 
@@ -21,7 +20,6 @@ class CreateFileObservation(Observation):
     )
 
     str_template: ClassVar[str] = "Created file {filepath}"
-
 
 def create_file(codebase: Codebase, filepath: str, content: str, max_tokens: Optional[int] = None) -> CreateFileObservation:
     """Create a new file.

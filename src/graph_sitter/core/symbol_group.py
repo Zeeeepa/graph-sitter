@@ -1,26 +1,24 @@
-from __future__ import annotations
 
 from collections.abc import Collection, Iterator
 from typing import TYPE_CHECKING, Generic, TypeVar, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.autocommit import reader, repr_func, writer
+from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.output.ast import AST
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.output.ast import AST
-
 
 Child = TypeVar("Child", bound="Editable")
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class SymbolGroup(Editable[Parent], Collection[Child], Generic[Child, Parent]):

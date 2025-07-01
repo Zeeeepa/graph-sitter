@@ -1,31 +1,29 @@
-from __future__ import annotations
 
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
 from graph_sitter.core.interfaces.has_block import HasBlock
 from graph_sitter.core.interfaces.has_value import HasValue
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.interfaces.supports_generic import SupportsGenerics
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.attribute import Attribute
+from graph_sitter.core.statements.statement import Statement
 from graph_sitter.enums import SymbolType
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.attribute import Attribute
-    from graph_sitter.core.statements.statement import Statement
-
 
 TCodeBlock = TypeVar("TCodeBlock", bound="CodeBlock")
 TAttribute = TypeVar("TAttribute", bound="Attribute")
 Parent = TypeVar("Parent", bound="HasBlock")
-
 
 @apidoc
 class TypeAlias(SupportsGenerics, HasValue, HasBlock, HasAttribute[TAttribute], Generic[TCodeBlock, TAttribute]):

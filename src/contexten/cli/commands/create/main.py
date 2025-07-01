@@ -1,12 +1,13 @@
+
 from pathlib import Path
 
 import rich
 import rich_click as click
 
 from contexten.cli.api.client import RestAPI
+from contexten.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.auth.constants import PROMPTS_DIR
 from graph_sitter.cli.auth.session import CodegenSession
-from contexten.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.codemod.convert import convert_to_cli
 from graph_sitter.cli.errors import ServerError
 from graph_sitter.cli.rich.codeblocks import format_command, format_path
@@ -14,7 +15,6 @@ from graph_sitter.cli.rich.pretty_print import pretty_print_error
 from graph_sitter.cli.rich.spinners import create_spinner
 from graph_sitter.cli.utils.default_code import DEFAULT_CODEMOD
 from graph_sitter.cli.workspace.decorators import requires_init
-
 
 def get_prompts_dir() -> Path:
     """Get the directory for storing prompts, creating it if needed."""
@@ -27,7 +27,6 @@ def get_prompts_dir() -> Path:
             f.write("\n# Codegen prompts\ncodegen-sh/prompts/\n")
 
     return PROMPTS_DIR
-
 
 def get_target_paths(name: str, path: Path) -> tuple[Path, Path]:
     """Get the target path for the new function file.
@@ -51,7 +50,6 @@ def get_target_paths(name: str, path: Path) -> tuple[Path, Path]:
     prompt_path = function_dir / f"{name_snake}-system-prompt.txt"
     return codemod_path, prompt_path
 
-
 def make_relative(path: Path) -> str:
     """Convert a path to a relative path from cwd, handling non-existent paths."""
     try:
@@ -63,7 +61,6 @@ def make_relative(path: Path) -> str:
             idx = parts.index(".codegen")
             return "./" + str(Path(*parts[idx:]))
         return f"./{path.name}"
-
 
 @click.command(name="create")
 @requires_init

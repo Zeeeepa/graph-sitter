@@ -38,7 +38,6 @@ Use the provided agent tools to look up additional information if needed.
 By following this instruction set, the agent will be well-equipped to assist users in effectively utilizing the Codegen SDK for their projects.
 """
 
-
 def create_sdk_expert_agent(
     codebase: Codebase, model_name: str = "claude-3-5-sonnet-latest", model_provider: str = "anthropic", memory: bool = True, debug: bool = True, **kwargs
 ) -> RunnableWithMessageHistory:

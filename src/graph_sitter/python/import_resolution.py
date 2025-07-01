@@ -1,30 +1,28 @@
-from __future__ import annotations
 
+from typing import TYPE_CHECKING
 import os
 import sys
-from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import reader
 from graph_sitter.core.expressions import Name
+from graph_sitter.core.file import SourceFile
 from graph_sitter.core.import_resolution import ExternalImportResolver, Import, ImportResolution
+from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.exportable import Exportable
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.import_statement import ImportStatement
 from graph_sitter.enums import ImportType, NodeType
+from graph_sitter.python.file import PyFile
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.interfaces.exportable import Exportable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.import_statement import ImportStatement
-    from graph_sitter.python.file import PyFile
-
 
 logger = get_logger(__name__)
-
 
 @py_apidoc
 class PyImport(Import["PyFile"]):
@@ -357,7 +355,6 @@ class PyImport(Import["PyFile"]):
             return f"from {import_module} import {self.name} as {alias}"
         else:
             return f"from {import_module} import {self.name}"
-
 
 class PyExternalImportResolver(ExternalImportResolver):
     def __init__(self, from_alias: str, to_context: CodebaseContext) -> None:

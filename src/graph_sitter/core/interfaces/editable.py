@@ -1,67 +1,65 @@
-from __future__ import annotations
 
-import itertools
-import re
 from abc import abstractmethod
+from collections.abc import Callable, Generator, Iterable, Sequence
 from functools import cached_property
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, Unpack, final, overload
+import itertools
+import re
 
+from rich.console import Console, ConsoleOptions, RenderResult
 from rich.markup import escape
 from rich.pretty import Pretty
+from tree_sitter import Node as TSNode
+from tree_sitter import Point, Range
+import rich.repr
 
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.codebase.flagging.code_flag import CodeFlag
+from graph_sitter.codebase.flagging.enums import FlagKwargs
 from graph_sitter.codebase.span import Span
+from graph_sitter.codebase.transaction_manager import TransactionManager
 from graph_sitter.codebase.transactions import EditTransaction, InsertTransaction, RemoveTransaction, TransactionPriority
 from graph_sitter.compiled.utils import get_all_identifiers
 from graph_sitter.core.autocommit import commiter, reader, remover, repr_func, writer
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.export import Export
+from graph_sitter.core.expressions import Expression
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.file import File, SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.core.function import Function
+from graph_sitter.core.import_resolution import Import, WildcardImport
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.placeholder.placeholder import Placeholder
+from graph_sitter.core.statements.statement import Statement
+from graph_sitter.core.symbol import Symbol
+from graph_sitter.core.symbol_group import SymbolGroup
+from graph_sitter.core.symbol_group import SymbolGroup
+from graph_sitter.enums import NodeType
 from graph_sitter.output.ast import AST
 from graph_sitter.output.constants import ANGULAR_STYLE, MAX_STRING_LENGTH
 from graph_sitter.output.jsonable import JSONable
 from graph_sitter.output.utils import style_editable
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.utils import descendant_for_byte_range, find_all_descendants, find_first_ancestor, find_index, truncate_line
+from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, Iterable, Sequence
 
-    import rich.repr
-    from rich.console import Console, ConsoleOptions, RenderResult
-    from tree_sitter import Node as TSNode
-    from tree_sitter import Point, Range
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.codebase.flagging.code_flag import CodeFlag
-    from graph_sitter.codebase.flagging.enums import FlagKwargs
-    from graph_sitter.codebase.transaction_manager import TransactionManager
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.export import Export
-    from graph_sitter.core.expressions import Expression
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.file import File, SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.import_resolution import Import, WildcardImport
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.statement import Statement
-    from graph_sitter.core.symbol import Symbol
-    from graph_sitter.core.symbol_group import SymbolGroup
-    from graph_sitter.enums import NodeType
-    from graph_sitter.visualizations.enums import VizNode
 CONTAINER_CHARS = (b"(", b")", b"{", b"}", b"[", b"]", b"<", b">", b"import")
 MAX_REPR_LEN: int = 200
-
 
 def _contains_container_chars(text: bytes) -> bool:
     return any([char in text for char in CONTAINER_CHARS])
 
-
 def _is_empty_container(text: str) -> bool:
     stripped_str = re.sub(r"\s+", "", text)
     return len(stripped_str) == 2 and all([char in CONTAINER_CHARS for char in text])
-
 
 _EXCLUDE_FROM_REPR: list[str] = [
     "ctx",
@@ -97,7 +95,6 @@ _EXCLUDE_FROM_REPR: list[str] = [
 Parent = TypeVar("Parent", bound="Editable")
 P = TypeVar("P", bound=Placeholder)
 T = TypeVar("T", bound="Editable")
-
 
 @apidoc
 class Editable(JSONable, Generic[Parent]):
@@ -284,7 +281,6 @@ class Editable(JSONable, Generic[Parent]):
             SymbolGroup: A group containing this node and its extended nodes that allows
             batch modification through a common interface.
         """
-        from graph_sitter.core.symbol_group import SymbolGroup
 
         return SymbolGroup(self.file_node_id, self.ctx, self.parent, children=self.extended_nodes)
 
@@ -1141,7 +1137,6 @@ class Editable(JSONable, Generic[Parent]):
     @reader
     def parent_function(self) -> Function | None:
         """Find the function this node is contained in"""
-        from graph_sitter.core.function import Function
 
         return self.parent_of_type(Function)
 

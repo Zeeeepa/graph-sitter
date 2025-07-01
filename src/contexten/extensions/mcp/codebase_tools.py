@@ -1,11 +1,12 @@
-import json
+
 from typing import Annotated
+import json
 
 from mcp.server.fastmcp import FastMCP
 
-from graph_sitter.core.codebase import Codebase
 from contexten.extensions.tools import reveal_symbol
 from contexten.extensions.tools.search import search
+from graph_sitter.core.codebase import Codebase
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 mcp = FastMCP(
@@ -13,7 +14,6 @@ mcp = FastMCP(
     instructions="""Use this server to access any information from your codebase. This tool can provide information ranging from AST Symbol details and information from across the codebase.
     Use this tool for all questions, queries regarding your codebase.""",
 )
-
 
 @mcp.tool(name="reveal_symbol", description="Reveal the dependencies and usages of a symbol up to N degrees")
 def reveal_symbol_tool(
@@ -36,7 +36,6 @@ def reveal_symbol_tool(
     )
     return json.dumps(result, indent=2)
 
-
 @mcp.tool(name="search_codebase", description="The search query to find in the codebase. When ripgrep is available, this will be passed as a ripgrep pattern. For regex searches, set use_regex=True")
 def search_codebase_tool(
     query: Annotated[str, "The search query to find in the codebase. When ripgrep is available, this will be passed as a ripgrep pattern. For regex searches, set use_regex=True."],
@@ -51,7 +50,6 @@ def search_codebase_tool(
     codebase = Codebase(repo_path=codebase_dir, language=codebase_language)
     result = search(codebase, query, target_directories=target_directories, file_extensions=file_extensions, page=page, files_per_page=files_per_page, use_regex=use_regex)
     return json.dumps(result, indent=2)
-
 
 if __name__ == "__main__":
     # Initialize and run the server

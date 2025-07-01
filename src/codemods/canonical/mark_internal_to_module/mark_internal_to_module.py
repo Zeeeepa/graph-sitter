@@ -1,11 +1,12 @@
+
 from codemods.codemod import Codemod
+from tests.shared.skills.decorators import skill, skill_impl
+from tests.shared.skills.skill import Skill
+
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from graph_sitter.writer_decorators import canonical
-from tests.shared.skills.decorators import skill, skill_impl
-from tests.shared.skills.skill import Skill
-
 
 @skill(
     canonical=True,

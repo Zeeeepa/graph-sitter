@@ -1,3 +1,4 @@
+
 from tree_sitter import Node as TSNode
 
 from graph_sitter.codebase.node_classes.node_classes import NodeClasses
@@ -57,18 +58,15 @@ from graph_sitter.typescript.statements.import_statement import TSImportStatemen
 from graph_sitter.typescript.symbol_groups.dict import TSDict
 from graph_sitter.typescript.type_alias import TSTypeAlias
 
-
 def parse_dict(node: TSNode, *args):
     if node.prev_named_sibling and node.prev_named_sibling.text.decode("utf-8").endswith("propTypes"):
         return TSObjectType(node, *args)
     return TSDict(node, *args)
 
-
 def parse_new(node: TSNode, *args):
     if not node.child_by_field_name("arguments"):
         return Value(node, *args)
     return FunctionCall(node, *args)
-
 
 TSExpressionMap = {
     "string": TSString,

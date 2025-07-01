@@ -1,19 +1,18 @@
+
 import logging
 
+from rich.table import Table
 import rich
 import rich_click as click
-from rich.table import Table
 
 from graph_sitter.configs.constants import ENV_FILENAME, GLOBAL_ENV_FILE
 from graph_sitter.configs.user_config import UserConfig
 from graph_sitter.shared.path import get_git_root_path
 
-
 @click.group(name="config")
 def config_command():
     """Manage codegen configuration."""
     pass
-
 
 @config_command.command(name="list")
 def list_command():
@@ -78,7 +77,6 @@ def list_command():
 
     rich.print(table)
 
-
 @config_command.command(name="get")
 @click.argument("key")
 def get_command(key: str):
@@ -91,7 +89,6 @@ def get_command(key: str):
     value = config.get(key)
 
     rich.print(f"[cyan]{key}[/cyan]=[magenta]{value}[/magenta]")
-
 
 @config_command.command(name="set")
 @click.argument("key")
@@ -113,7 +110,6 @@ def set_command(key: str, value: str):
             return
 
     rich.print(f"[green]Successfully set {key}=[magenta]{value}[/magenta] and saved to {ENV_FILENAME}[/green]")
-
 
 def _get_user_config() -> UserConfig:
     if (project_root := get_git_root_path()) is None:

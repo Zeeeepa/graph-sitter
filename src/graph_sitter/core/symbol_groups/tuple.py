@@ -1,7 +1,9 @@
+
 from typing import TYPE_CHECKING, TypeVar
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.expressions.builtin import Builtin
 from graph_sitter.core.expressions.expression import Expression
 from graph_sitter.core.interfaces.editable import Editable
@@ -10,9 +12,7 @@ from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
 Parent = TypeVar("Parent", bound=Editable)
-
 
 @apidoc
 class Tuple(Collection["Expression[Self, None]", Parent], Expression[Parent], Builtin):

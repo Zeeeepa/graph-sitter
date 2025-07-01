@@ -1,8 +1,10 @@
+
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
@@ -12,15 +14,12 @@ from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 from graph_sitter.typescript.detached_symbols.parameter import TSParameter
+from graph_sitter.typescript.expressions.type import TSType
 from graph_sitter.typescript.placeholder.placeholder_return_type import TSReturnTypePlaceholder
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.typescript.expressions.type import TSType
-
 
 Parent = TypeVar("Parent")
-
 
 @ts_apidoc
 class TSFunctionType(Type[Parent], Generic[Parent]):

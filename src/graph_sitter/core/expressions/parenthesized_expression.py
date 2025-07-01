@@ -1,3 +1,4 @@
+
 from typing import Generic, TypeVar, override
 
 from graph_sitter.codebase.transactions import TransactionPriority
@@ -13,7 +14,6 @@ from graph_sitter.shared.decorators.docs import apidoc
 from graph_sitter.typescript.statements.if_block_statement import TSIfBlockStatement
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class ParenthesizedExpression(Unwrappable[Parent], HasValue, IWrapper, Generic[Parent]):

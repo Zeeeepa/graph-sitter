@@ -1,13 +1,13 @@
+
+from pathlib import Path
 import asyncio
 import json
 import logging
 import os
 import platform
 import shutil
-from pathlib import Path
 
 import requests
-
 
 class Windsurf:
     def __init__(self, log_level=logging.INFO):
@@ -165,7 +165,6 @@ class Windsurf:
         user_info = await self.get_user_info()
         return user_info is not None
 
-
 async def main():
     windsurf = Windsurf(log_level=logging.DEBUG)
 
@@ -179,7 +178,6 @@ async def main():
 
     is_valid = await windsurf.validate_token()
     print(f"Token is valid: {is_valid}")
-
 
 if __name__ == "__main__":
     # TODO: don't have windsurf at the moment, test later if feature is needed

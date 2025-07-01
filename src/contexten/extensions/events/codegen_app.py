@@ -1,20 +1,19 @@
-import os
+
 from typing import Any, Optional
-
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-
-from graph_sitter.configs.models.codebase import CodebaseConfig
-from graph_sitter.configs.models.secrets import SecretsConfig
-from graph_sitter import Codebase
-from graph_sitter.shared.logging.get_logger import get_logger
+import os
 
 from .github import GitHub
 from .linear import Linear
 from .slack import Slack
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+
+from graph_sitter import Codebase
+from graph_sitter.configs.models.codebase import CodebaseConfig
+from graph_sitter.configs.models.secrets import SecretsConfig
+from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class CodegenApp:
     """A FastAPI-based application for handling various code-related events."""

@@ -1,46 +1,43 @@
-from __future__ import annotations
 
+from collections.abc import Generator, Sequence
 from typing import TYPE_CHECKING, Self, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import reader
 from graph_sitter.compiled.resolution import ResolutionStack
 from graph_sitter.compiled.sort import sort_editables
 from graph_sitter.compiled.utils import cached_property
 from graph_sitter.core.autocommit import commiter
 from graph_sitter.core.autocommit.decorators import writer
+from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.export import Export
 from graph_sitter.core.interfaces.chainable import Chainable
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
 from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.statement import Statement
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import SymbolType
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.typescript.class_definition import TSClass
+from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 from graph_sitter.typescript.enum_definition import TSEnum
+from graph_sitter.typescript.export import TSExport
 from graph_sitter.typescript.function import TSFunction
+from graph_sitter.typescript.import_resolution import TSImport
 from graph_sitter.typescript.interface import TSInterface
 from graph_sitter.typescript.interfaces.has_block import TSHasBlock
 from graph_sitter.typescript.symbol import TSSymbol
 from graph_sitter.typescript.type_alias import TSTypeAlias
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Sequence
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.statement import Statement
-    from graph_sitter.core.symbol import Symbol
-    from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
-    from graph_sitter.typescript.export import TSExport
-    from graph_sitter.typescript.import_resolution import TSImport
-
 
 logger = get_logger(__name__)
-
 
 @ts_apidoc
 class TSNamespace(

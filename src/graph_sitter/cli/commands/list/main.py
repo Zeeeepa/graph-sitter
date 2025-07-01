@@ -1,12 +1,12 @@
+
 from pathlib import Path
 
+from rich.table import Table
 import rich
 import rich_click as click
-from rich.table import Table
 
 from graph_sitter.cli.rich.codeblocks import format_codeblock, format_command
 from graph_sitter.cli.utils.codemod_manager import CodemodManager
-
 
 @click.command(name="list")
 def list_command():

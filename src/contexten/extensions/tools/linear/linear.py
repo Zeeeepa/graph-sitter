@@ -9,7 +9,6 @@ from contexten.extensions.linear.linear_client import LinearClient
 
 from ..observation import Observation
 
-
 class LinearIssueObservation(Observation):
     """Response from getting a Linear issue."""
 
@@ -17,7 +16,6 @@ class LinearIssueObservation(Observation):
     issue_data: dict = Field(description="Full issue data")
 
     str_template: ClassVar[str] = "Issue {issue_id}"
-
 
 class LinearCommentsObservation(Observation):
     """Response from getting Linear issue comments."""
@@ -31,7 +29,6 @@ class LinearCommentsObservation(Observation):
         """Get details for string representation."""
         return {"comment_count": len(self.comments)}
 
-
 class LinearCommentObservation(Observation):
     """Response from commenting on a Linear issue."""
 
@@ -39,7 +36,6 @@ class LinearCommentObservation(Observation):
     comment: dict = Field(description="Created comment data")
 
     str_template: ClassVar[str] = "Added comment to issue {issue_id}"
-
 
 class LinearWebhookObservation(Observation):
     """Response from registering a Linear webhook."""
@@ -49,7 +45,6 @@ class LinearWebhookObservation(Observation):
     response: dict = Field(description="Full webhook registration response")
 
     str_template: ClassVar[str] = "Registered webhook for team {team_id}"
-
 
 class LinearSearchObservation(Observation):
     """Response from searching Linear issues."""
@@ -66,7 +61,6 @@ class LinearSearchObservation(Observation):
             "query": self.query,
         }
 
-
 class LinearCreateIssueObservation(Observation):
     """Response from creating a Linear issue."""
 
@@ -75,7 +69,6 @@ class LinearCreateIssueObservation(Observation):
     issue_data: dict = Field(description="Created issue data")
 
     str_template: ClassVar[str] = "Created issue '{title}'"
-
 
 class LinearTeamsObservation(Observation):
     """Response from getting Linear teams."""
@@ -87,7 +80,6 @@ class LinearTeamsObservation(Observation):
     def _get_details(self) -> dict[str, int]:
         """Get details for string representation."""
         return {"team_count": len(self.teams)}
-
 
 def linear_get_issue_tool(client: LinearClient, issue_id: str) -> LinearIssueObservation:
     """Get an issue by its ID."""
@@ -131,7 +123,6 @@ def linear_get_issue_tool(client: LinearClient, issue_id: str) -> LinearIssueObs
             issue_data={},
         )
 
-
 def linear_get_issue_comments_tool(client: LinearClient, issue_id: str) -> LinearCommentsObservation:
     """Get comments for a specific issue."""
     try:
@@ -174,7 +165,6 @@ def linear_get_issue_comments_tool(client: LinearClient, issue_id: str) -> Linea
             comments=[],
         )
 
-
 def linear_comment_on_issue_tool(client: LinearClient, issue_id: str, body: str) -> LinearCommentObservation:
     """Add a comment to an issue."""
     try:
@@ -216,7 +206,6 @@ def linear_comment_on_issue_tool(client: LinearClient, issue_id: str, body: str)
             issue_id=issue_id,
             comment={},
         )
-
 
 def linear_register_webhook_tool(
     client: LinearClient,
@@ -272,7 +261,6 @@ def linear_register_webhook_tool(
             response={},
         )
 
-
 def linear_search_issues_tool(client: LinearClient, query: str, limit: int = 10) -> LinearSearchObservation:
     """Search for issues using a query string."""
     try:
@@ -314,7 +302,6 @@ def linear_search_issues_tool(client: LinearClient, query: str, limit: int = 10)
             query=query,
             issues=[],
         )
-
 
 def linear_create_issue_tool(client: LinearClient, title: str, description: str | None = None, team_id: str | None = None) -> LinearCreateIssueObservation:
     """Create a new issue."""
@@ -362,7 +349,6 @@ def linear_create_issue_tool(client: LinearClient, title: str, description: str 
             team_id=team_id,
             issue_data={},
         )
-
 
 def linear_get_teams_tool(client: LinearClient) -> LinearTeamsObservation:
     """Get all teams the authenticated user has access to."""

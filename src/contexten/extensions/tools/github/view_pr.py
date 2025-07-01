@@ -8,7 +8,6 @@ from graph_sitter import Codebase
 
 from ..observation import Observation
 
-
 class ViewPRObservation(Observation):
     """Response from viewing a PR."""
 
@@ -26,7 +25,6 @@ class ViewPRObservation(Observation):
     )
 
     str_template: ClassVar[str] = "PR #{pr_id}"
-
 
 def view_pr(codebase: Codebase, pr_id: int) -> ViewPRObservation:
     """Get the diff and modified symbols of a PR.

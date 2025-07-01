@@ -1,27 +1,25 @@
-from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Self, override
 
+from tree_sitter import Node as PyNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter, reader
+from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.try_catch_statement import TryCatchStatement
+from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
 from graph_sitter.python.statements.block_statement import PyBlockStatement
 from graph_sitter.python.statements.catch_statement import PyCatchStatement
 from graph_sitter.shared.decorators.docs import noapidoc, py_apidoc
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    from tree_sitter import Node as PyNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
-
 
 @py_apidoc
 class PyTryCatchStatement(TryCatchStatement["PyCodeBlock"], PyBlockStatement):

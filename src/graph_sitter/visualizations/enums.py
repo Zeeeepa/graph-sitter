@@ -1,6 +1,6 @@
+
 from dataclasses import dataclass
 from enum import StrEnum
-
 
 @dataclass(frozen=True)
 class VizNode:
@@ -15,12 +15,10 @@ class VizNode:
     file_path: str | None = None
     symbol_name: str | None = None
 
-
 @dataclass(frozen=True)
 class GraphJson:
     type: str
     data: dict
-
 
 class GraphType(StrEnum):
     TREE = "tree"

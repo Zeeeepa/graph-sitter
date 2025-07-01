@@ -19,7 +19,6 @@ from .view_file import add_line_numbers
 if TYPE_CHECKING:
     from .tool_output_types import SemanticEditArtifacts
 
-
 class SemanticEditObservation(Observation):
     """Response from making semantic edits to a file."""
 
@@ -77,7 +76,6 @@ class SemanticEditObservation(Observation):
             artifact=artifacts,
         )
 
-
 def generate_diff(original: str, modified: str) -> str:
     """Generate a unified diff between two strings.
 
@@ -100,7 +98,6 @@ def generate_diff(original: str, modified: str) -> str:
     )
 
     return "".join(diff)
-
 
 def _extract_code_block(llm_response: str) -> str:
     """Extract code from markdown code block in LLM response.
@@ -125,7 +122,6 @@ def _extract_code_block(llm_response: str) -> str:
     # Return the last code block exactly as is
     return matches[-1]
 
-
 def get_llm_edit(original_file_section: str, edit_content: str) -> str:
     """Get edited content from LLM.
 
@@ -146,7 +142,6 @@ def get_llm_edit(original_file_section: str, edit_content: str) -> str:
     response = chain.invoke({"original_file_section": original_file_section, "edit_content": edit_content})
 
     return response
-
 
 def _validate_edit_boundaries(original_lines: list[str], modified_lines: list[str], start_idx: int, end_idx: int) -> None:
     """Validate` that the edit only modified lines within the specified boundaries.
@@ -176,7 +171,6 @@ def _validate_edit_boundaries(original_lines: list[str], modified_lines: list[st
                 msg = f"Edit modified content after the specified end line {end_idx + 1}"
                 raise ValueError(msg)
 
-
 def extract_file_window(file_content: str, start: int = 1, end: int = -1) -> tuple[str, int, int]:
     """Extract a window of content from a file.
 
@@ -201,7 +195,6 @@ def extract_file_window(file_content: str, start: int = 1, end: int = -1) -> tup
     window_content = "\n".join(window_lines)
 
     return window_content, start_idx, end_idx
-
 
 def apply_semantic_edit(codebase: Codebase, filepath: str, edited_content: str, start: int = 1, end: int = -1) -> tuple[str, str]:
     """Apply a semantic edit to a section of content.
@@ -259,7 +252,6 @@ def apply_semantic_edit(codebase: Codebase, filepath: str, edited_content: str, 
     diff = generate_diff(original_section, edited_content)
 
     return new_content, diff
-
 
 def semantic_edit(codebase: Codebase, filepath: str, edit_content: str, start: int = 1, end: int = -1) -> SemanticEditObservation:
     """Edit a file using semantic editing with line range support."""

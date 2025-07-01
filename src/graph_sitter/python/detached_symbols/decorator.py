@@ -1,15 +1,15 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
 from graph_sitter.core.autocommit import reader
 from graph_sitter.core.detached_symbols.decorator import Decorator
 from graph_sitter.core.detached_symbols.function_call import FunctionCall
 from graph_sitter.shared.decorators.docs import py_apidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
 
 @py_apidoc
 class PyDecorator(Decorator["PyClass", "PyFunction", "PyParameter"]):

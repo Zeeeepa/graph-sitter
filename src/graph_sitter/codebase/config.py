@@ -1,5 +1,6 @@
-import os
+
 from typing import Self
+import os
 
 from pydantic import BaseModel
 from pydantic.config import ConfigDict
@@ -14,7 +15,6 @@ from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 HARD_MAX_AI_LIMIT = 500  # Global limit for AI requests
 
-
 class SessionOptions(BaseModel):
     """Options for a session. A session is a single codemod run."""
 
@@ -23,11 +23,9 @@ class SessionOptions(BaseModel):
     max_transactions: int | None = None
     max_ai_requests: int = Field(default=150, le=HARD_MAX_AI_LIMIT)
 
-
 TestFlags = DefaultCodebaseConfig.model_copy(update=dict(debug=True, track_graph=True, verify_graph=True, full_range_index=True, sync_enabled=True, conditional_type_resolution=True))
 LintFlags = DefaultCodebaseConfig.model_copy(update=dict(method_usages=False, sync_enabled=True))
 ParseTestFlags = DefaultCodebaseConfig.model_copy(update=dict(debug=False, track_graph=False, sync_enabled=True))
-
 
 class ProjectConfig(BaseModel):
     """Context for a codebase. A codebase is a set of files in a directory."""

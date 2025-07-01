@@ -1,26 +1,25 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import commiter, reader
+from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.parameter import Parameter
+from graph_sitter.core.expressions.name import Name
+from graph_sitter.core.import_resolution import Import
 from graph_sitter.core.interfaces.callable import Callable
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.placeholder.placeholder_stub import StubPlaceholder
 from graph_sitter.enums import ImportType, NodeType
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.detached_symbols.parameter import Parameter
-    from graph_sitter.core.expressions.name import Name
-    from graph_sitter.core.import_resolution import Import
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-
 
 @apidoc
 class ExternalModule(

@@ -1,32 +1,29 @@
-from graph_sitter.shared.logging.get_logger import get_logger
-import functools
+
 from collections.abc import Callable
 from typing import TYPE_CHECKING, ParamSpec, TypeVar, Union, overload
+import functools
 
 import wrapt
 
 from graph_sitter.core.autocommit.constants import AutoCommitState, enabled
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.symbol import Symbol
+from graph_sitter.shared.logging.get_logger import get_logger
 
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.symbol import Symbol
-
 
 logger = get_logger(__name__)
 P = ParamSpec("P")
 T = TypeVar("T")
 
-
 @overload
 def writer(wrapped: Callable[P, T]) -> Callable[P, T]: ...
-
 
 @overload
 def writer(
     wrapped: None = None, *, commit: bool = ...
 ) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
-
 
 def writer(
     wrapped: Callable[P, T] | None = None, *, commit: bool = True
@@ -54,7 +51,6 @@ def writer(
 
     return wrapper(wrapped)
 
-
 @wrapt.decorator(enabled=enabled)
 def remover(
     wrapped: Callable[P, T],
@@ -75,7 +71,6 @@ def remover(
     instance.removed = True
     return ret
 
-
 @wrapt.decorator(enabled=enabled)
 def repr_func(
     wrapped: Callable[P, T],
@@ -93,7 +88,6 @@ def repr_func(
     finally:
         autocommit.state = old_state
     return ret
-
 
 @wrapt.decorator(enabled=enabled)
 def mover(

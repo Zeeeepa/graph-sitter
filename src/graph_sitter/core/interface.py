@@ -1,30 +1,28 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
 
+from __future__ import annotations
 from graph_sitter._proxy import proxy_property
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.autocommit import reader
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.function import Function
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
 from graph_sitter.core.interfaces.has_block import HasBlock
 from graph_sitter.core.interfaces.inherits import Inherits
+from graph_sitter.core.statements.attribute import Attribute
+from graph_sitter.core.symbol_groups.parents import Parents
 from graph_sitter.enums import SymbolType
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.statements.attribute import Attribute
-    from graph_sitter.core.symbol_groups.parents import Parents
-
 
 TCodeBlock = TypeVar("TCodeBlock", bound="CodeBlock")
 TAttribute = TypeVar("TAttribute", bound="Attribute")
 TFunction = TypeVar("TFunction", bound="Function")
 TType = TypeVar("TType", bound="Type")
-
 
 @apidoc
 class Interface(Inherits, HasBlock, HasAttribute[TAttribute], Generic[TCodeBlock, TAttribute, TFunction, TType]):

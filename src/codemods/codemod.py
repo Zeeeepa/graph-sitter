@@ -1,5 +1,5 @@
-from collections.abc import Callable
 
+from collections.abc import Callable
 
 class Codemod:
     execute: Callable | None = None

@@ -1,6 +1,6 @@
+
 from datetime import datetime
 from typing import Optional
-
 
 class GitHubRepository:
     id: int
@@ -8,7 +8,6 @@ class GitHubRepository:
     name: str
     full_name: str
     private: bool
-
 
 class GitHubAccount:
     login: str
@@ -19,7 +18,6 @@ class GitHubAccount:
     site_admin: bool
     # Other URL fields omitted for brevity
     user_view_type: str
-
 
 class GitHubInstallation:
     id: int
@@ -43,7 +41,6 @@ class GitHubInstallation:
     suspended_by: Optional[str]
     suspended_at: Optional[datetime]
 
-
 class GitHubUser:
     login: str
     id: int
@@ -52,7 +49,6 @@ class GitHubUser:
     type: str
     site_admin: bool
     # Other URL fields omitted for brevity
-
 
 class GitHubInstallationEvent:
     action: str

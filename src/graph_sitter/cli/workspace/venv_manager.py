@@ -1,7 +1,7 @@
+
+from pathlib import Path
 import os
 import subprocess
-from pathlib import Path
-
 
 class VenvManager:
     """Manages the virtual environment for codegen."""

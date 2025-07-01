@@ -1,11 +1,20 @@
-from graph_sitter.shared.logging.get_logger import get_logger
+
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.compiled.autocommit import update_dict
 from graph_sitter.core.autocommit.constants import (
+from graph_sitter.core.autocommit.utils import is_file, is_on_graph, is_symbol
+from graph_sitter.core.file import File
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.symbol import Symbol
+from graph_sitter.shared.logging.get_logger import get_logger
+
     REMOVED,
     AutoCommitState,
     AutoCommitSymbol,
@@ -13,19 +22,10 @@ from graph_sitter.core.autocommit.constants import (
     NodeNotFoundError,
     OutdatedNodeError,
 )
-from graph_sitter.core.autocommit.utils import is_file, is_on_graph, is_symbol
-from graph_sitter.core.node_id_factory import NodeId
-from graph_sitter.compiled.autocommit import update_dict
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.file import File
-    from graph_sitter.core.import_resolution import Import
-    from graph_sitter.core.symbol import Symbol
-
 
 logger = get_logger(__name__)
-
 
 @dataclass
 class AutoCommitNode:
@@ -43,7 +43,6 @@ class AutoCommitNode:
     new_id: NodeId | None = None
     new_file: Optional["File"] = None
 
-
 @dataclass
 class PendingFiles:
     """Current files autocommit is operating on.
@@ -57,7 +56,6 @@ class PendingFiles:
 
     def __bool__(self) -> bool:
         return bool(self.files) or self.all
-
 
 class AutoCommit:
     """Global autocommit state.

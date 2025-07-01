@@ -1,7 +1,7 @@
-from __future__ import annotations
 
 from typing import Generic, TypeVar
 
+from __future__ import annotations
 from graph_sitter.compiled.autocommit import reader
 from graph_sitter.core.interfaces.chainable import Chainable
 from graph_sitter.core.interfaces.editable import Editable
@@ -9,7 +9,6 @@ from graph_sitter.enums import NodeType
 from graph_sitter.shared.decorators.docs import apidoc
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Expression(Editable[Parent], Generic[Parent]):

@@ -1,14 +1,13 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from __future__ import annotations
 from graph_sitter.core.symbol_groups.comment_group import CommentGroup
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
 from graph_sitter.typescript.statements.comment import TSComment, TSCommentType
+from graph_sitter.typescript.symbol import TSSymbol
 
 if TYPE_CHECKING:
-    from graph_sitter.typescript.symbol import TSSymbol
-
 
 @ts_apidoc
 class TSCommentGroup(CommentGroup):

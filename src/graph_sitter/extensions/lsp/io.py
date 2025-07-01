@@ -1,6 +1,7 @@
-import pprint
+
 from dataclasses import dataclass
 from pathlib import Path
+import pprint
 
 from attr import asdict
 from lsprotocol import types
@@ -12,7 +13,6 @@ from graph_sitter.codebase.io.io import IO
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 @dataclass
 class File:
@@ -33,7 +33,6 @@ class File:
     @property
     def identifier(self) -> types.OptionalVersionedTextDocumentIdentifier:
         return types.OptionalVersionedTextDocumentIdentifier(uri=self.path.as_uri(), version=self.version)
-
 
 class LSPIO(IO):
     base_io: FileIO

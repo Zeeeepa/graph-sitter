@@ -16,7 +16,6 @@ from .view_file import add_line_numbers
 if TYPE_CHECKING:
     from contexten.extensions.tools.tool_output_types import RelaceEditArtifacts
 
-
 class RelaceEditObservation(Observation):
     """Response from making edits to a file using Relace Instant Apply API."""
 
@@ -65,7 +64,6 @@ class RelaceEditObservation(Observation):
             artifact=artifacts,
         )
 
-
 def generate_diff(original: str, modified: str) -> str:
     """Generate a unified diff between two strings.
 
@@ -89,7 +87,6 @@ def generate_diff(original: str, modified: str) -> str:
 
     return "".join(diff)
 
-
 def get_relace_api_key() -> str:
     """Get the Relace API key from environment variables.
 
@@ -104,7 +101,6 @@ def get_relace_api_key() -> str:
         msg = "RELACE_API environment variable not found. Please set it in your .env file."
         raise ValueError(msg)
     return api_key
-
 
 def apply_relace_edit(api_key: str, initial_code: str, edit_snippet: str, stream: bool = False) -> str:
     """Apply an edit using the Relace Instant Apply API.
@@ -133,7 +129,6 @@ def apply_relace_edit(api_key: str, initial_code: str, edit_snippet: str, stream
     except Exception as e:
         msg = f"Relace API request failed: {e!s}"
         raise Exception(msg)
-
 
 def relace_edit(codebase: Codebase, filepath: str, edit_snippet: str, api_key: str | None = None) -> RelaceEditObservation:
     """Edit a file using the Relace Instant Apply API.

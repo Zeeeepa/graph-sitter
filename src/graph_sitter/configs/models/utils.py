@@ -1,5 +1,5 @@
-from pydantic_settings import SettingsConfigDict
 
+from pydantic_settings import SettingsConfigDict
 
 def get_setting_config(prefix: str) -> SettingsConfigDict:
     return SettingsConfigDict(

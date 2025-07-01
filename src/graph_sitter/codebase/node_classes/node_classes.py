@@ -1,25 +1,24 @@
-from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import TYPE_CHECKING
 
+from __future__ import annotations
+from graph_sitter.core.class_definition import Class
+from graph_sitter.core.detached_symbols.code_block import CodeBlock
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.detached_symbols.parameter import Parameter
+from graph_sitter.core.expressions import Expression
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.function import Function
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.resolvable import Resolvable
+from graph_sitter.core.statements.comment import Comment
+from graph_sitter.core.symbol import Symbol
 
 if TYPE_CHECKING:
-    from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.detached_symbols.code_block import CodeBlock
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.detached_symbols.parameter import Parameter
-    from graph_sitter.core.expressions import Expression
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.function import Function
-    from graph_sitter.core.import_resolution import Import
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.statements.comment import Comment
-    from graph_sitter.core.symbol import Symbol
-
 
 @dataclass
 class NodeClasses:

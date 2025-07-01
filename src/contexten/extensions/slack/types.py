@@ -1,7 +1,7 @@
+
 from typing import Literal
 
 from pydantic import BaseModel, Field
-
 
 class RichTextElement(BaseModel):
     type: str
@@ -11,18 +11,15 @@ class RichTextElement(BaseModel):
     url: str | None = None
     channel_id: str | None = None
 
-
 class RichTextSection(BaseModel):
     type: Literal["rich_text_section", "rich_text_list", "rich_text_quote", "rich_text_preformatted", "text", "channel", "user", "emoji", "link"]
     elements: list[RichTextElement]
     style: dict | str | None = None  # Can be either a dict for rich text styling or a string for list styles (e.g. "bullet")
 
-
 class Block(BaseModel):
     type: Literal["rich_text", "section", "divider", "header", "context", "actions", "image"]
     block_id: str
     elements: list[RichTextSection]
-
 
 class SlackEvent(BaseModel):
     user: str
@@ -36,7 +33,6 @@ class SlackEvent(BaseModel):
     event_ts: str
     thread_ts: str | None = None
 
-
 class SlackWebhookPayload(BaseModel):
     token: str | None = Field(None)
     team_id: str | None = Field(None)
@@ -48,14 +44,12 @@ class SlackWebhookPayload(BaseModel):
     challenge: str | None = Field(None)
     subtype: str | None = Field(None)
 
-
 class SlackMessageReaction(BaseModel):
     """Model for a reaction on a Slack message."""
 
     name: str
     users: list[str]
     count: int
-
 
 class SlackMessage(BaseModel):
     """Model for a message in a Slack conversation."""

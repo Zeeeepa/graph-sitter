@@ -16,22 +16,18 @@ RUN_FUNCTION_ENDPOINT = "/run"
 # Ephemeral sandbox apis
 RUN_ON_STRING_ENDPOINT = "/run_on_string"
 
-
 class ServerInfo(BaseModel):
     repo_name: str | None = None
     synced_commit: str | None = None
     warmup_state: WarmupState = WarmupState.PENDING
-
 
 class GetDiffRequest(BaseModel):
     codemod: Codemod
     max_transactions: int | None = None
     max_seconds: int | None = None
 
-
 class GetDiffResponse(BaseModel):
     result: CodemodRunResult
-
 
 class CreateBranchRequest(BaseModel):
     codemod: Codemod
@@ -39,23 +35,19 @@ class CreateBranchRequest(BaseModel):
     grouping_config: GroupingConfig
     branch_config: BranchConfig
 
-
 class CreateBranchResponse(BaseModel):
     results: list[CodemodRunResult] | None = None
     branches: list[CreatedBranch] | None = None
     num_flags: int | None = None
     group_segments: list[str] | None = None
 
-
 class GetRunOnStringRequest(BaseModel):
     codemod_source: str
     language: str
     files: dict[str, str]
 
-
 class GetRunOnStringResult(BaseModel):
     result: CodemodRunResult
-
 
 class RunFunctionRequest(BaseModel):
     codemod_source: str

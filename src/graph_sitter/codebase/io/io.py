@@ -1,10 +1,9 @@
+
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-
 class BadWriteError(Exception):
     pass
-
 
 class IO(ABC):
     def write_file(self, path: Path, content: str | bytes | None) -> None:

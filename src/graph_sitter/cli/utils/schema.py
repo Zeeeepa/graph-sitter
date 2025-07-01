@@ -1,7 +1,7 @@
+
 from typing import Self
 
 from pydantic import BaseModel
-
 
 class SafeBaseModel(BaseModel):
     @classmethod
@@ -14,7 +14,6 @@ class SafeBaseModel(BaseModel):
 
     def __str__(self) -> str:
         return self.model_dump_json(indent=4)
-
 
 class CodemodConfig(BaseModel):
     """Configuration for a codemod."""

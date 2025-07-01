@@ -1,5 +1,7 @@
 """Demo implementation of an agent with Codegen tools."""
 
+from a previous timestep to aid for the continuing conversation: \n{updates["summary"]}\n\n""",
+
 import uuid
 from typing import Annotated, Any, Literal, Optional, Union
 
@@ -25,7 +27,6 @@ from contexten.extensions.langchain.llm import LLM
 from contexten.extensions.langchain.prompts import SUMMARIZE_CONVERSATION_PROMPT
 from contexten.extensions.langchain.utils.custom_tool_node import CustomToolNode
 from contexten.extensions.langchain.utils.utils import get_max_model_input_tokens
-
 
 def manage_messages(existing: list[AnyMessage], updates: Union[list[AnyMessage], dict]) -> list[AnyMessage]:
     """Custom reducer for managing message history with summarization.
@@ -65,7 +66,6 @@ def manage_messages(existing: list[AnyMessage], updates: Union[list[AnyMessage],
             # Create summary message and mark it with additional_kwargs
             summary_msg = AIMessage(
                 content=f"""Here is a summary of the conversation
-            from a previous timestep to aid for the continuing conversation: \n{updates["summary"]}\n\n""",
                 additional_kwargs={"is_summary": True},  # Use additional_kwargs for custom metadata
             )
             summary_msg.id = str(uuid.uuid4())
@@ -75,14 +75,12 @@ def manage_messages(existing: list[AnyMessage], updates: Union[list[AnyMessage],
 
     return existing
 
-
 class GraphState(dict[str, Any]):
     """State of the graph."""
 
     query: str
     final_answer: str
     messages: Annotated[list[AnyMessage], manage_messages]
-
 
 class AgentGraph:
     """Main graph class for the agent."""
@@ -501,7 +499,6 @@ class AgentGraph:
         builder.add_conditional_edges("summarize_conversation", self.should_continue)
 
         return builder.compile(checkpointer=checkpointer, store=self.store, debug=debug)
-
 
 def create_react_agent(
     model: "LLM",

@@ -9,7 +9,6 @@ from graph_sitter import Codebase
 from .observation import Observation
 from .view_file import ViewFileObservation, view_file
 
-
 class RenameFileObservation(Observation):
     """Response from renaming a file."""
 
@@ -24,7 +23,6 @@ class RenameFileObservation(Observation):
     )
 
     str_template: ClassVar[str] = "Renamed file from {old_filepath} to {new_filepath}"
-
 
 def rename_file(codebase: Codebase, filepath: str, new_filepath: str) -> RenameFileObservation:
     """Rename a file and update all imports to point to the new location.

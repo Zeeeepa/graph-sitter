@@ -1,8 +1,8 @@
-import shutil
+
 from pathlib import Path
+import shutil
 
 from rich.status import Status
-
 
 def populate_api_docs(dest: Path, api_docs: dict[str, str], status: Status):
     """Writes all API docs to the docs folder"""

@@ -1,3 +1,4 @@
+
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Generic, TypeVar
@@ -6,7 +7,6 @@ from graph_sitter.core.detached_symbols.function_call import FunctionCall
 from graph_sitter.core.function import Function
 
 TFunction = TypeVar("TFunction", bound=Function)
-
 
 @dataclass
 class MultiGraph(Generic[TFunction]):

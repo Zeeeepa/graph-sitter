@@ -1,28 +1,27 @@
-from __future__ import annotations
 
 from functools import cached_property
 from typing import TYPE_CHECKING, Generic, TypeVar, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.autocommit import reader, writer
+from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions import Expression, Value
 from graph_sitter.core.expressions.name import Name
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
+from graph_sitter.typescript.detached_symbols.jsx.expression import JSXExpression
 from graph_sitter.typescript.detached_symbols.jsx.prop import JSXProp
 from graph_sitter.utils import find_all_descendants
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.detached_symbols.jsx.expression import JSXExpression
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @ts_apidoc
 class JSXElement(Expression[Parent], HasName, Generic[Parent]):

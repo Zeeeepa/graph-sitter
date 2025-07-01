@@ -1,3 +1,4 @@
+
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
@@ -5,20 +6,18 @@ from lsprotocol import types
 from lsprotocol.types import Position, Range
 
 from contexten.extensions.lsp.codemods.base import CodeAction
+from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
 from graph_sitter.shared.logging.get_logger import get_logger
 
 if TYPE_CHECKING:
-    from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
 
 logger = get_logger(__name__)
-
 
 def process_args(args: Any) -> tuple[str, Range]:
     uri = args[0]
     range = args[1]
     range = Range(start=Position(line=range["start"]["line"], character=range["start"]["character"]), end=Position(line=range["end"]["line"], character=range["end"]["character"]))
     return uri, range
-
 
 def execute_action(server: "GraphSitterLanguageServer", action: CodeAction, args: Any) -> None:
     uri, range = process_args(args)
@@ -28,7 +27,6 @@ def execute_action(server: "GraphSitterLanguageServer", action: CodeAction, args
         return
     action.execute(server, node, *args[2:])
     server.codebase.commit()
-
 
 def get_execute_action(action: CodeAction) -> Callable[["GraphSitterLanguageServer", Any], None]:
     def execute_action(server: "GraphSitterLanguageServer", args: Any) -> None:

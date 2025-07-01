@@ -1,3 +1,4 @@
+
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 
 from tree_sitter import Node as TSNode
@@ -5,17 +6,15 @@ from tree_sitter import Node as TSNode
 from graph_sitter.core.expressions.generic_type import GenericType
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.python.expressions.named_type import PyNamedType
+from graph_sitter.python.expressions.type import PyType
 from graph_sitter.shared.decorators.docs import py_apidoc
 from graph_sitter.shared.logging.get_logger import get_logger
 
 if TYPE_CHECKING:
-    from graph_sitter.python.expressions.type import PyType
 
 logger = get_logger(__name__)
 
-
 Parent = TypeVar("Parent")
-
 
 @py_apidoc
 class PyGenericType(PyNamedType[Parent], GenericType["PyType", Parent], Generic[Parent]):

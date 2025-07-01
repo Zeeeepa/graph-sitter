@@ -1,10 +1,10 @@
+
 import os
 
 from dotenv import find_dotenv, load_dotenv
 
 from contexten.cli.env.constants import DEFAULT_ENV
 from contexten.cli.env.enums import Environment
-
 
 class GlobalEnv:
     def __init__(self) -> None:
@@ -55,7 +55,6 @@ class GlobalEnv:
     def __repr__(self) -> str:
         # Returns all env vars in a readable format
         return "\n".join([f"{k}={v}" for k, v in self.__dict__.items()])
-
 
 # NOTE: load and store envvars once
 global_env = GlobalEnv()

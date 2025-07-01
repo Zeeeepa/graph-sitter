@@ -1,5 +1,6 @@
-import logging
+
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI
 
@@ -10,14 +11,15 @@ from graph_sitter.git.schemas.enums import SetupOption
 from graph_sitter.git.schemas.repo_config import RepoConfig
 from graph_sitter.runner.enums.warmup_state import WarmupState
 from graph_sitter.runner.models.apis import (
+from graph_sitter.runner.models.codemod import Codemod, CodemodRunResult
+from graph_sitter.runner.sandbox.runner import SandboxRunner
+from graph_sitter.shared.logging.get_logger import get_logger
+
     RUN_FUNCTION_ENDPOINT,
     GetDiffRequest,
     RunFunctionRequest,
     ServerInfo,
 )
-from graph_sitter.runner.models.codemod import Codemod, CodemodRunResult
-from graph_sitter.runner.sandbox.runner import SandboxRunner
-from graph_sitter.shared.logging.get_logger import get_logger
 
 # Configure logging at module level
 logging.basicConfig(
@@ -29,7 +31,6 @@ logger = get_logger(__name__)
 
 server_info: ServerInfo
 runner: SandboxRunner
-
 
 @asynccontextmanager
 async def lifespan(server: FastAPI):
@@ -63,14 +64,11 @@ async def lifespan(server: FastAPI):
     yield
     logger.info("Shutting down local daemon server")
 
-
 app = FastAPI(lifespan=lifespan)
-
 
 @app.get("/")
 def health() -> ServerInfo:
     return server_info
-
 
 @app.post(RUN_FUNCTION_ENDPOINT)
 async def run(request: RunFunctionRequest) -> CodemodRunResult:
@@ -81,7 +79,6 @@ async def run(request: RunFunctionRequest) -> CodemodRunResult:
         if commit_sha := runner.codebase.git_commit(f"[Codegen] {request.function_name}", exclude_paths=[".codegen/*"]):
             logger.info(f"Committed changes to {commit_sha.hexsha}")
     return diff_response.result
-
 
 def _save_uncommitted_changes_and_sync() -> None:
     if commit := runner.codebase.git_commit("[Codegen] Save uncommitted changes", exclude_paths=[".codegen/*"]):

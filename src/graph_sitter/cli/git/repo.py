@@ -1,10 +1,10 @@
-import os
+
 from pathlib import Path
+import os
 
 from pygit2.repository import Repository
 
 from graph_sitter.cli.git.folder import get_git_folder
-
 
 # TODO: move to graph_sitter.git module
 def get_git_repo(path: os.PathLike | None = None) -> Repository | None:

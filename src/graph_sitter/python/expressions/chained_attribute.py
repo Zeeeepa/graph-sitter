@@ -1,14 +1,14 @@
+
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from graph_sitter.core.expressions import Expression, Name
 from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.shared.decorators.docs import py_apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
 
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @py_apidoc
 class PyChainedAttribute(ChainedAttribute[Expression, Name, Parent], Generic[Parent]):

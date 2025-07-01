@@ -1,3 +1,4 @@
+
 from abc import ABC
 from pathlib import Path
 
@@ -6,7 +7,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from graph_sitter.configs.constants import ENV_FILENAME, GLOBAL_ENV_FILE
 from graph_sitter.shared.path import get_git_root_path
-
 
 class BaseConfig(BaseSettings, ABC):
     """Base class for all config classes.

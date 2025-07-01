@@ -1,3 +1,4 @@
+
 from typing import Annotated, Any
 
 from pydantic import BaseModel
@@ -8,7 +9,6 @@ from pydantic_core.core_schema import ValidationInfo
 from tree_sitter import Point, Range
 
 from graph_sitter.shared.decorators.docs import apidoc
-
 
 def validate_range(value: Any, info: ValidationInfo) -> Range:
     if isinstance(value, dict):
@@ -22,7 +22,6 @@ def validate_range(value: Any, info: ValidationInfo) -> Range:
         msg = "Invalid type for range field. Expected tree_sitter.Range or dict."
         raise ValueError(msg)
     return value
-
 
 def range_json_schema() -> JsonSchemaValue:
     return {
@@ -44,13 +43,11 @@ def range_json_schema() -> JsonSchemaValue:
         },
     }
 
-
 RangeAdapter = Annotated[
     Range,
     BeforeValidator(validate_range),
     WithJsonSchema(range_json_schema()),
 ]
-
 
 @apidoc
 class Span(BaseModel):

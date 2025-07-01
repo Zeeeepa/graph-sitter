@@ -8,7 +8,6 @@ from graph_sitter import Codebase
 
 from ..observation import Observation
 
-
 class SearchResultObservation(Observation):
     """Response from searching issues and pull requests."""
 
@@ -24,7 +23,6 @@ class SearchResultObservation(Observation):
     @property
     def total(self) -> int:
         return len(self.results)
-
 
 def search(
     codebase: Codebase,

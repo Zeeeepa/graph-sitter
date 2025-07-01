@@ -1,23 +1,22 @@
-from __future__ import annotations
 
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter
+from graph_sitter.core.import_resolution import Import
 from graph_sitter.core.interfaces.exportable import Exportable
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.export_statement import ExportStatement
+from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.export_statement import ExportStatement
-    from graph_sitter.core.symbol_groups.collection import Collection
-
 
 Parent = TypeVar("Parent", bound="Collection[Export, ExportStatement]")
-
 
 @apidoc
 class Export(Exportable[Parent], Generic[Parent]):
@@ -85,7 +84,6 @@ class Export(Exportable[Parent], Generic[Parent]):
         Returns:
             bool: True if the exported symbol has a different name than the name it is exported as, False otherwise.
         """
-        from graph_sitter.core.import_resolution import Import
 
         if self.exported_symbol is None:
             return False

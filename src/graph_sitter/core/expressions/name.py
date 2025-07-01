@@ -1,3 +1,4 @@
+
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Optional, Self, TypeVar, override
 
@@ -6,17 +7,16 @@ from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.autocommit import reader, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions.expression import Expression
+from graph_sitter.core.import_resolution import Import, WildcardImport
 from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
+from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.core.interfaces.resolvable import Resolvable
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.import_resolution import Import, WildcardImport
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.symbol import Symbol
 
 Parent = TypeVar("Parent", bound="Expression")
-
 
 @apidoc
 class Name(Expression[Parent], Resolvable, Generic[Parent]):

@@ -1,9 +1,10 @@
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
+from graph_sitter.codebase.codebase_context import CodebaseContext
 
+if TYPE_CHECKING:
 
 class Parseable(ABC):
     @abstractmethod

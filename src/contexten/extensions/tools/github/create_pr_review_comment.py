@@ -8,7 +8,6 @@ from graph_sitter import Codebase
 
 from ..observation import Observation
 
-
 class PRReviewCommentObservation(Observation):
     """Response from creating a PR review comment."""
 
@@ -28,7 +27,6 @@ class PRReviewCommentObservation(Observation):
         description="Line number the comment was added to",
     )
     str_template: ClassVar[str] = "Added review comment to PR #{pr_number} at {path}:{line}"
-
 
 def create_pr_review_comment(
     codebase: Codebase,

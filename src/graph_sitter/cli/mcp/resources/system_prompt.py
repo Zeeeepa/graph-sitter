@@ -1,3 +1,46 @@
+from collections import Counter
+from collections import defaultdict
+from collections import defaultdict
+from datetime import datetime
+
+from .flex_attention import (
+from .flex_attention import set_head_dim_values  # dynamic import
+from APoT_tensor.py import objectB
+from fastapi import FastAPI
+from flask import Flask
+from pydantic import BaseModel
+from quantizer.py import objectA
+import networkx as nx
+import networkx as nx
+import pytest
+import {
+import {
+import {
+
+from graph_sitter.codebase.config import ProjectConfig
+from graph_sitter.configs.models.codebase import CodebaseConfig
+from graph_sitter.configs.models.secrets import SecretsConfig
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.symbol import Symbol
+from graph_sitter.git.repo_operator.repo_operator import RepoOperator
+from graph_sitter.git.schemas.repo_config import RepoConfig
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+import graph_sitter
+import graph_sitter
+import graph_sitter
+
 SYSTEM_PROMPT = '''
 ---
 title: "Codegen"
@@ -120,10 +163,8 @@ Common use cases include:
   </Card>
 </CardGroup>
 
-
 ## Get Started
 
-import {
   COMMUNITY_SLACK_URL,
   CODEGEN_SDK_GITHUB_URL,
 } from "/snippets/links.mdx";
@@ -167,7 +208,6 @@ We built Graph-sitter with a key insight: future AI agents will need to ["act vi
 
 This creates a shared language that both humans and AI can reason about effectively, making code changes more predictable, reviewable, and maintainable. Whether you're a developer writing a complex refactoring script or an AI agent building transformation tools, Graph-sitter provides the foundation for expressing code changes as they should be: through code itself.
 
-
 ---
 title: "Getting Started"
 sidebarTitle: "Getting Started"
@@ -194,7 +234,6 @@ The [gs notebook](/cli/notebook) command creates a virtual environment and opens
 gs notebook --demo
 ```
 
-
 <Tip>
   The `notebook --demo` comes pre-configured to load [FastAPI](https://github.com/fastapi/fastapi)'s codebase, so you can start
   exploring right away!
@@ -209,7 +248,6 @@ gs notebook --demo
 Instantiating a [Codebase](/api-reference/core/Codebase) will automatically parse a codebase and make it available for manipulation.
 
 ```python
-from graph_sitter.core.codebase import Codebase
 
 # Clone + parse fastapi/fastapi
 codebase = Codebase.from_repo('fastapi/fastapi')
@@ -265,7 +303,6 @@ if recursive:
 Let's specifically drill into large test files, which can be cumbersome to manage.
 
 ```python
-from collections import Counter
 
 # Filter to all test functions and classes
 test_functions = [x for x in codebase.functions if x.name.startswith('test_')]
@@ -478,7 +515,6 @@ if base_class:
 
 </CardGroup>
 
-
 ---
 title: "Installation"
 sidebarTitle: "Installation"
@@ -500,7 +536,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```bash
 uv tool install graph-sitter
 ```
-
 
 <Note>
 This makes the `codegen` command available globally in your terminal, while keeping its dependencies isolated.
@@ -537,8 +572,6 @@ Let's walk through a minimal example of using Graph-sitter in a project:
     <Note>
         The `-d` flag in `gs create` generates an AI-powered implementation. This requires a Github account registered on [codegen.sh](https://codegen.sh)
     </Note>
-
-
 
 4. Run your codemod with [gs run](/cli/run):
    ```bash
@@ -640,7 +673,6 @@ gs creates a custom Python environment in `.codegen/.venv`. Configure your IDE t
 
 </AccordionGroup>
 
-
 ## Create a New Codemod
 
 Generate the boilerplate for a new code manipulation program using [gs create](/cli/create):
@@ -700,7 +732,6 @@ gs reset
 
 We recommend viewing changes in your IDE's native diff editor.
 
-
 ## What's Next
 
 <CardGroup cols={2}>
@@ -720,7 +751,6 @@ We recommend viewing changes in your IDE's native diff editor.
   </Card>
 </CardGroup>
 
-
 ---
 title: "Working with AI"
 sidebarTitle: "AI Integration"
@@ -734,7 +764,6 @@ Graph-sitter is designed to be used with AI assistants. This document describes 
 
 Graph-sitter provides a `.txt` file that you can drag-and-drop into any chat assistant. This is roughly 60k tokens and will enable chat assistants like, ChatGPT, Claude 3.5 etc. to build effectively with Codegen.
 
-import {
   CODEGEN_SYSTEM_PROMPT
 } from "/snippets/links.mdx";
 
@@ -808,7 +837,6 @@ This will ensure that the IDE's native chat model is aware of the APIs and commo
 
 <Warning>Coming soon!</Warning>
 
-
 ---
 title: "Under the Hood"
 sidebarTitle: "How it Works"
@@ -836,7 +864,6 @@ At the heart of Graph-sitter is a comprehensive graph representation of your cod
 
 ```python
 # Initialize and analyze the codebase
-from graph_sitter.core.codebase import Codebase
 codebase = Codebase("./")
 
 # Access pre-computed relationships
@@ -898,7 +925,6 @@ Graph-sitter is just getting started, and we're excited about the possibilities 
 - Improving documentation
 
 Check out our [community guide](/introduction/community) to get involved!
-
 
 ---
 title: "Guiding Principles"
@@ -976,7 +1002,6 @@ Graph-sitter embraces Python's strength as a "glue language" - its ability to se
   workflow.
 </Note>
 
-
 ---
 title: "Community & Contributing"
 sidebarTitle: "Community"
@@ -984,7 +1009,6 @@ icon: "people-group"
 iconType: "solid"
 ---
 
-import {
   COMMUNITY_SLACK_URL,
   CODEGEN_SDK_GITHUB_URL,
 } from "/snippets/links.mdx";
@@ -1025,7 +1049,6 @@ Check out our [Contributing Guide](https://github.com/codegen-sh/graph-sitter/bl
 - Submit pull requests
 - Report issues
 - Contribute to documentation
-
 
 ---
 title: "Codegen, Inc."
@@ -1100,7 +1123,6 @@ We believe in the power of open source software. Our core library, [codegen](htt
   Slack](https://community.codegen.com).
 </Note>
 
-
 ---
 title: "Frequently Asked Questions"
 sidebarTitle: "FAQ"
@@ -1159,7 +1181,6 @@ iconType: "solid"
     3. Reach out to us on [Twitter](https://x.com/codegen)
   </Accordion>
 </AccordionGroup>
-
 
 ---
 title: "Building with Codegen"
@@ -1310,7 +1331,6 @@ Learn how to use Codegen's core APIs to analyze and transform code.
   concepts or jump directly to the topics most relevant to your needs.
 </Note>
 
-
 ---
 title: "Parsing Codebases"
 sidebarTitle: "Parsing Codebases"
@@ -1325,8 +1345,6 @@ The primary entrypoint to programs leveraging Graph-sitter is the [Codebase](/ap
 Construct a Codebase by passing in a path to a local `git` repository or any subfolder within it. The path must be within a git repository (i.e., somewhere in the parent directory tree must contain a `.git` folder).
 
 ```python
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 # Parse from a git repository root
 codebase = Codebase("path/to/repository")
@@ -1358,8 +1376,6 @@ codebase = Codebase("./", programming_language=ProgrammingLanguage.TYPESCRIPT)
 To fetch and parse a repository directly from GitHub, use the `from_repo` function.
 
 ```python
-import graph_sitter
-from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 # Fetch and parse a repository (defaults to /tmp/codegen/{repo_name})
 codebase = codegen.from_repo('fastapi/fastapi')
@@ -1384,9 +1400,6 @@ codebase = codegen.from_repo(
 You can customize the behavior of your Codebase instance by passing a `CodebaseConfig` object. This allows you to configure secrets (like API keys) and toggle specific features:
 
 ```python
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.configs.models.codebase import CodebaseConfig
-from graph_sitter.configs.models.secrets import SecretsConfig
 
 codebase = Codebase(
     "path/to/repository",
@@ -1415,11 +1428,6 @@ For more complex scenarios, Graph-sitter supports an advanced initialization mod
 Here's an example:
 
 ```python
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.git.repo_operator.repo_operator import RepoOperator
-from graph_sitter.git.schemas.repo_config import RepoConfig
-from graph_sitter.codebase.config import ProjectConfig
-from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 codebase = Codebase(
     projects = [
@@ -1446,7 +1454,6 @@ Graph-sitter currently supports:
 - [TypeScript/JavaScript](/api-reference/typescript)
 - [React/JSX](/building-with-graph-sitter/react-and-jsx)
 
-
 ---
 title: "Reusable Codemods"
 sidebarTitle: "Reusable Codemods"
@@ -1467,8 +1474,6 @@ gs create rename-function
 This creates a new codemod in your `.codegen/codemods` directory:
 
 ```python
-import graph_sitter
-from graph_sitter.core.codebase import Codebase
 
 @graph_sitter.function("rename-function")
 def run(codebase: Codebase):
@@ -1508,7 +1513,6 @@ The execution flow:
 3. Changes are tracked and applied to your filesystem
 4. A diff preview shows what changed
 
-
 ## Codemod Structure
 
 A codemod consists of three main parts:
@@ -1536,7 +1540,6 @@ def run(codebase: Codebase):
 Codemods can accept arguments using Pydantic models:
 
 ```python
-from pydantic import BaseModel
 
 class RenameArgs(BaseModel):
     old_name: str
@@ -1698,7 +1701,6 @@ gs run my-codemod --apply-local
 codegen deploy my-codemod
 ```
 
-
 ---
 title: Function Decorator
 sidebarTitle: "@graph_sitter.function"
@@ -1732,7 +1734,6 @@ In this example, the function `run` is decorated with `@graph_sitter.function` a
 
 The `function` decorator is part of the codegen SDK CLI and is used to mark functions that are intended to be ran as part of a code generation process. It ensures that the function is properly registered and can be invoked with the specified name.
 
-
 ## CLI Examples
 
 ### Running a Function
@@ -1752,7 +1753,6 @@ This command runs the function named `my-function`.
 - [CLI Init Command](../cli/init.mdx): For initializing projects or environments related to the function decorator.
 - [CLI Create Command](../cli/create.mdx): For creating new functions or projects using the CLI.
 - [CLI Run Command](../cli/run.mdx): For running code or scripts using the CLI.
-
 
 ---
 title: "Language Support"
@@ -1866,7 +1866,6 @@ if isinstance(codebase, TSCodebaseType):
         print(f"Type alias: {type_alias.name}")
 ```
 
-
 ---
 title: "Commit and Reset"
 sidebarTitle: "Commit and Reset"
@@ -1891,7 +1890,6 @@ You can manage your codebase's state with two core APIs:
 When you make changes to your codebase through Codegen's APIs, they aren't immediately written to disk. You need to explicitly commit them with [codebase.commit()](/api-reference/core/Codebase#commit):
 
 ```python
-from graph_sitter.core.codebase import Codebase
 
 codebase = Codebase("./")
 
@@ -1930,7 +1928,6 @@ assert codebase.get_file("src/new_file.py", optional=True) is None
   `reset()` reverts both the in-memory state and any uncommitted filesystem
   changes. However, it preserves your codemod implementation in `.codegen/`.
 </Note>
-
 
 ---
 title: "Git Operations"
@@ -2005,7 +2002,6 @@ result = codebase.checkout(commit="abc123")
 result = codebase.checkout(branch="main", remote=True)
 ```
 
-
 ---
 title: "Files and Directories"
 sidebarTitle: "Files & Directories"
@@ -2022,7 +2018,6 @@ Graph-sitter provides three primary abstractions for working with your codebase'
 <Info>
   [SourceFile](/api-reference/core/SourceFile) is a subclass of [File](/api-reference/core/File) that provides additional functionality for source code files.
 </Info>
-
 
 ## Accessing Files and Directories
 
@@ -2043,7 +2038,6 @@ for file in codebase.files:
 exists = codebase.has_file("path/to/file.py")
 
 ```
-
 
 These APIs are similar for [Directory](/api-reference/core/Directory), which provides similar methods for accessing files and subdirectories.
 
@@ -2079,7 +2073,6 @@ source_files = codebase.files
 all_files = codebase.files(extensions="*")
 ```
 
-
 When getting a file with `codebase.get_file`, files ending in `.py, .js, .ts, .jsx, .tsx` are returned as [SourceFile](/api-reference/core/SourceFile) objects while other files are returned as [File](/api-reference/core/File) objects.
 
 Furthermore, you can use the `isinstance` function to check if a file is a [SourceFile](/api-reference/core/SourceFile):
@@ -2114,7 +2107,6 @@ See, for example:
 - `.get_function(...)` ([SourceFile](/api-reference/core/SourceFile#get-function) / [Directory](/api-reference/core/Directory#get-function)) - Get a specific function by name
 - `.get_class(...)` ([SourceFile](/api-reference/core/SourceFile#get-class) / [Directory](/api-reference/core/Directory#get-class)) - Get a specific class by name
 - `.get_global_var(...)` ([SourceFile](/api-reference/core/SourceFile#get-global-var) / [Directory](/api-reference/core/Directory#get-global-var)) - Get a specific global variable by name
-
 
 ```python
 # Get all functions in a file
@@ -2319,7 +2311,6 @@ dir.remove()
   directories if they have no external usages.
 </Warning>
 
-
 ---
 title: "The Editable API"
 sidebarTitle: "Editables"
@@ -2490,8 +2481,6 @@ for var in function.code_block.get_local_var_assignments():
         print(f"Warning: {var.name} defined in try block")
 ```
 
-
-
 ---
 title: "The Symbol API"
 sidebarTitle: "Symbols"
@@ -2608,7 +2597,6 @@ for method in class_def.methods:
   about code. Most transformations start with finding relevant symbols and then
   applying changes to them.
 </Note>
-
 
 ---
 title: "The Class API"
@@ -2786,7 +2774,6 @@ all_methods = class_def.methods(max_depth=None)  # Include inherited methods
 all_attrs = class_def.attributes(max_depth=None)  # Include inherited attributes
 ```
 
-
 ---
 title: "The Import API"
 sidebarTitle: "Imports"
@@ -2877,7 +2864,6 @@ for imp in file.imports:
 ```
 
 <Tip>Learn more about [external modules here](/building-with-graph-sitter/external-modules)</Tip>
-
 
 ## Bulk Operations
 
@@ -3099,7 +3085,6 @@ The Export API provides methods to identify and filter exports:
 - [.is_default_export()](/api-reference/typescript/TSExport#is-default-export)
 - [.is_wildcard_export()](/api-reference/typescript/TSExport#is-wildcard-export)
 
-
 ```python
 # Check export types
 for exp in file.exports:
@@ -3181,7 +3166,6 @@ iconType: "solid"
 ---
 
 Graph-sitter uses a set of core behaviors that can be inherited by code elements. These behaviors provide consistent APIs across different types of symbols.
-
 
 ## Core Behaviors
 
@@ -3277,7 +3261,6 @@ function.add_decorator("@timer")
 # Editable behavior
 function.edit("def process_input():\n    pass")
 ```
-
 
 ---
 title: "Statements and Code Blocks"
@@ -3615,7 +3598,6 @@ for statement in code_block.statements:
         print(f"With arguments: {[arg.source for arg in call.arguments]}")
 ```
 
-
 ---
 title: "Dependencies and Usages"
 sidebarTitle: "Dependencies and Usages"
@@ -3661,8 +3643,6 @@ If `A` depends on `B`, then `B` is used by `A`. This relationship is tracked in 
 
 flowchart LR
     B(BaseClass)
-
-
 
     A(MyClass)
     B ---| used by |A
@@ -3800,7 +3780,6 @@ all_function_imports = [
     if isinstance(dep, Import)
 ]
 ```
-
 
 ---
 title: "Function Calls and Call Sites"
@@ -4046,7 +4025,6 @@ print(f"After {order_by.name}: {limit_call.name}")
 print(f"Before {where.name}: {select.name}")
 ```
 
-
 ---
 title: "Variable Assignments"
 sidebarTitle: "Variable Assignments"
@@ -4058,7 +4036,6 @@ Codegen's enables manipulation of variable assignments via the following classes
 
 - [AssignmentStatement](../api-reference/core/AssignmentStatement) - A statement containing one or more assignments
 - [Assignment](../api-reference/core/Assignment) - A single assignment within an AssignmentStatement
-
 
 ### Simple Value Changes
 
@@ -4132,7 +4109,6 @@ dependencies = assignment.dependencies
   for more details.
 </Tip>
 
-
 ---
 title: "Local Variables"
 sidebarTitle: "Local Variables"
@@ -4198,7 +4174,6 @@ function.code_block.rename_variable_usages("config", "settings", fuzzy_match=Tru
   matched substring in all variable names. This might lead to unintended renames
   like `config_settings` becoming `settings_settings`.
 </Note>
-
 
 ---
 title: "Comments and Docstrings"
@@ -4415,7 +4390,6 @@ print(f"Documentation coverage: {coverage:.1f}%")
   more advanced coverage analysis and bulk documentation generation.
 </Note>
 
-
 ---
 title: "External Modules"
 sidebarTitle: "External Modules"
@@ -4535,7 +4509,6 @@ for imp in codebase.imports:
   When working with imports, always handle external modules as a special case.
   This ensures your codemods work correctly with both local and external code.
 </Note>
-
 
 ---
 title: "Working with Type Annotations"
@@ -4715,7 +4688,6 @@ if hasattr(type_annotation, "options"):
         option_types = option.resolved_value # Get symbols for each union option
 ```
 
-
 ---
 title: "Moving Symbols"
 sidebarTitle: "Moving Symbols"
@@ -4785,7 +4757,6 @@ for file in codebase.files:
 # Commit the changes once, at the end
 codebase.commit()
 ```
-
 
 ---
 title: "Collections"
@@ -4887,7 +4858,6 @@ for key in settings:
 # Bulk operations
 settings.clear()           # Remove all entries
 ```
-
 
 ---
 title: "Traversing the Call Graph"
@@ -5041,7 +5011,6 @@ When traversing call graphs, be mindful of:
 - Dynamic/runtime function calls that can't be statically analyzed
 </Warning>
 
-
 ---
 title: "React and JSX"
 sidebarTitle: "React and JSX"
@@ -5182,7 +5151,6 @@ for function in codebase.functions:
                 if not file.has_import("NewComponent"):
                     file.add_import(new_component)
 ```
-
 
 ---
 title: "Codebase Visualization"
@@ -5458,8 +5426,6 @@ def create_custom_graph(codebase):
 - Complex relationships might need multiple views
 - Some graph layouts may take time to compute
 - Preview features only work when adding symbol objects directly
-
-
 
 ---
 title: "Calling Out to LLMs"
@@ -5973,7 +5939,6 @@ const MyComponent: React.FC = () => {
   React components, where conditional rendering is common.
 </Tip>
 
-
 ---
 title: "Learn by Example"
 sidebarTitle: "At a Glance"
@@ -6124,7 +6089,6 @@ Explore our tutorials to learn how to use Graph-sitter for various code transfor
   Each tutorial includes practical examples, code snippets, and best practices.
   Follow them in order or jump to the ones most relevant to your needs.
 </Note>
-
 
 ---
 title: "Migrating APIs"
@@ -6365,11 +6329,9 @@ To demonstrate the visualization capabilities of the codegen we will generate th
  - [Function Dependency Graph](#function-dependency-graph)
  - [Blast Radius Visualization](#blast-radius-visualization)
 
-
 ## Call Trace Visualization
 
 Visualizing the call trace of a function is a great way to understand the flow of a function and for debugging. In this tutorial we will create a call trace visualization of the `patch` method of the `SharingConfigurationViewSet` class. View the source code [here](https://github.com/PostHog/posthog/blob/c2986d9ac7502aa107a4afbe31b3633848be6582/posthog/api/sharing.py#L163).
-
 
 ### Basic Setup
 First, we'll set up our codebase, graph and configure some basic parameters:
@@ -6488,7 +6450,6 @@ create_downstream_call_trace(target_method)
 # Render the visualization
 codebase.visualize(G)
 ```
-
 
 ### Take a look
 <iframe
@@ -6768,11 +6729,6 @@ First, we will do a "graph expansion" for each function - grab the function's so
 First, let's import the types we need from Codegen:
 
 ```python
-import graph_sitter
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.core.external_module import ExternalModule
-from graph_sitter.core.import_resolution import Import
-from graph_sitter.core.symbol import Symbol
 ```
 
 Here's how we get the full context for each function:
@@ -6937,8 +6893,6 @@ def create_training_example(function_data):
 examples = [create_training_example(f) for f in training_data["functions"]]
 ```
 
-
-
 ---
 title: "Organizing Your Codebase"
 sidebarTitle: "Organization"
@@ -7031,7 +6985,6 @@ print("\n✅ Code organization complete!")
 
 ```python
 # Create a graph to detect cycles
-import networkx as nx
 
 # Build dependency graph
 G = nx.DiGraph()
@@ -7197,7 +7150,6 @@ for symbol in symbols_to_move:
 
 By following these guidelines, you can effectively move symbols around your codebase while maintaining its integrity and functionality.
 
-
 ---
 title: "Improving Code Modularity"
 sidebarTitle: "Modularity"
@@ -7219,8 +7171,6 @@ Common use cases include:
 First, let's see how to analyze import relationships in your codebase:
 
 ```python
-import networkx as nx
-from collections import defaultdict
 
 # Create a graph of file dependencies
 def create_dependency_graph():
@@ -7338,7 +7288,6 @@ for file in codebase.files:
 Find modules that might need to be split up:
 
 ```python
-from collections import defaultdict
 
 def analyze_module_coupling():
     coupling_scores = defaultdict(int)
@@ -7429,8 +7378,6 @@ class FeatureFlags:
 
 You can use [Class.get_attribute(...)](/api-reference/core/Class#get-attribute) and [Attribute.usages](/api-reference/core/Attribute#usages) to analyze the coverage of your flags, like so:
 
-
-
 ```python
 feature_flag_usage = {}
 feature_flag_class = codebase.get_class('FeatureFlag')
@@ -7466,7 +7413,6 @@ This will output a table showing all feature flags and their usage counts, helpi
 <Tip>
     Learn more about [Attributes](/building-with-graph-sitter/class-api#class-attributes) and [tracking usages](/building-with-graph-sitter/dependencies-and-usages) here
 </Tip>
-
 
 ## Removing Rolled Out Flags
 
@@ -7554,7 +7500,6 @@ This will:
 3. Automatically reduce any conditional logic using the flag
 4. Handle common React patterns like ternaries and conditional rendering
 
-
 ## Related Resources
 - [Reducing Conditions](/building-with-graph-sitter/reducing-conditions) - Details on condition reduction APIs
 - [Dead Code Removal](/tutorials/deleting-dead-code) - Remove unused code after flag deletion
@@ -7602,7 +7547,6 @@ This will remove all code that is not explicitly referenced elsewhere, including
 
 To filter out special cases that are not explicitly referenced yet are, nonetheless, worth keeping around, you can use the following pattern:
 
-
 ```python
 for function in codebase.functions:
 
@@ -7632,7 +7576,6 @@ for function in codebase.functions:
 codebase.commit()
 ```
 
-
 ## Cleaning Up Unused Variables
 
 To remove unused variables, you can check for their usages within their scope:
@@ -7649,7 +7592,6 @@ for func in codebase.functions:
 # Commit
 codebase.commit()
 ```
-
 
 ## Cleaning Up After Removal
 
@@ -7672,7 +7614,6 @@ for file in codebase.files:
     # Replace three or more consecutive newlines with two newlines
     file.edit(re.sub(r"\n{3,}", "\n\n", file.content))
 ```
-
 
 ---
 title: "Increasing Type Coverage"
@@ -7703,7 +7644,6 @@ Graph-sitter programs typically access type annotations through the following AP
 - [Assignment.type](/api-reference/core/Assignment#type)
 
 Each of these has an associated setter.
-
 
 ## Finding the extent of your type coverage
 
@@ -7791,7 +7731,6 @@ for file in codebase.files:
                 function.set_return_type("null")
 ```
 </CodeGroup>
-
 
 ## Coming Soon: Advanced Type Inference
 
@@ -8367,7 +8306,6 @@ Which provides the following output:
 
 ## Identifying Areas of Low Documentation Coverage
 
-
 To identify areas of low documentation coverage, you can iterate through all directories and count the number of functions with docstrings.
 
 <Note>Learn more about [`Directories` here](/building-with-graph-sitter/files-and-directories).</Note>
@@ -8439,7 +8377,6 @@ The most efficient way to edit informative docstrings is to use [codebase.ai](/a
 
 ```python python
 # Import datetime for timestamp
-from datetime import datetime
 
 # Get current timestamp
 timestamp = datetime.now().strftime("%B %d, %Y")
@@ -8468,8 +8405,6 @@ for function in codebase.functions:
     # Set the new or updated docstring
     function.set_docstring(new_docstring)
 ```
-
-
 
 ## Adding Explicit Parameter Names and Types
 
@@ -8507,7 +8442,6 @@ for function in codebase.functions:
     # Set the new docstring
     function.set_docstring(docstring)
 ```
-
 
 ---
 title: "React Modernization"
@@ -8831,8 +8765,6 @@ components/
   code](/building-with-graph-sitter/moving-symbols) here.
 </Note>
 
-
-
 ---
 title: "Migrating from unittest to pytest"
 sidebarTitle: "Unittest to Pytest"
@@ -8880,7 +8812,6 @@ class TestUsers(unittest.TestCase):
         self.assertEqual(user.name, "test")
 
 # To:
-import pytest
 
 @pytest.fixture
 def db():
@@ -9044,7 +8975,6 @@ def temp_dir():
    - `monkeypatch` for modifying objects
    - `caplog` for capturing log messages
 
-
 ---
 title: "Migrating from SQLAlchemy 1.4 to 2.0"
 sidebarTitle: "SQLAlchemy 1.4 to 2.0"
@@ -9172,7 +9102,6 @@ Finally, we update relationship declarations to use the new style:
 
 ```
 
-
 ---
 title: "Fixing Import Loops"
 description: "Learn how to identify and fix problematic import loops using Codegen."
@@ -9191,7 +9120,6 @@ iconType: "solid"
     }}
     ></iframe>
 </Frame>
-
 
 Import loops occur when two or more Python modules depend on each other, creating a circular dependency. While some import cycles can be harmless, others can lead to runtime errors and make code harder to maintain.
 
@@ -9255,21 +9183,18 @@ for i, cycle in enumerate(cycles, 1):
     print(f"Number of static imports: {static_imports}")
 ```
 
-
 ## Understanding Import Cycles
 
 Not all import cycles are problematic! Here's an example of a cycle that one may think would cause an error but it does not because due to using dynamic imports.
 
 ```python
 # top level import in in APoT_tensor.py
-from quantizer.py import objectA
 ```
 
 ```python
 # dynamic import in quantizer.py
 def some_func():
     # dynamic import (evaluated when some_func() is called)
-    from APoT_tensor.py import objectB
 ```
 
 <img src="/images/valid-import-loop.png" />
@@ -9300,7 +9225,6 @@ def create_single_loop_graph(cycle):
                     cycle_graph.add_edge(cycle[i], cycle[j], **edge_data)
     return cycle_graph
 
-
 cycle_graph = create_single_loop_graph(cycle)
 codebase.visualize(cycle_graph)
 ```
@@ -9318,7 +9242,6 @@ codebase.visualize(cycle_graph)
     ></iframe>
 </Frame>
 
-
 # Step 3: Identify problematic cycles with mixed static & dynamic imports
 
 The import loops that we are really concerned about are those that have mixed static/dynamic imports.
@@ -9327,7 +9250,6 @@ Here's an example of a problematic cycle that we want to fix:
 
 ```python
 # In flex_decoding.py
-from .flex_attention import (
     compute_forward_block_mn,
     compute_forward_inner,
     # ... more static imports
@@ -9335,7 +9257,6 @@ from .flex_attention import (
 
 # Also in flex_decoding.py
 def create_flex_decoding_kernel(*args, **kwargs):
-    from .flex_attention import set_head_dim_values  # dynamic import
 ```
 
 It's clear that there is both a top level and a dynamic import that imports from the *same* module. Thus, this can cause issues if not handled carefully.
@@ -9691,7 +9612,6 @@ Check out these related tutorials:
 - [Codegen API Reference](/api-reference)
 - [Dependencies and Usages](/building-with-graph-sitter/dependencies-and-usages)
 
-
 ---
 title: "Migrating from Flask to FastAPI"
 sidebarTitle: "Flask to FastAPI"
@@ -9723,7 +9643,6 @@ First, we need to update Flask imports to their FastAPI equivalents and modify t
 </Tip>
 
 ```python
-from graph_sitter.core.codebase import Codebase
 
 # Parse the codebase
 codebase = Codebase("./")
@@ -9749,14 +9668,12 @@ for file in codebase.files:
 This transforms code from:
 
 ```python
-from flask import Flask
 app = Flask(__name__)
 ```
 
 to:
 
 ```python
-from fastapi import FastAPI
 app = FastAPI()
 ```
 

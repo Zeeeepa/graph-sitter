@@ -14,7 +14,6 @@ from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
-
 # TODO: WIP!
 class SymbolIndex(CodeIndex):
     """A semantic search index over codebase symbols.

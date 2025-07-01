@@ -1,5 +1,5 @@
-from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 
 def canonical(codemod):
     """Decorator for canonical Codemods that will be used for AI-agent prompts."""

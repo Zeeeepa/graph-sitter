@@ -1,32 +1,28 @@
+
 import json
 
-import requests
 from pydantic import BaseModel
+import requests
 
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
-
 # --- TYPES
-
 
 class LinearUser(BaseModel):
     id: str
     name: str
-
 
 class LinearComment(BaseModel):
     id: str
     body: str
     user: LinearUser | None = None
 
-
 class LinearIssue(BaseModel):
     id: str
     title: str
     description: str | None = None
-
 
 class LinearClient:
     api_headers: dict

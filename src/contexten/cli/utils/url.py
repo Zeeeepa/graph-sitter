@@ -1,14 +1,13 @@
+
 from enum import Enum
 
 from contexten.cli.env.enums import Environment
 from contexten.cli.env.global_env import global_env
 
-
 class DomainRegistry(Enum):
     STAGING = "chadcode.sh"
     PRODUCTION = "codegen.sh"
     LOCAL = "localhost:3000"
-
 
 def get_domain() -> str:
     """Get the appropriate domain based on the current environment."""
@@ -19,7 +18,6 @@ def get_domain() -> str:
             return DomainRegistry.STAGING.value
         case _:
             return DomainRegistry.LOCAL.value
-
 
 def generate_webapp_url(path: str = "", params: dict | None = None, protocol: str = "https") -> str:
     """Generate a complete URL for the web application.

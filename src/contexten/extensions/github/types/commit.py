@@ -1,7 +1,6 @@
-from pydantic import BaseModel
 
 from .author import GitHubAuthor
-
+from pydantic import BaseModel
 
 class GitHubCommit(BaseModel):
     id: str

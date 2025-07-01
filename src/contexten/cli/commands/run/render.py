@@ -1,10 +1,10 @@
-import rich
+
 from rich import box
 from rich.markdown import Markdown
 from rich.panel import Panel
+import rich
 
 from contexten.cli.api.schemas import RunCodemodOutput
-
 
 def pretty_print_output(output: RunCodemodOutput):
     """Pretty print the codemod run output with panels."""
@@ -20,7 +20,6 @@ def pretty_print_output(output: RunCodemodOutput):
     if output.observation:
         pretty_print_diff(output.observation)
 
-
 def pretty_print_logs(logs: str):
     """Pretty print logs in a panel."""
     rich.print(
@@ -34,7 +33,6 @@ def pretty_print_logs(logs: str):
     )
     rich.print()  # spacing
 
-
 def pretty_print_error(error: str):
     """Pretty print error in a panel."""
     rich.print(
@@ -47,7 +45,6 @@ def pretty_print_error(error: str):
         )
     )
     rich.print()  # spacing
-
 
 def pretty_print_diff(diff: str):
     """Pretty print diff in a panel."""

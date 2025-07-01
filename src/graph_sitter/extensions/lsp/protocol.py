@@ -1,19 +1,19 @@
-import os
+
 from pathlib import Path
 from typing import TYPE_CHECKING
+import os
 
 from lsprotocol.types import INITIALIZE, InitializeParams, InitializeResult
 from pygls.protocol import LanguageServerProtocol, lsp_method
 
-from graph_sitter.configs.models.codebase import CodebaseConfig
-from graph_sitter.core.codebase import Codebase
 from contexten.extensions.lsp.io import LSPIO
 from contexten.extensions.lsp.progress import LSPProgress
 from contexten.extensions.lsp.utils import get_path
+from graph_sitter.configs.models.codebase import CodebaseConfig
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
 
 if TYPE_CHECKING:
-    from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
-
 
 class GraphSitterLanguageServerProtocol(LanguageServerProtocol):
     _server: "GraphSitterLanguageServer"

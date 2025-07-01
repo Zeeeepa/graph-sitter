@@ -1,3 +1,4 @@
+
 from graph_sitter.codebase.flagging.code_flag import CodeFlag
 from graph_sitter.codebase.flagging.group import Group
 from graph_sitter.codebase.flagging.groupers.base_grouper import BaseGrouper
@@ -6,7 +7,6 @@ from graph_sitter.git.repo_operator.repo_operator import RepoOperator
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 class FileGrouper(BaseGrouper):
     """Group flags by file.

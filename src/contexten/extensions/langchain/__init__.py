@@ -31,7 +31,6 @@ __all__ = [
     "get_workspace_tools",
 ]
 
-
 def get_workspace_tools(codebase: Codebase) -> list[BaseTool]:
     """Get all workspace tools initialized with a codebase.
 

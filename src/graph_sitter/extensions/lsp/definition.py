@@ -1,3 +1,4 @@
+
 from lsprotocol.types import Position
 
 from graph_sitter.core.assignment import Assignment
@@ -10,7 +11,6 @@ from graph_sitter.core.interfaces.has_name import HasName
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 def go_to_definition(node: Editable | None, uri: str, position: Position) -> Editable | None:
     if node is None or not isinstance(node, (Expression)):

@@ -1,8 +1,8 @@
-import rich
+
 from pygit2 import Diff
 from pygit2.repository import Repository
 from rich.status import Status
-
+import rich
 
 def apply_patch(git_repo: Repository, patch: str):
     """Apply a git patch to the repository.

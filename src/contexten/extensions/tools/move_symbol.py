@@ -9,7 +9,6 @@ from graph_sitter import Codebase
 from .observation import Observation
 from .view_file import ViewFileObservation, view_file
 
-
 class MoveSymbolObservation(Observation):
     """Response from moving a symbol between files."""
 
@@ -30,7 +29,6 @@ class MoveSymbolObservation(Observation):
     )
 
     str_template: ClassVar[str] = "Moved symbol {symbol_name} from {source_file} to {target_file}"
-
 
 def move_symbol(
     codebase: Codebase,

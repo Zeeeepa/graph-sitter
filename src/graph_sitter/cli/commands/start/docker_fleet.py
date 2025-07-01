@@ -1,10 +1,10 @@
-import docker
+
 from docker.errors import NotFound
+import docker
 
 from graph_sitter.cli.commands.start.docker_container import DockerContainer
 
 GRAPH_SITTER_RUNNER_IMAGE = "graph_sitter-runner"
-
 
 class DockerFleet:
     containers: list[DockerContainer]
@@ -35,7 +35,6 @@ class DockerFleet:
 
     def __str__(self) -> str:
         return f"DockerFleet(containers={',\n'.join(str(container) for container in self.containers)})"
-
 
 if __name__ == "__main__":
     pool = DockerFleet.load()

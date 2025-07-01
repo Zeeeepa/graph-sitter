@@ -1,5 +1,5 @@
-from graph_sitter.codebase.progress.task import Task
 
+from graph_sitter.codebase.progress.task import Task
 
 class StubTask(Task):
     def update(self, message: str, count: int | None = None) -> None:

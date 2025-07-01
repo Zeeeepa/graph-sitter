@@ -1,18 +1,17 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import reader, writer
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.comment import Comment
 from graph_sitter.core.symbol_group import SymbolGroup
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
 
 Parent = TypeVar("Parent")
-
 
 @apidoc
 class CommentGroup(SymbolGroup[Comment, Parent]):

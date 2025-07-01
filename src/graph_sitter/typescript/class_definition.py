@@ -1,8 +1,11 @@
-from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING, Self
+import os
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.core.autocommit import commiter, reader, writer
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.dataclasses.usage import UsageKind
@@ -10,6 +13,8 @@ from graph_sitter.core.expressions.generic_type import GenericType
 from graph_sitter.core.expressions.placeholder_type import PlaceholderType
 from graph_sitter.core.external_module import ExternalModule
 from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.statements.symbol_statement import SymbolStatement
 from graph_sitter.core.symbol_group import SymbolGroup
 from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineCollection
 from graph_sitter.core.symbol_groups.parents import Parents
@@ -22,12 +27,6 @@ from graph_sitter.typescript.interfaces.has_block import TSHasBlock
 from graph_sitter.typescript.symbol import TSSymbol
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.statements.symbol_statement import SymbolStatement
-
 
 @ts_apidoc
 class TSClass(Class[TSFunction, TSDecorator, "TSCodeBlock", TSParameter, TSType], TSHasBlock, TSSymbol):

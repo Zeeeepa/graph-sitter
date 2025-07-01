@@ -1,9 +1,9 @@
+
 from types import FrameType, TracebackType
 
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
-
 
 def get_offset_traceback(tb_lines: list[str], line_offset: int = 0, filenameFilter: str = "<string>") -> str:
     """Generate a traceback string with offset line numbers.
@@ -31,7 +31,6 @@ def get_offset_traceback(tb_lines: list[str], line_offset: int = 0, filenameFilt
     # Join the processed lines back into a single string
     return "".join(offset_tb_lines)
 
-
 def get_local_frame(exc_type: type[BaseException], exc_value: BaseException, exc_traceback: TracebackType) -> FrameType | None:
     LOCAL_FILENAME = "<string>"
     LOCAL_MODULE_DIR = "codegen-backend/app/"
@@ -41,7 +40,6 @@ def get_local_frame(exc_type: type[BaseException], exc_value: BaseException, exc
 
     frame = tb.tb_frame if tb else None
     return frame
-
 
 def get_local_frame_context(frame: FrameType):
     local_vars = {k: v for k, v in frame.f_locals.items() if not k.startswith("__")}

@@ -1,27 +1,25 @@
-from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Self, override
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter, reader
+from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.detached_symbols.function_call import FunctionCall
+from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.try_catch_statement import TryCatchStatement
 from graph_sitter.shared.decorators.docs import noapidoc, ts_apidoc
+from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 from graph_sitter.typescript.statements.block_statement import TSBlockStatement
 from graph_sitter.typescript.statements.catch_statement import TSCatchStatement
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.dataclasses.usage import UsageKind
-    from graph_sitter.core.detached_symbols.function_call import FunctionCall
-    from graph_sitter.core.interfaces.conditional_block import ConditionalBlock
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
-
 
 @ts_apidoc
 class TSTryCatchStatement(TryCatchStatement["TSCodeBlock"], TSBlockStatement):

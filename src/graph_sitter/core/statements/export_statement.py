@@ -1,27 +1,26 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 
+from tree_sitter import Node as TSNode
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.autocommit import commiter
 from graph_sitter.core.dataclasses.usage import UsageKind
+from graph_sitter.core.export import Export
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.statement import Statement, StatementType
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
+from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 from graph_sitter.typescript.export import TSExport
 from graph_sitter.typescript.statements.import_statement import TSImportStatement
 from graph_sitter.utils import find_first_ancestor
 
 if TYPE_CHECKING:
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.export import Export
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
 
 TExport = TypeVar("TExport", bound="Export")
-
 
 @apidoc
 class ExportStatement(Statement["TSCodeBlock"], Generic[TExport]):

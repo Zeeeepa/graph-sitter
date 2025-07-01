@@ -2,7 +2,6 @@
 
 from typing import Optional, TypedDict
 
-
 class EditFileArtifacts(TypedDict, total=False):
     """Artifacts for edit file operations.
 
@@ -12,7 +11,6 @@ class EditFileArtifacts(TypedDict, total=False):
     filepath: str  # Path to the edited file
     diff: Optional[str]  # Diff of changes made to the file
     error: Optional[str]  # Error message (only present on error)
-
 
 class ViewFileArtifacts(TypedDict, total=False):
     """Artifacts for view file operations.
@@ -30,7 +28,6 @@ class ViewFileArtifacts(TypedDict, total=False):
     max_lines_per_page: Optional[int]  # Maximum lines that can be viewed at once
     file_size: Optional[int]  # Size of file in bytes
     error: Optional[str]  # Error message (only present on error)
-
 
 class ListDirectoryArtifacts(TypedDict, total=False):
     """Artifacts for directory listing operations.
@@ -50,7 +47,6 @@ class ListDirectoryArtifacts(TypedDict, total=False):
     max_depth: Optional[int]  # Maximum depth allowed
     error: Optional[str]  # Error message (only present on error)
 
-
 class SearchMatch(TypedDict, total=False):
     """Information about a single search match."""
 
@@ -58,7 +54,6 @@ class SearchMatch(TypedDict, total=False):
     line_number: int  # 1-based line number of the match
     line: str  # The full line containing the match
     match: str  # The specific text that matched
-
 
 class SearchArtifacts(TypedDict, total=False):
     """Artifacts for search operations.
@@ -76,7 +71,6 @@ class SearchArtifacts(TypedDict, total=False):
     file_paths: list[str]  # List of files containing matches
     error: Optional[str]  # Error message (only present on error)
 
-
 class SemanticEditArtifacts(TypedDict, total=False):
     """Artifacts for semantic edit operations.
 
@@ -89,7 +83,6 @@ class SemanticEditArtifacts(TypedDict, total=False):
     new_content: Optional[str]  # New content of the file after edits
     line_count: Optional[int]  # Total number of lines in the edited file
     error: Optional[str]  # Error message (only present on error)
-
 
 class RelaceEditArtifacts(TypedDict, total=False):
     """Artifacts for relace edit operations.

@@ -1,6 +1,6 @@
-from graph_sitter.core.codebase import Codebase
-from contexten.extensions.attribution.git_history import GitAttributionTracker
 
+from contexten.extensions.attribution.git_history import GitAttributionTracker
+from graph_sitter.core.codebase import Codebase
 
 def analyze_ai_impact(codebase: Codebase, ai_authors: list[str] | None = None, max_commits: int | None = None) -> dict:
     """Analyze the impact of AI on a codebase.
@@ -53,7 +53,6 @@ def analyze_ai_impact(codebase: Codebase, ai_authors: list[str] | None = None, m
         "timeline": timeline_data,
         "contributors": contributors,
     }
-
 
 def add_attribution_to_symbols(codebase: Codebase, ai_authors: list[str] | None = None) -> None:
     """Add attribution information to symbols in the codebase.

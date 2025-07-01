@@ -1,3 +1,4 @@
+
 from functools import cached_property
 
 from graph_sitter.core.autocommit import commiter, reader, writer
@@ -5,8 +6,8 @@ from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions.chained_attribute import ChainedAttribute
 from graph_sitter.core.expressions.defined_name import DefinedName
 from graph_sitter.core.expressions.name import Name
+from graph_sitter.core.function import Function
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
-
 
 @apidoc
 class HasName:
@@ -39,7 +40,6 @@ class HasName:
         if isinstance(self._name_node, ChainedAttribute):
             return self._name_node.full_name
         if isinstance(self._name_node, DefinedName):
-            from graph_sitter.core.function import Function
 
             if isinstance(self, Function) and self.is_method:
                 return self.parent_class.full_name + "." + self.name

@@ -1,22 +1,22 @@
-import shutil
+
 from contextlib import nullcontext
 from pathlib import Path
+import shutil
 
+from rich.status import Status
 import requests
 import rich
-from rich.status import Status
 
 from contexten.cli.api.client import RestAPI
 from contexten.cli.api.endpoints import CODEGEN_SYSTEM_PROMPT_URL
-from graph_sitter.cli.auth.constants import CODEGEN_DIR, DOCS_DIR, EXAMPLES_DIR, PROMPTS_DIR
-from graph_sitter.cli.auth.session import CodegenSession
 from contexten.cli.auth.token_manager import get_current_token
-from graph_sitter.cli.rich.spinners import create_spinner
-from graph_sitter.cli.utils.notebooks import create_notebook
 from contexten.cli.workspace.docs_workspace import populate_api_docs
 from contexten.cli.workspace.examples_workspace import populate_examples
+from graph_sitter.cli.auth.constants import CODEGEN_DIR, DOCS_DIR, EXAMPLES_DIR, PROMPTS_DIR
+from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.rich.spinners import create_spinner
+from graph_sitter.cli.utils.notebooks import create_notebook
 from graph_sitter.cli.workspace.venv_manager import VenvManager
-
 
 def initialize_codegen(session: CodegenSession, status: Status | str = "Initializing", fetch_docs: bool = False) -> CodegenSession:
     """Initialize or update the codegen directory structure and content.
@@ -85,13 +85,11 @@ def initialize_codegen(session: CodegenSession, status: Status | str = "Initiali
 
     return CODEGEN_FOLDER, DOCS_FOLDER, EXAMPLES_FOLDER
 
-
 def add_to_gitignore_if_not_present(gitignore: Path, line: str):
     if not gitignore.exists():
         gitignore.write_text(line)
     elif line not in gitignore.read_text():
         gitignore.write_text(gitignore.read_text() + "\n" + line)
-
 
 def modify_gitignore(codegen_folder: Path):
     """Update .gitignore to track only specific Codegen files."""

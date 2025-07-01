@@ -44,7 +44,6 @@ REASONER_SYSTEM_MESSAGE = """
     lines before and 20 lines after the edit range)
 """
 
-
 SUMMARIZE_CONVERSATION_PROMPT = """
     You are an expert conversation summarizer. You are given below a conversation between an AI coding agent and a human.
     It contains a human request and the agent thought process

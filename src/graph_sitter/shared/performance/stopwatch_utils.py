@@ -1,6 +1,7 @@
+
+from functools import wraps
 import subprocess
 import time
-from functools import wraps
 
 import sentry_sdk
 
@@ -8,7 +9,6 @@ from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.shared.performance.time_utils import humanize_duration
 
 logger = get_logger(__name__)
-
 
 def stopwatch(func):
     @wraps(func)
@@ -21,7 +21,6 @@ def stopwatch(func):
         return result
 
     return wrapper
-
 
 def stopwatch_with_sentry(name: str):
     def decorator(func):
@@ -38,7 +37,6 @@ def stopwatch_with_sentry(name: str):
         return wrapper
 
     return decorator
-
 
 def subprocess_with_stopwatch(command, command_desc: str | None = None, *args, **kwargs) -> subprocess.CompletedProcess[str]:
     start_time = time.time()

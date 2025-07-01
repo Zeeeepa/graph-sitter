@@ -1,16 +1,12 @@
 """Simple text-based search functionality for the codebase.
 
-This performs either a regex pattern match or simple text search across all files in the codebase.
-Each matching line will be returned with its line number.
-Results are paginated with a default of 10 files per page.
-"""
-
+from typing import ClassVar
 import logging
 import os
 import re
 import subprocess
-from typing import ClassVar
 
+from .observation import Observation
 from langchain_core.messages import ToolMessage
 from pydantic import Field
 
@@ -18,10 +14,12 @@ from contexten.extensions.tools.tool_output_types import SearchArtifacts
 from contexten.extensions.tools.tool_output_types import SearchMatch as SearchMatchDict
 from graph_sitter import Codebase
 
-from .observation import Observation
+This performs either a regex pattern match or simple text search across all files in the codebase.
+Each matching line will be returned with its line number.
+Results are paginated with a default of 10 files per page.
+"""
 
 logger = logging.getLogger(__name__)
-
 
 class SearchMatch(Observation):
     """Information about a single line match."""
@@ -49,7 +47,6 @@ class SearchMatch(Observation):
             "match": self.match,
         }
 
-
 class SearchFileResult(Observation):
     """Search results for a single file."""
 
@@ -74,7 +71,6 @@ class SearchFileResult(Observation):
     def _get_details(self) -> dict[str, str | int]:
         """Get details for string representation."""
         return {"match_count": len(self.matches)}
-
 
 class SearchObservation(Observation):
     """Response from searching the codebase."""
@@ -166,7 +162,6 @@ class SearchObservation(Observation):
             tool_call_id=tool_call_id,
             artifact=artifacts,
         )
-
 
 def _search_with_ripgrep(
     codebase: Codebase,
@@ -310,7 +305,6 @@ def _search_with_ripgrep(
         # Let the caller handle this by falling back to Python implementation
         raise
 
-
 def _search_with_python(
     codebase: Codebase,
     query: str,
@@ -406,7 +400,6 @@ def _search_with_python(
         files_per_page=files_per_page,
         results=paginated_results,
     )
-
 
 def search(
     codebase: Codebase,

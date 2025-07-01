@@ -1,12 +1,12 @@
-import itertools
+
 from collections import defaultdict
 from functools import cached_property
+import itertools
 
 from tree_sitter import Range
 
 from graph_sitter.compiled.sort import sort_editables
 from graph_sitter.core.interfaces.editable import Editable
-
 
 class RangeIndex:
     _ranges: defaultdict[Range, list[Editable]]

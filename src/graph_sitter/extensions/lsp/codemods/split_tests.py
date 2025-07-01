@@ -1,12 +1,12 @@
+
 from typing import TYPE_CHECKING
 
+from contexten.extensions.lsp.codemods.base import CodeAction
 from graph_sitter.core.function import Function
 from graph_sitter.core.interfaces.editable import Editable
-from contexten.extensions.lsp.codemods.base import CodeAction
+from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
 
 if TYPE_CHECKING:
-    from graph_sitter.extensions.lsp.server import GraphSitterLanguageServer
-
 
 class SplitTests(CodeAction):
     name = "Split Tests"

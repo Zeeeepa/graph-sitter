@@ -1,15 +1,16 @@
+
 import logging
 import textwrap
 
 from codemods.codemod import Codemod
-from graph_sitter.core.codebase import PyCodebaseType
-from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
-from graph_sitter.writer_decorators import canonical
 from tests.shared.skills.decorators import skill, skill_impl
 from tests.shared.skills.skill import Skill
 
-logger = logging.getLogger(__name__)
+from graph_sitter.core.codebase import PyCodebaseType
+from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
+from graph_sitter.writer_decorators import canonical
 
+logger = logging.getLogger(__name__)
 
 @skill(
     canonical=True,

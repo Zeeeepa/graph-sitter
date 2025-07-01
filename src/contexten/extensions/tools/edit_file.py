@@ -13,7 +13,6 @@ from .replacement_edit import generate_diff
 if TYPE_CHECKING:
     from .tool_output_types import EditFileArtifacts
 
-
 class EditFileObservation(Observation):
     """Response from editing a file."""
 
@@ -48,7 +47,6 @@ class EditFileObservation(Observation):
             artifact=artifacts_success,
             tool_call_id=tool_call_id,
         )
-
 
 def edit_file(codebase: Codebase, filepath: str, new_content: str) -> EditFileObservation:
     """Edit the contents of a file.

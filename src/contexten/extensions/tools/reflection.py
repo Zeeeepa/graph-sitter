@@ -12,7 +12,6 @@ from graph_sitter import Codebase
 
 from .observation import Observation
 
-
 class ReflectionSection(Observation):
     """A section of the reflection output."""
 
@@ -20,7 +19,6 @@ class ReflectionSection(Observation):
     content: str = Field(description="Content of the section")
 
     str_template: ClassVar[str] = "{title}:\n{content}"
-
 
 class ReflectionObservation(Observation):
     """Response from agent reflection."""
@@ -56,7 +54,6 @@ class ReflectionObservation(Observation):
 
         return "\n".join(output)
 
-
 # System prompt for the reflection LLM
 REFLECTION_SYSTEM_PROMPT = """You are an expert AI assistant specialized in reflection and strategic planning.
 Your task is to help organize thoughts, identify knowledge gaps, and create a strategic plan based on the information provided.
@@ -85,7 +82,6 @@ You will not suggest the agent writes new tests or modifies existing tests.
 
 **YOU MUST ABSTAIN FROM SUGGESTING THE AGENT WRITES NEW TESTS OR MODIFIES EXISTING TESTS.**
 """
-
 
 def parse_reflection_response(response: str) -> list[ReflectionSection]:
     """Parse the LLM response into structured reflection sections.
@@ -122,7 +118,6 @@ def parse_reflection_response(response: str) -> list[ReflectionSection]:
         sections.append(ReflectionSection(title=current_section, content="\n".join(current_content).strip()))
 
     return sections
-
 
 def perform_reflection(
     context_summary: str,

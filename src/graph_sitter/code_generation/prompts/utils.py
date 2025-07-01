@@ -1,9 +1,9 @@
+
 from graph_sitter.code_generation.enums import DocumentationDecorators
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.enums import NodeType
 from graph_sitter.python.class_definition import PyClass
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
-
 
 def get_decorator_for_language(
     language: ProgrammingLanguage = ProgrammingLanguage.PYTHON,
@@ -12,7 +12,6 @@ def get_decorator_for_language(
         return DocumentationDecorators.PYTHON
     elif language == ProgrammingLanguage.TYPESCRIPT:
         return DocumentationDecorators.TYPESCRIPT
-
 
 def get_api_classes_by_decorator(
     codebase: Codebase,
@@ -33,19 +32,16 @@ def get_api_classes_by_decorator(
             classes[cls.name] = cls
     return classes
 
-
 def format_python_codeblock(source: str) -> str:
     """A python codeblock in markdown format."""
     # USE 4 backticks instead of 3 so backticks inside the codeblock are handled properly
     cb = f"````python\n{source}\n````"
     return cb
 
-
 def set_indent(string: str, indent: int) -> str:
     """Sets the indentation of a string."""
     tab = "\t"
     return "\n".join([f"{tab * indent}{line}" for line in string.split("\n")])
-
 
 def get_codegen_sdk_class_docstring(cls: PyClass, codebase: Codebase) -> str:
     """Get the documentation for a single GraphSitter class and its methods."""

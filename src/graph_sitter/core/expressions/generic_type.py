@@ -1,29 +1,28 @@
+
 from abc import abstractmethod
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
 
 from tree_sitter import Node as TSNode
 
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.compiled.resolution import ResolutionStack
 from graph_sitter.core.autocommit import commiter, reader
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions.named_type import NamedType
+from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.symbol_groups.collection import Collection
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.expressions.type import Type
-    from graph_sitter.core.interfaces.editable import Editable
 
 Parent = TypeVar("Parent")
 
-
 TType = TypeVar("TType", bound="Type")
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class GenericType(NamedType[Parent], Generic[TType, Parent]):

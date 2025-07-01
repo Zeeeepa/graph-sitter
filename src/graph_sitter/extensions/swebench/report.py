@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-import json
-import subprocess
 from collections import defaultdict
 from pathlib import Path
+import json
+import subprocess
 
 from contexten.extensions.swebench.enums import SWEBenchDataset
 from contexten.extensions.swebench.tests import remove_patches_to_tests
 
 NUM_EVAL_PROCS = 5
-
 
 def run_evals(predictions_jsonl, logs_dir: Path, dataset: SWEBenchDataset, run_id: str):
     """Run the evaluations on the predictions on modal."""
@@ -26,7 +25,6 @@ python -m swebench.harness.run_evaluation
     print("Running evaluation command:", run_evals_cmd)
 
     subprocess.run(run_evals_cmd.split(), check=True)
-
 
 def get_report(predictions_jsonl, logs_dir: Path):
     # Load and parse the evaluation results directly from the predictions file
@@ -59,7 +57,6 @@ def get_report(predictions_jsonl, logs_dir: Path):
     # Convert lists to sets for compatibility with existing code
     return {k: set(v) for k, v in results.items()}
 
-
 def update_pred_json(predictions, report, predictions_dir: Path):
     all_instances = set(report.get("generated", []))
     all_instances.update(set(report.get("no_generation", [])))
@@ -86,7 +83,6 @@ def update_pred_json(predictions, report, predictions_dir: Path):
 
     return predictions
 
-
 def preds_to_jsonl(predictions, predictions_dir: Path):
     dname = predictions_dir
 
@@ -105,7 +101,6 @@ def preds_to_jsonl(predictions, predictions_dir: Path):
             }
             fh.write(json.dumps(minimal_pred) + "\n")
     return predictions_jsonl
-
 
 def generate_report(predictions_dir: Path, logs_dir: Path, dataset: SWEBenchDataset, run_id: str):
     # Automatically find all JSON files in predictions/results

@@ -1,3 +1,4 @@
+
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Generic, Self, TypeVar, override
 
@@ -6,15 +7,14 @@ from graph_sitter.compiled.autocommit import reader
 from graph_sitter.core.autocommit import commiter
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions.type import Type
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.interfaces.editable import Editable
 
 TType = TypeVar("TType", bound="Type")
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class PlaceholderType(Type[Parent], Generic[TType, Parent]):

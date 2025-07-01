@@ -10,7 +10,6 @@ from graph_sitter.core.codebase import Codebase
 
 T = TypeVar("T")  # Type of the items being indexed (e.g., File, Symbol)
 
-
 class CodeIndex(ABC):
     """Abstract base class for semantic code search indices.
 

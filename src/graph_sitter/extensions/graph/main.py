@@ -1,7 +1,7 @@
-from graph_sitter.core.codebase import Codebase
+
 from contexten.extensions.graph.create_graph import create_codebase_graph
 from contexten.extensions.graph.neo4j_exporter import Neo4jExporter
-
+from graph_sitter.core.codebase import Codebase
 
 def visualize_codebase(codebase, neo4j_uri: str, username: str, password: str):
     """Create and visualize a codebase graph in Neo4j.
@@ -34,7 +34,6 @@ def visualize_codebase(codebase, neo4j_uri: str, username: str, password: str):
 
     finally:
         exporter.close()
-
 
 if __name__ == "__main__":
     # Initialize codebase

@@ -1,9 +1,10 @@
+
+from typing import Literal
 import logging
 import os
-from typing import Literal
 
-import modal
 from fastapi import Request
+import modal
 
 from contexten.extensions.events.codegen_app import CodegenApp
 from contexten.extensions.events.modal.request_util import fastapi_request_adapter
@@ -15,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 # refactor this to be a config
 DEFAULT_SNAPSHOT_DICT_ID = "codegen-events-codebase-snapshots"
-
 
 class EventRouterMixin:
     """This class is intended to be registered as a modal Class
@@ -105,7 +105,6 @@ class EventRouterMixin:
 
             except Exception as e:
                 logging.exception(f"Error refreshing snapshot for {repo_full_name}: {e!s}")
-
 
 class CodebaseEventsApp:
     """This class is intended to be registered as a modal Class

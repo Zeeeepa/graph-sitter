@@ -1,9 +1,14 @@
-from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Generator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar, Generic, Literal, Self, TypeVar, override
 
+from tree_sitter import Node as TSNode
+import rich.repr
+
+from __future__ import annotations
+from graph_sitter.codebase.codebase_context import CodebaseContext
 from graph_sitter.codebase.resolution_stack import ResolutionStack
 from graph_sitter.codebase.transactions import TransactionPriority
 from graph_sitter.compiled.utils import cached_property
@@ -11,33 +16,28 @@ from graph_sitter.core.autocommit import commiter, reader, remover, writer
 from graph_sitter.core.dataclasses.usage import UsageKind
 from graph_sitter.core.expressions.name import Name
 from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.file import SourceFile
+from graph_sitter.core.file import SourceFile
 from graph_sitter.core.interfaces.chainable import Chainable
 from graph_sitter.core.interfaces.editable import Editable
+from graph_sitter.core.interfaces.exportable import Exportable
 from graph_sitter.core.interfaces.has_attribute import HasAttribute
+from graph_sitter.core.interfaces.has_name import HasName
+from graph_sitter.core.interfaces.importable import Importable
 from graph_sitter.core.interfaces.usable import Usable
+from graph_sitter.core.node_id_factory import NodeId
 from graph_sitter.core.statements.import_statement import ImportStatement
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import EdgeType, ImportType, NodeType
 from graph_sitter.output.constants import ANGULAR_STYLE
+from graph_sitter.python.file import PyFile
 from graph_sitter.shared.decorators.docs import apidoc, noapidoc
+from graph_sitter.typescript.file import TSFile
 from graph_sitter.visualizations.enums import VizNode
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    import rich.repr
-    from tree_sitter import Node as TSNode
-
-    from graph_sitter.codebase.codebase_context import CodebaseContext
-    from graph_sitter.core.file import SourceFile
-    from graph_sitter.core.interfaces.exportable import Exportable
-    from graph_sitter.core.interfaces.has_name import HasName
-    from graph_sitter.core.interfaces.importable import Importable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.symbol import Symbol
-
 
 TSourceFile = TypeVar("TSourceFile", bound="SourceFile")
-
 
 @dataclass
 class ImportResolution(Generic[TSourceFile]):
@@ -53,9 +53,7 @@ class ImportResolution(Generic[TSourceFile]):
     symbol: Symbol | ExternalModule | None = None  # None when we import the entire file (e.g. `from a.b.c import foo`)
     imports_file: bool = False  # True when we import the entire file (e.g. `from a.b.c import foo`)
 
-
 TSourceFile = TypeVar("TSourceFile", bound="SourceFile")
-
 
 @apidoc
 class Import(Usable[ImportStatement], Chainable, Generic[TSourceFile], HasAttribute[TSourceFile]):
@@ -324,8 +322,6 @@ class Import(Usable[ImportStatement], Chainable, Generic[TSourceFile], HasAttrib
         """Returns the symbol directly being imported, including an indirect import and an External
         Module.
         """
-        from graph_sitter.python.file import PyFile
-        from graph_sitter.typescript.file import TSFile
 
         symbol = next(iter(self.ctx.successors(self.node_id, edge_type=EdgeType.IMPORT_SYMBOL_RESOLUTION, sort=False)), None)
         if symbol is None:
@@ -409,7 +405,6 @@ class Import(Usable[ImportStatement], Chainable, Generic[TSourceFile], HasAttrib
             ```python
             def my_function():
                 import foo  # Dynamic - only imported when function runs
-
 
             if condition:
                 from bar import baz  # Dynamic - only imported if condition is True
@@ -583,7 +578,6 @@ class Import(Usable[ImportStatement], Chainable, Generic[TSourceFile], HasAttrib
     @reader
     def _wildcards(self) -> dict[str, WildcardImport[Self]]:
         """A list of all imports or wildcard imports."""
-        from graph_sitter.core.file import SourceFile
 
         res = {}
         if self.is_wildcard_import():
@@ -679,9 +673,7 @@ class Import(Usable[ImportStatement], Chainable, Generic[TSourceFile], HasAttrib
             return resolved.symbol or resolved.from_file
         return None
 
-
 TImport = TypeVar("TImport", bound="Import")
-
 
 class WildcardImport(Chainable, Generic[TImport]):
     """Class to represent one of many wildcard imports."""
@@ -715,7 +707,6 @@ class WildcardImport(Chainable, Generic[TImport]):
     @noapidoc
     def parent(self) -> Editable:
         return self.imp.parent
-
 
 class ExternalImportResolver:
     def resolve(self, imp: Import) -> str | None:

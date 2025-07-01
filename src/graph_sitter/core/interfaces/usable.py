@@ -1,22 +1,21 @@
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from __future__ import annotations
 from graph_sitter._proxy import proxy_property
 from graph_sitter.core.autocommit import reader
 from graph_sitter.core.dataclasses.usage import Usage, UsageType
+from graph_sitter.core.export import Export
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.interfaces.editable import Editable
 from graph_sitter.core.interfaces.importable import Importable
+from graph_sitter.core.node_id_factory import NodeId
+from graph_sitter.core.symbol import Symbol
 from graph_sitter.enums import EdgeType
 from graph_sitter.shared.decorators.docs import apidoc
 
 if TYPE_CHECKING:
-    from graph_sitter.core.export import Export
-    from graph_sitter.core.import_resolution import Import
-    from graph_sitter.core.interfaces.editable import Editable
-    from graph_sitter.core.node_id_factory import NodeId
-    from graph_sitter.core.symbol import Symbol
 Parent = TypeVar("Parent", bound="Editable")
-
 
 @apidoc
 class Usable(Importable[Parent], Generic[Parent]):

@@ -1,24 +1,10 @@
-# This file is auto-generated, do not modify manually. Edit this in src/gscli/generate/runner_imports.py.
-def get_generated_imports():
-    return """
-# External imports
+from pathlib import Path
 import os
 import re
-from pathlib import Path
+
 import networkx as nx
 import plotly
 
-# GraphSitter imports (private)
-
-from graph_sitter.git.models.codemod_context import CodemodContext
-from graph_sitter.git.models.github_named_user_context import GithubNamedUserContext
-from graph_sitter.git.models.pr_options import PROptions
-from graph_sitter.git.models.pr_part_context import PRPartContext
-from graph_sitter.git.models.pull_request_context import PullRequestContext
-
-from graph_sitter.shared.exceptions.control_flow import StopCodemodException
-
-# GraphSitter imports (public)
 from graph_sitter.codebase.flagging.enums import FlagKwargs
 from graph_sitter.codebase.flagging.enums import MessageType
 from graph_sitter.codebase.span import Span
@@ -111,6 +97,11 @@ from graph_sitter.core.symbol_groups.multi_line_collection import MultiLineColle
 from graph_sitter.core.symbol_groups.tuple import Tuple
 from graph_sitter.core.type_alias import TypeAlias
 from graph_sitter.enums import ImportType
+from graph_sitter.git.models.codemod_context import CodemodContext
+from graph_sitter.git.models.github_named_user_context import GithubNamedUserContext
+from graph_sitter.git.models.pr_options import PROptions
+from graph_sitter.git.models.pr_part_context import PRPartContext
+from graph_sitter.git.models.pull_request_context import PullRequestContext
 from graph_sitter.python.assignment import PyAssignment
 from graph_sitter.python.class_definition import PyClass
 from graph_sitter.python.detached_symbols.code_block import PyCodeBlock
@@ -145,6 +136,7 @@ from graph_sitter.python.statements.while_statement import PyWhileStatement
 from graph_sitter.python.statements.with_statement import WithStatement
 from graph_sitter.python.symbol import PySymbol
 from graph_sitter.python.symbol_groups.comment_group import PyCommentGroup
+from graph_sitter.shared.exceptions.control_flow import StopCodemodException
 from graph_sitter.typescript.assignment import TSAssignment
 from graph_sitter.typescript.class_definition import TSClass
 from graph_sitter.typescript.detached_symbols.code_block import TSCodeBlock
@@ -197,4 +189,13 @@ from graph_sitter.typescript.symbol_groups.dict import TSDict
 from graph_sitter.typescript.symbol_groups.dict import TSPair
 from graph_sitter.typescript.ts_config import TSConfig
 from graph_sitter.typescript.type_alias import TSTypeAlias
+
+# This file is auto-generated, do not modify manually. Edit this in src/gscli/generate/runner_imports.py.
+def get_generated_imports():
+    return """
+# External imports
+
+# GraphSitter imports (private)
+
+# GraphSitter imports (public)
 """
