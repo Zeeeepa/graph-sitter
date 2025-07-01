@@ -1,8 +1,8 @@
 import os
 
-import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+import requests
 
 from contexten.extensions.linear.types import LinearComment, LinearIssue, LinearTeam, LinearUser
 from graph_sitter.shared.logging.get_logger import get_logger

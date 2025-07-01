@@ -4,9 +4,9 @@ import rich
 import rich_click as click
 
 from contexten.cli.api.client import RestAPI
+from contexten.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.auth.constants import PROMPTS_DIR
 from graph_sitter.cli.auth.session import CodegenSession
-from contexten.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.codemod.convert import convert_to_cli
 from graph_sitter.cli.errors import ServerError
 from graph_sitter.cli.rich.codeblocks import format_command, format_path

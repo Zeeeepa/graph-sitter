@@ -1,8 +1,8 @@
 from unidiff import PatchSet
 
 from contexten.cli.api.client import RestAPI
-from graph_sitter.cli.auth.session import CodegenSession
 from contexten.cli.auth.token_manager import get_current_token
+from graph_sitter.cli.auth.session import CodegenSession
 
 
 class CodegenPullRequest:

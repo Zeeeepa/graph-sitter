@@ -1,5 +1,5 @@
-import time
 from pathlib import Path
+import time
 
 import rich
 import rich_click as click

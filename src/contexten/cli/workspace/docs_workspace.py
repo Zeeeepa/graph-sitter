@@ -1,5 +1,5 @@
-import shutil
 from pathlib import Path
+import shutil
 
 from rich.status import Status
 

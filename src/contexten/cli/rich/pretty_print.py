@@ -1,7 +1,7 @@
-import rich
 from rich import box
 from rich.markdown import Markdown
 from rich.panel import Panel
+import rich
 
 from contexten.cli.api.schemas import RunCodemodOutput
 

@@ -1,16 +1,16 @@
+from pathlib import Path
+from typing import Optional
 import importlib.util
 import logging
 import socket
 import subprocess
 import sys
-from pathlib import Path
-from typing import Optional
 
+from rich.logging import RichHandler
+from rich.panel import Panel
 import rich
 import rich_click as click
 import uvicorn
-from rich.logging import RichHandler
-from rich.panel import Panel
 
 from contexten.extensions.events.codegen_app import CodegenApp
 from graph_sitter.shared.logging.get_logger import get_logger

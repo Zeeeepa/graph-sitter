@@ -1,11 +1,11 @@
 import uuid
 import warnings
 
-import rich_click as click
 from langchain_core.messages import SystemMessage
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.prompt import Prompt
+import rich_click as click
 
 from contexten.extensions.langchain.agent import create_agent_with_tools
 from contexten.extensions.langchain.tools import (
