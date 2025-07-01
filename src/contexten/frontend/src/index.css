@@ -1,0 +1,289 @@
+/* Dark-Only Theme for Graph-Sitter Dashboard */
+:root {
+  /* Dark theme color palette */
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --bg-hover: #30363d;
+  --bg-active: #282e33;
+  
+  --text-primary: #f0f6fc;
+  --text-secondary: #8b949e;
+  --text-muted: #656d76;
+  
+  --border-primary: #30363d;
+  --border-secondary: #21262d;
+  
+  --accent-primary: #238636;
+  --accent-secondary: #1f6feb;
+  --accent-warning: #d29922;
+  --accent-danger: #da3633;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Segoe UI', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+code {
+  font-family: 'Fira Code', 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+  background-color: var(--bg-tertiary);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+}
+
+/* Custom scrollbar - Dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-hover);
+  border-radius: 4px;
+  border: 1px solid var(--border-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--bg-secondary);
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--accent-secondary);
+  color: var(--text-primary);
+}
+
+::-moz-selection {
+  background-color: var(--accent-secondary);
+  color: var(--text-primary);
+}
+
+/* Focus styles */
+*:focus {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* Button base styles */
+button {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+button:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-secondary);
+}
+
+button:active {
+  background-color: var(--bg-active);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary button variant */
+button.primary {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+button.primary:hover {
+  background-color: #2ea043;
+  border-color: #2ea043;
+}
+
+/* Secondary button variant */
+button.secondary {
+  background-color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+  color: white;
+}
+
+button.secondary:hover {
+  background-color: #388bfd;
+  border-color: #388bfd;
+}
+
+/* Input styles */
+input, textarea, select {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 0.5rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent-secondary);
+  outline: none;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Card styles */
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  border-color: var(--border-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+/* Status indicators */
+.status-active {
+  color: var(--accent-primary);
+}
+
+.status-warning {
+  color: var(--accent-warning);
+}
+
+.status-danger {
+  color: var(--accent-danger);
+}
+
+.status-secondary {
+  color: var(--accent-secondary);
+}
+
+/* Loading spinner */
+.spinner {
+  border: 2px solid var(--bg-tertiary);
+  border-top: 2px solid var(--accent-secondary);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Connection status indicator */
+.connection-status {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.connection-status.disconnected {
+  background-color: var(--accent-danger);
+  color: white;
+}
+
+.connection-status.connecting {
+  background-color: var(--accent-warning);
+  color: white;
+}
+
+/* Utility classes */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+
+.bg-primary { background-color: var(--bg-primary); }
+.bg-secondary { background-color: var(--bg-secondary); }
+.bg-tertiary { background-color: var(--bg-tertiary); }
+
+.border-primary { border-color: var(--border-primary); }
+.border-secondary { border-color: var(--border-secondary); }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .card {
+    padding: 0.75rem;
+  }
+  
+  button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --border-primary: #555555;
+    --bg-secondary: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

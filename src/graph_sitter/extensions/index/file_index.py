@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.file import File
-from contexten.extensions.index.code_index import CodeIndex
+from graph_sitter.extensions.index.code_index import CodeIndex
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
