@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
+
+import asyncio
+from contexten import ContextenApp
+
 import logging
 from logging import getLogger
 import modal
-from contexten import CodegenApp
 from fastapi import Request
-from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent, PullRequestUnlabeledEvent
+from contexten.extensions.Github.types.events.pull_request import PullRequestLabeledEvent, PullRequestUnlabeledEvent
 from helpers import remove_bot_comments, pr_review_agent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -26,7 +30,7 @@ base_image = (
     )
 )
 
-app = CodegenApp(name="github", image=base_image, modal_api_key="")
+app = ContextenApp(name="github", image=base_image, modal_api_key="")
 
 
 @app.github.event("pull_request:labeled")

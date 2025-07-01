@@ -1,16 +1,16 @@
 from github import Github
-from contexten.extensions.github.types.events.pull_request import PullRequestUnlabeledEvent
+from contexten.extensions.Github.types.events.pull_request import PullRequestUnlabeledEvent, PullRequestLabeledEvent
 from logging import getLogger
 
 import os
 
 from graph_sitter import Codebase
 
-from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
+from contexten.extensions.Github.types.events.pull_request import PullRequestLabeledEvent
 from graph_sitter.configs.models.secrets import SecretsConfig
 from contexten import CodeAgent
 
-from contexten.extensions.langchain.tools import (
+from contexten.agents.langchain.tools import (
     # Github
     GithubViewPRTool,
     GithubCreatePRCommentTool,
