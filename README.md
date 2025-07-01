@@ -1,117 +1,283 @@
-<br />
+# Complete CICD System with Codegen SDK
 
-<p align="center">
-  <a href="https://graph-sitter.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+A comprehensive CI/CD system built using the Codegen SDK that provides autonomous development workflows through natural language prompts.
 
-<h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
-</h2>
+## 🚀 Features
 
-<div align="center">
+- **Prompt-Driven Architecture**: All actions via natural language prompts using Codegen SDK
+- **Project Management**: Create, track, and manage projects with automatic Linear integration
+- **GitHub Integration**: Automatic PR reviews, validation, and deployment
+- **Linear Orchestration**: Main issues with sub-issues, auto-assignment to @codegen
+- **Modal Webhooks**: Unified webhook handling for GitHub and Linear events
+- **Real-time Dashboard**: Project monitoring and team collaboration
+- **Deployment Validation**: Automatic validation via successful PR deployments
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-graph-sitter.com-purple?style=flat-square)](https://graph-sitter.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/graph-sitter/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+## 📋 Prerequisites
 
-</div>
+1. **Codegen Account**: Get your org_id and token from [codegen.com/developer](https://codegen.com/developer)
+2. **GitHub PAT**: Personal Access Token with repo and webhook permissions
+3. **Linear API**: API token and team ID from Linear settings
+4. **Modal Account**: For webhook deployment (optional but recommended)
 
-<br />
+## 🛠️ Installation
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+1. **Clone and Setup**:
+```bash
+git clone <repository-url>
+cd cicd-system
+pip install -r requirements.txt
+```
+
+2. **Environment Configuration**:
+```bash
+cp .env.example .env
+# Edit .env with your actual credentials
+```
+
+3. **Required Environment Variables**:
+```bash
+# Codegen (Required)
+CODEGEN_ORG_ID=323
+CODEGEN_TOKEN=sk-ce027fa7-3c8d-4beb-8c86-ed8ae982ac99
+
+# GitHub (Required)
+GITHUB_TOKEN=your_github_pat_token
+GITHUB_ORG=your_org
+GITHUB_REPO=your_repo
+
+# Linear (Required)
+LINEAR_TOKEN=your_linear_token
+LINEAR_TEAM_ID=your_team_id
+
+# Webhooks (Optional)
+WEBHOOK_BASE_URL=https://your-modal-app.modal.run
+```
+
+## 🚀 Quick Start
+
+### 1. Basic Project Creation
 
 ```python
-from graph_sitter import Codebase
+from cicd_system import CICDSystem, CICDConfig
 
-# Graph-sitter builds a complete graph connecting
-# functions, classes, imports and their relationships
-codebase = Codebase("./")
+# Create system
+system = CICDSystem()
 
-# Work with code without dealing with syntax trees or parsing
-for function in codebase.functions:
-    # Comprehensive static analysis for references, dependencies, etc.
-    if not function.usages:
-        # Auto-handles references and imports to maintain correctness
-        function.move_to_file("deprecated.py")
+# Create a project
+project_id = await system.create_project(
+    name="AI Code Assistant",
+    requirements="""
+    Create an AI-powered code assistant that can:
+    1. Analyze codebases and provide insights
+    2. Generate code based on natural language descriptions
+    3. Review pull requests automatically
+    4. Suggest optimizations and refactoring
+    5. Integrate with GitHub and Linear for workflow automation
+    """,
+    github_repo="myorg/ai-code-assistant"
+)
+
+# Pin to dashboard
+dashboard = await system.pin_project_to_dashboard(project_id)
+print(f"Dashboard: {dashboard['dashboard_url']}")
 ```
 
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+### 2. Using the Simple API
 
-## Installation and Usage
+```python
+from cicd_system import quick_project_setup
 
-We support
-
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
-
-```
-# Install inside existing project
-uv pip install graph-sitter
-
-# Install global CLI
-uv tool install graph-sitter --python 3.13
-
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
+# One-line project setup
+project_id = await quick_project_setup(
+    name="My Project",
+    requirements="Build a web app with user authentication",
+    github_repo="myorg/my-project"
+)
 ```
 
-## Usage
+## 🎯 How It Works
 
-See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
+### 1. **Project Creation**
+- Creates Linear main issue as project orchestrator
+- Generates sub-issues for different functionalities
+- Sets up GitHub repository monitoring
+- Deploys Modal webhooks for real-time events
 
+### 2. **Linear Orchestration**
 ```
-from graph_sitter import Codebase
+[MAIN] Project Name - Orchestrator
+├── [RESEARCH] Requirements Analysis
+├── [IMPL] Core Implementation
+├── [TEST] Testing and Validation
+├── [DOCS] Documentation
+└── [DEPLOY] CI/CD Setup
 ```
 
-## Troubleshooting
+### 3. **Automatic Assignment**
+- Monitors Linear issues every 30 seconds
+- Auto-assigns unassigned issues to @codegen
+- Ensures no tasks are left unattended
 
-Having issues? Here are some common problems and their solutions:
+### 4. **PR Validation Pipeline**
+- Automatic PR reviews on creation
+- Code quality and security scans
+- Test coverage validation (>80%)
+- Deployment validation
+- Linear issue updates
 
-- **I'm hitting an UV error related to `[[ packages ]]`**: This means you're likely using an outdated version of UV. Try updating to the latest version with: `uv self update`.
-- **I'm hitting an error about `No module named 'codegen.sdk.extensions.utils'`**: The compiled cython extensions are out of sync. Update them with `uv sync --reinstall-package codegen`.
-- **I'm hitting a `RecursionError: maximum recursion depth exceeded` error while parsing my codebase**: If you are using python 3.12, try upgrading to 3.13. If you are already on 3.13, try upping the recursion limit with `sys.setrecursionlimit(10000)`.
+## 📊 Dashboard Features
 
-If you run into additional issues not listed here, please [join our slack community](https://community.codegen.com) and we'll help you out!
+The system provides a comprehensive dashboard with:
 
-## Resources
+- **Real-time Project Status**: Live updates on all projects
+- **Linear Issue Tracking**: Visual progress of all issues
+- **GitHub PR Pipeline**: CI/CD status and deployment tracking
+- **Team Activity**: Notifications and collaboration features
+- **Performance Metrics**: Success rates, completion times, analytics
 
-- [Docs](https://graph-sitter.com)
-- [Getting Started](https://graph-sitter.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+## 🔗 Webhook Integration
 
-## Why Graph-sitter?
+### Deploy to Modal
 
-Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
+```bash
+# Deploy webhooks
+modal deploy modal_webhooks.py
 
-We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+# Get webhook URLs
+modal app list
+```
 
-- **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
+### Configure GitHub Webhooks
 
-- **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
+1. Go to your GitHub repository settings
+2. Add webhook: `https://your-modal-app.modal.run/github-webhook`
+3. Select events: Pull requests, Push, Issues
+4. Set content type: `application/json`
 
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+### Configure Linear Webhooks
 
-## Contributing
+1. Go to Linear team settings
+2. Add webhook: `https://your-modal-app.modal.run/linear-webhook`
+3. Select events: Issues, Comments, Projects
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+## 🎮 Usage Examples
 
-## Enterprise
+### Project Management
 
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
+```python
+# List all projects
+projects = system.list_projects()
+
+# Get project status
+status = system.get_project_status(project_id)
+
+# Add requirements
+await system.add_requirements(
+    project_id, 
+    "Add mobile app support with React Native"
+)
+
+# Validate deployment
+result = await system.validate_deployment(project_id, pr_number=42)
+```
+
+### Direct Codegen Integration
+
+```python
+from codegen import Agent
+
+# Direct Codegen usage (the simple way!)
+agent = Agent(org_id="323", token="your-token")
+
+# Create Linear issue
+task = agent.run(prompt="Create a Linear issue for implementing user authentication")
+
+# Review PR
+task = agent.run(prompt="Review PR #123 and provide detailed feedback")
+
+# Merge PR
+task = agent.run(prompt="Merge PR #123 to main branch after validation")
+```
+
+## 🔧 Advanced Configuration
+
+### Custom Validation Rules
+
+```python
+config = CICDConfig(
+    auto_assign_timeout=60,  # 60 seconds instead of 30
+    github_org="custom-org",
+    linear_team_id="custom-team"
+)
+
+system = CICDSystem(config)
+```
+
+### Webhook Customization
+
+The Modal webhook handler can be customized for specific workflows:
+
+```python
+# In modal_webhooks.py
+async def custom_pr_handler(self, payload):
+    """Custom PR handling logic"""
+    prompt = f"""
+    Custom PR review for {payload['repository']['name']}:
+    - Check for specific coding standards
+    - Validate business logic
+    - Ensure security compliance
+    """
+    
+    task = self.codegen_agent.run(prompt=prompt)
+    return await self._wait_for_completion(task)
+```
+
+## 📈 Monitoring and Analytics
+
+The system tracks:
+
+- **Project Success Rates**: Percentage of successful deployments
+- **Issue Resolution Time**: Average time from creation to completion
+- **PR Validation Metrics**: Test coverage, security scan results
+- **Team Productivity**: Issues completed, PRs merged
+- **System Health**: Webhook response times, error rates
+
+## 🛡️ Security
+
+- All credentials stored in environment variables
+- GitHub PAT with minimal required permissions
+- Linear API token with team-specific access
+- Modal secrets for secure deployment
+- Webhook signature verification
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🆘 Support
+
+- **Documentation**: [Codegen Docs](https://docs.codegen.com)
+- **Issues**: Create GitHub issues for bugs or feature requests
+- **Community**: Join the [Codegen Slack](https://community.codegen.com)
+
+## 🎉 Key Benefits
+
+1. **Simplicity**: Everything via natural language prompts
+2. **Automation**: Full CI/CD pipeline without manual intervention
+3. **Intelligence**: AI-powered code reviews and suggestions
+4. **Integration**: Seamless GitHub and Linear workflow
+5. **Scalability**: Handle multiple projects simultaneously
+6. **Reliability**: Built-in error handling and retry logic
+
+---
+
+**Remember**: This system embraces the Codegen philosophy - **ALL ACTIONS VIA PROMPTS**! 🚀
+
