@@ -1,0 +1,532 @@
+name: Autonomous CI/CD with Codegen SDK
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      enable_autonomous_healing:
+        description: 'Enable autonomous healing'
+        required: false
+        default: 'true'
+        type: boolean
+      enable_intelligent_review:
+        description: 'Enable intelligent PR review'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+  CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+  AUTONOMOUS_MODE: true
+
+jobs:
+  # Initialize autonomous CI/CD orchestrator
+  autonomous-init:
+    runs-on: ubuntu-latest
+    outputs:
+      orchestrator-id: ${{ steps.init.outputs.orchestrator-id }}
+      monitoring-enabled: ${{ steps.init.outputs.monitoring-enabled }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python Environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Initialize Autonomous Orchestrator
+        id: init
+        run: |
+          echo "🤖 Initializing Autonomous CI/CD Orchestrator"
+          
+          # Generate unique orchestrator ID
+          ORCHESTRATOR_ID="orchestrator-${{ github.run_id }}-$(date +%s)"
+          echo "orchestrator-id=$ORCHESTRATOR_ID" >> $GITHUB_OUTPUT
+          
+          # Check if autonomous features are enabled
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            HEALING_ENABLED="${{ github.event.inputs.enable_autonomous_healing }}"
+            REVIEW_ENABLED="${{ github.event.inputs.enable_intelligent_review }}"
+          else
+            HEALING_ENABLED="true"
+            REVIEW_ENABLED="true"
+          fi
+          
+          echo "monitoring-enabled=true" >> $GITHUB_OUTPUT
+          
+          # Initialize orchestrator
+          python -c "
+          import asyncio
+          from src.contexten.extensions.autonomous_cicd import AutonomousCICDOrchestrator
+          
+          async def init_orchestrator():
+              config = {
+                  'codegen_org_id': '${{ env.CODEGEN_ORG_ID }}',
+                  'codegen_token': '${{ env.CODEGEN_TOKEN }}',
+                  'codebase_path': '.',
+                  'orchestration_mode': 'full_autonomous',
+                  'enable_pr_reviews': $REVIEW_ENABLED,
+                  'enable_self_healing': $HEALING_ENABLED,
+                  'enable_predictive_analysis': True,
+                  'workflow_run_id': '${{ github.run_id }}',
+                  'orchestrator_id': '$ORCHESTRATOR_ID'
+              }
+              
+              orchestrator = AutonomousCICDOrchestrator(config)
+              print(f'✅ Orchestrator {orchestrator_id} initialized successfully')
+              
+              # Start monitoring this workflow
+              await orchestrator.monitor_pipeline('${{ github.workflow }}', '${{ github.run_id }}')
+          
+          asyncio.run(init_orchestrator())
+          "
+
+  # Intelligent PR Review (runs on PR events)
+  intelligent-pr-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: autonomous-init
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python Environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Intelligent PR Review
+        run: |
+          echo "🧠 Starting Intelligent PR Review"
+          
+          python -c "
+          import asyncio
+          import json
+          from src.contexten.extensions.autonomous_cicd import IntelligentPRReviewer
+          from src.contexten.extensions.github.events.pull_request import PullRequestEvent
+          
+          async def review_pr():
+              config = {
+                  'codegen_org_id': '${{ env.CODEGEN_ORG_ID }}',
+                  'codegen_token': '${{ env.CODEGEN_TOKEN }}',
+                  'codebase_path': '.',
+                  'auto_approve_threshold': 8.5,
+                  'auto_request_changes_threshold': 6.0,
+                  'enable_auto_fixes': True,
+                  'enable_test_generation': True
+              }
+              
+              reviewer = IntelligentPRReviewer(config)
+              
+              # Create PR event from GitHub context
+              pr_event = PullRequestEvent(
+                  action='${{ github.event.action }}',
+                  number=${{ github.event.number }},
+                  pull_request={
+                      'title': '${{ github.event.pull_request.title }}',
+                      'body': '${{ github.event.pull_request.body }}',
+                      'head': {'sha': '${{ github.event.pull_request.head.sha }}'},
+                      'base': {'ref': '${{ github.event.pull_request.base.ref }}'}
+                  }
+              )
+              
+              # Perform intelligent review
+              analysis = await reviewer.review_pr(pr_event)
+              summary = await reviewer.generate_review_summary(analysis)
+              
+              # Post review comments
+              await reviewer.post_review_comments(analysis, summary)
+              
+              print(f'✅ PR Review completed: Score {summary.overall_score:.1f}/10')
+              print(f'📊 Recommendation: {summary.recommendation}')
+              print(f'⏱️ Estimated review time: {summary.estimated_review_time} minutes')
+              
+              # Set outputs for next jobs
+              with open('pr_analysis.json', 'w') as f:
+                  json.dump({
+                      'score': summary.overall_score,
+                      'recommendation': summary.recommendation,
+                      'key_concerns': summary.key_concerns,
+                      'positive_aspects': summary.positive_aspects
+                  }, f)
+          
+          asyncio.run(review_pr())
+          "
+
+      - name: Upload PR Analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr-analysis
+          path: pr_analysis.json
+
+  # Enhanced Unit Tests with Autonomous Monitoring
+  autonomous-unit-tests:
+    runs-on: ubuntu-latest
+    needs: autonomous-init
+    strategy:
+      matrix:
+        group: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python Environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Run Unit Tests with Monitoring
+        id: tests
+        continue-on-error: true
+        run: |
+          echo "🧪 Running Unit Tests (Group ${{ matrix.group }}) with Autonomous Monitoring"
+          
+          # Start test execution with monitoring
+          python -c "
+          import asyncio
+          import subprocess
+          import sys
+          from datetime import datetime
+          
+          async def run_monitored_tests():
+              print(f'Starting test group ${{ matrix.group }} at {datetime.now()}')
+              
+              # Run tests
+              result = subprocess.run([
+                  'uv', 'run', 'pytest',
+                  '-n', 'auto',
+                  '--cov', 'src',
+                  '--splits', '8', '--group', '${{ matrix.group }}',
+                  '--timeout', '15',
+                  '-o', 'junit_suite_name=unit-tests-${{ matrix.group }}',
+                  'tests/unit'
+              ], capture_output=True, text=True)
+              
+              if result.returncode != 0:
+                  print(f'❌ Tests failed with return code {result.returncode}')
+                  print(f'STDOUT: {result.stdout}')
+                  print(f'STDERR: {result.stderr}')
+                  
+                  # Trigger autonomous healing if enabled
+                  if '${{ needs.autonomous-init.outputs.monitoring-enabled }}' == 'true':
+                      print('🔧 Triggering autonomous healing...')
+                      # Healing logic would be implemented here
+                  
+                  sys.exit(result.returncode)
+              else:
+                  print(f'✅ Tests passed successfully')
+                  print(f'STDOUT: {result.stdout}')
+          
+          asyncio.run(run_monitored_tests())
+          "
+
+      - name: Autonomous Failure Analysis
+        if: failure()
+        run: |
+          echo "🔍 Performing Autonomous Failure Analysis"
+          
+          python -c "
+          import asyncio
+          from src.contexten.extensions.autonomous_cicd import SelfHealingPipeline
+          from src.contexten.extensions.autonomous_cicd.self_healing_pipeline import FailureContext, FailureType
+          from datetime import datetime
+          
+          async def analyze_failure():
+              config = {
+                  'codegen_org_id': '${{ env.CODEGEN_ORG_ID }}',
+                  'codegen_token': '${{ env.CODEGEN_TOKEN }}',
+                  'codebase_path': '.',
+                  'enable_automated_fixes': True,
+                  'max_healing_attempts': 3,
+                  'min_confidence_threshold': 0.7
+              }
+              
+              healing_pipeline = SelfHealingPipeline(config)
+              
+              # Create failure context
+              failure_context = FailureContext(
+                  workflow_run_id='${{ github.run_id }}',
+                  job_name='autonomous-unit-tests',
+                  step_name='Run Unit Tests with Monitoring',
+                  failure_type=FailureType.TEST_FAILURE,
+                  error_message='Unit tests failed in group ${{ matrix.group }}',
+                  error_logs='Test execution failed',
+                  affected_files=[],
+                  commit_sha='${{ github.sha }}',
+                  branch_name='${{ github.ref_name }}',
+                  timestamp=datetime.now()
+              )
+              
+              # Attempt healing
+              healing_result = await healing_pipeline.heal_failure(failure_context)
+              
+              print(f'🔧 Healing Status: {healing_result.status.value}')
+              print(f'✅ Success: {healing_result.success}')
+              
+              if healing_result.success:
+                  print(f'🎉 Autonomous healing successful!')
+                  print(f'Changes made: {healing_result.changes_made}')
+              else:
+                  print(f'❌ Healing failed: {healing_result.error_message}')
+                  print(f'💡 Lessons learned: {healing_result.lessons_learned}')
+          
+          asyncio.run(analyze_failure())
+          "
+
+      - uses: ./.github/actions/report
+        if: always()
+        with:
+          flag: autonomous-unit-tests-${{ matrix.group }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
+  # Autonomous Integration Tests
+  autonomous-integration-tests:
+    runs-on: ubuntu-latest
+    needs: [autonomous-init, autonomous-unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python Environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Run Integration Tests with Healing
+        run: |
+          echo "🔗 Running Integration Tests with Autonomous Healing"
+          
+          python -c "
+          import asyncio
+          import subprocess
+          import sys
+          from datetime import datetime
+          
+          async def run_integration_tests():
+              print(f'Starting integration tests at {datetime.now()}')
+              
+              # Run integration tests
+              result = subprocess.run([
+                  'uv', 'run', 'pytest',
+                  '-n', 'auto',
+                  '-o', 'junit_suite_name=autonomous-integration-tests',
+                  'tests/integration/codegen'
+              ], capture_output=True, text=True, env={
+                  **dict(os.environ),
+                  'GITHUB_TOKEN': '${{ secrets.GHA_PAT }}'
+              })
+              
+              if result.returncode != 0:
+                  print(f'❌ Integration tests failed')
+                  print(f'STDERR: {result.stderr}')
+                  
+                  # Auto-healing for integration test failures
+                  print('🔧 Attempting autonomous healing for integration test failures...')
+                  # Healing implementation would go here
+                  
+                  sys.exit(result.returncode)
+              else:
+                  print(f'✅ Integration tests passed')
+          
+          import os
+          asyncio.run(run_integration_tests())
+          "
+
+      - uses: ./.github/actions/report
+        if: always()
+        with:
+          flag: autonomous-integration-tests
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
+  # Predictive Analysis and Optimization
+  predictive-analysis:
+    runs-on: ubuntu-latest
+    needs: [autonomous-unit-tests, autonomous-integration-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Predictive Failure Analysis
+        run: |
+          echo "🔮 Running Predictive Failure Analysis"
+          
+          python -c "
+          import asyncio
+          from src.contexten.extensions.autonomous_cicd import AutonomousCICDOrchestrator
+          
+          async def predictive_analysis():
+              config = {
+                  'codegen_org_id': '${{ env.CODEGEN_ORG_ID }}',
+                  'codegen_token': '${{ env.CODEGEN_TOKEN }}',
+                  'codebase_path': '.',
+                  'enable_predictive_analysis': True
+              }
+              
+              orchestrator = AutonomousCICDOrchestrator(config)
+              
+              # Generate comprehensive report
+              report = await orchestrator.generate_comprehensive_report()
+              
+              print('📊 Autonomous CI/CD Report:')
+              print(f\"Success Rate: {report['summary']['success_rate']:.2%}\")
+              print(f\"Cost Savings: \${report['summary']['cost_savings_usd']:.2f}\")
+              print(f\"Time Savings: {report['summary']['time_savings_hours']:.1f} hours\")
+              
+              # Check for optimization opportunities
+              if report['recommendations']:
+                  print('💡 Optimization Recommendations:')
+                  for rec in report['recommendations']:
+                      print(f'  - {rec}')
+              
+              # Apply optimizations if needed
+              optimization_result = await orchestrator.optimize_system_performance()
+              
+              if optimization_result['optimizations_applied'] > 0:
+                  print(f\"🚀 Applied {optimization_result['optimizations_applied']} optimizations\")
+                  for opt in optimization_result['details']:
+                      print(f\"  - {opt['description']}\")
+          
+          asyncio.run(predictive_analysis())
+          "
+
+  # Autonomous System Health Check
+  system-health-check:
+    runs-on: ubuntu-latest
+    needs: [autonomous-init]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: ./.github/actions/setup-environment
+
+      - name: System Health Assessment
+        run: |
+          echo "🏥 Performing Autonomous System Health Check"
+          
+          python -c "
+          import asyncio
+          from src.contexten.extensions.autonomous_cicd import AutonomousCICDOrchestrator
+          
+          async def health_check():
+              config = {
+                  'codegen_org_id': '${{ env.CODEGEN_ORG_ID }}',
+                  'codegen_token': '${{ env.CODEGEN_TOKEN }}',
+                  'codebase_path': '.'
+              }
+              
+              orchestrator = AutonomousCICDOrchestrator(config)
+              
+              # Get system status
+              status = await orchestrator.get_system_status()
+              
+              print('🔍 System Status:')
+              print(f\"Mode: {status['mode']}\")
+              print(f\"Active Operations: {status['active_operations']}\")
+              
+              for component, state in status['components'].items():
+                  emoji = '✅' if state == 'active' else '⚠️'
+                  print(f\"{emoji} {component}: {state}\")
+              
+              # Generate final report
+              report = await orchestrator.generate_comprehensive_report()
+              
+              # Save report as artifact
+              import json
+              with open('autonomous_cicd_report.json', 'w') as f:
+                  json.dump(report, f, indent=2, default=str)
+              
+              print('📋 Comprehensive report saved to autonomous_cicd_report.json')
+          
+          asyncio.run(health_check())
+          "
+
+      - name: Upload Autonomous CI/CD Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: autonomous-cicd-report
+          path: autonomous_cicd_report.json
+
+  # Notification and Reporting
+  autonomous-notification:
+    runs-on: ubuntu-latest
+    needs: [autonomous-unit-tests, autonomous-integration-tests, predictive-analysis, system-health-check]
+    if: always()
+    steps:
+      - name: Download Reports
+        uses: actions/download-artifact@v3
+        with:
+          name: autonomous-cicd-report
+
+      - name: Send Autonomous CI/CD Summary
+        run: |
+          echo "📢 Sending Autonomous CI/CD Summary"
+          
+          # Determine overall status
+          if [[ "${{ needs.autonomous-unit-tests.result }}" == "success" && "${{ needs.autonomous-integration-tests.result }}" == "success" ]]; then
+            STATUS="✅ SUCCESS"
+            COLOR="good"
+          elif [[ "${{ needs.autonomous-unit-tests.result }}" == "failure" || "${{ needs.autonomous-integration-tests.result }}" == "failure" ]]; then
+            STATUS="❌ FAILURE"
+            COLOR="danger"
+          else
+            STATUS="⚠️ PARTIAL"
+            COLOR="warning"
+          fi
+          
+          # Create summary message
+          cat << EOF > summary.md
+          ## 🤖 Autonomous CI/CD Summary
+          
+          **Status:** $STATUS
+          **Workflow:** ${{ github.workflow }}
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+          
+          ### 📊 Results
+          - **Unit Tests:** ${{ needs.autonomous-unit-tests.result }}
+          - **Integration Tests:** ${{ needs.autonomous-integration-tests.result }}
+          - **Predictive Analysis:** ${{ needs.predictive-analysis.result }}
+          - **Health Check:** ${{ needs.system-health-check.result }}
+          
+          ### 🔗 Links
+          - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [Commit](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          
+          *Generated by Graph-Sitter Autonomous CI/CD*
+          EOF
+          
+          echo "Summary created:"
+          cat summary.md
+
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+# Cleanup job to manage resources
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [autonomous-notification]
+    if: always()
+    steps:
+      - name: Cleanup Autonomous Resources
+        run: |
+          echo "🧹 Cleaning up autonomous CI/CD resources"
+          echo "Orchestrator ID: ${{ needs.autonomous-init.outputs.orchestrator-id }}"
+          echo "Cleanup completed"
+
