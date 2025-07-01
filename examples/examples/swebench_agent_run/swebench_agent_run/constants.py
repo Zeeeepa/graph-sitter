@@ -1,5 +1,5 @@
-from contexten.extensions.swebench.enums import SWEBenchDataset
-from contexten.extensions.swebench.enums import SWEBenchLiteSubset
+from graph_sitter.extensions.swebench.enums import SWEBenchDataset
+from graph_sitter.extensions.swebench.enums import SWEBenchLiteSubset
 
 
 DATASET_DICT = {

@@ -5,7 +5,7 @@ import pygit2
 
 import graph_sitter
 from graph_sitter.core.codebase import Codebase
-from contexten.extensions.attribution.main import add_attribution_to_symbols, analyze_ai_impact
+from graph_sitter.extensions.attribution.main import add_attribution_to_symbols, analyze_ai_impact
 
 
 def diagnose_repository(codebase):

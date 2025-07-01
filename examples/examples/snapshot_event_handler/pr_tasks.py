@@ -1,5 +1,5 @@
 import logging
-from contexten.extensions.github.types.pull_request import PullRequestLabeledEvent
+from graph_sitter.extensions.github.types.pull_request import PullRequestLabeledEvent
 
 from graph_sitter import Codebase
 

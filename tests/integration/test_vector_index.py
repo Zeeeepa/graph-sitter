@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from graph_sitter.codebase.factory.get_session import get_codebase_session
-from contexten.extensions.index.file_index import FileIndex
+from graph_sitter.extensions.index.file_index import FileIndex
 
 
 def test_file_index_lifecycle(tmpdir) -> None:

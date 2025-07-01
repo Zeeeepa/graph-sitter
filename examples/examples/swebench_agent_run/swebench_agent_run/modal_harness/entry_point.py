@@ -33,7 +33,7 @@ from swebench.harness.test_spec.test_spec import TestSpec
 from swebench.harness.utils import EvaluationError
 
 if TYPE_CHECKING:
-    from contexten.extensions.swebench.utils import SweBenchExample
+    from graph_sitter.extensions.swebench.utils import SweBenchExample
 
 image = (
     modal_lib.Image.debian_slim(python_version="3.13")
@@ -90,7 +90,7 @@ class ShouldRetry(Exception):
 
 @app.function(timeout=43200, max_containers=10)
 async def run_agent_modal(entry: "SweBenchExample", run_id: str, model: str):
-    from contexten.extensions.swebench.harness import run_agent_on_entry
+    from graph_sitter.extensions.swebench.harness import run_agent_on_entry
 
     """Modal function to process a single example from the SWE-bench dataset."""
     for attempt in tenacity.Retrying(

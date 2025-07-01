@@ -4,8 +4,8 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from contexten.extensions.swebench.enums import SWEBenchDataset
-from contexten.extensions.swebench.tests import remove_patches_to_tests
+from graph_sitter.extensions.swebench.enums import SWEBenchDataset
+from graph_sitter.extensions.swebench.tests import remove_patches_to_tests
 
 from .modal_harness import patched_swebench_eval
 
