@@ -5,7 +5,7 @@ from typing import Literal
 import modal
 from fastapi import Request
 
-from contexten.extensions.events.codegen_app import CodegenApp
+from contexten.extensions.events.contexten_app import ContextenApp
 from contexten.extensions.events.modal.request_util import fastapi_request_adapter
 from graph_sitter.git.clients.git_repo_client import GitRepoClient
 from graph_sitter.git.schemas.repo_config import RepoConfig
@@ -123,9 +123,9 @@ class CodebaseEventsApp:
     repo_name: str = modal.parameter(default="")
     snapshot_index_id: str = DEFAULT_SNAPSHOT_DICT_ID
 
-    def get_codegen_app(self) -> CodegenApp:
+    def get_codegen_app(self) -> ContextenApp:
         full_repo_name = f"{self.repo_org}/{self.repo_name}"
-        return CodegenApp(name=f"{full_repo_name}-events", repo=full_repo_name, commit=self.commit)
+        return ContextenApp(name=f"{full_repo_name}-events", repo=full_repo_name, commit=self.commit)
 
     @modal.enter(snap=True)
     def load(self):
@@ -137,7 +137,7 @@ class CodebaseEventsApp:
         snapshot_dict = modal.Dict.from_name(self.snapshot_index_id, {}, create_if_missing=True)
         snapshot_dict.put(f"{self.repo_org}/{self.repo_name}", self.commit)
 
-    def setup_handlers(self, cg: CodegenApp):
+    def setup_handlers(self, cg: ContextenApp):
         msg = "Subclasses must implement this method"
         raise NotImplementedError(msg)
 
