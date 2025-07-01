@@ -2,7 +2,7 @@
 """
 Codemod to fix documentation import errors.
 This script fixes systematic import errors in documentation files where
-contexten.sdk.* and contexten.shared.* imports should be graph_sitter.* imports.
+graph_sitter.sdk.* and graph_sitter.shared.* imports should be graph_sitter.* imports.
 """
 
 import os
@@ -19,20 +19,20 @@ class DocumentationImportFixer:
         # Define the correct import mappings
         self.import_mappings = {
             # SDK imports should go to graph_sitter
-            r'from contexten\.sdk\.core\.interfaces\.callable import': 'from graph_sitter.core.interfaces.callable import',
-            r'from contexten\.sdk\.core\.function import': 'from graph_sitter.core.function import',
-            r'from contexten\.sdk\.core\.external_module import': 'from graph_sitter.core.external_module import',
-            r'from contexten\.sdk\.codebase\.config import': 'from graph_sitter.codebase.config import',
-            r'from contexten\.sdk import ExternalModule': 'from graph_sitter.core.external_module import ExternalModule',
-            r'from contexten\.sdk\.core\.import_resolution import': 'from graph_sitter.core.import_resolution import',
-            r'from contexten\.sdk\.core\.symbol import': 'from graph_sitter.core.symbol import',
-            r'from contexten\.sdk\.core import': 'from graph_sitter.core import',
+            r'from graph_sitter\.sdk\.core\.interfaces\.callable import': 'from graph_sitter.core.interfaces.callable import',
+            r'from graph_sitter\.sdk\.core\.function import': 'from graph_sitter.core.function import',
+            r'from graph_sitter\.sdk\.core\.external_module import': 'from graph_sitter.core.external_module import',
+            r'from graph_sitter\.sdk\.codebase\.config import': 'from graph_sitter.codebase.config import',
+            r'from graph_sitter\.sdk import ExternalModule': 'from graph_sitter.core.external_module import ExternalModule',
+            r'from graph_sitter\.sdk\.core\.import_resolution import': 'from graph_sitter.core.import_resolution import',
+            r'from graph_sitter\.sdk\.core\.symbol import': 'from graph_sitter.core.symbol import',
+            r'from graph_sitter\.sdk\.core import': 'from graph_sitter.core import',
             
             # Shared imports should go to graph_sitter
-            r'from contexten\.shared\.enums\.programming_language import': 'from graph_sitter.shared.enums.programming_language import',
+            r'from graph_sitter\.shared\.enums\.programming_language import': 'from graph_sitter.shared.enums.programming_language import',
             
-            # Agent should be CodegenApp from contexten
-            r'from contexten import Agent': 'from contexten import CodegenApp',
+            # Agent should be CodegenApp from graph_sitter
+            r'from graph_sitter import Agent': 'from graph_sitter import CodegenApp',
         }
     
     def fix_documentation_files(self):
@@ -95,21 +95,21 @@ class DocumentationImportFixer:
                 lines = content.split('\n')
                 for line_num, line in enumerate(lines, 1):
                     # Check for problematic patterns
-                    if re.search(r'from contexten\.sdk', line):
+                    if re.search(r'from graph_sitter\.sdk', line):
                         remaining_issues.append({
                             'file': doc_file,
                             'line': line_num,
                             'content': line.strip(),
-                            'issue': 'contexten.sdk import'
+                            'issue': 'graph_sitter.sdk import'
                         })
-                    elif re.search(r'from contexten\.shared', line):
+                    elif re.search(r'from graph_sitter\.shared', line):
                         remaining_issues.append({
                             'file': doc_file,
                             'line': line_num,
                             'content': line.strip(),
-                            'issue': 'contexten.shared import'
+                            'issue': 'graph_sitter.shared import'
                         })
-                    elif re.search(r'from contexten import Agent', line):
+                    elif re.search(r'from graph_sitter import Agent', line):
                         remaining_issues.append({
                             'file': doc_file,
                             'line': line_num,

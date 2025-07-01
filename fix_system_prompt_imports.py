@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fix all import issues in src/graph_sitter/system-prompt.txt
-This script fixes the remaining import errors where contexten.* should be graph_sitter.*
+This script fixes the remaining import errors where graph_sitter.* should be graph_sitter.*
 """
 
 import re
@@ -23,46 +23,46 @@ def fix_system_prompt_imports():
         # Define the import mappings for system-prompt.txt
         import_mappings = {
             # Basic Codebase import
-            r'from contexten import Codebase': 'from graph_sitter import Codebase',
+            r'from graph_sitter import Codebase': 'from graph_sitter import Codebase',
             
             # Config imports
-            r'from contexten\.configs import CodebaseConfig': 'from graph_sitter.configs import CodebaseConfig',
-            r'from contexten\.configs\.models\.codebase import CodebaseConfig': 'from graph_sitter.configs.models.codebase import CodebaseConfig',
-            r'from contexten\.configs\.models\.secrets import SecretsConfig': 'from graph_sitter.configs.models.secrets import SecretsConfig',
+            r'from graph_sitter\.configs import CodebaseConfig': 'from graph_sitter.configs import CodebaseConfig',
+            r'from graph_sitter\.configs\.models\.codebase import CodebaseConfig': 'from graph_sitter.configs.models.codebase import CodebaseConfig',
+            r'from graph_sitter\.configs\.models\.secrets import SecretsConfig': 'from graph_sitter.configs.models.secrets import SecretsConfig',
             
             # Git imports
-            r'from contexten\.git\.repo_operator\.local_repo_operator import LocalRepoOperator': 'from graph_sitter.git.repo_operator.local_repo_operator import LocalRepoOperator',
-            r'from contexten\.git\.schemas\.repo_config import BaseRepoConfig': 'from graph_sitter.git.schemas.repo_config import BaseRepoConfig',
-            r'from contexten\.git\.repo_operator\.repo_operator import RepoOperator': 'from graph_sitter.git.repo_operator.repo_operator import RepoOperator',
-            r'from contexten\.git\.schemas\.repo_config import RepoConfig': 'from graph_sitter.git.schemas.repo_config import RepoConfig',
+            r'from graph_sitter\.git\.repo_operator\.local_repo_operator import LocalRepoOperator': 'from graph_sitter.git.repo_operator.local_repo_operator import LocalRepoOperator',
+            r'from graph_sitter\.git\.schemas\.repo_config import BaseRepoConfig': 'from graph_sitter.git.schemas.repo_config import BaseRepoConfig',
+            r'from graph_sitter\.git\.repo_operator\.repo_operator import RepoOperator': 'from graph_sitter.git.repo_operator.repo_operator import RepoOperator',
+            r'from graph_sitter\.git\.schemas\.repo_config import RepoConfig': 'from graph_sitter.git.schemas.repo_config import RepoConfig',
             
             # SDK imports (should all be graph_sitter)
-            r'from contexten\.sdk import ExternalModule': 'from graph_sitter.core.external_module import ExternalModule',
-            r'from contexten\.sdk\.codebase\.config import ProjectConfig': 'from graph_sitter.sdk.codebase.config import ProjectConfig',
-            r'from contexten\.sdk\.core\.interfaces\.callable import FunctionCallDefinition': 'from graph_sitter.core.interfaces.callable import FunctionCallDefinition',
-            r'from contexten\.sdk\.core\.function import Function': 'from graph_sitter.core.function import Function',
-            r'from contexten\.sdk\.core\.external_module import ExternalModule': 'from graph_sitter.core.external_module import ExternalModule',
-            r'from contexten\.sdk\.core\.import_resolution import Import': 'from graph_sitter.core.import_resolution import Import',
-            r'from contexten\.sdk\.core\.symbol import Symbol': 'from graph_sitter.core.symbol import Symbol',
+            r'from graph_sitter\.sdk import ExternalModule': 'from graph_sitter.core.external_module import ExternalModule',
+            r'from graph_sitter\.sdk\.codebase\.config import ProjectConfig': 'from graph_sitter.sdk.codebase.config import ProjectConfig',
+            r'from graph_sitter\.sdk\.core\.interfaces\.callable import FunctionCallDefinition': 'from graph_sitter.core.interfaces.callable import FunctionCallDefinition',
+            r'from graph_sitter\.sdk\.core\.function import Function': 'from graph_sitter.core.function import Function',
+            r'from graph_sitter\.sdk\.core\.external_module import ExternalModule': 'from graph_sitter.core.external_module import ExternalModule',
+            r'from graph_sitter\.sdk\.core\.import_resolution import Import': 'from graph_sitter.core.import_resolution import Import',
+            r'from graph_sitter\.sdk\.core\.symbol import Symbol': 'from graph_sitter.core.symbol import Symbol',
             
             # Shared imports
-            r'from contexten\.shared\.enums\.programming_language import ProgrammingLanguage': 'from graph_sitter.shared.enums.programming_language import ProgrammingLanguage',
+            r'from graph_sitter\.shared\.enums\.programming_language import ProgrammingLanguage': 'from graph_sitter.shared.enums.programming_language import ProgrammingLanguage',
             
             # Extension imports (these should all be graph_sitter.extensions)
-            r'from contexten\.extensions\.index\.file_index import FileIndex': 'from graph_sitter.extensions.index.file_index import FileIndex',
-            r'from contexten\.extensions\.lsp\.utils import get_path': 'from graph_sitter.extensions.lsp.utils import get_path',
-            r'from contexten\.extensions\.lsp\.codemods import ACTIONS': 'from graph_sitter.extensions.lsp.codemods import ACTIONS',
-            r'from contexten\.extensions\.lsp\.codemods\.base import CodeAction': 'from graph_sitter.extensions.lsp.codemods.base import CodeAction',
-            r'from contexten\.extensions\.lsp\.execute import execute_action': 'from graph_sitter.extensions.lsp.execute import execute_action',
-            r'from contexten\.extensions\.lsp\.io import LSPIO': 'from graph_sitter.extensions.lsp.io import LSPIO',
-            r'from contexten\.extensions\.lsp\.progress import LSPProgress': 'from graph_sitter.extensions.lsp.progress import LSPProgress',
-            r'from contexten\.extensions\.lsp\.range import get_tree_sitter_range': 'from graph_sitter.extensions.lsp.range import get_tree_sitter_range',
-            r'from contexten\.extensions\.index\.code_index import CodeIndex': 'from graph_sitter.extensions.index.code_index import CodeIndex',
-            r'from contexten\.extensions\.graph\.create_graph import create_codebase_graph': 'from graph_sitter.extensions.graph.create_graph import create_codebase_graph',
-            r'from contexten\.extensions\.graph\.neo4j_exporter import Neo4jExporter': 'from graph_sitter.extensions.graph.neo4j_exporter import Neo4jExporter',
-            r'from contexten\.extensions\.graph\.utils import Node, NodeLabel, Relation, RelationLabel, SimpleGraph': 'from graph_sitter.extensions.graph.utils import Node, NodeLabel, Relation, RelationLabel, SimpleGraph',
-            r'from contexten\.extensions\.graph\.utils import SimpleGraph': 'from graph_sitter.extensions.graph.utils import SimpleGraph',
-            r'from contexten\.extensions\.attribution\.main import add_attribution_to_symbols, analyze_ai_impact': 'from graph_sitter.extensions.attribution.main import add_attribution_to_symbols, analyze_ai_impact',
+            r'from graph_sitter\.extensions\.index\.file_index import FileIndex': 'from graph_sitter.extensions.index.file_index import FileIndex',
+            r'from graph_sitter\.extensions\.lsp\.utils import get_path': 'from graph_sitter.extensions.lsp.utils import get_path',
+            r'from graph_sitter\.extensions\.lsp\.codemods import ACTIONS': 'from graph_sitter.extensions.lsp.codemods import ACTIONS',
+            r'from graph_sitter\.extensions\.lsp\.codemods\.base import CodeAction': 'from graph_sitter.extensions.lsp.codemods.base import CodeAction',
+            r'from graph_sitter\.extensions\.lsp\.execute import execute_action': 'from graph_sitter.extensions.lsp.execute import execute_action',
+            r'from graph_sitter\.extensions\.lsp\.io import LSPIO': 'from graph_sitter.extensions.lsp.io import LSPIO',
+            r'from graph_sitter\.extensions\.lsp\.progress import LSPProgress': 'from graph_sitter.extensions.lsp.progress import LSPProgress',
+            r'from graph_sitter\.extensions\.lsp\.range import get_tree_sitter_range': 'from graph_sitter.extensions.lsp.range import get_tree_sitter_range',
+            r'from graph_sitter\.extensions\.index\.code_index import CodeIndex': 'from graph_sitter.extensions.index.code_index import CodeIndex',
+            r'from graph_sitter\.extensions\.graph\.create_graph import create_codebase_graph': 'from graph_sitter.extensions.graph.create_graph import create_codebase_graph',
+            r'from graph_sitter\.extensions\.graph\.neo4j_exporter import Neo4jExporter': 'from graph_sitter.extensions.graph.neo4j_exporter import Neo4jExporter',
+            r'from graph_sitter\.extensions\.graph\.utils import Node, NodeLabel, Relation, RelationLabel, SimpleGraph': 'from graph_sitter.extensions.graph.utils import Node, NodeLabel, Relation, RelationLabel, SimpleGraph',
+            r'from graph_sitter\.extensions\.graph\.utils import SimpleGraph': 'from graph_sitter.extensions.graph.utils import SimpleGraph',
+            r'from graph_sitter\.extensions\.attribution\.main import add_attribution_to_symbols, analyze_ai_impact': 'from graph_sitter.extensions.attribution.main import add_attribution_to_symbols, analyze_ai_impact',
         }
         
         # Apply all the import fixes
@@ -100,12 +100,12 @@ def verify_fixes():
         
         # Check for remaining problematic imports
         problematic_patterns = [
-            r'from contexten import Codebase',
-            r'from contexten\.configs',
-            r'from contexten\.git',
-            r'from contexten\.sdk',
-            r'from contexten\.shared',
-            r'from contexten\.extensions',
+            r'from graph_sitter import Codebase',
+            r'from graph_sitter\.configs',
+            r'from graph_sitter\.git',
+            r'from graph_sitter\.sdk',
+            r'from graph_sitter\.shared',
+            r'from graph_sitter\.extensions',
         ]
         
         remaining_issues = []

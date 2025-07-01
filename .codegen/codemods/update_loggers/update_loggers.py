@@ -1,4 +1,4 @@
-import contexten
+import graph_sitter
 from graph_sitter.core.codebase import PyCodebaseType
 
 

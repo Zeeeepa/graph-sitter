@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Codemod to fix import issues after renaming codegen to contexten.
+Codemod to fix import issues after renaming codegen to graph_sitter.
 This script analyzes the codebase and fixes imports systematically.
 """
 
@@ -19,7 +19,7 @@ class ImportAnalyzer:
         self.import_issues = []
         
     def analyze_module_structure(self):
-        """Analyze what modules exist in graph_sitter vs contexten."""
+        """Analyze what modules exist in graph_sitter vs graph_sitter."""
         print("🔍 Analyzing module structure...")
         
         # Find all Python modules in graph_sitter
@@ -38,7 +38,7 @@ class ImportAnalyzer:
                 if py_file.name != "__init__.py":
                     rel_path = py_file.relative_to(contexten_dir)
                     module_path = str(rel_path.with_suffix("")).replace("/", ".")
-                    self.contexten_modules.add(f"contexten.{module_path}")
+                    self.contexten_modules.add(f"graph_sitter.{module_path}")
         
         print(f"  📦 Found {len(self.graph_sitter_modules)} graph_sitter modules")
         print(f"  📦 Found {len(self.contexten_modules)} contexten modules")
@@ -83,7 +83,7 @@ class ImportAnalyzer:
                 })
             
             # Check for imports that should be from graph_sitter
-            if re.match(r'from\s+contexten.*\bCodebase\b', line):
+            if re.match(r'from\s+graph_sitter.*\bCodebase\b', line):
                 issues.append({
                     'file': file_path,
                     'line': line_num,
@@ -91,8 +91,8 @@ class ImportAnalyzer:
                     'content': line
                 })
             
-            # Check for PyCodebaseType imports from contexten (should be graph_sitter)
-            if re.match(r'from\s+contexten.*\bPyCodebaseType\b', line):
+            # Check for PyCodebaseType imports from graph_sitter (should be graph_sitter)
+            if re.match(r'from\s+graph_sitter.*\bPyCodebaseType\b', line):
                 issues.append({
                     'file': file_path,
                     'line': line_num,
@@ -207,39 +207,39 @@ class ImportFixer:
         for line in lines:
             original_line = line
             
-            # Fix: from codegen -> from contexten (but be careful about specific cases)
+            # Fix: from graph_sitter -> from graph_sitter (but be careful about specific cases)
             if re.match(r'from\s+codegen\b', line):
                 # Don't change if it's already been handled or is a special case
                 if 'Codebase' in line:
                     # Codebase should come from graph_sitter
                     line = re.sub(r'from\s+codegen\b', 'from graph_sitter', line)
                 else:
-                    line = re.sub(r'from\s+codegen\b', 'from contexten', line)
+                    line = re.sub(r'from\s+codegen\b', 'from graph_sitter', line)
             
-            # Fix: import codegen -> import contexten
+            # Fix: import graph_sitter -> import graph_sitter
             if re.match(r'import\s+codegen\b', line):
-                line = re.sub(r'import\s+codegen\b', 'import contexten', line)
+                line = re.sub(r'import\s+codegen\b', 'import graph_sitter', line)
             
             # Fix: Codebase imports should be from graph_sitter
-            if re.match(r'from\s+contexten.*\bCodebase\b', line):
+            if re.match(r'from\s+graph_sitter.*\bCodebase\b', line):
                 # Extract just the Codebase import
                 if 'import Codebase' in line:
                     line = 'from graph_sitter import Codebase'
             
             # Fix: PyCodebaseType imports should be from graph_sitter
-            if re.match(r'from\s+contexten.*\bPyCodebaseType\b', line):
+            if re.match(r'from\s+graph_sitter.*\bPyCodebaseType\b', line):
                 # Extract just the PyCodebaseType import
                 if 'import PyCodebaseType' in line:
                     line = 'from graph_sitter.core.codebase import PyCodebaseType'
             
             # Fix: incorrect CodegenApp imports
             if re.match(r'from\s+contexten\.extensions\.events\.app\s+import\s+CodegenApp', line):
-                line = 'from contexten import CodegenApp'
+                line = 'from graph_sitter import CodegenApp'
             
-            # Fix: Extensions should be from contexten, not graph_sitter
+            # Fix: Extensions should be from graph_sitter, not graph_sitter
             # BUT: Don't change if we're inside graph_sitter/extensions (internal imports)
             if re.match(r'from\s+graph_sitter\.extensions', line) and not is_internal_extension:
-                line = re.sub(r'from\s+graph_sitter\.extensions', 'from contexten.extensions', line)
+                line = re.sub(r'from\s+graph_sitter\.extensions', 'from graph_sitter.extensions', line)
             
             # Fix: configs should be from graph_sitter
             if re.match(r'from\s+contexten\.configs', line):

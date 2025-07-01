@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Comprehensive codemod to fix ALL remaining import issues.
-This script fixes systematic import errors where contexten.sdk.*, contexten.shared.*, 
-and contexten.core.* imports should be graph_sitter.* imports.
+This script fixes systematic import errors where graph_sitter.sdk.*, graph_sitter.shared.*, 
+and graph_sitter.core.* imports should be graph_sitter.* imports.
 """
 
 import os
@@ -20,25 +20,25 @@ class ComprehensiveImportFixer:
         # Define the correct import mappings
         self.import_mappings = {
             # SDK imports should go to graph_sitter
-            r'from contexten\.sdk\.core\.directory import': 'from graph_sitter.core.directory import',
-            r'from contexten\.sdk\.ai\.utils import': 'from graph_sitter.ai.utils import',
-            r'from contexten\.sdk\.core\.external_module import': 'from graph_sitter.core.external_module import',
-            r'from contexten\.sdk\.core\.import_resolution import': 'from graph_sitter.core.import_resolution import',
-            r'from contexten\.sdk\.core\.symbol import': 'from graph_sitter.core.symbol import',
-            r'from contexten\.sdk\.core\.statements\.if_block_statement import': 'from graph_sitter.core.statements.if_block_statement import',
-            r'from contexten\.sdk\.enums import': 'from graph_sitter.enums import',
-            r'from contexten\.sdk\.core\.statements\.statement import': 'from graph_sitter.core.statements.statement import',
-            r'from contexten\.sdk\.core\.codebase import': 'from graph_sitter.core.codebase import',
+            r'from graph_sitter\.sdk\.core\.directory import': 'from graph_sitter.core.directory import',
+            r'from graph_sitter\.sdk\.ai\.utils import': 'from graph_sitter.ai.utils import',
+            r'from graph_sitter\.sdk\.core\.external_module import': 'from graph_sitter.core.external_module import',
+            r'from graph_sitter\.sdk\.core\.import_resolution import': 'from graph_sitter.core.import_resolution import',
+            r'from graph_sitter\.sdk\.core\.symbol import': 'from graph_sitter.core.symbol import',
+            r'from graph_sitter\.sdk\.core\.statements\.if_block_statement import': 'from graph_sitter.core.statements.if_block_statement import',
+            r'from graph_sitter\.sdk\.enums import': 'from graph_sitter.enums import',
+            r'from graph_sitter\.sdk\.core\.statements\.statement import': 'from graph_sitter.core.statements.statement import',
+            r'from graph_sitter\.sdk\.core\.codebase import': 'from graph_sitter.core.codebase import',
             
             # Shared imports should go to graph_sitter
-            r'from contexten\.shared\.logging\.get_logger import': 'from graph_sitter.shared.logging.get_logger import',
-            r'from contexten\.shared\.enums\.programming_language import': 'from graph_sitter.shared.enums.programming_language import',
+            r'from graph_sitter\.shared\.logging\.get_logger import': 'from graph_sitter.shared.logging.get_logger import',
+            r'from graph_sitter\.shared\.enums\.programming_language import': 'from graph_sitter.shared.enums.programming_language import',
             
             # Core imports should go to graph_sitter
-            r'from contexten\.core\.': 'from graph_sitter.core.',
+            r'from graph_sitter\.core\.': 'from graph_sitter.core.',
             
             # Codebase imports should be from graph_sitter (not contexten)
-            r'from contexten import Codebase': 'from graph_sitter import Codebase',
+            r'from graph_sitter import Codebase': 'from graph_sitter import Codebase',
         }
     
     def fix_all_files(self):
@@ -156,26 +156,26 @@ class ComprehensiveImportFixer:
                 lines = content.split('\n')
                 for line_num, line in enumerate(lines, 1):
                     # Check for problematic patterns
-                    if re.search(r'from contexten\.sdk', line):
+                    if re.search(r'from graph_sitter\.sdk', line):
                         remaining_issues.append({
                             'file': file_path,
                             'line': line_num,
                             'content': line.strip(),
-                            'issue': 'contexten.sdk import'
+                            'issue': 'graph_sitter.sdk import'
                         })
-                    elif re.search(r'from contexten\.shared', line):
+                    elif re.search(r'from graph_sitter\.shared', line):
                         remaining_issues.append({
                             'file': file_path,
                             'line': line_num,
                             'content': line.strip(),
-                            'issue': 'contexten.shared import'
+                            'issue': 'graph_sitter.shared import'
                         })
-                    elif re.search(r'from contexten\.core', line):
+                    elif re.search(r'from graph_sitter\.core', line):
                         remaining_issues.append({
                             'file': file_path,
                             'line': line_num,
                             'content': line.strip(),
-                            'issue': 'contexten.core import'
+                            'issue': 'graph_sitter.core import'
                         })
                         
             except Exception as e:
