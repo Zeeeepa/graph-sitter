@@ -1,4 +1,5 @@
 """Contexten package - AI agent extensions and tools."""
-from .extensions.events.codegen_app import CodegenApp
+from .extensions.events.contexten_app import ContextenApp
 
-__all__ = ["CodegenApp"]
+__all__ = ["ContextenApp"]
+

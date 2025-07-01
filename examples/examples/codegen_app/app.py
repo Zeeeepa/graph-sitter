@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
+import asyncio
 import logging
 
 import modal
-from contexten import CodeAgent, CodegenApp
+from contexten import CodeAgent, ContextenApp
 from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.slack.types import SlackEvent
@@ -16,7 +19,7 @@ logger = logging.getLogger(__name__)
 ########################################################################################################################
 
 # Create the cg_app
-cg = CodegenApp(name="codegen-test", repo="codegen-sh/Kevin-s-Adventure-Game")
+cg = ContextenApp(name="codegen-test", repo="codegen-sh/Kevin-s-Adventure-Game")
 
 
 @cg.slack.event("app_mention")

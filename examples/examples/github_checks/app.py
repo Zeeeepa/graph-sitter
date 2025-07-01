@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
+
+import asyncio
+from contexten import ContextenApp
+
 import logging
 
 import modal
-from contexten import CodegenApp
 from graph_sitter import Codebase
 from contexten.extensions.github.types.events.pull_request import PullRequestLabeledEvent
 from contexten.extensions.tools.github.create_pr_comment import create_pr_comment
@@ -13,7 +17,8 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-cg = CodegenApp(name="codegen-github-checks")
+# Create the cg_app
+cg = ContextenApp(name="codegen-github-checks")
 
 
 def create_graph_from_codebase(repo_path):
