@@ -1,276 +1,54 @@
 [project]
-name = "graph-sitter"
-dynamic = ["version", "urls"]
-description = "Scriptable interface to a powerful, multi-lingual language server built on top of Tree-sitter"
-readme = "README.md"
-# renovate: datasource=python-version depName=python
-requires-python = ">=3.12, <3.14"
+name = "deployment-validator"
+version = "0.1.0"
+description = "Standalone deployment validation system with GitHub integration"
+authors = [
+    {name = "Codegen", email = "support@codegen.com"},
+]
 dependencies = [
-  "openai==1.78.1",
-  "tiktoken<1.0.0,>=0.5.1",
-  "tabulate>=0.9.0,<1.0.0",
-  "codeowners<1.0.0,>=0.6.0",
-  "dataclasses-json<1.0.0,>=0.6.4",
-  "dicttoxml<2.0.0,>=1.7.16",
-  "xmltodict<1.0.0,>=0.13.0",
-  "astor<1.0.0,>=0.8.1",
-  "tree-sitter>=0.23.1",
-  "tree-sitter-python>=0.23.4",
-  "tree-sitter-typescript>=0.23.2",
-  "tree-sitter-javascript>=0.23.1",
-  "python-levenshtein<1.0.0,>=0.25.1",
-  "networkx>=3.4.1",
-  "wrapt<2.0.0,>=1.16.0",
-  "pyright<2.0.0,>=1.1.372",
-  "watchfiles<1.1.0,>=1.0.0",
-  "rich<14.0.0,>=13.7.1",
-  "pydantic<3.0.0,>=2.9.2",
-  "pydantic-settings>=2.0.0",
-  "docstring-parser<1.0,>=0.16",
-  "plotly>=5.24.0,<7.0.0",
-  "humanize<5.0.0,>=4.10.0",
-  "pytest-snapshot>=0.9.0",
-  "pyjson5==1.6.9",
-  "mini-racer>=0.12.4",
-  "rustworkx>=0.15.1",
-  "typing-extensions>=4.12.2",
-  "termcolor>=2.4.0",
-  "sentry-sdk==2.28.0",
-  "click>=8.1.7",
-  "requests>=2.32.3",
-  "lazy-object-proxy>=0.0.0",
-  "pydantic-core>=2.23.4",
-  "hatch-vcs>=0.4.0",
-  "hatchling>=1.25.0",
-  "pyinstrument>=5.0.0",
-  "pip>=24.3.1",                       # This is needed for some NPM/YARN/PNPM post-install scripts to work!
-  "rich-click>=1.8.5",
-  "python-dotenv>=1.0.1",
-  "giturlparse",
-  "pygit2>=1.16.0",
-  "unidiff>=0.7.5",
-  "datamodel-code-generator>=0.26.5",
-  "PyGithub==2.6.1",
-  "GitPython==3.1.44",
-  "psutil>=5.8.0",
-  "fastapi[standard]<1.0.0,>=0.115.2",
-  "starlette<1.0.0,>=0.16.0",
-  "tqdm>=4.67.1",
-  "tomlkit>=0.13.2",
-  "python-semantic-release",
-  "uvicorn[standard]>=0.30.0",
-  "packaging>=24.2",
-  "numpy>=2.2.2",
-  "mcp[cli]",
-  "neo4j",
-  "modal>=0.73.45",
-  "lox>=0.12.0",
-  "docker>=6.1.3",
-  "urllib3>=2.0.0",
-  "datasets",
-  "colorlog>=6.9.0",
-  "codegen-sdk-pink>=0.1.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "sqlalchemy>=2.0.23",
+    "alembic>=1.12.1",
+    "pydantic>=2.4.2",
+    "pydantic-settings>=2.0.3",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    "aiohttp>=3.9.0",
+    "grainchain[all]>=0.1.0",
+    "codegen>=0.1.0",
+    "graph-sitter>=0.1.0",
+    "PyGithub>=2.1.1",
+    "cryptography>=41.0.5",
+    "pyyaml>=6.0.1",
 ]
-
-# renovate: datasource=python-version depName=python
-license = { text = "Apache-2.0" }
-classifiers = [
-  "Development Status :: 4 - Beta",
-
-  "Environment :: Console",
-  "Environment :: MacOS X",
-
-  "Intended Audience :: Developers",
-  "Intended Audience :: Information Technology",
-
-  "License :: OSI Approved",
-  "License :: OSI Approved :: Apache Software License",
-
-  "Operating System :: OS Independent",
-
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-
-  "Topic :: Software Development",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: Software Development :: Code Generators",
-  "Topic :: Software Development :: Libraries",
-]
-authors = [{ name = "Codegen Team", email = "team@codegen.sh" }]
-keywords = [
-  "codegen",
-  "codebase",
-  "codebase manipulation",
-  "codebase analysis",
-  "codebase transformation",
-  "refactoring",
-  "code generation",
-]
-[project.scripts]
-gs = "graph_sitter.cli.cli:main"
 
 [project.optional-dependencies]
-pink = ["codegen-sdk-pink>=0.1.0"]
-types = [
-  "types-networkx>=3.2.1.20240918",
-  "types-tabulate>=0.9.0.20240106",
-  "types-requests>=2.32.0.20241016",
-  "types-toml>=0.10.8.20240310",
-]
-lsp = ["pygls>=2.0.0a2", "lsprotocol==2024.0.0b1", "attrs>=25.1.0"]
-[tool.uv]
-cache-keys = [{ git = { commit = true, tags = true } }]
-dev-dependencies = [
-  "coverage<8.0.0,>=7.6.1",
-  #    "scalene>=1.5.45",
-  "filelock<4.0.0,>=3.15.4",
-  "pytest>=8.3.3",
-  "pytest-cov>=6.1.0,<6.1.1",
-  "ruff>=0.6.8",
-  "mypy[mypyc,faster-cache]>=1.13.0",
-  "pre-commit>=4.0.1",
-  "pytest-xdist>=3.6.1,<4.0.0",
-  "pytest-mock<4.0.0,>=3.14.0",
-  "pytest-timeout>=2.3.1",
-  "braintrust>=0.0.160",
-  "ruff-lsp<1.0.0,>=0.0.55",
-  "austin-python>=1.7.1",
-  "autoflake>=2.3.1",
-  #    "nuitka>=2.4.8",
-  "typer>=0.12.5",
-  "pre-commit-uv>=4.1.4",
-  "austin-dist>=3.7.0",
-  "uv>=0.4.25",
-  "deptry>=0.22.0",
-  "cibuildwheel[uv]>=2.22.0",
-  "sybil[pytest]>=9.0.0",
-  "jsbeautifier<2.0.0,>=1.15.1",
-  "inflection<1.0.0,>=0.5.1",
-  "autoflake>=2.3.1",
-  "black>=24.8.0",
-  "isort>=5.13.2",
-  "emoji>=2.14.0",
-  "pytest-benchmark[histogram]>=5.1.0",
-  "pytest-asyncio>=0.21.1,<1.0.0",
-  "loguru>=0.7.3",
-  "httpx<0.28.2,>=0.28.1",
-  "jupyterlab>=4.3.5",
-  "modal>=0.73.25",
-  "pytest-lsp>=1.0.0b1",
-  "cython>=3.0.11",
-  "pytest-split>=0.10.0",
+dev = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+    "pytest-cov>=4.1.0",
+    "black>=23.11.0",
+    "isort>=5.12.0",
+    "mypy>=1.7.0",
+    "ruff>=0.1.5",
 ]
 
-[tool.uv.workspace]
-exclude = ["examples"]
-
-
-[tool.cython-lint]
-max-line-length = 200
-
-
-[tool.coverage.run]
-branch = true
-plugins = ["Cython.Coverage"]
-concurrency = ["multiprocessing", "thread"]
-parallel = true
-sigterm = true
-
-[tool.coverage.report]
-skip_covered = true
-skip_empty = true
-exclude_also = [
-  "if TYPE_CHECKING:",
-  # Don't complain about missing debug-only code:
-  "def __repr__",
-  # Don't complain if tests don't hit defensive assertion code:
-  "raise AssertionError",
-  "raise NotImplementedError",
-  # Don't complain if non-runnable code isn't run:
-  "if __name__ == .__main__.:",
-  # Don't complain about abstract methods, they aren't run:
-  "@(abc\\.)?abstractmethod",
-]
-
-[tool.coverage.html]
-show_contexts = true
-[tool.coverage.json]
-show_contexts = true
-[tool.pyright]
-pythonVersion = "3.12"
-enableExperimentalFeatures = true
-[tool.pytest.ini_options]
-# addopts = -v
-pythonpath = "."
-norecursedirs = "repos expected"
-# addopts = -v --cov=app --cov-report=term
-
-addopts = "--dist=loadgroup --junitxml=build/test-results/test/TEST.xml --strict-config --import-mode=importlib --cov-context=test --cov-config=pyproject.toml -p no:doctest"
-filterwarnings = """
-    ignore::DeprecationWarning:botocore.*:
-    ignore::DeprecationWarning:sqlalchemy.*:
-    ignore::DeprecationWarning:posthog.*:"""
-log_cli = 1
-log_cli_level = "INFO"
-xfail_strict = true
-junit_duration_report = "call"
-junit_logging = "all"
-tmp_path_retention_policy = "failed"
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
 [build-system]
-requires = ["hatchling>=1.26.3", "hatch-vcs>=0.4.0", "setuptools-scm>=8.0.0"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.ruff]
+select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
+ignore = ["E501"]
 
-[tool.deptry]
-extend_exclude = [".*/eval/test_files/.*.py", ".*conftest.py"]
-pep621_dev_dependency_groups = ["types"]
-known_first_party = ["graph_sitter"]
-[tool.deptry.per_rule_ignores]
-DEP002 = [
-  "pyright",
-  "mini-racer",
-  "hatch-vcs",
-  "pyinstrument",
-  "pip",
-  "python-levenshtein",
-  "pytest-snapshot",
-  "langgraph-prebuilt",
-]
-DEP004 = "pytest"
+[tool.black]
+line-length = 100
+target-version = ["py39"]
 
-[tool.deptry.package_module_name_map]
-python-levenshtein = ["Levenshtein"]
-PyGithub = ["github"]
-[tool.cibuildwheel]
-build-frontend = "build[uv]"
-skip = ["*i686*", "*musllinux*"]
-environment = { "HATCH_BUILD_HOOKS_ENABLE" = "true" }
-manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"
-manylinux-aarch64-image = "quay.io/pypa/manylinux_2_34_aarch64"
-[tool.cibuildwheel.linux]
-before-all = "curl -sSf https://sh.rustup.rs | sh -s -- -y"
-environment = { "PATH" = "$HOME/.cargo/bin:$PATH" }
-[tool.cibuildwheel.macos]
-before-all = "curl -sSf https://sh.rustup.rs | sh -s -- -y"
-environment = { "PATH" = "$HOME/.cargo/bin:$PATH" }
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
 
-[tool.semantic_release]
-assets = []
-build_command_env = []
-commit_message = "{version}\n\nAutomatically generated by python-semantic-release"
-commit_parser = "angular"
-logging_use_named_masks = false
-major_on_zero = true
-allow_zero_version = true
-repo_dir = "."
-no_git_verify = false
-tag_format = "v{version}"
-
-[tool.semantic_release.branches.develop]
-match = "develop"
-prerelease_token = "rc"
-prerelease = false

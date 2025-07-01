@@ -9,15 +9,22 @@ logger = logging.getLogger(__name__)
 
 def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeledEvent):
     # Next.js codemod to detect imports of the react-dev-overlay module in production code
-
-    patch, commit_shas, modified_symbols = codebase.get_modified_symbols_in_pr(event.pull_request.number)
-    modified_files = set(commit_shas.keys())
     from graph_sitter.core.statements.if_block_statement import IfBlockStatement
 
     DIR_NAME = "packages/next/src/client/components/react-dev-overlay"
-    directory = codebase.get_directory(DIR_NAME)
 
-    violations = []
+    # Get modified files from the PR
+    patch, commit_shas, modified_symbols, pr_url = codebase.get_modified_symbols_in_pr(event.pull_request.number)
+    modified_files = set(commit_shas.keys())
+
+    violations: list[str] = []
+
+    # Get the directory we're checking for violations
+    directory = codebase.get_directory(DIR_NAME)
+    
+    if not directory:
+        logger.warning(f"Directory {DIR_NAME} not found in codebase")
+        return violations
 
     false_operators = ["!=", "!=="]
     true_operators = ["===", "=="]
@@ -35,8 +42,25 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
             return False
 
         condition = if_block.condition
-        # Get the operator without any whitespace
-        operator = condition.operator[-1].source
+        if not condition:
+            return False
+            
+        # Get the operator - check if condition has operator attribute or children with operators
+        operator = None
+        if hasattr(condition, 'operator') and condition.operator:
+            if hasattr(condition.operator, '__iter__') and len(condition.operator) > 0:
+                operator = condition.operator[-1].source
+            else:
+                operator = condition.operator.source if hasattr(condition.operator, 'source') else str(condition.operator)
+        elif hasattr(condition, 'children'):
+            # Look for operator in children
+            for child in condition.children:
+                if hasattr(child, 'source') and child.source in (false_operators + true_operators):
+                    operator = child.source
+                    break
+        
+        if not operator:
+            return False
 
         # Check for non-production conditions
         if operator in false_operators and condition.source == f"process.env.NODE_ENV {operator} 'production'":
@@ -63,19 +87,34 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
             return False
 
         condition = main_if.condition
-        operator = condition.operator[-1].source
+        # Fix the operator access similar to above
+        operator = None
+        if hasattr(condition, 'operator') and condition.operator:
+            if hasattr(condition.operator, '__iter__') and len(condition.operator) > 0:
+                operator = condition.operator[-1].source
+            else:
+                operator = condition.operator.source if hasattr(condition.operator, 'source') else str(condition.operator)
+        elif hasattr(condition, 'children'):
+            # Look for operator in children
+            for child in condition.children:
+                if hasattr(child, 'source') and child.source in (false_operators + true_operators):
+                    operator = child.source
+                    break
+        
+        if not operator:
+            return False
 
         # Valid if the main if block checks for production
         return operator in true_operators and condition.source == f"process.env.NODE_ENV {operator} 'production'"
 
-    for file in directory.files(recursive=True):
-        for imp in file.inbound_imports:
+    # Fix: Call files() as a method with proper parameters
+    for source_file in directory.files(extensions="*", recursive=True):
+        for imp in source_file.inbound_imports:
             if imp.file.filepath not in modified_files:
                 # skip if the import is not in the pull request's modified files
                 continue
             # Skip if the import is from within the target directory
             if directory.dirpath in imp.file.filepath:
-                # "✅ Valid import" if the import is within the target directory
                 continue
 
             parent_if_block = imp.parent_of_type(IfBlockStatement)
@@ -90,7 +129,8 @@ def lint_for_dev_import_violations(codebase: Codebase, event: PullRequestLabeled
                 continue
 
             # Report invalid imports that aren't properly guarded
-            violation = f"- Violation in `{file.filepath}`: Importing from `{imp.file.filepath}` ([link]({imp.github_url}))"
+            violation = f"- Violation in `{source_file.filepath}`: Importing from `{imp.file.filepath}` ([link]({imp.github_url}))"
+
             violations.append(violation)
             logger.info(f"Found violation: {violation}")
 

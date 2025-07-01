@@ -1,0 +1,68 @@
+---
+# Global validation configuration
+
+# Global variables available to all components
+global_vars:
+  NODE_ENV: test
+  TEST_TIMEOUT: 30000
+  MAX_RETRIES: 3
+
+# Command template settings
+templates:
+  - name: setup
+    commands:
+      - npm install
+      - npm run build
+    validation:
+      timeout: 300
+      required_files:
+        - package.json
+        - tsconfig.json
+
+  - name: test
+    commands:
+      - npm run test
+      - npm run lint
+    validation:
+      timeout: 600
+      required_env:
+        - NODE_ENV
+        - TEST_TIMEOUT
+
+# Feature validation settings
+feature_validation:
+  complexity_threshold: 10
+  coverage_threshold: 80
+  lint_rules:
+    - no-unused-vars
+    - no-console
+    - prefer-const
+
+# UI testing configuration
+ui_testing:
+  browsers:
+    - chromium
+    - firefox
+  viewport:
+    width: 1280
+    height: 720
+  screenshot_dir: "./test-results/screenshots"
+  video_dir: "./test-results/videos"
+
+# Deployment settings
+deployment:
+  environments:
+    - name: validation
+      url: "https://validation.example.com"
+      required_checks:
+        - build
+        - test
+        - ui-test
+    - name: staging
+      url: "https://staging.example.com"
+      required_checks:
+        - build
+        - test
+        - ui-test
+        - security-scan
+

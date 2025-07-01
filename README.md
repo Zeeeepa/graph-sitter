@@ -1,117 +1,103 @@
-<br />
+# Deployment Validation System
 
-<p align="center">
-  <a href="https://graph-sitter.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+A standalone application for managing deployment validations across GitHub repositories.
 
-<h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
-</h2>
+## Features
 
-<div align="center">
+- GitHub OAuth integration
+- Repository selection and pinning
+- Deployment validation workflows
+- Sandbox environments
+- Secure secrets management
+- Custom validation rules
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-graph-sitter.com-purple?style=flat-square)](https://graph-sitter.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/graph-sitter/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+## Setup
 
-</div>
+1. Create a GitHub OAuth App:
+   - Go to GitHub Developer Settings
+   - Create a new OAuth App
+   - Set callback URL to `http://localhost:8000/api/v1/auth/github/callback`
+   - Save the client ID and secret
 
-<br />
+2. Create `.env` file:
+   ```env
+   # GitHub OAuth
+   GITHUB_CLIENT_ID=your_client_id
+   GITHUB_CLIENT_SECRET=your_client_secret
+   GITHUB_CALLBACK_URL=http://localhost:8000/api/v1/auth/github/callback
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+   # Security
+   SECRET_KEY=your_secret_key
+   ENCRYPTION_KEY=your_encryption_key
 
-```python
-from graph_sitter import Codebase
+   # Database
+   DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/validator
+   ```
 
-# Graph-sitter builds a complete graph connecting
-# functions, classes, imports and their relationships
-codebase = Codebase("./")
+3. Start the application:
+   ```bash
+   docker-compose up -d
+   ```
 
-# Work with code without dealing with syntax trees or parsing
-for function in codebase.functions:
-    # Comprehensive static analysis for references, dependencies, etc.
-    if not function.usages:
-        # Auto-handles references and imports to maintain correctness
-        function.move_to_file("deprecated.py")
-```
-
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
-
-## Installation and Usage
-
-We support
-
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
-
-```
-# Install inside existing project
-uv pip install graph-sitter
-
-# Install global CLI
-uv tool install graph-sitter --python 3.13
-
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
-```
+4. Access the application:
+   - API: http://localhost:8000/api/docs
+   - Frontend: http://localhost:3000
 
 ## Usage
 
-See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
+1. Log in with GitHub:
+   - Click "Login with GitHub"
+   - Authorize the application
 
-```
-from graph_sitter import Codebase
-```
+2. Select repositories:
+   - View your repositories
+   - Pin repositories you want to monitor
 
-## Troubleshooting
+3. Configure validation workflows:
+   - Create workflow with setup commands
+   - Add environment variables and secrets
+   - Define validation rules
 
-Having issues? Here are some common problems and their solutions:
+4. Monitor validations:
+   - View workflow history
+   - Access sandbox environments
+   - Check validation results
 
-- **I'm hitting an UV error related to `[[ packages ]]`**: This means you're likely using an outdated version of UV. Try updating to the latest version with: `uv self update`.
-- **I'm hitting an error about `No module named 'codegen.sdk.extensions.utils'`**: The compiled cython extensions are out of sync. Update them with `uv sync --reinstall-package codegen`.
-- **I'm hitting a `RecursionError: maximum recursion depth exceeded` error while parsing my codebase**: If you are using python 3.12, try upgrading to 3.13. If you are already on 3.13, try upping the recursion limit with `sys.setrecursionlimit(10000)`.
+## API Documentation
 
-If you run into additional issues not listed here, please [join our slack community](https://community.codegen.com) and we'll help you out!
+Full API documentation is available at `/api/docs` when the application is running.
 
-## Resources
+Key endpoints:
 
-- [Docs](https://graph-sitter.com)
-- [Getting Started](https://graph-sitter.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+- `/api/v1/auth/*` - Authentication endpoints
+- `/api/v1/repos/*` - Repository management
+- `/api/v1/validation/*` - Validation workflows
 
-## Why Graph-sitter?
+## Development
 
-Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
+1. Install dependencies:
+   ```bash
+   pip install -e ".[dev]"
+   ```
 
-We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+2. Run migrations:
+   ```bash
+   alembic upgrade head
+   ```
 
-- **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
-
-- **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
-
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+3. Start development server:
+   ```bash
+   uvicorn src.app.main:app --reload
+   ```
 
 ## Contributing
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-## Enterprise
+## License
 
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
+MIT License
+
