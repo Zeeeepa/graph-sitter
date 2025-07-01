@@ -9,7 +9,7 @@ from tests.shared.skills.decorators import skill, skill_impl
 from tests.shared.skills.skill import Skill
 from tests.shared.skills.skill_test import SkillTestCase
 
-EVAL_SKILLS_TEST_DIR = Path(__file__).parent.parents[3] / "src" / "codemods" / "eval" / "test_files"
+EVAL_SKILLS_TEST_DIR = Path(__file__).parent.parents[3] / "src" / "graph_sitter" / "codemods" / "eval" / "test_files"
 
 
 ########################################################################################################################

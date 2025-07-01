@@ -1,11 +1,30 @@
 {
-	"private": true,
-	"release": {
-		"branches": ["develop"],
-		"plugins": [
-			"@semantic-release/commit-analyzer",
-			"@semantic-release/release-notes-generator",
-			"@semantic-release/github"
-		]
-	}
+  "name": "enhanced-codebase-analytics",
+  "version": "2.0.0",
+  "description": "Advanced codebase analytics with interactive issue detection powered by Graph-Sitter",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd backend && python -m uvicorn api:app --reload --host 0.0.0.0 --port 8000",
+    "frontend:dev": "cd frontend && npm run dev",
+    "backend:install": "cd backend && pip install -r requirements.txt",
+    "frontend:install": "cd frontend && npm install",
+    "install:all": "npm run backend:install && npm run frontend:install",
+    "build": "cd frontend && npm run build",
+    "start": "concurrently \"npm run backend:start\" \"npm run frontend:start\"",
+    "backend:start": "cd backend && python -m uvicorn api:app --host 0.0.0.0 --port 8000",
+    "frontend:start": "cd frontend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "codebase-analytics",
+    "graph-sitter",
+    "code-analysis",
+    "static-analysis",
+    "issue-detection"
+  ],
+  "author": "Enhanced Analytics Team",
+  "license": "MIT"
 }
+

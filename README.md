@@ -1,117 +1,294 @@
-<br />
+# Enhanced Codebase Analytics 📊
 
-<p align="center">
-  <a href="https://graph-sitter.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+A comprehensive code analysis platform that provides detailed insights into repository structure, code quality, and potential issues. Built with FastAPI backend and Next.js frontend, featuring interactive visualizations and real-time analysis.
 
-<h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
-</h2>
+## 🚀 Features
 
-<div align="center">
+### Core Analysis Capabilities
+- **Repository Structure Visualization**: Interactive tree view of your codebase
+- **Issue Detection**: Identifies Critical, Functional, and Minor code issues
+- **Metrics Calculation**: Lines of code, complexity metrics, and maintainability scores
+- **Git History Analysis**: Commit activity and contribution patterns
+- **Multi-language Support**: Python, JavaScript, TypeScript, JSX, TSX
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-graph-sitter.com-purple?style=flat-square)](https://graph-sitter.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/graph-sitter/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+### Issue Detection Categories
+- **🔴 Critical Issues**: Implementation errors, misspelled functions, incorrect logic
+- **🟡 Functional Issues**: Missing validation, incomplete implementations, TODOs
+- **🔵 Minor Issues**: Unused parameters, redundant code, formatting issues
 
-</div>
+### Visualizations
+- Repository structure with issue counts
+- Complexity metrics charts
+- Commit activity timeline
+- Issue distribution analysis
 
-<br />
+## 🛠️ Technology Stack
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+### Backend
+- **FastAPI**: High-performance Python web framework
+- **Pydantic**: Data validation and serialization
+- **Git Integration**: Repository cloning and analysis
+- **Code Analysis**: Custom static analysis engine
 
-```python
-from graph_sitter import Codebase
+### Frontend
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first styling
+- **Recharts**: Interactive data visualizations
+- **Radix UI**: Accessible component primitives
 
-# Graph-sitter builds a complete graph connecting
-# functions, classes, imports and their relationships
-codebase = Codebase("./")
+## 📦 Installation & Deployment
 
-# Work with code without dealing with syntax trees or parsing
-for function in codebase.functions:
-    # Comprehensive static analysis for references, dependencies, etc.
-    if not function.usages:
-        # Auto-handles references and imports to maintain correctness
-        function.move_to_file("deprecated.py")
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- Git
+- Docker (optional, for containerized deployment)
+
+### Quick Start (Development)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Zeeeepa/codebase-analytics.git
+   cd codebase-analytics
+   ```
+
+2. **Install backend dependencies**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   cd ..
+   ```
+
+3. **Install frontend dependencies**
+   ```bash
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+4. **Start development servers**
+   ```bash
+   # Option 1: Use the development deployment script
+   ./dev-deploy.sh --install-deps
+   
+   # Option 2: Start services manually
+   # Terminal 1 - Backend
+   cd backend && python api.py
+   
+   # Terminal 2 - Frontend
+   cd frontend && npm run dev
+   ```
+
+### Production Deployment
+
+#### Docker Deployment (Recommended)
+```bash
+# Build and start all services
+./deploy.sh --env production --rebuild
+
+# Services will be available at:
+# - Frontend: http://localhost
+# - API: http://localhost/api
+# - API Docs: http://localhost/api/docs
 ```
 
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+#### Manual Production Deployment
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+python api.py
 
-## Installation and Usage
-
-We support
-
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
-
-```
-# Install inside existing project
-uv pip install graph-sitter
-
-# Install global CLI
-uv tool install graph-sitter --python 3.13
-
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
+# Frontend
+cd frontend
+npm install
+npm run build
+npm start
 ```
 
-## Usage
+## 🔧 Configuration
 
-See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
+### Environment Variables
+```bash
+# Backend
+PYTHONUNBUFFERED=1
 
+# Frontend
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
-from graph_sitter import Codebase
+
+### Docker Configuration
+The application includes comprehensive Docker setup:
+- **Backend Dockerfile**: Python 3.11 with security optimizations
+- **Frontend Dockerfile**: Multi-stage Node.js build
+- **Nginx Configuration**: Load balancing and security headers
+- **Docker Compose**: Orchestrated multi-service deployment
+
+## 📖 API Documentation
+
+### Health Check
+```bash
+GET /health
 ```
 
-## Troubleshooting
+### Repository Analysis
+```bash
+POST /analyze_repo
+Content-Type: application/json
 
-Having issues? Here are some common problems and their solutions:
+{
+  "repo_url": "https://github.com/owner/repo"
+}
+```
 
-- **I'm hitting an UV error related to `[[ packages ]]`**: This means you're likely using an outdated version of UV. Try updating to the latest version with: `uv self update`.
-- **I'm hitting an error about `No module named 'codegen.sdk.extensions.utils'`**: The compiled cython extensions are out of sync. Update them with `uv sync --reinstall-package codegen`.
-- **I'm hitting a `RecursionError: maximum recursion depth exceeded` error while parsing my codebase**: If you are using python 3.12, try upgrading to 3.13. If you are already on 3.13, try upping the recursion limit with `sys.setrecursionlimit(10000)`.
+**Response Structure:**
+```json
+{
+  "repo_url": "string",
+  "description": "string",
+  "basic_metrics": {
+    "files": 0,
+    "functions": 0,
+    "classes": 0,
+    "modules": 0
+  },
+  "line_metrics": {
+    "total": {
+      "loc": 0,
+      "lloc": 0,
+      "comments": 0,
+      "comment_density": 0.0
+    }
+  },
+  "complexity_metrics": {
+    "cyclomatic_complexity": {"average": 0.0},
+    "maintainability_index": {"average": 0.0}
+  },
+  "repository_structure": {
+    "name": "string",
+    "type": "directory",
+    "children": []
+  },
+  "issues_summary": {
+    "total": 0,
+    "critical": 0,
+    "functional": 0,
+    "minor": 0
+  },
+  "detailed_issues": [],
+  "monthly_commits": {}
+}
+```
 
-If you run into additional issues not listed here, please [join our slack community](https://community.codegen.com) and we'll help you out!
+## 🎯 Usage Examples
 
-## Resources
+### Analyze a Repository
+```bash
+curl -X POST "http://localhost:8000/analyze_repo" \\
+     -H "Content-Type: application/json" \\
+     -d '{"repo_url": "https://github.com/facebook/react"}'
+```
 
-- [Docs](https://graph-sitter.com)
-- [Getting Started](https://graph-sitter.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+### Frontend Integration
+```typescript
+const analyzeRepository = async (repoUrl: string) => {
+  const response = await fetch('/api/analyze_repo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ repo_url: repoUrl })
+  });
+  return response.json();
+};
+```
 
-## Why Graph-sitter?
+## 🔍 Issue Detection Examples
 
-Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
+### Critical Issues
+- **Misspelled Functions**: `def commiter()` → Should be `committer`
+- **Incorrect Logic**: Checking `@staticmethod` instead of `@classmethod`
+- **Runtime Errors**: Using `assert` for type checking in production
 
-We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+### Functional Issues
+- **Incomplete Work**: TODO comments indicating unfinished features
+- **Redundant Code**: Multiple caching decorators on same function
+- **Missing Validation**: Functions without input validation
 
-- **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
+### Minor Issues
+- **Code Quality**: Unused function parameters
+- **Style Issues**: Inconsistent formatting
+- **Documentation**: Missing or incomplete docstrings
 
-- **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
+## 🚀 Deployment Scripts
 
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+### Development Deployment
+```bash
+# Start both services
+./dev-deploy.sh
 
-## Contributing
+# Backend only
+./dev-deploy.sh --backend-only
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+# Frontend only
+./dev-deploy.sh --frontend-only
 
-## Enterprise
+# Install dependencies first
+./dev-deploy.sh --install-deps
+```
 
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
+### Production Deployment
+```bash
+# Full production deployment
+./deploy.sh --env production
+
+# Force rebuild
+./deploy.sh --env production --rebuild
+
+# Show logs
+./deploy.sh --env production --logs
+```
+
+## 🔒 Security Features
+
+- **Rate Limiting**: API and frontend request throttling
+- **Security Headers**: XSS protection, content type validation
+- **CORS Configuration**: Controlled cross-origin requests
+- **Input Validation**: Comprehensive request validation
+- **Non-root Containers**: Security-hardened Docker images
+
+## 📊 Monitoring & Health Checks
+
+- **Health Endpoints**: `/health` for service monitoring
+- **Docker Health Checks**: Automated container health monitoring
+- **Service Dependencies**: Proper startup ordering
+- **Graceful Shutdown**: Clean service termination
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For issues and questions:
+- Create an issue on GitHub
+- Check the API documentation at `/docs`
+- Review the deployment logs
+
+## 🎉 Acknowledgments
+
+- Built with modern web technologies
+- Inspired by code quality tools
+- Community-driven development
+
+---
+
+**Ready to analyze your codebase? Start with the quick deployment guide above! 🚀**
+

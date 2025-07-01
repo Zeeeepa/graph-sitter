@@ -1,0 +1,7 @@
+fastapi[standard]>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+requests>=2.31.0
+codegen>=0.5.30
+python-multipart>=0.0.6
+
