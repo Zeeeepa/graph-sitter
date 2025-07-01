@@ -2,7 +2,7 @@ from graph_sitter.code_generation.doc_utils.utils import safe_get_class
 from graph_sitter.core.class_definition import Class
 from graph_sitter.core.external_module import ExternalModule
 from graph_sitter.core.function import Function
-from contexten.extensions.graph.utils import Node, NodeLabel, Relation, RelationLabel, SimpleGraph
+from graph_sitter.extensions.graph.utils import Node, NodeLabel, Relation, RelationLabel, SimpleGraph
 from graph_sitter.python.class_definition import PyClass
 
 

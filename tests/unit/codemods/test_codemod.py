@@ -1,4 +1,4 @@
-from codemods.codemod import Codemod
+from graph_sitter.codemods.codemod import Codemod
 from graph_sitter.core.codebase import Codebase
 
 
