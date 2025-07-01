@@ -2,6 +2,12 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
+from collections import defaultdict
+try:
+    from sortedcontainers import SortedList
+    SORTED_CONTAINERS_AVAILABLE = True
+except ImportError:
+    SORTED_CONTAINERS_AVAILABLE = False
 
 from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
 from graph_sitter.codebase.transactions import (
@@ -33,8 +39,7 @@ class TransactionManager:
     This is used by the Codebase class to queue up transactions and then commit them in bulk.
     """
 
-    # Unsorted list of transactions, grouped by file
-    # TODO: consider using SortedList for better performance
+    # Optimized transaction storage - uses SortedList if available for better performance
     queued_transactions: dict[Path, list[Transaction]]
     pending_undos: set[Callable[[], None]]
     _commiting: bool = False
@@ -43,10 +48,22 @@ class TransactionManager:
     stopwatch_max_seconds: int | None = None  # None = no limit
 
     def __init__(self) -> None:
-        self.queued_transactions = dict()
+        # Use SortedList for better performance if available, otherwise fallback to regular list
+        if SORTED_CONTAINERS_AVAILABLE:
+            self.queued_transactions = defaultdict(lambda: SortedList(key=Transaction._to_sort_key))
+            logger.debug("Using SortedList for optimized transaction management")
+        else:
+            self.queued_transactions = dict()
+            logger.warning("SortedList not available, using regular list (consider installing sortedcontainers for better performance)")
+        
         self.pending_undos = set()
 
     def sort_transactions(self) -> None:
+        # If using SortedList, sorting is automatic and this method is a no-op
+        if SORTED_CONTAINERS_AVAILABLE:
+            return
+        
+        # Fallback to manual sorting for regular lists
         for file_path, file_transactions in self.queued_transactions.items():
             file_transactions.sort(key=Transaction._to_sort_key)
 
