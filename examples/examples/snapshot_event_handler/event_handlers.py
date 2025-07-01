@@ -1,5 +1,5 @@
 from contexten.agents.code_agent import CodeAgent
-from contexten.extensions.events.codegen_app import CodegenApp
+from contexten.extensions.events.contexten_app import ContextenApp
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.slack.types import SlackEvent
 from contexten.extensions.events.modal.base import CodebaseEventsApp, EventRouterMixin
@@ -48,7 +48,7 @@ class CustomEventHandlersAPI(CodebaseEventsApp):
     repo_name: str = modal.parameter(default="Kevin-s-Adventure-Game")
     snapshot_index_id: str = SNAPSHOT_DICT_ID
 
-    def setup_handlers(self, cg: CodegenApp):
+    def setup_handlers(self, cg: ContextenApp):
         @cg.slack.event("app_mention")
         async def handle_mention(event: SlackEvent):
             logger.info("[APP_MENTION] Received cg_app_mention event")
