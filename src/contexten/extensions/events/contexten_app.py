@@ -16,14 +16,14 @@ from .slack import Slack
 logger = get_logger(__name__)
 
 
-class CodegenApp:
-    """A FastAPI-based application for handling various code-related events."""
+class ContextenApp:
+    """A FastAPI-based application for handling various code-related events and orchestrating contexten extensions."""
 
     github: GitHub
     linear: Linear
     slack: Slack
 
-    def __init__(self, name: str, repo: Optional[str] = None, tmp_dir: str = "/tmp/codegen", commit: str | None = "latest"):
+    def __init__(self, name: str, repo: Optional[str] = None, tmp_dir: str = "/tmp/contexten", commit: str | None = "latest"):
         self.name = name
         self.tmp_dir = tmp_dir
 
@@ -114,7 +114,7 @@ class CodegenApp:
             <!DOCTYPE html>
             <html>
                 <head>
-                    <title>Codegen</title>
+                    <title>Contexten</title>
                     <style>
                         body {
                             margin: 0;
@@ -134,7 +134,7 @@ class CodegenApp:
                     </style>
                 </head>
                 <body>
-                    <h1>codegen</h1>
+                    <h1>contexten</h1>
                 </body>
             </html>
             """
