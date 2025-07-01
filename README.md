@@ -26,6 +26,19 @@
 
 ```python
 from graph_sitter import Codebase
+from codegen.agents.agent import Agent
+agent = Agent(
+    org_id="11",  # Your organization ID
+    token="your_api_token_here",  # Your API authentication token
+    base_url="https://codegen-sh-rest-api.modal.run",  # Optional - defaults to this URL
+)
+
+# Run an agent with a prompt
+task = agent.run(prompt="Which github repos can you currently access?")
+
+# Check the initial status
+print(task.status)  # Returns the current status of the task (e.g., "queued", "in_progress", etc.)
+
 
 # Graph-sitter builds a complete graph connecting
 # functions, classes, imports and their relationships
@@ -37,6 +50,15 @@ for function in codebase.functions:
     if not function.usages:
         # Auto-handles references and imports to maintain correctness
         function.move_to_file("deprecated.py")
+# Refresh the task to get updated status
+task.refresh()
+
+# Check the updated status
+print(task.status)
+
+# Once task is complete, you can access the result
+if task.status == "completed":
+    print(task.result)
 ```
 
 Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
@@ -115,3 +137,63 @@ Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to 
 ## Enterprise
 
 For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
+
+---
+
+## 🚀 Enhanced Agent Integration
+
+Graph-Sitter now includes enhanced **ChatAgent** and **CodeAgent** with seamless [Codegen SDK](https://codegen.com) integration:
+
+### Key Features
+- **Automatic SDK Detection**: Agents automatically detect and use Codegen SDK when credentials are available
+- **Intelligent Fallback**: Falls back to local LangChain agents when SDK is unavailable
+- **Unified Interface**: Same API works for both local and remote agents
+- **Enhanced Context**: Codegen SDK agents receive enhanced prompts with codebase context
+
+### Quick Setup
+
+1. **Install Codegen SDK** (optional but recommended):
+   ```bash
+   pip install codegen
+   ```
+
+2. **Configure Environment Variables**:
+   ```bash
+   export CODEGEN_ORG_ID="your_organization_id_here"
+   export CODEGEN_TOKEN="your_api_token_here"
+   ```
+
+3. **Use Enhanced Agents**:
+   ```python
+   from graph_sitter import Codebase
+   from contexten.agents.chat_agent import ChatAgent
+   from contexten.agents.code_agent import CodeAgent
+
+   codebase = Codebase("path/to/your/project")
+   
+   # Auto-detects Codegen SDK configuration
+   chat_agent = ChatAgent(codebase)
+   code_agent = CodeAgent(codebase)
+   
+   # Chat with your codebase
+   response = chat_agent.run("Explain the main components of this project")
+   
+   # Request code changes
+   result = code_agent.run("Add input validation to the login function")
+   ```
+
+### Configuration Options
+
+```python
+# Force Codegen SDK usage
+agent = ChatAgent(codebase, use_codegen_sdk=True)
+
+# Force local-only mode
+agent = ChatAgent(codebase, use_codegen_sdk=False)
+
+# Check configuration status
+from contexten.agents.codegen_config import print_codegen_status
+print_codegen_status()
+```
+
+See the [examples/codegen_sdk_integration_demo.py](examples/codegen_sdk_integration_demo.py) for complete usage examples.

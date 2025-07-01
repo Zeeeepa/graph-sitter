@@ -8,10 +8,17 @@ from langchain_core.runnables.config import RunnableConfig
 from langgraph.graph.graph import CompiledGraph
 from langsmith import Client
 
+# Import Codegen SDK if available
+try:
+    from codegen import Agent as CodegenAgent
+    CODEGEN_AVAILABLE = True
+except ImportError:
+    CODEGEN_AVAILABLE = False
+
 from contexten.agents.loggers import ExternalLogger
 from contexten.agents.tracer import MessageStreamTracer
-from contexten.extensions.langchain.agent import create_codebase_agent
-from contexten.extensions.langchain.utils.get_langsmith_url import (
+from contexten.agents.langchain.agent import create_codebase_agent
+from contexten.agents.langchain.utils.get_langsmith_url import (
     find_and_print_langsmith_run_url,
 )
 
@@ -22,7 +29,7 @@ from contexten.agents.utils import AgentConfig
 
 
 class CodeAgent:
-    """Agent for interacting with a codebase."""
+    """Agent for interacting with a codebase with optional Codegen SDK integration."""
 
     codebase: "Codebase"
     agent: CompiledGraph
@@ -33,6 +40,8 @@ class CodeAgent:
     instance_id: str | None = None
     difficulty: int | None = None
     logger: Optional[ExternalLogger] = None
+    use_codegen_sdk: bool = False
+    codegen_agent: Optional[CodegenAgent] = None
 
     def __init__(
         self,
@@ -46,6 +55,7 @@ class CodeAgent:
         agent_config: Optional[AgentConfig] = None,
         thread_id: Optional[str] = None,
         logger: Optional[ExternalLogger] = None,
+        use_codegen_sdk: Optional[bool] = None,
         **kwargs,
     ):
         """Initialize a CodeAgent.
@@ -58,6 +68,7 @@ class CodeAgent:
             tools: Additional tools to use
             tags: Tags to add to the agent trace. Must be of the same type.
             metadata: Metadata to use for the agent. Must be a dictionary.
+            use_codegen_sdk: Whether to use Codegen SDK. If None, auto-detect from environment
             **kwargs: Additional LLM configuration options. Supported options:
                 - temperature: Temperature parameter (0-1)
                 - top_p: Top-p sampling parameter (0-1)
@@ -65,6 +76,29 @@ class CodeAgent:
                 - max_tokens: Maximum number of tokens to generate
         """
         self.codebase = codebase
+        
+        # Check if Codegen SDK should be used
+        if use_codegen_sdk is None:
+            use_codegen_sdk = self._should_use_codegen_sdk()
+        
+        self.use_codegen_sdk = use_codegen_sdk
+        
+        if self.use_codegen_sdk and CODEGEN_AVAILABLE:
+            # Initialize Codegen SDK agent
+            org_id = os.getenv("CODEGEN_ORG_ID")
+            token = os.getenv("CODEGEN_TOKEN")
+            
+            if org_id and token:
+                self.codegen_agent = CodegenAgent(org_id=org_id, token=token)
+                print(f"✅ CodeAgent initialized with Codegen SDK (org_id: {org_id})")
+            else:
+                print("⚠️ Codegen SDK requested but missing CODEGEN_ORG_ID or CODEGEN_TOKEN")
+                self.codegen_agent = None
+                self.use_codegen_sdk = False
+        else:
+            self.codegen_agent = None
+        
+        # Initialize local LangChain agent as fallback or primary
         self.agent = create_codebase_agent(
             self.codebase,
             model_provider=model_provider,
@@ -87,6 +121,7 @@ class CodeAgent:
         print(f"Using LangSmith project: {self.project_name}")
 
         # Store SWEBench metadata if provided
+        metadata = metadata or {}
         self.run_id = metadata.get("run_id")
         self.instance_id = metadata.get("instance_id")
         # Extract difficulty value from "difficulty_X" format
@@ -94,7 +129,7 @@ class CodeAgent:
         self.difficulty = int(difficulty_str.split("_")[1]) if difficulty_str and "_" in difficulty_str else None
 
         # Initialize tags for agent trace
-        self.tags = [*tags, self.model_name]
+        self.tags = list(tags) + [self.model_name]
 
         # set logger if provided
         self.logger = logger
@@ -106,17 +141,55 @@ class CodeAgent:
             **metadata,
         }
 
+    def _should_use_codegen_sdk(self) -> bool:
+        """Check if Codegen SDK should be used based on environment variables."""
+        return (
+            CODEGEN_AVAILABLE and 
+            os.getenv("CODEGEN_ORG_ID") is not None and 
+            os.getenv("CODEGEN_TOKEN") is not None
+        )
+
     def run(self, prompt: str, image_urls: Optional[list[str]] = None) -> str:
         """Run the agent with a prompt and optional images.
 
         Args:
             prompt: The prompt to run
             image_urls: Optional list of base64-encoded image strings. Example: ["data:image/png;base64,<base64_str>"]
-            thread_id: Optional thread ID for message history
 
         Returns:
             The agent's response
         """
+        # Try Codegen SDK first if available
+        if self.use_codegen_sdk and self.codegen_agent:
+            try:
+                print(f"🤖 Using Codegen SDK for prompt: {prompt[:100]}...")
+                
+                # For code tasks, we can enhance the prompt with codebase context
+                enhanced_prompt = f"""
+Codebase Context: {self.codebase.repo_path}
+
+Task: {prompt}
+
+Please analyze the codebase and implement the requested changes.
+"""
+                
+                task = self.codegen_agent.run(prompt=enhanced_prompt)
+                
+                # Wait for completion and return result
+                while task.status not in ["completed", "failed", "cancelled"]:
+                    task.refresh()
+                
+                if task.status == "completed":
+                    return task.result
+                else:
+                    print(f"⚠️ Codegen SDK task failed with status: {task.status}")
+                    # Fall back to local agent
+            except Exception as e:
+                print(f"⚠️ Codegen SDK error: {e}, falling back to local agent")
+
+        # Use local LangChain agent
+        print(f"🔧 Using local LangChain agent for prompt: {prompt[:100]}...")
+        
         self.config = {
             "configurable": {
                 "thread_id": self.thread_id,

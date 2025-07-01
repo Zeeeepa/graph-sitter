@@ -1,0 +1,345 @@
+name: Autonomous CI/CD with Consolidated Prefect Orchestration
+
+on:
+  workflow_run:
+    workflows: ["*"]
+    types:
+      - completed
+  push:
+    branches: [develop, main]
+  schedule:
+    # Run autonomous maintenance daily at 2 AM UTC
+    - cron: '0 2 * * *'
+    # Run health checks every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Operation mode'
+        required: true
+        default: 'health-check'
+        type: choice
+        options:
+        - health-check
+        - component-analysis
+        - failure-analysis
+        - performance-monitoring
+        - dependency-management
+        - security-audit
+        - initialize-orchestration
+      component:
+        description: 'Component to analyze (for component-analysis mode)'
+        required: false
+        type: string
+      linear_issue_id:
+        description: 'Linear issue ID (for component-analysis mode)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+  actions: read
+
+jobs:
+  # Initialize Prefect orchestration system
+  initialize-orchestration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'initialize-orchestration'
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: |
+          pip install -e .
+          pip install prefect aiohttp psutil
+
+      - name: Initialize Prefect Orchestration
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          python scripts/autonomous_orchestrator.py --action initialize
+
+  # Main autonomous orchestration
+  autonomous-orchestration:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'failure' || 
+      github.event_name == 'schedule' || 
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && contains(fromJson('["develop", "main"]'), github.ref_name))
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: |
+          pip install -e .
+          pip install prefect aiohttp psutil
+
+      - name: Determine Operation Mode
+        id: determine-mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.conclusion }}" = "failure" ]; then
+            echo "mode=failure_analysis" >> $GITHUB_OUTPUT
+            echo "event_type=workflow_run.completed" >> $GITHUB_OUTPUT
+            echo "event_data={\"conclusion\": \"failure\", \"workflow_run_id\": \"${{ github.event.workflow_run.id }}\", \"workflow_name\": \"${{ github.event.workflow_run.name }}\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" = "0 2 * * *" ]; then
+            echo "mode=dependency_management" >> $GITHUB_OUTPUT
+            echo "event_type=schedule" >> $GITHUB_OUTPUT
+            echo "event_data={\"schedule_type\": \"daily\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" = "*/15 * * * *" ]; then
+            echo "mode=health_check" >> $GITHUB_OUTPUT
+            echo "event_type=schedule" >> $GITHUB_OUTPUT
+            echo "event_data={\"schedule_type\": \"health_check\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "mode=performance_monitoring" >> $GITHUB_OUTPUT
+            echo "event_type=push" >> $GITHUB_OUTPUT
+            echo "event_data={\"ref\": \"${{ github.ref }}\", \"sha\": \"${{ github.sha }}\", \"branch\": \"${{ github.ref_name }}\"}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+            echo "event_type=manual" >> $GITHUB_OUTPUT
+            echo "event_data={\"mode\": \"${{ github.event.inputs.mode }}\", \"component\": \"${{ github.event.inputs.component }}\", \"linear_issue_id\": \"${{ github.event.inputs.linear_issue_id }}\"}" >> $GITHUB_OUTPUT
+          else
+            echo "mode=health_check" >> $GITHUB_OUTPUT
+            echo "event_type=unknown" >> $GITHUB_OUTPUT
+            echo "event_data={}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Execute Autonomous Operation via Orchestration
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          # Initialize orchestration system
+          echo "🚀 Initializing orchestration system..."
+          python scripts/autonomous_orchestrator.py --action initialize
+          
+          # Execute the determined operation
+          echo "🎯 Executing operation: ${{ steps.determine-mode.outputs.mode }}"
+          
+          if [ "${{ steps.determine-mode.outputs.mode }}" = "health_check" ]; then
+            python scripts/autonomous_orchestrator.py --action health-check
+          elif [ "${{ steps.determine-mode.outputs.mode }}" = "component-analysis" ]; then
+            if [ -n "${{ github.event.inputs.component }}" ]; then
+              python scripts/autonomous_orchestrator.py \
+                --action component-analysis \
+                --component "${{ github.event.inputs.component }}" \
+                --linear-issue-id "${{ github.event.inputs.linear_issue_id }}" \
+                --wait
+            else
+              echo "⚠️ Component analysis requested but no component specified"
+              python scripts/autonomous_orchestrator.py --action health-check
+            fi
+          else
+            python scripts/autonomous_orchestrator.py \
+              --action execute \
+              --operation "${{ steps.determine-mode.outputs.mode }}" \
+              --parameters '${{ steps.determine-mode.outputs.event_data }}' \
+              --wait
+          fi
+
+      - name: Display System Status
+        if: always()
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          echo "📊 Displaying final system status..."
+          python scripts/autonomous_orchestrator.py --action status
+
+  # Component analysis workflow (can be triggered independently)
+  component-analysis:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'component-analysis' && github.event.inputs.component != ''
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: |
+          pip install -e .
+          pip install prefect aiohttp psutil
+
+      - name: Run Component Analysis
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          echo "🔍 Running detailed component analysis for: ${{ github.event.inputs.component }}"
+          
+          python scripts/autonomous_orchestrator.py \
+            --action component-analysis \
+            --component "${{ github.event.inputs.component }}" \
+            --linear-issue-id "${{ github.event.inputs.linear_issue_id }}"
+
+      - name: Create Analysis Summary
+        if: always()
+        run: |
+          echo "📋 Component Analysis Summary" >> $GITHUB_STEP_SUMMARY
+          echo "=========================" >> $GITHUB_STEP_SUMMARY
+          echo "Component: ${{ github.event.inputs.component }}" >> $GITHUB_STEP_SUMMARY
+          echo "Linear Issue: ${{ github.event.inputs.linear_issue_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "Timestamp: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the Prefect UI and Linear issue for detailed results." >> $GITHUB_STEP_SUMMARY
+
+  # Legacy fallback (if orchestration fails)
+  legacy-fallback:
+    runs-on: ubuntu-latest
+    if: failure() && (github.event.workflow_run.conclusion == 'failure' || github.event_name == 'schedule')
+    needs: [autonomous-orchestration]
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: |
+          pip install codegen graph-sitter requests PyGithub
+
+      - name: Fallback to Direct Codegen SDK
+        env:
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_TOKEN: ${{ secrets.CODEGEN_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔄 Orchestration failed, falling back to direct Codegen SDK..."
+          
+          python -c "
+          import os
+          from codegen import Agent
+          
+          # Initialize agent
+          agent = Agent(
+              org_id=os.environ['CODEGEN_ORG_ID'],
+              token=os.environ['CODEGEN_TOKEN']
+          )
+          
+          # Determine fallback action
+          if '${{ github.event.workflow_run.conclusion }}' == 'failure':
+              prompt = '''
+              Analyze and fix the CI/CD failure in workflow run ${{ github.event.workflow_run.id }}.
+              
+              Tasks:
+              1. Investigate the failure logs and identify root cause
+              2. Determine if this is a known issue pattern
+              3. Generate and implement a fix if possible
+              4. Create a PR with the fix and comprehensive testing
+              5. Update monitoring to prevent similar failures
+              
+              Use autonomous error healing and self-recovery mechanisms.
+              '''
+          else:
+              prompt = '''
+              Perform autonomous system maintenance and health check.
+              
+              Tasks:
+              1. Check system health and performance
+              2. Identify any issues or optimization opportunities
+              3. Perform safe maintenance operations
+              4. Generate status report
+              
+              Focus on system reliability and autonomous operation capability.
+              '''
+          
+          # Execute task
+          task = agent.run(prompt=prompt)
+          print(f'Fallback task started: {task.id}')
+          "
+
+  # Notification job
+  notify-completion:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [autonomous-orchestration, component-analysis]
+    
+    steps:
+      - name: Send Completion Notification
+        if: env.SLACK_WEBHOOK_URL
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          # Determine overall status
+          if [ "${{ needs.autonomous-orchestration.result }}" = "success" ] || [ "${{ needs.component-analysis.result }}" = "success" ]; then
+            STATUS="✅ Success"
+            COLOR="good"
+          elif [ "${{ needs.autonomous-orchestration.result }}" = "failure" ] || [ "${{ needs.component-analysis.result }}" = "failure" ]; then
+            STATUS="❌ Failed"
+            COLOR="danger"
+          else
+            STATUS="⚠️ Partial"
+            COLOR="warning"
+          fi
+          
+          # Send Slack notification
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"attachments\": [{
+                \"color\": \"$COLOR\",
+                \"title\": \"Autonomous CI/CD Orchestration Complete\",
+                \"fields\": [
+                  {\"title\": \"Status\", \"value\": \"$STATUS\", \"short\": true},
+                  {\"title\": \"Repository\", \"value\": \"${{ github.repository }}\", \"short\": true},
+                  {\"title\": \"Trigger\", \"value\": \"${{ github.event_name }}\", \"short\": true},
+                  {\"title\": \"Workflow\", \"value\": \"[View Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"short\": true}
+                ],
+                \"footer\": \"Autonomous Orchestrator\",
+                \"ts\": $(date +%s)
+              }]
+            }" \
+            $SLACK_WEBHOOK_URL
+
