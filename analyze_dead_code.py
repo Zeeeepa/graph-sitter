@@ -37,41 +37,64 @@ try:
     print("="*60)
     print(summary)
     
-    # Find potentially unused symbols
+    # List all functions and classes
     print("\n" + "="*60)
-    print("DEAD CODE ANALYSIS")
+    print("ALL FUNCTIONS AND CLASSES")
     print("="*60)
     
+    all_functions = []
+    all_classes = []
     unused_functions = []
     unused_classes = []
     
-    # Check functions
+    # Collect all functions
     for func in codebase.functions:
         if isinstance(func, Function):
+            all_functions.append(func)
             usages = func.symbol_usages
             if len(usages) == 0:
                 unused_functions.append(func)
     
-    # Check classes  
+    # Collect all classes  
     for cls in codebase.classes:
         if isinstance(cls, Class):
+            all_classes.append(cls)
             usages = cls.symbol_usages
             if len(usages) == 0:
                 unused_classes.append(cls)
     
-    print(f"\n🔍 Found {len(unused_functions)} potentially unused functions:")
-    for func in unused_functions[:10]:  # Show first 10
-        print(f"  - {func.name} in {func.file.name}")
+    # Print all functions
+    print(f"\n📋 ALL FUNCTIONS ({len(all_functions)} total):")
+    print("-" * 40)
+    for i, func in enumerate(all_functions, 1):
+        usage_count = len(func.symbol_usages)
+        status = "🔴 UNUSED" if usage_count == 0 else f"✅ {usage_count} usages"
+        print(f"{i:3d}. {func.name:<30} | {func.file.name:<25} | {status}")
     
-    if len(unused_functions) > 10:
-        print(f"  ... and {len(unused_functions) - 10} more")
+    # Print all classes
+    print(f"\n📋 ALL CLASSES ({len(all_classes)} total):")
+    print("-" * 40)
+    for i, cls in enumerate(all_classes, 1):
+        usage_count = len(cls.symbol_usages)
+        status = "🔴 UNUSED" if usage_count == 0 else f"✅ {usage_count} usages"
+        print(f"{i:3d}. {cls.name:<30} | {cls.file.name:<25} | {status}")
     
-    print(f"\n🔍 Found {len(unused_classes)} potentially unused classes:")
-    for cls in unused_classes[:10]:  # Show first 10
-        print(f"  - {cls.name} in {cls.file.name}")
+    # Summary of unused items
+    print(f"\n" + "="*60)
+    print("DEAD CODE ANALYSIS SUMMARY")
+    print("="*60)
+    print(f"🔍 Found {len(unused_functions)} potentially unused functions out of {len(all_functions)} total")
+    print(f"🔍 Found {len(unused_classes)} potentially unused classes out of {len(all_classes)} total")
     
-    if len(unused_classes) > 10:
-        print(f"  ... and {len(unused_classes) - 10} more")
+    if unused_functions:
+        print(f"\n🔴 UNUSED FUNCTIONS:")
+        for func in unused_functions:
+            print(f"  - {func.name} in {func.file.name}")
+    
+    if unused_classes:
+        print(f"\n🔴 UNUSED CLASSES:")
+        for cls in unused_classes:
+            print(f"  - {cls.name} in {cls.file.name}")
     
     # Show files with most symbols
     print(f"\n📁 Files with most symbols:")
