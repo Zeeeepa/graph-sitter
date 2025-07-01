@@ -14,8 +14,7 @@ skills: list[Skill] = []
 SkillDecoratorType = Callable[[ExecuteFuncType], SkillImplementation]
 REPO_ROOT_PATH: Path = Path(__file__).parent.parent.parent.parent
 SKILLS_PATH: Path = REPO_ROOT_PATH / "tests" / "unit" / "skills" / "implementations"
-CODEMODS_PATH: Path = REPO_ROOT_PATH / "src" / "codemods" / "canonical"
-
+CODEMODS_PATH: Path = REPO_ROOT_PATH / "src" / "graph_sitter" / "codemods" / "canonical"
 
 def import_skills_from(path: Path, module_prefix: str):
     for file in path.rglob("*.py"):
