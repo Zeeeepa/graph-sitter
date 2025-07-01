@@ -1,117 +1,468 @@
-<br />
+# Graph-Sitter
 
-<p align="center">
-  <a href="https://graph-sitter.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+A powerful code analysis framework with semantic understanding, dependency resolution, and comprehensive tooling for modern software development.
 
-<h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
-</h2>
+## 🚀 Features
 
-<div align="center">
+- **Code Analysis**: Deep semantic analysis of codebases with symbol resolution
+- **Dependency Tracking**: Comprehensive dependency analysis and visualization
+- **Multi-Language Support**: Python, TypeScript, JavaScript, and more
+- **Extension System**: Modular architecture with pluggable extensions
+- **Dashboard Interface**: Modern web-based dashboard for project management
+- **Real-time Updates**: WebSocket-powered live monitoring and updates
+- **Cython Performance**: High-performance core modules written in Cython
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-graph-sitter.com-purple?style=flat-square)](https://graph-sitter.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/graph-sitter/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+## 📋 Prerequisites
 
-</div>
+Before installing Graph-Sitter, ensure you have the following prerequisites:
 
-<br />
+### System Requirements
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+- **Python 3.8+** (Python 3.13 recommended)
+- **Node.js 16+** (for frontend components)
+- **Git** (for version control)
+
+### System Dependencies
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt update
+sudo apt install -y gcc build-essential python3-dev libpixman-1-dev libcairo2-dev \
+  libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev jq libssl-dev zlib1g-dev \
+  libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
+  libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-openssl
+```
+
+#### macOS
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install dependencies
+brew install jq openssl readline sqlite3 xz zlib tcl-tk
+```
+
+## 🛠️ Installation
+
+### Quick Start (Recommended)
+
+The fastest way to get started is using our automated setup script:
+
+```bash
+# Clone the repository
+git clone https://github.com/Zeeeepa/graph-sitter.git
+cd graph-sitter
+
+# Run the full build script (sets up everything)
+./scripts/fullbuild.sh
+
+# Or run with tests
+./scripts/fullbuild.sh --test
+```
+
+This script will:
+- Install UV package manager
+- Create and activate a virtual environment
+- Install all dependencies
+- Set up pre-commit hooks
+- Compile Cython modules
+- Install the package in development mode
+- Optionally run tests
+
+### Manual Installation
+
+If you prefer manual installation or need more control:
+
+#### 1. Install UV Package Manager
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+#### 2. Create Virtual Environment
+
+```bash
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+#### 3. Install Dependencies
+
+```bash
+uv sync --dev
+```
+
+#### 4. Install Development Tools
+
+```bash
+uv tool install deptry
+uv tool install pre-commit --with pre-commit-uv
+pre-commit install
+pre-commit install-hooks
+```
+
+#### 5. Build Cython Modules
+
+```bash
+# Quick build and test
+./scripts/build_and_test.sh --test
+
+# Or manually
+python setup.py build_ext --inplace
+uv pip install -e .
+```
+
+## 🏃‍♂️ Quick Start
+
+### Basic Usage
 
 ```python
-from graph_sitter import Codebase
+from graph_sitter import GraphSitter
 
-# Graph-sitter builds a complete graph connecting
-# functions, classes, imports and their relationships
-codebase = Codebase("./")
+# Initialize the analyzer
+analyzer = GraphSitter()
 
-# Work with code without dealing with syntax trees or parsing
-for function in codebase.functions:
-    # Comprehensive static analysis for references, dependencies, etc.
-    if not function.usages:
-        # Auto-handles references and imports to maintain correctness
-        function.move_to_file("deprecated.py")
+# Analyze a codebase
+result = analyzer.analyze_project("/path/to/your/project")
+
+# Get dependency graph
+dependencies = analyzer.get_dependencies()
+
+# Resolve symbols
+symbols = analyzer.resolve_symbols("MyClass")
 ```
 
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+### Running Tests
 
-## Installation and Usage
+```bash
+# Run all tests
+python -m pytest tests/unit -v
 
-We support
+# Run specific test file
+python -m pytest tests/unit/test_specific.py -v
 
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
-
-```
-# Install inside existing project
-uv pip install graph-sitter
-
-# Install global CLI
-uv tool install graph-sitter --python 3.13
-
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
+# Run with coverage
+python -m pytest tests --cov=graph_sitter
 ```
 
-## Usage
+### Starting the Dashboard
 
-See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
+```bash
+# Start the backend server
+python src/contexten/backend/main.py
 
+# In another terminal, start the frontend
+cd src/contexten/frontend
+npm install
+npm run dev
 ```
-from graph_sitter import Codebase
+
+The dashboard will be available at `http://localhost:3000`.
+
+## 🏗️ Development Setup
+
+### Development Environment
+
+For active development, use the build script with test mode:
+
+```bash
+./scripts/build_and_test.sh --test
 ```
 
-## Troubleshooting
+This will:
+- Check for virtual environment
+- Install Cython if needed
+- Compile all Cython modules
+- Install the package in development mode
+- Run the test suite
 
-Having issues? Here are some common problems and their solutions:
+### Pre-commit Hooks
 
-- **I'm hitting an UV error related to `[[ packages ]]`**: This means you're likely using an outdated version of UV. Try updating to the latest version with: `uv self update`.
-- **I'm hitting an error about `No module named 'codegen.sdk.extensions.utils'`**: The compiled cython extensions are out of sync. Update them with `uv sync --reinstall-package codegen`.
-- **I'm hitting a `RecursionError: maximum recursion depth exceeded` error while parsing my codebase**: If you are using python 3.12, try upgrading to 3.13. If you are already on 3.13, try upping the recursion limit with `sys.setrecursionlimit(10000)`.
+Pre-commit hooks are automatically installed during setup. They include:
+- Code formatting (Ruff, Biome)
+- Linting (Ruff, Cython-lint)
+- Type checking
+- Dependency validation
 
-If you run into additional issues not listed here, please [join our slack community](https://community.codegen.com) and we'll help you out!
+To run pre-commit manually:
+```bash
+pre-commit run --all-files
+```
 
-## Resources
+### Extension Development
 
-- [Docs](https://graph-sitter.com)
-- [Getting Started](https://graph-sitter.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+Graph-Sitter supports custom extensions. To create a new extension:
 
-## Why Graph-sitter?
+1. Create your extension in `src/graph_sitter/extensions/`
+2. Implement the required interface
+3. Register your extension in the configuration
+4. Test your extension with the test suite
 
-Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
+## 🚀 Deployment
 
-We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+### Production Deployment
 
-- **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
+#### 1. Environment Setup
 
-- **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
+```bash
+# Clone and setup
+git clone https://github.com/Zeeeepa/graph-sitter.git
+cd graph-sitter
 
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+# Production build
+./scripts/fullbuild.sh
+```
 
-## Contributing
+#### 2. Configuration
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+Create a production configuration file:
 
-## Enterprise
+```python
+# config/production.py
+DATABASE_URL = "postgresql://user:pass@localhost/graphsitter"
+REDIS_URL = "redis://localhost:6379"
+SECRET_KEY = "your-secret-key"
+DEBUG = False
+```
 
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
+#### 3. Database Setup
+
+```bash
+# Setup databases
+./database/setup_all_databases.sh
+```
+
+#### 4. Start Services
+
+```bash
+# Start the backend API
+uvicorn src.contexten.backend.main:app --host 0.0.0.0 --port 8000
+
+# Start the frontend (build first)
+cd src/contexten/frontend
+npm run build
+npm run start
+```
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile example
+FROM python:3.13-slim
+
+WORKDIR /app
+COPY . .
+
+RUN ./scripts/fullbuild.sh
+EXPOSE 8000
+
+CMD ["uvicorn", "src.contexten.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### Environment Variables
+
+Key environment variables for deployment:
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:pass@localhost/graphsitter
+REDIS_URL=redis://localhost:6379
+
+# Security
+SECRET_KEY=your-secret-key-here
+ALLOWED_HOSTS=yourdomain.com,localhost
+
+# Features
+DEBUG=false
+ENABLE_WEBSOCKETS=true
+ENABLE_EXTENSIONS=true
+```
+
+## 🔧 Configuration
+
+### Project Configuration
+
+Graph-Sitter can be configured via `pyproject.toml`:
+
+```toml
+[tool.graph_sitter]
+# Analysis settings
+max_depth = 10
+include_tests = true
+exclude_patterns = ["node_modules", ".git", "__pycache__"]
+
+# Extension settings
+extensions = ["analyze", "visualize", "resolve"]
+
+# Performance settings
+cache_enabled = true
+parallel_processing = true
+```
+
+### Extension Configuration
+
+Extensions can be configured individually:
+
+```toml
+[tool.graph_sitter.extensions.analyze]
+enabled = true
+deep_analysis = true
+
+[tool.graph_sitter.extensions.visualize]
+enabled = true
+output_format = "svg"
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+#### 1. Cython Compilation Errors
+
+```bash
+# Ensure you have the required system dependencies
+sudo apt install gcc python3-dev  # Linux
+brew install gcc  # macOS
+
+# Clean and rebuild
+python setup.py clean --all
+./scripts/build_and_test.sh
+```
+
+#### 2. Import Errors
+
+```bash
+# Ensure the package is installed in development mode
+uv pip install -e .
+
+# Check if Cython modules are compiled
+python -c "import graph_sitter.compiled.utils"
+```
+
+#### 3. Pre-commit Hook Failures
+
+```bash
+# Update pre-commit hooks
+pre-commit autoupdate
+
+# Run specific hook
+pre-commit run biome-check --all-files
+```
+
+#### 4. WebSocket Connection Issues
+
+- Ensure backend is running on the correct port
+- Check firewall settings
+- Verify CORS configuration in the backend
+
+#### 5. Database Connection Issues
+
+```bash
+# Check database status
+./database/setup_all_databases.sh
+
+# Verify connection
+python -c "from src.contexten.backend.database import test_connection; test_connection()"
+```
+
+### Debug Mode
+
+Enable debug logging:
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Or set environment variable
+export GRAPH_SITTER_DEBUG=true
+```
+
+### Performance Issues
+
+If you experience performance issues:
+
+1. **Enable caching**: Set `cache_enabled = true` in configuration
+2. **Parallel processing**: Set `parallel_processing = true`
+3. **Reduce analysis depth**: Lower `max_depth` setting
+4. **Exclude unnecessary files**: Add patterns to `exclude_patterns`
+
+## 📚 Documentation
+
+- **API Reference**: [docs/api/](docs/api/)
+- **Extension Guide**: [docs/extensions/](docs/extensions/)
+- **Architecture Overview**: [docs/architecture/](docs/architecture/)
+- **Contributing Guide**: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# All tests
+python -m pytest tests/unit -v
+
+# Specific test categories
+python -m pytest tests/unit/core -v          # Core functionality
+python -m pytest tests/unit/extensions -v   # Extensions
+python -m pytest tests/unit/api -v          # API tests
+
+# With coverage
+python -m pytest tests --cov=graph_sitter --cov-report=html
+```
+
+### Test Configuration
+
+Tests can be configured via `pytest.ini`:
+
+```ini
+[tool:pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts = -v --tb=short
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes
+4. Run tests: `./scripts/build_and_test.sh --test`
+5. Commit your changes: `git commit -m 'Add amazing feature'`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+### Code Style
+
+We use automated code formatting and linting:
+- **Python**: Ruff for formatting and linting
+- **JavaScript/TypeScript**: Biome for formatting and linting
+- **Cython**: cython-lint for Cython-specific linting
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [FastAPI](https://fastapi.tiangolo.com/) and [React](https://reactjs.org/)
+- Powered by [Tree-sitter](https://tree-sitter.github.io/) for parsing
+- Uses [UV](https://github.com/astral-sh/uv) for fast Python package management
+- Inspired by modern developer tools and static analysis frameworks
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/Zeeeepa/graph-sitter/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Zeeeepa/graph-sitter/discussions)
+- **Documentation**: [Project Wiki](https://github.com/Zeeeepa/graph-sitter/wiki)
+
+---
+
+**Happy coding with Graph-Sitter! 🎉**
+

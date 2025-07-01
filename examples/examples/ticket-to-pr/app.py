@@ -1,7 +1,12 @@
-from graph_sitter import Codebase, CodeAgent
-from contexten.extensions.clients.linear import LinearClient
-from contexten import CodegenApp
-from contexten.extensions.tools.github.create_pr import create_pr
+#!/usr/bin/env python3
+
+import asyncio
+from contexten import ContextenApp
+from contexten.agents.code_agent import CodeAgent
+
+from graph_sitter import Codebase
+from contexten.extensions.linear.linear_client_modal import LinearClient
+from contexten.agents.tools.github.create_pr import create_pr
 from graph_sitter.shared.enums.programming_language import ProgrammingLanguage
 from helpers import create_codebase, format_linear_message, has_codegen_label, process_update_event
 
@@ -17,10 +22,10 @@ logger = logging.getLogger(__name__)
 
 image = modal.Image.debian_slim(python_version="3.13").apt_install("git").pip_install("fastapi[standard]", "codegen==v0.26.3")
 
-app = CodegenApp("linear-bot", image=image, modal_api_key="")
+app = ContextenApp("linear-bot")
+modal_app = modal.App("linear-bot")
 
-
-@app.cls(secrets=[modal.Secret.from_dotenv()], keep_warm=1)
+@modal_app.cls(image=image, secrets=[modal.Secret.from_dotenv()], keep_warm=1)
 class LinearApp:
     codebase: Codebase
 

@@ -20,7 +20,7 @@ from tests.shared.codemod.test_discovery import find_codemod_test_cases, find_re
 from tests.shared.utils.recursion import set_recursion_limit
 
 if TYPE_CHECKING:
-    from codemods.codemod import Codemod
+    from graph_sitter.codemods.codemod import Codemod
 
 logger = logging.getLogger(__name__)
 

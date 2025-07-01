@@ -1,8 +1,8 @@
 from contexten.agents.code_agent import CodeAgent
-from contexten.extensions.events.codegen_app import CodegenApp
+from contexten.extensions.contexten_app.contexten_app import ContextenApp
 from contexten.extensions.linear.types import LinearEvent
 from contexten.extensions.slack.types import SlackEvent
-from contexten.extensions.events.modal.base import CodebaseEventsApp, EventRouterMixin
+from contexten.extensions.modal.base import CodebaseEventsApp, EventRouterMixin
 from contexten.extensions.github.types.pull_request import PullRequestLabeledEvent
 from pr_tasks import lint_for_dev_import_violations
 from typing import Literal
@@ -11,6 +11,9 @@ from fastapi import FastAPI, Request
 from classy_fastapi import Routable, post
 import modal
 import logging
+import asyncio
+from graph_sitter.git.clients.git_repo_client import GitRepoClient
+from graph_sitter.git.schemas.repo_config import RepoConfig
 
 load_dotenv(".env")
 
@@ -48,7 +51,7 @@ class CustomEventHandlersAPI(CodebaseEventsApp):
     repo_name: str = modal.parameter(default="Kevin-s-Adventure-Game")
     snapshot_index_id: str = SNAPSHOT_DICT_ID
 
-    def setup_handlers(self, cg: CodegenApp):
+    def setup_handlers(self, cg: ContextenApp):
         @cg.slack.event("app_mention")
         async def handle_mention(event: SlackEvent):
             logger.info("[APP_MENTION] Received cg_app_mention event")
@@ -68,30 +71,21 @@ class CustomEventHandlersAPI(CodebaseEventsApp):
 
             return {"message": "Mentioned", "received_text": event.text, "response": response}
 
-        @cg.github.event("pull_request:labeled")
+        @cg.github.event("PullRequestLabeledEvent")
         def handle_pr(event: PullRequestLabeledEvent):
-            logger.info("PR labeled")
-            logger.info(f"PR head sha: {event.pull_request.head.sha}")
-
+            logger.info(f"PR labeled: {event.pull_request.title}")
             codebase = cg.get_codebase()
-            logger.info(f"Codebase: {codebase.name} codebase.repo: {codebase.repo_path}")
-
-            # =====[ Check out commit ]=====
-            # Might require fetch?
-            logger.info("> Checking out commit")
-            codebase.checkout(commit=event.pull_request.head.sha)
-
-            logger.info("> Running PR Lints")
-            # LINT CODEMOD
             lint_for_dev_import_violations(codebase, event)
 
-            return {"message": "PR event handled", "num_files": len(codebase.files), "num_functions": len(codebase.functions)}
+            # Fix: files() is a method, functions is a property
+            return {"message": "PR event handled", "num_files": len(codebase.files()), "num_functions": len(codebase.functions)}
 
         @cg.linear.event("Issue")
         def handle_issue(event: LinearEvent):
             logger.info(f"Issue created: {event}")
             codebase = cg.get_codebase()
-            return {"message": "Linear Issue event", "num_files": len(codebase.files), "num_functions": len(codebase.functions)}
+            # Fix: files() is a method, functions is a property
+            return {"message": "Linear Issue event", "num_files": len(codebase.files()), "num_functions": len(codebase.functions)}
 
 
 @codegen_events_app.cls(image=base_image, secrets=[modal.Secret.from_dotenv(".env")])
