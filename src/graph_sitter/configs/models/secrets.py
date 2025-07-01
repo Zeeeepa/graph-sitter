@@ -14,3 +14,8 @@ class SecretsConfig(BaseConfig):
     github_token: str | None = None
     openai_api_key: str | None = None
     linear_api_key: str | None = None
+    
+    # Codegen SDK configuration
+    codegen_org_id: str | None = None
+    codegen_token: str | None = None
+

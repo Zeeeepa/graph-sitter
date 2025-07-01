@@ -23,7 +23,8 @@ from rich.console import Console
 from typing_extensions import TypeVar, deprecated
 
 from graph_sitter._proxy import proxy_property
-from graph_sitter.ai.client import get_openai_client
+from graph_sitter.ai.client import get_ai_client, get_openai_client
+from graph_sitter.ai.providers import AIProvider
 from graph_sitter.codebase.codebase_ai import generate_system_prompt, generate_tools
 from graph_sitter.codebase.codebase_context import (
     GLOBAL_FILE_IGNORE_LIST,
@@ -1177,20 +1178,29 @@ class Codebase(
     # AI
     ####################################################################################################################
 
-    _ai_helper: OpenAI = None
+    _ai_helper: AIProvider = None
     _num_ai_requests: int = 0
 
     @property
     @noapidoc
-    def ai_client(self) -> OpenAI:
-        """Enables calling AI/LLM APIs - re-export of the initialized `openai` module"""
+    def ai_client(self) -> AIProvider:
+        """Enables calling AI/LLM APIs - supports both OpenAI and Codegen SDK"""
         # Create a singleton AIHelper instance
         if self._ai_helper is None:
-            if self.ctx.secrets.openai_api_key is None:
-                msg = "OpenAI key is not set"
-                raise ValueError(msg)
-
-            self._ai_helper = get_openai_client(key=self.ctx.secrets.openai_api_key)
+            # Try to get AI provider with intelligent selection
+            try:
+                # First try with available credentials (prefer Codegen SDK)
+                self._ai_helper = get_ai_client(prefer_codegen=True)
+            except ValueError:
+                # Fallback to OpenAI if we have the key set
+                if self.ctx.secrets.openai_api_key is None:
+                    msg = "No AI provider available. Please set CODEGEN_ORG_ID + CODEGEN_TOKEN or OPENAI_API_KEY"
+                    raise ValueError(msg)
+                
+                # Use OpenAI provider with the configured key
+                from graph_sitter.ai.providers import OpenAIProvider
+                self._ai_helper = OpenAIProvider(api_key=self.ctx.secrets.openai_api_key)
+        
         return self._ai_helper
 
     def ai(
@@ -1218,69 +1228,66 @@ class Codebase(
             MaxAIRequestsError: If the maximum number of allowed AI requests (default 150) has been exceeded.
         """
         # Check max transactions
-        logger.info("Creating call to OpenAI...")
+        provider_name = self.ai_client.provider_name
+        logger.info(f"Creating call to {provider_name}...")
         self._num_ai_requests += 1
         if self.ctx.session_options.max_ai_requests is not None and self._num_ai_requests > self.ctx.session_options.max_ai_requests:
             logger.info(f"Max AI requests reached: {self.ctx.session_options.max_ai_requests}. Stopping codemod.")
             msg = f"Maximum number of AI requests reached: {self.ctx.session_options.max_ai_requests}"
             raise MaxAIRequestsError(msg, threshold=self.ctx.session_options.max_ai_requests)
 
-        params = {
-            "messages": [
-                {"role": "system", "content": generate_system_prompt(target, context)},
-                {"role": "user", "content": prompt},
-            ],
-            "model": model,
-            "functions": generate_tools(),
-            "temperature": 0,
-        }
-        if model.startswith("gpt"):
-            params["tool_choice"] = "required"
-
-        # Make the AI request
-        response = self.ai_client.chat.completions.create(
-            model=model,
-            messages=params["messages"],
-            tools=params["functions"],  # type: ignore
-            temperature=params["temperature"],
-            tool_choice=params["tool_choice"],
-        )
-
-        # Handle finish reasons
-        # First check if there is a response
-        if response.choices:
-            # Check response reason
-            choice = response.choices[0]
-            if choice.finish_reason == "tool_calls" or choice.finish_reason == "function_call" or choice.finish_reason == "stop":
-                # Check if there is a tool call
-                if choice.message.tool_calls:
-                    tool_call = choice.message.tool_calls[0]
-                    response_answer = json.loads(tool_call.function.arguments)
-                    if "answer" in response_answer:
-                        response_answer = response_answer["answer"]
-                    else:
-                        msg = "No answer found in tool call. (tool_call.function.arguments does not contain answer)"
+        # Generate system prompt and tools
+        system_prompt = generate_system_prompt(target, context)
+        tools = generate_tools()
+        
+        # Determine tool choice based on model and provider
+        tool_choice = None
+        if model.startswith("gpt") and provider_name == "OpenAI":
+            tool_choice = "required"
+        
+        # Make the AI request using the provider abstraction
+        try:
+            ai_response = self.ai_client.generate_response(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                model=model,
+                temperature=0,
+                tools=tools,
+                tool_choice=tool_choice
+            )
+            
+            response_answer = ai_response.content
+            
+            # For OpenAI responses, we might need to parse tool calls
+            if provider_name == "OpenAI" and ai_response.raw_response:
+                response = ai_response.raw_response
+                if response.choices:
+                    choice = response.choices[0]
+                    if choice.finish_reason == "tool_calls" and choice.message.tool_calls:
+                        tool_call = choice.message.tool_calls[0]
+                        try:
+                            response_data = json.loads(tool_call.function.arguments)
+                            if "answer" in response_data:
+                                response_answer = response_data["answer"]
+                            else:
+                                response_answer = str(response_data)
+                        except json.JSONDecodeError:
+                            response_answer = tool_call.function.arguments
+                    elif choice.finish_reason == "length":
+                        msg = "AI response too long / ran out of tokens."
                         raise ValueError(msg)
-                else:
-                    msg = "No tool call found in AI response. (choice.message.tool_calls is empty)"
-                    raise ValueError(msg)
-            elif choice.finish_reason == "length":
-                msg = "AI response too long / ran out of tokens. (choice.finish_reason == length)"
-                raise ValueError(msg)
-            elif choice.finish_reason == "content_filter":
-                msg = "AI response was blocked by OpenAI's content filter. (choice.finish_reason == content_filter)"
-                raise ValueError(msg)
-            else:
-                msg = f"Unknown finish reason from AI: {choice.finish_reason}"
-                raise ValueError(msg)
-        else:
-            msg = "No response from AI Provider. (response.choices is empty)"
-            raise ValueError(msg)
-
-        # Agent sometimes fucks up and does \\\\n for some reason.
-        response_answer = codecs.decode(response_answer, "unicode_escape")
-        logger.info(f"OpenAI response: {response_answer}")
-        return response_answer
+                    elif choice.finish_reason == "content_filter":
+                        msg = "AI response was blocked by content filter."
+                        raise ValueError(msg)
+            
+            # Agent sometimes uses escaped characters
+            response_answer = codecs.decode(response_answer, "unicode_escape")
+            logger.info(f"{provider_name} response: {response_answer}")
+            return response_answer
+            
+        except Exception as e:
+            logger.error(f"AI request failed: {e}")
+            raise
 
     def set_ai_key(self, key: str) -> None:
         """Sets the OpenAI key for the current Codebase instance."""
