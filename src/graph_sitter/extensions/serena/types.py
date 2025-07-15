@@ -55,6 +55,7 @@ class RefactoringResult:
     conflicts: List[RefactoringConflict]
     message: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
+    warnings: Optional[List[str]] = None
     
     @property
     def has_conflicts(self) -> bool:
@@ -80,12 +81,13 @@ class CodeGenerationResult:
 @dataclass
 class SemanticSearchResult:
     """Result of a semantic search operation."""
+    symbol_name: str
     file_path: str
-    line: int
-    character: int
-    match: str
-    context: str
-    similarity: float
+    line_number: int
+    symbol_type: str
+    relevance_score: float
+    context_snippet: str
+    documentation: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
 
 

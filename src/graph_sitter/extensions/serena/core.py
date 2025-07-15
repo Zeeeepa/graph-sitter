@@ -137,6 +137,26 @@ class SerenaCore:
                 self._event_loop.close()
     
     # Intelligence Methods
+    def get_symbol_info(self, file_path: str, line: int, character: int, **kwargs) -> Optional[Dict[str, Any]]:
+        """Get detailed symbol information at the specified position."""
+        if SerenaCapability.INTELLIGENCE not in self._capabilities:
+            raise ValueError("Intelligence capability not enabled")
+        
+        intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
+        return intelligence.get_symbol_info(file_path, line, character, **kwargs)
+    
+    def generate_code(self, prompt: str, **kwargs) -> Optional[Dict[str, Any]]:
+        """Generate code based on the provided prompt."""
+        if SerenaCapability.GENERATION not in self._capabilities:
+            # Fallback to intelligence capability for basic generation
+            if SerenaCapability.INTELLIGENCE not in self._capabilities:
+                raise ValueError("Neither generation nor intelligence capability enabled")
+            intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
+            return intelligence.generate_code(prompt, **kwargs)
+        
+        generator = self._capabilities[SerenaCapability.GENERATION]
+        return generator.generate_code(prompt, **kwargs)
+    
     def get_completions(self, file_path: str, line: int, character: int, **kwargs) -> List[Dict[str, Any]]:
         """Get code completions at the specified position."""
         if SerenaCapability.INTELLIGENCE not in self._capabilities:

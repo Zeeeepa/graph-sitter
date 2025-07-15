@@ -45,8 +45,11 @@ def demo_enhanced_symbol_intelligence(serena: SerenaCore):
         search_results = serena.semantic_search("codebase", max_results=5)
         print(f"   Found {len(search_results)} results for 'codebase':")
         for result in search_results[:3]:
-            print(f"   - {result['symbol_name']} in {result['file_path']}:{result['line_number']}")
-            print(f"     Relevance: {result['relevance_score']:.2f}")
+            if hasattr(result, 'symbol_name'):
+                print(f"   - {result.symbol_name} in {result.file_path}:{result.line_number}")
+                print(f"     Relevance: {result.relevance_score:.2f}")
+            else:
+                print(f"   - {result}")
     except Exception as e:
         print(f"   Error: {e}")
     
@@ -285,12 +288,15 @@ def main():
     # Initialize codebase
     print("\n📁 Initializing codebase...")
     try:
-        codebase = Codebase.from_directory(".")
-        print(f"   ✅ Loaded codebase with {len(codebase.files)} files")
-        print(f"   📊 Found {len(codebase.symbols)} symbols")
+        codebase = Codebase(".")
+        print(f"   ✅ Loaded codebase from current directory")
+        print(f"   📊 Found {len(codebase.files)} files")
+        print(f"   🔍 Found {len(codebase.symbols)} symbols")
         print(f"   🏗️  {len(codebase.classes)} classes, {len(codebase.functions)} functions")
     except Exception as e:
         print(f"   ❌ Error loading codebase: {e}")
+        import traceback
+        traceback.print_exc()
         return
     
     # Configure Serena with all capabilities
@@ -340,4 +346,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
