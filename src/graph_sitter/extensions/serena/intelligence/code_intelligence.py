@@ -346,14 +346,26 @@ class CodeIntelligence:
             documentation = self._get_symbol_documentation(symbol)
             signature = self._get_symbol_signature(symbol)
             
+            # Get position information
+            symbol_line = line
+            symbol_char = character
+            
+            if hasattr(symbol, 'start_point'):
+                symbol_line = symbol.start_point.row
+                symbol_char = symbol.start_point.column
+            elif hasattr(symbol, 'line_number'):
+                symbol_line = symbol.line_number
+                symbol_char = getattr(symbol, 'column_number', character)
+            
             return SymbolInfo(
                 name=symbol.name,
                 kind=symbol_kind,
-                location=f"{file_path}:{symbol.line_number}:{symbol.column_number}",
+                file_path=file_path,
+                line=symbol_line,
+                character=symbol_char,
                 documentation=documentation,
-                signature=signature,
-                usages=usages,
-                references=references
+                type_annotation=signature,
+                scope=getattr(symbol, 'scope', None)
             )
             
         except Exception as e:
@@ -364,23 +376,34 @@ class CodeIntelligence:
         """Perform semantic search across the codebase."""
         try:
             results = []
+            logger.debug(f"Semantic search for '{query}' across {len(self.codebase.symbols)} symbols")
             
             # Search through symbols using existing graph-sitter capabilities
             for symbol in self.codebase.symbols:
                 # Simple text matching for now - can be enhanced with embeddings
                 if query.lower() in symbol.name.lower():
+                    logger.debug(f"Found match: {symbol.name} in {symbol.filepath}")
                     score = self._calculate_relevance_score(symbol, query)
+                    
+                    # Get line number from symbol position
+                    line_number = 0
+                    if hasattr(symbol, 'start_point'):
+                        line_number = symbol.start_point.row
+                    elif hasattr(symbol, 'line_number'):
+                        line_number = symbol.line_number
                     
                     result = SemanticSearchResult(
                         symbol_name=symbol.name,
                         file_path=symbol.filepath,
-                        line_number=symbol.line_number,
+                        line_number=line_number,
                         symbol_type=self._get_symbol_kind(symbol),
                         relevance_score=score,
                         context_snippet=self._get_context_snippet(symbol),
                         documentation=self._get_symbol_documentation(symbol)
                     )
                     results.append(result)
+            
+            logger.debug(f"Semantic search found {len(results)} results")
             
             # Sort by relevance and limit results
             results.sort(key=lambda x: x.relevance_score, reverse=True)
@@ -397,40 +420,86 @@ class CodeIntelligence:
             generated_code = self._generate_code_from_prompt(prompt, context)
             
             return CodeGenerationResult(
+                success=True,
                 generated_code=generated_code,
-                confidence_score=0.8,
-                suggestions=[
-                    "Consider adding error handling",
-                    "Add type hints for better code clarity",
-                    "Consider adding docstring documentation"
-                ],
-                imports_needed=self._extract_needed_imports(generated_code),
-                context_used=context or {}
+                message="Code generated successfully",
+                metadata={
+                    "confidence_score": 0.8,
+                    "suggestions": [
+                        "Consider adding error handling",
+                        "Add type hints for better code clarity",
+                        "Consider adding docstring documentation"
+                    ],
+                    "imports_needed": self._extract_needed_imports(generated_code),
+                    "context_used": context or {}
+                }
             )
             
         except Exception as e:
             logger.error(f"Error generating code: {e}")
             return CodeGenerationResult(
+                success=False,
                 generated_code="# Error generating code",
-                confidence_score=0.0,
-                suggestions=["Please try a different prompt"],
-                imports_needed=[],
-                context_used={}
+                message=f"Error generating code: {e}",
+                metadata={
+                    "confidence_score": 0.0,
+                    "suggestions": ["Please try a different prompt"],
+                    "imports_needed": [],
+                    "context_used": {}
+                }
             )
     
     def _find_symbol_at_position(self, file, line: int, character: int):
         """Find symbol at the specified position in the file."""
         try:
             # Use graph-sitter's existing capabilities to find symbols
+            best_match = None
+            best_distance = float('inf')
+            
             for symbol in file.symbols:
-                if hasattr(symbol, 'line_number') and hasattr(symbol, 'column_number'):
-                    if symbol.line_number == line:
-                        return symbol
-                # Check if position is within symbol range
-                if (hasattr(symbol, 'start_line') and hasattr(symbol, 'end_line') and
-                    symbol.start_line <= line <= symbol.end_line):
-                    return symbol
-            return None
+                # Check if symbol has position information using start_point/end_point
+                if hasattr(symbol, 'start_point') and hasattr(symbol, 'end_point'):
+                    start_row = symbol.start_point.row
+                    start_col = symbol.start_point.column
+                    end_row = symbol.end_point.row
+                    end_col = symbol.end_point.column
+                    
+                    # Check if position is within symbol range (0-based indexing)
+                    if start_row <= line <= end_row:
+                        # If on the same line as start, check column
+                        if start_row == line:
+                            if character >= start_col:
+                                distance = abs(start_col - character)
+                                if distance < best_distance:
+                                    best_distance = distance
+                                    best_match = symbol
+                        # If on the same line as end, check column
+                        elif end_row == line:
+                            if character <= end_col:
+                                distance = abs(end_col - character)
+                                if distance < best_distance:
+                                    best_distance = distance
+                                    best_match = symbol
+                        # If between start and end lines
+                        else:
+                            distance = abs(start_row - line)
+                            if distance < best_distance:
+                                best_distance = distance
+                                best_match = symbol
+                
+                # Fallback: check for legacy line_number attribute
+                elif hasattr(symbol, 'line_number'):
+                    symbol_line = symbol.line_number
+                    symbol_char = getattr(symbol, 'column_number', 0)
+                    
+                    if symbol_line == line:
+                        distance = abs(symbol_char - character) if hasattr(symbol, 'column_number') else 0
+                        if distance < best_distance:
+                            best_distance = distance
+                            best_match = symbol
+            
+            return best_match
+            
         except Exception as e:
             logger.debug(f"Error finding symbol at position: {e}")
             return None

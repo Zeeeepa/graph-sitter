@@ -33,7 +33,8 @@ def demo_enhanced_symbol_intelligence(serena: SerenaCore):
             print(f"   Kind: {symbol_info['kind']}")
             print(f"   Location: {symbol_info['location']}")
             print(f"   Documentation: {symbol_info['documentation'][:100]}...")
-            print(f"   Usages found: {len(symbol_info['usages'])}")
+            if 'type_annotation' in symbol_info and symbol_info['type_annotation']:
+                print(f"   Type: {symbol_info['type_annotation']}")
         else:
             print("   No symbol found at specified position")
     except Exception as e:
@@ -57,11 +58,16 @@ def demo_enhanced_symbol_intelligence(serena: SerenaCore):
     print("\n3. AI-Assisted Code Generation:")
     try:
         generation_result = serena.generate_code("Create a function to validate email addresses")
-        if generation_result:
+        if generation_result and generation_result.get('success'):
             print(f"   Generated code:")
             print(f"   {generation_result['generated_code'][:200]}...")
-            print(f"   Confidence: {generation_result['confidence_score']:.2f}")
-            print(f"   Suggestions: {', '.join(generation_result['suggestions'][:2])}")
+            metadata = generation_result.get('metadata', {})
+            confidence = metadata.get('confidence_score', 0.0)
+            suggestions = metadata.get('suggestions', [])
+            print(f"   Confidence: {confidence:.2f}")
+            print(f"   Suggestions: {', '.join(suggestions[:2])}")
+        else:
+            print(f"   Code generation failed: {generation_result.get('message', 'Unknown error')}")
     except Exception as e:
         print(f"   Error: {e}")
 

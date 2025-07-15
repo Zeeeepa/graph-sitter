@@ -21,14 +21,45 @@ class SemanticSearch:
     
     def semantic_search(self, query: str, language: str = "natural", **kwargs) -> List[Dict[str, Any]]:
         """Perform semantic search across the codebase."""
-        return [
-            {
-                'file': 'example.py',
-                'line': 10,
-                'match': f'Found match for: {query}',
-                'score': 0.95
-            }
-        ]
+        try:
+            # Get the intelligence capability to perform real search
+            if hasattr(self, 'codebase') and self.codebase:
+                from ..intelligence.code_intelligence import CodeIntelligence
+                intelligence = CodeIntelligence(self.codebase, self.lsp_bridge)
+                
+                # Get max_results from kwargs, default to 10
+                max_results = kwargs.get('max_results', 10)
+                
+                # Perform real semantic search
+                search_results = intelligence.semantic_search(query, max_results)
+                
+                # Convert SemanticSearchResult objects to dictionaries
+                results = []
+                for result in search_results:
+                    results.append({
+                        'symbol_name': result.symbol_name,
+                        'file': result.file_path,
+                        'line': result.line_number,
+                        'symbol_type': result.symbol_type,
+                        'score': result.relevance_score,
+                        'context': result.context_snippet,
+                        'documentation': result.documentation
+                    })
+                
+                return results
+            else:
+                # Fallback to mock data if no codebase available
+                return [
+                    {
+                        'file': 'example.py',
+                        'line': 10,
+                        'match': f'Found match for: {query}',
+                        'score': 0.95
+                    }
+                ]
+        except Exception as e:
+            logger.error(f"Error in semantic search: {e}")
+            return []
     
     def find_code_patterns(self, pattern: str, suggest_improvements: bool = False) -> List[Dict[str, Any]]:
         """Find code patterns matching the specified pattern."""
@@ -58,4 +89,3 @@ class SemanticSearch:
     def shutdown(self) -> None:
         """Shutdown semantic search."""
         pass
-

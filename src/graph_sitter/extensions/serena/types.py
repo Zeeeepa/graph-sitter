@@ -56,6 +56,8 @@ class RefactoringResult:
     message: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
     warnings: Optional[List[str]] = None
+    preview_available: Optional[bool] = None
+    error_message: Optional[str] = None
     
     @property
     def has_conflicts(self) -> bool:
@@ -66,6 +68,41 @@ class RefactoringResult:
     def files_changed(self) -> List[str]:
         """Get list of files that would be changed."""
         return list(set(change.file_path for change in self.changes))
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert RefactoringResult to dictionary."""
+        return {
+            'success': self.success,
+            'refactoring_type': self.refactoring_type.value if self.refactoring_type else None,
+            'changes': [
+                {
+                    'file_path': change.file_path,
+                    'start_line': change.start_line,
+                    'end_line': change.end_line,
+                    'old_content': change.old_content,
+                    'new_content': change.new_content,
+                    'change_type': change.change_type.value if change.change_type else None
+                }
+                for change in self.changes
+            ],
+            'conflicts': [
+                {
+                    'file_path': conflict.file_path,
+                    'line_number': conflict.line_number,
+                    'conflict_type': conflict.conflict_type.value if conflict.conflict_type else None,
+                    'description': conflict.description,
+                    'suggested_resolution': conflict.suggested_resolution
+                }
+                for conflict in self.conflicts
+            ],
+            'message': self.message,
+            'metadata': self.metadata or {},
+            'warnings': self.warnings or [],
+            'preview_available': self.preview_available,
+            'error_message': self.error_message,
+            'has_conflicts': self.has_conflicts,
+            'files_changed': self.files_changed
+        }
 
 
 @dataclass

@@ -143,7 +143,23 @@ class SerenaCore:
             raise ValueError("Intelligence capability not enabled")
         
         intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
-        return intelligence.get_symbol_info(file_path, line, character, **kwargs)
+        symbol_info = intelligence.get_symbol_info(file_path, line, character, **kwargs)
+        
+        if symbol_info:
+            # Convert SymbolInfo object to dictionary
+            return {
+                'name': symbol_info.name,
+                'kind': symbol_info.kind,
+                'location': f"{symbol_info.file_path}:{symbol_info.line}:{symbol_info.character}",
+                'file_path': symbol_info.file_path,
+                'line': symbol_info.line,
+                'character': symbol_info.character,
+                'documentation': symbol_info.documentation or "",
+                'type_annotation': symbol_info.type_annotation or "",
+                'scope': symbol_info.scope or ""
+            }
+        
+        return None
     
     def generate_code(self, prompt: str, **kwargs) -> Optional[Dict[str, Any]]:
         """Generate code based on the provided prompt."""
@@ -152,10 +168,30 @@ class SerenaCore:
             if SerenaCapability.INTELLIGENCE not in self._capabilities:
                 raise ValueError("Neither generation nor intelligence capability enabled")
             intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
-            return intelligence.generate_code(prompt, **kwargs)
+            result = intelligence.generate_code(prompt, **kwargs)
+            
+            if result:
+                # Convert CodeGenerationResult to dictionary
+                return {
+                    'success': result.success,
+                    'generated_code': result.generated_code,
+                    'message': result.message,
+                    'metadata': result.metadata or {}
+                }
+            return None
         
         generator = self._capabilities[SerenaCapability.GENERATION]
-        return generator.generate_code(prompt, **kwargs)
+        result = generator.generate_code(prompt, **kwargs)
+        
+        if result:
+            # Convert CodeGenerationResult to dictionary
+            return {
+                'success': result.success,
+                'generated_code': result.generated_code,
+                'message': result.message,
+                'metadata': result.metadata or {}
+            }
+        return None
     
     def get_completions(self, file_path: str, line: int, character: int, **kwargs) -> List[Dict[str, Any]]:
         """Get code completions at the specified position."""
