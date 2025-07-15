@@ -1,19 +1,10 @@
 """
-LSP Integration for Graph-Sitter
+LSP (Language Server Protocol) integration for graph-sitter.
 
-This module provides Language Server Protocol integration for comprehensive
-error detection and diagnostic capabilities in graph-sitter codebases.
-
-Adapted from Serena's solidlsp implementation.
+This module provides LSP infrastructure for advanced code intelligence features.
 """
 
-from .serena_bridge import ErrorInfo, DiagnosticSeverity
-from .transaction_manager import TransactionAwareLSPManager, get_lsp_manager
+from .serena_bridge import SerenaLSPBridge, ErrorInfo
 
-__all__ = [
-    'ErrorInfo',
-    'DiagnosticSeverity', 
-    'TransactionAwareLSPManager',
-    'get_lsp_manager'
-]
+__all__ = ['SerenaLSPBridge', 'ErrorInfo']
 

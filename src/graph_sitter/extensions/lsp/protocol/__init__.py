@@ -1,16 +1,16 @@
-"""LSP Protocol Types and Constants"""
+"""
+LSP Protocol types and definitions.
+"""
 
-from .lsp_types import *
-from .lsp_constants import *
+from .lsp_types import (
+    Position, Range, Location, Diagnostic, DiagnosticSeverity,
+    CompletionItem, CompletionItemKind, Hover, SignatureHelp,
+    TextEdit, WorkspaceEdit
+)
 
 __all__ = [
-    'Position',
-    'Range', 
-    'Location',
-    'DiagnosticSeverity',
-    'DiagnosticTag',
-    'Diagnostic',
-    'PublishDiagnosticsParams',
-    'LSPConstants'
+    'Position', 'Range', 'Location', 'Diagnostic', 'DiagnosticSeverity',
+    'CompletionItem', 'CompletionItemKind', 'Hover', 'SignatureHelp',
+    'TextEdit', 'WorkspaceEdit'
 ]
 

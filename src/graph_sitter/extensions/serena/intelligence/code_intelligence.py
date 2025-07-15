@@ -13,6 +13,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
+from ..types import (
+    CompletionContext, HoverContext, SignatureContext, SymbolInfo,
+    SemanticSearchResult, CodeGenerationResult
+)
 
 from .completions import CompletionProvider
 from .hover import HoverProvider
@@ -324,4 +328,3 @@ class CodeIntelligence:
         self.executor.shutdown(wait=True)
         
         logger.info("Code intelligence engine shutdown complete")
-

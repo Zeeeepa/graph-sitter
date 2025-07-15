@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Any
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
-from .refactoring_engine import RefactoringResult, RefactoringType
+from ..types import RefactoringResult, RefactoringType, RefactoringChange, RefactoringConflict
 
 logger = get_logger(__name__)
 

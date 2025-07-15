@@ -15,48 +15,15 @@ from enum import Enum
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
+from ..types import RefactoringType, RefactoringResult, RefactoringChange, RefactoringConflict
 
+# Import refactoring modules after types to avoid circular imports
 from .rename_refactor import RenameRefactor
 from .extract_refactor import ExtractRefactor
 from .inline_refactor import InlineRefactor
 from .move_refactor import MoveRefactor
 
 logger = get_logger(__name__)
-
-
-class RefactoringType(Enum):
-    """Types of refactoring operations."""
-    RENAME = "rename"
-    EXTRACT_METHOD = "extract_method"
-    EXTRACT_VARIABLE = "extract_variable"
-    INLINE_METHOD = "inline_method"
-    INLINE_VARIABLE = "inline_variable"
-    MOVE_SYMBOL = "move_symbol"
-    MOVE_FILE = "move_file"
-
-
-@dataclass
-class RefactoringResult:
-    """Result of a refactoring operation."""
-    success: bool
-    refactoring_type: RefactoringType
-    changes: List[Dict[str, Any]]
-    conflicts: List[Dict[str, Any]]
-    warnings: List[str]
-    error_message: Optional[str] = None
-    preview_available: bool = False
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary representation."""
-        return {
-            'success': self.success,
-            'refactoringType': self.refactoring_type.value,
-            'changes': self.changes,
-            'conflicts': self.conflicts,
-            'warnings': self.warnings,
-            'errorMessage': self.error_message,
-            'previewAvailable': self.preview_available
-        }
 
 
 @dataclass
@@ -604,4 +571,3 @@ class RefactoringEngine:
         self.move_refactor.shutdown()
         
         logger.info("Refactoring engine shutdown complete")
-

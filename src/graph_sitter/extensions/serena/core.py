@@ -14,38 +14,9 @@ from enum import Enum
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge, ErrorInfo
 from graph_sitter.core.codebase import Codebase
+from .types import SerenaCapability, SerenaConfig
 
 logger = get_logger(__name__)
-
-
-class SerenaCapability(Enum):
-    """Available Serena capabilities."""
-    INTELLIGENCE = "intelligence"  # Completions, hover, signatures
-    REFACTORING = "refactoring"   # Rename, extract, inline, move
-    ACTIONS = "actions"           # Code actions, quick fixes
-    GENERATION = "generation"     # Code generation, templates
-    SEARCH = "search"            # Semantic search, patterns
-    REALTIME = "realtime"        # File watching, incremental updates
-    SYMBOLS = "symbols"          # Advanced symbol intelligence
-    MULTI_LANG = "multi_lang"    # Multi-language support
-
-
-@dataclass
-class SerenaConfig:
-    """Configuration for Serena integration."""
-    enabled_capabilities: List[SerenaCapability] = None
-    realtime_analysis: bool = True
-    file_watch_patterns: List[str] = None
-    cache_size: int = 1000
-    max_completions: int = 50
-    enable_ai_features: bool = True
-    performance_mode: bool = False
-    
-    def __post_init__(self):
-        if self.enabled_capabilities is None:
-            self.enabled_capabilities = list(SerenaCapability)
-        if self.file_watch_patterns is None:
-            self.file_watch_patterns = ["*.py", "*.ts", "*.js", "*.java", "*.cs", "*.go", "*.rs"]
 
 
 class SerenaCore:
@@ -384,4 +355,3 @@ class SerenaCore:
     
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.shutdown()
-

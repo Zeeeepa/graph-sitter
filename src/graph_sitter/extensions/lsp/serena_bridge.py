@@ -22,12 +22,7 @@ from .language_servers.python_server import PythonLanguageServer
 logger = get_logger(__name__)
 
 
-class DiagnosticSeverity(IntEnum):
-    """Diagnostic severity levels."""
-    ERROR = 1
-    WARNING = 2
-    INFORMATION = 3
-    HINT = 4
+# DiagnosticSeverity is now imported from protocol.lsp_types
 
 
 @dataclass
@@ -181,6 +176,49 @@ class SerenaLSPBridge:
             self.language_servers.clear()
             self.diagnostics_cache.clear()
             self.is_initialized = False
+    
+    def get_completions(self, file_path: str, line: int, character: int) -> List[Any]:
+        """Get code completions at the specified position."""
+        if not self.is_initialized:
+            return []
+        
+        # Find appropriate language server
+        for server in self.language_servers.values():
+            if server.supports_file(file_path):
+                return server.get_completions(file_path, line, character)
+        
+        return []
+    
+    def get_hover_info(self, file_path: str, line: int, character: int) -> Optional[Any]:
+        """Get hover information at the specified position."""
+        if not self.is_initialized:
+            return None
+        
+        # Find appropriate language server
+        for server in self.language_servers.values():
+            if server.supports_file(file_path):
+                return server.get_hover_info(file_path, line, character)
+        
+        return None
+    
+    def get_signature_help(self, file_path: str, line: int, character: int) -> Optional[Any]:
+        """Get signature help at the specified position."""
+        if not self.is_initialized:
+            return None
+        
+        # Find appropriate language server
+        for server in self.language_servers.values():
+            if server.supports_file(file_path):
+                return server.get_signature_help(file_path, line, character)
+        
+        return None
+    
+    def initialize_language_servers(self) -> None:
+        """Initialize all language servers."""
+        with self._lock:
+            for server in self.language_servers.values():
+                if not server.is_running:
+                    server.initialize()
     
     def get_status(self) -> Dict[str, Any]:
         """Get status information about the LSP bridge."""
