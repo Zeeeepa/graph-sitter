@@ -137,12 +137,19 @@ class SignatureContext:
 class SerenaCapability(Enum):
     """Serena capabilities that can be enabled/disabled."""
     CODE_INTELLIGENCE = "code_intelligence"
+    INTELLIGENCE = "intelligence"  # Alias for CODE_INTELLIGENCE
     REFACTORING = "refactoring"
     CODE_ACTIONS = "code_actions"
+    ACTIONS = "actions"  # Alias for CODE_ACTIONS
     CODE_GENERATION = "code_generation"
+    GENERATION = "generation"  # Alias for CODE_GENERATION
     SEMANTIC_SEARCH = "semantic_search"
+    SEARCH = "search"  # Alias for SEMANTIC_SEARCH
     SYMBOL_INTELLIGENCE = "symbol_intelligence"
+    SYMBOLS = "symbols"  # Alias for SYMBOL_INTELLIGENCE
     REALTIME_ANALYSIS = "realtime_analysis"
+    REALTIME = "realtime"  # Alias for REALTIME_ANALYSIS
+    ANALYSIS = "analysis"  # New capability for real-time analysis
 
 
 @dataclass

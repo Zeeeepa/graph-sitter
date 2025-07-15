@@ -315,6 +315,231 @@ class CodeIntelligence:
             }
         }
     
+    def get_symbol_info(self, file_path: str, line: int, character: int) -> Optional[SymbolInfo]:
+        """Get detailed information about a symbol at the specified position."""
+        try:
+            # Get the file from the codebase
+            file = self.codebase.get_file(file_path, optional=True)
+            if not file:
+                return None
+            
+            # Find the symbol at the specified position
+            symbol = self._find_symbol_at_position(file, line, character)
+            if not symbol:
+                return None
+            
+            # Get symbol usages and references
+            usages = []
+            references = []
+            
+            try:
+                symbol_usages = symbol.usages()
+                for usage in symbol_usages:
+                    usage_info = f"{usage.usage_symbol.filepath}:{usage.usage_symbol.line_number}"
+                    usages.append(usage_info)
+                    references.append(usage_info)
+            except Exception as e:
+                logger.warning(f"Error getting symbol usages: {e}")
+            
+            # Build symbol information
+            symbol_kind = self._get_symbol_kind(symbol)
+            documentation = self._get_symbol_documentation(symbol)
+            signature = self._get_symbol_signature(symbol)
+            
+            return SymbolInfo(
+                name=symbol.name,
+                kind=symbol_kind,
+                location=f"{file_path}:{symbol.line_number}:{symbol.column_number}",
+                documentation=documentation,
+                signature=signature,
+                usages=usages,
+                references=references
+            )
+            
+        except Exception as e:
+            logger.error(f"Error getting symbol info: {e}")
+            return None
+    
+    def semantic_search(self, query: str, max_results: int = 10) -> List[SemanticSearchResult]:
+        """Perform semantic search across the codebase."""
+        try:
+            results = []
+            
+            # Search through symbols using existing graph-sitter capabilities
+            for symbol in self.codebase.symbols:
+                # Simple text matching for now - can be enhanced with embeddings
+                if query.lower() in symbol.name.lower():
+                    score = self._calculate_relevance_score(symbol, query)
+                    
+                    result = SemanticSearchResult(
+                        symbol_name=symbol.name,
+                        file_path=symbol.filepath,
+                        line_number=symbol.line_number,
+                        symbol_type=self._get_symbol_kind(symbol),
+                        relevance_score=score,
+                        context_snippet=self._get_context_snippet(symbol),
+                        documentation=self._get_symbol_documentation(symbol)
+                    )
+                    results.append(result)
+            
+            # Sort by relevance and limit results
+            results.sort(key=lambda x: x.relevance_score, reverse=True)
+            return results[:max_results]
+            
+        except Exception as e:
+            logger.error(f"Error in semantic search: {e}")
+            return []
+    
+    def generate_code(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> CodeGenerationResult:
+        """Generate code based on prompt and context."""
+        try:
+            # Basic code generation - can be enhanced with AI models
+            generated_code = self._generate_code_from_prompt(prompt, context)
+            
+            return CodeGenerationResult(
+                generated_code=generated_code,
+                confidence_score=0.8,
+                suggestions=[
+                    "Consider adding error handling",
+                    "Add type hints for better code clarity",
+                    "Consider adding docstring documentation"
+                ],
+                imports_needed=self._extract_needed_imports(generated_code),
+                context_used=context or {}
+            )
+            
+        except Exception as e:
+            logger.error(f"Error generating code: {e}")
+            return CodeGenerationResult(
+                generated_code="# Error generating code",
+                confidence_score=0.0,
+                suggestions=["Please try a different prompt"],
+                imports_needed=[],
+                context_used={}
+            )
+    
+    def _find_symbol_at_position(self, file, line: int, character: int):
+        """Find symbol at the specified position in the file."""
+        try:
+            # Use graph-sitter's existing capabilities to find symbols
+            for symbol in file.symbols:
+                if hasattr(symbol, 'line_number') and hasattr(symbol, 'column_number'):
+                    if symbol.line_number == line:
+                        return symbol
+                # Check if position is within symbol range
+                if (hasattr(symbol, 'start_line') and hasattr(symbol, 'end_line') and
+                    symbol.start_line <= line <= symbol.end_line):
+                    return symbol
+            return None
+        except Exception as e:
+            logger.debug(f"Error finding symbol at position: {e}")
+            return None
+    
+    def _get_symbol_kind(self, symbol) -> str:
+        """Get the kind/type of symbol."""
+        try:
+            if hasattr(symbol, 'symbol_type'):
+                return str(symbol.symbol_type).lower()
+            return symbol.__class__.__name__.lower()
+        except Exception:
+            return "unknown"
+    
+    def _get_symbol_documentation(self, symbol) -> str:
+        """Extract documentation for a symbol."""
+        try:
+            if hasattr(symbol, 'docstring') and symbol.docstring:
+                return symbol.docstring
+            if hasattr(symbol, 'comment') and symbol.comment:
+                return symbol.comment
+            return f"Symbol: {symbol.name}"
+        except Exception:
+            return ""
+    
+    def _get_symbol_signature(self, symbol) -> str:
+        """Get the signature of a symbol."""
+        try:
+            if hasattr(symbol, 'signature'):
+                return symbol.signature
+            if hasattr(symbol, 'name'):
+                return f"{symbol.__class__.__name__}: {symbol.name}"
+            return str(symbol)
+        except Exception:
+            return ""
+    
+    def _calculate_relevance_score(self, symbol, query: str) -> float:
+        """Calculate relevance score for semantic search."""
+        try:
+            score = 0.0
+            query_lower = query.lower()
+            name_lower = symbol.name.lower()
+            
+            # Exact match gets highest score
+            if name_lower == query_lower:
+                score += 1.0
+            # Starts with query gets high score
+            elif name_lower.startswith(query_lower):
+                score += 0.8
+            # Contains query gets medium score
+            elif query_lower in name_lower:
+                score += 0.6
+            
+            # Boost score for certain symbol types
+            if hasattr(symbol, 'symbol_type'):
+                if 'function' in str(symbol.symbol_type).lower():
+                    score += 0.1
+                elif 'class' in str(symbol.symbol_type).lower():
+                    score += 0.2
+            
+            return min(score, 1.0)
+        except Exception:
+            return 0.0
+    
+    def _get_context_snippet(self, symbol) -> str:
+        """Get a context snippet for the symbol."""
+        try:
+            if hasattr(symbol, 'content'):
+                content = str(symbol.content)
+                # Return first 100 characters as snippet
+                return content[:100] + "..." if len(content) > 100 else content
+            return f"Symbol: {symbol.name}"
+        except Exception:
+            return ""
+    
+    def _generate_code_from_prompt(self, prompt: str, context: Optional[Dict[str, Any]]) -> str:
+        """Generate code from prompt - basic implementation."""
+        try:
+            # Basic template-based generation
+            if "function" in prompt.lower():
+                return f"""def generated_function():
+    \"\"\"Generated function based on: {prompt}\"\"\"
+    # TODO: Implement function logic
+    pass"""
+            elif "class" in prompt.lower():
+                return f"""class GeneratedClass:
+    \"\"\"Generated class based on: {prompt}\"\"\"
+    
+    def __init__(self):
+        # TODO: Initialize class
+        pass"""
+            else:
+                return f"# Generated code for: {prompt}\n# TODO: Implement logic"
+        except Exception:
+            return "# Error generating code"
+    
+    def _extract_needed_imports(self, code: str) -> List[str]:
+        """Extract imports that might be needed for the generated code."""
+        imports = []
+        
+        # Basic import detection
+        if "typing" in code.lower():
+            imports.append("from typing import *")
+        if "dataclass" in code.lower():
+            imports.append("from dataclasses import dataclass")
+        if "pathlib" in code.lower():
+            imports.append("from pathlib import Path")
+        
+        return imports
+
     def shutdown(self) -> None:
         """Shutdown the intelligence engine."""
         logger.info("Shutting down code intelligence engine")

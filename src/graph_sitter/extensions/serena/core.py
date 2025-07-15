@@ -80,6 +80,10 @@ class SerenaCore:
                 from .search import SemanticSearch
                 self._capabilities[capability] = SemanticSearch(self.codebase, self.lsp_bridge)
             
+            elif capability == SerenaCapability.ANALYSIS:
+                from .analysis import RealtimeAnalyzer
+                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.lsp_bridge)
+            
             elif capability == SerenaCapability.REALTIME:
                 from .realtime import RealtimeAnalyzer
                 self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.lsp_bridge)
@@ -290,6 +294,49 @@ class SerenaCore:
         
         realtime = self._capabilities[SerenaCapability.REALTIME]
         return realtime.disable_analysis()
+    
+    # Analysis Methods
+    def analyze_file(self, file_path: str, force: bool = False) -> Optional[Dict[str, Any]]:
+        """Analyze a specific file for issues and metrics."""
+        if SerenaCapability.ANALYSIS not in self._capabilities:
+            raise ValueError("Analysis capability not enabled")
+        
+        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
+        result = analyzer.analyze_file(file_path, force=force)
+        return result.__dict__ if result else None
+    
+    def get_analysis_results(self, file_paths: Optional[List[str]] = None) -> Dict[str, Dict[str, Any]]:
+        """Get analysis results for specified files or all analyzed files."""
+        if SerenaCapability.ANALYSIS not in self._capabilities:
+            raise ValueError("Analysis capability not enabled")
+        
+        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
+        results = analyzer.get_analysis_results(file_paths)
+        return {path: result.__dict__ for path, result in results.items()}
+    
+    def queue_file_analysis(self, file_path: str) -> None:
+        """Queue a file for background analysis."""
+        if SerenaCapability.ANALYSIS not in self._capabilities:
+            raise ValueError("Analysis capability not enabled")
+        
+        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
+        analyzer.queue_analysis(file_path)
+    
+    def start_analysis_engine(self) -> None:
+        """Start the real-time analysis engine."""
+        if SerenaCapability.ANALYSIS not in self._capabilities:
+            raise ValueError("Analysis capability not enabled")
+        
+        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
+        analyzer.start()
+    
+    def stop_analysis_engine(self) -> None:
+        """Stop the real-time analysis engine."""
+        if SerenaCapability.ANALYSIS not in self._capabilities:
+            raise ValueError("Analysis capability not enabled")
+        
+        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
+        analyzer.stop()
     
     # Utility Methods
     def get_diagnostics(self) -> List[ErrorInfo]:
