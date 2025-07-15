@@ -213,31 +213,9 @@ class Codebase(
         self.ctx = CodebaseContext(projects, config=config, secrets=secrets, io=io, progress=progress)
         self.console = Console(record=True, soft_wrap=True)
         if self.ctx.config.use_pink != PinkMode.OFF:
-            try:
-                import codegen_sdk_pink
-                self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
-            except ImportError as e:
-                import warnings
-                warnings.warn(
-                    f"Pink SDK is configured but not installed. "
-                    f"Install with: pip install codegen-sdk-pink or pip install 'graph-sitter[pink]'",
-                    UserWarning,
-                    stacklevel=2
-                )
-                # Fallback to OFF mode if Pink SDK is not available
-                self.ctx.config.use_pink = PinkMode.OFF
-                self._pink_codebase = None
-            except Exception as e:
-                import warnings
-                warnings.warn(
-                    f"Failed to initialize Pink SDK: {e}. Falling back to Python-only parsing.",
-                    UserWarning,
-                    stacklevel=2
-                )
-                self.ctx.config.use_pink = PinkMode.OFF
-                self._pink_codebase = None
-        else:
-            self._pink_codebase = None
+            import codegen_sdk_pink
+
+            self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
 
     @noapidoc
     def __str__(self) -> str:

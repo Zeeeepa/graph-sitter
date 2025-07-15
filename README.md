@@ -71,6 +71,42 @@ gs run test-function
 gs notebook
 ```
 
+### 🚀 Enhanced Performance with Pink SDK
+
+For improved performance and support for additional file types, install the optional Pink SDK:
+
+```bash
+# Install with Pink SDK support
+uv pip install 'graph-sitter[pink]'
+
+# Or install Pink SDK separately
+uv pip install codegen-sdk-pink
+```
+
+The Pink SDK provides:
+- **Faster file parsing** using Rust-based tree-sitter
+- **Support for non-source files** (configuration files, etc.)
+- **Enhanced performance** for large codebases
+
+Configure Pink SDK usage:
+
+```python
+from graph_sitter import Codebase
+from graph_sitter.configs.models.codebase import CodebaseConfig, PinkMode
+
+# Use Pink SDK for all files (maximum performance)
+config = CodebaseConfig(use_pink=PinkMode.ALL_FILES)
+codebase = Codebase("./", config=config)
+
+# Use Pink SDK only for non-source files (balanced approach)
+config = CodebaseConfig(use_pink=PinkMode.NON_SOURCE_FILES)
+codebase = Codebase("./", config=config)
+
+# Disable Pink SDK (Python-only parsing)
+config = CodebaseConfig(use_pink=PinkMode.OFF)
+codebase = Codebase("./", config=config)
+```
+
 ## Usage
 
 See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
