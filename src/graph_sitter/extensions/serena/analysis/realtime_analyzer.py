@@ -309,12 +309,31 @@ class RealtimeAnalyzer:
                     
                     # If only appears once (the import itself), it's likely unused
                     if occurrences <= 1:
+                        # Try to get line number from import object
+                        line_number = 0
+                        if hasattr(import_obj, 'line_number'):
+                            line_number = import_obj.line_number
+                        elif hasattr(import_obj, 'start_line'):
+                            line_number = import_obj.start_line
+                        elif hasattr(import_obj, 'location'):
+                            location = import_obj.location
+                            if hasattr(location, 'line'):
+                                line_number = location.line
+                        
+                        # If still no line number, try to find it in content
+                        if line_number == 0:
+                            lines = file_content.split('\n')
+                            for i, line in enumerate(lines):
+                                if f'import {import_name}' in line or f'from {import_name}' in line:
+                                    line_number = i + 1
+                                    break
+                        
                         issues.append(CodeIssue(
                             issue_type="unused_import",
                             severity="warning",
                             message=f"Unused import: {import_name}",
                             file_path=file_obj.filepath,
-                            line_number=getattr(import_obj, 'line_number', 0),
+                            line_number=line_number,
                             column_number=0,
                             suggestion=f"Remove unused import: {import_name}"
                         ))
@@ -341,8 +360,10 @@ class RealtimeAnalyzer:
         metrics = {
             'cyclomatic_complexity': 0,
             'lines_of_code': 0,
-            'function_count': 0,
-            'class_count': 0
+            'functions': 0,
+            'classes': 0,
+            'function_count': 0,  # Keep for backward compatibility
+            'class_count': 0      # Keep for backward compatibility
         }
         
         try:
@@ -351,21 +372,68 @@ class RealtimeAnalyzer:
             lines = [line.strip() for line in content.split('\n')]
             metrics['lines_of_code'] = len([line for line in lines if line and not line.startswith('#')])
             
-            # Count functions and classes
-            symbols = getattr(file_obj, 'symbols', [])
-            for symbol in symbols:
-                if hasattr(symbol, 'symbol_type'):
-                    symbol_type = str(symbol.symbol_type).lower()
-                    if 'function' in symbol_type:
-                        metrics['function_count'] += 1
-                    elif 'class' in symbol_type:
-                        metrics['class_count'] += 1
+            # Count functions and classes using graph-sitter symbols
+            try:
+                # Try to get symbols from the file object
+                if hasattr(file_obj, 'symbols'):
+                    symbols = file_obj.symbols
+                    for symbol in symbols:
+                        symbol_type = getattr(symbol, 'symbol_type', None)
+                        if symbol_type:
+                            symbol_type_str = str(symbol_type).lower()
+                            if 'function' in symbol_type_str or 'method' in symbol_type_str:
+                                metrics['functions'] += 1
+                                metrics['function_count'] += 1
+                            elif 'class' in symbol_type_str:
+                                metrics['classes'] += 1
+                                metrics['class_count'] += 1
+                
+                # Fallback: count using simple text analysis
+                if metrics['functions'] == 0 and metrics['classes'] == 0:
+                    import re
+                    # Count function definitions
+                    func_pattern = r'^\s*def\s+\w+'
+                    metrics['functions'] = len(re.findall(func_pattern, content, re.MULTILINE))
+                    metrics['function_count'] = metrics['functions']
+                    
+                    # Count class definitions
+                    class_pattern = r'^\s*class\s+\w+'
+                    metrics['classes'] = len(re.findall(class_pattern, content, re.MULTILINE))
+                    metrics['class_count'] = metrics['classes']
+                    
+            except Exception as e:
+                logger.debug(f"Error counting symbols: {e}")
+                # Fallback to regex counting
+                import re
+                func_pattern = r'^\s*def\s+\w+'
+                metrics['functions'] = len(re.findall(func_pattern, content, re.MULTILINE))
+                metrics['function_count'] = metrics['functions']
+                
+                class_pattern = r'^\s*class\s+\w+'
+                metrics['classes'] = len(re.findall(class_pattern, content, re.MULTILINE))
+                metrics['class_count'] = metrics['classes']
             
-            # Simple cyclomatic complexity (count decision points)
-            decision_keywords = ['if', 'elif', 'else', 'for', 'while', 'try', 'except', 'with']
-            for keyword in decision_keywords:
-                metrics['cyclomatic_complexity'] += content.count(f' {keyword} ')
-                metrics['cyclomatic_complexity'] += content.count(f'\n{keyword} ')
+            # Calculate cyclomatic complexity
+            # Start with base complexity of 1
+            metrics['cyclomatic_complexity'] = 1
+            
+            # Count decision points
+            import re
+            decision_patterns = [
+                r'\bif\b',
+                r'\belif\b', 
+                r'\bfor\b',
+                r'\bwhile\b',
+                r'\btry\b',
+                r'\bexcept\b',
+                r'\band\b',
+                r'\bor\b',
+                r'\?',  # ternary operator
+            ]
+            
+            for pattern in decision_patterns:
+                matches = re.findall(pattern, content)
+                metrics['cyclomatic_complexity'] += len(matches)
             
         except Exception as e:
             logger.debug(f"Error analyzing complexity: {e}")
@@ -448,4 +516,114 @@ class RealtimeAnalyzer:
             return max(score, 0.0)
         except Exception:
             return 0.5
-
+    
+    def _should_analyze_file(self, file_path: str, force: bool = False) -> bool:
+        """Check if file should be analyzed."""
+        if force:
+            return True
+        
+        # Check if file exists
+        if not Path(file_path).exists():
+            return False
+        
+        # Check if file has been modified since last analysis
+        try:
+            file_mtime = Path(file_path).stat().st_mtime
+            last_analysis = self._file_watchers.get(file_path, 0)
+            return file_mtime > last_analysis
+        except Exception:
+            return True
+    
+    def _check_syntax_errors(self, file_path: str) -> List[CodeIssue]:
+        """Check for syntax errors using LSP."""
+        issues = []
+        
+        try:
+            if self.lsp_bridge:
+                diagnostics = self.lsp_bridge.get_diagnostics(file_path)
+                for diagnostic in diagnostics:
+                    severity = "error" if diagnostic.get('severity', 1) <= 2 else "warning"
+                    issues.append(CodeIssue(
+                        issue_type="syntax_error",
+                        severity=severity,
+                        message=diagnostic.get('message', 'Syntax error'),
+                        file_path=file_path,
+                        line_number=diagnostic.get('range', {}).get('start', {}).get('line', 0) + 1,
+                        column_number=diagnostic.get('range', {}).get('start', {}).get('character', 0),
+                        suggestion="Fix syntax error"
+                    ))
+        except Exception as e:
+            logger.debug(f"Error checking syntax errors: {e}")
+        
+        return issues
+    
+    def get_system_status(self) -> Dict[str, Any]:
+        """Get system status information."""
+        return {
+            'running': self._running,
+            'files_analyzed': len(self._analysis_cache),
+            'enabled_checks': list(self.enabled_checks),
+            'background_processing': self._analysis_thread is not None and self._analysis_thread.is_alive(),
+            'cache_size': len(self._analysis_cache)
+        }
+    
+    def clear_cache(self, file_path: Optional[str] = None):
+        """Clear analysis cache."""
+        if file_path:
+            self._analysis_cache.pop(file_path, None)
+            self._file_watchers.pop(file_path, None)
+        else:
+            self._analysis_cache.clear()
+            self._file_watchers.clear()
+    
+    def get_file_metrics(self, file_path: str) -> Optional[Dict[str, Any]]:
+        """Get metrics for a specific file."""
+        result = self._analysis_cache.get(file_path)
+        if result:
+            return result.metrics
+        return None
+    
+    def get_file_issues(self, file_path: str) -> List[Dict[str, Any]]:
+        """Get issues for a specific file."""
+        result = self._analysis_cache.get(file_path)
+        if result:
+            return result.issues
+        return []
+    
+    def _run_analysis_loop(self):
+        """Background analysis loop."""
+        logger.info("Real-time analysis loop started")
+        
+        while not self._stop_event.is_set():
+            try:
+                # Process queued files
+                files_to_analyze = []
+                while not self._analysis_queue.empty() and len(files_to_analyze) < 10:
+                    try:
+                        file_path = self._analysis_queue.get_nowait()
+                        files_to_analyze.append(file_path)
+                    except:
+                        break
+                
+                # Analyze files in parallel
+                if files_to_analyze:
+                    futures = []
+                    for file_path in files_to_analyze:
+                        future = self._executor.submit(self.analyze_file, file_path)
+                        futures.append(future)
+                    
+                    # Wait for completion
+                    for future in as_completed(futures, timeout=30):
+                        try:
+                            future.result()
+                        except Exception as e:
+                            logger.debug(f"Analysis task failed: {e}")
+                
+                # Sleep briefly
+                self._stop_event.wait(1.0)
+                
+            except Exception as e:
+                logger.error(f"Error in analysis loop: {e}")
+                self._stop_event.wait(5.0)
+        
+        logger.info("Real-time analysis loop stopped")

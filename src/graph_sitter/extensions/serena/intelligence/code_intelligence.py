@@ -335,7 +335,20 @@ class CodeIntelligence:
             try:
                 symbol_usages = symbol.usages()
                 for usage in symbol_usages:
-                    usage_info = f"{usage.usage_symbol.filepath}:{usage.usage_symbol.line_number}"
+                    # Get usage symbol information safely
+                    usage_symbol = usage.usage_symbol
+                    filepath = getattr(usage_symbol, 'filepath', 'unknown')
+                    
+                    # Try different ways to get line number
+                    line_number = 0
+                    if hasattr(usage_symbol, 'line_number'):
+                        line_number = usage_symbol.line_number
+                    elif hasattr(usage_symbol, 'start_line'):
+                        line_number = usage_symbol.start_line
+                    elif hasattr(usage_symbol, 'start_point'):
+                        line_number = usage_symbol.start_point.row + 1
+                    
+                    usage_info = f"{filepath}:{line_number}"
                     usages.append(usage_info)
                     references.append(usage_info)
             except Exception as e:

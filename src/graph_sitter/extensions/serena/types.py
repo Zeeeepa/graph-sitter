@@ -76,22 +76,22 @@ class RefactoringResult:
             'refactoring_type': self.refactoring_type.value if self.refactoring_type else None,
             'changes': [
                 {
-                    'file_path': change.file_path,
-                    'start_line': change.start_line,
-                    'end_line': change.end_line,
-                    'old_content': change.old_content,
-                    'new_content': change.new_content,
-                    'change_type': change.change_type.value if change.change_type else None
+                    'file_path': getattr(change, 'file_path', change.get('file_path', 'unknown') if isinstance(change, dict) else 'unknown'),
+                    'start_line': getattr(change, 'start_line', change.get('start_line', 0) if isinstance(change, dict) else 0),
+                    'end_line': getattr(change, 'end_line', change.get('end_line', 0) if isinstance(change, dict) else 0),
+                    'old_content': getattr(change, 'old_content', change.get('old_content', '') if isinstance(change, dict) else ''),
+                    'new_content': getattr(change, 'new_content', change.get('new_content', '') if isinstance(change, dict) else ''),
+                    'change_type': getattr(change, 'change_type', change.get('change_type', None) if isinstance(change, dict) else None)
                 }
                 for change in self.changes
             ],
             'conflicts': [
                 {
-                    'file_path': conflict.file_path,
-                    'line_number': conflict.line_number,
-                    'conflict_type': conflict.conflict_type.value if conflict.conflict_type else None,
-                    'description': conflict.description,
-                    'suggested_resolution': conflict.suggested_resolution
+                    'file_path': getattr(conflict, 'file_path', conflict.get('file_path', 'unknown') if isinstance(conflict, dict) else 'unknown'),
+                    'line_number': getattr(conflict, 'line_number', conflict.get('line_number', 0) if isinstance(conflict, dict) else 0),
+                    'conflict_type': getattr(conflict, 'conflict_type', conflict.get('conflict_type', None) if isinstance(conflict, dict) else None),
+                    'description': getattr(conflict, 'description', conflict.get('description', '') if isinstance(conflict, dict) else ''),
+                    'suggested_resolution': getattr(conflict, 'suggested_resolution', conflict.get('suggested_resolution', '') if isinstance(conflict, dict) else '')
                 }
                 for conflict in self.conflicts
             ],
