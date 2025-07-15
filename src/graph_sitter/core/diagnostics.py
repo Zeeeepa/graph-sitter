@@ -21,14 +21,45 @@ try:
     from graph_sitter.extensions.lsp.serena_bridge import ErrorInfo
     LSP_AVAILABLE = True
 except ImportError:
-    logger.info("LSP integration not available. Install Serena dependencies for error detection.")
+    logger.debug("LSP integration not available. Install Serena dependencies for error detection.")
     LSP_AVAILABLE = False
     # Fallback types
     class ErrorInfo:
-        def __init__(self, **kwargs):
-            pass
+        def __init__(self, file_path: str = "", line: int = 0, column: int = 0, 
+                     message: str = "", severity: str = "error", code: str = "", **kwargs):
+            self.file_path = file_path
+            self.line = line
+            self.column = column
+            self.message = message
+            self.severity = severity
+            self.code = code
+            
+        def get_context(self, lines_before: int = 2, lines_after: int = 2) -> str:
+            return f"Context not available (LSP not installed)"
+    
     class TransactionAwareLSPManager:
         def __init__(self, *args, **kwargs):
+            self.errors = []
+            self.warnings = []
+            self.hints = []
+            self.diagnostics = []
+            
+        def get_file_errors(self, file_path: str):
+            return []
+            
+        def get_file_diagnostics(self, file_path: str):
+            return []
+            
+        def refresh_diagnostics(self):
+            pass
+            
+        def get_lsp_status(self):
+            return {'enabled': False, 'available': False}
+            
+        def shutdown(self):
+            pass
+            
+        def apply_diffs(self, diffs):
             pass
 
 
@@ -184,18 +215,25 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
         return codebase._diagnostics.get_lsp_status()
     
     # Add properties and methods to codebase instance
-    # Use type() to add properties to the instance's class
-    codebase_class = type(codebase)
+    # Add properties directly to the instance using property descriptors
+    def _create_property(getter_func):
+        """Create a property that works on the instance"""
+        class InstanceProperty:
+            def __get__(self, obj, objtype=None):
+                if obj is None:
+                    return self
+                return getter_func(obj)
+        return InstanceProperty()
     
-    # Add properties if they don't already exist
-    if not hasattr(codebase_class, 'errors'):
-        codebase_class.errors = property(_get_errors)
-    if not hasattr(codebase_class, 'warnings'):
-        codebase_class.warnings = property(_get_warnings)
-    if not hasattr(codebase_class, 'hints'):
-        codebase_class.hints = property(_get_hints)
-    if not hasattr(codebase_class, 'diagnostics'):
-        codebase_class.diagnostics = property(_get_diagnostics)
+    # Add properties to the instance
+    if not hasattr(codebase, 'errors'):
+        type(codebase).errors = _create_property(_get_errors)
+    if not hasattr(codebase, 'warnings'):
+        type(codebase).warnings = _create_property(_get_warnings)
+    if not hasattr(codebase, 'hints'):
+        type(codebase).hints = _create_property(_get_hints)
+    if not hasattr(codebase, 'diagnostics'):
+        type(codebase).diagnostics = _create_property(_get_diagnostics)
     
     # Add methods directly to the instance
     codebase.get_file_errors = _get_file_errors

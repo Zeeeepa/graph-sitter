@@ -216,6 +216,14 @@ class Codebase(
             try:
                 import codegen_sdk_pink
                 self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
+
+                # Enable Pink SDK type bridge for compatibility
+                try:
+                    from graph_sitter.extensions.pink_bridge import enhance_codebase_with_pink_bridge
+                    enhance_codebase_with_pink_bridge(self)
+                except ImportError:
+                    logger.warning("Pink bridge not available - type conversion may not work correctly")
+
             except ImportError as e:
                 import warnings
                 warnings.warn(
@@ -238,6 +246,13 @@ class Codebase(
                 self._pink_codebase = None
         else:
             self._pink_codebase = None
+
+        # Enable self-analysis capabilities for all codebases
+        try:
+            from graph_sitter.extensions.self_analysis import add_self_analysis_capabilities
+            add_self_analysis_capabilities(self)
+        except ImportError:
+            logger.debug("Self-analysis capabilities not available")
 
     @noapidoc
     def __str__(self) -> str:
