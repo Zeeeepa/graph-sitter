@@ -1,37 +1,42 @@
 """
-Transaction-Aware LSP Context Manager
+Transaction-Aware LSP Manager
 
-This module provides a transaction-aware context manager that keeps Serena's LSP
-synchronized with Graph-Sitter's file changes, ensuring diagnostic information
-is always current with the codebase state.
+This module provides transaction-aware LSP integration that stays synchronized
+with graph-sitter's file change tracking and transaction system.
 """
 
 import threading
-import weakref
+import time
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Callable
-from contextlib import contextmanager
+from typing import List, Optional, Dict, Any, Set
+from weakref import WeakKeyDictionary
 
-from graph_sitter.codebase.diff_lite import DiffLite
-from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge, ErrorInfo
 from graph_sitter.shared.logging.get_logger import get_logger
+from .serena_bridge import SerenaLSPBridge, ErrorInfo, DiagnosticSeverity
 
 logger = get_logger(__name__)
+
+# Global registry of LSP managers
+_lsp_managers: WeakKeyDictionary = WeakKeyDictionary()
+_manager_lock = threading.RLock()
 
 
 class TransactionAwareLSPManager:
     """
-    Manages LSP context in a transaction-aware manner, ensuring that diagnostic
-    information stays synchronized with Graph-Sitter's codebase changes.
+    LSP manager that integrates with graph-sitter's transaction system
+    to provide real-time diagnostic updates.
     """
     
-    def __init__(self, repo_path: Path, enable_lsp: bool = True):
-        self.repo_path = repo_path
+    def __init__(self, repo_path: str, enable_lsp: bool = True):
+        self.repo_path = Path(repo_path)
         self.enable_lsp = enable_lsp
+        self._bridge: Optional[SerenaLSPBridge] = None
+        self._diagnostics_cache: List[ErrorInfo] = []
+        self._file_diagnostics_cache: Dict[str, List[ErrorInfo]] = {}
+        self._last_refresh = 0.0
+        self._refresh_interval = 5.0  # Refresh every 5 seconds
         self._lock = threading.RLock()
-        self._lsp_bridge: Optional[SerenaLSPBridge] = None
-        self._transaction_stack: List[List[DiffLite]] = []
-        self._change_listeners: Set[Callable[[List[DiffLite]], None]] = set()
+        self._shutdown = False
         
         if self.enable_lsp:
             self._initialize_bridge()
@@ -39,210 +44,249 @@ class TransactionAwareLSPManager:
     def _initialize_bridge(self) -> None:
         """Initialize the Serena LSP bridge."""
         try:
-            self._lsp_bridge = SerenaLSPBridge(self.repo_path, self.enable_lsp)
-            logger.info(f"Transaction-aware LSP manager initialized for {self.repo_path}")
+            self._bridge = SerenaLSPBridge(str(self.repo_path))
+            if self._bridge.is_initialized:
+                logger.info(f"LSP manager initialized for {self.repo_path}")
+                self._refresh_diagnostics_async()
+            else:
+                logger.warning(f"LSP bridge failed to initialize for {self.repo_path}")
+                self.enable_lsp = False
         except Exception as e:
             logger.error(f"Failed to initialize LSP bridge: {e}")
             self.enable_lsp = False
     
-    def add_change_listener(self, listener: Callable[[List[DiffLite]], None]) -> None:
-        """Add a listener for file changes."""
-        with self._lock:
-            self._change_listeners.add(listener)
-    
-    def remove_change_listener(self, listener: Callable[[List[DiffLite]], None]) -> None:
-        """Remove a change listener."""
-        with self._lock:
-            self._change_listeners.discard(listener)
-    
-    def apply_diffs(self, diffs: List[DiffLite]) -> None:
-        """
-        Apply file changes and update LSP context.
-        This is called by Graph-Sitter's transaction system.
-        """
-        if not self.enable_lsp or not self._lsp_bridge:
-            return
-        
-        with self._lock:
+    def _refresh_diagnostics_async(self) -> None:
+        """Refresh diagnostics in background thread."""
+        def refresh_worker():
             try:
-                # Process each diff through the LSP bridge
-                for diff in diffs:
-                    self._lsp_bridge.handle_file_change(diff)
-                
-                # Notify change listeners
-                for listener in self._change_listeners:
-                    try:
-                        listener(diffs)
-                    except Exception as e:
-                        logger.warning(f"Change listener failed: {e}")
-                
-                logger.debug(f"Applied {len(diffs)} diffs to LSP context")
-                
+                if self._bridge and not self._shutdown:
+                    diagnostics = self._bridge.get_diagnostics()
+                    with self._lock:
+                        self._diagnostics_cache = diagnostics
+                        self._last_refresh = time.time()
+                        
+                        # Update file-specific cache
+                        self._file_diagnostics_cache.clear()
+                        for diag in diagnostics:
+                            if diag.file_path not in self._file_diagnostics_cache:
+                                self._file_diagnostics_cache[diag.file_path] = []
+                            self._file_diagnostics_cache[diag.file_path].append(diag)
+                    
+                    logger.debug(f"Refreshed {len(diagnostics)} diagnostics")
             except Exception as e:
-                logger.error(f"Error applying diffs to LSP: {e}")
-    
-    @contextmanager
-    def transaction(self):
-        """
-        Context manager for LSP transactions.
-        Changes are batched and applied atomically.
-        """
-        with self._lock:
-            # Start a new transaction
-            self._transaction_stack.append([])
-            
-            try:
-                yield self
-            except Exception as e:
-                # Rollback transaction on error
-                self._rollback_transaction()
-                raise
-            else:
-                # Commit transaction on success
-                self._commit_transaction()
-    
-    def _commit_transaction(self) -> None:
-        """Commit the current transaction."""
-        if not self._transaction_stack:
-            return
+                logger.error(f"Error refreshing diagnostics: {e}")
         
-        diffs = self._transaction_stack.pop()
-        if diffs:
-            self.apply_diffs(diffs)
+        # Run in background thread
+        thread = threading.Thread(target=refresh_worker, daemon=True)
+        thread.start()
     
-    def _rollback_transaction(self) -> None:
-        """Rollback the current transaction."""
-        if self._transaction_stack:
-            diffs = self._transaction_stack.pop()
-            logger.info(f"Rolled back transaction with {len(diffs)} changes")
-    
-    def add_transaction_diff(self, diff: DiffLite) -> None:
-        """Add a diff to the current transaction."""
-        with self._lock:
-            if self._transaction_stack:
-                self._transaction_stack[-1].append(diff)
-            else:
-                # No active transaction, apply immediately
-                self.apply_diffs([diff])
+    def _should_refresh(self) -> bool:
+        """Check if diagnostics should be refreshed."""
+        return (time.time() - self._last_refresh) > self._refresh_interval
     
     @property
     def errors(self) -> List[ErrorInfo]:
         """Get all errors in the codebase."""
-        if not self.enable_lsp or not self._lsp_bridge:
+        if not self.enable_lsp:
             return []
-        return self._lsp_bridge.get_errors()
+        
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+        
+        with self._lock:
+            return [d for d in self._diagnostics_cache if d.is_error]
     
     @property
     def warnings(self) -> List[ErrorInfo]:
         """Get all warnings in the codebase."""
-        if not self.enable_lsp or not self._lsp_bridge:
+        if not self.enable_lsp:
             return []
-        return self._lsp_bridge.get_warnings()
+        
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+        
+        with self._lock:
+            return [d for d in self._diagnostics_cache if d.is_warning]
     
     @property
     def hints(self) -> List[ErrorInfo]:
         """Get all hints in the codebase."""
-        if not self.enable_lsp or not self._lsp_bridge:
+        if not self.enable_lsp:
             return []
-        return self._lsp_bridge.get_hints()
+        
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+        
+        with self._lock:
+            return [d for d in self._diagnostics_cache if d.is_hint]
     
     @property
     def diagnostics(self) -> List[ErrorInfo]:
         """Get all diagnostics (errors, warnings, hints) in the codebase."""
-        if not self.enable_lsp or not self._lsp_bridge:
+        if not self.enable_lsp:
             return []
-        return self._lsp_bridge.get_diagnostics()
+        
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+        
+        with self._lock:
+            return self._diagnostics_cache.copy()
     
     def get_file_errors(self, file_path: str) -> List[ErrorInfo]:
         """Get errors for a specific file."""
-        if not self.enable_lsp or not self._lsp_bridge:
+        if not self.enable_lsp:
             return []
         
-        all_errors = self._lsp_bridge.get_errors()
-        return [error for error in all_errors if error.file_path == file_path]
+        file_diagnostics = self.get_file_diagnostics(file_path)
+        return [d for d in file_diagnostics if d.is_error]
     
     def get_file_diagnostics(self, file_path: str) -> List[ErrorInfo]:
         """Get all diagnostics for a specific file."""
-        if not self.enable_lsp or not self._lsp_bridge:
+        if not self.enable_lsp:
             return []
         
-        all_diagnostics = self._lsp_bridge.get_diagnostics()
-        return [diag for diag in all_diagnostics if diag.file_path == file_path]
+        # Normalize file path
+        try:
+            file_path = str(Path(file_path).relative_to(self.repo_path))
+        except ValueError:
+            # If not relative to repo, use as-is
+            pass
+        
+        with self._lock:
+            if file_path in self._file_diagnostics_cache:
+                return self._file_diagnostics_cache[file_path].copy()
+        
+        # If not in cache, try to get from bridge directly
+        if self._bridge:
+            try:
+                diagnostics = self._bridge.get_file_diagnostics(file_path)
+                with self._lock:
+                    self._file_diagnostics_cache[file_path] = diagnostics
+                return diagnostics
+            except Exception as e:
+                logger.error(f"Error getting file diagnostics: {e}")
+        
+        return []
+    
+    def apply_diffs(self, diffs: Any) -> None:
+        """
+        Handle file changes from graph-sitter's diff system.
+        This method is called when files are modified through graph-sitter.
+        """
+        if not self.enable_lsp or not self._bridge:
+            return
+        
+        try:
+            # Extract changed files from diffs
+            changed_files: Set[str] = set()
+            
+            # Handle different diff formats
+            if hasattr(diffs, '__iter__'):
+                for diff in diffs:
+                    if hasattr(diff, 'file_path'):
+                        changed_files.add(diff.file_path)
+                    elif hasattr(diff, 'path'):
+                        changed_files.add(diff.path)
+            
+            if changed_files:
+                logger.debug(f"Files changed: {changed_files}")
+                
+                # Clear cache for changed files
+                with self._lock:
+                    for file_path in changed_files:
+                        self._file_diagnostics_cache.pop(file_path, None)
+                
+                # Trigger refresh
+                self._refresh_diagnostics_async()
+        
+        except Exception as e:
+            logger.error(f"Error handling diff changes: {e}")
     
     def refresh_diagnostics(self) -> None:
         """Force refresh of diagnostic information."""
-        if not self.enable_lsp or not self._lsp_bridge:
+        if not self.enable_lsp or not self._bridge:
             return
         
-        with self._lock:
-            # Clear cache to force refresh
-            self._lsp_bridge._diagnostics_cache.clear()
-            logger.info("Forced refresh of LSP diagnostics")
+        try:
+            self._bridge.refresh_diagnostics()
+            with self._lock:
+                self._diagnostics_cache.clear()
+                self._file_diagnostics_cache.clear()
+                self._last_refresh = 0.0  # Force refresh
+            
+            self._refresh_diagnostics_async()
+            
+        except Exception as e:
+            logger.error(f"Error refreshing diagnostics: {e}")
     
-    def is_lsp_enabled(self) -> bool:
-        """Check if LSP integration is enabled and working."""
-        return self.enable_lsp and self._lsp_bridge is not None
-    
-    def get_lsp_status(self) -> Dict[str, any]:
+    def get_lsp_status(self) -> Dict[str, Any]:
         """Get status information about the LSP integration."""
         status = {
             'enabled': self.enable_lsp,
-            'bridge_initialized': self._lsp_bridge is not None,
-            'active_transactions': len(self._transaction_stack),
-            'change_listeners': len(self._change_listeners)
+            'repo_path': str(self.repo_path),
+            'last_refresh': self._last_refresh,
+            'diagnostics_count': len(self._diagnostics_cache),
+            'errors_count': len([d for d in self._diagnostics_cache if d.is_error]),
+            'warnings_count': len([d for d in self._diagnostics_cache if d.is_warning]),
+            'hints_count': len([d for d in self._diagnostics_cache if d.is_hint])
         }
         
-        if self._lsp_bridge:
-            status.update({
-                'serena_available': self._lsp_bridge.enable_lsp,
-                'cached_files': len(self._lsp_bridge._diagnostics_cache)
-            })
+        if self._bridge:
+            bridge_status = self._bridge.get_status()
+            status.update(bridge_status)
         
         return status
     
     def shutdown(self) -> None:
         """Shutdown the LSP manager and clean up resources."""
+        self._shutdown = True
+        
+        if self._bridge:
+            try:
+                self._bridge.shutdown()
+            except Exception as e:
+                logger.error(f"Error shutting down LSP bridge: {e}")
+        
         with self._lock:
-            if self._lsp_bridge:
-                self._lsp_bridge.shutdown()
-                self._lsp_bridge = None
-            
-            self._transaction_stack.clear()
-            self._change_listeners.clear()
-            logger.info("Transaction-aware LSP manager shut down")
+            self._diagnostics_cache.clear()
+            self._file_diagnostics_cache.clear()
+        
+        logger.info(f"LSP manager shutdown for {self.repo_path}")
 
 
-# Global registry for LSP managers to prevent multiple instances
-_lsp_managers: Dict[str, weakref.ReferenceType] = {}
-_registry_lock = threading.Lock()
-
-
-def get_lsp_manager(repo_path: Path, enable_lsp: bool = True) -> TransactionAwareLSPManager:
+def get_lsp_manager(repo_path: str, enable_lsp: bool = True) -> TransactionAwareLSPManager:
     """
     Get or create an LSP manager for a repository.
-    Uses a global registry to ensure only one manager per repository.
-    """
-    repo_key = str(repo_path.resolve())
     
-    with _registry_lock:
+    This function maintains a registry of LSP managers to avoid creating
+    multiple managers for the same repository.
+    """
+    repo_path = str(Path(repo_path).resolve())
+    
+    with _manager_lock:
         # Check if we already have a manager for this repo
-        if repo_key in _lsp_managers:
-            manager_ref = _lsp_managers[repo_key]
-            manager = manager_ref()
-            if manager is not None:
-                return manager
-            else:
-                # Manager was garbage collected, remove from registry
-                del _lsp_managers[repo_key]
+        for existing_manager in _lsp_managers.values():
+            if str(existing_manager.repo_path) == repo_path:
+                return existing_manager
         
         # Create new manager
         manager = TransactionAwareLSPManager(repo_path, enable_lsp)
-        _lsp_managers[repo_key] = weakref.ref(manager, lambda ref: _cleanup_manager(repo_key))
+        
+        # Store in registry (using a dummy key since we can't use the manager as its own key)
+        _lsp_managers[object()] = manager
         
         return manager
 
 
-def _cleanup_manager(repo_key: str) -> None:
-    """Clean up manager from registry when it's garbage collected."""
-    with _registry_lock:
-        _lsp_managers.pop(repo_key, None)
+def shutdown_all_lsp_managers() -> None:
+    """Shutdown all active LSP managers."""
+    with _manager_lock:
+        for manager in list(_lsp_managers.values()):
+            try:
+                manager.shutdown()
+            except Exception as e:
+                logger.error(f"Error shutting down LSP manager: {e}")
+        
+        _lsp_managers.clear()
+        logger.info("All LSP managers shutdown")
+
