@@ -213,7 +213,7 @@ class Codebase(
         self.ctx = CodebaseContext(projects, config=config, secrets=secrets, io=io, progress=progress)
         self.console = Console(record=True, soft_wrap=True)
         if self.ctx.config.use_pink != PinkMode.OFF:
-            import graph_sitter_sdk_pink
+            import codegen_sdk_pink
 
             self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
 
