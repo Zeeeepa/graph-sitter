@@ -6,7 +6,8 @@ integrating Serena's LSP for real-time error detection and semantic analysis.
 """
 
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING, Dict
+from datetime import datetime
 
 from graph_sitter.shared.logging.get_logger import get_logger
 
@@ -129,6 +130,162 @@ class CodebaseDiagnostics:
         status['available'] = LSP_AVAILABLE
         return status
     
+    def get_all_errors_with_context(self, lines_before: int = 2, lines_after: int = 2) -> List[dict]:
+        """
+        Get all errors with their context information.
+        
+        Args:
+            lines_before: Number of lines to include before each error
+            lines_after: Number of lines to include after each error
+            
+        Returns:
+            List of dictionaries containing error info and context
+        """
+        errors_with_context = []
+        
+        for error in self.errors:
+            error_dict = {
+                'file_path': error.file_path,
+                'line': error.line,
+                'character': error.character,
+                'message': error.message,
+                'severity': error.severity.name,
+                'source': error.source,
+                'code': error.code,
+                'context': error.get_context(lines_before, lines_after),
+                'detailed_context': error.get_detailed_context(lines_before, lines_after)
+            }
+            errors_with_context.append(error_dict)
+        
+        return errors_with_context
+    
+    def get_errors_by_file(self, lines_before: int = 2, lines_after: int = 2) -> Dict[str, List[dict]]:
+        """
+        Get errors grouped by file with context.
+        
+        Args:
+            lines_before: Number of lines to include before each error
+            lines_after: Number of lines to include after each error
+            
+        Returns:
+            Dictionary mapping file paths to lists of error contexts
+        """
+        errors_by_file = {}
+        
+        for error in self.errors:
+            file_path = error.file_path
+            if file_path not in errors_by_file:
+                errors_by_file[file_path] = []
+            
+            error_dict = {
+                'line': error.line,
+                'character': error.character,
+                'message': error.message,
+                'severity': error.severity.name,
+                'source': error.source,
+                'code': error.code,
+                'context': error.get_context(lines_before, lines_after),
+                'detailed_context': error.get_detailed_context(lines_before, lines_after)
+            }
+            errors_by_file[file_path].append(error_dict)
+        
+        return errors_by_file
+    
+    def get_errors_by_severity(self, lines_before: int = 2, lines_after: int = 2) -> Dict[str, List[dict]]:
+        """
+        Get errors grouped by severity with context.
+        
+        Args:
+            lines_before: Number of lines to include before each error
+            lines_after: Number of lines to include after each error
+            
+        Returns:
+            Dictionary mapping severity levels to lists of error contexts
+        """
+        errors_by_severity = {}
+        
+        for error in self.errors:
+            severity = error.severity.name
+            if severity not in errors_by_severity:
+                errors_by_severity[severity] = []
+            
+            error_dict = {
+                'file_path': error.file_path,
+                'line': error.line,
+                'character': error.character,
+                'message': error.message,
+                'source': error.source,
+                'code': error.code,
+                'context': error.get_context(lines_before, lines_after),
+                'detailed_context': error.get_detailed_context(lines_before, lines_after)
+            }
+            errors_by_severity[severity].append(error_dict)
+        
+        return errors_by_severity
+    
+    def generate_error_context_report(self, lines_before: int = 3, lines_after: int = 3) -> str:
+        """
+        Generate a comprehensive error context report.
+        
+        Args:
+            lines_before: Number of lines to include before each error
+            lines_after: Number of lines to include after each error
+            
+        Returns:
+            Formatted report string with all error contexts
+        """
+        errors = self.get_all_errors_with_context(lines_before, lines_after)
+        
+        if not errors:
+            return "🎉 No errors found in the codebase!"
+        
+        report_lines = [
+            "# Error Context Report",
+            f"Generated: {datetime.now().isoformat()}",
+            f"Total Errors: {len(errors)}",
+            ""
+        ]
+        
+        # Group by file for better organization
+        errors_by_file = self.get_errors_by_file(lines_before, lines_after)
+        
+        for file_path, file_errors in errors_by_file.items():
+            report_lines.extend([
+                f"## File: {file_path}",
+                f"Errors: {len(file_errors)}",
+                ""
+            ])
+            
+            for i, error in enumerate(file_errors, 1):
+                severity_emoji = {
+                    'ERROR': '🔴',
+                    'WARNING': '🟡',
+                    'INFORMATION': '🔵',
+                    'HINT': '💡'
+                }.get(error['severity'], '❓')
+                
+                report_lines.extend([
+                    f"### {severity_emoji} Error {i}: Line {error['line']}",
+                    f"**Message:** {error['message']}",
+                    f"**Severity:** {error['severity']}",
+                    f"**Source:** {error['source'] or 'Unknown'}",
+                    ""
+                ])
+                
+                if error['code']:
+                    report_lines.append(f"**Code:** {error['code']}")
+                    report_lines.append("")
+                
+                report_lines.extend([
+                    "**Context:**",
+                    "```",
+                    error['context'],
+                    "```",
+                    ""
+                ])
+        
+        return "\n".join(report_lines)
+    
     def shutdown(self) -> None:
         """Shutdown diagnostic services."""
         if self._lsp_manager:
@@ -183,6 +340,18 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
     def _get_lsp_status():
         return codebase._diagnostics.get_lsp_status()
     
+    def _get_all_errors_with_context(lines_before: int = 2, lines_after: int = 2):
+        return codebase._diagnostics.get_all_errors_with_context(lines_before, lines_after)
+    
+    def _get_errors_by_file(lines_before: int = 2, lines_after: int = 2):
+        return codebase._diagnostics.get_errors_by_file(lines_before, lines_after)
+    
+    def _get_errors_by_severity(lines_before: int = 2, lines_after: int = 2):
+        return codebase._diagnostics.get_errors_by_severity(lines_before, lines_after)
+    
+    def _generate_error_context_report(lines_before: int = 3, lines_after: int = 3):
+        return codebase._diagnostics.generate_error_context_report(lines_before, lines_after)
+    
     # Add properties and methods to codebase instance
     # Use type() to add properties to the instance's class
     codebase_class = type(codebase)
@@ -203,6 +372,12 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
     codebase.refresh_diagnostics = _refresh_diagnostics
     codebase.is_lsp_enabled = _is_lsp_enabled
     codebase.get_lsp_status = _get_lsp_status
+    
+    # Add new error context methods
+    codebase.get_all_errors_with_context = _get_all_errors_with_context
+    codebase.get_errors_by_file = _get_errors_by_file
+    codebase.get_errors_by_severity = _get_errors_by_severity
+    codebase.generate_error_context_report = _generate_error_context_report
     
     # Add cleanup to existing shutdown method if it exists
     original_shutdown = getattr(codebase, 'shutdown', None)
