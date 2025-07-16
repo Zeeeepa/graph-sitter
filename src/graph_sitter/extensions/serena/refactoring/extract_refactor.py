@@ -167,18 +167,22 @@ class ExtractRefactor:
             # Check if method name is valid
             if not method_name.isidentifier():
                 result['valid'] = False
+                # Get file path safely
+                file_path = getattr(file, 'filepath', getattr(file, 'file_path', str(file)))
                 result['conflicts'].append(RefactoringConflict(
                     conflict_type="invalid_identifier",
                     description=f"'{method_name}' is not a valid method name",
-                    file_path=file.filepath,
+                    file_path=file_path,
                     line_number=start_line,
                     severity="error"
                 ))
             
             # Check if method name already exists
-            for symbol in file.symbols:
+            file_path = getattr(file, 'filepath', getattr(file, 'file_path', str(file)))
+            symbols = getattr(file, 'symbols', [])
+            for symbol in symbols:
                 if hasattr(symbol, 'name') and symbol.name == method_name:
-                    result['warnings'].append(f"Method '{method_name}' already exists in {file.filepath}")
+                    result['warnings'].append(f"Method '{method_name}' already exists in {file_path}")
             
             # Check line range validity
             if start_line >= end_line:

@@ -80,6 +80,30 @@ class TransactionAwareLSPManager:
         thread = threading.Thread(target=refresh_worker, daemon=True)
         thread.start()
     
+    def apply_diffs(self, diffs) -> None:
+        """Apply diffs to the LSP context and refresh diagnostics."""
+        if self._shutdown or not self._bridge:
+            return
+        
+        try:
+            # Notify bridge of changes
+            affected_files = set()
+            for diff in diffs:
+                if hasattr(diff, 'file_path'):
+                    affected_files.add(diff.file_path)
+                elif hasattr(diff, 'path'):
+                    affected_files.add(diff.path)
+                elif hasattr(diff, 'file'):
+                    affected_files.add(str(diff.file.path))
+            
+            if affected_files:
+                self._bridge.notify_file_changes(list(affected_files))
+                # Trigger async refresh
+                self._refresh_diagnostics_async()
+                
+        except Exception as e:
+            logger.error(f"Error applying diffs to LSP: {e}")
+    
     def _should_refresh(self) -> bool:
         """Check if diagnostics should be refreshed."""
         return (time.time() - self._last_refresh) > self._refresh_interval
@@ -289,4 +313,3 @@ def shutdown_all_lsp_managers() -> None:
         
         _lsp_managers.clear()
         logger.info("All LSP managers shutdown")
-

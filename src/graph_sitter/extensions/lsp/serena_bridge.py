@@ -163,6 +163,25 @@ class SerenaLSPBridge:
                 except Exception as e:
                     logger.error(f"Error refreshing diagnostics for {lang} server: {e}")
     
+    def notify_file_changes(self, file_paths: List[str]) -> None:
+        """Notify language servers of file changes."""
+        if not self.is_initialized:
+            return
+        
+        with self._lock:
+            for file_path in file_paths:
+                # Clear cached diagnostics for changed files
+                if file_path in self.diagnostics_cache:
+                    del self.diagnostics_cache[file_path]
+                
+                # Notify appropriate language servers
+                for server in self.language_servers.values():
+                    if server.supports_file(file_path):
+                        try:
+                            server.notify_file_change(file_path)
+                        except Exception as e:
+                            logger.error(f"Error notifying server of file change {file_path}: {e}")
+    
     def shutdown(self) -> None:
         """Shutdown all language servers."""
         with self._lock:

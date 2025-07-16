@@ -213,46 +213,9 @@ class Codebase(
         self.ctx = CodebaseContext(projects, config=config, secrets=secrets, io=io, progress=progress)
         self.console = Console(record=True, soft_wrap=True)
         if self.ctx.config.use_pink != PinkMode.OFF:
-            try:
-                import codegen_sdk_pink
-                self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
+            import codegen_sdk_pink
 
-                # Enable Pink SDK type bridge for compatibility
-                try:
-                    from graph_sitter.extensions.pink_bridge import enhance_codebase_with_pink_bridge
-                    enhance_codebase_with_pink_bridge(self)
-                except ImportError:
-                    logger.warning("Pink bridge not available - type conversion may not work correctly")
-
-            except ImportError as e:
-                import warnings
-                warnings.warn(
-                    f"Pink SDK is configured but not installed. "
-                    f"Install with: pip install codegen-sdk-pink or pip install 'graph-sitter[pink]'",
-                    UserWarning,
-                    stacklevel=2
-                )
-                # Fallback to OFF mode if Pink SDK is not available
-                self.ctx.config.use_pink = PinkMode.OFF
-                self._pink_codebase = None
-            except Exception as e:
-                import warnings
-                warnings.warn(
-                    f"Failed to initialize Pink SDK: {e}. Falling back to Python-only parsing.",
-                    UserWarning,
-                    stacklevel=2
-                )
-                self.ctx.config.use_pink = PinkMode.OFF
-                self._pink_codebase = None
-        else:
-            self._pink_codebase = None
-
-        # Enable self-analysis capabilities for all codebases
-        try:
-            from graph_sitter.extensions.self_analysis import add_self_analysis_capabilities
-            add_self_analysis_capabilities(self)
-        except ImportError:
-            logger.debug("Self-analysis capabilities not available")
+            self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
 
     @noapidoc
     def __str__(self) -> str:
