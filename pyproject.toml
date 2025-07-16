@@ -120,6 +120,11 @@ types = [
   "types-toml>=0.10.8.20240310",
 ]
 lsp = ["pygls>=2.0.0a2", "lsprotocol==2024.0.0b1", "attrs>=25.1.0"]
+serena = [
+  "serena>=0.1.0",
+  "solidlsp>=0.1.0",
+  "sensai>=0.1.0",
+]
 [tool.uv]
 cache-keys = [{ git = { commit = true, tags = true } }]
 dev-dependencies = [
