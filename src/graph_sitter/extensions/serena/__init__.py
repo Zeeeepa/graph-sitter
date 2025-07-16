@@ -6,6 +6,7 @@ including real-time code intelligence, advanced refactoring, code generation, an
 """
 
 from .core import SerenaCore
+from .types import SerenaConfig, SerenaCapability, RefactoringType, RefactoringResult, CodeGenerationResult, SemanticSearchResult, SymbolInfo
 from .intelligence import CodeIntelligence
 from .refactoring import RefactoringEngine
 from .actions import CodeActions
@@ -16,6 +17,13 @@ from .symbols import SymbolIntelligence
 
 __all__ = [
     'SerenaCore',
+    'SerenaConfig',
+    'SerenaCapability',
+    'RefactoringType',
+    'RefactoringResult',
+    'CodeGenerationResult',
+    'SemanticSearchResult',
+    'SymbolInfo',
     'CodeIntelligence', 
     'RefactoringEngine',
     'CodeActions',
@@ -26,4 +34,3 @@ __all__ = [
 ]
 
 __version__ = "1.0.0"
-
