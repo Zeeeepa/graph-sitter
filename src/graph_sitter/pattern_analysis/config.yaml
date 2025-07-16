@@ -1,0 +1,211 @@
+# Configuration file for Historical Pattern Analysis Engine
+# This file contains default configuration values for the pattern analysis system
+
+pattern_analysis:
+  # Data pipeline configuration
+  data_pipeline:
+    batch_size: 10000                    # Number of records to process in each batch
+    processing_interval: 3600            # Processing interval in seconds (1 hour)
+    retention_days: 365                  # Data retention period in days
+    max_workers: 4                       # Maximum number of worker threads
+    
+    # Database connection settings
+    database_url: null                   # Database connection URL (set via environment)
+    connection_pool_size: 10             # Database connection pool size
+    query_timeout: 30                    # Query timeout in seconds
+    
+    # Data extraction settings
+    extraction_batch_size: 1000          # Batch size for data extraction
+    parallel_extractions: true           # Enable parallel data extraction
+    
+  # Machine learning models configuration
+  ml_models:
+    training_interval: 86400             # Training interval in seconds (daily)
+    min_training_samples: 1000           # Minimum samples required for training
+    accuracy_threshold: 0.8              # Minimum accuracy threshold for deployment
+    model_cache_size: 10                 # Number of models to cache in memory
+    
+    # Model storage settings
+    model_storage_path: "./models"       # Path to store model files
+    model_versioning: true               # Enable model versioning
+    auto_deployment: true                # Automatically deploy models that meet criteria
+    
+    # Training settings
+    cross_validation_folds: 5            # Number of cross-validation folds
+    test_size: 0.2                       # Test set size for model evaluation
+    random_state: 42                     # Random state for reproducibility
+    
+    # Model-specific settings
+    task_failure_model:
+      n_estimators: 100                  # Number of trees in Random Forest
+      max_depth: 10                      # Maximum depth of trees
+      min_samples_split: 5               # Minimum samples to split a node
+      min_samples_leaf: 2                # Minimum samples in leaf node
+      
+    resource_usage_model:
+      n_estimators: 50                   # Number of trees in Random Forest
+      max_features: "sqrt"               # Number of features to consider
+      
+    performance_model:
+      forecast_horizon: 24               # Default forecast horizon in hours
+      seasonal_periods: [24, 168]       # Seasonal periods (daily, weekly)
+  
+  # Recommendation engine configuration
+  recommendations:
+    generation_interval: 3600            # Recommendation generation interval in seconds
+    min_confidence: 0.7                  # Minimum confidence threshold
+    max_recommendations: 10              # Maximum recommendations to generate
+    
+    # Recommendation types and weights
+    type_weights:
+      configuration_tuning: 1.0          # Weight for configuration recommendations
+      workflow_improvement: 0.9          # Weight for workflow recommendations
+      resource_optimization: 0.8         # Weight for resource recommendations
+      performance_enhancement: 0.9       # Weight for performance recommendations
+      error_prevention: 1.0              # Weight for error prevention recommendations
+    
+    # Implementation tracking
+    track_effectiveness: true            # Track recommendation effectiveness
+    effectiveness_window_days: 30        # Window for measuring effectiveness
+  
+  # Pattern detection configuration
+  pattern_detection:
+    # Statistical significance settings
+    significance_threshold: 0.05         # Statistical significance threshold
+    min_pattern_frequency: 5             # Minimum frequency for pattern detection
+    confidence_threshold: 0.6            # Minimum confidence for pattern classification
+    
+    # Pattern types and their weights
+    pattern_weights:
+      task_performance: 0.9              # Weight for task performance patterns
+      pipeline_efficiency: 0.8           # Weight for pipeline efficiency patterns
+      resource_usage: 0.7                # Weight for resource usage patterns
+      error_frequency: 1.0               # Weight for error frequency patterns
+      workflow_optimization: 0.6         # Weight for workflow patterns
+      temporal_trend: 0.5                # Weight for temporal trend patterns
+    
+    # Anomaly detection settings
+    anomaly_detection:
+      contamination: 0.1                 # Expected proportion of anomalies
+      n_estimators: 100                  # Number of estimators for Isolation Forest
+      
+    # Trend analysis settings
+    trend_analysis:
+      min_correlation: 0.3               # Minimum correlation for trend significance
+      p_value_threshold: 0.05            # P-value threshold for trend significance
+      
+    # Seasonality detection settings
+    seasonality:
+      min_periods: 7                     # Minimum periods for seasonality detection
+      seasonal_strength_threshold: 0.3   # Threshold for seasonal pattern strength
+  
+  # Feature engineering configuration
+  feature_engineering:
+    # Temporal features
+    temporal_features:
+      hour_of_day: true                  # Extract hour of day
+      day_of_week: true                  # Extract day of week
+      month: true                        # Extract month
+      quarter: true                      # Extract quarter
+      is_weekend: true                   # Weekend indicator
+      is_business_hours: true            # Business hours indicator
+    
+    # Rolling window features
+    rolling_windows: [5, 10, 24]        # Rolling window sizes
+    
+    # Aggregation features
+    aggregation_functions: ["mean", "std", "min", "max", "count"]
+    
+    # Feature selection
+    feature_selection:
+      enabled: true                      # Enable automatic feature selection
+      k_best: 20                         # Number of best features to select
+      selection_method: "f_classif"      # Feature selection method
+  
+  # Performance and monitoring
+  performance:
+    # Processing performance
+    max_processing_time: 300             # Maximum processing time in seconds
+    memory_limit_gb: 8                   # Memory limit in GB
+    
+    # Monitoring settings
+    enable_metrics: true                 # Enable performance metrics collection
+    metrics_interval: 60                 # Metrics collection interval in seconds
+    
+    # Alerting thresholds
+    alerts:
+      high_memory_usage: 0.8             # Alert when memory usage exceeds 80%
+      high_processing_time: 240          # Alert when processing takes > 4 minutes
+      low_accuracy: 0.7                  # Alert when model accuracy drops below 70%
+      high_error_rate: 0.1               # Alert when error rate exceeds 10%
+  
+  # Logging configuration
+  logging:
+    level: "INFO"                        # Logging level (DEBUG, INFO, WARNING, ERROR)
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file_path: "./logs/pattern_analysis.log"
+    max_file_size_mb: 100               # Maximum log file size in MB
+    backup_count: 5                      # Number of backup log files to keep
+    
+    # Component-specific logging levels
+    components:
+      data_pipeline: "INFO"
+      pattern_detection: "INFO"
+      predictive_analytics: "INFO"
+      recommendation_engine: "INFO"
+      model_management: "DEBUG"
+  
+  # Security and access control
+  security:
+    # API security
+    enable_authentication: true          # Enable API authentication
+    api_key_required: true              # Require API key for access
+    
+    # Data privacy
+    anonymize_sensitive_data: true       # Anonymize sensitive data in logs
+    encrypt_model_data: false           # Encrypt stored model data
+    
+    # Access control
+    read_only_users: []                 # List of read-only users
+    admin_users: []                     # List of admin users
+  
+  # Integration settings
+  integrations:
+    # OpenEvolve integration
+    openevolve:
+      enabled: false                     # Enable OpenEvolve integration
+      api_endpoint: null                 # OpenEvolve API endpoint
+      api_key: null                      # OpenEvolve API key
+      sync_interval: 3600                # Sync interval in seconds
+    
+    # Self-healing system integration
+    self_healing:
+      enabled: false                     # Enable self-healing integration
+      webhook_url: null                  # Self-healing webhook URL
+      notification_threshold: 0.8        # Threshold for sending notifications
+    
+    # External monitoring systems
+    monitoring:
+      prometheus:
+        enabled: false                   # Enable Prometheus metrics
+        port: 8000                       # Prometheus metrics port
+        path: "/metrics"                 # Metrics endpoint path
+      
+      grafana:
+        enabled: false                   # Enable Grafana dashboards
+        dashboard_url: null              # Grafana dashboard URL
+  
+  # Development and testing
+  development:
+    # Debug settings
+    debug_mode: false                    # Enable debug mode
+    verbose_logging: false               # Enable verbose logging
+    
+    # Testing settings
+    mock_data_generation: false          # Generate mock data for testing
+    test_data_size: 1000                # Size of test datasets
+    
+    # Performance profiling
+    enable_profiling: false              # Enable performance profiling
+    profiling_output_dir: "./profiling" # Directory for profiling output
+

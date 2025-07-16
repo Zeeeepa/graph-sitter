@@ -70,6 +70,12 @@ dependencies = [
   "datasets",
   "colorlog>=6.9.0",
   "codegen-sdk-pink>=0.1.0",
+  # Machine Learning dependencies for pattern analysis
+  "scikit-learn>=1.3.0,<2.0.0",
+  "pandas>=2.0.0,<3.0.0",
+  "numpy>=1.24.0,<2.0.0",
+  "joblib>=1.3.0,<2.0.0",
+  "scipy>=1.10.0,<2.0.0",
 ]
 
 # renovate: datasource=python-version depName=python
