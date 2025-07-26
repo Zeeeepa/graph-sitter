@@ -63,6 +63,35 @@ from .api import (
     find_function_relationships
 )
 
+# Advanced API (NEW - Comprehensive integration)
+from .advanced_api import (
+    SerenaAdvancedAPI,
+    create_serena_api as create_advanced_serena_api,
+    quick_error_analysis,
+    quick_knowledge_extraction
+)
+
+# Advanced components
+from .knowledge_integration import (
+    AdvancedKnowledgeIntegration,
+    KnowledgeContext,
+    KnowledgeGraph,
+    AdvancedErrorContext
+)
+
+from .advanced_context import (
+    AdvancedContextEngine,
+    ContextualError,
+    ContextualInsight
+)
+
+from .advanced_error_viewer import (
+    AdvancedErrorViewer,
+    ErrorViewConfig,
+    ErrorCluster,
+    ErrorVisualization
+)
+
 # MCP and semantic tools
 from .mcp_bridge import SerenaMCPBridge, MCPToolResult
 from .semantic_tools import SemanticTools
@@ -103,6 +132,25 @@ __all__ = [
     'analyze_file_errors',
     'find_function_relationships',
     
+    # Advanced API (NEW - Comprehensive integration)
+    'SerenaAdvancedAPI',
+    'create_advanced_serena_api',
+    'quick_error_analysis',
+    'quick_knowledge_extraction',
+    
+    # Advanced components
+    'AdvancedKnowledgeIntegration',
+    'KnowledgeContext',
+    'KnowledgeGraph',
+    'AdvancedErrorContext',
+    'AdvancedContextEngine',
+    'ContextualError',
+    'ContextualInsight',
+    'AdvancedErrorViewer',
+    'ErrorViewConfig',
+    'ErrorCluster',
+    'ErrorVisualization',
+    
     # MCP and semantic tools
     'SerenaMCPBridge',
     'MCPToolResult',
@@ -118,4 +166,4 @@ __all__ = [
     'SymbolIntelligence'
 ]
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
