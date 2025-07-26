@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
@@ -186,7 +186,7 @@ class CodeIntelligence:
             return {'completions': [], 'hover': None, 'signatures': None}
         
         # Submit concurrent tasks
-        futures = {
+        futures: Dict[str, Future[Any]] = {
             'completions': self.executor.submit(self.get_completions, file_path, line, character),
             'hover': self.executor.submit(self.get_hover_info, file_path, line, character),
             'signatures': self.executor.submit(self.get_signature_help, file_path, line, character)

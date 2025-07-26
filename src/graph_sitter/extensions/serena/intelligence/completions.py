@@ -169,7 +169,7 @@ class CompletionProvider:
     
     def _get_lsp_completions(self, file_path: str, line: int, character: int, context: Dict[str, Any]) -> List[CompletionItem]:
         """Get completions from LSP servers."""
-        completions = []
+        completions: List[CompletionItem] = []
         
         try:
             # This would integrate with actual LSP servers
@@ -183,7 +183,7 @@ class CompletionProvider:
     
     def _get_symbol_completions(self, file_path: str, line: int, character: int, context: Dict[str, Any]) -> List[CompletionItem]:
         """Get completions based on symbols in the codebase."""
-        completions = []
+        completions: List[CompletionItem] = []
         word_prefix = context.get('word_prefix', '').lower()
         
         if len(word_prefix) < 2:  # Only complete for 2+ characters
@@ -241,7 +241,7 @@ class CompletionProvider:
     
     def _get_keyword_completions(self, file_path: str, context: Dict[str, Any]) -> List[CompletionItem]:
         """Get keyword completions based on language."""
-        completions = []
+        completions: List[CompletionItem] = []
         language = context.get('language', '')
         word_prefix = context.get('word_prefix', '').lower()
         
@@ -484,9 +484,9 @@ class CompletionProvider:
         
         # Boost score for exact matches
         word_prefix = context.get('word_prefix', '').lower()
-        if symbol.name.lower() == word_prefix:
+        if symbol.name and symbol.name.lower() == word_prefix:
             score += 0.3
-        elif symbol.name.lower().startswith(word_prefix):
+        elif symbol.name and symbol.name.lower().startswith(word_prefix):
             score += 0.2
         
         return min(score, 1.0)
@@ -619,7 +619,7 @@ class CompletionProvider:
                 'timestamp': time.time()
             }
     
-    def invalidate_cache(self, file_path: str = None) -> None:
+    def invalidate_cache(self, file_path: Optional[str] = None) -> None:
         """Invalidate completion cache."""
         with self._cache_lock:
             if file_path:
