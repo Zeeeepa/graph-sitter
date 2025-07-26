@@ -5,7 +5,7 @@ import rich_click as click
 
 from graph_sitter.cli.api.client import RestAPI
 from graph_sitter.cli.auth.constants import PROMPTS_DIR
-from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.codemod.convert import convert_to_cli
 from graph_sitter.cli.errors import ServerError
@@ -71,7 +71,7 @@ def make_relative(path: Path) -> str:
 @click.argument("path", type=click.Path(path_type=Path), default=None)
 @click.option("--description", "-d", default=None, help="Description of what this codemod does.")
 @click.option("--overwrite", is_flag=True, help="Overwrites function if it already exists.")
-def create_command(session: CodegenSession, name: str, path: Path | None, description: str | None = None, overwrite: bool = False):
+def create_command(session: CliSession, name: str, path: Path | None, description: str | None = None, overwrite: bool = False):
     """Create a new codegen function.
 
     NAME is the name/label for the function

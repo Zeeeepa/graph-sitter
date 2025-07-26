@@ -3,13 +3,13 @@ import rich_click as click
 
 from graph_sitter.cli.api.client import RestAPI
 from graph_sitter.cli.auth.decorators import requires_auth
-from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.rich.spinners import create_spinner
 from graph_sitter.cli.utils.codemod_manager import CodemodManager
 
 
-def run_on_pr(session: CodegenSession, codemod_name: str, pr_number: int) -> None:
+def run_on_pr(session: CliSession, codemod_name: str, pr_number: int) -> None:
     """Test a webhook against a specific PR."""
     # Find the codemod
     codemod = CodemodManager.get(codemod_name)
@@ -37,7 +37,7 @@ def run_on_pr(session: CodegenSession, codemod_name: str, pr_number: int) -> Non
 @requires_auth
 @click.argument("codemod_name", type=str)
 @click.argument("pr_number", type=int)
-def run_on_pr_command(session: CodegenSession, codemod_name: str, pr_number: int):
+def run_on_pr_command(session: CliSession, codemod_name: str, pr_number: int):
     """Test a webhook against a specific PR.
 
     CODEMOD_NAME is the name of the codemod to test
