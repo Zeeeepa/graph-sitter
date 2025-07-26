@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
-from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
+from ..mcp_bridge import SerenaMCPBridge
 from ..types import (
     CompletionContext, HoverContext, SignatureContext, SymbolInfo,
     SemanticSearchResult, CodeGenerationResult
@@ -46,15 +46,15 @@ class CodeIntelligence:
     with caching and performance optimization.
     """
     
-    def __init__(self, codebase: Codebase, lsp_bridge: SerenaLSPBridge, config: Optional[IntelligenceConfig] = None):
+    def __init__(self, codebase: Codebase, mcp_bridge: SerenaMCPBridge, config: Optional[IntelligenceConfig] = None):
         self.codebase = codebase
-        self.lsp_bridge = lsp_bridge
+        self.mcp_bridge = mcp_bridge
         self.config = config or IntelligenceConfig()
         
         # Initialize providers
-        self.completion_provider = CompletionProvider(codebase, lsp_bridge, self.config)
-        self.hover_provider = HoverProvider(codebase, lsp_bridge, self.config)
-        self.signature_provider = SignatureProvider(codebase, lsp_bridge, self.config)
+        self.completion_provider = CompletionProvider(codebase, mcp_bridge, self.config)
+        self.hover_provider = HoverProvider(codebase, mcp_bridge, self.config)
+        self.signature_provider = SignatureProvider(codebase, mcp_bridge, self.config)
         
         # Thread pool for concurrent operations
         self.executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="CodeIntelligence")
