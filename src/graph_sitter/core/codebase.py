@@ -215,7 +215,7 @@ class Codebase(
         if self.ctx.config.use_pink != PinkMode.OFF:
             import graph_sitter_sdk_pink
 
-            self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
+            self._pink_codebase = graph_sitter_sdk_pink.Codebase(self.repo_path)
 
     @noapidoc
     def __str__(self) -> str:
