@@ -1,0 +1,26 @@
+{
+  "project_structure": {
+    "error": "SerenaAdvancedAPI.build_knowledge_graph() got an unexpected keyword argument 'include_dependencies'"
+  },
+  "codebase_knowledge": {
+    "src/graph_sitter/core/codebase.py": {
+      "error": "SerenaAdvancedAPI.extract_knowledge() got an unexpected keyword argument 'include_dependencies'"
+    },
+    "src/graph_sitter/extensions/serena/__init__.py": {
+      "error": "SerenaAdvancedAPI.extract_knowledge() got an unexpected keyword argument 'include_dependencies'"
+    },
+    "src/graph_sitter/extensions/serena/advanced_api.py": {
+      "error": "SerenaAdvancedAPI.extract_knowledge() got an unexpected keyword argument 'include_dependencies'"
+    },
+    "src/graph_sitter/extensions/serena/knowledge_integration.py": {
+      "error": "SerenaAdvancedAPI.extract_knowledge() got an unexpected keyword argument 'include_dependencies'"
+    }
+  },
+  "architectural_patterns": {},
+  "error_landscape": {
+    "error": "'SerenaAdvancedAPI' object has no attribute 'get_all_errors_with_context'"
+  },
+  "dependencies_relationships": {
+    "error": "'SerenaAdvancedAPI' object has no attribute 'get_dependency_graph'"
+  }
+}
