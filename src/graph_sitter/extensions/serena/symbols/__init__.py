@@ -1,7 +1,8 @@
 """
-Symbol Intelligence Module
+Symbol Intelligence System for Serena LSP Integration
 
-Provides advanced symbol analysis and context understanding.
+This module provides advanced symbol analysis, context understanding,
+and impact analysis capabilities.
 """
 
 from .symbol_intelligence import SymbolIntelligence

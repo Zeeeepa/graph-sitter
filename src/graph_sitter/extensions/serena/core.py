@@ -2,28 +2,35 @@
 Serena Core Integration
 
 Main orchestrator for all Serena LSP capabilities in graph-sitter.
+Coordinates between LSP integration, refactoring, symbol intelligence, and other advanced features.
 """
 
 import asyncio
 import threading
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union, Callable
 from dataclasses import dataclass
 from enum import Enum
 
-from graph_sitter.shared.logging.get_logger import get_logger
-from .mcp_bridge import SerenaMCPBridge, ErrorInfo
-from graph_sitter.core.codebase import Codebase
-from .serena_types import SerenaCapability, SerenaConfig
+from .types import (
+    SerenaCapability, 
+    SerenaConfig, 
+    RefactoringResult,
+    SymbolInfo,
+    CodeAction,
+    CodeGenerationResult,
+    SemanticSearchResult,
+    HoverInfo,
+    CompletionItem,
+    AnalysisContext,
+    PerformanceMetrics,
+    EventSubscription,
+    EventHandler,
+    AsyncEventHandler
+)
 
-# Try to import LSP bridge for enhanced functionality
-try:
-    from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
-    LSP_BRIDGE_AVAILABLE = True
-except ImportError:
-    LSP_BRIDGE_AVAILABLE = False
-
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SerenaCore:
@@ -33,454 +40,488 @@ class SerenaCore:
     Orchestrates all Serena LSP capabilities and provides unified interface
     for real-time code intelligence, refactoring, and advanced analysis.
     
-    Enhanced version supports both MCP and LSP bridges for maximum compatibility.
+    Features:
+    - Capability management and coordination
+    - Event-driven architecture
+    - Performance monitoring
+    - Background processing
+    - LSP integration coordination
     """
     
-    def __init__(self, codebase: Codebase, config: Optional[SerenaConfig] = None):
-        self.codebase = codebase
+    def __init__(self, codebase_path: str, config: Optional[SerenaConfig] = None):
+        self.codebase_path = Path(codebase_path)
         self.config = config or SerenaConfig()
-        self.repo_path = Path(codebase.repo_path)
         
-        # Core components - use LSP bridge if available, fallback to MCP
-        if LSP_BRIDGE_AVAILABLE and getattr(self.config, 'prefer_lsp_bridge', True):
-            self.lsp_bridge = SerenaLSPBridge(str(self.repo_path))
-            self.bridge = self.lsp_bridge
-            self.bridge_type = 'lsp'
-            logger.info("Using enhanced LSP bridge for Serena integration")
-        else:
-            self.mcp_bridge = SerenaMCPBridge(str(self.repo_path))
-            self.bridge = self.mcp_bridge
-            self.bridge_type = 'mcp'
-            logger.info("Using MCP bridge for Serena integration")
-        
+        # Core state
         self._capabilities: Dict[SerenaCapability, Any] = {}
-        self._event_loop = None
-        self._background_thread = None
-        self._shutdown_event = threading.Event()
+        self._initialized = False
+        self._shutdown_requested = False
         
-        # Initialize semantic tools (maintain backward compatibility)
-        if hasattr(self, 'mcp_bridge'):
-            from .semantic_tools import SemanticTools
-            self.semantic_tools = SemanticTools(self.mcp_bridge)
+        # Event system
+        self._event_subscriptions: Dict[str, List[EventSubscription]] = {}
+        self._event_queue: asyncio.Queue = asyncio.Queue()
         
-        # Initialize capabilities
-        self._initialize_capabilities()
+        # Background processing
+        self._event_loop: Optional[asyncio.AbstractEventLoop] = None
+        self._background_thread: Optional[threading.Thread] = None
+        self._background_tasks: List[asyncio.Task] = []
         
-        # Start background processing if realtime is enabled
-        if self.config.realtime_analysis:
-            self._start_background_processing()
+        # Performance tracking
+        self._performance_metrics: List[PerformanceMetrics] = []
+        self._operation_counts: Dict[str, int] = {}
+        
+        # LSP integration reference (will be set by LSP integration)
+        self._lsp_integration: Optional[Any] = None
+        
+        logger.info(f"SerenaCore initialized for codebase: {self.codebase_path}")
     
-    def _initialize_capabilities(self) -> None:
-        """Initialize enabled Serena capabilities."""
+    async def initialize(self) -> bool:
+        """
+        Initialize all enabled capabilities.
+        
+        Returns:
+            True if initialization successful
+        """
+        if self._initialized:
+            return True
+        
         try:
-            for capability in self.config.enabled_capabilities:
-                self._initialize_capability(capability)
+            logger.info("Initializing Serena core capabilities...")
             
-            logger.info(f"Serena initialized with {len(self._capabilities)} capabilities")
+            # Start background processing if needed
+            if self.config.realtime_analysis:
+                await self._start_background_processing()
+            
+            # Initialize enabled capabilities
+            await self._initialize_capabilities()
+            
+            # Emit initialization event
+            await self._emit_event("core.initialized", {
+                'capabilities': [cap.value for cap in self.config.enabled_capabilities],
+                'config': self.config.__dict__
+            })
+            
+            self._initialized = True
+            logger.info("✅ Serena core initialization complete")
+            return True
             
         except Exception as e:
-            logger.error(f"Failed to initialize Serena capabilities: {e}")
+            logger.error(f"Failed to initialize Serena core: {e}")
+            return False
     
-    def _initialize_capability(self, capability: SerenaCapability) -> None:
-        """Initialize a specific capability with enhanced bridge support."""
-        try:
-            if capability == SerenaCapability.INTELLIGENCE:
-                from .intelligence import CodeIntelligence
-                self._capabilities[capability] = CodeIntelligence(self.codebase, self.bridge)
-            
-            elif capability == SerenaCapability.REFACTORING:
-                from .refactoring import RefactoringEngine
-                self._capabilities[capability] = RefactoringEngine(self.codebase, self.bridge)
-            
-            elif capability == SerenaCapability.ACTIONS:
-                from .actions import CodeActions
-                self._capabilities[capability] = CodeActions(self.codebase, self.bridge)
-            
-            elif capability == SerenaCapability.GENERATION:
-                from .generation import CodeGenerator
-                self._capabilities[capability] = CodeGenerator(self.codebase, self.bridge)
-            
-            elif capability == SerenaCapability.SEARCH:
-                from .search import SemanticSearch
-                self._capabilities[capability] = SemanticSearch(self.codebase, self.bridge)
-            
-            elif capability == SerenaCapability.ANALYSIS:
-                from .analysis import RealtimeAnalyzer
-                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.bridge)
-            
-            elif capability == SerenaCapability.REALTIME:
-                from .realtime import RealtimeAnalyzer
-                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.bridge)
-            
-            elif capability == SerenaCapability.SYMBOLS:
-                from .symbols import SymbolIntelligence
-                self._capabilities[capability] = SymbolIntelligence(self.codebase, self.bridge)
-            
-            logger.debug(f"Initialized {capability.value} capability using {self.bridge_type} bridge")
-            
-        except ImportError as e:
-            logger.warning(f"Could not initialize {capability.value}: {e}")
-        except Exception as e:
-            logger.error(f"Error initializing {capability.value}: {e}")
-    
-    def _start_background_processing(self) -> None:
-        """Start background thread for real-time processing."""
-        if self._background_thread is not None:
+    async def shutdown(self) -> None:
+        """Shutdown all capabilities and background processing."""
+        if not self._initialized:
             return
         
-        self._background_thread = threading.Thread(
-            target=self._background_worker,
-            daemon=True,
-            name="SerenaBackgroundWorker"
-        )
-        self._background_thread.start()
-        logger.info("Started Serena background processing")
-    
-    def _background_worker(self) -> None:
-        """Background worker for real-time analysis."""
+        logger.info("Shutting down Serena core...")
+        self._shutdown_requested = True
+        
         try:
-            # Create event loop for async operations
-            self._event_loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self._event_loop)
+            # Emit shutdown event
+            await self._emit_event("core.shutting_down", {})
             
-            # Start real-time analyzer if available
-            if SerenaCapability.REALTIME in self._capabilities:
-                realtime_analyzer = self._capabilities[SerenaCapability.REALTIME]
-                self._event_loop.run_until_complete(
-                    realtime_analyzer.start_monitoring()
-                )
+            # Shutdown capabilities
+            for capability, instance in self._capabilities.items():
+                if hasattr(instance, 'shutdown'):
+                    try:
+                        if asyncio.iscoroutinefunction(instance.shutdown):
+                            await instance.shutdown()
+                        else:
+                            instance.shutdown()
+                    except Exception as e:
+                        logger.error(f"Error shutting down {capability.value}: {e}")
             
-            # Keep running until shutdown
-            while not self._shutdown_event.is_set():
-                self._event_loop.run_until_complete(asyncio.sleep(0.1))
-                
+            # Cancel background tasks
+            for task in self._background_tasks:
+                task.cancel()
+            
+            if self._background_tasks:
+                await asyncio.gather(*self._background_tasks, return_exceptions=True)
+            
+            # Stop background thread
+            if self._background_thread and self._background_thread.is_alive():
+                self._background_thread.join(timeout=5.0)
+            
+            self._capabilities.clear()
+            self._background_tasks.clear()
+            self._event_subscriptions.clear()
+            
+            self._initialized = False
+            logger.info("✅ Serena core shutdown complete")
+            
         except Exception as e:
-            logger.error(f"Error in background worker: {e}")
-        finally:
-            if self._event_loop:
-                self._event_loop.close()
+            logger.error(f"Error during Serena core shutdown: {e}")
     
-    # Intelligence Methods
-    def get_symbol_info(self, file_path: str, line: int, character: int, **kwargs) -> Optional[Dict[str, Any]]:
-        """Get detailed symbol information at the specified position."""
-        return self.semantic_tools.get_symbol_context(file_path, line, character)
+    def set_lsp_integration(self, lsp_integration: Any) -> None:
+        """Set reference to LSP integration for coordination."""
+        self._lsp_integration = lsp_integration
+        logger.debug("LSP integration reference set")
     
-    def generate_code(self, prompt: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """Generate code based on the provided prompt."""
-        if SerenaCapability.GENERATION not in self._capabilities:
-            # Fallback to intelligence capability for basic generation
-            if SerenaCapability.INTELLIGENCE not in self._capabilities:
-                raise ValueError("Neither generation nor intelligence capability enabled")
-            intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
-            result = intelligence.generate_code(prompt, **kwargs)
-            
-            if result:
-                # Convert CodeGenerationResult to dictionary
-                return {
-                    'success': result.success,
-                    'generated_code': result.generated_code,
-                    'message': result.message,
-                    'metadata': result.metadata or {}
-                }
+    def get_capability(self, capability: SerenaCapability) -> Optional[Any]:
+        """Get instance of a specific capability."""
+        return self._capabilities.get(capability)
+    
+    def is_capability_enabled(self, capability: SerenaCapability) -> bool:
+        """Check if a capability is enabled and available."""
+        return (
+            capability in self.config.enabled_capabilities and
+            capability in self._capabilities
+        )
+    
+    async def get_refactoring_result(self, refactoring_type: str, **kwargs) -> RefactoringResult:
+        """Get refactoring result through the refactoring engine."""
+        if not self.is_capability_enabled(SerenaCapability.REFACTORING):
+            return RefactoringResult(
+                success=False,
+                refactoring_type=None,
+                changes=[],
+                conflicts=[],
+                error_message="Refactoring capability not enabled"
+            )
+        
+        refactoring_engine = self._capabilities[SerenaCapability.REFACTORING]
+        return await refactoring_engine.perform_refactoring(refactoring_type, **kwargs)
+    
+    async def get_symbol_info(self, symbol: str, context: Optional[AnalysisContext] = None) -> Optional[SymbolInfo]:
+        """Get symbol information through symbol intelligence."""
+        if not self.is_capability_enabled(SerenaCapability.SYMBOL_INTELLIGENCE):
             return None
         
-        generator = self._capabilities[SerenaCapability.GENERATION]
-        result = generator.generate_code(prompt, **kwargs)
-        
-        if result:
-            # Convert CodeGenerationResult to dictionary
-            return {
-                'success': result.success,
-                'generated_code': result.generated_code,
-                'message': result.message,
-                'metadata': result.metadata or {}
-            }
-        return None
+        symbol_intelligence = self._capabilities[SerenaCapability.SYMBOL_INTELLIGENCE]
+        return await symbol_intelligence.get_symbol_info(symbol, context)
     
-    def get_completions(self, file_path: str, line: int, character: int, **kwargs) -> List[Dict[str, Any]]:
-        """Get code completions at the specified position."""
-        return self.semantic_tools.get_completions(file_path, line, character)
-    
-    def get_hover_info(self, file_path: str, line: int, character: int) -> Optional[Dict[str, Any]]:
-        """Get hover information for symbol at position."""
-        return self.semantic_tools.get_hover_info(file_path, line, character)
-    
-    def get_signature_help(self, file_path: str, line: int, character: int) -> Optional[Dict[str, Any]]:
-        """Get signature help for function call at position."""
-        if SerenaCapability.INTELLIGENCE not in self._capabilities:
-            return None
-        
-        intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
-        return intelligence.get_signature_help(file_path, line, character)
-    
-    def semantic_search(self, query: str, file_pattern: Optional[str] = None, max_results: int = 10) -> List[Dict[str, Any]]:
-        """Perform semantic search across the codebase."""
-        return self.semantic_tools.semantic_search(query, file_pattern, max_results)
-    
-    def find_symbol(self, symbol_name: str, symbol_type: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Find symbol definitions and references."""
-        return self.semantic_tools.find_symbol(symbol_name, symbol_type)
-    
-    def analyze_code_quality(self, file_path: Optional[str] = None) -> Dict[str, Any]:
-        """Analyze code quality and get suggestions."""
-        return self.semantic_tools.analyze_code_quality(file_path)
-    
-    # Refactoring Methods
-    def rename_symbol(self, file_path: str, line: int, character: int, new_name: str, preview: bool = False) -> Dict[str, Any]:
-        """Rename symbol at position across all files."""
-        return self.semantic_tools.refactor_rename(file_path, line, character, new_name, preview)
-    
-    def extract_method(self, file_path: str, start_line: int, end_line: int, method_name: str, **kwargs) -> Dict[str, Any]:
-        """Extract selected code into a new method."""
-        if SerenaCapability.REFACTORING not in self._capabilities:
-            return {"success": False, "error": "Refactoring capability not available"}
-        
-        refactoring = self._capabilities[SerenaCapability.REFACTORING]
-        return refactoring.extract_method(file_path, start_line, end_line, method_name, **kwargs)
-    
-    def extract_variable(self, file_path: str, line: int, character: int, variable_name: str, **kwargs) -> Dict[str, Any]:
-        """Extract expression into a variable."""
-        if SerenaCapability.REFACTORING not in self._capabilities:
-            return {"success": False, "error": "Refactoring capability not available"}
-        
-        refactoring = self._capabilities[SerenaCapability.REFACTORING]
-        return refactoring.extract_variable(file_path, line, character, variable_name, **kwargs)
-    
-    # Code Actions Methods
-    def get_code_actions(self, file_path: str, start_line: int, end_line: int, context: List[str] = None) -> List[Dict[str, Any]]:
-        """Get available code actions for the specified range."""
-        if SerenaCapability.ACTIONS not in self._capabilities:
+    async def get_code_actions(self, file_path: str, start_line: int, end_line: int, context: List[str]) -> List[CodeAction]:
+        """Get available code actions."""
+        if not self.is_capability_enabled(SerenaCapability.CODE_ACTIONS):
             return []
         
-        actions = self._capabilities[SerenaCapability.ACTIONS]
-        return actions.get_code_actions(file_path, start_line, end_line, context or [])
+        code_actions = self._capabilities[SerenaCapability.CODE_ACTIONS]
+        return await code_actions.get_code_actions(file_path, start_line, end_line, context)
     
-    def apply_code_action(self, action_id: str, file_path: str, **kwargs) -> Dict[str, Any]:
+    async def apply_code_action(self, action_id: str, **kwargs) -> Dict[str, Any]:
         """Apply a specific code action."""
-        if SerenaCapability.ACTIONS not in self._capabilities:
-            return {"success": False, "error": "Code actions capability not available"}
+        if not self.is_capability_enabled(SerenaCapability.CODE_ACTIONS):
+            return {'success': False, 'error': 'Code actions capability not enabled'}
         
-        actions = self._capabilities[SerenaCapability.ACTIONS]
-        return actions.apply_code_action(action_id, file_path, **kwargs)
+        code_actions = self._capabilities[SerenaCapability.CODE_ACTIONS]
+        return await code_actions.apply_code_action(action_id, **kwargs)
     
-    def organize_imports(self, file_path: str, remove_unused: bool = True, sort_imports: bool = True) -> Dict[str, Any]:
-        """Organize imports in the specified file."""
-        if SerenaCapability.ACTIONS not in self._capabilities:
-            return {"success": False, "error": "Code actions capability not available"}
+    async def generate_code(self, prompt: str, context: Optional[AnalysisContext] = None) -> CodeGenerationResult:
+        """Generate code using AI assistance."""
+        if not self.is_capability_enabled(SerenaCapability.CODE_GENERATION):
+            return CodeGenerationResult(
+                success=False,
+                generated_code="",
+                error_message="Code generation capability not enabled"
+            )
         
-        actions = self._capabilities[SerenaCapability.ACTIONS]
-        return actions.organize_imports(file_path, remove_unused, sort_imports)
+        code_generator = self._capabilities[SerenaCapability.CODE_GENERATION]
+        return await code_generator.generate_code(prompt, context)
     
-    # Generation Methods
-    def generate_boilerplate(self, template: str, context: Dict[str, Any], target_file: str = None) -> Dict[str, Any]:
-        """Generate boilerplate code from template."""
-        if SerenaCapability.GENERATION not in self._capabilities:
-            return {"success": False, "error": "Code generation capability not available"}
+    async def semantic_search(self, query: str, **kwargs) -> SemanticSearchResult:
+        """Perform semantic search in the codebase."""
+        if not self.is_capability_enabled(SerenaCapability.SEMANTIC_SEARCH):
+            return SemanticSearchResult(
+                query=query,
+                results=[],
+                total_count=0,
+                search_time=0.0,
+                metadata={'error': 'Semantic search capability not enabled'}
+            )
         
-        generator = self._capabilities[SerenaCapability.GENERATION]
-        return generator.generate_boilerplate(template, context, target_file)
+        semantic_search = self._capabilities[SerenaCapability.SEMANTIC_SEARCH]
+        return await semantic_search.search(query, **kwargs)
     
-    def generate_tests(self, target_function: str, test_types: List[str] = None, **kwargs) -> Dict[str, Any]:
-        """Generate tests for the specified function."""
-        if SerenaCapability.GENERATION not in self._capabilities:
-            return {"success": False, "error": "Code generation capability not available"}
+    async def get_hover_info(self, file_path: str, line: int, character: int) -> Optional[HoverInfo]:
+        """Get hover information for a position."""
+        if not self.is_capability_enabled(SerenaCapability.HOVER_INFO):
+            return None
         
-        generator = self._capabilities[SerenaCapability.GENERATION]
-        return generator.generate_tests(target_function, test_types or ["unit"], **kwargs)
+        hover_provider = self._capabilities[SerenaCapability.HOVER_INFO]
+        return await hover_provider.get_hover_info(file_path, line, character)
     
-    def generate_documentation(self, target: str, format: str = "docstring", **kwargs) -> Dict[str, Any]:
-        """Generate documentation for the specified target."""
-        if SerenaCapability.GENERATION not in self._capabilities:
-            return {"success": False, "error": "Code generation capability not available"}
-        
-        generator = self._capabilities[SerenaCapability.GENERATION]
-        return generator.generate_documentation(target, format, **kwargs)
-    
-    # Search Methods
-    def semantic_search(self, query: str, language: str = "natural", **kwargs) -> List[Dict[str, Any]]:
-        """Perform semantic search across the codebase."""
-        if SerenaCapability.SEARCH not in self._capabilities:
+    async def get_completions(self, file_path: str, line: int, character: int, context: Optional[str] = None) -> List[CompletionItem]:
+        """Get code completions for a position."""
+        if not self.is_capability_enabled(SerenaCapability.COMPLETIONS):
             return []
         
-        search = self._capabilities[SerenaCapability.SEARCH]
-        return search.semantic_search(query, language, **kwargs)
+        completion_provider = self._capabilities[SerenaCapability.COMPLETIONS]
+        return await completion_provider.get_completions(file_path, line, character, context)
     
-    def find_code_patterns(self, pattern: str, suggest_improvements: bool = False) -> List[Dict[str, Any]]:
-        """Find code patterns matching the specified pattern."""
-        if SerenaCapability.SEARCH not in self._capabilities:
-            return []
+    def subscribe_to_event(self, event_type: str, handler: Union[EventHandler, AsyncEventHandler], priority: int = 0) -> None:
+        """Subscribe to an event type."""
+        subscription = EventSubscription(
+            event_type=event_type,
+            handler=handler,
+            is_async=asyncio.iscoroutinefunction(handler),
+            priority=priority
+        )
         
-        search = self._capabilities[SerenaCapability.SEARCH]
-        return search.find_code_patterns(pattern, suggest_improvements)
-    
-    def find_similar_code(self, reference_code: str, similarity_threshold: float = 0.8) -> List[Dict[str, Any]]:
-        """Find code similar to the reference code."""
-        if SerenaCapability.SEARCH not in self._capabilities:
-            return []
+        if event_type not in self._event_subscriptions:
+            self._event_subscriptions[event_type] = []
         
-        search = self._capabilities[SerenaCapability.SEARCH]
-        return search.find_similar_code(reference_code, similarity_threshold)
-    
-    # Symbol Intelligence Methods
-    def get_symbol_context(self, symbol: str, include_dependencies: bool = True, **kwargs) -> Dict[str, Any]:
-        """Get comprehensive context for a symbol."""
-        if SerenaCapability.SYMBOLS not in self._capabilities:
-            return {}
+        self._event_subscriptions[event_type].append(subscription)
         
-        symbols = self._capabilities[SerenaCapability.SYMBOLS]
-        return symbols.get_symbol_context(symbol, include_dependencies, **kwargs)
-    
-    def analyze_symbol_impact(self, symbol: str, change_type: str) -> Dict[str, Any]:
-        """Analyze the impact of changing a symbol."""
-        if SerenaCapability.SYMBOLS not in self._capabilities:
-            return {}
+        # Sort by priority (higher priority first)
+        self._event_subscriptions[event_type].sort(key=lambda s: s.priority, reverse=True)
         
-        symbols = self._capabilities[SerenaCapability.SYMBOLS]
-        return symbols.analyze_symbol_impact(symbol, change_type)
+        logger.debug(f"Subscribed to event: {event_type}")
     
-    # Real-time Methods
-    def enable_realtime_analysis(self, watch_patterns: List[str] = None, auto_refresh: bool = True) -> bool:
-        """Enable real-time analysis with file watching."""
-        if SerenaCapability.REALTIME not in self._capabilities:
-            return False
+    def unsubscribe_from_event(self, event_type: str, handler: Union[EventHandler, AsyncEventHandler]) -> None:
+        """Unsubscribe from an event type."""
+        if event_type in self._event_subscriptions:
+            self._event_subscriptions[event_type] = [
+                sub for sub in self._event_subscriptions[event_type]
+                if sub.handler != handler
+            ]
+            logger.debug(f"Unsubscribed from event: {event_type}")
+    
+    async def _emit_event(self, event_type: str, data: Any) -> None:
+        """Emit an event to all subscribers."""
+        if event_type not in self._event_subscriptions:
+            return
         
-        realtime = self._capabilities[SerenaCapability.REALTIME]
-        return realtime.enable_analysis(watch_patterns or self.config.file_watch_patterns, auto_refresh)
-    
-    def disable_realtime_analysis(self) -> bool:
-        """Disable real-time analysis."""
-        if SerenaCapability.REALTIME not in self._capabilities:
-            return False
+        subscriptions = self._event_subscriptions[event_type]
         
-        realtime = self._capabilities[SerenaCapability.REALTIME]
-        return realtime.disable_analysis()
+        for subscription in subscriptions:
+            try:
+                if subscription.is_async:
+                    await subscription.handler(event_type, data)
+                else:
+                    subscription.handler(event_type, data)
+            except Exception as e:
+                logger.error(f"Error in event handler for {event_type}: {e}")
     
-    # Analysis Methods
-    def analyze_file(self, file_path: str, force: bool = False) -> Optional[Dict[str, Any]]:
-        """Analyze a specific file for issues and metrics."""
-        if SerenaCapability.ANALYSIS not in self._capabilities:
-            raise ValueError("Analysis capability not enabled")
-        
-        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
-        result = analyzer.analyze_file(file_path, force=force)
-        return result.__dict__ if result else None
+    def get_performance_metrics(self) -> List[Dict[str, Any]]:
+        """Get performance metrics for all operations."""
+        return [metric.to_dict() for metric in self._performance_metrics]
     
-    def get_analysis_results(self, file_paths: Optional[List[str]] = None) -> Dict[str, Dict[str, Any]]:
-        """Get analysis results for specified files or all analyzed files."""
-        if SerenaCapability.ANALYSIS not in self._capabilities:
-            raise ValueError("Analysis capability not enabled")
-        
-        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
-        results = analyzer.get_analysis_results(file_paths)
-        return {path: result.__dict__ for path, result in results.items()}
-    
-    def queue_file_analysis(self, file_path: str) -> None:
-        """Queue a file for background analysis."""
-        if SerenaCapability.ANALYSIS not in self._capabilities:
-            raise ValueError("Analysis capability not enabled")
-        
-        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
-        analyzer.queue_analysis(file_path)
-    
-    def start_analysis_engine(self) -> None:
-        """Start the real-time analysis engine."""
-        if SerenaCapability.ANALYSIS not in self._capabilities:
-            raise ValueError("Analysis capability not enabled")
-        
-        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
-        analyzer.start()
-    
-    def stop_analysis_engine(self) -> None:
-        """Stop the real-time analysis engine."""
-        if SerenaCapability.ANALYSIS not in self._capabilities:
-            raise ValueError("Analysis capability not enabled")
-        
-        analyzer = self._capabilities[SerenaCapability.ANALYSIS]
-        analyzer.stop()
-    
-    # Utility Methods
-    def get_diagnostics(self) -> List[ErrorInfo]:
-        """Get all diagnostics from bridge."""
-        if self.bridge_type == 'lsp' and hasattr(self.bridge, 'get_diagnostics'):
-            return self.bridge.get_diagnostics()
-        elif self.bridge_type == 'mcp':
-            # MCP bridge doesn't have direct diagnostics - would need to call specific tools
-            return []
-        return []
-    
-    def get_file_diagnostics(self, file_path: str) -> List[ErrorInfo]:
-        """Get diagnostics for a specific file."""
-        if self.bridge_type == 'lsp' and hasattr(self.bridge, 'get_file_diagnostics'):
-            return self.bridge.get_file_diagnostics(file_path)
-        elif self.bridge_type == 'mcp':
-            # MCP bridge doesn't have direct diagnostics - would need to call specific tools
-            return []
-        return []
-    
-    def refresh_diagnostics(self) -> None:
-        """Refresh diagnostic information."""
-        if self.bridge_type == 'lsp' and hasattr(self.bridge, 'refresh_diagnostics'):
-            self.bridge.refresh_diagnostics()
-        elif self.bridge_type == 'mcp':
-            # MCP bridge doesn't have direct diagnostics - would need to call specific tools
-            pass
+    def get_operation_counts(self) -> Dict[str, int]:
+        """Get operation counts."""
+        return self._operation_counts.copy()
     
     def get_status(self) -> Dict[str, Any]:
-        """Get comprehensive status of Serena integration."""
-        capability_status = {}
-        for cap, instance in self._capabilities.items():
-            if hasattr(instance, 'get_status'):
-                capability_status[cap.value] = instance.get_status()
-            else:
-                capability_status[cap.value] = {"available": True}
-        
-        # Get bridge status based on type
-        if self.bridge_type == 'lsp':
-            bridge_status = self.bridge.get_status() if hasattr(self.bridge, 'get_status') else {"initialized": True}
-        else:  # mcp
-            bridge_status = {"initialized": self.mcp_bridge.is_initialized, "available_tools": len(self.mcp_bridge.available_tools)}
-        
+        """Get comprehensive status information."""
         return {
-            "enabled_capabilities": [cap.value for cap in self.config.enabled_capabilities],
-            "active_capabilities": list(capability_status.keys()),
-            "realtime_analysis": self.config.realtime_analysis,
-            "background_thread_active": self._background_thread is not None and self._background_thread.is_alive(),
-            "bridge_type": self.bridge_type,
-            "lsp_bridge_status" if self.bridge_type == 'lsp' else "mcp_bridge_status": bridge_status,
-            "capability_details": capability_status
+            'initialized': self._initialized,
+            'codebase_path': str(self.codebase_path),
+            'enabled_capabilities': [cap.value for cap in self.config.enabled_capabilities],
+            'active_capabilities': [cap.value for cap in self._capabilities.keys()],
+            'background_processing': self._background_thread is not None and self._background_thread.is_alive(),
+            'event_subscriptions': {
+                event_type: len(subscriptions)
+                for event_type, subscriptions in self._event_subscriptions.items()
+            },
+            'operation_counts': self._operation_counts,
+            'performance_metrics_count': len(self._performance_metrics)
         }
     
-    def shutdown(self) -> None:
-        """Shutdown Serena integration and cleanup resources."""
-        logger.info("Shutting down Serena integration")
-        
-        # Signal shutdown
-        self._shutdown_event.set()
-        
-        # Shutdown capabilities
-        for capability, instance in self._capabilities.items():
+    async def _initialize_capabilities(self) -> None:
+        """Initialize all enabled capabilities."""
+        for capability in self.config.enabled_capabilities:
             try:
-                if hasattr(instance, 'shutdown'):
-                    instance.shutdown()
+                await self._initialize_capability(capability)
             except Exception as e:
-                logger.error(f"Error shutting down {capability.value}: {e}")
+                logger.error(f"Failed to initialize capability {capability.value}: {e}")
+    
+    async def _initialize_capability(self, capability: SerenaCapability) -> None:
+        """Initialize a specific capability."""
+        logger.debug(f"Initializing capability: {capability.value}")
         
-        # Shutdown bridge
-        if hasattr(self.bridge, 'shutdown'):
-            self.bridge.shutdown()
+        if capability == SerenaCapability.REFACTORING:
+            from .refactoring.refactoring_engine import RefactoringEngine
+            instance = RefactoringEngine(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
+            
+        elif capability == SerenaCapability.SYMBOL_INTELLIGENCE:
+            from .symbols.symbol_intelligence import SymbolIntelligence
+            instance = SymbolIntelligence(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
+            
+        elif capability == SerenaCapability.CODE_ACTIONS:
+            from .actions.code_actions import CodeActions
+            instance = CodeActions(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
+            
+        elif capability == SerenaCapability.REAL_TIME_ANALYSIS:
+            from .realtime.realtime_analyzer import RealtimeAnalyzer
+            instance = RealtimeAnalyzer(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
+            
+        elif capability == SerenaCapability.SEMANTIC_SEARCH:
+            from .search.semantic_search import SemanticSearch
+            instance = SemanticSearch(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
+            
+        elif capability == SerenaCapability.CODE_GENERATION:
+            from .generation.code_generator import CodeGenerator
+            instance = CodeGenerator(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
+            
+        elif capability == SerenaCapability.HOVER_INFO:
+            from .intelligence.hover import HoverProvider
+            instance = HoverProvider(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
+            
+        elif capability == SerenaCapability.COMPLETIONS:
+            from .intelligence.completions import CompletionProvider
+            instance = CompletionProvider(self.codebase_path, self)
+            await instance.initialize()
+            self._capabilities[capability] = instance
         
-        # Wait for background thread
+        logger.info(f"✅ Initialized capability: {capability.value}")
+    
+    async def _start_background_processing(self) -> None:
+        """Start background processing for real-time features."""
         if self._background_thread and self._background_thread.is_alive():
-            self._background_thread.join(timeout=5.0)
+            return
         
-        # Close event loop
-        if self._event_loop and not self._event_loop.is_closed():
-            self._event_loop.close()
+        logger.info("Starting background processing...")
         
-        logger.info("Serena integration shutdown complete")
+        # Create event loop for background thread
+        def run_background_loop():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            self._event_loop = loop
+            
+            try:
+                # Start background tasks
+                self._background_tasks = [
+                    loop.create_task(self._event_processor()),
+                    loop.create_task(self._performance_monitor()),
+                ]
+                
+                # Run until shutdown
+                loop.run_until_complete(self._background_runner())
+                
+            except Exception as e:
+                logger.error(f"Error in background processing: {e}")
+            finally:
+                loop.close()
+        
+        self._background_thread = threading.Thread(target=run_background_loop, daemon=True)
+        self._background_thread.start()
+        
+        logger.info("✅ Background processing started")
     
-    def __enter__(self):
-        return self
+    async def _background_runner(self) -> None:
+        """Main background processing loop."""
+        while not self._shutdown_requested:
+            try:
+                await asyncio.sleep(1.0)
+                
+                # Emit heartbeat event
+                await self._emit_event("core.heartbeat", {
+                    'timestamp': asyncio.get_event_loop().time(),
+                    'active_tasks': len(self._background_tasks)
+                })
+                
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in background runner: {e}")
+                await asyncio.sleep(5.0)  # Wait before retrying
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.shutdown()
+    async def _event_processor(self) -> None:
+        """Process events from the event queue."""
+        while not self._shutdown_requested:
+            try:
+                # Process events with timeout
+                try:
+                    event_type, data = await asyncio.wait_for(
+                        self._event_queue.get(),
+                        timeout=1.0
+                    )
+                    await self._emit_event(event_type, data)
+                except asyncio.TimeoutError:
+                    continue
+                    
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error processing events: {e}")
+    
+    async def _performance_monitor(self) -> None:
+        """Monitor performance metrics."""
+        while not self._shutdown_requested:
+            try:
+                await asyncio.sleep(30.0)  # Monitor every 30 seconds
+                
+                # Clean up old metrics (keep last 1000)
+                if len(self._performance_metrics) > 1000:
+                    self._performance_metrics = self._performance_metrics[-1000:]
+                
+                # Emit performance event
+                await self._emit_event("core.performance_update", {
+                    'metrics_count': len(self._performance_metrics),
+                    'operation_counts': self._operation_counts.copy()
+                })
+                
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in performance monitor: {e}")
+    
+    def _record_operation(self, operation_name: str, duration: float) -> None:
+        """Record an operation for performance tracking."""
+        # Update operation count
+        self._operation_counts[operation_name] = self._operation_counts.get(operation_name, 0) + 1
+        
+        # Record performance metric
+        metric = PerformanceMetrics(
+            operation_name=operation_name,
+            start_time=0.0,  # Not tracking start time for recorded operations
+            end_time=0.0,
+            duration=duration
+        )
+        
+        self._performance_metrics.append(metric)
+        
+        # Emit operation event
+        if self._event_loop:
+            asyncio.run_coroutine_threadsafe(
+                self._emit_event("core.operation_completed", {
+                    'operation': operation_name,
+                    'duration': duration,
+                    'count': self._operation_counts[operation_name]
+                }),
+                self._event_loop
+            )
+
+
+# Convenience functions for creating and managing SerenaCore instances
+_global_core_instance: Optional[SerenaCore] = None
+
+
+async def get_or_create_core(codebase_path: str, config: Optional[SerenaConfig] = None) -> SerenaCore:
+    """Get or create a global SerenaCore instance."""
+    global _global_core_instance
+    
+    if _global_core_instance is None:
+        _global_core_instance = SerenaCore(codebase_path, config)
+        await _global_core_instance.initialize()
+    
+    return _global_core_instance
+
+
+async def shutdown_global_core() -> None:
+    """Shutdown the global SerenaCore instance."""
+    global _global_core_instance
+    
+    if _global_core_instance:
+        await _global_core_instance.shutdown()
+        _global_core_instance = None
+
+
+def create_core(codebase_path: str, config: Optional[SerenaConfig] = None) -> SerenaCore:
+    """Create a new SerenaCore instance (not global)."""
+    return SerenaCore(codebase_path, config)
+
