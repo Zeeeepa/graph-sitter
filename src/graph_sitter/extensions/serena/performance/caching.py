@@ -90,7 +90,8 @@ class AnalysisCache:
             
             with open(path, 'rb') as f:
                 content = f.read()
-            return hashlib.md5(content).hexdigest()
+            # Use MD5 for non-security purposes (file change detection)
+            return hashlib.md5(content, usedforsecurity=False).hexdigest()
         except Exception:
             return "error"
     
@@ -172,8 +173,9 @@ class AnalysisCache:
                     key_data = json.loads(key)
                     if key_data.get('file_path') == file_path_str:
                         keys_to_remove.append(key)
-                except Exception:
-                    continue
+                except (json.JSONDecodeError, KeyError, TypeError):
+                    # Skip malformed cache keys
+                    pass
             
             for key in keys_to_remove:
                 del self._cache[key]
@@ -312,8 +314,9 @@ class BatchCache:
             try:
                 operation, file_path = key.split(':', 1)
                 self.base_cache.set(operation, file_path, data)
-            except Exception:
-                continue
+            except (ValueError, AttributeError):
+                # Skip malformed batch keys
+                pass
         
         self._batch_results.clear()
         self._batch_active = False
@@ -371,4 +374,3 @@ def batch_cached_analysis(operations: list):
             self.batch_cache.end_batch()
     
     return BatchContext()
-

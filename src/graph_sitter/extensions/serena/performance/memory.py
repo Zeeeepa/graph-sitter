@@ -222,7 +222,7 @@ def get_memory_stats() -> MemoryStats:
 
 @contextmanager
 def memory_efficient_analysis(enable_gc: bool = True,
-                            gc_frequency: int = 100) -> Generator[MemoryOptimizer, None, None]:
+                            gc_frequency: int = 100) -> Generator[Any, None, None]:
     """
     Context manager for memory-efficient analysis operations.
     
@@ -450,4 +450,3 @@ def memory_efficient_batch_analysis(file_paths: List[str],
             gc.collect()
     
     return results
-

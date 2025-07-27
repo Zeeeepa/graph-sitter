@@ -207,7 +207,8 @@ class ParallelAnalyzer:
                         timeout=timeout,
                         return_when=concurrent.futures.ALL_COMPLETED
                     )
-                except Exception:
+                except (concurrent.futures.TimeoutError, RuntimeError):
+                    # Handle timeout or runtime errors gracefully
                     pass
                 
                 # Collect any new results
@@ -457,4 +458,3 @@ class AsyncAnalyzer:
                 if (self._stats['completed'] + self._stats['failed']) > 0 else 0
             )
         }
-
