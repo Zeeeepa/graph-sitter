@@ -13,10 +13,17 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
 from ..mcp_bridge import SerenaMCPBridge
-from ..types import (
+from ..serena_types import (
     CompletionContext, HoverContext, SignatureContext, SymbolInfo,
     SemanticSearchResult, CodeGenerationResult
 )
+
+# Try to import LSP bridge for enhanced functionality
+try:
+    from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
+    LSP_BRIDGE_AVAILABLE = True
+except ImportError:
+    LSP_BRIDGE_AVAILABLE = False
 
 from .completions import CompletionProvider
 from .hover import HoverProvider
@@ -46,15 +53,23 @@ class CodeIntelligence:
     with caching and performance optimization.
     """
     
-    def __init__(self, codebase: Codebase, mcp_bridge: SerenaMCPBridge, config: Optional[IntelligenceConfig] = None):
+    def __init__(self, codebase: Codebase, bridge: Union[SerenaMCPBridge, 'SerenaLSPBridge'], config: Optional[IntelligenceConfig] = None):
         self.codebase = codebase
-        self.mcp_bridge = mcp_bridge
+        self.bridge = bridge
+        self.bridge_type = 'lsp' if LSP_BRIDGE_AVAILABLE and hasattr(bridge, 'get_completions') else 'mcp'
+        
+        # Maintain backward compatibility
+        if self.bridge_type == 'mcp':
+            self.mcp_bridge = bridge
+        else:
+            self.lsp_bridge = bridge
+            
         self.config = config or IntelligenceConfig()
         
-        # Initialize providers
-        self.completion_provider = CompletionProvider(codebase, mcp_bridge, self.config)
-        self.hover_provider = HoverProvider(codebase, mcp_bridge, self.config)
-        self.signature_provider = SignatureProvider(codebase, mcp_bridge, self.config)
+        # Initialize providers with appropriate bridge
+        self.completion_provider = CompletionProvider(codebase, bridge, self.config)
+        self.hover_provider = HoverProvider(codebase, bridge, self.config)
+        self.signature_provider = SignatureProvider(codebase, bridge, self.config)
         
         # Thread pool for concurrent operations
         self.executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="CodeIntelligence")
