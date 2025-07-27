@@ -512,7 +512,7 @@ class DeepCodebaseAnalyzer:
     
     def _generate_hierarchy_data(self, files, classes, functions) -> Dict[str, Any]:
         """Generate hierarchical data for tree visualization."""
-        hierarchy = {
+        hierarchy: Dict[str, Any] = {
             "name": "Codebase",
             "children": []
         }
@@ -525,14 +525,14 @@ class DeepCodebaseAnalyzer:
             file_groups[directory].append(file)
         
         for directory, dir_files in file_groups.items():
-            dir_node = {
+            dir_node: Dict[str, Any] = {
                 "name": directory,
                 "type": "directory",
                 "children": []
             }
             
             for file in dir_files:
-                file_node = {
+                file_node: Dict[str, Any] = {
                     "name": file.name,
                     "type": "file",
                     "size": len(file.symbols),
@@ -542,7 +542,7 @@ class DeepCodebaseAnalyzer:
                 # Add classes in this file
                 file_classes = [cls for cls in classes if getattr(cls, 'filepath', '').endswith(file.name)]
                 for cls in file_classes:
-                    class_node = {
+                    class_node: Dict[str, Any] = {
                         "name": cls.name,
                         "type": "class",
                         "size": len(cls.methods) + len(cls.attributes)
@@ -552,7 +552,7 @@ class DeepCodebaseAnalyzer:
                 # Add functions in this file
                 file_functions = [func for func in functions if getattr(func, 'filepath', '').endswith(file.name)]
                 for func in file_functions:
-                    function_node = {
+                    function_node: Dict[str, Any] = {
                         "name": func.name,
                         "type": "function",
                         "size": len(func.parameters) + len(func.dependencies)
