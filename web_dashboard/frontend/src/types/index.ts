@@ -49,7 +49,7 @@ export interface ValidationResult {
   message?: string;
   logs: string[];
   deployment_logs: string[];
-  test_results?: any;
+  test_results?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   started_at?: string;
@@ -160,7 +160,7 @@ export interface ProjectNotification extends WebSocketMessage {
     project_name: string;
     event_type: string;
     timestamp: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

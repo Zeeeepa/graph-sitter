@@ -258,7 +258,7 @@ export const TestDashboard: React.FC = () => {
             </h2>
             
             <div className="space-y-4">
-              {testSuites.map((suite, suiteIndex) => (
+              {testSuites.map((suite) => (
                 <div key={suite.name} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">

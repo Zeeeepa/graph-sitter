@@ -59,32 +59,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ className }) => {
   );
 
   // Handle file selection from tree
-  const handleFileSelect = useCallback((filePath: string) => {
+  const handleFileSelect = useCallback((_filePath: string) => {
     // File selection is handled by the store
   }, []);
 
   // Handle file double-click to open in editor
-  const handleFileDoubleClick = useCallback((filePath: string) => {
+  const handleFileDoubleClick = useCallback((_filePath: string) => {
     // Open file in editor
   }, []);
 
   // Handle symbol navigation
-  const handleSymbolClick = useCallback((symbol: any) => {
+  const handleSymbolClick = useCallback((_symbol: Record<string, unknown>) => {
     // Navigate to symbol definition
   }, []);
 
   // Handle go to definition
-  const handleGoToDefinition = useCallback((filePath: string, line: number, column: number) => {
+  const handleGoToDefinition = useCallback((_filePath: string, _line: number, _column: number) => {
     // Navigate to definition
   }, []);
 
   // Handle find references
-  const handleFindReferences = useCallback((filePath: string, line: number, column: number) => {
+  const handleFindReferences = useCallback((_filePath: string, _line: number, _column: number) => {
     // Find and show references
   }, []);
 
   // Handle agent run
-  const handleStartAgentRun = useCallback((targetText: string) => {
+  const handleStartAgentRun = useCallback((_targetText: string) => {
     setShowAgentDialog(true);
   }, []);
 
@@ -341,14 +341,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ className }) => {
 };
 
 // Helper function to get all errors from file tree
-function getAllErrors(fileTree: any): any[] {
-  const errors: any[] = [];
+function getAllErrors(fileTree: Record<string, unknown>): Record<string, unknown>[] {
+  const errors: Record<string, unknown>[] = [];
   
-  const traverse = (node: any) => {
-    if (node.errors) {
+  const traverse = (node: Record<string, unknown>) => {
+    if (node.errors && Array.isArray(node.errors)) {
       errors.push(...node.errors);
     }
-    if (node.children) {
+    if (node.children && Array.isArray(node.children)) {
       node.children.forEach(traverse);
     }
   };

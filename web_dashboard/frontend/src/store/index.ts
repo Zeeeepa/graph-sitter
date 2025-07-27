@@ -89,7 +89,7 @@ const initialSearchState: SearchState = {
 export const useAppStore = create<AppStore>()(
   devtools(
     persist(
-      immer((set, get) => ({
+      immer((set) => ({
         // Initial State
         user: null,
         projects: [],

@@ -307,7 +307,8 @@ class WebSocketManager:
             # Close websocket if still open
             try:
                 await websocket.close()
-            except:
+            except Exception:
+                # Ignore errors when closing websocket
                 pass
             
         except Exception as e:
@@ -468,7 +469,8 @@ class WebSocketManager:
             for connection_info in connections.copy():
                 try:
                     await connection_info.websocket.close()
-                except:
+                except Exception:
+                    # Ignore errors when closing websocket
                     pass
                 await self._remove_connection(connection_info)
         
