@@ -16,6 +16,13 @@ from .mcp_bridge import SerenaMCPBridge, ErrorInfo
 from graph_sitter.core.codebase import Codebase
 from .types import SerenaCapability, SerenaConfig
 
+# Try to import LSP bridge for enhanced functionality
+try:
+    from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
+    LSP_BRIDGE_AVAILABLE = True
+except ImportError:
+    LSP_BRIDGE_AVAILABLE = False
+
 logger = get_logger(__name__)
 
 
@@ -25,6 +32,8 @@ class SerenaCore:
     
     Orchestrates all Serena LSP capabilities and provides unified interface
     for real-time code intelligence, refactoring, and advanced analysis.
+    
+    Enhanced version supports both MCP and LSP bridges for maximum compatibility.
     """
     
     def __init__(self, codebase: Codebase, config: Optional[SerenaConfig] = None):
@@ -32,16 +41,27 @@ class SerenaCore:
         self.config = config or SerenaConfig()
         self.repo_path = Path(codebase.repo_path)
         
-        # Core components
-        self.mcp_bridge = SerenaMCPBridge(str(self.repo_path))
+        # Core components - use LSP bridge if available, fallback to MCP
+        if LSP_BRIDGE_AVAILABLE and getattr(self.config, 'prefer_lsp_bridge', True):
+            self.lsp_bridge = SerenaLSPBridge(str(self.repo_path))
+            self.bridge = self.lsp_bridge
+            self.bridge_type = 'lsp'
+            logger.info("Using enhanced LSP bridge for Serena integration")
+        else:
+            self.mcp_bridge = SerenaMCPBridge(str(self.repo_path))
+            self.bridge = self.mcp_bridge
+            self.bridge_type = 'mcp'
+            logger.info("Using MCP bridge for Serena integration")
+        
         self._capabilities: Dict[SerenaCapability, Any] = {}
         self._event_loop = None
         self._background_thread = None
         self._shutdown_event = threading.Event()
         
-        # Initialize semantic tools
-        from .semantic_tools import SemanticTools
-        self.semantic_tools = SemanticTools(self.mcp_bridge)
+        # Initialize semantic tools (maintain backward compatibility)
+        if hasattr(self, 'mcp_bridge'):
+            from .semantic_tools import SemanticTools
+            self.semantic_tools = SemanticTools(self.mcp_bridge)
         
         # Initialize capabilities
         self._initialize_capabilities()
@@ -62,41 +82,41 @@ class SerenaCore:
             logger.error(f"Failed to initialize Serena capabilities: {e}")
     
     def _initialize_capability(self, capability: SerenaCapability) -> None:
-        """Initialize a specific capability."""
+        """Initialize a specific capability with enhanced bridge support."""
         try:
             if capability == SerenaCapability.INTELLIGENCE:
                 from .intelligence import CodeIntelligence
-                self._capabilities[capability] = CodeIntelligence(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = CodeIntelligence(self.codebase, self.bridge)
             
             elif capability == SerenaCapability.REFACTORING:
                 from .refactoring import RefactoringEngine
-                self._capabilities[capability] = RefactoringEngine(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = RefactoringEngine(self.codebase, self.bridge)
             
             elif capability == SerenaCapability.ACTIONS:
                 from .actions import CodeActions
-                self._capabilities[capability] = CodeActions(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = CodeActions(self.codebase, self.bridge)
             
             elif capability == SerenaCapability.GENERATION:
                 from .generation import CodeGenerator
-                self._capabilities[capability] = CodeGenerator(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = CodeGenerator(self.codebase, self.bridge)
             
             elif capability == SerenaCapability.SEARCH:
                 from .search import SemanticSearch
-                self._capabilities[capability] = SemanticSearch(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = SemanticSearch(self.codebase, self.bridge)
             
             elif capability == SerenaCapability.ANALYSIS:
                 from .analysis import RealtimeAnalyzer
-                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.bridge)
             
             elif capability == SerenaCapability.REALTIME:
                 from .realtime import RealtimeAnalyzer
-                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.bridge)
             
             elif capability == SerenaCapability.SYMBOLS:
                 from .symbols import SymbolIntelligence
-                self._capabilities[capability] = SymbolIntelligence(self.codebase, self.mcp_bridge)
+                self._capabilities[capability] = SymbolIntelligence(self.codebase, self.bridge)
             
-            logger.debug(f"Initialized {capability.value} capability")
+            logger.debug(f"Initialized {capability.value} capability using {self.bridge_type} bridge")
             
         except ImportError as e:
             logger.warning(f"Could not initialize {capability.value}: {e}")
@@ -380,19 +400,30 @@ class SerenaCore:
     
     # Utility Methods
     def get_diagnostics(self) -> List[ErrorInfo]:
-        """Get all diagnostics from LSP bridge."""
-        # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+        """Get all diagnostics from bridge."""
+        if self.bridge_type == 'lsp' and hasattr(self.bridge, 'get_diagnostics'):
+            return self.bridge.get_diagnostics()
+        elif self.bridge_type == 'mcp':
+            # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+            return []
         return []
     
     def get_file_diagnostics(self, file_path: str) -> List[ErrorInfo]:
         """Get diagnostics for a specific file."""
-        # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+        if self.bridge_type == 'lsp' and hasattr(self.bridge, 'get_file_diagnostics'):
+            return self.bridge.get_file_diagnostics(file_path)
+        elif self.bridge_type == 'mcp':
+            # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+            return []
         return []
     
     def refresh_diagnostics(self) -> None:
         """Refresh diagnostic information."""
-        # MCP bridge doesn't have direct diagnostics - would need to call specific tools
-        pass
+        if self.bridge_type == 'lsp' and hasattr(self.bridge, 'refresh_diagnostics'):
+            self.bridge.refresh_diagnostics()
+        elif self.bridge_type == 'mcp':
+            # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+            pass
     
     def get_status(self) -> Dict[str, Any]:
         """Get comprehensive status of Serena integration."""
@@ -403,12 +434,19 @@ class SerenaCore:
             else:
                 capability_status[cap.value] = {"available": True}
         
+        # Get bridge status based on type
+        if self.bridge_type == 'lsp':
+            bridge_status = self.bridge.get_status() if hasattr(self.bridge, 'get_status') else {"initialized": True}
+        else:  # mcp
+            bridge_status = {"initialized": self.mcp_bridge.is_initialized, "available_tools": len(self.mcp_bridge.available_tools)}
+        
         return {
             "enabled_capabilities": [cap.value for cap in self.config.enabled_capabilities],
             "active_capabilities": list(capability_status.keys()),
             "realtime_analysis": self.config.realtime_analysis,
             "background_thread_active": self._background_thread is not None and self._background_thread.is_alive(),
-            "mcp_bridge_status": {"initialized": self.mcp_bridge.is_initialized, "available_tools": len(self.mcp_bridge.available_tools)},
+            "bridge_type": self.bridge_type,
+            "lsp_bridge_status" if self.bridge_type == 'lsp' else "mcp_bridge_status": bridge_status,
             "capability_details": capability_status
         }
     
@@ -427,8 +465,9 @@ class SerenaCore:
             except Exception as e:
                 logger.error(f"Error shutting down {capability.value}: {e}")
         
-        # Shutdown MCP bridge
-        self.mcp_bridge.shutdown()
+        # Shutdown bridge
+        if hasattr(self.bridge, 'shutdown'):
+            self.bridge.shutdown()
         
         # Wait for background thread
         if self._background_thread and self._background_thread.is_alive():
