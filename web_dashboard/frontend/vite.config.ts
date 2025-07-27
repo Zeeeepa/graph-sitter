@@ -1,16 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import monacoEditorPlugin from 'vite-plugin-monaco-editor'
 import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    monacoEditorPlugin({
-      languageWorkers: ['editorWorkerService', 'typescript', 'json', 'html', 'css']
-    })
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -24,7 +18,7 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
+    port: 5173,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
@@ -38,25 +32,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          monaco: ['monaco-editor', '@monaco-editor/react'],
-          visualization: ['d3', 'vis-network', 'react-flow-renderer'],
-          ui: ['@headlessui/react', '@heroicons/react', 'framer-motion']
-        }
-      }
-    }
+    sourcemap: true
   },
   optimizeDeps: {
-    include: [
-      'monaco-editor/esm/vs/language/typescript/typescript.worker',
-      'monaco-editor/esm/vs/language/json/json.worker',
-      'monaco-editor/esm/vs/language/html/html.worker',
-      'monaco-editor/esm/vs/language/css/css.worker',
-      'monaco-editor/esm/vs/editor/editor.worker'
-    ]
+    exclude: ['monaco-editor']
   }
 })
