@@ -275,16 +275,16 @@ class RealtimeAnalyzer:
     
     def _should_monitor_file(self, file_path: str) -> bool:
         """Check if a file should be monitored."""
-        file_path = Path(file_path)
+        file_path_obj = Path(file_path)
         
         # Check ignore patterns
         for ignore_pattern in self._ignore_patterns:
-            if ignore_pattern in str(file_path):
+            if ignore_pattern in str(file_path_obj):
                 return False
         
         # Check watch patterns
         for watch_pattern in self._watch_patterns:
-            if file_path.match(watch_pattern):
+            if file_path_obj.match(watch_pattern):
                 return True
         
         return False
@@ -524,4 +524,3 @@ class RealtimeFileHandler(FileSystemEventHandler):
             )
             
             logger.debug(f"File moved: {event.src_path} -> {event.dest_path}")
-
