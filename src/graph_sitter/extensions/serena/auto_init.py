@@ -10,14 +10,16 @@ from .integration import add_serena_to_codebase
 
 logger = get_logger(__name__)
 
-def initialize_serena_integration():
+def initialize_serena_integration(codebase_class=None):
     """Initialize Serena integration with the Codebase class."""
     try:
-        # Import Codebase class
-        from graph_sitter.core.codebase import Codebase
+        # Use provided Codebase class or import it
+        if codebase_class is None:
+            from graph_sitter.core.codebase import Codebase
+            codebase_class = Codebase
         
         # Add Serena methods to Codebase
-        add_serena_to_codebase(Codebase)
+        add_serena_to_codebase(codebase_class)
         
         logger.info("✅ Serena LSP integration successfully added to Codebase class")
         logger.info("🚀 Available methods: get_completions, get_hover_info, rename_symbol, extract_method, semantic_search, and more!")
@@ -31,6 +33,12 @@ def initialize_serena_integration():
         logger.error(f"Failed to initialize Serena integration: {e}")
         return False
 
-# Auto-initialize when this module is imported
-_initialized = initialize_serena_integration()
+# Lazy initialization - only initialize when explicitly requested
+_initialized = None
 
+def ensure_serena_initialized(codebase_class=None):
+    """Ensure Serena integration is initialized."""
+    global _initialized
+    if _initialized is None:
+        _initialized = initialize_serena_integration(codebase_class)
+    return _initialized

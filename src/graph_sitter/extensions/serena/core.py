@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge, ErrorInfo
+from .mcp_bridge import SerenaMCPBridge, ErrorInfo
 from graph_sitter.core.codebase import Codebase
 from .types import SerenaCapability, SerenaConfig
 
@@ -33,11 +33,15 @@ class SerenaCore:
         self.repo_path = Path(codebase.repo_path)
         
         # Core components
-        self.lsp_bridge = SerenaLSPBridge(str(self.repo_path))
+        self.mcp_bridge = SerenaMCPBridge(str(self.repo_path))
         self._capabilities: Dict[SerenaCapability, Any] = {}
         self._event_loop = None
         self._background_thread = None
         self._shutdown_event = threading.Event()
+        
+        # Initialize semantic tools
+        from .semantic_tools import SemanticTools
+        self.semantic_tools = SemanticTools(self.mcp_bridge)
         
         # Initialize capabilities
         self._initialize_capabilities()
@@ -62,35 +66,35 @@ class SerenaCore:
         try:
             if capability == SerenaCapability.INTELLIGENCE:
                 from .intelligence import CodeIntelligence
-                self._capabilities[capability] = CodeIntelligence(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = CodeIntelligence(self.codebase, self.mcp_bridge)
             
             elif capability == SerenaCapability.REFACTORING:
                 from .refactoring import RefactoringEngine
-                self._capabilities[capability] = RefactoringEngine(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = RefactoringEngine(self.codebase, self.mcp_bridge)
             
             elif capability == SerenaCapability.ACTIONS:
                 from .actions import CodeActions
-                self._capabilities[capability] = CodeActions(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = CodeActions(self.codebase, self.mcp_bridge)
             
             elif capability == SerenaCapability.GENERATION:
                 from .generation import CodeGenerator
-                self._capabilities[capability] = CodeGenerator(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = CodeGenerator(self.codebase, self.mcp_bridge)
             
             elif capability == SerenaCapability.SEARCH:
                 from .search import SemanticSearch
-                self._capabilities[capability] = SemanticSearch(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = SemanticSearch(self.codebase, self.mcp_bridge)
             
             elif capability == SerenaCapability.ANALYSIS:
                 from .analysis import RealtimeAnalyzer
-                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.mcp_bridge)
             
             elif capability == SerenaCapability.REALTIME:
                 from .realtime import RealtimeAnalyzer
-                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = RealtimeAnalyzer(self.codebase, self.mcp_bridge)
             
             elif capability == SerenaCapability.SYMBOLS:
                 from .symbols import SymbolIntelligence
-                self._capabilities[capability] = SymbolIntelligence(self.codebase, self.lsp_bridge)
+                self._capabilities[capability] = SymbolIntelligence(self.codebase, self.mcp_bridge)
             
             logger.debug(f"Initialized {capability.value} capability")
             
@@ -139,27 +143,7 @@ class SerenaCore:
     # Intelligence Methods
     def get_symbol_info(self, file_path: str, line: int, character: int, **kwargs) -> Optional[Dict[str, Any]]:
         """Get detailed symbol information at the specified position."""
-        if SerenaCapability.INTELLIGENCE not in self._capabilities:
-            raise ValueError("Intelligence capability not enabled")
-        
-        intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
-        symbol_info = intelligence.get_symbol_info(file_path, line, character, **kwargs)
-        
-        if symbol_info:
-            # Convert SymbolInfo object to dictionary
-            return {
-                'name': symbol_info.name,
-                'kind': symbol_info.kind,
-                'location': f"{symbol_info.file_path}:{symbol_info.line}:{symbol_info.character}",
-                'file_path': symbol_info.file_path,
-                'line': symbol_info.line,
-                'character': symbol_info.character,
-                'documentation': symbol_info.documentation or "",
-                'type_annotation': symbol_info.type_annotation or "",
-                'scope': symbol_info.scope or ""
-            }
-        
-        return None
+        return self.semantic_tools.get_symbol_context(file_path, line, character)
     
     def generate_code(self, prompt: str, **kwargs) -> Optional[Dict[str, Any]]:
         """Generate code based on the provided prompt."""
@@ -195,19 +179,11 @@ class SerenaCore:
     
     def get_completions(self, file_path: str, line: int, character: int, **kwargs) -> List[Dict[str, Any]]:
         """Get code completions at the specified position."""
-        if SerenaCapability.INTELLIGENCE not in self._capabilities:
-            return []
-        
-        intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
-        return intelligence.get_completions(file_path, line, character, **kwargs)
+        return self.semantic_tools.get_completions(file_path, line, character)
     
     def get_hover_info(self, file_path: str, line: int, character: int) -> Optional[Dict[str, Any]]:
         """Get hover information for symbol at position."""
-        if SerenaCapability.INTELLIGENCE not in self._capabilities:
-            return None
-        
-        intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
-        return intelligence.get_hover_info(file_path, line, character)
+        return self.semantic_tools.get_hover_info(file_path, line, character)
     
     def get_signature_help(self, file_path: str, line: int, character: int) -> Optional[Dict[str, Any]]:
         """Get signature help for function call at position."""
@@ -217,14 +193,22 @@ class SerenaCore:
         intelligence = self._capabilities[SerenaCapability.INTELLIGENCE]
         return intelligence.get_signature_help(file_path, line, character)
     
+    def semantic_search(self, query: str, file_pattern: Optional[str] = None, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Perform semantic search across the codebase."""
+        return self.semantic_tools.semantic_search(query, file_pattern, max_results)
+    
+    def find_symbol(self, symbol_name: str, symbol_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Find symbol definitions and references."""
+        return self.semantic_tools.find_symbol(symbol_name, symbol_type)
+    
+    def analyze_code_quality(self, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Analyze code quality and get suggestions."""
+        return self.semantic_tools.analyze_code_quality(file_path)
+    
     # Refactoring Methods
     def rename_symbol(self, file_path: str, line: int, character: int, new_name: str, preview: bool = False) -> Dict[str, Any]:
         """Rename symbol at position across all files."""
-        if SerenaCapability.REFACTORING not in self._capabilities:
-            return {"success": False, "error": "Refactoring capability not available"}
-        
-        refactoring = self._capabilities[SerenaCapability.REFACTORING]
-        return refactoring.rename_symbol(file_path, line, character, new_name, preview)
+        return self.semantic_tools.refactor_rename(file_path, line, character, new_name, preview)
     
     def extract_method(self, file_path: str, start_line: int, end_line: int, method_name: str, **kwargs) -> Dict[str, Any]:
         """Extract selected code into a new method."""
@@ -397,15 +381,18 @@ class SerenaCore:
     # Utility Methods
     def get_diagnostics(self) -> List[ErrorInfo]:
         """Get all diagnostics from LSP bridge."""
-        return self.lsp_bridge.get_diagnostics()
+        # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+        return []
     
     def get_file_diagnostics(self, file_path: str) -> List[ErrorInfo]:
         """Get diagnostics for a specific file."""
-        return self.lsp_bridge.get_file_diagnostics(file_path)
+        # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+        return []
     
     def refresh_diagnostics(self) -> None:
         """Refresh diagnostic information."""
-        self.lsp_bridge.refresh_diagnostics()
+        # MCP bridge doesn't have direct diagnostics - would need to call specific tools
+        pass
     
     def get_status(self) -> Dict[str, Any]:
         """Get comprehensive status of Serena integration."""
@@ -421,7 +408,7 @@ class SerenaCore:
             "active_capabilities": list(capability_status.keys()),
             "realtime_analysis": self.config.realtime_analysis,
             "background_thread_active": self._background_thread is not None and self._background_thread.is_alive(),
-            "lsp_bridge_status": self.lsp_bridge.get_status(),
+            "mcp_bridge_status": {"initialized": self.mcp_bridge.is_initialized, "available_tools": len(self.mcp_bridge.available_tools)},
             "capability_details": capability_status
         }
     
@@ -440,8 +427,8 @@ class SerenaCore:
             except Exception as e:
                 logger.error(f"Error shutting down {capability.value}: {e}")
         
-        # Shutdown LSP bridge
-        self.lsp_bridge.shutdown()
+        # Shutdown MCP bridge
+        self.mcp_bridge.shutdown()
         
         # Wait for background thread
         if self._background_thread and self._background_thread.is_alive():

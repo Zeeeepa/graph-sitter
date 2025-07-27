@@ -13,7 +13,7 @@ import threading
 
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
-from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
+from ..mcp_bridge import SerenaMCPBridge
 from graph_sitter.core.symbol import Symbol
 
 logger = get_logger(__name__)
@@ -66,9 +66,9 @@ class SignatureProvider:
     Analyzes function calls and provides parameter information and documentation.
     """
     
-    def __init__(self, codebase: Codebase, lsp_bridge: SerenaLSPBridge, config):
+    def __init__(self, codebase: Codebase, mcp_bridge: SerenaMCPBridge, config):
         self.codebase = codebase
-        self.lsp_bridge = lsp_bridge
+        self.mcp_bridge = mcp_bridge
         self.config = config
         
         # Signature cache
@@ -557,4 +557,3 @@ class SignatureProvider:
         with self._cache_lock:
             self._cache.clear()
         logger.debug("Signature provider shutdown")
-
