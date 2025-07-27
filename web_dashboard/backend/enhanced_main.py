@@ -38,9 +38,20 @@ from enhanced_visualization import (
     get_error_dashboard
 )
 
-# Set up logging
+# Set up logging first
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Import new real-time and agent integration modules
+try:
+    from realtime_api import websocket_endpoint, manager, analyzer
+    from diagnostic_streaming import diagnostic_streamer
+    from agent_bridge import handle_agent_websocket_message, agent_bridge
+    REALTIME_ENABLED = True
+    logger.info("Real-time and agent integration modules loaded successfully")
+except ImportError as e:
+    logger.warning(f"Real-time modules not available: {e}")
+    REALTIME_ENABLED = False
 
 # Create FastAPI app
 app = FastAPI(
@@ -400,6 +411,100 @@ async def search_codebase(query: str, limit: int = 20):
         logger.error(f"Error searching codebase: {e}")
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
+# ============================================================================
+# REAL-TIME WEBSOCKET ENDPOINTS
+# ============================================================================
+
+if REALTIME_ENABLED:
+    @app.websocket("/ws/analysis")
+    async def websocket_analysis_endpoint(websocket: WebSocket):
+        """WebSocket endpoint for real-time analysis using existing graph-sitter functions."""
+        await websocket_endpoint(websocket)
+
+    @app.websocket("/ws/diagnostics")
+    async def websocket_diagnostics_endpoint(websocket: WebSocket):
+        """WebSocket endpoint for real-time diagnostic streaming using existing Serena integration."""
+        await websocket.accept()
+        try:
+            while True:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                if message.get("type") == "start_diagnostics":
+                    repo_url = message.get("repo_url")
+                    if repo_url and repo_url in manager.codebase_cache:
+                        codebase = manager.codebase_cache[repo_url]
+                        await diagnostic_streamer.start_diagnostic_stream(repo_url, codebase, websocket)
+                    else:
+                        await websocket.send_text(json.dumps({
+                            "type": "error",
+                            "message": "Repository not loaded. Please load repository first."
+                        }))
+                elif message.get("type") == "stop_diagnostics":
+                    repo_url = message.get("repo_url")
+                    if repo_url:
+                        diagnostic_streamer.stop_diagnostic_stream(repo_url, websocket)
+                        
+        except WebSocketDisconnect:
+            logger.info("Diagnostics WebSocket disconnected")
+        except Exception as e:
+            logger.error(f"Error in diagnostics WebSocket: {e}")
+
+    @app.websocket("/ws/agents")
+    async def websocket_agents_endpoint(websocket: WebSocket):
+        """WebSocket endpoint for agent interaction using existing CodeAgent and ChatAgent."""
+        await websocket.accept()
+        try:
+            while True:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                await handle_agent_websocket_message(websocket, message)
+                
+        except WebSocketDisconnect:
+            logger.info("Agent WebSocket disconnected")
+            await agent_bridge.close_session(websocket)
+        except Exception as e:
+            logger.error(f"Error in agent WebSocket: {e}")
+            await agent_bridge.close_session(websocket)
+
+    # Add REST endpoints for real-time features
+    @app.post("/api/load-repo")
+    async def load_repository_endpoint(repo_data: dict):
+        """Load repository using existing Codebase.from_repo method."""
+        try:
+            repo_url = repo_data.get("repo_url")
+            if not repo_url:
+                raise HTTPException(status_code=400, detail="Repository URL is required")
+            
+            logger.info(f"Loading repository: {repo_url}")
+            start_time = datetime.now()
+            
+            # Use existing Codebase.from_repo method
+            codebase = Codebase.from_repo(repo_url)
+            manager.codebase_cache[repo_url] = codebase
+            
+            processing_time = (datetime.now() - start_time).total_seconds()
+            logger.info(f"Repository loaded in {processing_time:.2f}s")
+            
+            return {
+                "status": "success",
+                "repo_url": repo_url,
+                "processing_time": processing_time,
+                "codebase_info": {
+                    "total_files": len(list(codebase.files)),
+                    "total_functions": len(list(codebase.functions)),
+                    "total_classes": len(list(codebase.classes))
+                },
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error loading repository: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to load repository: {str(e)}")
+
+else:
+    logger.warning("Real-time WebSocket endpoints not available - modules not loaded")
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler for better error responses."""
@@ -414,15 +519,23 @@ async def global_exception_handler(request, exc):
     )
 
 if __name__ == "__main__":
-    print("🚀 Starting Enhanced Dashboard Backend with Graph-Sitter Integration")
-    print("=" * 70)
-    print("📊 Features:")
-    print("  • Real-time codebase analysis")
-    print("  • Graph-sitter integration")
-    print("  • Enhanced API endpoints")
-    print("  • Performance monitoring")
+    print("🚀 Starting Enhanced Dashboard Backend with Full Integration")
+    print("=" * 80)
+    print("📊 Core Features:")
+    print("  • Real-time codebase analysis using existing graph-sitter functions")
+    print("  • GitHub URL loading with Codebase.from_repo()")
+    print("  • Enhanced API endpoints with performance monitoring")
     print("  • Comprehensive error handling")
-    print("=" * 70)
+    print("")
+    if REALTIME_ENABLED:
+        print("⚡ Real-time Features:")
+        print("  • WebSocket analysis streaming (/ws/analysis)")
+        print("  • Live diagnostic updates using existing Serena integration (/ws/diagnostics)")
+        print("  • Agent interaction with existing CodeAgent/ChatAgent (/ws/agents)")
+        print("  • Repository loading endpoint (/api/load-repo)")
+    else:
+        print("⚠️  Real-time features disabled (modules not available)")
+    print("=" * 80)
     
     uvicorn.run(
         "enhanced_main:app",
