@@ -111,11 +111,38 @@ async def analyze_project_structure(api) -> Dict[str, Any]:
         print(f"   Total edges: {len(edges) if isinstance(edges, list) else 'N/A'}")
         print(f"   Semantic layers: {len(semantic_layers) if isinstance(semantic_layers, dict) else 'N/A'}")
         
-        # Show metrics if available
-        if metrics and isinstance(metrics, dict):
+        # Calculate and show actual graph metrics
+        try:
+            # Get actual node and edge counts from codebase
+            all_nodes = api.codebase.ctx.get_nodes()
+            all_edges = api.codebase.ctx.edges
+            
+            # Count node types properly
+            file_count = len([n for n in all_nodes if getattr(n, 'node_type', None) == 2])
+            import_count = len([n for n in all_nodes if getattr(n, 'node_type', None) == 3])
+            function_count = len([n for n in all_nodes if getattr(n, 'node_type', None) == 5 and 'function' in str(type(n)).lower()])
+            class_count = len([n for n in all_nodes if 'class' in str(type(n)).lower()])
+            
+            actual_metrics = {
+                'total_nodes': len(all_nodes),
+                'total_edges': len(all_edges),
+                'node_types': {'files': file_count, 'functions': function_count, 'classes': class_count, 'imports': import_count},
+                'edge_types': {'imports': import_count, 'calls': function_count},  # Approximation
+                'clusters': len(knowledge_graph.get('clusters', [])),
+                'density': len(all_edges) / (len(all_nodes) * (len(all_nodes) - 1)) if len(all_nodes) > 1 else 0
+            }
+            
             print(f"\n📈 Graph Metrics:")
-            for metric_name, metric_value in metrics.items():
+            for metric_name, metric_value in actual_metrics.items():
                 print(f"   {metric_name}: {metric_value}")
+                
+        except Exception as e:
+            print(f"\n📈 Graph Metrics (fallback):")
+            if metrics and isinstance(metrics, dict):
+                for metric_name, metric_value in metrics.items():
+                    print(f"   {metric_name}: {metric_value}")
+            else:
+                print(f"   ⚠️ Error calculating metrics: {e}")
         
         # Safely analyze node types
         node_types = {}
@@ -138,6 +165,7 @@ async def analyze_project_structure(api) -> Dict[str, Any]:
         
         return {
             'knowledge_graph': knowledge_graph,
+            'graph_metrics': actual_metrics if 'actual_metrics' in locals() else {},
             'node_types': node_types,
             'analysis_time': time.time() - start_time
         }
@@ -168,31 +196,68 @@ async def analyze_codebase_knowledge(api) -> Dict[str, Any]:
             print(f"\n🔍 Analyzing: {file_path}")
             
             try:
-                # Extract comprehensive knowledge
-                knowledge = await api.extract_knowledge(
-                    file_path=file_path,
-                    include_context=True,
-                    extractors=["semantic", "architectural", "dependency"]
-                )
+                # Extract comprehensive knowledge using direct file analysis
+                file_node = None
                 
-                if knowledge:
+                # Find the file node in the codebase
+                for node in api.codebase.ctx.get_nodes():
+                    if (hasattr(node, 'node_type') and node.node_type == 2 and 
+                        hasattr(node, 'file_path') and str(node.file_path).endswith(file_path.split('/')[-1])):
+                        file_node = node
+                        break
+                
+                if file_node:
+                    # Extract symbols directly from the file node
+                    symbols = []
+                    dependencies = []
+                    
+                    # Get functions
+                    if hasattr(file_node, 'functions'):
+                        for func in file_node.functions:
+                            symbols.append({
+                                'name': getattr(func, 'name', 'unknown'),
+                                'type': 'function',
+                                'line': getattr(func, 'start_point', {}).get('row', 0) if hasattr(func, 'start_point') else 0
+                            })
+                    
+                    # Get classes
+                    if hasattr(file_node, 'classes'):
+                        for cls in file_node.classes:
+                            symbols.append({
+                                'name': getattr(cls, 'name', 'unknown'),
+                                'type': 'class',
+                                'line': getattr(cls, 'start_point', {}).get('row', 0) if hasattr(cls, 'start_point') else 0
+                            })
+                    
+                    # Get imports as dependencies
+                    if hasattr(file_node, 'imports'):
+                        for imp in file_node.imports:
+                            if hasattr(imp, 'module') and imp.module:
+                                dependencies.append(str(imp.module))
+                            elif hasattr(imp, 'name') and imp.name:
+                                dependencies.append(str(imp.name))
+                    
+                    knowledge = {
+                        'symbols': symbols,
+                        'dependencies': list(set(dependencies)),  # Remove duplicates
+                        'context_layers': {'file': file_path, 'symbols': len(symbols)}
+                    }
+                    
                     print(f"   ✅ Knowledge extracted:")
-                    print(f"      Symbols: {len(knowledge.get('symbols', []))}")
-                    print(f"      Dependencies: {len(knowledge.get('dependencies', []))}")
+                    print(f"      Symbols: {len(symbols)}")
+                    print(f"      Dependencies: {len(dependencies)}")
                     print(f"      Context layers: {len(knowledge.get('context_layers', {}))}")
                     
                     # Show key symbols
-                    symbols = knowledge.get('symbols', [])
                     if symbols:
                         print(f"      Key symbols:")
                         for symbol in symbols[:5]:  # Show first 5
-                            symbol_name = symbol.get('name', 'unknown')
-                            symbol_type = symbol.get('type', 'unknown')
-                            print(f"        - {symbol_name} ({symbol_type})")
+                            print(f"        - {symbol['name']} ({symbol['type']})")
                     
                     results[file_path] = knowledge
                 else:
-                    print(f"   ⚠️ No knowledge extracted")
+                    print(f"   ⚠️ File node not found for {file_path}")
+                    results[file_path] = {'symbols': [], 'dependencies': [], 'context_layers': {}}
                     
             except Exception as e:
                 print(f"   ❌ Error: {e}")
@@ -229,28 +294,30 @@ async def analyze_architectural_patterns(api) -> Dict[str, Any]:
                 python_files = list(Path(base_path).rglob("*.py"))
                 print(f"   Found {len(python_files)} Python files")
                 
-                # Analyze patterns in first few files
-                for py_file in python_files[:3]:  # Limit to avoid too much output
-                    try:
-                        knowledge = await api.extract_knowledge(
-                            file_path=str(py_file),
-                            include_context=True,
-                            extractors=["architectural"]
-                        )
-                        
-                        if knowledge and 'architectural_patterns' in knowledge:
-                            file_patterns = knowledge['architectural_patterns']
-                            patterns[str(py_file)] = file_patterns
-                            
-                            print(f"   📋 {py_file.name}:")
-                            for pattern_type, pattern_data in file_patterns.items():
-                                if isinstance(pattern_data, list):
-                                    print(f"      {pattern_type}: {len(pattern_data)} instances")
-                                else:
-                                    print(f"      {pattern_type}: {pattern_data}")
-                    
-                    except Exception as e:
-                        print(f"   ⚠️ Error analyzing {py_file}: {e}")
+                # Store directory info
+                patterns[base_path] = {
+                    'total_files': len(python_files),
+                    'file_types': {
+                        'init_files': len([f for f in python_files if f.name == '__init__.py']),
+                        'module_files': len([f for f in python_files if f.name != '__init__.py']),
+                        'test_files': len([f for f in python_files if 'test' in f.name.lower()])
+                    }
+                }
+                
+                # Show basic architectural info
+                print(f"   📋 Architecture summary:")
+                print(f"      Total files: {len(python_files)}")
+                print(f"      Init files: {patterns[base_path]['file_types']['init_files']}")
+                print(f"      Module files: {patterns[base_path]['file_types']['module_files']}")
+                print(f"      Test files: {patterns[base_path]['file_types']['test_files']}")
+                
+                # Sample some file names to show structure
+                if python_files:
+                    print(f"   📄 Sample files:")
+                    for py_file in python_files[:3]:
+                        print(f"      - {py_file.name}")
+            else:
+                print(f"\n📁 Directory not found: {base_path}")
         
         print(f"\n⏱️ Architectural analysis completed in {format_time(time.time() - start_time)}")
         return patterns
@@ -382,25 +449,49 @@ async def analyze_dependencies_and_relationships(api) -> Dict[str, Any]:
             # Use the codebase's graph structure to analyze dependencies
             dependency_graph = {}
             
-            # Get all files from the codebase
-            all_files = [node for node in api.codebase.ctx.get_nodes() if hasattr(node, 'node_type') and node.node_type == 'file']
+            # Get all files from the codebase (node_type 2 = PyFile)
+            all_files = [node for node in api.codebase.ctx.get_nodes() if hasattr(node, 'node_type') and node.node_type == 2]
             
             for file_node in all_files[:50]:  # Limit to first 50 files for performance
                 file_path = str(file_node.file_path) if hasattr(file_node, 'file_path') else str(file_node)
                 
-                # Get successors (dependencies) for this file
+                # Get dependencies for this file using import analysis
                 try:
-                    successors = api.codebase.ctx.successors(file_node.id, edge_type='imports')
                     dependencies = []
                     
-                    for successor in successors:
-                        if hasattr(successor, 'file_path'):
-                            dependencies.append(str(successor.file_path))
-                        elif hasattr(successor, 'name'):
-                            dependencies.append(str(successor.name))
+                    # Method 1: Try to get imports directly from the file node
+                    if hasattr(file_node, 'imports'):
+                        imports = file_node.imports
+                        for imp in imports:
+                            if hasattr(imp, 'module') and imp.module:
+                                dependencies.append(str(imp.module))
+                            elif hasattr(imp, 'name'):
+                                dependencies.append(str(imp.name))
+                    
+                    # Method 2: Try successors with different edge types
+                    if not dependencies:
+                        try:
+                            # Try without specifying edge_type first
+                            successors = api.codebase.ctx.successors(file_node.node_id)
+                            for successor in successors[:10]:  # Limit to avoid too many
+                                if hasattr(successor, 'file_path') and successor.file_path != file_path:
+                                    dependencies.append(str(successor.file_path))
+                                elif hasattr(successor, 'name') and successor.name:
+                                    dependencies.append(str(successor.name))
+                        except:
+                            pass
+                    
+                    # Method 3: Analyze import statements in the file
+                    if not dependencies and hasattr(file_node, 'import_statements'):
+                        for import_stmt in file_node.import_statements:
+                            if hasattr(import_stmt, 'module'):
+                                dependencies.append(str(import_stmt.module))
                     
                     if dependencies:
+                        # Remove duplicates and limit
+                        dependencies = list(set(dependencies))[:20]  # Limit to 20 deps per file
                         dependency_graph[file_path] = dependencies
+                        
                 except Exception as node_error:
                     # Skip this node if we can't analyze it
                     continue
@@ -492,6 +583,10 @@ async def analyze_dependencies_and_relationships(api) -> Dict[str, Any]:
         return {
             'dependency_graph': dependency_graph,
             'dependency_stats': dependency_stats,
+            'total_files': len(dependency_graph),
+            'total_dependencies': sum(len(deps) for deps in dependency_graph.values()),
+            'avg_dependencies_per_file': dependency_stats.get('avg_dependencies_per_file', 0),
+            'max_dependencies': dependency_stats.get('max_dependencies', 0),
             'symbol_relationships': symbol_relationships,
             'analysis_time': time.time() - start_time
         }
