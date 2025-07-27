@@ -98,6 +98,22 @@ except ImportError:
 from .mcp_bridge import SerenaMCPBridge, MCPToolResult
 from .semantic_tools import SemanticTools
 
+# Performance optimizations (NEW - Performance focus)
+try:
+    from .performance import (
+        get_cache,
+        configure_cache,
+        cached_analysis,
+        ParallelAnalyzer,
+        parallel_analysis,
+        get_memory_optimizer,
+        memory_efficient_analysis,
+        optimize_memory_usage
+    )
+except ImportError:
+    # Performance features are optional
+    pass
+
 # Existing components (maintained for compatibility)
 from .intelligence import CodeIntelligence
 from .refactoring import RefactoringEngine
@@ -157,6 +173,16 @@ __all__ = [
     'SerenaMCPBridge',
     'MCPToolResult',
     'SemanticTools',
+    
+    # Performance optimization components (NEW - Performance focus)
+    'get_cache',
+    'configure_cache', 
+    'cached_analysis',
+    'ParallelAnalyzer',
+    'parallel_analysis',
+    'get_memory_optimizer',
+    'memory_efficient_analysis',
+    'optimize_memory_usage',
     
     # Existing components (maintained for compatibility)
     'CodeIntelligence', 
