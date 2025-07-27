@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { useTheme } from '@/store';
 import { Dashboard } from '@/components/Dashboard';
+import { TestDashboard } from '@/components/TestDashboard/TestDashboard';
 import { AuthProvider } from '@/components/Auth/AuthProvider';
 import { WebSocketProvider } from '@/components/WebSocket/WebSocketProvider';
 import { CommandPalette } from '@/components/CommandPalette';
@@ -67,8 +68,10 @@ function App() {
             <Router>
               <div className="h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
                 <Routes>
-                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/" element={<TestDashboard />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/project/:projectId" element={<Dashboard />} />
+                  <Route path="/test" element={<TestDashboard />} />
                 </Routes>
                 
                 <CommandPalette />
