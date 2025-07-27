@@ -98,6 +98,33 @@ except ImportError:
 from .mcp_bridge import SerenaMCPBridge, MCPToolResult
 from .semantic_tools import SemanticTools
 
+# LSP Integration (NEW - Real-time server communication)
+try:
+    from .lsp_integration import (
+        SerenaLSPIntegration,
+        create_serena_lsp_integration,
+        get_comprehensive_code_errors,
+        analyze_file_errors as lsp_analyze_file_errors
+    )
+    
+    from .lsp import (
+        SerenaLSPClient,
+        SerenaServerManager,
+        ServerConfig,
+        ErrorRetriever,
+        ComprehensiveErrorList,
+        CodeError,
+        RealTimeDiagnostics,
+        DiagnosticFilter,
+        DiagnosticStats,
+        ConnectionType
+    )
+    
+    LSP_AVAILABLE = True
+except ImportError:
+    # LSP integration not available
+    LSP_AVAILABLE = False
+
 # Existing components (maintained for compatibility)
 from .intelligence import CodeIntelligence
 from .refactoring import RefactoringEngine
@@ -157,6 +184,23 @@ __all__ = [
     'SerenaMCPBridge',
     'MCPToolResult',
     'SemanticTools',
+    
+    # LSP Integration (NEW - Real-time server communication)
+    'SerenaLSPIntegration',
+    'create_serena_lsp_integration', 
+    'get_comprehensive_code_errors',
+    'lsp_analyze_file_errors',
+    'SerenaLSPClient',
+    'SerenaServerManager',
+    'ServerConfig',
+    'ErrorRetriever',
+    'ComprehensiveErrorList',
+    'CodeError',
+    'RealTimeDiagnostics',
+    'DiagnosticFilter',
+    'DiagnosticStats',
+    'ConnectionType',
+    'LSP_AVAILABLE',
     
     # Existing components (maintained for compatibility)
     'CodeIntelligence', 
