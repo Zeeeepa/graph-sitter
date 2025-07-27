@@ -856,15 +856,4 @@ export const useAppStore = create<AppStore>()(
 );`
 };
 
-// Export all mock data
-export {
-  mockUser,
-  mockProject,
-  mockErrors,
-  mockSymbols,
-  mockFileTree,
-  mockDependencies,
-  mockCodeMetrics,
-  mockCodeAnalysis,
-  mockFileContent
-};
+// All exports are already defined above with individual export statements
