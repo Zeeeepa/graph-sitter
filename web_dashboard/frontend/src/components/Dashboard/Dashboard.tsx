@@ -28,8 +28,7 @@ import { AgentRunDialog } from '@/components/AgentRunDialog/AgentRunDialog';
 import { CodeGraph } from '@/components/CodeGraph/CodeGraph';
 import { StatusBar } from '@/components/StatusBar/StatusBar';
 import { ActivityBar } from '@/components/ActivityBar/ActivityBar';
-import { useFileContent } from '@/hooks/useFileContent';
-import { useCodeAnalysisQuery } from '@/hooks/useCodeAnalysis';
+import { useFileContent, useCodeAnalysisQuery } from '@/hooks';
 
 interface DashboardProps {
   className?: string;
