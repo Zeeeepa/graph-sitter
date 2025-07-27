@@ -46,9 +46,87 @@ logger = logging.getLogger(__name__)
 try:
     from realtime_api import websocket_endpoint, manager, analyzer
     from diagnostic_streaming import diagnostic_streamer
-    from agent_bridge import handle_agent_websocket_message, agent_bridge
+    from comprehensive_agent_bridge import (
+        comprehensive_agent_bridge,
+        agent_connection_manager,
+        ComprehensiveAgentSession
+    )
     REALTIME_ENABLED = True
     logger.info("Real-time and agent integration modules loaded successfully")
+    
+    # Comprehensive agent message handler
+    async def handle_comprehensive_agent_message(websocket, message):
+        """Handle comprehensive agent WebSocket messages."""
+        try:
+            message_type = message.get("type")
+            
+            if message_type == "create_session":
+                # Create new agent session
+                agent_type = message.get("agent_type", "chat")
+                session = await comprehensive_agent_bridge.create_session(
+                    codebase=analyzer.codebase if analyzer else None,
+                    agent_type=agent_type
+                )
+                
+                response = {
+                    "type": "session_created",
+                    "session_id": session.session_id,
+                    "agent_type": session.agent_type,
+                    "timestamp": datetime.now().isoformat()
+                }
+                await websocket.send_text(json.dumps(response))
+                
+            elif message_type == "query":
+                # Process agent query
+                session_id = message.get("session_id")
+                query = message.get("query")
+                context = message.get("context", {})
+                
+                if not session_id or not query:
+                    error_response = {
+                        "type": "error",
+                        "message": "Session ID and query are required",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    await websocket.send_text(json.dumps(error_response))
+                    return
+                
+                # Process the query
+                result = await comprehensive_agent_bridge.process_query(session_id, query, context)
+                
+                response = {
+                    "type": "query_response",
+                    **result
+                }
+                await websocket.send_text(json.dumps(response))
+                
+            elif message_type == "get_session_stats":
+                # Get session statistics
+                stats = await comprehensive_agent_bridge.get_session_stats()
+                response = {
+                    "type": "session_stats",
+                    **stats
+                }
+                await websocket.send_text(json.dumps(response))
+                
+            else:
+                error_response = {
+                    "type": "error",
+                    "message": f"Unknown message type: {message_type}",
+                    "timestamp": datetime.now().isoformat()
+                }
+                await websocket.send_text(json.dumps(error_response))
+                
+        except Exception as e:
+            error_response = {
+                "type": "error",
+                "message": str(e),
+                "traceback": traceback.format_exc(),
+                "timestamp": datetime.now().isoformat()
+            }
+            await websocket.send_text(json.dumps(error_response))
+            logger.error(f"Error handling comprehensive agent message: {e}")
+    
 except ImportError as e:
     logger.warning(f"Real-time modules not available: {e}")
     REALTIME_ENABLED = False
@@ -452,20 +530,22 @@ if REALTIME_ENABLED:
 
     @app.websocket("/ws/agents")
     async def websocket_agents_endpoint(websocket: WebSocket):
-        """WebSocket endpoint for agent interaction using existing CodeAgent and ChatAgent."""
-        await websocket.accept()
+        """WebSocket endpoint for comprehensive agent interaction using full LangChain agents."""
+        await agent_connection_manager.connect(websocket)
+        logger.info("Comprehensive agent WebSocket connection established")
+        
         try:
             while True:
                 data = await websocket.receive_text()
                 message = json.loads(data)
-                await handle_agent_websocket_message(websocket, message)
+                await handle_comprehensive_agent_message(websocket, message)
                 
         except WebSocketDisconnect:
-            logger.info("Agent WebSocket disconnected")
-            await agent_bridge.close_session(websocket)
+            logger.info("Comprehensive agent WebSocket disconnected")
+            agent_connection_manager.disconnect(websocket)
         except Exception as e:
-            logger.error(f"Error in agent WebSocket: {e}")
-            await agent_bridge.close_session(websocket)
+            logger.error(f"Error in comprehensive agent WebSocket: {e}")
+            agent_connection_manager.disconnect(websocket)
 
     # Add REST endpoints for real-time features
     @app.post("/api/load-repo")
