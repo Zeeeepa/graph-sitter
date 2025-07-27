@@ -1,7 +1,8 @@
 """
-Real-time Analysis Module
+Real-time Analysis System for Serena LSP Integration
 
-Provides file watching and incremental analysis capabilities.
+This module provides file monitoring and incremental analysis capabilities
+for real-time code intelligence.
 """
 
 from .realtime_analyzer import RealtimeAnalyzer

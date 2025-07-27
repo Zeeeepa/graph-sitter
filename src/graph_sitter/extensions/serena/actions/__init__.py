@@ -1,7 +1,8 @@
 """
-Code Actions Module
+Code Actions System for Serena LSP Integration
 
-Provides code actions, quick fixes, and automated improvements.
+This module provides automated code fixes, improvements, and quick actions
+integrated with LSP code actions protocol.
 """
 
 from .code_actions import CodeActions

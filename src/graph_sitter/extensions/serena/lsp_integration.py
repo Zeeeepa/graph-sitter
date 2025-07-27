@@ -1,9 +1,9 @@
 """
-Comprehensive LSP Serena Integration
+Enhanced LSP Serena Integration
 
 This module provides the main integration point for LSP-based Serena analysis,
-combining all LSP components into a unified interface for comprehensive
-code error retrieval and analysis.
+combining all LSP components with advanced Serena capabilities including
+refactoring, symbol intelligence, code actions, and real-time analysis.
 """
 
 import asyncio
@@ -27,37 +27,61 @@ from .lsp import (
     ConnectionType
 )
 
+from .types import (
+    SerenaConfig,
+    SerenaCapability,
+    RefactoringResult,
+    SymbolInfo,
+    CodeAction,
+    HoverInfo,
+    CompletionItem
+)
+
 logger = logging.getLogger(__name__)
 
 
 class SerenaLSPIntegration:
     """
-    Comprehensive LSP integration for Serena analysis.
+    Enhanced LSP integration for Serena analysis with advanced capabilities.
     
     This class provides a unified interface for:
-    - LSP server management
-    - Real-time error retrieval
+    - LSP server management and coordination
+    - Real-time error retrieval and diagnostics
+    - Advanced refactoring operations
+    - Symbol intelligence and analysis
+    - Code actions and quick fixes
+    - Real-time file monitoring
     - Comprehensive code analysis
-    - Live error monitoring
     - Performance optimization
     
     Features:
     - Automatic server discovery and management
-    - Multiple server support
-    - Real-time diagnostics
-    - Comprehensive error analysis
-    - Performance monitoring
-    - Event-driven architecture
+    - Multiple server support with load balancing
+    - Real-time diagnostics and monitoring
+    - Integration with Serena core capabilities
+    - Advanced refactoring with conflict detection
+    - Symbol intelligence and impact analysis
+    - Code actions with LSP protocol compliance
+    - Event-driven architecture with background processing
+    - Performance monitoring and optimization
     """
     
     def __init__(self, 
+                 codebase_path: str,
                  config_dir: Optional[str] = None,
                  auto_discover_servers: bool = True,
-                 enable_real_time_diagnostics: bool = True):
+                 enable_real_time_diagnostics: bool = True,
+                 serena_config: Optional[SerenaConfig] = None):
+        
+        self.codebase_path = Path(codebase_path)
+        self.serena_config = serena_config or SerenaConfig()
         
         # Core components
         self.server_manager = SerenaServerManager(config_dir)
         self.real_time_diagnostics = RealTimeDiagnostics() if enable_real_time_diagnostics else None
+        
+        # Serena core integration
+        self._serena_core: Optional[Any] = None
         
         # State tracking
         self._active_clients: Dict[str, SerenaLSPClient] = {}
@@ -86,13 +110,17 @@ class SerenaLSPIntegration:
     
     async def initialize(self) -> bool:
         """
-        Initialize the LSP integration.
+        Initialize the LSP integration with Serena core coordination.
         
         Returns:
             True if initialization successful
         """
         try:
-            logger.info("Initializing Serena LSP integration...")
+            logger.info("Initializing enhanced Serena LSP integration...")
+            
+            # Initialize Serena core if enabled capabilities require it
+            if self._requires_serena_core():
+                await self._initialize_serena_core()
             
             # Discover servers if enabled
             if self.auto_discover_servers:
@@ -119,8 +147,12 @@ class SerenaLSPIntegration:
             if self._active_clients and self.real_time_diagnostics:
                 await self._start_real_time_monitoring()
             
+            # Connect LSP integration to Serena core
+            if self._serena_core:
+                self._serena_core.set_lsp_integration(self)
+            
             self._initialized = True
-            logger.info(f"LSP integration initialized with {len(self._active_clients)} active servers")
+            logger.info(f"Enhanced LSP integration initialized with {len(self._active_clients)} active servers and Serena core")
             return True
             
         except Exception as e:
@@ -588,16 +620,204 @@ class SerenaLSPIntegration:
                 logger.error(f"Error in stats listener: {e}")
 
 
+    def _requires_serena_core(self) -> bool:
+        """Check if any enabled capabilities require Serena core."""
+        advanced_capabilities = {
+            SerenaCapability.REFACTORING,
+            SerenaCapability.SYMBOL_INTELLIGENCE,
+            SerenaCapability.CODE_ACTIONS,
+            SerenaCapability.REAL_TIME_ANALYSIS,
+            SerenaCapability.SEMANTIC_SEARCH,
+            SerenaCapability.CODE_GENERATION
+        }
+        
+        return any(cap in self.serena_config.enabled_capabilities for cap in advanced_capabilities)
+    
+    async def _initialize_serena_core(self) -> None:
+        """Initialize Serena core with LSP integration."""
+        try:
+            from .core import SerenaCore
+            
+            self._serena_core = SerenaCore(str(self.codebase_path), self.serena_config)
+            await self._serena_core.initialize()
+            
+            logger.info("Serena core initialized for LSP integration")
+            
+        except Exception as e:
+            logger.error(f"Error initializing Serena core: {e}")
+            self._serena_core = None
+    
+    def get_serena_core(self) -> Optional[Any]:
+        """Get the Serena core instance."""
+        return self._serena_core
+    
+    async def get_completions_enhanced(
+        self,
+        file_path: str,
+        line: int,
+        character: int,
+        context: Optional[str] = None
+    ) -> List[CompletionItem]:
+        """Get enhanced completions using Serena core if available."""
+        try:
+            # Try Serena core first
+            if self._serena_core and self._serena_core.is_capability_enabled(SerenaCapability.COMPLETIONS):
+                return await self._serena_core.get_completions(file_path, line, character, context)
+            
+            # Fallback to LSP completions
+            completions_data = await self.get_completions(file_path, line, character)
+            return [
+                CompletionItem(
+                    label=item.get('label', ''),
+                    kind=item.get('kind', ''),
+                    detail=item.get('detail'),
+                    documentation=item.get('documentation'),
+                    insert_text=item.get('insertText')
+                )
+                for item in completions_data
+            ]
+            
+        except Exception as e:
+            logger.error(f"Error getting enhanced completions: {e}")
+            return []
+    
+    async def get_hover_info_enhanced(
+        self,
+        file_path: str,
+        line: int,
+        character: int
+    ) -> Optional[HoverInfo]:
+        """Get enhanced hover info using Serena core if available."""
+        try:
+            # Try Serena core first
+            if self._serena_core and self._serena_core.is_capability_enabled(SerenaCapability.HOVER_INFO):
+                return await self._serena_core.get_hover_info(file_path, line, character)
+            
+            # Fallback to LSP hover
+            hover_data = await self.get_hover_info(file_path, line, character)
+            if hover_data:
+                return HoverInfo(
+                    content=hover_data.get('content', ''),
+                    content_type=hover_data.get('content_type', 'markdown')
+                )
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error getting enhanced hover info: {e}")
+            return None
+    
+    async def perform_refactoring(
+        self,
+        refactoring_type: str,
+        **kwargs
+    ) -> RefactoringResult:
+        """Perform refactoring using Serena core."""
+        try:
+            if not self._serena_core:
+                from .types import RefactoringType
+                return RefactoringResult(
+                    success=False,
+                    refactoring_type=RefactoringType(refactoring_type) if refactoring_type in [t.value for t in RefactoringType] else None,
+                    changes=[],
+                    conflicts=[],
+                    error_message="Serena core not available for refactoring"
+                )
+            
+            return await self._serena_core.get_refactoring_result(refactoring_type, **kwargs)
+            
+        except Exception as e:
+            logger.error(f"Error performing refactoring: {e}")
+            from .types import RefactoringType
+            return RefactoringResult(
+                success=False,
+                refactoring_type=RefactoringType(refactoring_type) if refactoring_type in [t.value for t in RefactoringType] else None,
+                changes=[],
+                conflicts=[],
+                error_message=str(e)
+            )
+    
+    async def get_symbol_info_enhanced(
+        self,
+        symbol: str,
+        file_path: Optional[str] = None
+    ) -> Optional[SymbolInfo]:
+        """Get enhanced symbol information using Serena core."""
+        try:
+            if not self._serena_core:
+                return None
+            
+            from .types import AnalysisContext
+            context = AnalysisContext(file_path=file_path) if file_path else None
+            return await self._serena_core.get_symbol_info(symbol, context)
+            
+        except Exception as e:
+            logger.error(f"Error getting enhanced symbol info: {e}")
+            return None
+    
+    async def get_code_actions_enhanced(
+        self,
+        file_path: str,
+        start_line: int,
+        end_line: int,
+        context: List[str],
+        diagnostics: Optional[List[Dict[str, Any]]] = None
+    ) -> List[CodeAction]:
+        """Get enhanced code actions using Serena core."""
+        try:
+            if not self._serena_core:
+                return []
+            
+            return await self._serena_core.get_code_actions(file_path, start_line, end_line, context)
+            
+        except Exception as e:
+            logger.error(f"Error getting enhanced code actions: {e}")
+            return []
+    
+    async def apply_code_action_enhanced(
+        self,
+        action_id: str,
+        file_path: str,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Apply code action using Serena core."""
+        try:
+            if not self._serena_core:
+                return {'success': False, 'error': 'Serena core not available'}
+            
+            return await self._serena_core.apply_code_action(action_id, file_path=file_path, **kwargs)
+            
+        except Exception as e:
+            logger.error(f"Error applying enhanced code action: {e}")
+            return {'success': False, 'error': str(e)}
+
+
 # Convenience functions for easy integration
 
-async def create_serena_lsp_integration(**kwargs) -> SerenaLSPIntegration:
+async def create_serena_lsp_integration(
+    codebase_path: str,
+    config_dir: Optional[str] = None,
+    serena_config: Optional[SerenaConfig] = None,
+    **kwargs
+) -> SerenaLSPIntegration:
     """
-    Create and initialize a Serena LSP integration.
+    Create and initialize an enhanced Serena LSP integration.
+    
+    Args:
+        codebase_path: Path to the codebase
+        config_dir: Optional config directory
+        serena_config: Optional Serena configuration
+        **kwargs: Additional arguments
     
     Returns:
         Initialized LSP integration instance
     """
-    integration = SerenaLSPIntegration(**kwargs)
+    integration = SerenaLSPIntegration(
+        codebase_path=codebase_path,
+        config_dir=config_dir,
+        serena_config=serena_config,
+        **kwargs
+    )
     success = await integration.initialize()
     
     if not success:
@@ -643,4 +863,3 @@ async def analyze_file_errors(file_path: str, **kwargs) -> List[CodeError]:
         return await integration.analyze_file(file_path, **kwargs)
     finally:
         await integration.shutdown()
-
