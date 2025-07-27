@@ -41,7 +41,7 @@ Usage:
 
 # Core components
 from .core import SerenaCore
-from .types import SerenaConfig, SerenaCapability, RefactoringType, RefactoringResult, CodeGenerationResult, SemanticSearchResult, SymbolInfo
+from .serena_types import SerenaConfig, SerenaCapability, RefactoringType, RefactoringResult, CodeGenerationResult, SemanticSearchResult, SymbolInfo
 
 # Error analysis system (NEW - Main focus)
 from .error_analysis import (
@@ -63,34 +63,36 @@ from .api import (
     find_function_relationships
 )
 
-# Advanced API (NEW - Comprehensive integration)
-from .advanced_api import (
-    SerenaAdvancedAPI,
-    create_serena_api as create_advanced_serena_api,
-    quick_error_analysis,
-    quick_knowledge_extraction
-)
-
 # Advanced components
-from .knowledge_integration import (
-    AdvancedKnowledgeIntegration,
-    KnowledgeContext,
-    KnowledgeGraph,
-    AdvancedErrorContext
-)
+try:
+    from .knowledge_integration import (
+        AdvancedKnowledgeIntegration,
+        KnowledgeContext,
+        KnowledgeGraph,
+        AdvancedErrorContext
+    )
+except ImportError:
+    # Fallback if advanced components are not available
+    pass
 
-from .advanced_context import (
-    AdvancedContextEngine,
-    ContextualError,
-    ContextualInsight
-)
+try:
+    from .advanced_context import (
+        AdvancedContextEngine,
+        ContextualError,
+        ContextualInsight
+    )
+except ImportError:
+    pass
 
-from .advanced_error_viewer import (
-    AdvancedErrorViewer,
-    ErrorViewConfig,
-    ErrorCluster,
-    ErrorVisualization
-)
+try:
+    from .advanced_error_viewer import (
+        AdvancedErrorViewer,
+        ErrorViewConfig,
+        ErrorCluster,
+        ErrorVisualization
+    )
+except ImportError:
+    pass
 
 # MCP and semantic tools
 from .mcp_bridge import SerenaMCPBridge, MCPToolResult

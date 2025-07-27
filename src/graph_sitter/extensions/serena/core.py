@@ -14,7 +14,7 @@ from enum import Enum
 from graph_sitter.shared.logging.get_logger import get_logger
 from .mcp_bridge import SerenaMCPBridge, ErrorInfo
 from graph_sitter.core.codebase import Codebase
-from .types import SerenaCapability, SerenaConfig
+from .serena_types import SerenaCapability, SerenaConfig
 
 # Try to import LSP bridge for enhanced functionality
 try:

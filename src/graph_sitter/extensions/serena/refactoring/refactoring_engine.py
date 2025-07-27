@@ -15,7 +15,7 @@ from enum import Enum
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.extensions.lsp.serena_bridge import SerenaLSPBridge
-from ..types import RefactoringType, RefactoringResult, RefactoringChange, RefactoringConflict
+from ..serena_types import RefactoringType, RefactoringResult, RefactoringChange, RefactoringConflict
 
 # Import refactoring modules after types to avoid circular imports
 from .rename_refactor import RenameRefactor

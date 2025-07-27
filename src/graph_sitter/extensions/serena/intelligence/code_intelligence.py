@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
 from ..mcp_bridge import SerenaMCPBridge
-from ..types import (
+from ..serena_types import (
     CompletionContext, HoverContext, SignatureContext, SymbolInfo,
     SemanticSearchResult, CodeGenerationResult
 )

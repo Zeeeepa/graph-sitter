@@ -1,386 +1,301 @@
-# Advanced Serena Integration for Graph-Sitter
+# Enhanced Serena: Comprehensive Codebase Knowledge Extension
 
-This module provides comprehensive integration with Serena's codebase knowledge features, enabling advanced error analysis, context inclusion, semantic understanding, and intelligent code insights.
+Enhanced Serena builds upon graph-sitter's powerful foundation to provide comprehensive codebase knowledge extension capabilities. It leverages existing graph-sitter features like symbol resolution, usage tracking, and AST manipulation to deliver advanced code intelligence, refactoring, and analysis features.
 
-## 🚀 Features
+## 🚀 Key Features
 
-### 🧠 Knowledge Extraction
-- **Semantic Analysis**: Deep understanding of code semantics, types, and intent
-- **Architectural Insights**: Design patterns, coupling analysis, and architectural smells
-- **Dependency Analysis**: Comprehensive dependency tracking and impact assessment
-- **Knowledge Graphs**: Visual representation of codebase relationships and structure
+### 1. Enhanced Symbol Intelligence
+- **Real-time symbol resolution** using graph-sitter's existing symbol tracking
+- **Cross-reference analysis** with usage patterns and dependencies
+- **Documentation extraction** from docstrings and comments
+- **Signature analysis** with parameter and return type information
+- **Semantic search** across the entire codebase
 
-### 🐛 Advanced Error Analysis
-- **Contextual Error Analysis**: Multi-layered context analysis for comprehensive error understanding
-- **Intelligent Fix Suggestions**: AI-powered recommendations with implementation guidance
-- **Error Clustering**: Automatic grouping of related errors for efficient resolution
-- **Impact Assessment**: Understanding the scope and risk of errors
+### 2. Advanced Refactoring Engine
+- **Safe symbol renaming** with conflict detection and validation
+- **Method extraction** with dependency analysis and parameter detection
+- **Inline refactoring** for methods and variables
+- **Move operations** for symbols and files
+- **Preview mode** to see changes before applying them
 
-### 🎯 Context Inclusion
-- **Multi-Level Context**: Immediate, function, class, file, module, and project-level context
-- **Relationship Mapping**: Symbol relationships, dependency chains, and usage patterns
-- **Architectural Context**: Understanding code within its architectural framework
-- **Ecosystem Knowledge**: Leveraging broader ecosystem patterns and best practices
+### 3. Real-time Code Analysis
+- **Continuous quality monitoring** with background analysis
+- **Issue detection** including syntax errors, unused imports, style violations
+- **Complexity metrics** with cyclomatic complexity and maintainability scores
+- **Performance tracking** with caching and optimization
+- **Configurable analysis rules** for different coding standards
 
-### 📊 Visualization & Insights
-- **Code Visualizations**: Syntax highlighting, dependency graphs, control flow charts
-- **Error Visualizations**: Impact charts, relationship diagrams, and pattern analysis
-- **Knowledge Insights**: Semantic layers, architectural patterns, and design recommendations
+### 4. LSP Integration
+- **Complete LSP protocol support** for IDE-like features
+- **Intelligent code completions** with context awareness
+- **Hover information** with rich symbol details
+- **Signature help** for function calls and method invocations
+- **Diagnostic reporting** with real-time error detection
 
-## 🛠️ Installation
-
-```bash
-pip install graph-sitter[serena]
-```
-
-## 📖 Quick Start
-
-### Basic Usage
-
-```python
-import asyncio
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.extensions.serena import create_serena_api
-
-async def main():
-    # Load your codebase
-    codebase = Codebase.from_directory("path/to/your/project")
-    
-    # Create advanced API instance
-    api = await create_serena_api(codebase, enable_serena=True)
-    
-    try:
-        # Extract comprehensive knowledge
-        knowledge = await api.extract_knowledge(
-            file_path="src/main.py",
-            symbol_name="main_function",
-            include_context=True
-        )
-        
-        # Analyze error with full context
-        error_info = {
-            "id": "error_001",
-            "type": "complexity_issue",
-            "severity": "high",
-            "file_path": "src/main.py",
-            "line_number": 42,
-            "message": "High cyclomatic complexity"
-        }
-        
-        analysis = await api.analyze_error_comprehensive(error_info)
-        
-        # Build knowledge graph
-        graph = await api.build_knowledge_graph(include_semantic_layers=True)
-        
-        print(f"Knowledge extracted: {len(knowledge)} insights")
-        print(f"Error analysis: {analysis['error_overview']['basic_info']['type']}")
-        print(f"Knowledge graph: {len(graph['nodes'])} nodes, {len(graph['edges'])} edges")
-        
-    finally:
-        await api.shutdown()
-
-asyncio.run(main())
-```
-
-### Quick Functions
-
-```python
-from graph_sitter.extensions.serena import quick_error_analysis, quick_knowledge_extraction
-
-# Quick error analysis
-error_analysis = await quick_error_analysis(codebase, error_info)
-
-# Quick knowledge extraction
-knowledge = await quick_knowledge_extraction(codebase, "src/main.py", "function_name")
-```
-
-## 🔧 API Reference
-
-### SerenaAdvancedAPI
-
-The main API class providing comprehensive Serena integration.
-
-#### Knowledge Extraction
-
-```python
-# Extract comprehensive knowledge about a code element
-knowledge = await api.extract_knowledge(
-    file_path="src/module.py",
-    symbol_name="MyClass",
-    line_number=100,
-    include_context=True,
-    extractors=["semantic", "architectural", "dependency"]
-)
-
-# Build knowledge graph
-graph = await api.build_knowledge_graph(
-    include_semantic_layers=True,
-    include_metrics=True
-)
-
-# Search semantic patterns
-results = await api.search_semantic_patterns(
-    query="factory pattern",
-    pattern_type="design_pattern",
-    max_results=10
-)
-```
-
-#### Error Analysis
-
-```python
-# Comprehensive error analysis
-analysis = await api.analyze_error_comprehensive(
-    error_info=error_data,
-    include_visualizations=True,
-    include_suggestions=True
-)
-
-# Error context analysis
-context = await api.analyze_error_context(
-    error_info=error_data,
-    context_depth=3
-)
-
-# Cluster related errors
-clusters = await api.cluster_errors(
-    errors=error_list,
-    cluster_types=["file_based", "pattern_based"]
-)
-```
-
-#### Context Analysis
-
-```python
-# Symbol context analysis
-context = await api.analyze_symbol_context(
-    file_path="src/module.py",
-    symbol_name="function_name",
-    symbol_type="function",
-    include_relationships=True
-)
-
-# File context analysis
-file_context = await api.analyze_file_context(
-    file_path="src/module.py",
-    include_dependencies=True,
-    include_metrics=True
-)
-```
-
-#### Relationship Analysis
-
-```python
-# Dependency analysis
-dependencies = await api.analyze_dependencies(
-    file_path="src/module.py",
-    symbol_name="MyClass",
-    include_transitive=True,
-    max_depth=5
-)
-
-# Find related symbols
-related = await api.find_related_symbols(
-    file_path="src/module.py",
-    symbol_name="function_name",
-    relation_types=["calls", "uses", "inherits"],
-    max_results=20
-)
-```
-
-#### Architectural Analysis
-
-```python
-# Project architecture analysis
-architecture = await api.analyze_architecture(
-    scope="project",
-    include_patterns=True,
-    include_metrics=True
-)
-```
+### 5. Code Generation & AI Assistance
+- **Template-based code generation** with context awareness
+- **Import management** with automatic dependency detection
+- **Code suggestions** based on patterns and best practices
+- **Extensible generation framework** for custom templates
 
 ## 🏗️ Architecture
 
-### Core Components
+Enhanced Serena is built as a modular system that extends graph-sitter's core capabilities:
 
-1. **AdvancedKnowledgeIntegration**: Main knowledge extraction and integration system
-2. **AdvancedContextEngine**: Multi-layered context analysis engine
-3. **AdvancedErrorViewer**: Comprehensive error viewing and visualization
-4. **SerenaAdvancedAPI**: Unified API layer for all functionality
+```
+Enhanced Serena Architecture
+├── Core Integration (SerenaCore)
+│   ├── Capability Management
+│   ├── LSP Bridge Integration
+│   └── Background Processing
+├── Intelligence Module
+│   ├── Symbol Analysis
+│   ├── Semantic Search
+│   └── Code Generation
+├── Refactoring Engine
+│   ├── Rename Refactor
+│   ├── Extract Refactor
+│   ├── Inline Refactor
+│   └── Move Refactor
+├── Analysis Engine
+│   ├── Real-time Analyzer
+│   ├── Quality Metrics
+│   └── Issue Detection
+└── LSP Integration
+    ├── Protocol Implementation
+    ├── Language Servers
+    └── Bridge Components
+```
 
-### Knowledge Extractors
+## 📚 Usage Examples
 
-- **SemanticKnowledgeExtractor**: Semantic analysis using Serena's capabilities
-- **ArchitecturalKnowledgeExtractor**: Architectural patterns and design analysis
-- **DependencyKnowledgeExtractor**: Dependency tracking and impact analysis
+### Basic Setup
 
-### Data Models
+```python
+from graph_sitter import Codebase
+from graph_sitter.extensions.serena import SerenaCore
+from graph_sitter.extensions.serena.serena_types import SerenaCapability, SerenaConfig
 
-- **KnowledgeContext**: Comprehensive context for knowledge extraction
-- **KnowledgeGraph**: Graph representation of codebase understanding
-- **ContextualError**: Enhanced error with comprehensive context
-- **ErrorVisualization**: Error visualization data and metadata
+# Load your codebase
+codebase = Codebase.from_directory("./my_project")
 
-## 🎨 Visualization Types
+# Configure Serena with desired capabilities
+config = SerenaConfig(
+    enabled_capabilities=[
+        SerenaCapability.INTELLIGENCE,
+        SerenaCapability.REFACTORING,
+        SerenaCapability.ANALYSIS
+    ],
+    realtime_analysis=True,
+    cache_enabled=True
+)
 
-### Code Visualizations
-- **Code Highlighting**: Syntax-highlighted code with annotations
-- **Dependency Graphs**: Visual representation of dependencies
-- **Control Flow Charts**: Function control flow visualization
-- **Impact Charts**: Error impact and scope visualization
+# Initialize Serena
+with SerenaCore(codebase, config) as serena:
+    # Use enhanced features
+    pass
+```
 
-### Knowledge Visualizations
-- **Knowledge Graphs**: Interactive codebase relationship graphs
-- **Semantic Layers**: Semantic similarity and clustering visualizations
-- **Architectural Diagrams**: Design pattern and architectural structure views
+### Symbol Intelligence
 
-## 🔍 Error Analysis Features
+```python
+# Get detailed symbol information
+symbol_info = serena.get_symbol_info("src/main.py", line=50, character=10)
+print(f"Symbol: {symbol_info['name']}")
+print(f"Type: {symbol_info['kind']}")
+print(f"Usages: {len(symbol_info['usages'])}")
 
-### Context Layers
-1. **Immediate Context**: Surrounding code lines and immediate environment
-2. **Function Context**: Function-level analysis including complexity and parameters
-3. **Class Context**: Class-level analysis including methods and inheritance
-4. **File Context**: File-level metrics and symbol analysis
-5. **Module Context**: Module-level dependencies and relationships
-6. **Project Context**: Project-wide architectural patterns and health
+# Semantic search across codebase
+results = serena.semantic_search("authentication", max_results=10)
+for result in results:
+    print(f"{result['symbol_name']} in {result['file_path']}")
+    print(f"Relevance: {result['relevance_score']:.2f}")
 
-### Fix Suggestions
-- **Immediate Fixes**: Critical issues requiring immediate attention
-- **Short-term Fixes**: High-priority improvements
-- **Long-term Improvements**: Architectural and design enhancements
-- **Code Examples**: Concrete implementation examples
-- **Best Practices**: Industry best practices and recommendations
+# Generate code with AI assistance
+code_result = serena.generate_code("Create a function to validate email addresses")
+print(code_result['generated_code'])
+```
 
-### Error Clustering
-- **File-based Clustering**: Errors grouped by file location
-- **Function-based Clustering**: Errors within the same function
-- **Pattern-based Clustering**: Errors with similar patterns or types
-- **Priority Scoring**: Automatic priority calculation for clusters
+### Advanced Refactoring
+
+```python
+# Safe symbol renaming with preview
+rename_result = serena.rename_symbol(
+    file_path="src/models.py",
+    line=25,
+    character=5,
+    new_name="UserAccount",
+    preview=True  # Preview changes before applying
+)
+
+if rename_result['success'] and not rename_result['conflicts']:
+    # Apply the rename
+    final_result = serena.rename_symbol(
+        file_path="src/models.py",
+        line=25,
+        character=5,
+        new_name="UserAccount",
+        preview=False
+    )
+
+# Extract method refactoring
+extract_result = serena.extract_method(
+    file_path="src/utils.py",
+    start_line=100,
+    end_line=120,
+    method_name="validate_input_data",
+    preview=True
+)
+```
+
+### Real-time Analysis
+
+```python
+# Start the analysis engine
+serena.start_analysis_engine()
+
+# Analyze specific files
+analysis = serena.analyze_file("src/main.py", force=True)
+print(f"Issues found: {len(analysis['issues'])}")
+print(f"Complexity score: {analysis['complexity_score']:.2f}")
+print(f"Maintainability: {analysis['maintainability_score']:.2f}")
+
+# Queue files for background analysis
+serena.queue_file_analysis("src/models.py")
+serena.queue_file_analysis("src/views.py")
+
+# Get all analysis results
+all_results = serena.get_analysis_results()
+for file_path, result in all_results.items():
+    print(f"{file_path}: {len(result['issues'])} issues")
+```
+
+### LSP Integration
+
+```python
+# Get intelligent completions
+completions = serena.get_completions("src/main.py", line=50, character=10)
+for completion in completions:
+    print(f"{completion['label']}: {completion['detail']}")
+
+# Get hover information
+hover_info = serena.get_hover_info("src/main.py", line=50, character=10)
+print(hover_info['contents'])
+
+# Get signature help
+signature_help = serena.get_signature_help("src/main.py", line=75, character=20)
+for signature in signature_help['signatures']:
+    print(signature['label'])
+
+# Get diagnostics
+diagnostics = serena.get_file_diagnostics("src/main.py")
+for diagnostic in diagnostics:
+    print(f"{diagnostic.severity}: {diagnostic.message}")
+```
+
+## 🔧 Configuration
+
+Enhanced Serena is highly configurable to suit different development workflows:
+
+```python
+config = SerenaConfig(
+    # Enable specific capabilities
+    enabled_capabilities=[
+        SerenaCapability.INTELLIGENCE,
+        SerenaCapability.REFACTORING,
+        SerenaCapability.ANALYSIS,
+        SerenaCapability.SEARCH,
+        SerenaCapability.GENERATION
+    ],
+    
+    # Real-time analysis settings
+    realtime_analysis=True,
+    analysis_interval=1.0,  # seconds
+    max_file_size=1024*1024,  # 1MB
+    
+    # Caching configuration
+    cache_enabled=True,
+    max_cache_size=1000,
+    
+    # Background processing
+    background_processing=True,
+    max_workers=4,
+    
+    # Analysis rules
+    enabled_checks=[
+        'syntax_errors',
+        'unused_imports',
+        'undefined_variables',
+        'complexity_analysis',
+        'style_violations'
+    ],
+    
+    # File watching patterns
+    file_watch_patterns=['**/*.py', '**/*.js', '**/*.ts']
+)
+```
+
+## 🎯 Integration with Graph-sitter
+
+Enhanced Serena leverages graph-sitter's existing powerful capabilities:
+
+### Symbol Resolution
+- Uses `codebase.symbols` for comprehensive symbol discovery
+- Leverages `symbol.usages()` for cross-reference analysis
+- Builds on `symbol.rename()` for safe refactoring operations
+
+### AST Manipulation
+- Utilizes graph-sitter's tree-sitter parsing for accurate code analysis
+- Extends existing file editing capabilities with advanced refactoring
+- Integrates with the transaction system for safe code modifications
+
+### Codebase Management
+- Works with `codebase.files` for comprehensive file analysis
+- Uses `codebase.commit()` for transactional changes
+- Integrates with git operations for version control
+
+### Performance Optimization
+- Leverages graph-sitter's caching mechanisms
+- Uses existing indexing for fast symbol lookup
+- Builds on the background processing framework
+
+## 📊 Performance Features
+
+- **Intelligent Caching**: Results are cached to avoid redundant analysis
+- **Background Processing**: Analysis runs in background threads
+- **Incremental Updates**: Only analyzes changed files
+- **Memory Optimization**: Configurable cache sizes and cleanup
+- **Performance Monitoring**: Built-in metrics and profiling
 
 ## 🧪 Testing
 
 Run the comprehensive demo to see all features in action:
 
 ```bash
-python examples/advanced_serena_integration_demo.py
+python examples/serena_enhanced_demo.py
 ```
 
-## 🔧 Configuration
-
-### API Configuration
-
-```python
-api = SerenaAdvancedAPI(
-    codebase=codebase,
-    enable_serena=True,        # Enable Serena MCP integration
-    enable_caching=True,       # Enable result caching
-    max_workers=4              # Parallel processing workers
-)
-```
-
-### Error Viewer Configuration
-
-```python
-from graph_sitter.extensions.serena import ErrorViewConfig
-
-config = ErrorViewConfig(
-    include_context=True,
-    include_suggestions=True,
-    include_related_errors=True,
-    include_code_examples=True,
-    max_context_depth=3,
-    max_suggestions=10,
-    max_related_errors=5
-)
-
-error_viewer = AdvancedErrorViewer(codebase, config=config)
-```
-
-## 🚀 Performance
-
-### Caching
-- **Knowledge Cache**: Caches extracted knowledge for faster repeated access
-- **Context Cache**: Caches context analysis results
-- **Graph Cache**: Caches knowledge graph construction
-
-### Parallel Processing
-- **Multi-threaded Extraction**: Parallel knowledge extraction using multiple workers
-- **Async Operations**: Asynchronous processing for better performance
-- **Batch Processing**: Efficient batch processing for large codebases
-
-### Memory Management
-- **Lazy Loading**: Load knowledge on-demand
-- **Cache Limits**: Configurable cache size limits
-- **Resource Cleanup**: Automatic resource cleanup and garbage collection
-
-## 🔌 Integration
-
-### Serena MCP Integration
-The advanced integration leverages Serena's Model Context Protocol (MCP) server for enhanced capabilities:
-
-- **Semantic Tools**: Advanced semantic analysis and understanding
-- **Code Intelligence**: Intelligent code analysis and insights
-- **Symbol Intelligence**: Deep symbol relationship analysis
-- **Semantic Search**: Pattern matching and similarity search
-
-### Fallback Implementation
-When Serena MCP is not available, the system provides fallback implementations:
-
-- **Basic Semantic Analysis**: Simple semantic analysis without Serena
-- **Pattern Detection**: Basic architectural pattern detection
-- **Dependency Analysis**: Standard dependency tracking
-- **Context Analysis**: Multi-layered context without advanced insights
-
-## 📊 Metrics and Analytics
-
-### Knowledge Metrics
-- **Extraction Coverage**: Percentage of codebase analyzed
-- **Knowledge Depth**: Depth of analysis performed
-- **Relationship Density**: Density of discovered relationships
-- **Pattern Coverage**: Architectural patterns detected
-
-### Error Metrics
-- **Error Distribution**: Distribution of errors by type and severity
-- **Context Completeness**: Completeness of context analysis
-- **Fix Success Rate**: Success rate of applied fixes
-- **Resolution Time**: Time to resolve clustered errors
-
-### Performance Metrics
-- **Extraction Time**: Time taken for knowledge extraction
-- **Analysis Throughput**: Number of elements analyzed per second
-- **Cache Hit Rate**: Effectiveness of caching system
-- **Memory Usage**: Memory consumption during analysis
+This demo showcases:
+- Enhanced symbol intelligence
+- Advanced refactoring capabilities
+- Real-time code analysis
+- LSP integration features
+- Performance monitoring
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Implement your changes with tests
-4. Submit a pull request
+Enhanced Serena is designed to be extensible. You can:
+
+1. **Add new analysis rules** in the `analysis` module
+2. **Extend refactoring operations** in the `refactoring` module
+3. **Enhance code generation** in the `intelligence` module
+4. **Add new LSP features** in the `lsp` module
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Enhanced Serena follows the same license as graph-sitter.
 
-## 🆘 Support
+---
 
-For support and questions:
-- Create an issue on GitHub
-- Check the documentation
-- Run the demo for examples
-- Review the API reference
-
-## 🔄 Version History
-
-### v2.0.0 (Current)
-- Advanced Serena integration with comprehensive knowledge extraction
-- Multi-layered context analysis and error viewing
-- Knowledge graph construction and visualization
-- Architectural pattern detection and analysis
-- Enhanced API with async support and caching
-
-### v1.0.0
-- Basic Serena integration
-- Simple error analysis
-- Basic context inclusion
+**Enhanced Serena: Making graph-sitter even more powerful for comprehensive codebase knowledge extension.**
 
