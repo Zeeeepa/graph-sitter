@@ -1,0 +1,700 @@
+{
+  "analysis_timestamp": "2025-07-27T20:11:11.553095",
+  "codebase_path": "/tmp/Zeeeepa/graph-sitter",
+  "codebase_summary": "Contains 58717 nodes\n- 1354 files\n- 9989 imports\n- 1249 external_modules\n- 5180 symbols\n\t- 1070 classes\n\t- 2780 functions\n\t- 1330 global_vars\n\t- 0 interfaces\n\nContains 210398 edges\n- 199260 symbol -> used symbol\n- 9971 import -> used symbol\n- 0 export -> exported symbol\n    ",
+  "statistics": {
+    "total_files": 1354,
+    "total_functions": 2780,
+    "total_classes": 1070,
+    "total_symbols": 5180
+  },
+  "deep_analysis": {
+    "comprehensive_metrics": {
+      "basic_counts": {
+        "total_files": 1354,
+        "total_functions": 2780,
+        "total_classes": 1070,
+        "total_symbols": 5180,
+        "total_imports": 9989
+      },
+      "complexity_metrics": {
+        "function_complexity": {
+          "average": 4.997482014388489,
+          "max": 56,
+          "min": 1,
+          "distribution": {
+            "0-5": 2090,
+            "6-10": 546,
+            "11-20": 130,
+            "21-50": 13,
+            "51+": 1
+          }
+        },
+        "class_complexity": {
+          "average": 6.830841121495327,
+          "max": 93,
+          "min": 0,
+          "distribution": {
+            "0-5": 624,
+            "6-10": 268,
+            "11-20": 133,
+            "21-50": 41,
+            "51+": 4
+          }
+        },
+        "file_complexity": {
+          "average": 11.203101920236337,
+          "max": 125,
+          "min": 0,
+          "distribution": {
+            "0-5": 470,
+            "6-10": 351,
+            "11-20": 339,
+            "21-50": 179,
+            "51+": 15
+          }
+        }
+      },
+      "dependency_metrics": {
+        "most_imported_modules": {
+          "ProgrammingLanguage": 354,
+          "get_codebase_session": 324,
+          "TYPE_CHECKING": 263,
+          "Codebase": 222,
+          "Path": 169,
+          "TypeVar": 140,
+          "os": 123,
+          "noapidoc": 119,
+          "Generic": 116,
+          "reader": 113
+        },
+        "total_unique_imports": 1498,
+        "average_imports_per_file": 7.3774002954209745,
+        "most_connected_files": [
+          [
+            "tools",
+            {
+              "imports": 47,
+              "symbols": 65,
+              "functions": 1,
+              "classes": 62
+            }
+          ],
+          [
+            "deep_comprehensive_analysis",
+            {
+              "imports": 26,
+              "symbols": 81,
+              "functions": 0,
+              "classes": 0
+            }
+          ],
+          [
+            "editable",
+            {
+              "imports": 81,
+              "symbols": 9,
+              "functions": 2,
+              "classes": 1
+            }
+          ],
+          [
+            "integrated_self_analysis",
+            {
+              "imports": 29,
+              "symbols": 50,
+              "functions": 0,
+              "classes": 0
+            }
+          ],
+          [
+            "codebase_context",
+            {
+              "imports": 71,
+              "symbols": 5,
+              "functions": 1,
+              "classes": 2
+            }
+          ],
+          [
+            "main",
+            {
+              "imports": 36,
+              "symbols": 28,
+              "functions": 17,
+              "classes": 3
+            }
+          ],
+          [
+            "parser",
+            {
+              "imports": 58,
+              "symbols": 5,
+              "functions": 0,
+              "classes": 2
+            }
+          ],
+          [
+            "ts_node_classes",
+            {
+              "imports": 57,
+              "symbols": 6,
+              "functions": 2,
+              "classes": 0
+            }
+          ],
+          [
+            "database",
+            {
+              "imports": 46,
+              "symbols": 11,
+              "functions": 2,
+              "classes": 6
+            }
+          ],
+          [
+            "enhanced_main",
+            {
+              "imports": 32,
+              "symbols": 22,
+              "functions": 17,
+              "classes": 0
+            }
+          ]
+        ],
+        "dependency_graph_stats": {
+          "total_edges": 9989,
+          "total_nodes": 1354,
+          "density": 0.005452624017310403
+        }
+      },
+      "code_quality_metrics": {
+        "function_quality": {
+          "total_functions": 2780,
+          "functions_with_parameters": 2497,
+          "functions_with_documentation": 685,
+          "parameter_usage_rate": 0.8982014388489209,
+          "documentation_rate": 0.24640287769784172
+        },
+        "class_quality": {
+          "total_classes": 1070,
+          "classes_with_methods": 687,
+          "classes_with_documentation": 816,
+          "method_usage_rate": 0.6420560747663552,
+          "documentation_rate": 0.7626168224299066
+        },
+        "file_quality": {
+          "total_files": 1354,
+          "files_with_imports": 1209,
+          "files_with_classes": 566,
+          "files_with_functions": 730,
+          "import_usage_rate": 0.8929098966026587,
+          "class_definition_rate": 0.41802067946824223,
+          "function_definition_rate": 0.5391432791728212
+        }
+      },
+      "distribution_metrics": {
+        "file_size_distribution": {
+          "by_symbol_count": {
+            "0-5": 1075,
+            "6-10": 169,
+            "11-20": 93,
+            "21-50": 15,
+            "51+": 2
+          },
+          "average_symbols_per_file": 3.8257016248153617
+        },
+        "function_parameter_distribution": {
+          "distribution": {
+            "0-5": 2732,
+            "6-10": 47,
+            "11-20": 1,
+            "21-50": 0,
+            "51+": 0
+          },
+          "average_parameters": 1.2744604316546762
+        },
+        "class_method_distribution": {
+          "distribution": {
+            "0-5": 889,
+            "6-10": 82,
+            "11-20": 65,
+            "21-50": 31,
+            "51+": 3
+          },
+          "average_methods": 3.552336448598131
+        },
+        "directory_distribution": {
+          "tests/unit/sdk/typescript/function": 30,
+          "src/graph_sitter/core/expressions": 26,
+          "src/graph_sitter/extensions/tools": 25,
+          "tests/unit/sdk/typescript/file": 23,
+          "tests/unit/sdk/python/function": 22,
+          ".": 22,
+          "src/graph_sitter/core/interfaces": 20,
+          "src/graph_sitter/core/statements": 19,
+          "src/graph_sitter/core": 18,
+          "tests/unit/sdk/python/statements": 18
+        }
+      },
+      "architectural_metrics": {
+        "inheritance_metrics": {
+          "classes_with_inheritance": 799,
+          "average_inheritance_depth": 1.481852315394243,
+          "max_inheritance_depth": 5
+        },
+        "coupling_metrics": {
+          "average_coupling": 10.168577981651376,
+          "max_coupling": 176,
+          "highly_coupled_modules": [
+            [
+              "__init__",
+              176
+            ],
+            [
+              "main",
+              133
+            ],
+            [
+              "codebase",
+              116
+            ],
+            [
+              "file",
+              94
+            ],
+            [
+              "utils",
+              87
+            ]
+          ]
+        },
+        "cohesion_metrics": {
+          "files_per_class": 1.2654205607476636,
+          "functions_per_file": 2.0531757754800593,
+          "classes_per_file": 0.7902511078286558
+        }
+      }
+    },
+    "hotspots": {
+      "complex_functions": [
+        {
+          "name": "get_workspace_tools",
+          "file": "src/graph_sitter/extensions/langchain/tools.py",
+          "complexity_score": 55,
+          "dependencies": 54,
+          "parameters": 1,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "create_codebase_agent",
+          "file": "src/graph_sitter/extensions/langchain/agent.py",
+          "complexity_score": 28,
+          "dependencies": 19,
+          "parameters": 9,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "create_chat_agent",
+          "file": "src/graph_sitter/extensions/langchain/agent.py",
+          "complexity_score": 26,
+          "dependencies": 17,
+          "parameters": 9,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "get_codebase_session",
+          "file": "src/graph_sitter/codebase/factory/get_session.py",
+          "complexity_score": 25,
+          "dependencies": 15,
+          "parameters": 10,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "run_eval",
+          "file": "examples/examples/swebench_agent_run/eval_cli.py",
+          "complexity_score": 25,
+          "dependencies": 16,
+          "parameters": 9,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "create_codebase_agent",
+          "file": "examples/examples/langchain_agent/run.py",
+          "complexity_score": 24,
+          "dependencies": 17,
+          "parameters": 7,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "initialize_codegen",
+          "file": "src/graph_sitter/cli/workspace/initialize_workspace.py",
+          "complexity_score": 22,
+          "dependencies": 19,
+          "parameters": 3,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "patched_swebench_eval",
+          "file": "examples/examples/swebench_agent_run/swebench_agent_run/modal_harness/entry_point.py",
+          "complexity_score": 22,
+          "dependencies": 5,
+          "parameters": 17,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "create_command",
+          "file": "src/graph_sitter/cli/commands/create/main.py",
+          "complexity_score": 21,
+          "dependencies": 16,
+          "parameters": 5,
+          "reason": "High complexity due to many dependencies and parameters"
+        },
+        {
+          "name": "run_instance_modal",
+          "file": "examples/examples/swebench_agent_run/swebench_agent_run/modal_harness/entry_point.py",
+          "complexity_score": 21,
+          "dependencies": 17,
+          "parameters": 4,
+          "reason": "High complexity due to many dependencies and parameters"
+        }
+      ],
+      "large_classes": [
+        {
+          "name": "Editable",
+          "file": "src/graph_sitter/core/interfaces/editable.py",
+          "size_score": 92,
+          "methods": 85,
+          "attributes": 7,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "Codebase",
+          "file": "src/graph_sitter/core/codebase.py",
+          "size_score": 79,
+          "methods": 71,
+          "attributes": 8,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "CodebaseContext",
+          "file": "src/graph_sitter/codebase/codebase_context.py",
+          "size_score": 77,
+          "methods": 46,
+          "attributes": 31,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "RepoOperator",
+          "file": "src/graph_sitter/git/repo_operator/repo_operator.py",
+          "size_score": 72,
+          "methods": 64,
+          "attributes": 8,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "SourceFile",
+          "file": "src/graph_sitter/core/file.py",
+          "size_score": 48,
+          "methods": 46,
+          "attributes": 2,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "Import",
+          "file": "src/graph_sitter/core/import_resolution.py",
+          "size_score": 44,
+          "methods": 36,
+          "attributes": 8,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "PullRequest",
+          "file": "src/graph_sitter/extensions/github/types/pull_request.py",
+          "size_score": 43,
+          "methods": 0,
+          "attributes": 43,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "GitRepoClient",
+          "file": "src/graph_sitter/git/clients/git_repo_client.py",
+          "size_score": 43,
+          "methods": 40,
+          "attributes": 3,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "TSConfig",
+          "file": "src/graph_sitter/typescript/ts_config.py",
+          "size_score": 39,
+          "methods": 19,
+          "attributes": 20,
+          "reason": "Large class with many methods and attributes"
+        },
+        {
+          "name": "LSPConstants",
+          "file": "src/graph_sitter/extensions/lsp/protocol/lsp_constants.py",
+          "size_score": 38,
+          "methods": 0,
+          "attributes": 38,
+          "reason": "Large class with many methods and attributes"
+        }
+      ],
+      "highly_coupled_files": [
+        {
+          "name": "codebase",
+          "path": "src/graph_sitter/core/codebase.py",
+          "coupling_score": 125,
+          "imports": 103,
+          "symbols": 22,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "tools",
+          "path": "src/graph_sitter/extensions/langchain/tools.py",
+          "coupling_score": 112,
+          "imports": 47,
+          "symbols": 65,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "deep_comprehensive_analysis",
+          "path": "scripts/deep_comprehensive_analysis.py",
+          "coupling_score": 107,
+          "imports": 26,
+          "symbols": 81,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "editable",
+          "path": "src/graph_sitter/core/interfaces/editable.py",
+          "coupling_score": 90,
+          "imports": 81,
+          "symbols": 9,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "__init__",
+          "path": "src/graph_sitter/extensions/serena/__init__.py",
+          "coupling_score": 84,
+          "imports": 70,
+          "symbols": 14,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "integrated_self_analysis",
+          "path": "scripts/integrated_self_analysis.py",
+          "coupling_score": 79,
+          "imports": 29,
+          "symbols": 50,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "codebase_context",
+          "path": "src/graph_sitter/codebase/codebase_context.py",
+          "coupling_score": 76,
+          "imports": 71,
+          "symbols": 5,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "file",
+          "path": "src/graph_sitter/core/file.py",
+          "coupling_score": 67,
+          "imports": 58,
+          "symbols": 9,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "main",
+          "path": "web_dashboard/backend/main.py",
+          "coupling_score": 64,
+          "imports": 36,
+          "symbols": 28,
+          "reason": "High coupling due to many imports and symbol references"
+        },
+        {
+          "name": "parser",
+          "path": "src/graph_sitter/core/parser.py",
+          "coupling_score": 63,
+          "imports": 58,
+          "symbols": 5,
+          "reason": "High coupling due to many imports and symbol references"
+        }
+      ],
+      "potential_issues": [
+        {
+          "type": "function_without_params",
+          "name": "test_get_documented_objects",
+          "file": "tests/unit/sdk/code_generation/test_codemod_writer_decorators.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "list_command",
+          "file": "src/graph_sitter/cli/commands/list/main.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "context_mock",
+          "file": "tests/unit/sdk/core/test_codebase.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "demo_transaction_features",
+          "file": "comprehensive_integration_demo.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "reset_command",
+          "file": "src/graph_sitter/cli/commands/reset/main.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "fastapi_app",
+          "file": "examples/examples/slack_chatbot/api.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "get_documented_objects",
+          "file": "src/graph_sitter/code_generation/current_code_codebase.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "report_cases",
+          "file": "tests/shared/codemod/commands.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "run",
+          "file": "examples/examples/flask_to_fastapi_migration/run.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "run",
+          "file": "examples/examples/python2_to_python3/run.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "view_codemods",
+          "file": "examples/examples/codegen-mcp-server/server.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "main",
+          "file": "examples/serena_enhanced_demo.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "reset",
+          "file": "examples/examples/codegen-mcp-server/server.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "main",
+          "file": "run_simple_analysis.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "main",
+          "file": "codemod_deduplication_tool.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "main",
+          "file": "examples/serena_comprehensive_demo.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "main",
+          "file": "run_full_analysis.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "main",
+          "file": "comprehensive_serena_demo.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "function_without_params",
+          "name": "main",
+          "file": "serena_analyzer.py",
+          "severity": "medium",
+          "description": "Function with no parameters but many dependencies"
+        },
+        {
+          "type": "class_without_methods",
+          "name": "Char",
+          "file": "src/codemods/eval/test_files/sample_py_7/expected/bar/enums.py",
+          "severity": "low",
+          "description": "Class with attributes but no methods"
+        }
+      ]
+    },
+    "visualization_data_available": true
+  },
+  "agent_testing": {
+    "lightweight_agents_working": true,
+    "agent_responses_generated": 4,
+    "sample_responses": {
+      "overview": "Hello! I'm here to help you explore and understand this codebase. ## Codebase Overview\n\nContains 58717 nodes\n- 1354 files\n- 9989 imports\n- 1249 external_modules\n- 5180 symbols\n\t- 1070 classes\n\t- 2780 ...",
+      "statistics": "## Codebase Overview\n\nContains 58717 nodes\n- 1354 files\n- 9989 imports\n- 1249 external_modules\n- 5180 symbols\n\t- 1070 classes\n\t- 2780 functions\n\t- 1330 global_vars\n\t- 0 interfaces\n\nContains 210398 edg...",
+      "search": "## Function Analysis\n\n**Total Functions:** 2780\n**Functions with Parameters:** 2497\n\n**Most Complex Functions:**\n1. **get_workspace_tools** - Complexity: 55 (1 params, 54 deps)\n2. **create_codebase_ag...",
+      "functions": "## Codebase Overview\n\nContains 58717 nodes\n- 1354 files\n- 9989 imports\n- 1249 external_modules\n- 5180 symbols\n\t- 1070 classes\n\t- 2780 functions\n\t- 1330 global_vars\n\t- 0 interfaces\n\nContains 210398 edg..."
+    }
+  },
+  "serena_integration": {
+    "files_analyzed": 1,
+    "errors_found": 0,
+    "error_patterns": 6
+  },
+  "realtime_integration": {
+    "realtime_api": true,
+    "diagnostic_streaming": true,
+    "agent_bridge": true
+  },
+  "github_capability": true,
+  "integration_status": {
+    "existing_analysis_functions": "\u2705 Working",
+    "deep_analysis_capabilities": "\u2705 Working",
+    "lightweight_agent_infrastructure": "\u2705 Working",
+    "existing_serena_integration": "\u2705 Working",
+    "new_realtime_modules": "\u2705 Available",
+    "github_url_loading": "\u2705 Available"
+  }
+}
