@@ -14,6 +14,7 @@ import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 
 import uvicorn
@@ -120,6 +121,11 @@ class WebhookPayload(BaseModel):
 async def root():
     """Health check endpoint."""
     return {"message": "Web-Eval-Agent Dashboard API", "status": "running"}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 @app.get("/api/projects", response_model=ProjectListResponse)
 async def list_projects(

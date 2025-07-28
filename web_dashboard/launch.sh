@@ -187,9 +187,19 @@ setup_frontend() {
     print_status "Installing Node.js dependencies..."
     npm install
     
-    # Build the frontend
-    print_status "Building frontend..."
-    npm run build
+    # Start the frontend in development mode
+    print_status "Starting frontend in development mode..."
+    npm run dev &
+    FRONTEND_PID=$!
+    
+    # Wait for frontend to be ready
+    print_status "Waiting for frontend to be ready..."
+    for i in {1..30}; do
+        if curl -s http://localhost:5173 &> /dev/null; then
+            break
+        fi
+        sleep 1
+    done
     
     cd ..
     print_status "Frontend setup complete ✅"
