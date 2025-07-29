@@ -380,11 +380,22 @@ setup_backend() {
     fi
     
     # Activate virtual environment
+    print_status "Activating virtual environment..."
     source venv/bin/activate
+    
+    # Upgrade pip
+    print_status "Upgrading pip..."
+    pip install --upgrade pip
     
     # Install dependencies
     print_status "Installing Python dependencies..."
     pip install -r requirements.txt
+    
+    # Install graph-sitter if available
+    if [ -f "../../setup.py" ] || [ -f "../../pyproject.toml" ]; then
+        print_status "Installing graph-sitter from parent directory..."
+        pip install -e ../..
+    fi
     
     # Run database migrations (optional for development)
     if [ "$SKIP_DOCKER" = false ]; then
