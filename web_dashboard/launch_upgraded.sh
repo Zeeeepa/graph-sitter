@@ -591,7 +591,7 @@ start_backend() {
     cd ..
     
     # Wait a moment and check if backend started successfully
-    sleep 5
+    sleep 3
     
     if curl -s http://localhost:8000/health > /dev/null; then
         print_success "Backend started successfully ✅"
