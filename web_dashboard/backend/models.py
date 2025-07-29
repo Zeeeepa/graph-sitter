@@ -17,12 +17,12 @@ from sqlalchemy.dialects.postgresql import UUID
 from typing import Any
 
 # SQLAlchemy Base
-Base = declarative_base()  # type: ignore[misc]
+Base = declarative_base()
 
 
 # SQLAlchemy ORM Models
 
-class ProjectORM(Base):
+class ProjectORM(Base):  # type: ignore[misc,valid-type]
     """SQLAlchemy Project model."""
     __tablename__ = "projects"
     
@@ -46,7 +46,7 @@ class ProjectORM(Base):
     validation_results = relationship("ValidationResultORM", back_populates="project")
 
 
-class AgentRunORM(Base):
+class AgentRunORM(Base):  # type: ignore[misc,valid-type]
     """SQLAlchemy AgentRun model."""
     __tablename__ = "agent_runs"
     
@@ -66,7 +66,7 @@ class AgentRunORM(Base):
     project = relationship("ProjectORM", back_populates="agent_runs")
 
 
-class WebhookEventORM(Base):
+class WebhookEventORM(Base):  # type: ignore[misc,valid-type]
     """SQLAlchemy WebhookEvent model."""
     __tablename__ = "webhook_events"
     
@@ -84,7 +84,7 @@ class WebhookEventORM(Base):
     project = relationship("ProjectORM", back_populates="webhook_events")
 
 
-class ValidationResultORM(Base):
+class ValidationResultORM(Base):  # type: ignore[misc,valid-type]
     """SQLAlchemy ValidationResult model."""
     __tablename__ = "validation_results"
     
@@ -106,7 +106,7 @@ class ValidationResultORM(Base):
     project = relationship("ProjectORM", back_populates="validation_results")
 
 
-class UserORM(Base):
+class UserORM(Base):  # type: ignore[misc,valid-type]
     """SQLAlchemy User model."""
     __tablename__ = "users"
     
