@@ -48,7 +48,7 @@ class IntelligentValidationResult:
     structural_validation: ValidationResult
     ai_validation: Optional[Dict] = None
     combined_score: float = 0.0
-    recommendations: List[str] = None
+    recommendations: Optional[List[str]] = None
 
     def __post_init__(self):
         if self.recommendations is None:
@@ -61,7 +61,7 @@ class IntelligentPRValidator:
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path)
         self.base_validator = PRValidator(repo_path)
-        self.codebase = None
+        self.codebase: Optional[Codebase] = None
 
         # Codegen configuration
         self.org_id = os.getenv("CODEGEN_ORG_ID")
@@ -116,6 +116,8 @@ class IntelligentPRValidator:
 
             # Run Codegen analysis
             print("📤 Sending validation request to Codegen...")
+            if self.codegen_agent is None:
+                return {"status": "error", "error": "Codegen agent not initialized"}
             task = self.codegen_agent.run(prompt=prompt)
 
             # Wait for completion
@@ -217,7 +219,7 @@ class IntelligentPRValidator:
         # Format structural issues
         issues_summary = ""
         if structural_result.issues:
-            issues_by_category = {}
+            issues_by_category: Dict[str, List[ValidationIssue]] = {}
             for issue in structural_result.issues[:10]:  # Top 10 issues
                 category = issue.category
                 if category not in issues_by_category:
@@ -496,7 +498,7 @@ def generate_intelligent_report(result: IntelligentValidationResult) -> str:
         report += "\n## 🔍 Detailed Issues\n"
 
         # Group by category
-        categories = {}
+        categories: Dict[str, List[ValidationIssue]] = {}
         for issue in result.structural_validation.issues:
             if issue.category not in categories:
                 categories[issue.category] = []
