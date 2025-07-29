@@ -16,7 +16,7 @@ import aiohttp
 from github import Github, GithubException
 from github.Repository import Repository
 from github.PullRequest import PullRequest
-from github.Webhook import Webhook
+# from github.Webhook import Webhook  # Not available in current PyGithub version
 
 logger = logging.getLogger(__name__)
 
