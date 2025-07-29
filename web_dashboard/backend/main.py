@@ -24,7 +24,25 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 import json
 
-from database import Database, get_database
+# Conditional database import for development mode
+try:
+    from database import Database, get_database
+    DATABASE_AVAILABLE = True
+except ImportError as e:
+    print(f"Database module not available: {e}")
+    print("Running in development mode without database functionality")
+    DATABASE_AVAILABLE = False
+    
+    # Mock database functions for development
+    class MockDatabase:
+        async def get_projects(self): return []
+        async def create_project(self, project): return {"id": "mock-id", **project.dict()}
+        async def get_project(self, project_id): return None
+        async def update_project(self, project_id, updates): return None
+        async def delete_project(self, project_id): return None
+    
+    def get_database():
+        return MockDatabase()
 from models import (
     Project, ProjectCreate, ProjectUpdate, ProjectSettings,
     AgentRun, AgentRunCreate, AgentRunUpdate,
@@ -145,7 +163,12 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint for monitoring."""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    return {
+        "status": "healthy", 
+        "timestamp": datetime.now().isoformat(),
+        "database_available": DATABASE_AVAILABLE,
+        "mode": "development" if not DATABASE_AVAILABLE else "production"
+    }
 
 @app.get("/api/projects", response_model=ProjectListResponse)
 async def list_projects(

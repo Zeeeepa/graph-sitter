@@ -40,3 +40,4 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+*.pid
