@@ -372,11 +372,12 @@ class PRValidator:
 
     def _validate_class(self, cls: Class, file_path: str):
         """Validate a specific class"""
-        if not hasattr(cls, 'name'):
+        if not hasattr(cls, 'name') or cls.name is None:
             return
         
         # Check if class has methods
-        if hasattr(cls, "methods") and len(cls.methods) == 0:
+        methods = getattr(cls, "methods", None)
+        if methods is not None and hasattr(methods, '__len__') and len(methods) == 0:
             # Skip dataclasses, enums, and other special classes
             if not any(keyword in cls.name.lower() for keyword in ["enum", "dataclass", "namedtuple", "config", "type"]):
                 self.validation_result.add_issue(
@@ -391,8 +392,8 @@ class PRValidator:
                 )
 
         # Validate methods
-        if hasattr(cls, "methods"):
-            for method in cls.methods:
+        if methods is not None and hasattr(methods, '__iter__'):
+            for method in methods:
                 self._validate_function(method, file_path)
 
     def _validate_imports_and_dependencies(self):
@@ -525,20 +526,24 @@ class PRValidator:
         if not self.codebase or not hasattr(self.codebase, 'files'):
             return None
         
-        for file in self.codebase.files:
-            if hasattr(file, "path") and str(file.path).endswith(file_path):
-                return file
+        files = getattr(self.codebase, 'files', None)
+        if files is not None and hasattr(files, '__iter__'):
+            for file in files:
+                if hasattr(file, "path") and str(file.path).endswith(file_path):
+                    return file
         return None
 
     def _module_exists(self, module_name: str) -> bool:
         """Check if module exists"""
         # Check internal modules
         if self.codebase and hasattr(self.codebase, 'files'):
-            for file in self.codebase.files:
-                if hasattr(file, "path"):
-                    file_path = str(file.path)
-                    if module_name.replace(".", "/") in file_path:
-                        return True
+            files = getattr(self.codebase, 'files', None)
+            if files is not None and hasattr(files, '__iter__'):
+                for file in files:
+                    if hasattr(file, "path"):
+                        file_path = str(file.path)
+                        if module_name.replace(".", "/") in file_path:
+                            return True
 
         # Try importing (for external packages)
         try:
@@ -563,7 +568,7 @@ def generate_validation_report(result: ValidationResult) -> str:
 """
 
     # Group issues by category
-    categories = {}
+    categories: Dict[str, List[ValidationIssue]] = {}
     for issue in result.issues:
         if issue.category not in categories:
             categories[issue.category] = []
