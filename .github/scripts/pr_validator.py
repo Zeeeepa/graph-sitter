@@ -79,11 +79,11 @@ class PRValidator:
 
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path)
-        self.codebase = None
-        self.changed_files = []
+        self.codebase: Optional[Codebase] = None
+        self.changed_files: List[str] = []
         self.validation_result = ValidationResult(is_valid=True, issues=[], summary={})
 
-    def validate_pr(self, pr_files: List[str] = None) -> ValidationResult:
+    def validate_pr(self, pr_files: Optional[List[str]] = None) -> ValidationResult:
         """Main validation entry point"""
         print("🔍 Starting PR validation...")
 
@@ -174,7 +174,7 @@ class PRValidator:
             
             # Fallback: analyze all Python files in src directory
             print("⚠️ Could not detect changed files, analyzing src Python files...")
-            python_files = []
+            python_files: List[Path] = []
             src_path = self.repo_path / "src"
             if src_path.exists():
                 python_files.extend(src_path.rglob("*.py"))
@@ -278,7 +278,7 @@ class PRValidator:
 
     def _validate_function(self, function: Function, file_path: str):
         """Validate a specific function"""
-        if not hasattr(function, 'name'):
+        if not hasattr(function, 'name') or function.name is None:
             return
         
         # Check if function has implementation
@@ -317,7 +317,7 @@ class PRValidator:
             return
         
         # Check if parameter is used in function body
-        if hasattr(function, "code_block") and hasattr(function.code_block, "source"):
+        if hasattr(function, "code_block") and function.code_block and hasattr(function.code_block, "source"):
             function_source = function.code_block.source
 
             if param_name not in function_source:
@@ -334,14 +334,14 @@ class PRValidator:
 
     def _validate_graph_sitter_function_patterns(self, function: Function, file_path: str):
         """Validate graph-sitter specific function patterns"""
-        if not hasattr(function, 'name') or not hasattr(function, 'code_block'):
+        if not hasattr(function, 'name') or not hasattr(function, 'code_block') or function.name is None:
             return
             
         function_name = function.name
         
         # Check for proper error handling in graph operations
         if any(keyword in function_name.lower() for keyword in ["sync", "reset", "init", "validate"]):
-            if hasattr(function.code_block, "source"):
+            if function.code_block and hasattr(function.code_block, "source"):
                 source = function.code_block.source
                 if "try:" not in source and "except" not in source:
                     self.validation_result.add_issue(
@@ -641,4 +641,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -76,7 +76,7 @@ class IntelligentPRValidator:
                 print(f"⚠️ Could not initialize Codegen agent: {e}")
 
     def validate_pr_intelligent(
-        self, pr_files: List[str] = None
+        self, pr_files: Optional[List[str]] = None
     ) -> IntelligentValidationResult:
         """Perform intelligent PR validation combining structural and AI analysis"""
         print("🧠 Starting intelligent PR validation...")
@@ -100,7 +100,7 @@ class IntelligentPRValidator:
         return combined_result
 
     def _perform_ai_validation(
-        self, pr_files: List[str], structural_result: ValidationResult
+        self, pr_files: Optional[List[str]], structural_result: ValidationResult
     ) -> Dict:
         """Perform AI-powered validation using Codegen"""
         try:
@@ -150,7 +150,7 @@ class IntelligentPRValidator:
             return {"status": "error", "error": str(e)}
 
     def _generate_ai_context(
-        self, pr_files: List[str], structural_result: ValidationResult
+        self, pr_files: Optional[List[str]], structural_result: ValidationResult
     ) -> Dict:
         """Generate context for AI analysis"""
         context = {
@@ -594,4 +594,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
