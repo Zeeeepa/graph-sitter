@@ -48,10 +48,10 @@ class LSPError:
     data: Optional[Any] = None
     
     def to_dict(self) -> Dict[str, Any]:
-        result = {"code": self.code, "message": self.message}
+        error_dict: Dict[str, Any] = {"code": self.code, "message": self.message}
         if self.data is not None:
-            result["data"] = self.data
-        return result
+            error_dict["data"] = self.data
+        return error_dict
 
 
 @dataclass
@@ -91,7 +91,7 @@ class LSPResponse(LSPMessage):
     error: Optional[LSPError] = None
     
     def to_dict(self) -> Dict[str, Any]:
-        response_dict = {"jsonrpc": self.jsonrpc, "id": self.id}
+        response_dict: Dict[str, Any] = {"jsonrpc": self.jsonrpc, "id": self.id}
         if self.error:
             response_dict["error"] = self.error.to_dict()
         else:
