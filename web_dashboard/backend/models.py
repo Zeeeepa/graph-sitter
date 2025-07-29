@@ -1,7 +1,7 @@
 """
 Database Models for Web-Eval-Agent Dashboard
 
-Pydantic models for API requests/responses and database entities.
+SQLAlchemy ORM models and Pydantic models for API requests/responses.
 """
 
 from datetime import datetime
@@ -9,6 +9,115 @@ from enum import Enum
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 import uuid
+
+from sqlalchemy import Column, String, DateTime, Boolean, Text, Integer, ForeignKey, JSON
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
+from typing import Any
+
+# SQLAlchemy Base
+Base = declarative_base()
+
+
+# SQLAlchemy ORM Models
+
+class ProjectORM(Base):  # type: ignore[misc,valid-type]
+    """SQLAlchemy Project model."""
+    __tablename__ = "projects"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    github_owner = Column(String(255), nullable=False)
+    github_repo = Column(String(255), nullable=False)
+    webhook_url = Column(String(500), nullable=True)
+    webhook_id = Column(String(255), nullable=True)
+    status = Column(String(50), nullable=False, default="active")
+    user_id = Column(String(255), nullable=False)
+    settings = Column(JSON, nullable=True, default={})
+    last_activity = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    agent_runs = relationship("AgentRunORM", back_populates="project")
+    webhook_events = relationship("WebhookEventORM", back_populates="project")
+    validation_results = relationship("ValidationResultORM", back_populates="project")
+
+
+class AgentRunORM(Base):  # type: ignore[misc,valid-type]
+    """SQLAlchemy AgentRun model."""
+    __tablename__ = "agent_runs"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    target_text = Column(Text, nullable=False)
+    auto_confirm_plan = Column(Boolean, nullable=False, default=False)
+    status = Column(String(50), nullable=False, default="pending")
+    session_id = Column(String(255), nullable=True)
+    response_data = Column(JSON, nullable=True)
+    error_message = Column(Text, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    project = relationship("ProjectORM", back_populates="agent_runs")
+
+
+class WebhookEventORM(Base):  # type: ignore[misc,valid-type]
+    """SQLAlchemy WebhookEvent model."""
+    __tablename__ = "webhook_events"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    event_type = Column(String(100), nullable=False)
+    payload = Column(JSON, nullable=False)
+    processed = Column(Boolean, nullable=False, default=False)
+    processed_at = Column(DateTime, nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    project = relationship("ProjectORM", back_populates="webhook_events")
+
+
+class ValidationResultORM(Base):  # type: ignore[misc,valid-type]
+    """SQLAlchemy ValidationResult model."""
+    __tablename__ = "validation_results"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    pr_number = Column(Integer, nullable=False)
+    status = Column(String(50), nullable=False, default="pending")
+    success = Column(Boolean, nullable=False, default=False)
+    message = Column(Text, nullable=True)
+    logs = Column(JSON, nullable=True, default=[])
+    deployment_logs = Column(JSON, nullable=True, default=[])
+    test_results = Column(JSON, nullable=True)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    project = relationship("ProjectORM", back_populates="validation_results")
+
+
+class UserORM(Base):  # type: ignore[misc,valid-type]
+    """SQLAlchemy User model."""
+    __tablename__ = "users"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), nullable=False, unique=True)
+    name = Column(String(255), nullable=True)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    last_login = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class ProjectStatus(str, Enum):

@@ -1,12 +1,56 @@
 #!/bin/bash
 
 # 🚀 Web Dashboard Launch Script
-# Comprehensive CI/CD testing with web-eval-agent integration
+# Smart launcher with automatic dependency installation and fallback modes
 
 set -e
 
-echo "🚀 Starting Web Dashboard with Full CI/CD Testing..."
-echo "=================================================="
+# Parse command line arguments
+SKIP_DOCKER=false
+DEV_MODE=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --skip-docker)
+            SKIP_DOCKER=true
+            shift
+            ;;
+        --dev)
+            DEV_MODE=true
+            SKIP_DOCKER=true
+            shift
+            ;;
+        -h|--help)
+            echo "🚀 Web Dashboard Launch Script"
+            echo ""
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --dev         Development mode (no Docker, minimal setup)"
+            echo "  --skip-docker Skip Docker installation and database setup"
+            echo "  -h, --help    Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0            # Full launch with Docker and databases"
+            echo "  $0 --dev      # Development mode, no Docker required"
+            echo "  $0 --skip-docker # Skip Docker but try other features"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$DEV_MODE" = true ]; then
+    echo "🚀 Starting Web Dashboard in Development Mode..."
+    echo "=================================================="
+else
+    echo "🚀 Starting Web Dashboard with Full CI/CD Testing..."
+    echo "=================================================="
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -37,34 +81,109 @@ check_dependencies() {
     print_header "🔍 Checking Dependencies..."
     
     local missing_deps=()
+    local install_commands=()
     
     if ! command -v node &> /dev/null; then
         missing_deps+=("node")
+        install_commands+=("curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs")
     fi
     
-    if ! command -v npm &> /dev/null; then
+    if ! command -v npm &> /dev/null && command -v node &> /dev/null; then
         missing_deps+=("npm")
+        install_commands+=("sudo apt-get install -y npm")
     fi
     
     if ! command -v python3 &> /dev/null; then
         missing_deps+=("python3")
+        install_commands+=("sudo apt-get install -y python3 python3-pip python3-venv")
     fi
     
     if ! command -v pip3 &> /dev/null; then
         missing_deps+=("pip3")
+        install_commands+=("sudo apt-get install -y python3-pip")
     fi
     
-    if ! command -v docker &> /dev/null; then
-        missing_deps+=("docker")
+    # Check for Docker and offer installation (unless skipped)
+    if [ "$SKIP_DOCKER" = false ] && ! command -v docker &> /dev/null; then
+        print_warning "Docker not found. Installing Docker for WSL2..."
+        install_docker_wsl2
+    elif [ "$SKIP_DOCKER" = true ]; then
+        print_warning "Skipping Docker installation (--skip-docker or --dev mode)"
     fi
     
     if [ ${#missing_deps[@]} -ne 0 ]; then
         print_error "Missing dependencies: ${missing_deps[*]}"
-        print_error "Please install the missing dependencies and try again."
-        exit 1
+        print_status "Auto-installing missing dependencies..."
+        
+        # Update package list
+        sudo apt-get update
+        
+        # Install missing dependencies
+        for cmd in "${install_commands[@]}"; do
+            print_status "Running: $cmd"
+            eval "$cmd"
+        done
+        
+        print_status "Dependencies installed. Please restart your shell and run the script again."
+        exit 0
     fi
     
     print_status "All dependencies are installed ✅"
+}
+
+# Install Docker for WSL2
+install_docker_wsl2() {
+    print_header "🐳 Installing Docker for WSL2..."
+    
+    # Check if we're in WSL2
+    if grep -qi microsoft /proc/version; then
+        print_status "WSL2 detected. Installing Docker..."
+        
+        # Update package index
+        sudo apt-get update
+        
+        # Install prerequisites
+        sudo apt-get install -y \
+            ca-certificates \
+            curl \
+            gnupg \
+            lsb-release
+        
+        # Add Docker's official GPG key
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        
+        # Set up the repository
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+          $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        
+        # Update package index again
+        sudo apt-get update
+        
+        # Install Docker Engine
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        
+        # Add user to docker group
+        sudo usermod -aG docker $USER
+        
+        # Start Docker service
+        sudo service docker start
+        
+        print_status "Docker installed successfully! ✅"
+        print_warning "You may need to restart your shell or run 'newgrp docker' to use Docker without sudo."
+        
+        # Test Docker installation
+        if docker --version &> /dev/null; then
+            print_status "Docker is working correctly"
+        else
+            print_warning "Docker installed but may need shell restart"
+        fi
+    else
+        print_error "Not running in WSL2. Please install Docker manually."
+        print_error "Visit: https://docs.docker.com/get-docker/"
+        exit 1
+    fi
 }
 
 # Load environment variables
@@ -75,76 +194,144 @@ load_environment() {
         export $(cat .env | grep -v '^#' | xargs)
         print_status "Environment variables loaded from .env ✅"
     else
-        print_warning "No .env file found, using system environment variables"
-    fi
-    
-    # Validate required environment variables
-    local required_vars=(
-        "CODEGEN_ORG_ID"
-        "CODEGEN_API_TOKEN"
-        "GITHUB_TOKEN"
-        "GEMINI_API_KEY"
-        "CLOUDFLARE_API_KEY"
-        "CLOUDFLARE_ACCOUNT_ID"
-        "CLOUDFLARE_WORKER_URL"
-    )
-    
-    local missing_vars=()
-    for var in "${required_vars[@]}"; do
-        if [ -z "${!var}" ]; then
-            missing_vars+=("$var")
+        print_warning "No .env file found"
+        if [ "$DEV_MODE" = true ]; then
+            print_status "Creating minimal .env for development mode..."
+            cat > .env << 'EOF'
+# Development Environment Variables
+CODEGEN_ORG_ID=dev-org
+CODEGEN_API_TOKEN=dev-token
+GITHUB_TOKEN=dev-github-token
+GEMINI_API_KEY=dev-gemini-key
+CLOUDFLARE_API_KEY=dev-cloudflare-key
+CLOUDFLARE_ACCOUNT_ID=dev-account-id
+CLOUDFLARE_WORKER_URL=https://dev-worker.example.com
+DATABASE_URL=postgresql://postgres:password@localhost:5432/web_eval_agent
+EOF
+            export $(cat .env | grep -v '^#' | xargs)
+            print_status "Created and loaded development .env ✅"
+        else
+            print_warning "Using system environment variables"
         fi
-    done
-    
-    if [ ${#missing_vars[@]} -ne 0 ]; then
-        print_error "Missing required environment variables: ${missing_vars[*]}"
-        exit 1
     fi
     
-    print_status "All required environment variables are set ✅"
+    # Validate required environment variables (skip in dev mode)
+    if [ "$DEV_MODE" = false ]; then
+        local required_vars=(
+            "CODEGEN_ORG_ID"
+            "CODEGEN_API_TOKEN"
+            "GITHUB_TOKEN"
+            "GEMINI_API_KEY"
+            "CLOUDFLARE_API_KEY"
+            "CLOUDFLARE_ACCOUNT_ID"
+            "CLOUDFLARE_WORKER_URL"
+        )
+        
+        local missing_vars=()
+        for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+                missing_vars+=("$var")
+            fi
+        done
+        
+        if [ ${#missing_vars[@]} -ne 0 ]; then
+            print_error "Missing required environment variables: ${missing_vars[*]}"
+            print_status "Use --dev mode to skip this validation"
+            exit 1
+        fi
+        
+        print_status "All required environment variables are set ✅"
+    else
+        print_status "Environment validation skipped (development mode) ✅"
+    fi
 }
 
 # Start database services
 start_database() {
+    if [ "$SKIP_DOCKER" = true ]; then
+        print_header "🗄️ Skipping Database Services (Development Mode)..."
+        print_warning "Database services disabled. Some features may not work."
+        return 0
+    fi
+    
     print_header "🗄️ Starting Database Services..."
     
+    # Ensure Docker is available and running
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is not available. Use --dev mode or restart your shell and try again."
+        print_status "Falling back to development mode..."
+        SKIP_DOCKER=true
+        return 0
+    fi
+    
+    # Start Docker service if not running
+    if ! docker info &> /dev/null; then
+        print_status "Starting Docker service..."
+        sudo service docker start
+        sleep 3
+    fi
+    
     # Check if PostgreSQL is running
-    if ! pg_isready -h localhost -p 5432 &> /dev/null; then
+    if ! command -v pg_isready &> /dev/null || ! pg_isready -h localhost -p 5432 &> /dev/null; then
         print_status "Starting PostgreSQL with Docker..."
+        
+        # Remove existing container if it exists
+        docker rm -f web-eval-postgres &> /dev/null || true
+        
         docker run -d \
             --name web-eval-postgres \
             -e POSTGRES_DB=web_eval_agent \
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=password \
             -p 5432:5432 \
-            postgres:15-alpine || print_warning "PostgreSQL container may already be running"
+            postgres:15-alpine
         
         # Wait for PostgreSQL to be ready
         print_status "Waiting for PostgreSQL to be ready..."
-        for i in {1..30}; do
-            if pg_isready -h localhost -p 5432 &> /dev/null; then
+        for i in {1..60}; do
+            if docker exec web-eval-postgres pg_isready -U postgres &> /dev/null; then
+                print_status "PostgreSQL is ready ✅"
                 break
+            fi
+            if [ $i -eq 60 ]; then
+                print_error "PostgreSQL failed to start within 60 seconds"
+                docker logs web-eval-postgres
+                exit 1
             fi
             sleep 1
         done
+    else
+        print_status "PostgreSQL is already running ✅"
     fi
     
     # Check if Redis is running
-    if ! redis-cli ping &> /dev/null; then
+    if ! command -v redis-cli &> /dev/null || ! redis-cli -h localhost -p 6379 ping &> /dev/null; then
         print_status "Starting Redis with Docker..."
+        
+        # Remove existing container if it exists
+        docker rm -f web-eval-redis &> /dev/null || true
+        
         docker run -d \
             --name web-eval-redis \
             -p 6379:6379 \
-            redis:7-alpine || print_warning "Redis container may already be running"
+            redis:7-alpine
         
         # Wait for Redis to be ready
         print_status "Waiting for Redis to be ready..."
-        for i in {1..10}; do
-            if redis-cli ping &> /dev/null; then
+        for i in {1..30}; do
+            if docker exec web-eval-redis redis-cli ping &> /dev/null; then
+                print_status "Redis is ready ✅"
                 break
+            fi
+            if [ $i -eq 30 ]; then
+                print_error "Redis failed to start within 30 seconds"
+                docker logs web-eval-redis
+                exit 1
             fi
             sleep 1
         done
+    else
+        print_status "Redis is already running ✅"
     fi
     
     print_status "Database services are running ✅"
@@ -169,9 +356,17 @@ setup_backend() {
     print_status "Installing Python dependencies..."
     pip install -r requirements.txt
     
-    # Run database migrations
-    print_status "Running database migrations..."
-    alembic upgrade head || print_warning "Migration failed, continuing..."
+    # Run database migrations (optional for development)
+    if [ "$SKIP_DOCKER" = false ]; then
+        print_status "Running database migrations..."
+        if command -v docker &> /dev/null && docker ps | grep -q web-eval-postgres; then
+            alembic upgrade head || print_warning "Migration failed, continuing without database..."
+        else
+            print_warning "Database not available, skipping migrations..."
+        fi
+    else
+        print_warning "Skipping database migrations (development mode)"
+    fi
     
     cd ..
     print_status "Backend setup complete ✅"
@@ -183,26 +378,41 @@ setup_frontend() {
     
     cd frontend
     
+    # Check for WSL path issues and fix them
+    if grep -qi microsoft /proc/version; then
+        print_status "WSL detected, checking for path issues..."
+        
+        # Clear npm cache to avoid WSL path issues
+        npm cache clean --force 2>/dev/null || true
+        
+        # Remove node_modules if it exists to avoid permission issues
+        if [ -d "node_modules" ]; then
+            print_status "Removing existing node_modules to avoid WSL path issues..."
+            rm -rf node_modules
+        fi
+        
+        # Set npm to use local cache
+        export npm_config_cache="$(pwd)/.npm-cache"
+        mkdir -p .npm-cache
+    fi
+    
     # Install dependencies
     print_status "Installing Node.js dependencies..."
-    npm install
-    
-    # Start the frontend in development mode
-    print_status "Starting frontend in development mode..."
-    npm run dev &
-    FRONTEND_PID=$!
-    
-    # Wait for frontend to be ready
-    print_status "Waiting for frontend to be ready..."
-    for i in {1..30}; do
-        if curl -s http://localhost:5173 &> /dev/null; then
-            break
-        fi
-        sleep 1
-    done
+    if ! npm install; then
+        print_warning "npm install failed, trying with legacy peer deps..."
+        npm install --legacy-peer-deps || {
+            print_error "npm install failed. This might be due to WSL path issues."
+            print_status "Try running the following manually:"
+            print_status "  cd frontend"
+            print_status "  rm -rf node_modules package-lock.json"
+            print_status "  npm cache clean --force"
+            print_status "  npm install --legacy-peer-deps"
+            exit 1
+        }
+    fi
     
     cd ..
-    print_status "Frontend setup complete ✅"
+    print_status "Frontend dependencies installed ✅"
 }
 
 # Start backend server
@@ -413,36 +623,64 @@ EOF
 
 # Display launch information
 show_launch_info() {
-    print_header "🎉 Launch Complete!"
-    echo "=================================================="
-    echo ""
-    echo "🌐 Frontend (Test Dashboard): http://localhost:5173"
-    echo "🚀 Backend API: http://localhost:8000"
-    echo "📚 API Documentation: http://localhost:8000/docs"
-    echo "🔍 API Health: http://localhost:8000/health"
-    echo ""
-    echo "🧪 Test Dashboard Features:"
-    echo "  • Interactive File Tree with search"
-    echo "  • Monaco Code Editor with syntax highlighting"
-    echo "  • Code Graph Visualization with multiple layouts"
-    echo "  • Real-time error detection and highlighting"
-    echo "  • Automated test suite (35 tests)"
-    echo "  • Manual testing instructions"
-    echo ""
-    echo "🔧 Environment:"
-    echo "  • Codegen Org ID: $CODEGEN_ORG_ID"
-    echo "  • GitHub Integration: ✅"
-    echo "  • Gemini AI: ✅"
-    echo "  • Cloudflare Worker: $CLOUDFLARE_WORKER_URL"
-    echo ""
-    echo "📋 Next Steps:"
-    echo "  1. Open http://localhost:5173 in your browser"
-    echo "  2. Click 'Run All Tests' to execute automated tests"
-    echo "  3. Follow manual testing instructions"
-    echo "  4. Test CI/CD integration with real repositories"
-    echo ""
-    echo "🛑 To stop all services: Ctrl+C or run './stop.sh'"
-    echo "=================================================="
+    if [ "$DEV_MODE" = true ]; then
+        print_header "🎉 Development Launch Complete!"
+        echo "=================================================="
+        echo ""
+        echo "🌐 Frontend Dashboard: http://localhost:5173"
+        echo "🚀 Backend API: http://localhost:8000"
+        echo "📚 API Documentation: http://localhost:8000/docs"
+        echo "🔍 API Health: http://localhost:8000/health"
+        echo ""
+        echo "⚠️  Development Mode Notes:"
+        echo "  • Database services are disabled"
+        echo "  • Some features may not work without database"
+        echo "  • API keys are set to development values"
+        echo "  • Perfect for frontend development and testing"
+        echo ""
+        echo "🔧 For full functionality:"
+        echo "  • Run './launch.sh' (without --dev) to enable databases"
+        echo "  • Configure real API keys in .env file"
+        echo ""
+        echo "🛑 To stop all services: Ctrl+C or run './stop.sh'"
+        echo "=================================================="
+    else
+        print_header "🎉 Full Launch Complete!"
+        echo "=================================================="
+        echo ""
+        echo "🌐 Frontend (Test Dashboard): http://localhost:5173"
+        echo "🚀 Backend API: http://localhost:8000"
+        echo "📚 API Documentation: http://localhost:8000/docs"
+        echo "🔍 API Health: http://localhost:8000/health"
+        echo ""
+        echo "🧪 Test Dashboard Features:"
+        echo "  • Interactive File Tree with search"
+        echo "  • Monaco Code Editor with syntax highlighting"
+        echo "  • Code Graph Visualization with multiple layouts"
+        echo "  • Real-time error detection and highlighting"
+        echo "  • Automated test suite (35 tests)"
+        echo "  • Manual testing instructions"
+        echo ""
+        echo "🔧 Environment:"
+        echo "  • Codegen Org ID: $CODEGEN_ORG_ID"
+        if [ "$SKIP_DOCKER" = false ]; then
+            echo "  • Database: PostgreSQL + Redis ✅"
+        else
+            echo "  • Database: Disabled (development mode)"
+        fi
+        echo "  • GitHub Integration: ✅"
+        echo "  • Gemini AI: ✅"
+        echo "  • Cloudflare Worker: $CLOUDFLARE_WORKER_URL"
+        echo ""
+        echo "📋 Next Steps:"
+        echo "  1. Open http://localhost:5173 in your browser"
+        echo "  2. Click 'Run All Tests' to execute automated tests"
+        echo "  3. Follow manual testing instructions"
+        echo "  4. Test CI/CD integration with real repositories"
+        echo ""
+        echo "🛑 To stop all services: Ctrl+C or run './stop.sh'"
+        echo "=================================================="
+    fi
 }
 
 # Cleanup function
@@ -477,10 +715,15 @@ main() {
     # Wait a moment for services to fully start
     sleep 3
     
-    test_codegen_api
-    test_github_api
-    test_cloudflare_worker
-    run_web_eval_tests
+    # Run tests only in full mode
+    if [ "$DEV_MODE" = false ]; then
+        test_codegen_api
+        test_github_api
+        test_cloudflare_worker
+        run_web_eval_tests
+    else
+        print_status "Skipping API tests in development mode"
+    fi
     
     show_launch_info
     

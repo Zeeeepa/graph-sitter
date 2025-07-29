@@ -1,12 +1,13 @@
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from alembic import context
+from alembic import context  # type: ignore[attr-defined]
 import os
 import sys
 
 # Add the backend directory to the path so we can import our models
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+backend_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(0, backend_dir)
 
 # Import your models here
 from models import Base
@@ -86,4 +87,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-
