@@ -57,7 +57,7 @@ class LSPError:
 @dataclass
 class LSPMessage:
     """Base LSP message."""
-    jsonrpc: str = "2.0"
+    jsonrpc: str
     
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -76,6 +76,7 @@ class LSPRequest(LSPMessage):
     @classmethod
     def create(cls, method: str, params: Optional[Dict[str, Any]] = None) -> 'LSPRequest':
         return cls(
+            jsonrpc="2.0",
             id=str(uuid.uuid4()),
             method=method,
             params=params
@@ -155,6 +156,7 @@ class ProtocolHandler:
             if "method" in data:
                 # Request
                 return LSPRequest(
+                    jsonrpc="2.0",
                     id=data["id"],
                     method=data["method"],
                     params=data.get("params")
@@ -171,6 +173,7 @@ class ProtocolHandler:
                     )
                 
                 return LSPResponse(
+                    jsonrpc="2.0",
                     id=data["id"],
                     result=data.get("result"),
                     error=error
@@ -181,6 +184,7 @@ class ProtocolHandler:
                 raise ValueError("Notification missing method")
             
             return LSPNotification(
+                jsonrpc="2.0",
                 method=data["method"],
                 params=data.get("params")
             )
@@ -188,6 +192,7 @@ class ProtocolHandler:
     def create_request(self, method: str, params: Optional[Dict[str, Any]] = None) -> LSPRequest:
         """Create a new LSP request with unique ID."""
         return LSPRequest(
+            jsonrpc="2.0",
             id=self.generate_message_id(),
             method=method,
             params=params
@@ -198,6 +203,7 @@ class ProtocolHandler:
                        error: Optional[LSPError] = None) -> LSPResponse:
         """Create an LSP response for a given request."""
         return LSPResponse(
+            jsonrpc="2.0",
             id=request_id,
             result=result,
             error=error
@@ -207,6 +213,7 @@ class ProtocolHandler:
                           params: Optional[Dict[str, Any]] = None) -> LSPNotification:
         """Create an LSP notification."""
         return LSPNotification(
+            jsonrpc="2.0",
             method=method,
             params=params
         )
@@ -216,7 +223,7 @@ class ProtocolHandler:
                             data: Optional[Any] = None) -> LSPResponse:
         """Create an error response."""
         error = LSPError(code=code.value, message=message, data=data)
-        return LSPResponse(id=request_id, error=error)
+        return LSPResponse(jsonrpc="2.0", id=request_id, error=error)
     
     def register_request_handler(self, method: str, handler: Callable):
         """Register a handler for incoming requests."""
@@ -391,4 +398,3 @@ class SerenaProtocolExtensions:
         if exclude_patterns:
             params["excludePatterns"] = exclude_patterns
         return params
-
