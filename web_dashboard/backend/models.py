@@ -11,13 +11,20 @@ from pydantic import BaseModel, Field
 import uuid
 
 from sqlalchemy import Column, String, DateTime, Boolean, Text, Integer, ForeignKey, JSON
-from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-# SQLAlchemy Base with proper typing
-Base: DeclarativeMeta = declarative_base()
+if TYPE_CHECKING:
+    from sqlalchemy.ext.declarative import DeclarativeMeta
+
+# SQLAlchemy Base
+Base = declarative_base()
+
+# For mypy type checking
+if TYPE_CHECKING:
+    Base: DeclarativeMeta
 
 
 # SQLAlchemy ORM Models
