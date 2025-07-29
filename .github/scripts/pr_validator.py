@@ -27,12 +27,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 try:
     from graph_sitter import Codebase
     from graph_sitter.core.class_definition import Class
-    from graph_sitter.core.external_module import ExternalModule
+    from graph_sitter.core.external_module import ExternalModule  # noqa: F401
     from graph_sitter.core.file import SourceFile
     from graph_sitter.core.function import Function
     from graph_sitter.core.import_resolution import Import
-    from graph_sitter.core.symbol import Symbol
-    from graph_sitter.enums import EdgeType, SymbolType
+    from graph_sitter.core.symbol import Symbol  # noqa: F401
+    from graph_sitter.enums import EdgeType, SymbolType  # noqa: F401
     from graph_sitter.codebase.validation import post_init_validation, PostInitValidationStatus
 
     GRAPH_SITTER_AVAILABLE = True
