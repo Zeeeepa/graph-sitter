@@ -282,7 +282,7 @@ class PRValidator:
             return
         
         # Check if function has implementation
-        if not hasattr(function, "code_block") or not function.code_block:
+        if not hasattr(function, "code_block") or getattr(function, "code_block", None) is None:
             # Skip abstract methods and interface definitions
             if not any(keyword in function.name for keyword in ["abstract", "interface", "protocol"]):
                 self.validation_result.add_issue(
@@ -317,8 +317,9 @@ class PRValidator:
             return
         
         # Check if parameter is used in function body
-        if hasattr(function, "code_block") and function.code_block and hasattr(function.code_block, "source"):
-            function_source = function.code_block.source
+        code_block = getattr(function, "code_block", None)
+        if code_block is not None and hasattr(code_block, "source"):
+            function_source = code_block.source
 
             if param_name not in function_source:
                 self.validation_result.add_issue(
@@ -341,8 +342,9 @@ class PRValidator:
         
         # Check for proper error handling in graph operations
         if any(keyword in function_name.lower() for keyword in ["sync", "reset", "init", "validate"]):
-            if function.code_block and hasattr(function.code_block, "source"):
-                source = function.code_block.source
+            code_block = getattr(function, "code_block", None)
+            if code_block is not None and hasattr(code_block, "source"):
+                source = code_block.source
                 if "try:" not in source and "except" not in source:
                     self.validation_result.add_issue(
                         ValidationIssue(
