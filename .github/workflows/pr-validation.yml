@@ -89,14 +89,14 @@ jobs:
 
       - name: Upload validation artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pr-validation-reports-${{ github.event.pull_request.number }}
           path: |
-            pr_validation_report.md
-            pr_validation_result.json
-            intelligent_validation_report.md
-            intelligent_validation_result.json
+            .github/scripts/pr_validation_report.md
+            .github/scripts/pr_validation_result.json
+            .github/scripts/intelligent_validation_report.md
+            .github/scripts/intelligent_validation_result.json
           retention-days: 30
 
       - name: Parse validation results
@@ -104,10 +104,10 @@ jobs:
         id: validation-results
         run: |
           # Parse structural validation results
-          if [ -f pr_validation_result.json ]; then
-            STRUCTURAL_VALID=$(python -c "import json; result = json.load(open('pr_validation_result.json')); print(result.get('is_valid', False))")
-            STRUCTURAL_ERRORS=$(python -c "import json; result = json.load(open('pr_validation_result.json')); print(result.get('summary', {}).get('errors', 0))")
-            STRUCTURAL_WARNINGS=$(python -c "import json; result = json.load(open('pr_validation_result.json')); print(result.get('summary', {}).get('warnings', 0))")
+          if [ -f .github/scripts/pr_validation_result.json ]; then
+            STRUCTURAL_VALID=$(python -c "import json; result = json.load(open('.github/scripts/pr_validation_result.json')); print(result.get('is_valid', False))")
+            STRUCTURAL_ERRORS=$(python -c "import json; result = json.load(open('.github/scripts/pr_validation_result.json')); print(result.get('summary', {}).get('errors', 0))")
+            STRUCTURAL_WARNINGS=$(python -c "import json; result = json.load(open('.github/scripts/pr_validation_result.json')); print(result.get('summary', {}).get('warnings', 0))")
           else
             STRUCTURAL_VALID="False"
             STRUCTURAL_ERRORS="999"
@@ -115,9 +115,9 @@ jobs:
           fi
 
           # Parse intelligent validation results
-          if [ -f intelligent_validation_result.json ]; then
-            COMBINED_SCORE=$(python -c "import json; result = json.load(open('intelligent_validation_result.json')); print(result.get('combined_score', 0))")
-            AI_STATUS=$(python -c "import json; result = json.load(open('intelligent_validation_result.json')); print(result.get('ai_status', 'not_available'))")
+          if [ -f .github/scripts/intelligent_validation_result.json ]; then
+            COMBINED_SCORE=$(python -c "import json; result = json.load(open('.github/scripts/intelligent_validation_result.json')); print(result.get('combined_score', 0))")
+            AI_STATUS=$(python -c "import json; result = json.load(open('.github/scripts/intelligent_validation_result.json')); print(result.get('ai_status', 'not_available'))")
           else
             COMBINED_SCORE="0"
             AI_STATUS="error"
@@ -142,13 +142,13 @@ jobs:
             let intelligentReport = '';
             
             try {
-              structuralReport = fs.readFileSync('pr_validation_report.md', 'utf8');
+              structuralReport = fs.readFileSync('.github/scripts/pr_validation_report.md', 'utf8');
             } catch (error) {
               structuralReport = '❌ **Structural Validation Failed**: Could not generate report.\n\nError: ' + error.message;
             }
 
             try {
-              intelligentReport = fs.readFileSync('intelligent_validation_report.md', 'utf8');
+              intelligentReport = fs.readFileSync('.github/scripts/intelligent_validation_report.md', 'utf8');
             } catch (error) {
               intelligentReport = '❌ **Intelligent Validation Failed**: Could not generate report.\n\nError: ' + error.message;
             }
@@ -347,4 +347,3 @@ jobs:
           # Exit with success to avoid blocking the PR workflow
           # The actual validation results are communicated via status checks
           exit 0
-
