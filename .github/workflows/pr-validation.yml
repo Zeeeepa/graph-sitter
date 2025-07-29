@@ -1,0 +1,350 @@
+name: Intelligent PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - "develop"
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  pr-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Install additional dependencies
+        run: |
+          # Install codegen SDK if credentials are available
+          if [ -n "${{ secrets.CODEGEN_ORG_ID }}" ] && [ -n "${{ secrets.CODEGEN_API_TOKEN }}" ]; then
+            echo "Installing Codegen SDK..."
+            uv add codegen
+          else
+            echo "Codegen credentials not available, skipping AI validation"
+          fi
+
+      - name: Get PR context
+        id: pr-context
+        run: |
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }})
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Count changes
+          CHANGED_COUNT=$(echo "$CHANGED_FILES" | wc -l)
+          echo "CHANGED_COUNT=$CHANGED_COUNT" >> $GITHUB_OUTPUT
+
+          # Save changed files
+          echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+          echo "$CHANGED_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          # Get PR info
+          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
+          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "PR_ADDITIONS=${{ github.event.pull_request.additions }}" >> $GITHUB_ENV
+          echo "PR_DELETIONS=${{ github.event.pull_request.deletions }}" >> $GITHUB_ENV
+
+      - name: Run Structural PR Validation
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "🔍 Running structural PR validation..."
+          echo "📊 PR Context:"
+          echo "  - Title: $PR_TITLE"
+          echo "  - Author: $PR_AUTHOR"
+          echo "  - Changes: +$PR_ADDITIONS/-$PR_DELETIONS"
+          echo "  - Files: ${{ steps.pr-context.outputs.CHANGED_COUNT }}"
+          echo ""
+
+          cd .github/scripts
+          python pr_validator.py
+
+      - name: Run Intelligent PR Validation
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          CODEGEN_API_TOKEN: ${{ secrets.CODEGEN_API_TOKEN }}
+        run: |
+          echo "🧠 Running intelligent PR validation..."
+          cd .github/scripts
+          python intelligent_pr_validator.py
+
+      - name: Upload validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr-validation-reports-${{ github.event.pull_request.number }}
+          path: |
+            pr_validation_report.md
+            pr_validation_result.json
+            intelligent_validation_report.md
+            intelligent_validation_result.json
+          retention-days: 30
+
+      - name: Parse validation results
+        if: always()
+        id: validation-results
+        run: |
+          # Parse structural validation results
+          if [ -f pr_validation_result.json ]; then
+            STRUCTURAL_VALID=$(python -c "import json; result = json.load(open('pr_validation_result.json')); print(result.get('is_valid', False))")
+            STRUCTURAL_ERRORS=$(python -c "import json; result = json.load(open('pr_validation_result.json')); print(result.get('summary', {}).get('errors', 0))")
+            STRUCTURAL_WARNINGS=$(python -c "import json; result = json.load(open('pr_validation_result.json')); print(result.get('summary', {}).get('warnings', 0))")
+          else
+            STRUCTURAL_VALID="False"
+            STRUCTURAL_ERRORS="999"
+            STRUCTURAL_WARNINGS="0"
+          fi
+
+          # Parse intelligent validation results
+          if [ -f intelligent_validation_result.json ]; then
+            COMBINED_SCORE=$(python -c "import json; result = json.load(open('intelligent_validation_result.json')); print(result.get('combined_score', 0))")
+            AI_STATUS=$(python -c "import json; result = json.load(open('intelligent_validation_result.json')); print(result.get('ai_status', 'not_available'))")
+          else
+            COMBINED_SCORE="0"
+            AI_STATUS="error"
+          fi
+
+          echo "STRUCTURAL_VALID=$STRUCTURAL_VALID" >> $GITHUB_OUTPUT
+          echo "STRUCTURAL_ERRORS=$STRUCTURAL_ERRORS" >> $GITHUB_OUTPUT
+          echo "STRUCTURAL_WARNINGS=$STRUCTURAL_WARNINGS" >> $GITHUB_OUTPUT
+          echo "COMBINED_SCORE=$COMBINED_SCORE" >> $GITHUB_OUTPUT
+          echo "AI_STATUS=$AI_STATUS" >> $GITHUB_OUTPUT
+
+      - name: Comment validation results on PR
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            // Read validation reports
+            let structuralReport = '';
+            let intelligentReport = '';
+            
+            try {
+              structuralReport = fs.readFileSync('pr_validation_report.md', 'utf8');
+            } catch (error) {
+              structuralReport = '❌ **Structural Validation Failed**: Could not generate report.\n\nError: ' + error.message;
+            }
+
+            try {
+              intelligentReport = fs.readFileSync('intelligent_validation_report.md', 'utf8');
+            } catch (error) {
+              intelligentReport = '❌ **Intelligent Validation Failed**: Could not generate report.\n\nError: ' + error.message;
+            }
+
+            // Get validation scores
+            const combinedScore = '${{ steps.validation-results.outputs.COMBINED_SCORE }}';
+            const structuralValid = '${{ steps.validation-results.outputs.STRUCTURAL_VALID }}';
+            const structuralErrors = '${{ steps.validation-results.outputs.STRUCTURAL_ERRORS }}';
+            const structuralWarnings = '${{ steps.validation-results.outputs.STRUCTURAL_WARNINGS }}';
+            const aiStatus = '${{ steps.validation-results.outputs.AI_STATUS }}';
+
+            // Determine status emoji
+            let statusEmoji = '❌';
+            if (parseFloat(combinedScore) >= 90) statusEmoji = '✅';
+            else if (parseFloat(combinedScore) >= 75) statusEmoji = '🟢';
+            else if (parseFloat(combinedScore) >= 60) statusEmoji = '🟡';
+            else statusEmoji = '🔴';
+
+            // Create enhanced comment
+            const commentBody = `## 🧠 Graph-Sitter PR Validation Results ${statusEmoji}
+
+            **Combined Score: ${combinedScore}/100**
+
+            ### Quick Summary
+            - **Structural Validation**: ${structuralValid === 'True' ? '✅ Passed' : '❌ Failed'}
+            - **Errors**: ${structuralErrors}
+            - **Warnings**: ${structuralWarnings}
+            - **AI Analysis**: ${aiStatus === 'completed' ? '✅ Completed' : aiStatus === 'not_available' ? '⚠️ Not Available' : '❌ ' + aiStatus}
+
+            ### 🔍 Structural Validation Report
+            <details>
+            <summary>Click to expand structural validation details</summary>
+
+            ${structuralReport}
+            </details>
+
+            ### 🧠 Intelligent Validation Report
+            <details>
+            <summary>Click to expand intelligent validation details</summary>
+
+            ${intelligentReport}
+            </details>
+
+            ### 🔧 Next Steps
+            ${parseFloat(combinedScore) >= 75 
+              ? '✅ **Ready for Review**: This PR meets quality standards and is ready for human review.' 
+              : parseFloat(combinedScore) >= 60 
+                ? '🟡 **Needs Minor Improvements**: Address the recommendations above before merging.' 
+                : '🔴 **Requires Significant Changes**: Please fix the identified issues before proceeding.'
+            }
+
+            ---
+            *Intelligent validation powered by graph-sitter + Codegen AI*  
+            *Generated at: ${new Date().toISOString()}*`;
+
+            // Post comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
+
+      - name: Set detailed PR status checks
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const combinedScore = parseFloat('${{ steps.validation-results.outputs.COMBINED_SCORE }}');
+            const structuralValid = '${{ steps.validation-results.outputs.STRUCTURAL_VALID }}' === 'True';
+            const structuralErrors = parseInt('${{ steps.validation-results.outputs.STRUCTURAL_ERRORS }}');
+            const structuralWarnings = parseInt('${{ steps.validation-results.outputs.STRUCTURAL_WARNINGS }}');
+            const aiStatus = '${{ steps.validation-results.outputs.AI_STATUS }}';
+
+            const sha = '${{ github.event.pull_request.head.sha }}';
+            const targetUrl = `${context.payload.pull_request.html_url}/checks`;
+
+            // Overall status
+            const overallState = combinedScore >= 75 ? 'success' : 'failure';
+            const overallDescription = `Score: ${combinedScore}/100 | ${structuralErrors} errors, ${structuralWarnings} warnings`;
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: sha,
+              state: overallState,
+              target_url: targetUrl,
+              description: overallDescription,
+              context: 'Graph-Sitter PR Validation'
+            });
+
+            // Structural validation status
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: sha,
+              state: structuralValid ? 'success' : 'failure',
+              target_url: targetUrl,
+              description: `${structuralErrors} errors, ${structuralWarnings} warnings`,
+              context: 'Structural Validation'
+            });
+
+            // AI validation status
+            const aiState = aiStatus === 'completed' ? 'success' : 
+                           aiStatus === 'not_available' ? 'pending' : 'failure';
+            const aiDescription = aiStatus === 'completed' ? 'AI analysis completed' :
+                                 aiStatus === 'not_available' ? 'AI analysis not available' :
+                                 `AI analysis ${aiStatus}`;
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: sha,
+              state: aiState,
+              target_url: targetUrl,
+              description: aiDescription,
+              context: 'AI Validation'
+            });
+
+      - name: Add PR labels based on validation
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const combinedScore = parseFloat('${{ steps.validation-results.outputs.COMBINED_SCORE }}');
+            const structuralErrors = parseInt('${{ steps.validation-results.outputs.STRUCTURAL_ERRORS }}');
+
+            const labelsToAdd = [];
+            const labelsToRemove = ['validation-passed', 'validation-failed', 'needs-fixes', 'ready-for-review'];
+
+            // Add labels based on score
+            if (combinedScore >= 90) {
+              labelsToAdd.push('validation-passed', 'ready-for-review');
+            } else if (combinedScore >= 75) {
+              labelsToAdd.push('validation-passed');
+            } else if (combinedScore >= 60) {
+              labelsToAdd.push('needs-minor-fixes');
+            } else {
+              labelsToAdd.push('validation-failed', 'needs-fixes');
+            }
+
+            // Add error-specific labels
+            if (structuralErrors > 0) {
+              labelsToAdd.push('has-errors');
+            }
+
+            // Remove old labels
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label
+                });
+              } catch (error) {
+                // Label might not exist, ignore
+              }
+            }
+
+            // Add new labels
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: labelsToAdd
+              });
+            }
+
+      - name: Determine final job status
+        if: always()
+        run: |
+          COMBINED_SCORE="${{ steps.validation-results.outputs.COMBINED_SCORE }}"
+          STRUCTURAL_ERRORS="${{ steps.validation-results.outputs.STRUCTURAL_ERRORS }}"
+
+          echo "🎯 Final Validation Results:"
+          echo "  Combined Score: $COMBINED_SCORE/100"
+          echo "  Structural Errors: $STRUCTURAL_ERRORS"
+
+          # Always pass the workflow, but provide clear feedback
+          # The status checks and PR comments provide the actual validation results
+          if (( $(echo "$COMBINED_SCORE >= 75" | bc -l) )); then
+            echo "✅ Intelligent validation PASSED!"
+            echo "  PR meets quality standards and is ready for review."
+          elif (( $(echo "$COMBINED_SCORE >= 60" | bc -l) )); then
+            echo "🟡 Intelligent validation PASSED with recommendations"
+            echo "  PR has minor issues but can proceed with caution."
+          else
+            echo "❌ Intelligent validation indicates significant issues"
+            echo "  PR requires improvements before merging."
+          fi
+
+          # Exit with success to avoid blocking the PR workflow
+          # The actual validation results are communicated via status checks
+          exit 0
+
