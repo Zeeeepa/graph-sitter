@@ -17,7 +17,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass, asdict
 
 # Import the base validator
-from pr_validator import PRValidator, ValidationResult, ValidationSeverity
+from pr_validator import PRValidator, ValidationResult, ValidationSeverity, ValidationIssue
 
 # Codegen imports
 try:
@@ -219,7 +219,7 @@ class IntelligentPRValidator:
         # Format structural issues
         issues_summary = ""
         if structural_result.issues:
-            issues_by_category: Dict[str, List[ValidationIssue]] = {}
+            issues_by_category = {}
             for issue in structural_result.issues[:10]:  # Top 10 issues
                 category = issue.category
                 if category not in issues_by_category:
@@ -377,7 +377,7 @@ Provide specific, actionable feedback that helps improve the PR quality while ma
             ai_score = analysis.get("overall_score", 50)
 
             # Extract recommendations
-            if "recommendations" in analysis:
+            if "recommendations" in analysis and combined.recommendations is not None:
                 combined.recommendations.extend(analysis["recommendations"])
 
         # Weight: 60% structural, 40% AI (if available)
@@ -387,14 +387,15 @@ Provide specific, actionable feedback that helps improve the PR quality while ma
             combined.combined_score = structural_score
 
         # Add structural recommendations
-        if structural_result.summary.get("errors", 0) > 0:
+        if structural_result.summary.get("errors", 0) > 0 and combined.recommendations is not None:
             combined.recommendations.append("Fix all structural errors before merging")
 
-        if structural_result.summary.get("warnings", 0) > 5:
+        if structural_result.summary.get("warnings", 0) > 5 and combined.recommendations is not None:
             combined.recommendations.append("Consider addressing structural warnings")
 
         # Add graph-sitter specific recommendations
-        if any("graph" in issue.category.lower() for issue in structural_result.issues):
+        if (any("graph" in issue.category.lower() for issue in structural_result.issues) and 
+            combined.recommendations is not None):
             combined.recommendations.append("Review graph-sitter specific patterns and optimizations")
 
         return combined
@@ -421,9 +422,10 @@ Provide specific, actionable feedback that helps improve the PR quality while ma
         if not self.codebase:
             return None
 
-        for file in self.codebase.files:
-            if hasattr(file, "path") and str(file.path).endswith(file_path):
-                return file
+        if hasattr(self.codebase, 'files') and hasattr(self.codebase.files, '__iter__'):
+            for file in self.codebase.files:
+                if hasattr(file, "path") and str(file.path).endswith(file_path):
+                    return file
         return None
 
 
@@ -498,7 +500,7 @@ def generate_intelligent_report(result: IntelligentValidationResult) -> str:
         report += "\n## 🔍 Detailed Issues\n"
 
         # Group by category
-        categories: Dict[str, List[ValidationIssue]] = {}
+        categories = {}
         for issue in result.structural_validation.issues:
             if issue.category not in categories:
                 categories[issue.category] = []
