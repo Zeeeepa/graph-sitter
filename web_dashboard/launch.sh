@@ -271,9 +271,22 @@ check_dependencies() {
         print_success "Dependencies installed successfully"
     fi
     
-    # Docker check (unless skipped)
-    if [ "$SKIP_DOCKER" = false ] && ! command -v docker &> /dev/null; then
-        print_warning "Docker not found."
+    # Enhanced Docker check with proper service detection
+    check_docker_installation
+    
+    print_success "Dependency check complete ✅"
+}
+
+# Enhanced Docker checking and installation
+check_docker_installation() {
+    if [ "$SKIP_DOCKER" = true ]; then
+        print_warning "Skipping Docker installation (--skip-docker or --dev mode)"
+        return 0
+    fi
+    
+    # Check if Docker command exists
+    if ! command -v docker &> /dev/null; then
+        print_warning "Docker command not found."
         if [ "$DEV_MODE" = false ]; then
             print_status "Attempting to install Docker for $ENVIRONMENT..."
             if ! install_docker_for_environment; then
@@ -283,13 +296,68 @@ check_dependencies() {
         else
             print_status "Development mode enabled - Docker installation skipped"
         fi
-    elif [ "$SKIP_DOCKER" = true ]; then
-        print_warning "Skipping Docker installation (--skip-docker or --dev mode)"
-    elif command -v docker &> /dev/null; then
-        print_status "Docker found ✅"
+        return 0
     fi
     
-    print_success "Dependency check complete ✅"
+    # Docker command exists, now check if service is properly configured
+    print_status "Docker command found, checking service status..."
+    
+    # Check if Docker daemon is accessible
+    if docker info &> /dev/null; then
+        print_success "Docker is running and accessible ✅"
+        return 0
+    fi
+    
+    # Docker command exists but daemon not accessible
+    print_warning "Docker command found but daemon not accessible"
+    
+    # Try to start Docker service
+    if systemctl is-active --quiet docker 2>/dev/null; then
+        print_status "Docker service is active but not accessible - checking permissions..."
+    elif systemctl list-unit-files docker.service &> /dev/null; then
+        print_status "Docker service exists but not running - attempting to start..."
+        if sudo systemctl start docker 2>/dev/null; then
+            print_success "Docker service started successfully"
+            sleep 2
+            if docker info &> /dev/null; then
+                print_success "Docker is now accessible ✅"
+                return 0
+            fi
+        fi
+    else
+        print_warning "Docker service not found in systemd"
+        
+        # For WSL, Docker might need different handling
+        if [[ "$ENVIRONMENT" == "WSL" ]]; then
+            print_status "WSL detected - trying alternative Docker startup methods..."
+            
+            # Try starting Docker daemon manually (for Docker Desktop integration)
+            if sudo service docker start 2>/dev/null; then
+                print_status "Docker service started via service command"
+                sleep 3
+                if docker info &> /dev/null; then
+                    print_success "Docker is now accessible ✅"
+                    return 0
+                fi
+            fi
+            
+            # Check if Docker Desktop is running on Windows
+            if [[ -f "/mnt/c/Program Files/Docker/Docker/Docker Desktop.exe" ]] || [[ -f "/mnt/c/Users/$USER/AppData/Local/Docker/Docker Desktop.exe" ]]; then
+                print_tip "Docker Desktop detected on Windows. Please ensure Docker Desktop is running and WSL integration is enabled."
+                print_tip "In Docker Desktop: Settings → Resources → WSL Integration → Enable integration"
+            fi
+        fi
+    fi
+    
+    # If we get here, Docker isn't working properly
+    print_error "Docker is installed but not accessible. Common fixes:"
+    print_tip "1. Add your user to docker group: sudo usermod -aG docker \$USER"
+    print_tip "2. Restart your shell: newgrp docker"
+    print_tip "3. For WSL: Ensure Docker Desktop is running with WSL integration"
+    print_tip "4. Try: sudo systemctl enable docker && sudo systemctl start docker"
+    
+    print_warning "Continuing in development mode without Docker..."
+    SKIP_DOCKER=true
 }
 
 # Environment-aware Docker installation
