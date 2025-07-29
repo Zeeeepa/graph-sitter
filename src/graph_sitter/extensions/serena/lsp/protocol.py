@@ -48,16 +48,16 @@ class LSPError:
     data: Optional[Any] = None
     
     def to_dict(self) -> Dict[str, Any]:
-        result = {"code": self.code, "message": self.message}
+        error_dict: Dict[str, Any] = {"code": self.code, "message": self.message}
         if self.data is not None:
-            result["data"] = self.data
-        return result
+            error_dict["data"] = self.data
+        return error_dict
 
 
 @dataclass
 class LSPMessage:
     """Base LSP message."""
-    jsonrpc: str = "2.0"
+    jsonrpc: str
     
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -76,6 +76,7 @@ class LSPRequest(LSPMessage):
     @classmethod
     def create(cls, method: str, params: Optional[Dict[str, Any]] = None) -> 'LSPRequest':
         return cls(
+            jsonrpc="2.0",
             id=str(uuid.uuid4()),
             method=method,
             params=params
@@ -90,12 +91,12 @@ class LSPResponse(LSPMessage):
     error: Optional[LSPError] = None
     
     def to_dict(self) -> Dict[str, Any]:
-        result = {"jsonrpc": self.jsonrpc, "id": self.id}
+        response_dict: Dict[str, Any] = {"jsonrpc": self.jsonrpc, "id": self.id}
         if self.error:
-            result["error"] = self.error.to_dict()
+            response_dict["error"] = self.error.to_dict()
         else:
-            result["result"] = self.result
-        return result
+            response_dict["result"] = self.result
+        return response_dict
 
 
 @dataclass
@@ -155,6 +156,7 @@ class ProtocolHandler:
             if "method" in data:
                 # Request
                 return LSPRequest(
+                    jsonrpc="2.0",
                     id=data["id"],
                     method=data["method"],
                     params=data.get("params")
@@ -171,6 +173,7 @@ class ProtocolHandler:
                     )
                 
                 return LSPResponse(
+                    jsonrpc="2.0",
                     id=data["id"],
                     result=data.get("result"),
                     error=error
@@ -181,6 +184,7 @@ class ProtocolHandler:
                 raise ValueError("Notification missing method")
             
             return LSPNotification(
+                jsonrpc="2.0",
                 method=data["method"],
                 params=data.get("params")
             )
@@ -188,6 +192,7 @@ class ProtocolHandler:
     def create_request(self, method: str, params: Optional[Dict[str, Any]] = None) -> LSPRequest:
         """Create a new LSP request with unique ID."""
         return LSPRequest(
+            jsonrpc="2.0",
             id=self.generate_message_id(),
             method=method,
             params=params
@@ -198,6 +203,7 @@ class ProtocolHandler:
                        error: Optional[LSPError] = None) -> LSPResponse:
         """Create an LSP response for a given request."""
         return LSPResponse(
+            jsonrpc="2.0",
             id=request_id,
             result=result,
             error=error
@@ -207,6 +213,7 @@ class ProtocolHandler:
                           params: Optional[Dict[str, Any]] = None) -> LSPNotification:
         """Create an LSP notification."""
         return LSPNotification(
+            jsonrpc="2.0",
             method=method,
             params=params
         )
@@ -216,7 +223,7 @@ class ProtocolHandler:
                             data: Optional[Any] = None) -> LSPResponse:
         """Create an error response."""
         error = LSPError(code=code.value, message=message, data=data)
-        return LSPResponse(id=request_id, error=error)
+        return LSPResponse(jsonrpc="2.0", id=request_id, error=error)
     
     def register_request_handler(self, method: str, handler: Callable):
         """Register a handler for incoming requests."""
@@ -302,7 +309,7 @@ class ProtocolHandler:
     
     def track_request(self, request: LSPRequest) -> asyncio.Future:
         """Track a request for response correlation."""
-        future = asyncio.Future()
+        future: asyncio.Future = asyncio.Future()
         self._pending_requests[request.id] = future
         return future
     
@@ -351,7 +358,7 @@ class SerenaProtocolExtensions:
     @staticmethod
     def create_analyze_file_request(file_path: str, content: Optional[str] = None) -> Dict[str, Any]:
         """Create parameters for file analysis request."""
-        params = {"uri": f"file://{file_path}"}
+        params: Dict[str, Any] = {"uri": f"file://{file_path}"}
         if content is not None:
             params["content"] = content
         return params
@@ -360,7 +367,7 @@ class SerenaProtocolExtensions:
     def create_get_errors_request(file_path: Optional[str] = None, 
                                 severity_filter: Optional[List[str]] = None) -> Dict[str, Any]:
         """Create parameters for error retrieval request."""
-        params = {}
+        params: Dict[str, Any] = {}
         if file_path:
             params["uri"] = f"file://{file_path}"
         if severity_filter:
@@ -372,7 +379,7 @@ class SerenaProtocolExtensions:
                                           include_suggestions: bool = True,
                                           max_errors: Optional[int] = None) -> Dict[str, Any]:
         """Create parameters for comprehensive error analysis request."""
-        params = {
+        params: Dict[str, Any] = {
             "includeContext": include_context,
             "includeSuggestions": include_suggestions
         }
@@ -385,10 +392,9 @@ class SerenaProtocolExtensions:
                                       file_patterns: Optional[List[str]] = None,
                                       exclude_patterns: Optional[List[str]] = None) -> Dict[str, Any]:
         """Create parameters for codebase analysis request."""
-        params = {"rootUri": f"file://{root_path}"}
+        params: Dict[str, Any] = {"rootUri": f"file://{root_path}"}
         if file_patterns:
             params["includePatterns"] = file_patterns
         if exclude_patterns:
             params["excludePatterns"] = exclude_patterns
         return params
-
