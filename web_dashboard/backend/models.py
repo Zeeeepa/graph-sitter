@@ -14,22 +14,15 @@ from sqlalchemy import Column, String, DateTime, Boolean, Text, Integer, Foreign
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-from typing import Any, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.declarative import DeclarativeMeta
+from typing import Any
 
 # SQLAlchemy Base
-Base = declarative_base()
-
-# For mypy type checking
-if TYPE_CHECKING:
-    Base: DeclarativeMeta
+Base = declarative_base()  # type: ignore[misc]
 
 
 # SQLAlchemy ORM Models
 
-class ProjectORM(Base):  # type: ignore[misc]
+class ProjectORM(Base):
     """SQLAlchemy Project model."""
     __tablename__ = "projects"
     
@@ -53,7 +46,7 @@ class ProjectORM(Base):  # type: ignore[misc]
     validation_results = relationship("ValidationResultORM", back_populates="project")
 
 
-class AgentRunORM(Base):  # type: ignore[misc]
+class AgentRunORM(Base):
     """SQLAlchemy AgentRun model."""
     __tablename__ = "agent_runs"
     
@@ -73,7 +66,7 @@ class AgentRunORM(Base):  # type: ignore[misc]
     project = relationship("ProjectORM", back_populates="agent_runs")
 
 
-class WebhookEventORM(Base):  # type: ignore[misc]
+class WebhookEventORM(Base):
     """SQLAlchemy WebhookEvent model."""
     __tablename__ = "webhook_events"
     
@@ -91,7 +84,7 @@ class WebhookEventORM(Base):  # type: ignore[misc]
     project = relationship("ProjectORM", back_populates="webhook_events")
 
 
-class ValidationResultORM(Base):  # type: ignore[misc]
+class ValidationResultORM(Base):
     """SQLAlchemy ValidationResult model."""
     __tablename__ = "validation_results"
     
@@ -113,7 +106,7 @@ class ValidationResultORM(Base):  # type: ignore[misc]
     project = relationship("ProjectORM", back_populates="validation_results")
 
 
-class UserORM(Base):  # type: ignore[misc]
+class UserORM(Base):
     """SQLAlchemy User model."""
     __tablename__ = "users"
     
