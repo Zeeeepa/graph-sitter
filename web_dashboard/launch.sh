@@ -105,10 +105,20 @@ check_dependencies() {
     
     # Check for Docker and offer installation (unless skipped)
     if [ "$SKIP_DOCKER" = false ] && ! command -v docker &> /dev/null; then
-        print_warning "Docker not found. Installing Docker for WSL2..."
-        install_docker_wsl2
+        print_warning "Docker not found."
+        if [ "$DEV_MODE" = false ]; then
+            print_status "Attempting to install Docker for WSL2..."
+            if ! install_docker_wsl2; then
+                print_warning "Docker installation failed. Continuing in development mode..."
+                SKIP_DOCKER=true
+            fi
+        else
+            print_status "Development mode enabled - Docker installation skipped"
+        fi
     elif [ "$SKIP_DOCKER" = true ]; then
         print_warning "Skipping Docker installation (--skip-docker or --dev mode)"
+    elif command -v docker &> /dev/null; then
+        print_status "Docker found ✅"
     fi
     
     if [ ${#missing_deps[@]} -ne 0 ]; then
@@ -140,18 +150,23 @@ install_docker_wsl2() {
         print_status "WSL2 detected. Installing Docker..."
         
         # Update package index
-        sudo apt-get update
+        if ! sudo apt-get update; then
+            print_error "Failed to update package index"
+            return 1
+        fi
         
         # Install prerequisites
-        sudo apt-get install -y \
-            ca-certificates \
-            curl \
-            gnupg \
-            lsb-release
+        if ! sudo apt-get install -y ca-certificates curl gnupg lsb-release; then
+            print_error "Failed to install prerequisites"
+            return 1
+        fi
         
         # Add Docker's official GPG key
         sudo mkdir -p /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        if ! curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg; then
+            print_error "Failed to add Docker GPG key"
+            return 1
+        fi
         
         # Set up the repository
         echo \
@@ -159,16 +174,24 @@ install_docker_wsl2() {
           $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         
         # Update package index again
-        sudo apt-get update
+        if ! sudo apt-get update; then
+            print_error "Failed to update package index after adding Docker repository"
+            return 1
+        fi
         
         # Install Docker Engine
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        if ! sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
+            print_error "Failed to install Docker Engine"
+            return 1
+        fi
         
         # Add user to docker group
         sudo usermod -aG docker $USER
         
         # Start Docker service
-        sudo service docker start
+        if ! sudo service docker start; then
+            print_warning "Failed to start Docker service automatically"
+        fi
         
         print_status "Docker installed successfully! ✅"
         print_warning "You may need to restart your shell or run 'newgrp docker' to use Docker without sudo."
@@ -182,7 +205,7 @@ install_docker_wsl2() {
     else
         print_error "Not running in WSL2. Please install Docker manually."
         print_error "Visit: https://docs.docker.com/get-docker/"
-        exit 1
+        return 1
     fi
 }
 
@@ -267,8 +290,15 @@ start_database() {
     # Start Docker service if not running
     if ! docker info &> /dev/null; then
         print_status "Starting Docker service..."
-        sudo service docker start
-        sleep 3
+        if sudo service docker start 2>/dev/null; then
+            print_status "Docker service started successfully"
+            sleep 3
+        else
+            print_error "Failed to start Docker service. Docker may not be installed."
+            print_status "Falling back to development mode..."
+            SKIP_DOCKER=true
+            return 0
+        fi
     fi
     
     # Check if PostgreSQL is running

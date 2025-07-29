@@ -56,14 +56,26 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Web-Eval-Agent Dashboard Backend")
     
-    # Initialize database
+    # Initialize database (skip in development mode if no database available)
     database = Database()
-    await database.initialize()
+    try:
+        await database.initialize()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.warning(f"Database initialization failed: {e}")
+        logger.info("Running in development mode without database")
     
     # Initialize integrations
     await github_integration.initialize()
     await codegen_client.initialize()
-    await validation_pipeline.initialize()
+    
+    # Initialize validation pipeline (skip if database not available)
+    try:
+        await validation_pipeline.initialize()
+        logger.info("Validation pipeline initialized")
+    except Exception as e:
+        logger.warning(f"Validation pipeline initialization failed: {e}")
+        logger.info("Running without validation pipeline")
     
     logger.info("Backend initialization complete")
     
@@ -71,10 +83,18 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Shutting down backend")
-    await database.close()
+    try:
+        await database.close()
+    except Exception as e:
+        logger.warning(f"Database shutdown failed: {e}")
+    
     await github_integration.shutdown()
     await codegen_client.shutdown()
-    await validation_pipeline.shutdown()
+    
+    try:
+        await validation_pipeline.shutdown()
+    except Exception as e:
+        logger.warning(f"Validation pipeline shutdown failed: {e}")
 
 # Create FastAPI app
 app = FastAPI(
