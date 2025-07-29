@@ -219,7 +219,7 @@ class IntelligentPRValidator:
         # Format structural issues
         issues_summary = ""
         if structural_result.issues:
-            issues_by_category = {}
+            issues_by_category: Dict[str, List[ValidationIssue]] = {}
             for issue in structural_result.issues[:10]:  # Top 10 issues
                 category = issue.category
                 if category not in issues_by_category:
@@ -422,10 +422,16 @@ Provide specific, actionable feedback that helps improve the PR quality while ma
         if not self.codebase:
             return None
 
-        if hasattr(self.codebase, 'files') and hasattr(self.codebase.files, '__iter__'):
-            for file in self.codebase.files:
-                if hasattr(file, "path") and str(file.path).endswith(file_path):
-                    return file
+        if hasattr(self.codebase, 'files'):
+            try:
+                files = self.codebase.files
+                if hasattr(files, '__iter__'):
+                    for file in files:
+                        if hasattr(file, "path") and str(file.path).endswith(file_path):
+                            return file
+            except (TypeError, AttributeError):
+                # Handle case where files is not iterable
+                pass
         return None
 
 
@@ -500,7 +506,7 @@ def generate_intelligent_report(result: IntelligentValidationResult) -> str:
         report += "\n## 🔍 Detailed Issues\n"
 
         # Group by category
-        categories = {}
+        categories: Dict[str, List[ValidationIssue]] = {}
         for issue in result.structural_validation.issues:
             if issue.category not in categories:
                 categories[issue.category] = []
