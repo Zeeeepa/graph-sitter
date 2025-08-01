@@ -10,6 +10,7 @@ This module contains the four core error handling methods that are added to the 
 
 from typing import List, Dict, Any, Optional
 from graph_sitter.shared.logging.get_logger import get_logger
+from graph_sitter.core.working_error_detection import WorkingErrorDetector, ErrorInfo as WorkingErrorInfo
 
 logger = get_logger(__name__)
 
@@ -31,7 +32,7 @@ class SerenaErrorMethods:
     
     def errors(self) -> List[Dict[str, Any]]:
         """
-        Get all errors in the codebase.
+        Get all errors in the codebase using working error detection.
         
         Returns:
             List of error dictionaries with id, file_path, line, message, severity, etc.
@@ -43,34 +44,36 @@ class SerenaErrorMethods:
             >>> for error in all_errors:
             ...     print(f"{error['file_path']}:{error['line']} - {error['message']}")
         """
-        analyzer = self._ensure_serena_analyzer()
-        if not analyzer:
-            logger.warning("Serena analyzer not available, returning empty error list")
-            return []
-        
         try:
-            # Collect all LSP diagnostics
-            diagnostics = analyzer.collect_all_lsp_diagnostics()
+            # Use working error detection
+            detector = WorkingErrorDetector(str(self.repo_path))
+            all_errors = detector.scan_directory()
             
-            # Convert to simple dictionary format
-            errors = []
-            for diag in diagnostics:
-                errors.append({
-                    'id': diag.id,
-                    'file_path': diag.file_path,
-                    'line': diag.line,
-                    'character': diag.character,
-                    'message': diag.message,
-                    'severity': diag.severity,
-                    'code': diag.code,
-                    'source': diag.source,
-                    'has_fix': len(analyzer._generate_fix_suggestions(diag)) > 0
-                })
+            # Convert to standard format
+            error_list = []
+            for error in all_errors:
+                error_dict = {
+                    'id': f"{error.file_path}:{error.line}:{error.column}",
+                    'file_path': error.file_path,
+                    'line': error.line,
+                    'character': error.column,
+                    'column': error.column,
+                    'severity': error.severity,
+                    'message': error.message,
+                    'source': error.source,
+                    'code': error.code,
+                    'error_type': error.error_type,
+                    'has_fix': False  # TODO: Implement fix suggestions
+                }
+                error_list.append(error_dict)
             
-            return errors
+            logger.info(f"Found {len(error_list)} errors using working detection")
+            return error_list
             
         except Exception as e:
-            logger.error(f"Error collecting codebase errors: {e}")
+            logger.error(f"Error getting errors: {e}")
+            import traceback
+            logger.error(f"Error traceback: {traceback.format_exc()}")
             return []
     
     def full_error_context(self, error_id: str) -> Optional[Dict[str, Any]]:
@@ -333,4 +336,3 @@ class SerenaErrorMethods:
             'description': 'Basic syntax fix (placeholder - would fix common syntax issues)',
             'changes': [f'Would fix syntax in {context.error.file_path}']
         }
-

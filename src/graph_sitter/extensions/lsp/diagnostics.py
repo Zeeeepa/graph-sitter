@@ -48,27 +48,34 @@ class CodebaseDiagnostics:
         try:
             self._lsp_manager = get_lsp_manager(self.codebase.repo_path, self.enable_lsp)
             
-            # Hook into the codebase's apply_diffs method
-            original_apply_diffs = self.codebase.ctx.apply_diffs
-            
-            def enhanced_apply_diffs(diffs):
-                # Call original method
-                result = original_apply_diffs(diffs)
+            # Only hook into apply_diffs if the method exists
+            if hasattr(self.codebase, 'ctx') and hasattr(self.codebase.ctx, 'apply_diffs'):
+                original_apply_diffs = self.codebase.ctx.apply_diffs
                 
-                # Update LSP context
-                if self._lsp_manager:
-                    self._lsp_manager.apply_diffs(diffs)
+                def enhanced_apply_diffs(diffs):
+                    # Call original method
+                    result = original_apply_diffs(diffs)
+                    
+                    # Update LSP context
+                    if self._lsp_manager:
+                        try:
+                            self._lsp_manager.apply_diffs(diffs)
+                        except Exception as e:
+                            logger.warning(f"Failed to update LSP context: {e}")
+                    
+                    return result
                 
-                return result
-            
-            # Replace the method
-            self.codebase.ctx.apply_diffs = enhanced_apply_diffs
+                # Replace the method
+                self.codebase.ctx.apply_diffs = enhanced_apply_diffs
             
             logger.info(f"LSP diagnostics enabled for {self.codebase.repo_path}")
             
         except Exception as e:
             logger.error(f"Failed to initialize LSP diagnostics: {e}")
+            import traceback
+            logger.error(f"LSP initialization traceback: {traceback.format_exc()}")
             self.enable_lsp = False
+            self._lsp_manager = None
     
     @property
     def errors(self) -> List[ErrorInfo]:

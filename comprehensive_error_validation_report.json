@@ -1,0 +1,102 @@
+{
+  "test_summary": {
+    "test_directory": "test_error_validation",
+    "total_test_files": 4,
+    "expected_total_errors": 17
+  },
+  "expected_errors": {
+    "syntax_errors.py": {
+      "expected_count": 5,
+      "error_types": [
+        "syntax_error",
+        "indentation_error",
+        "invalid_syntax"
+      ]
+    },
+    "import_errors.py": {
+      "expected_count": 6,
+      "error_types": [
+        "import_error",
+        "name_error",
+        "undefined_variable"
+      ]
+    },
+    "type_errors.py": {
+      "expected_count": 6,
+      "error_types": [
+        "type_error",
+        "zero_division_error",
+        "attribute_error"
+      ]
+    },
+    "valid_code.py": {
+      "expected_count": 0,
+      "error_types": []
+    }
+  },
+  "python_syntax_results": {
+    "syntax_errors.py": {
+      "python_syntax_errors": 1,
+      "error": "expected ':' (syntax_errors.py, line 5)"
+    },
+    "import_errors.py": {
+      "python_syntax_errors": 0
+    },
+    "type_errors.py": {
+      "python_syntax_errors": 0
+    }
+  },
+  "graph_sitter_results": {
+    "syntax_errors.py": {
+      "diagnostics_count": 0,
+      "diagnostics": []
+    },
+    "import_errors.py": {
+      "diagnostics_count": 0,
+      "diagnostics": []
+    },
+    "type_errors.py": {
+      "diagnostics_count": 0,
+      "diagnostics": []
+    },
+    "valid_code.py": {
+      "diagnostics_count": 0,
+      "diagnostics": []
+    },
+    "unified_interface": {
+      "errors_count": 0,
+      "errors_sample": []
+    }
+  },
+  "validation_results": {
+    "total_files_tested": 4,
+    "files_with_correct_detection": 1,
+    "files_with_incorrect_detection": 3,
+    "detailed_results": {
+      "syntax_errors.py": {
+        "status": "incorrect",
+        "expected": 5,
+        "actual": 0,
+        "difference": -5
+      },
+      "import_errors.py": {
+        "status": "incorrect",
+        "expected": 6,
+        "actual": 0,
+        "difference": -6
+      },
+      "type_errors.py": {
+        "status": "incorrect",
+        "expected": 6,
+        "actual": 0,
+        "difference": -6
+      },
+      "valid_code.py": {
+        "status": "correct",
+        "expected": 0,
+        "actual": 0
+      }
+    },
+    "success_rate": 25.0
+  }
+}

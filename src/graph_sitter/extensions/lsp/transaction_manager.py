@@ -9,15 +9,15 @@ import threading
 import time
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Set
-from weakref import WeakKeyDictionary
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from .serena_bridge import SerenaLSPBridge, ErrorInfo, DiagnosticSeverity
+from .serena_bridge import SerenaLSPBridge
+from .protocol.lsp_types import ErrorInfo, DiagnosticSeverity
 
 logger = get_logger(__name__)
 
-# Global registry of LSP managers
-_lsp_managers: WeakKeyDictionary = WeakKeyDictionary()
+# Global registry of LSP managers - use regular dict instead of WeakKeyDictionary
+_lsp_managers: Dict[str, "TransactionAwareLSPManager"] = {}
 _manager_lock = threading.RLock()
 
 
@@ -261,19 +261,18 @@ def get_lsp_manager(repo_path: str, enable_lsp: bool = True) -> TransactionAware
     This function maintains a registry of LSP managers to avoid creating
     multiple managers for the same repository.
     """
-    repo_path = str(Path(repo_path).resolve())
+    repo_path_str = str(Path(repo_path).resolve())
     
     with _manager_lock:
         # Check if we already have a manager for this repo
-        for existing_manager in _lsp_managers.values():
-            if str(existing_manager.repo_path) == repo_path:
-                return existing_manager
+        if repo_path_str in _lsp_managers:
+            return _lsp_managers[repo_path_str]
         
         # Create new manager
-        manager = TransactionAwareLSPManager(repo_path, enable_lsp)
+        manager = TransactionAwareLSPManager(repo_path_str, enable_lsp)
         
-        # Store in registry (using a dummy key since we can't use the manager as its own key)
-        _lsp_managers[object()] = manager
+        # Store in registry using repo path as key
+        _lsp_managers[repo_path_str] = manager
         
         return manager
 
@@ -289,4 +288,3 @@ def shutdown_all_lsp_managers() -> None:
         
         _lsp_managers.clear()
         logger.info("All LSP managers shutdown")
-
