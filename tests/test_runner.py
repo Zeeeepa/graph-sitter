@@ -95,11 +95,13 @@ def main():
     if args.performance:
         pytest_cmd.append("--run-performance")
     
-    # Add common options
+    # Add common options and override problematic pyproject.toml settings
     pytest_cmd.extend([
         "--tb=short",
-        "--strict-markers",
-        "--disable-warnings"
+        "--strict-markers", 
+        "--disable-warnings",
+        "--override-ini=addopts=",  # Clear addopts from pyproject.toml
+        "--import-mode=importlib"   # Keep this useful setting
     ])
     
     print("Unified Error Interface Test Runner")
@@ -209,4 +211,3 @@ if __name__ == "__main__":
     
     # Run main argument parser
     main()
-

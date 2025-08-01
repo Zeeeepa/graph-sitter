@@ -32,7 +32,7 @@ class UnifiedErrorInterface:
         self._lsp_integration: Optional[SerenaLSPIntegration] = None
         self._error_cache: Dict[str, ErrorInfo] = {}
         
-    def _ensure_lsp_integration(self) -> SerenaLSPIntegration:
+    def _ensure_lsp_integration(self) -> Optional[SerenaLSPIntegration]:
         """Lazy initialization of LSP integration."""
         if self._lsp_integration is None:
             try:
@@ -44,8 +44,9 @@ class UnifiedErrorInterface:
                 )
                 logger.info("LSP integration initialized for unified error interface")
             except Exception as e:
-                logger.error(f"Failed to initialize LSP integration: {e}")
-                raise RuntimeError(f"LSP integration unavailable: {e}")
+                logger.warning(f"LSP integration not available: {e}")
+                # Return None instead of raising - graceful degradation
+                return None
         
         return self._lsp_integration
     
@@ -69,6 +70,11 @@ class UnifiedErrorInterface:
         """
         try:
             lsp_integration = self._ensure_lsp_integration()
+            
+            # If LSP integration is not available, return empty list gracefully
+            if lsp_integration is None:
+                logger.info("LSP integration not available, returning empty error list")
+                return []
             
             # Get all diagnostics from LSP servers
             all_errors = []
@@ -114,7 +120,7 @@ class UnifiedErrorInterface:
             return all_errors
             
         except Exception as e:
-            logger.error(f"Failed to get errors: {e}")
+            logger.warning(f"Failed to get errors: {e}")
             return []
     
     def full_error_context(self, error_id: str) -> Dict[str, Any]:

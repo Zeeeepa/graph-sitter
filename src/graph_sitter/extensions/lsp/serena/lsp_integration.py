@@ -18,11 +18,34 @@ from ..serena_bridge import SerenaLSPBridge, ErrorInfo
 # These would be implemented with actual LSP functionality
 class SerenaLSPClient:
     def __init__(self, *args, **kwargs):
-        pass
+        self.initialized = False
+    
+    def initialize(self):
+        self.initialized = True
+        return True
 
 class SerenaServerManager:
     def __init__(self, *args, **kwargs):
-        pass
+        self.servers = []
+        self.status_listeners = []
+        self.initialized = False
+    
+    def add_status_listener(self, listener):
+        """Add a status listener."""
+        self.status_listeners.append(listener)
+    
+    def initialize(self):
+        """Initialize the server manager."""
+        self.initialized = True
+        return True
+    
+    def get_diagnostics(self, file_path):
+        """Get diagnostics for a file (placeholder)."""
+        return []
+    
+    def shutdown(self):
+        """Shutdown the server manager."""
+        self.initialized = False
 
 class ServerConfig:
     def __init__(self, *args, **kwargs):

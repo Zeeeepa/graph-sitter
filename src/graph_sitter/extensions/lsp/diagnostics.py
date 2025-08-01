@@ -48,21 +48,27 @@ class CodebaseDiagnostics:
         try:
             self._lsp_manager = get_lsp_manager(self.codebase.repo_path, self.enable_lsp)
             
-            # Hook into the codebase's apply_diffs method
-            original_apply_diffs = self.codebase.ctx.apply_diffs
-            
-            def enhanced_apply_diffs(diffs):
-                # Call original method
-                result = original_apply_diffs(diffs)
-                
-                # Update LSP context
-                if self._lsp_manager:
-                    self._lsp_manager.apply_diffs(diffs)
-                
-                return result
-            
-            # Replace the method
-            self.codebase.ctx.apply_diffs = enhanced_apply_diffs
+            # Hook into the codebase's apply_diffs method if it exists and is callable
+            if hasattr(self.codebase, 'ctx') and hasattr(self.codebase.ctx, 'apply_diffs'):
+                try:
+                    original_apply_diffs = self.codebase.ctx.apply_diffs
+                    
+                    def enhanced_apply_diffs(diffs):
+                        # Call original method
+                        result = original_apply_diffs(diffs)
+                        
+                        # Update LSP context
+                        if self._lsp_manager:
+                            self._lsp_manager.apply_diffs(diffs)
+                        
+                        return result
+                    
+                    # Replace the method
+                    self.codebase.ctx.apply_diffs = enhanced_apply_diffs
+                    
+                except Exception as hook_error:
+                    logger.warning(f"Could not hook into apply_diffs method: {hook_error}")
+                    # Continue without the hook - LSP will still work for basic diagnostics
             
             logger.info(f"LSP diagnostics enabled for {self.codebase.repo_path}")
             
