@@ -9,13 +9,13 @@ features are automatically available.
 # Import the main Codebase class first
 from graph_sitter.core.codebase import Codebase
 
-# Then ensure Serena integration is loaded
+# Then ensure Serena integration is loaded (now from LSP extension)
 try:
-    from graph_sitter.extensions.serena.auto_init import ensure_serena_initialized
+    from graph_sitter.extensions.lsp.serena.auto_init import ensure_serena_initialized
     _initialized = ensure_serena_initialized(Codebase)
     if _initialized:
-        # Import Serena components for convenience
-        from graph_sitter.extensions.serena import (
+        # Import Serena components for convenience (now from LSP extension)
+        from graph_sitter.extensions.lsp.serena import (
             SerenaCore, 
             SerenaConfig, 
             SerenaCapability,

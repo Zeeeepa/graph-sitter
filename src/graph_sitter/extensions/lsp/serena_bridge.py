@@ -1,8 +1,17 @@
 """
 Serena LSP Bridge for Graph-Sitter
 
-This module provides a bridge between Serena's solidlsp implementation
-and graph-sitter's codebase analysis system.
+This module provides a comprehensive bridge between Serena's LSP implementation
+and graph-sitter's codebase analysis system. It consolidates LSP functionality
+from the former separate Serena extension into the unified LSP extension.
+
+Features:
+- Unified LSP server management and coordination
+- Real-time error retrieval and diagnostics  
+- Advanced refactoring operations
+- Symbol intelligence and analysis
+- Code actions and quick fixes
+- Performance optimization
 """
 
 import os

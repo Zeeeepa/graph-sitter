@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-# LSP integration imports (optional)
+# LSP integration imports (now local to LSP extension)
 try:
-    from graph_sitter.extensions.lsp.transaction_manager import get_lsp_manager, TransactionAwareLSPManager
-    from graph_sitter.extensions.lsp.serena_bridge import ErrorInfo
+    from .transaction_manager import get_lsp_manager, TransactionAwareLSPManager
+    from .serena_bridge import ErrorInfo
     LSP_AVAILABLE = True
 except ImportError:
     logger.info("LSP integration not available. Install Serena dependencies for error detection.")
