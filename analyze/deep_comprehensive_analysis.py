@@ -113,7 +113,7 @@ hotspots = {}
 viz_data = {}
 
 try:
-    from graph_sitter.analysis.deep_analysis import DeepCodebaseAnalyzer
+    from graph_sitter.analysis.analysis import DeepCodebaseAnalyzer
     print("✅ Successfully imported deep analysis module")
     
     # Initialize deep analyzer

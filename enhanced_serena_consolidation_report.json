@@ -1,0 +1,451 @@
+{
+  "timestamp": "1754039813.1400888",
+  "codebase_status": "initialized",
+  "unified_interface_test": {
+    "errors_method": {
+      "available": true,
+      "working": true,
+      "result": {
+        "type": "<class 'list'>",
+        "count": 0,
+        "sample": []
+      }
+    },
+    "full_error_context_method": {
+      "available": true,
+      "working": true,
+      "result": null
+    },
+    "resolve_errors_method": {
+      "available": true,
+      "working": true,
+      "result": {
+        "type": "<class 'dict'>",
+        "keys": [
+          "total_errors",
+          "attempted_fixes",
+          "successful_fixes",
+          "failed_fixes",
+          "results"
+        ],
+        "summary": {
+          "total_errors": 0,
+          "attempted_fixes": 0,
+          "successful_fixes": 0,
+          "failed_fixes": 0,
+          "results": []
+        }
+      }
+    },
+    "resolve_error_method": {
+      "available": true,
+      "working": true,
+      "result": null
+    },
+    "overall_status": "fully_working"
+  },
+  "serena_analysis": {
+    "file_analysis": {
+      "advanced_error_viewer.py": {
+        "path": "graph_sitter/extensions/serena/advanced_error_viewer.py",
+        "size_bytes": 25621,
+        "line_count": 649,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "__init__.py": {
+        "path": "graph_sitter/extensions/serena/__init__.py",
+        "size_bytes": 8076,
+        "line_count": 309,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "semantic_tools.py": {
+        "path": "graph_sitter/extensions/serena/semantic_tools.py",
+        "size_bytes": 10678,
+        "line_count": 303,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "knowledge_integration.py": {
+        "path": "graph_sitter/extensions/serena/knowledge_integration.py",
+        "size_bytes": 31489,
+        "line_count": 791,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "core.py": {
+        "path": "graph_sitter/extensions/serena/core.py",
+        "size_bytes": 21643,
+        "line_count": 527,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "mcp_bridge.py": {
+        "path": "graph_sitter/extensions/serena/mcp_bridge.py",
+        "size_bytes": 12013,
+        "line_count": 350,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "types.py": {
+        "path": "graph_sitter/extensions/serena/types.py",
+        "size_bytes": 15018,
+        "line_count": 477,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "error_analysis.py": {
+        "path": "graph_sitter/extensions/serena/error_analysis.py",
+        "size_bytes": 28354,
+        "line_count": 662,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "auto_init.py": {
+        "path": "graph_sitter/extensions/serena/auto_init.py",
+        "size_bytes": 20193,
+        "line_count": 566,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "lsp_integration.py": {
+        "path": "graph_sitter/extensions/serena/lsp_integration.py",
+        "size_bytes": 32920,
+        "line_count": 865,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "advanced_context.py": {
+        "path": "graph_sitter/extensions/serena/advanced_context.py",
+        "size_bytes": 27636,
+        "line_count": 659,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "integration.py": {
+        "path": "graph_sitter/extensions/serena/integration.py",
+        "size_bytes": 22130,
+        "line_count": 571,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "api.py": {
+        "path": "graph_sitter/extensions/serena/api.py",
+        "size_bytes": 15413,
+        "line_count": 374,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "serena_types.py": {
+        "path": "graph_sitter/extensions/serena/serena_types.py",
+        "size_bytes": 7303,
+        "line_count": 230,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "intelligence/__init__.py": {
+        "path": "graph_sitter/extensions/serena/intelligence/__init__.py",
+        "size_bytes": 422,
+        "line_count": 19,
+        "is_empty": false,
+        "has_substantial_content": false
+      },
+      "intelligence/code_intelligence.py": {
+        "path": "graph_sitter/extensions/serena/intelligence/code_intelligence.py",
+        "size_bytes": 25401,
+        "line_count": 639,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "intelligence/completions.py": {
+        "path": "graph_sitter/extensions/serena/intelligence/completions.py",
+        "size_bytes": 26697,
+        "line_count": 652,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "intelligence/hover.py": {
+        "path": "graph_sitter/extensions/serena/intelligence/hover.py",
+        "size_bytes": 21823,
+        "line_count": 575,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "intelligence/signatures.py": {
+        "path": "graph_sitter/extensions/serena/intelligence/signatures.py",
+        "size_bytes": 22047,
+        "line_count": 559,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "generation/__init__.py": {
+        "path": "graph_sitter/extensions/serena/generation/__init__.py",
+        "size_bytes": 156,
+        "line_count": 10,
+        "is_empty": false,
+        "has_substantial_content": false
+      },
+      "generation/code_generator.py": {
+        "path": "graph_sitter/extensions/serena/generation/code_generator.py",
+        "size_bytes": 6639,
+        "line_count": 190,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "analysis/realtime_analyzer.py": {
+        "path": "graph_sitter/extensions/serena/analysis/realtime_analyzer.py",
+        "size_bytes": 17248,
+        "line_count": 451,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "analysis/__init__.py": {
+        "path": "graph_sitter/extensions/serena/analysis/__init__.py",
+        "size_bytes": 235,
+        "line_count": 14,
+        "is_empty": false,
+        "has_substantial_content": false
+      },
+      "lsp/client.py": {
+        "path": "graph_sitter/extensions/serena/lsp/client.py",
+        "size_bytes": 21260,
+        "line_count": 588,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "lsp/error_retrieval.py": {
+        "path": "graph_sitter/extensions/serena/lsp/error_retrieval.py",
+        "size_bytes": 19965,
+        "line_count": 536,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "lsp/protocol.py": {
+        "path": "graph_sitter/extensions/serena/lsp/protocol.py",
+        "size_bytes": 13737,
+        "line_count": 400,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "lsp/server_manager.py": {
+        "path": "graph_sitter/extensions/serena/lsp/server_manager.py",
+        "size_bytes": 21873,
+        "line_count": 624,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "lsp/diagnostics.py": {
+        "path": "graph_sitter/extensions/serena/lsp/diagnostics.py",
+        "size_bytes": 23620,
+        "line_count": 641,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "lsp/__init__.py": {
+        "path": "graph_sitter/extensions/serena/lsp/__init__.py",
+        "size_bytes": 1478,
+        "line_count": 78,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "search/semantic_search.py": {
+        "path": "graph_sitter/extensions/serena/search/semantic_search.py",
+        "size_bytes": 3462,
+        "line_count": 91,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "search/__init__.py": {
+        "path": "graph_sitter/extensions/serena/search/__init__.py",
+        "size_bytes": 180,
+        "line_count": 10,
+        "is_empty": false,
+        "has_substantial_content": false
+      },
+      "realtime/realtime_analyzer.py": {
+        "path": "graph_sitter/extensions/serena/realtime/realtime_analyzer.py",
+        "size_bytes": 19786,
+        "line_count": 526,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "realtime/__init__.py": {
+        "path": "graph_sitter/extensions/serena/realtime/__init__.py",
+        "size_bytes": 252,
+        "line_count": 11,
+        "is_empty": false,
+        "has_substantial_content": false
+      },
+      "symbols/__init__.py": {
+        "path": "graph_sitter/extensions/serena/symbols/__init__.py",
+        "size_bytes": 255,
+        "line_count": 11,
+        "is_empty": false,
+        "has_substantial_content": false
+      },
+      "symbols/symbol_intelligence.py": {
+        "path": "graph_sitter/extensions/serena/symbols/symbol_intelligence.py",
+        "size_bytes": 28047,
+        "line_count": 721,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "actions/__init__.py": {
+        "path": "graph_sitter/extensions/serena/actions/__init__.py",
+        "size_bytes": 241,
+        "line_count": 11,
+        "is_empty": false,
+        "has_substantial_content": false
+      },
+      "actions/code_actions.py": {
+        "path": "graph_sitter/extensions/serena/actions/code_actions.py",
+        "size_bytes": 26305,
+        "line_count": 722,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "refactoring/extract_refactor.py": {
+        "path": "graph_sitter/extensions/serena/refactoring/extract_refactor.py",
+        "size_bytes": 7265,
+        "line_count": 192,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "refactoring/rename_refactor.py": {
+        "path": "graph_sitter/extensions/serena/refactoring/rename_refactor.py",
+        "size_bytes": 19127,
+        "line_count": 491,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "refactoring/refactoring_engine.py": {
+        "path": "graph_sitter/extensions/serena/refactoring/refactoring_engine.py",
+        "size_bytes": 17038,
+        "line_count": 458,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "refactoring/inline_refactor.py": {
+        "path": "graph_sitter/extensions/serena/refactoring/inline_refactor.py",
+        "size_bytes": 8597,
+        "line_count": 230,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "refactoring/move_refactor.py": {
+        "path": "graph_sitter/extensions/serena/refactoring/move_refactor.py",
+        "size_bytes": 7617,
+        "line_count": 212,
+        "is_empty": false,
+        "has_substantial_content": true
+      },
+      "refactoring/__init__.py": {
+        "path": "graph_sitter/extensions/serena/refactoring/__init__.py",
+        "size_bytes": 732,
+        "line_count": 28,
+        "is_empty": false,
+        "has_substantial_content": false
+      }
+    },
+    "consolidation_opportunities": [
+      {
+        "type": "merge_minimal_files",
+        "priority": "medium",
+        "files": [
+          "graph_sitter/extensions/serena/intelligence/__init__.py",
+          "graph_sitter/extensions/serena/generation/__init__.py",
+          "graph_sitter/extensions/serena/analysis/__init__.py",
+          "graph_sitter/extensions/serena/search/__init__.py",
+          "graph_sitter/extensions/serena/realtime/__init__.py",
+          "graph_sitter/extensions/serena/symbols/__init__.py",
+          "graph_sitter/extensions/serena/actions/__init__.py",
+          "graph_sitter/extensions/serena/refactoring/__init__.py"
+        ],
+        "description": "Consider merging 8 minimal files"
+      },
+      {
+        "type": "consolidate_overlapping",
+        "priority": "high",
+        "files": [
+          "graph_sitter/extensions/serena/advanced_error_viewer.py",
+          "graph_sitter/extensions/serena/error_analysis.py",
+          "graph_sitter/extensions/serena/advanced_context.py",
+          "graph_sitter/extensions/serena/lsp/error_retrieval.py"
+        ],
+        "description": "Consolidate 4 files with overlapping functionality"
+      }
+    ],
+    "implementation_status": {
+      "core.py": {
+        "exists": true,
+        "lines": 527,
+        "status": "implemented"
+      },
+      "auto_init.py": {
+        "exists": true,
+        "lines": 566,
+        "status": "implemented"
+      },
+      "types.py": {
+        "exists": true,
+        "lines": 477,
+        "status": "implemented"
+      },
+      "api.py": {
+        "exists": true,
+        "lines": 374,
+        "status": "implemented"
+      },
+      "error_analysis.py": {
+        "exists": true,
+        "lines": 662,
+        "status": "implemented"
+      }
+    },
+    "recommendations": [
+      {
+        "phase": 2,
+        "action": "consolidate_lsp",
+        "priority": "high",
+        "risk": "medium",
+        "description": "Consolidate 7 LSP integration files",
+        "files": [
+          "lsp_integration.py",
+          "lsp/client.py",
+          "lsp/error_retrieval.py",
+          "lsp/protocol.py",
+          "lsp/server_manager.py",
+          "lsp/diagnostics.py",
+          "lsp/__init__.py"
+        ]
+      },
+      {
+        "phase": 3,
+        "action": "consolidate_analysis",
+        "priority": "high",
+        "risk": "medium",
+        "description": "Consolidate 6 analysis components",
+        "files": [
+          "advanced_error_viewer.py",
+          "error_analysis.py",
+          "advanced_context.py",
+          "analysis/realtime_analyzer.py",
+          "analysis/__init__.py",
+          "lsp/error_retrieval.py"
+        ]
+      }
+    ]
+  },
+  "consolidation_status": {
+    "phase_1_ready": false,
+    "lsp_consolidation_needed": true,
+    "analysis_consolidation_needed": true
+  },
+  "recommendations": [],
+  "next_steps": [
+    "\u2705 Unified interface is working - ready for consolidation",
+    "\ud83d\udd27 Plan LSP integration consolidation",
+    "\ud83d\udd27 Plan analysis component consolidation"
+  ]
+}

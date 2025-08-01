@@ -549,3 +549,18 @@ def add_serena_to_codebase(codebase_class: type) -> None:
 # Auto-initialize when this module is imported
 _initialized = initialize_serena_integration()
 
+
+def ensure_serena_initialized(codebase_class: type) -> bool:
+    """
+    Ensure Serena integration is initialized for the given codebase class.
+    
+    This function is called by enhanced/codebase.py for backward compatibility.
+    """
+    try:
+        if not _initialized:
+            # Try to initialize again
+            return initialize_serena_integration()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to ensure Serena initialization: {e}")
+        return False
