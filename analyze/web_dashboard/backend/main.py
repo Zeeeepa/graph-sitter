@@ -36,6 +36,14 @@ from webhook_handler import WebhookHandler
 from validation_pipeline import ValidationPipeline
 from websocket_manager import WebSocketManager
 
+# Import comprehensive analysis integration
+try:
+    from comprehensive_analysis_integration import get_comprehensive_analysis_router
+    COMPREHENSIVE_ANALYSIS_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Comprehensive analysis integration not available: {e}")
+    COMPREHENSIVE_ANALYSIS_AVAILABLE = False
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
@@ -600,6 +608,17 @@ async def _start_validation_pipeline(project: Project, pr_number: int, user_id: 
                 "error": str(e)
             }
         )
+
+# Include comprehensive analysis router if available
+if COMPREHENSIVE_ANALYSIS_AVAILABLE:
+    try:
+        comprehensive_router = get_comprehensive_analysis_router()
+        app.include_router(comprehensive_router)
+        logger.info("✅ Comprehensive Analysis Integration enabled")
+    except Exception as e:
+        logger.error(f"Failed to include comprehensive analysis router: {e}")
+else:
+    logger.warning("⚠️  Comprehensive Analysis Integration not available")
 
 if __name__ == "__main__":
     uvicorn.run(
