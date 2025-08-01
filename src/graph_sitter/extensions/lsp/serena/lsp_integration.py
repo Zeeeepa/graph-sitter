@@ -12,20 +12,84 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Callable, Union
 
-from .lsp import (
-    SerenaLSPClient,
-    SerenaServerManager,
-    ServerConfig,
-    ErrorRetriever,
-    ComprehensiveErrorList,
-    CodeError,
-    ErrorSeverity,
-    ErrorCategory,
-    RealTimeDiagnostics,
-    DiagnosticFilter,
-    DiagnosticStats,
-    ConnectionType
-)
+from ..serena_bridge import SerenaLSPBridge, ErrorInfo
+
+# Placeholder classes for missing LSP components
+# These would be implemented with actual LSP functionality
+class SerenaLSPClient:
+    def __init__(self, *args, **kwargs):
+        self.initialized = False
+    
+    def initialize(self):
+        self.initialized = True
+        return True
+
+class SerenaServerManager:
+    def __init__(self, *args, **kwargs):
+        self.servers = []
+        self.status_listeners = []
+        self.initialized = False
+    
+    def add_status_listener(self, listener):
+        """Add a status listener."""
+        self.status_listeners.append(listener)
+    
+    def initialize(self):
+        """Initialize the server manager."""
+        self.initialized = True
+        return True
+    
+    def get_diagnostics(self, file_path):
+        """Get diagnostics for a file (placeholder)."""
+        return []
+    
+    def shutdown(self):
+        """Shutdown the server manager."""
+        self.initialized = False
+
+class ServerConfig:
+    def __init__(self, *args, **kwargs):
+        pass
+
+class ErrorRetriever:
+    def __init__(self, *args, **kwargs):
+        pass
+
+class ComprehensiveErrorList:
+    def __init__(self, *args, **kwargs):
+        pass
+
+class CodeError:
+    def __init__(self, *args, **kwargs):
+        pass
+
+class ErrorSeverity:
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+    HINT = "hint"
+
+class ErrorCategory:
+    SYNTAX = "syntax"
+    TYPE = "type"
+    IMPORT = "import"
+    UNDEFINED = "undefined"
+
+class RealTimeDiagnostics:
+    def __init__(self, *args, **kwargs):
+        pass
+
+class DiagnosticFilter:
+    def __init__(self, *args, **kwargs):
+        pass
+
+class DiagnosticStats:
+    def __init__(self, *args, **kwargs):
+        pass
+
+class ConnectionType:
+    STDIO = "stdio"
+    TCP = "tcp"
 
 from .types import (
     SerenaConfig,

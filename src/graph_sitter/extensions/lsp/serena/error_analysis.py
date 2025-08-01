@@ -15,7 +15,7 @@ import traceback
 
 from graph_sitter.shared.logging.get_logger import get_logger
 from graph_sitter.core.codebase import Codebase
-from graph_sitter.core.diagnostics import CodebaseDiagnostics, add_diagnostic_capabilities
+from graph_sitter.extensions.lsp.diagnostics import CodebaseDiagnostics, add_diagnostic_capabilities
 from graph_sitter.extensions.lsp.serena_bridge import ErrorInfo, SerenaLSPBridge
 from .mcp_bridge import SerenaMCPBridge, MCPToolResult
 from .semantic_tools import SemanticTools

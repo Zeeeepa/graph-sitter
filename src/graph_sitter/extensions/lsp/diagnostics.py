@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-# LSP integration imports (optional)
+# LSP integration imports (now local to LSP extension)
 try:
-    from graph_sitter.extensions.lsp.transaction_manager import get_lsp_manager, TransactionAwareLSPManager
-    from graph_sitter.extensions.lsp.serena_bridge import ErrorInfo
+    from .transaction_manager import get_lsp_manager, TransactionAwareLSPManager
+    from .serena_bridge import ErrorInfo
     LSP_AVAILABLE = True
 except ImportError:
     logger.info("LSP integration not available. Install Serena dependencies for error detection.")
@@ -48,21 +48,27 @@ class CodebaseDiagnostics:
         try:
             self._lsp_manager = get_lsp_manager(self.codebase.repo_path, self.enable_lsp)
             
-            # Hook into the codebase's apply_diffs method
-            original_apply_diffs = self.codebase.ctx.apply_diffs
-            
-            def enhanced_apply_diffs(diffs):
-                # Call original method
-                result = original_apply_diffs(diffs)
-                
-                # Update LSP context
-                if self._lsp_manager:
-                    self._lsp_manager.apply_diffs(diffs)
-                
-                return result
-            
-            # Replace the method
-            self.codebase.ctx.apply_diffs = enhanced_apply_diffs
+            # Hook into the codebase's apply_diffs method if it exists and is callable
+            if hasattr(self.codebase, 'ctx') and hasattr(self.codebase.ctx, 'apply_diffs'):
+                try:
+                    original_apply_diffs = self.codebase.ctx.apply_diffs
+                    
+                    def enhanced_apply_diffs(diffs):
+                        # Call original method
+                        result = original_apply_diffs(diffs)
+                        
+                        # Update LSP context
+                        if self._lsp_manager:
+                            self._lsp_manager.apply_diffs(diffs)
+                        
+                        return result
+                    
+                    # Replace the method
+                    self.codebase.ctx.apply_diffs = enhanced_apply_diffs
+                    
+                except Exception as hook_error:
+                    logger.warning(f"Could not hook into apply_diffs method: {hook_error}")
+                    # Continue without the hook - LSP will still work for basic diagnostics
             
             logger.info(f"LSP diagnostics enabled for {self.codebase.repo_path}")
             
@@ -204,6 +210,9 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
     codebase.is_lsp_enabled = _is_lsp_enabled
     codebase.get_lsp_status = _get_lsp_status
     
+    # Add unified error interface methods
+    _add_unified_error_interface(codebase)
+    
     # Add cleanup to existing shutdown method if it exists
     original_shutdown = getattr(codebase, 'shutdown', None)
     
@@ -215,6 +224,32 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
     codebase.shutdown = enhanced_shutdown
     
     logger.info(f"Diagnostic capabilities added to codebase: {codebase.repo_path}")
+
+
+def _add_unified_error_interface(codebase: "Codebase") -> None:
+    """Add unified error interface methods to the codebase."""
+    try:
+        from .serena.unified_error_interface import UnifiedErrorInterface
+        
+        # Create unified error interface instance
+        error_interface = UnifiedErrorInterface(codebase)
+        codebase._error_interface = error_interface
+        
+        # Add unified methods to codebase
+        codebase.errors = error_interface.errors
+        codebase.full_error_context = error_interface.full_error_context
+        codebase.resolve_errors = error_interface.resolve_errors
+        codebase.resolve_error = error_interface.resolve_error
+        
+        # Add helper method to get the interface
+        codebase._get_error_interface = lambda: error_interface
+        
+        logger.info("Unified error interface added to codebase")
+        
+    except ImportError as e:
+        logger.warning(f"Unified error interface not available: {e}")
+    except Exception as e:
+        logger.error(f"Failed to add unified error interface: {e}")
 
 
 # Monkey patch to automatically add diagnostics to new Codebase instances

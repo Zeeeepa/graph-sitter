@@ -30,17 +30,18 @@ class PythonLanguageServer(BaseLanguageServer):
         """Get the command to start the Python language server."""
         # Try different possible pylsp installations
         possible_commands = [
-            ["pylsp"],
-            ["python", "-m", "pylsp"],
-            ["python3", "-m", "pylsp"],
+            ["pylsp", "--verbose"],  # Add verbose logging for debugging
+            ["python", "-m", "pylsp", "--verbose"],
+            ["python3", "-m", "pylsp", "--verbose"],
             ["pyls"],  # Legacy python-language-server
         ]
         
         for command in possible_commands:
             if shutil.which(command[0]):
+                logger.info(f"Found Python LSP server: {' '.join(command)}")
                 return command
         
-        logger.warning("No Python language server found. Install with: pip install python-lsp-server")
+        logger.error("No Python language server found. Install with: pip install python-lsp-server[all]")
         return []
     
     def supports_file(self, file_path: str) -> bool:
@@ -385,4 +386,3 @@ class PythonLanguageServer(BaseLanguageServer):
             'has_pylsp': bool(shutil.which("pylsp") or shutil.which("pyls"))
         })
         return status
-

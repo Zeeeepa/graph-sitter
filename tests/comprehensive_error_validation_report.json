@@ -1,0 +1,160 @@
+{
+  "summary": {
+    "total_tests": 24,
+    "passed_tests": 3,
+    "failed_tests": 21,
+    "pass_rate": 12.5,
+    "categories_tested": 11
+  },
+  "category_breakdown": {
+    "syntax": {
+      "total_tests": 4,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "missing_parenthesis",
+        "missing_colon",
+        "invalid_indentation",
+        "unclosed_string"
+      ]
+    },
+    "import": {
+      "total_tests": 3,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "missing_module",
+        "missing_import_item",
+        "circular_import_simulation"
+      ]
+    },
+    "type": {
+      "total_tests": 3,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "type_mismatch_operation",
+        "wrong_argument_type",
+        "none_type_operation"
+      ]
+    },
+    "name": {
+      "total_tests": 3,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "undefined_variable",
+        "undefined_function",
+        "undefined_class"
+      ]
+    },
+    "attribute": {
+      "total_tests": 2,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "missing_method",
+        "missing_attribute"
+      ]
+    },
+    "index": {
+      "total_tests": 1,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "list_index_error"
+      ]
+    },
+    "key": {
+      "total_tests": 1,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "dict_key_error"
+      ]
+    },
+    "value": {
+      "total_tests": 1,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "invalid_conversion"
+      ]
+    },
+    "logic": {
+      "total_tests": 1,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "division_by_zero"
+      ]
+    },
+    "quality": {
+      "total_tests": 2,
+      "passed_tests": 0,
+      "pass_rate": 0.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": [
+        "unused_variable",
+        "unused_import"
+      ]
+    },
+    "false_positive": {
+      "total_tests": 3,
+      "passed_tests": 3,
+      "pass_rate": 100.0,
+      "avg_context_quality": 0.0,
+      "avg_reasoning_quality": 0.0,
+      "failed_tests": []
+    }
+  },
+  "error_detection_coverage": {
+    "detected_types": [],
+    "coverage_count": 0
+  },
+  "context_quality_analysis": {
+    "avg_context_quality": 0.0,
+    "avg_reasoning_quality": 0.0,
+    "high_quality_context": 0,
+    "low_quality_context": 24
+  },
+  "false_positive_analysis": {
+    "total_false_positive_tests": 3,
+    "false_positives_detected": 0,
+    "false_positive_rate": 0.0
+  },
+  "recommendations": [
+    "Overall error detection needs improvement - less than 80% pass rate",
+    "Error context quality is low - need richer contextual information",
+    "Error reasoning quality is low - need better fix suggestions",
+    "Poor detection for syntax errors - 0.0% pass rate",
+    "Poor detection for import errors - 0.0% pass rate",
+    "Poor detection for type errors - 0.0% pass rate",
+    "Poor detection for name errors - 0.0% pass rate",
+    "Poor detection for attribute errors - 0.0% pass rate",
+    "Poor detection for index errors - 0.0% pass rate",
+    "Poor detection for key errors - 0.0% pass rate",
+    "Poor detection for value errors - 0.0% pass rate",
+    "Poor detection for logic errors - 0.0% pass rate",
+    "Poor detection for quality errors - 0.0% pass rate"
+  ]
+}
