@@ -1,0 +1,945 @@
+{
+  "lsp_file_analysis": {
+    "src/graph_sitter/core/lsp_manager.py": {
+      "functions": [
+        {
+          "name": "get_lsp_manager",
+          "line": "unknown",
+          "usages": 2,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "shutdown_all_managers",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        }
+      ],
+      "classes": [
+        {
+          "name": "LSPManager",
+          "line": "unknown",
+          "methods": 33,
+          "subclasses": 0
+        }
+      ],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/core/lsp_types.py": {
+      "functions": [
+        {
+          "name": "position_from_line_char",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "range_from_positions",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "diagnostic_from_error",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": true
+        }
+      ],
+      "classes": [
+        {
+          "name": "DiagnosticSeverity",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "ErrorSeverity",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "CompletionItemKind",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "ErrorType",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "Position",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "Range",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "Position",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "Range",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "ErrorInfo",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "Location",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "Diagnostic",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "TextEdit",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "ErrorCollection",
+          "line": "unknown",
+          "methods": 4,
+          "subclasses": 0
+        },
+        {
+          "name": "WorkspaceEdit",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "CompletionItem",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "ParameterInformation",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "SignatureInformation",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "SignatureHelp",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "MarkupContent",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "Hover",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "ErrorSummary",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "ErrorContext",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "QuickFix",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "CompletionItem",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "HoverInfo",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "SignatureHelp",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "SymbolInfo",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "LSPCapabilities",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "LSPStatus",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "HealthCheck",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "LSPResponse",
+          "line": "unknown",
+          "methods": 2,
+          "subclasses": 0
+        }
+      ],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/core/lsp_type_adapters.py": {
+      "functions": [
+        {
+          "name": "convert_serena_errors_to_unified",
+          "line": "unknown",
+          "usages": 6,
+          "has_type_annotations": false,
+          "is_diagnostic_method": true
+        },
+        {
+          "name": "convert_protocol_diagnostics_to_unified",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": true
+        },
+        {
+          "name": "create_unified_error_collection",
+          "line": "unknown",
+          "usages": 7,
+          "has_type_annotations": false,
+          "is_diagnostic_method": true
+        }
+      ],
+      "classes": [
+        {
+          "name": "LSPTypeAdapter",
+          "line": "unknown",
+          "methods": 11,
+          "subclasses": 0
+        }
+      ],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/core/unified_diagnostics.py": {
+      "functions": [],
+      "classes": [
+        {
+          "name": "UnifiedDiagnosticCollector",
+          "line": "unknown",
+          "methods": 15,
+          "subclasses": 0
+        }
+      ],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/extensions/lsp/serena_bridge.py": {
+      "functions": [],
+      "classes": [
+        {
+          "name": "ErrorInfo",
+          "line": "unknown",
+          "methods": 4,
+          "subclasses": 0
+        },
+        {
+          "name": "SerenaLSPBridge",
+          "line": "unknown",
+          "methods": 15,
+          "subclasses": 0
+        }
+      ],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/extensions/lsp/transaction_manager.py": {
+      "functions": [
+        {
+          "name": "test_edit_base_case",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_base_case",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_insert_base_case",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_ordering",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_ordering",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_insert_ordering",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_dedupe",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_conflict",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_conflict",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_lsp_manager",
+          "line": "unknown",
+          "usages": 2,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_conflict_subset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_conflict_subset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "shutdown_all_lsp_managers",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_remove_conflict_subset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_edit_conflict_subset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_insert_remove_conflict_subset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_insert_edit_conflict_subset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_conflict_superset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_conflict_superset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_remove_conflict_superset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_edit_conflict_superset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_insert_conflict_superset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_insert_conflict_superset",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_remove_multi_conflict",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_priority",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_suffix",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_prefix",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_prefix_suffix",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_prefix_suffix_single",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_edit_prefix_ordering",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        }
+      ],
+      "classes": [
+        {
+          "name": "MockFile",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "TransactionAwareLSPManager",
+          "line": "unknown",
+          "methods": 14,
+          "subclasses": 0
+        },
+        {
+          "name": "TransactionError",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "TransactionManager",
+          "line": "unknown",
+          "methods": 23,
+          "subclasses": 0
+        }
+      ],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/enhanced/codebase.py": {
+      "functions": [
+        {
+          "name": "test_codebase_symbols",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_codegen_sdk_subdirectories",
+          "line": "unknown",
+          "usages": 1,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "context_mock",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_codegen_sdk_codebase",
+          "line": "unknown",
+          "usages": 8,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "codebase",
+          "line": "unknown",
+          "usages": 3,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_graphsitter_repo_path",
+          "line": "unknown",
+          "usages": 6,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_codeowners_property",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_codegen_codebase_base_path",
+          "line": "unknown",
+          "usages": 4,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_current_code_codebase",
+          "line": "unknown",
+          "usages": 2,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "test_from_codebase_non_existent_repo",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "import_all_codegen_sdk_modules",
+          "line": "unknown",
+          "usages": 3,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_documented_objects",
+          "line": "unknown",
+          "usages": 7,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "_verify_lsp_methods",
+          "line": "unknown",
+          "usages": 1,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        }
+      ],
+      "classes": [
+        {
+          "name": "PinkMode",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "CodebaseConfig",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "Codebase",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "SplitFunctionsIntoSeparateFiles",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        },
+        {
+          "name": "DocumentedObjects",
+          "line": "unknown",
+          "methods": 0,
+          "subclasses": 0
+        },
+        {
+          "name": "MoveSymbolDemonstration",
+          "line": "unknown",
+          "methods": 2,
+          "subclasses": 0
+        },
+        {
+          "name": "Codebase",
+          "line": "unknown",
+          "methods": 71,
+          "subclasses": 1
+        },
+        {
+          "name": "MoveSymbolWithUpdatedImports",
+          "line": "unknown",
+          "methods": 2,
+          "subclasses": 0
+        },
+        {
+          "name": "MoveSymbolWithAddBackEdgeStrategy",
+          "line": "unknown",
+          "methods": 2,
+          "subclasses": 0
+        },
+        {
+          "name": "MoveSymbolToFileWithDependencies",
+          "line": "unknown",
+          "methods": 2,
+          "subclasses": 0
+        },
+        {
+          "name": "MoveSymbolsWithDependencies",
+          "line": "unknown",
+          "methods": 1,
+          "subclasses": 0
+        }
+      ],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/codebase/codebase_analysis.py": {
+      "functions": [
+        {
+          "name": "get_codebase_summary",
+          "line": "unknown",
+          "usages": 12,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_file_summary",
+          "line": "unknown",
+          "usages": 10,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_class_summary",
+          "line": "unknown",
+          "usages": 9,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_function_summary",
+          "line": "unknown",
+          "usages": 8,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "get_symbol_summary",
+          "line": "unknown",
+          "usages": 7,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        }
+      ],
+      "classes": [],
+      "method_patterns": {},
+      "issues": []
+    },
+    "src/graph_sitter/ai/codebase_ai.py": {
+      "functions": [
+        {
+          "name": "generate_system_prompt",
+          "line": "unknown",
+          "usages": 4,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "generate_flag_system_prompt",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "generate_context",
+          "line": "unknown",
+          "usages": 4,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "generate_tools",
+          "line": "unknown",
+          "usages": 2,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        },
+        {
+          "name": "generate_flag_tools",
+          "line": "unknown",
+          "usages": 0,
+          "has_type_annotations": false,
+          "is_diagnostic_method": false
+        }
+      ],
+      "classes": [],
+      "method_patterns": {},
+      "issues": []
+    }
+  },
+  "function_analysis": {},
+  "method_consistency": {
+    "diagnostic_methods": {},
+    "naming_inconsistencies": [],
+    "duplicate_functionality": [],
+    "missing_methods": []
+  },
+  "error_patterns": [],
+  "recommendations": [
+    {
+      "type": "type_annotations",
+      "priority": "medium",
+      "title": "Add type annotations to src/graph_sitter/core/lsp_manager.py",
+      "description": "Found 2 functions without proper type annotations",
+      "affected_files": [
+        "src/graph_sitter/core/lsp_manager.py"
+      ],
+      "action": "Add type hints to improve code quality and IDE support"
+    },
+    {
+      "type": "type_annotations",
+      "priority": "medium",
+      "title": "Add type annotations to src/graph_sitter/core/lsp_types.py",
+      "description": "Found 3 functions without proper type annotations",
+      "affected_files": [
+        "src/graph_sitter/core/lsp_types.py"
+      ],
+      "action": "Add type hints to improve code quality and IDE support"
+    },
+    {
+      "type": "type_annotations",
+      "priority": "medium",
+      "title": "Add type annotations to src/graph_sitter/core/lsp_type_adapters.py",
+      "description": "Found 3 functions without proper type annotations",
+      "affected_files": [
+        "src/graph_sitter/core/lsp_type_adapters.py"
+      ],
+      "action": "Add type hints to improve code quality and IDE support"
+    },
+    {
+      "type": "type_annotations",
+      "priority": "medium",
+      "title": "Add type annotations to src/graph_sitter/extensions/lsp/transaction_manager.py",
+      "description": "Found 30 functions without proper type annotations",
+      "affected_files": [
+        "src/graph_sitter/extensions/lsp/transaction_manager.py"
+      ],
+      "action": "Add type hints to improve code quality and IDE support"
+    },
+    {
+      "type": "type_annotations",
+      "priority": "medium",
+      "title": "Add type annotations to src/graph_sitter/enhanced/codebase.py",
+      "description": "Found 13 functions without proper type annotations",
+      "affected_files": [
+        "src/graph_sitter/enhanced/codebase.py"
+      ],
+      "action": "Add type hints to improve code quality and IDE support"
+    },
+    {
+      "type": "type_annotations",
+      "priority": "medium",
+      "title": "Add type annotations to src/graph_sitter/codebase/codebase_analysis.py",
+      "description": "Found 5 functions without proper type annotations",
+      "affected_files": [
+        "src/graph_sitter/codebase/codebase_analysis.py"
+      ],
+      "action": "Add type hints to improve code quality and IDE support"
+    },
+    {
+      "type": "type_annotations",
+      "priority": "medium",
+      "title": "Add type annotations to src/graph_sitter/ai/codebase_ai.py",
+      "description": "Found 5 functions without proper type annotations",
+      "affected_files": [
+        "src/graph_sitter/ai/codebase_ai.py"
+      ],
+      "action": "Add type hints to improve code quality and IDE support"
+    },
+    {
+      "type": "dead_code",
+      "priority": "low",
+      "title": "Remove unused functions in src/graph_sitter/core/lsp_manager.py",
+      "description": "Found 1 potentially unused functions",
+      "affected_files": [
+        "src/graph_sitter/core/lsp_manager.py"
+      ],
+      "action": "Review and remove unused functions: shutdown_all_managers"
+    },
+    {
+      "type": "dead_code",
+      "priority": "low",
+      "title": "Remove unused functions in src/graph_sitter/core/lsp_types.py",
+      "description": "Found 3 potentially unused functions",
+      "affected_files": [
+        "src/graph_sitter/core/lsp_types.py"
+      ],
+      "action": "Review and remove unused functions: position_from_line_char, range_from_positions, diagnostic_from_error"
+    },
+    {
+      "type": "dead_code",
+      "priority": "low",
+      "title": "Remove unused functions in src/graph_sitter/core/lsp_type_adapters.py",
+      "description": "Found 1 potentially unused functions",
+      "affected_files": [
+        "src/graph_sitter/core/lsp_type_adapters.py"
+      ],
+      "action": "Review and remove unused functions: convert_protocol_diagnostics_to_unified"
+    },
+    {
+      "type": "dead_code",
+      "priority": "low",
+      "title": "Remove unused functions in src/graph_sitter/extensions/lsp/transaction_manager.py",
+      "description": "Found 29 potentially unused functions",
+      "affected_files": [
+        "src/graph_sitter/extensions/lsp/transaction_manager.py"
+      ],
+      "action": "Review and remove unused functions: test_edit_base_case, test_remove_base_case, test_insert_base_case, test_edit_ordering, test_remove_ordering"
+    },
+    {
+      "type": "dead_code",
+      "priority": "low",
+      "title": "Remove unused functions in src/graph_sitter/enhanced/codebase.py",
+      "description": "Found 4 potentially unused functions",
+      "affected_files": [
+        "src/graph_sitter/enhanced/codebase.py"
+      ],
+      "action": "Review and remove unused functions: test_codebase_symbols, context_mock, test_codeowners_property, test_from_codebase_non_existent_repo"
+    },
+    {
+      "type": "dead_code",
+      "priority": "low",
+      "title": "Remove unused functions in src/graph_sitter/ai/codebase_ai.py",
+      "description": "Found 2 potentially unused functions",
+      "affected_files": [
+        "src/graph_sitter/ai/codebase_ai.py"
+      ],
+      "action": "Review and remove unused functions: generate_flag_system_prompt, generate_flag_tools"
+    }
+  ]
+}
