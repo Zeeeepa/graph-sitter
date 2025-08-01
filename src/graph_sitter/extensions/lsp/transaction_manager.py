@@ -16,8 +16,27 @@ from .serena_bridge import SerenaLSPBridge, ErrorInfo, DiagnosticSeverity
 
 logger = get_logger(__name__)
 
-# Global registry of LSP managers
-_lsp_managers: WeakKeyDictionary = WeakKeyDictionary()
+
+class WeakRefKey:
+    """A weak-referenceable key class for LSP manager registry."""
+    def __init__(self, repo_path: str):
+        self.repo_path = repo_path
+    
+    def __hash__(self):
+        return hash(self.repo_path)
+    
+    def __eq__(self, other):
+        if isinstance(other, WeakRefKey):
+            return self.repo_path == other.repo_path
+        return False
+    
+    def __repr__(self):
+        return f"WeakRefKey({self.repo_path})"
+
+
+# Global registry of LSP managers - using string keys instead of WeakKeyDictionary
+# to avoid weak reference issues with object() keys
+_lsp_managers: Dict[str, 'TransactionAwareLSPManager'] = {}
 _manager_lock = threading.RLock()
 
 
@@ -265,28 +284,33 @@ def get_lsp_manager(repo_path: str, enable_lsp: bool = True) -> TransactionAware
     
     with _manager_lock:
         # Check if we already have a manager for this repo
-        for existing_manager in _lsp_managers.values():
-            if str(existing_manager.repo_path) == repo_path:
+        if repo_path in _lsp_managers:
+            existing_manager = _lsp_managers[repo_path]
+            if not existing_manager._shutdown:
                 return existing_manager
+            else:
+                # Remove shutdown manager
+                del _lsp_managers[repo_path]
         
         # Create new manager
         manager = TransactionAwareLSPManager(repo_path, enable_lsp)
         
-        # Store in registry (using a dummy key since we can't use the manager as its own key)
-        _lsp_managers[object()] = manager
+        # Store in registry using repo_path as key
+        _lsp_managers[repo_path] = manager
         
+        logger.info(f"Created new LSP manager for {repo_path}")
         return manager
 
 
 def shutdown_all_lsp_managers() -> None:
     """Shutdown all active LSP managers."""
     with _manager_lock:
-        for manager in list(_lsp_managers.values()):
+        for repo_path, manager in list(_lsp_managers.items()):
             try:
                 manager.shutdown()
+                logger.info(f"Shutdown LSP manager for {repo_path}")
             except Exception as e:
-                logger.error(f"Error shutting down LSP manager: {e}")
+                logger.error(f"Error shutting down LSP manager for {repo_path}: {e}")
         
         _lsp_managers.clear()
         logger.info("All LSP managers shutdown")
-

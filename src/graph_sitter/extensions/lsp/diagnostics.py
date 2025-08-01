@@ -210,6 +210,9 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
     codebase.is_lsp_enabled = _is_lsp_enabled
     codebase.get_lsp_status = _get_lsp_status
     
+    # Add unified error interface methods
+    _add_unified_error_interface(codebase)
+    
     # Add cleanup to existing shutdown method if it exists
     original_shutdown = getattr(codebase, 'shutdown', None)
     
@@ -221,6 +224,32 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
     codebase.shutdown = enhanced_shutdown
     
     logger.info(f"Diagnostic capabilities added to codebase: {codebase.repo_path}")
+
+
+def _add_unified_error_interface(codebase: "Codebase") -> None:
+    """Add unified error interface methods to the codebase."""
+    try:
+        from .serena.unified_error_interface import UnifiedErrorInterface
+        
+        # Create unified error interface instance
+        error_interface = UnifiedErrorInterface(codebase)
+        codebase._error_interface = error_interface
+        
+        # Add unified methods to codebase
+        codebase.errors = error_interface.errors
+        codebase.full_error_context = error_interface.full_error_context
+        codebase.resolve_errors = error_interface.resolve_errors
+        codebase.resolve_error = error_interface.resolve_error
+        
+        # Add helper method to get the interface
+        codebase._get_error_interface = lambda: error_interface
+        
+        logger.info("Unified error interface added to codebase")
+        
+    except ImportError as e:
+        logger.warning(f"Unified error interface not available: {e}")
+    except Exception as e:
+        logger.error(f"Failed to add unified error interface: {e}")
 
 
 # Monkey patch to automatically add diagnostics to new Codebase instances

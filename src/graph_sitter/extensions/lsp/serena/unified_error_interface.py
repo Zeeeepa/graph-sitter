@@ -87,12 +87,12 @@ class UnifiedErrorInterface:
             for file in self.codebase.files:
                 if file.file_path.endswith('.py'):
                     try:
-                        # This would call the actual LSP diagnostics
-                        # file_errors = lsp_integration.get_file_diagnostics(file.file_path)
+                        # Get real LSP diagnostics first, fall back to placeholder if needed
+                        file_errors = self._get_real_lsp_diagnostics(file.file_path)
                         
-                        # For now, we'll create a placeholder structure
-                        # In the real implementation, this would get actual LSP diagnostics
-                        file_errors = self._get_file_diagnostics_placeholder(file.file_path)
+                        # If no real LSP diagnostics available, use enhanced placeholder as fallback
+                        if not file_errors:
+                            file_errors = self._get_file_diagnostics_placeholder(file.file_path)
                         
                         for error in file_errors:
                             error_dict = {
@@ -548,6 +548,145 @@ class UnifiedErrorInterface:
                 'fix_description': None
             }
     
+    def _get_real_lsp_diagnostics(self, file_path: str) -> List[Dict[str, Any]]:
+        """
+        Get real LSP diagnostics for a file.
+        This connects to the actual LSP servers to get real error data.
+        """
+        try:
+            # Try to get diagnostics from the codebase's LSP integration
+            if hasattr(self.codebase, 'get_file_diagnostics'):
+                result = self.codebase.get_file_diagnostics(file_path)
+                
+                if result and result.get('success') and result.get('diagnostics'):
+                    lsp_diagnostics = result['diagnostics']
+                    
+                    # Convert LSP diagnostics to our standard format
+                    converted_errors = []
+                    for diag in lsp_diagnostics:
+                        try:
+                            # Handle different LSP diagnostic formats
+                            severity = diag.get('severity', 'error')
+                            if isinstance(severity, int):
+                                # Convert LSP severity numbers to strings
+                                severity_map = {1: 'error', 2: 'warning', 3: 'info', 4: 'hint'}
+                                severity = severity_map.get(severity, 'error')
+                            
+                            range_info = diag.get('range', {})
+                            start_pos = range_info.get('start', {})
+                            
+                            error_dict = {
+                                'line': start_pos.get('line', 0) + 1,  # Convert to 1-based
+                                'character': start_pos.get('character', 0),
+                                'message': diag.get('message', 'Unknown error'),
+                                'severity': severity,
+                                'source': diag.get('source', 'lsp'),
+                                'code': diag.get('code'),
+                                'has_fix': self._error_has_fix(diag),
+                                'file_path': file_path
+                            }
+                            
+                            converted_errors.append(error_dict)
+                            
+                        except Exception as e:
+                            logger.warning(f"Error converting LSP diagnostic: {e}")
+                            continue
+                    
+                    if converted_errors:
+                        logger.info(f"Retrieved {len(converted_errors)} real LSP diagnostics for {file_path}")
+                        return converted_errors
+            
+            # Try alternative LSP integration paths
+            lsp_integration = self._ensure_lsp_integration()
+            if lsp_integration and hasattr(lsp_integration, 'get_file_diagnostics'):
+                try:
+                    diagnostics = lsp_integration.get_file_diagnostics(file_path)
+                    if diagnostics:
+                        logger.info(f"Retrieved {len(diagnostics)} diagnostics from LSP integration for {file_path}")
+                        return self._convert_lsp_diagnostics_to_standard_format(diagnostics, file_path)
+                except Exception as e:
+                    logger.warning(f"LSP integration diagnostics failed: {e}")
+            
+            return []
+            
+        except Exception as e:
+            logger.warning(f"Failed to get real LSP diagnostics for {file_path}: {e}")
+            return []
+    
+    def _error_has_fix(self, diagnostic: Dict[str, Any]) -> bool:
+        """Determine if an LSP diagnostic has an available fix."""
+        # Check if there are code actions or quick fixes available
+        if diagnostic.get('codeActions'):
+            return True
+        
+        # Check common fixable error codes
+        code = diagnostic.get('code')
+        if code:
+            # Common fixable Python error codes
+            fixable_codes = [
+                'F401',  # unused import
+                'F841',  # unused variable
+                'E302',  # expected 2 blank lines
+                'E303',  # too many blank lines
+                'E701',  # multiple statements on one line
+                'W292',  # no newline at end of file
+                'W391',  # blank line at end of file
+            ]
+            return str(code) in fixable_codes
+        
+        # Check message patterns for fixable issues
+        message = diagnostic.get('message', '').lower()
+        fixable_patterns = [
+            'unused import',
+            'unused variable',
+            'missing whitespace',
+            'trailing whitespace',
+            'missing newline',
+            'too many blank lines',
+        ]
+        
+        return any(pattern in message for pattern in fixable_patterns)
+    
+    def _convert_lsp_diagnostics_to_standard_format(self, diagnostics: List[Any], file_path: str) -> List[Dict[str, Any]]:
+        """Convert various LSP diagnostic formats to our standard format."""
+        converted = []
+        
+        for diag in diagnostics:
+            try:
+                # Handle ErrorInfo objects
+                if hasattr(diag, 'file_path'):
+                    error_dict = {
+                        'line': getattr(diag, 'line', 1),
+                        'character': getattr(diag, 'character', 0),
+                        'message': getattr(diag, 'message', 'Unknown error'),
+                        'severity': str(getattr(diag, 'severity', 'error')).lower(),
+                        'source': getattr(diag, 'source', 'lsp'),
+                        'code': getattr(diag, 'code', None),
+                        'has_fix': self._error_has_fix({'code': getattr(diag, 'code', None), 'message': getattr(diag, 'message', '')}),
+                        'file_path': file_path
+                    }
+                    converted.append(error_dict)
+                
+                # Handle dictionary format
+                elif isinstance(diag, dict):
+                    error_dict = {
+                        'line': diag.get('line', 1),
+                        'character': diag.get('character', 0),
+                        'message': diag.get('message', 'Unknown error'),
+                        'severity': str(diag.get('severity', 'error')).lower(),
+                        'source': diag.get('source', 'lsp'),
+                        'code': diag.get('code'),
+                        'has_fix': self._error_has_fix(diag),
+                        'file_path': file_path
+                    }
+                    converted.append(error_dict)
+                    
+            except Exception as e:
+                logger.warning(f"Error converting diagnostic: {e}")
+                continue
+        
+        return converted
+
     def _get_file_diagnostics_placeholder(self, file_path: str) -> List[Dict[str, Any]]:
         """
         Enhanced placeholder method for getting file diagnostics.
