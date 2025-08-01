@@ -875,14 +875,18 @@ class ComprehensiveAnalysisEngine:
             analysis_results['serena_features'] = await self.demonstrate_serena_features()
             
             # 6. Run deep comprehensive analysis
+            # 7. Run unified Serena analysis
+            self.logger.info("🚀 Running unified Serena analysis...")
+            analysis_results["unified_serena_analysis"] = await self.run_unified_serena_analysis()
+            
             self.logger.info("🔬 Running deep comprehensive analysis...")
             analysis_results["deep_comprehensive_analysis"] = await self.run_deep_comprehensive_analysis()
             
-            # 7. Generate dashboard data
+            # 8. Generate dashboard data
             self.logger.info("📊 Generating dashboard data...")
             analysis_results['dashboard_data'] = await self.generate_dashboard_data(analysis_results)
             
-            # 8. Performance metrics
+            # 9. Performance metrics
             analysis_results['performance_metrics'] = {
                 'total_analysis_time': time.time() - start_time,
                 'files_analyzed': analysis_results['structure_analysis'].get('total_files', 0),
@@ -1655,4 +1659,106 @@ async def main_deep_comprehensive():
     
     print("\n🎉 Deep Comprehensive Analysis Complete!")
     print("This analysis demonstrates the full integration of all graph-sitter capabilities.")
+
+
+    async def run_unified_serena_analysis(self) -> Dict[str, Any]:
+        """Run unified Serena analysis with ALL capabilities."""
+        self.logger.info("🚀 Starting unified Serena analysis...")
+        
+        try:
+            from unified_serena_analyzer import UnifiedSerenaAnalyzer
+            
+            # Initialize unified analyzer with current codebase
+            unified_analyzer = UnifiedSerenaAnalyzer(str(self.codebase_path))
+            
+            # Initialize codebase
+            if not unified_analyzer.initialize_codebase():
+                return {"error": "Failed to initialize unified Serena analyzer"}
+            
+            # Record start time
+            start_time = time.time()
+            
+            # 1. Collect ALL LSP diagnostics
+            lsp_diagnostics = unified_analyzer.collect_all_lsp_diagnostics()
+            
+            # 2. Demonstrate all Serena features
+            serena_demo = unified_analyzer.demonstrate_serena_features()
+            
+            # 3. Perform comprehensive codebase analysis
+            analysis_results = unified_analyzer.analyze_codebase_comprehensive()
+            
+            # 4. Record performance metrics
+            unified_analyzer.performance_metrics = {
+                'analysis_time': f"{time.time() - start_time:.2f} seconds",
+                'lsp_diagnostics_collected': len(lsp_diagnostics),
+                'serena_features_working': len(serena_demo.get('successful_features', [])),
+                'serena_features_total': len(serena_demo.get('features_tested', [])),
+                'files_analyzed': analysis_results.get('files_analyzed', 0)
+            }
+            
+            # 5. Print comprehensive report
+            unified_analyzer.print_comprehensive_report(analysis_results)
+            
+            # 6. Cleanup
+            unified_analyzer.cleanup()
+            
+            # Return complete results
+            return {
+                'lsp_diagnostics': lsp_diagnostics,
+                'serena_features': serena_demo,
+                'analysis_results': analysis_results,
+                'performance_metrics': unified_analyzer.performance_metrics,
+                'serena_status': unified_analyzer.serena_status
+            }
+            
+        except ImportError as e:
+            self.logger.error(f"Could not import unified Serena analyzer: {e}")
+            return {"error": f"Unified Serena analyzer not available: {e}"}
+        except Exception as e:
+            self.logger.error(f"Unified Serena analysis failed: {e}")
+            return {"error": f"Unified Serena analysis failed: {e}"}
+
+
+async def main_unified_serena():
+    """Main function for running unified Serena analysis."""
+    print("🚀 UNIFIED SERENA ANALYSIS ENGINE")
+    print("=" * 60)
+    print("Complete codebase analysis with ALL LSP errors, symbol overviews, and Serena features")
+    print("This consolidates ALL Serena capabilities into one comprehensive analysis.")
+    print()
+    
+    # Initialize analyzer
+    engine = ComprehensiveAnalysisEngine(".")
+    
+    # Initialize codebase
+    if not await engine.initialize_codebase():
+        print("❌ Failed to initialize codebase. Continuing with limited analysis...")
+    
+    # Run unified Serena analysis
+    try:
+        results = await engine.run_unified_serena_analysis()
+        
+        if "error" not in results:
+            print("\n✅ Unified Serena analysis completed successfully!")
+            
+            # Show summary
+            lsp_count = len(results.get('lsp_diagnostics', []))
+            serena_working = len(results.get('serena_features', {}).get('successful_features', []))
+            serena_total = len(results.get('serena_features', {}).get('features_tested', []))
+            files_analyzed = results.get('analysis_results', {}).get('files_analyzed', 0)
+            
+            print(f"📊 Analysis Summary:")
+            print(f"   LSP Diagnostics: {lsp_count}")
+            print(f"   Serena Features: {serena_working}/{serena_total} working")
+            print(f"   Files Analyzed: {files_analyzed}")
+            
+        else:
+            print(f"\n⚠️  Unified Serena analysis had issues: {results['error']}")
+        
+    except Exception as e:
+        print(f"❌ Unified Serena analysis failed: {e}")
+        traceback.print_exc()
+    
+    print("\n🎉 Unified Serena Analysis Complete!")
+    print("This analysis demonstrates the full integration of ALL Serena capabilities.")
 
