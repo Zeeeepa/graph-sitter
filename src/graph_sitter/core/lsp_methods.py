@@ -51,7 +51,7 @@ class LSPMethodsMixin:
             >>> all_errors = codebase.errors()
             >>> print(f"Found {len(all_errors.errors)} errors")
         """
-        return self._lsp.get_all_errors()
+        return self._lsp.get_all_errors(codebase=self)
     
     def full_error_context(self, error_id: str) -> Optional[ErrorContext]:
         """Get full context for a specific error.
@@ -692,4 +692,3 @@ class LSPMethodsMixin:
 
 # Export the mixin
 __all__ = ['LSPMethodsMixin']
-

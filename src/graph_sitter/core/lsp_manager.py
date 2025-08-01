@@ -20,6 +20,7 @@ from .lsp_types import (
     LSPStatus, HealthCheck, ErrorSeverity, ErrorType, Position, Range,
     ErrorCallback
 )
+from .unified_diagnostics import UnifiedDiagnosticCollector
 
 logger = get_logger(__name__)
 
@@ -44,6 +45,7 @@ class LSPManager:
         # Lazy-loaded components
         self._serena_bridge = None
         self._transaction_manager = None
+        self._unified_diagnostics: Optional[UnifiedDiagnosticCollector] = None
         
         # Caching
         self._error_cache: Optional[ErrorCollection] = None
@@ -93,6 +95,9 @@ class LSPManager:
                 from graph_sitter.extensions.lsp.transaction_manager import TransactionAwareLSPManager
                 self._transaction_manager = TransactionAwareLSPManager(str(self.repo_path))
                 
+                # Initialize unified diagnostic collector
+                # Note: We need a codebase object for this, so we'll initialize it lazily when needed
+                
                 self._initialized = True
                 logger.info(f"LSP components initialized successfully for {self.repo_path}")
                 
@@ -108,6 +113,26 @@ class LSPManager:
                 return False
             finally:
                 self._initializing = False
+    
+    def _ensure_unified_diagnostics(self, codebase) -> bool:
+        """Ensure unified diagnostics collector is initialized."""
+        if self._unified_diagnostics is not None:
+            return True
+        
+        if not self._ensure_initialized():
+            return False
+        
+        try:
+            self._unified_diagnostics = UnifiedDiagnosticCollector(
+                codebase=codebase,
+                enable_lsp=True,
+                enable_transaction_awareness=True
+            )
+            logger.info("Unified diagnostic collector initialized")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize unified diagnostics: {e}")
+            return False
     
     def _is_cache_valid(self) -> bool:
         """Check if the current cache is still valid."""
@@ -130,7 +155,7 @@ class LSPManager:
     
     # Core Error Retrieval Methods
     
-    def get_all_errors(self) -> ErrorCollection:
+    def get_all_errors(self, codebase=None) -> ErrorCollection:
         """Get all errors in the codebase."""
         self._request_count += 1
         
@@ -140,22 +165,36 @@ class LSPManager:
             return cached
         
         if not self._ensure_initialized():
-            return ErrorCollection(errors=[], total_count=0)
+            return ErrorCollection(errors=[], total_count=0, error_count=0, warning_count=0, info_count=0, hint_count=0, files_with_errors=0)
         
         try:
-            # Get errors from Serena bridge
+            # Use unified diagnostics if available and codebase is provided
+            if codebase and self._ensure_unified_diagnostics(codebase):
+                error_collection = self._unified_diagnostics.get_all_diagnostics()
+                self._update_cache(error_collection)
+                return error_collection
+            
+            # Fallback to Serena bridge
             raw_errors = self._serena_bridge.get_all_diagnostics()
             errors = self._convert_raw_errors(raw_errors)
             
             # Update cache
-            error_collection = ErrorCollection(errors=errors, total_count=len(errors))
+            error_collection = ErrorCollection(
+                errors=errors, 
+                total_count=len(errors),
+                error_count=sum(1 for e in errors if e.severity == ErrorSeverity.ERROR),
+                warning_count=sum(1 for e in errors if e.severity == ErrorSeverity.WARNING),
+                info_count=sum(1 for e in errors if e.severity == ErrorSeverity.INFO),
+                hint_count=sum(1 for e in errors if e.severity == ErrorSeverity.HINT),
+                files_with_errors=len(set(e.file_path for e in errors))
+            )
             self._update_cache(error_collection)
             
             return error_collection
             
         except Exception as e:
             logger.error(f"Error retrieving all errors: {e}")
-            return ErrorCollection(errors=[], total_count=0)
+            return ErrorCollection(errors=[], total_count=0, error_count=0, warning_count=0, info_count=0, hint_count=0, files_with_errors=0)
     
     def get_errors_by_file(self, file_path: str) -> ErrorCollection:
         """Get errors for a specific file."""
@@ -606,4 +645,3 @@ def shutdown_all_managers() -> None:
 
 # Export main classes
 __all__ = ['LSPManager', 'get_lsp_manager', 'shutdown_all_managers']
-

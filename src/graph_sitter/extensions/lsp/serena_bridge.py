@@ -149,6 +149,99 @@ class SerenaLSPBridge:
         
         return file_diagnostics
     
+    def get_all_diagnostics(self) -> List[ErrorInfo]:
+        """
+        Get all diagnostics from all language servers.
+        
+        This method is required by the unified LSP manager and provides
+        comprehensive diagnostic information from all active language servers.
+        
+        Returns:
+            List[ErrorInfo]: All diagnostics from all language servers
+        """
+        if not self.is_initialized:
+            logger.debug("LSP bridge not initialized, returning empty diagnostics")
+            return []
+        
+        all_diagnostics = []
+        
+        with self._lock:
+            # Get diagnostics from all language servers
+            for lang, server in self.language_servers.items():
+                try:
+                    logger.debug(f"Getting diagnostics from {lang} server")
+                    server_diagnostics = server.get_diagnostics()
+                    
+                    # Convert server diagnostics to ErrorInfo if needed
+                    for diagnostic in server_diagnostics:
+                        if isinstance(diagnostic, ErrorInfo):
+                            all_diagnostics.append(diagnostic)
+                        else:
+                            # Convert from protocol diagnostic to ErrorInfo
+                            error_info = self._convert_diagnostic_to_error_info(diagnostic)
+                            if error_info:
+                                all_diagnostics.append(error_info)
+                                
+                    logger.debug(f"Got {len(server_diagnostics)} diagnostics from {lang} server")
+                    
+                except Exception as e:
+                    logger.error(f"Error getting diagnostics from {lang} server: {e}")
+                    continue
+            
+            # Update cache
+            self.diagnostics_cache['all'] = all_diagnostics
+        
+        logger.info(f"Retrieved {len(all_diagnostics)} total diagnostics from {len(self.language_servers)} servers")
+        return all_diagnostics
+    
+    def _convert_diagnostic_to_error_info(self, diagnostic) -> Optional[ErrorInfo]:
+        """Convert a protocol diagnostic to ErrorInfo."""
+        try:
+            # Handle different diagnostic formats
+            if hasattr(diagnostic, 'range') and hasattr(diagnostic, 'message'):
+                # LSP protocol diagnostic
+                range_obj = diagnostic.range
+                start = range_obj.start if range_obj else None
+                end = range_obj.end if range_obj else None
+                
+                return ErrorInfo(
+                    file_path=getattr(diagnostic, 'file_path', ''),
+                    line=start.line if start else 0,
+                    character=start.character if start else 0,
+                    message=diagnostic.message,
+                    severity=getattr(diagnostic, 'severity', DiagnosticSeverity.ERROR),
+                    source=getattr(diagnostic, 'source', None),
+                    code=getattr(diagnostic, 'code', None),
+                    end_line=end.line if end else None,
+                    end_character=end.character if end else None
+                )
+            
+            # If it's already an ErrorInfo, return as-is
+            elif isinstance(diagnostic, ErrorInfo):
+                return diagnostic
+            
+            # Handle dictionary format
+            elif isinstance(diagnostic, dict):
+                return ErrorInfo(
+                    file_path=diagnostic.get('file_path', ''),
+                    line=diagnostic.get('line', 0),
+                    character=diagnostic.get('character', 0),
+                    message=diagnostic.get('message', ''),
+                    severity=diagnostic.get('severity', DiagnosticSeverity.ERROR),
+                    source=diagnostic.get('source'),
+                    code=diagnostic.get('code'),
+                    end_line=diagnostic.get('end_line'),
+                    end_character=diagnostic.get('end_character')
+                )
+            
+            else:
+                logger.warning(f"Unknown diagnostic format: {type(diagnostic)}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error converting diagnostic to ErrorInfo: {e}")
+            return None
+    
     def refresh_diagnostics(self) -> None:
         """Force refresh of diagnostic information."""
         if not self.is_initialized:
