@@ -101,7 +101,7 @@ def demo_enhanced_codebase():
     
     try:
         # Test enhanced codebase AI
-        from graph_sitter.codebase.codebase_ai import generate_system_prompt
+        from graph_sitter.ai.codebase_ai import generate_system_prompt
         
         print("✅ Enhanced codebase AI imported successfully")
         
@@ -194,4 +194,3 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
-
