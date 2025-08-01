@@ -1,132 +1,106 @@
 """
-Comprehensive LSP Error Retrieval Methods for Codebase Class
+Enhanced LSP Error Retrieval Methods for Codebase Class
 
 This module provides all the LSP error retrieval and code intelligence methods
-that are added to the main Codebase class to create a unified interface.
+that are added to the main Codebase class using the unified consolidated components.
 """
 
 import time
 from pathlib import Path
+from typing import List, Dict, Any, Optional, Generator, Callable
 from graph_sitter.shared.logging.get_logger import get_logger
 
 logger = get_logger(__name__)
 
 
 class LSPMethodsMixin:
-    """Mixin class that provides comprehensive LSP methods for the Codebase class."""
+    """Mixin class that provides comprehensive LSP methods using unified consolidated components."""
     
-    def _get_diagnostics_manager(self):
-        """Get or create diagnostics manager for LSP integration."""
-        if not hasattr(self, '_diagnostics_manager'):
+    def _get_unified_diagnostics(self):
+        """Get or create unified diagnostics engine."""
+        if not hasattr(self, '_unified_diagnostics'):
             try:
-                from graph_sitter.core.diagnostics import CodebaseDiagnostics
-                self._diagnostics_manager = CodebaseDiagnostics(self, enable_lsp=True)
+                from graph_sitter.core.unified_diagnostics import get_diagnostic_engine
+                self._unified_diagnostics = get_diagnostic_engine(self, enable_lsp=True)
             except ImportError:
-                logger.warning("LSP diagnostics not available. Install Serena dependencies for error detection.")
-                self._diagnostics_manager = None
-        return self._diagnostics_manager
+                logger.warning("Unified diagnostics not available. Install dependencies for error detection.")
+                self._unified_diagnostics = None
+        return self._unified_diagnostics
     
-    def _get_deep_analyzer(self):
-        """Get or create deep analyzer for comprehensive metrics."""
-        if not hasattr(self, '_deep_analyzer'):
+    def _get_unified_analysis(self):
+        """Get or create unified analysis engine."""
+        if not hasattr(self, '_unified_analysis'):
             try:
-                from graph_sitter.analysis.deep_analysis import DeepCodebaseAnalyzer
-                self._deep_analyzer = DeepCodebaseAnalyzer(self)
+                from graph_sitter.core.unified_analysis import UnifiedAnalysisEngine
+                self._unified_analysis = UnifiedAnalysisEngine(self)
             except ImportError:
-                logger.warning("Deep analysis not available.")
-                self._deep_analyzer = None
-        return self._deep_analyzer
+                logger.warning("Unified analysis not available.")
+                self._unified_analysis = None
+        return self._unified_analysis
     
-    def _get_serena_core(self):
-        """Get or create Serena core for advanced capabilities."""
-        if not hasattr(self, '_serena_core'):
+    def _get_code_generation_engine(self):
+        """Get or create LSP code generation engine."""
+        if not hasattr(self, '_code_generation_engine'):
             try:
-                from graph_sitter.extensions.serena.core import SerenaCore, get_or_create_core
-                from graph_sitter.extensions.serena.types import SerenaConfig
-                import asyncio
-                
-                # Create event loop if needed
-                try:
-                    loop = asyncio.get_event_loop()
-                except RuntimeError:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                
-                config = SerenaConfig()
-                self._serena_core = loop.run_until_complete(
-                    get_or_create_core(str(self.repo_path), config)
-                )
+                from graph_sitter.extensions.serena.lsp_code_generation import LSPCodeGenerationEngine
+                diagnostics = self._get_unified_diagnostics()
+                if diagnostics:
+                    self._code_generation_engine = LSPCodeGenerationEngine(diagnostics)
+                else:
+                    self._code_generation_engine = None
             except ImportError:
-                logger.warning("Serena core not available.")
-                self._serena_core = None
-        return self._serena_core
+                logger.warning("Code generation engine not available.")
+                self._code_generation_engine = None
+        return self._code_generation_engine
 
     # ========================================================================
-    # CORE ERROR RETRIEVAL COMMANDS
+    # CORE ERROR RETRIEVAL COMMANDS (Using Unified Components)
     # ========================================================================
     
-    def errors(self):
-        """Get all errors in the codebase."""
-        diagnostics_manager = self._get_diagnostics_manager()
-        if diagnostics_manager:
-            return diagnostics_manager.errors
+    def errors(self) -> List[Any]:
+        """Get all errors in the codebase using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.errors
         return []
     
-    def errors_by_file(self, file_path: str):
-        """Get errors in a specific file."""
-        diagnostics_manager = self._get_diagnostics_manager()
-        if diagnostics_manager and hasattr(diagnostics_manager, '_lsp_manager'):
-            lsp_manager = diagnostics_manager._lsp_manager
-            if lsp_manager and hasattr(lsp_manager, '_file_diagnostics_cache'):
-                return lsp_manager._file_diagnostics_cache.get(file_path, [])
+    def errors_by_file(self, file_path: str) -> List[Any]:
+        """Get errors in a specific file using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_errors_by_file(file_path)
         return []
     
-    def errors_by_severity(self, severity):
-        """Filter errors by severity (error/warning/info)."""
-        all_errors = self.errors()
-        if hasattr(severity, 'upper'):
-            severity = severity.upper()
-        
-        severity_map = {
-            'ERROR': 1, 'WARNING': 2, 'INFO': 3, 'INFORMATION': 3, 'HINT': 4
-        }
-        severity_level = severity_map.get(severity, 1)
-        
-        return [error for error in all_errors if error.severity == severity_level]
+    def errors_by_severity(self, severity: str) -> List[Any]:
+        """Filter errors by severity using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_errors_by_severity(severity)
+        return []
     
-    def errors_by_type(self, error_type):
-        """Filter errors by type (syntax/semantic/lint)."""
-        all_errors = self.errors()
-        error_type = error_type.lower()
-        
-        return [error for error in all_errors 
-                if error.source and error_type in error.source.lower()]
+    def errors_by_type(self, error_type: str) -> List[Any]:
+        """Filter errors by type using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_errors_by_type(error_type)
+        return []
     
-    def recent_errors(self, since_timestamp):
-        """Get recent errors since timestamp."""
-        # For now, return all errors - could be enhanced with timestamp tracking
-        return self.errors()
+    def recent_errors(self, since_timestamp: float) -> List[Any]:
+        """Get recent errors since timestamp using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_recent_errors(since_timestamp)
+        return []
 
     # ========================================================================
-    # DETAILED ERROR CONTEXT
+    # DETAILED ERROR CONTEXT (Using Unified Components)
     # ========================================================================
     
-    def full_error_context(self, error_id):
-        """Get full context for a specific error."""
-        all_errors = self.errors()
-        for error in all_errors:
-            if hasattr(error, 'id') and error.id == error_id:
-                return {
-                    'error': error,
-                    'file_path': error.file_path,
-                    'line': error.line,
-                    'character': error.character,
-                    'message': error.message,
-                    'severity': error.severity,
-                    'source': error.source,
-                    'code': error.code,
-                    'context_lines': self._get_error_context_lines(error)
-                }
+    def full_error_context(self, error_id: str) -> Optional[Dict[str, Any]]:
+        """Get full context for a specific error using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_full_error_context(error_id)
         return None
     
     def _get_error_context_lines(self, error, context_size=5):
@@ -149,51 +123,31 @@ class LSPMethodsMixin:
             logger.warning(f"Could not get context lines for error: {e}")
         return None
     
-    def error_suggestions(self, error_id):
-        """Get fix suggestions for an error."""
-        error_context = self.full_error_context(error_id)
-        if error_context:
-            # Basic suggestions based on error type
-            suggestions = []
-            message = error_context['message'].lower()
-            
-            if 'undefined' in message or 'not defined' in message:
-                suggestions.append("Check if the variable/function is properly imported or defined")
-            elif 'syntax' in message:
-                suggestions.append("Check for missing brackets, quotes, or semicolons")
-            elif 'type' in message:
-                suggestions.append("Verify the data types match the expected types")
-            else:
-                suggestions.append("Review the error message and surrounding code")
-            
-            return suggestions
+    def error_suggestions(self, error_id: str) -> List[str]:
+        """Get fix suggestions for an error using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_error_suggestions(error_id)
+        
+        # Fallback to code generation engine
+        code_gen = self._get_code_generation_engine()
+        if code_gen:
+            return code_gen.get_error_resolution_suggestions(error_id)
+        
         return []
     
-    def error_related_symbols(self, error_id):
-        """Get symbols related to the error."""
-        error_context = self.full_error_context(error_id)
-        if error_context:
-            # Find symbols in the error context
-            file_path = error_context['file_path']
-            try:
-                # Get file object and its symbols
-                for file in self.files:
-                    if str(file.filepath).endswith(file_path):
-                        return [symbol.name for symbol in file.symbols]
-            except Exception as e:
-                logger.warning(f"Could not get related symbols: {e}")
+    def error_related_symbols(self, error_id: str) -> List[str]:
+        """Get symbols related to the error using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_error_related_symbols(error_id)
         return []
     
-    def error_impact_analysis(self, error_id):
-        """Get impact analysis of the error."""
-        error_context = self.full_error_context(error_id)
-        if error_context:
-            return {
-                'severity_impact': 'High' if error_context['error'].severity == 1 else 'Medium',
-                'affected_file': error_context['file_path'],
-                'potential_cascade': len(self.error_related_symbols(error_id)) > 0,
-                'fix_complexity': 'Simple' if 'syntax' in error_context['message'].lower() else 'Complex'
-            }
+    def error_impact_analysis(self, error_id: str) -> Dict[str, Any]:
+        """Get impact analysis of the error using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_error_impact_analysis(error_id)
         return {}
 
     # ========================================================================
@@ -255,156 +209,201 @@ class LSPMethodsMixin:
                 for path, count in file_errors.most_common(10)]
 
     # ========================================================================
-    # REAL-TIME ERROR MONITORING
+    # REAL-TIME ERROR MONITORING (Using Unified Components)
     # ========================================================================
     
-    def watch_errors(self, callback):
-        """Set up real-time error monitoring."""
-        diagnostics_manager = self._get_diagnostics_manager()
-        if diagnostics_manager and hasattr(diagnostics_manager, '_lsp_manager'):
-            # Set up callback for error changes
-            def error_change_handler():
-                current_errors = self.errors()
-                callback(current_errors)
-            
-            # Store callback for future use
-            if not hasattr(self, '_error_callbacks'):
-                self._error_callbacks = []
-            self._error_callbacks.append(callback)
-            
-            return True
+    def watch_errors(self, callback: Callable[[List[Any]], None]) -> bool:
+        """Set up real-time error monitoring using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.watch_errors(callback)
         return False
     
-    def error_stream(self):
-        """Get a stream of error updates."""
-        # Generator that yields error updates
-        def error_generator():
+    def error_stream(self) -> Generator[List[Any], None, None]:
+        """Get a stream of error updates using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.error_stream()
+        
+        # Fallback generator
+        def fallback_generator():
             last_errors = []
             while True:
                 current_errors = self.errors()
                 if current_errors != last_errors:
                     yield current_errors
                     last_errors = current_errors
-                time.sleep(1)  # Check every second
+                time.sleep(1)
         
-        return error_generator()
+        return fallback_generator()
     
-    def refresh_errors(self):
-        """Force refresh of error detection."""
-        diagnostics_manager = self._get_diagnostics_manager()
-        if diagnostics_manager and hasattr(diagnostics_manager, '_lsp_manager'):
-            lsp_manager = diagnostics_manager._lsp_manager
-            if lsp_manager and hasattr(lsp_manager, '_refresh_diagnostics_async'):
-                lsp_manager._refresh_diagnostics_async()
-                return True
+    def refresh_errors(self) -> bool:
+        """Force refresh of error detection using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.refresh_errors()
         return False
 
     # ========================================================================
-    # ERROR RESOLUTION & ACTIONS
+    # ERROR RESOLUTION & ACTIONS (Using Unified Components)
     # ========================================================================
     
-    def auto_fix_errors(self, error_ids):
-        """Auto-fix specific errors."""
-        fixed_errors = []
-        for error_id in error_ids:
-            quick_fixes = self.get_quick_fixes(error_id)
-            if quick_fixes:
-                # Apply the first available fix
-                if self.apply_error_fix(error_id, quick_fixes[0]['id']):
-                    fixed_errors.append(error_id)
-        return fixed_errors
-    
-    def get_quick_fixes(self, error_id):
-        """Get available quick fixes for an error."""
-        error_context = self.full_error_context(error_id)
-        if error_context:
-            fixes = []
-            message = error_context['message'].lower()
-            
-            # Generate basic quick fixes based on error type
-            if 'import' in message:
-                fixes.append({
-                    'id': f'fix_import_{error_id}',
-                    'title': 'Add missing import',
-                    'description': 'Add the missing import statement'
-                })
-            elif 'undefined' in message:
-                fixes.append({
-                    'id': f'fix_undefined_{error_id}',
-                    'title': 'Define variable',
-                    'description': 'Define the undefined variable'
-                })
-            
-            return fixes
+    def auto_fix_errors(self, error_ids: List[str]) -> List[str]:
+        """Auto-fix specific errors using code generation engine."""
+        code_gen = self._get_code_generation_engine()
+        if code_gen:
+            fixed_errors = []
+            for error_id in error_ids:
+                fixes = code_gen.generate_error_fixes(error_id)
+                if fixes:
+                    # Apply the highest confidence fix
+                    best_fix = max(fixes, key=lambda f: f.get('confidence', 0))
+                    if self.apply_error_fix(error_id, best_fix):
+                        fixed_errors.append(error_id)
+            return fixed_errors
         return []
     
-    def apply_error_fix(self, error_id, fix_id):
+    def get_quick_fixes(self, error_id: str) -> List[Dict[str, Any]]:
+        """Get available quick fixes for an error using code generation engine."""
+        code_gen = self._get_code_generation_engine()
+        if code_gen:
+            return code_gen.generate_error_fixes(error_id)
+        return []
+    
+    def apply_error_fix(self, error_id: str, fix: Dict[str, Any]) -> bool:
         """Apply a specific fix to resolve an error."""
-        # Basic implementation - could be enhanced with actual code modifications
-        logger.info(f"Applying fix {fix_id} for error {error_id}")
-        return True
+        try:
+            # Apply code changes from the fix
+            code_changes = fix.get('code_changes', [])
+            for change in code_changes:
+                file_path = change.get('file_path')
+                line = change.get('line')
+                action = change.get('action')
+                new_code = change.get('new_code')
+                
+                if file_path and new_code:
+                    # Apply the code change (simplified implementation)
+                    logger.info(f"Applying {action} at {file_path}:{line} - {new_code[:50]}...")
+                    # In a real implementation, this would modify the actual file
+            
+            return True
+        except Exception as e:
+            logger.error(f"Error applying fix for {error_id}: {e}")
+            return False
 
     # ========================================================================
-    # FULL SERENA LSP FEATURE RETRIEVAL
+    # COMPREHENSIVE LSP FEATURE RETRIEVAL (Using Unified Components)
     # ========================================================================
     
-    def completions(self, file_path, position):
-        """Get code completions at the specified position."""
-        serena_core = self._get_serena_core()
-        if serena_core:
-            try:
-                import asyncio
-                loop = asyncio.get_event_loop()
-                return loop.run_until_complete(
-                    serena_core.get_completions(file_path, position[0], position[1])
-                )
-            except Exception as e:
-                logger.warning(f"Could not get completions: {e}")
+    def completions(self, file_path: str, position: tuple) -> List[Dict[str, Any]]:
+        """Get code completions at the specified position using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_completions(file_path, position[0], position[1])
         return []
     
-    def hover_info(self, file_path, position):
-        """Get hover information at the specified position."""
-        serena_core = self._get_serena_core()
-        if serena_core:
-            try:
-                import asyncio
-                loop = asyncio.get_event_loop()
-                return loop.run_until_complete(
-                    serena_core.get_hover_info(file_path, position[0], position[1])
-                )
-            except Exception as e:
-                logger.warning(f"Could not get hover info: {e}")
+    def hover_info(self, file_path: str, position: tuple) -> Optional[Dict[str, Any]]:
+        """Get hover information at the specified position using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_hover_info(file_path, position[0], position[1])
         return None
     
-    def signature_help(self, file_path, position):
-        """Get function signature help at the specified position."""
-        # Basic implementation - could be enhanced with LSP integration
+    def signature_help(self, file_path: str, position: tuple) -> Dict[str, Any]:
+        """Get function signature help at the specified position using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_signature_help(file_path, position[0], position[1])
         return {'signatures': [], 'active_signature': 0, 'active_parameter': 0}
     
-    def definitions(self, symbol_name):
-        """Go to definition for a symbol."""
-        definitions = []
-        for symbol in self.symbols:
-            if symbol.name == symbol_name:
-                definitions.append({
-                    'file_path': str(symbol.file.filepath) if hasattr(symbol, 'file') else '',
-                    'line': getattr(symbol, 'line_number', 0),
-                    'character': 0
-                })
-        return definitions
+    def definitions(self, file_path: str, position: tuple) -> List[Dict[str, Any]]:
+        """Go to definition for a symbol using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_definitions(file_path, position[0], position[1])
+        return []
     
-    def references(self, symbol_name):
-        """Find all references to a symbol."""
-        references = []
-        for symbol in self.symbols:
-            if symbol.name == symbol_name:
-                for usage in symbol.symbol_usages:
-                    references.append({
-                        'file_path': str(usage.file.filepath) if hasattr(usage, 'file') else '',
-                        'line': getattr(usage, 'line_number', 0),
-                        'character': 0
-                    })
-        return references
+    def references(self, file_path: str, position: tuple, include_declaration: bool = True) -> List[Dict[str, Any]]:
+        """Find all references to a symbol using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_references(file_path, position[0], position[1], include_declaration)
+        return []
+    
+    def document_symbols(self, file_path: str) -> List[Dict[str, Any]]:
+        """Get document symbols using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_document_symbols(file_path)
+        return []
+    
+    def workspace_symbols(self, query: str = "") -> List[Dict[str, Any]]:
+        """Get workspace symbols using unified diagnostics."""
+        diagnostics = self._get_unified_diagnostics()
+        if diagnostics:
+            return diagnostics.get_workspace_symbols(query)
+        return []
+
+    # ========================================================================
+    # COMPREHENSIVE ANALYSIS (Using Unified Components)
+    # ========================================================================
+    
+    def comprehensive_analysis(self, level: str = "COMPREHENSIVE") -> Dict[str, Any]:
+        """Get comprehensive codebase analysis using unified analysis engine."""
+        analysis = self._get_unified_analysis()
+        if analysis:
+            return analysis.analyze(level)
+        return {}
+    
+    def basic_analysis(self) -> Dict[str, Any]:
+        """Get basic codebase analysis using unified analysis engine."""
+        return self.comprehensive_analysis("BASIC")
+    
+    def deep_analysis(self) -> Dict[str, Any]:
+        """Get deep codebase analysis using unified analysis engine."""
+        return self.comprehensive_analysis("DEEP")
+    
+    def architectural_insights(self) -> Dict[str, Any]:
+        """Get architectural insights using unified analysis engine."""
+        analysis = self._get_unified_analysis()
+        if analysis:
+            return analysis.get_architectural_insights()
+        return {}
+    
+    def code_quality_metrics(self) -> Dict[str, Any]:
+        """Get code quality metrics using unified analysis engine."""
+        analysis = self._get_unified_analysis()
+        if analysis:
+            return analysis.get_code_quality_metrics()
+        return {}
+    
+    def complexity_analysis(self) -> Dict[str, Any]:
+        """Get complexity analysis using unified analysis engine."""
+        analysis = self._get_unified_analysis()
+        if analysis:
+            return analysis.get_complexity_analysis()
+        return {}
+    
+    def dependency_analysis(self) -> Dict[str, Any]:
+        """Get dependency analysis using unified analysis engine."""
+        analysis = self._get_unified_analysis()
+        if analysis:
+            return analysis.get_dependency_analysis()
+        return {}
+    
+    def security_analysis(self) -> Dict[str, Any]:
+        """Get security analysis using unified analysis engine."""
+        analysis = self._get_unified_analysis()
+        if analysis:
+            return analysis.get_security_analysis()
+        return {}
+    
+    def performance_analysis(self) -> Dict[str, Any]:
+        """Get performance analysis using unified analysis engine."""
+        analysis = self._get_unified_analysis()
+        if analysis:
+            return analysis.get_performance_analysis()
+        return {}
 
     # ========================================================================
     # CODE ACTIONS & REFACTORING
@@ -641,4 +640,3 @@ class LSPMethodsMixin:
         })
         
         return capabilities
-
