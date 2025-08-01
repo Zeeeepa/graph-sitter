@@ -17,8 +17,7 @@ from .lsp_types import (
     Position as UnifiedPosition,
     Range as UnifiedRange,
     CompletionItem as UnifiedCompletionItem,
-    HoverInfo as UnifiedHoverInfo,
-    DiagnosticInfo as UnifiedDiagnosticInfo
+    HoverInfo as UnifiedHoverInfo
 )
 
 # Import protocol types
@@ -125,21 +124,24 @@ class LSPTypeAdapter:
         elif 'undefined' in error.message.lower():
             error_type = UnifiedErrorType.UNDEFINED
         
+        # Create range from line/character positions
+        start_pos = UnifiedPosition(line=error.line, character=error.character)
+        end_pos = UnifiedPosition(
+            line=error.end_line if error.end_line is not None else error.line,
+            character=error.end_character if error.end_character is not None else error.character
+        )
+        range_obj = UnifiedRange(start=start_pos, end=end_pos)
+        
         return UnifiedErrorInfo(
             id=f"{error.file_path}:{error.line}:{error.character}",
-            file_path=error.file_path,
             message=error.message,
             severity=LSPTypeAdapter.severity_to_unified(error.severity),
             error_type=error_type,
-            line=error.line,
-            character=error.character,
-            end_line=error.end_line,
-            end_character=error.end_character,
-            source=error.source,
+            file_path=error.file_path,
+            range=range_obj,
+            source=error.source or "serena-lsp",
             code=str(error.code) if error.code else None,
-            has_quick_fix=False,  # Default, can be enhanced
-            related_information=[],
-            tags=[]
+            has_quick_fix=False  # Default, can be enhanced
         )
     
     @staticmethod
@@ -178,21 +180,24 @@ class LSPTypeAdapter:
                 end_line = getattr(end, 'line', None)
                 end_char = getattr(end, 'character', None)
         
+        # Create range from diagnostic positions
+        start_pos = UnifiedPosition(line=start_line, character=start_char)
+        end_pos = UnifiedPosition(
+            line=end_line if end_line is not None else start_line,
+            character=end_char if end_char is not None else start_char
+        )
+        range_obj = UnifiedRange(start=start_pos, end=end_pos)
+        
         return UnifiedErrorInfo(
             id=f"{file_path}:{start_line}:{start_char}",
-            file_path=file_path,
             message=getattr(diagnostic, 'message', ''),
             severity=LSPTypeAdapter.severity_to_unified(getattr(diagnostic, 'severity', 1)),
             error_type=error_type,
-            line=start_line,
-            character=start_char,
-            end_line=end_line,
-            end_character=end_char,
-            source=getattr(diagnostic, 'source', None),
+            file_path=file_path,
+            range=range_obj,
+            source=getattr(diagnostic, 'source', None) or "lsp-protocol",
             code=str(getattr(diagnostic, 'code', '')) if getattr(diagnostic, 'code', None) else None,
-            has_quick_fix=False,  # Default, can be enhanced
-            related_information=[],
-            tags=[]
+            has_quick_fix=False  # Default, can be enhanced
         )
     
     @staticmethod

@@ -350,5 +350,5 @@ class UnifiedDiagnosticCollector:
         """Cleanup on deletion."""
         try:
             self.shutdown()
-        except:
+        except Exception:
             pass

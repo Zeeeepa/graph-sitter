@@ -453,7 +453,7 @@ class LSPManager:
                 character=getattr(raw_range.end, 'character', 0)
             )
             return Range(start, end)
-        except:
+        except Exception:
             return Range(Position(0, 0), Position(0, 0))
     
     def _get_surrounding_code(self, file_path: str, range_obj: Range) -> str:
@@ -619,7 +619,7 @@ class LSPManager:
         if self._serena_bridge:
             try:
                 self._serena_bridge.shutdown()
-            except:
+            except Exception:
                 pass
         
         logger.info(f"LSP Manager shut down for {self.repo_path}")

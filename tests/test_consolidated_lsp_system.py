@@ -481,30 +481,32 @@ class TestErrorHandlingAndValidation:
         import threading
         import time
         
-        manager = LSPManager("/tmp/test")
-        results = []
-        errors = []
-        
-        def worker():
-            try:
-                # Simulate concurrent initialization attempts
-                success = manager._ensure_initialized()
-                results.append(success)
-            except Exception as e:
-                errors.append(e)
-        
-        # Start multiple threads
-        threads = [threading.Thread(target=worker) for _ in range(5)]
-        for thread in threads:
-            thread.start()
-        
-        for thread in threads:
-            thread.join()
-        
-        # Should not have any errors from concurrent access
-        assert len(errors) == 0
-        # All threads should get consistent results
-        assert len(set(results)) <= 1  # All same result
+        import tempfile
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manager = LSPManager(temp_dir)
+            results = []
+            errors = []
+            
+            def worker():
+                try:
+                    # Simulate concurrent initialization attempts
+                    success = manager._ensure_initialized()
+                    results.append(success)
+                except Exception as e:
+                    errors.append(e)
+            
+            # Start multiple threads
+            threads = [threading.Thread(target=worker) for _ in range(5)]
+            for thread in threads:
+                thread.start()
+            
+            for thread in threads:
+                thread.join()
+            
+            # Should not have any errors from concurrent access
+            assert len(errors) == 0
+            # All threads should get consistent results
+            assert len(set(results)) <= 1  # All same result
 
 
 if __name__ == "__main__":

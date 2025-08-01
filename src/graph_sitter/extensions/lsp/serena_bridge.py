@@ -121,8 +121,15 @@ class SerenaLSPBridge:
         with self._lock:
             for lang, server in self.language_servers.items():
                 try:
-                    diagnostics = server.get_diagnostics()
-                    all_diagnostics.extend(diagnostics)
+                    # Get protocol diagnostics from server
+                    protocol_diagnostics = server.get_diagnostics()
+                    
+                    # Convert each diagnostic to ErrorInfo
+                    for diagnostic in protocol_diagnostics:
+                        error_info = self._convert_diagnostic_to_error_info(diagnostic, file_path="")
+                        if error_info:
+                            all_diagnostics.append(error_info)
+                            
                 except Exception as e:
                     logger.error(f"Error getting diagnostics from {lang} server: {e}")
         
@@ -142,8 +149,15 @@ class SerenaLSPBridge:
             for lang, server in self.language_servers.items():
                 try:
                     if server.supports_file(file_path):
-                        diagnostics = server.get_file_diagnostics(file_path)
-                        file_diagnostics.extend(diagnostics)
+                        # Get protocol diagnostics from server
+                        protocol_diagnostics = server.get_file_diagnostics(file_path)
+                        
+                        # Convert each diagnostic to ErrorInfo
+                        for diagnostic in protocol_diagnostics:
+                            error_info = self._convert_diagnostic_to_error_info(diagnostic, file_path=file_path)
+                            if error_info:
+                                file_diagnostics.append(error_info)
+                                
                 except Exception as e:
                     logger.error(f"Error getting file diagnostics from {lang} server: {e}")
         
@@ -178,7 +192,7 @@ class SerenaLSPBridge:
                             all_diagnostics.append(diagnostic)
                         else:
                             # Convert from protocol diagnostic to ErrorInfo
-                            error_info = self._convert_diagnostic_to_error_info(diagnostic)
+                            error_info = self._convert_diagnostic_to_error_info(diagnostic, file_path="")
                             if error_info:
                                 all_diagnostics.append(error_info)
                                 
@@ -194,7 +208,7 @@ class SerenaLSPBridge:
         logger.info(f"Retrieved {len(all_diagnostics)} total diagnostics from {len(self.language_servers)} servers")
         return all_diagnostics
     
-    def _convert_diagnostic_to_error_info(self, diagnostic) -> Optional[ErrorInfo]:
+    def _convert_diagnostic_to_error_info(self, diagnostic, file_path: str = "") -> Optional[ErrorInfo]:
         """Convert a protocol diagnostic to ErrorInfo."""
         try:
             # Handle different diagnostic formats
@@ -205,7 +219,7 @@ class SerenaLSPBridge:
                 end = range_obj.end if range_obj else None
                 
                 return ErrorInfo(
-                    file_path=getattr(diagnostic, 'file_path', ''),
+                    file_path=file_path or getattr(diagnostic, 'file_path', ''),
                     line=start.line if start else 0,
                     character=start.character if start else 0,
                     message=diagnostic.message,
@@ -223,7 +237,7 @@ class SerenaLSPBridge:
             # Handle dictionary format
             elif isinstance(diagnostic, dict):
                 return ErrorInfo(
-                    file_path=diagnostic.get('file_path', ''),
+                    file_path=file_path or diagnostic.get('file_path', ''),
                     line=diagnostic.get('line', 0),
                     character=diagnostic.get('character', 0),
                     message=diagnostic.get('message', ''),
