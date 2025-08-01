@@ -876,17 +876,21 @@ class ComprehensiveAnalysisEngine:
             
             # 6. Run deep comprehensive analysis
             # 7. Run unified Serena analysis
+            # 8. Run comprehensive unified analysis
+            self.logger.info("🚀 Running comprehensive unified analysis...")
+            analysis_results["comprehensive_unified_analysis"] = await self.run_comprehensive_unified_analysis()
+            
             self.logger.info("🚀 Running unified Serena analysis...")
             analysis_results["unified_serena_analysis"] = await self.run_unified_serena_analysis()
             
             self.logger.info("🔬 Running deep comprehensive analysis...")
             analysis_results["deep_comprehensive_analysis"] = await self.run_deep_comprehensive_analysis()
             
-            # 8. Generate dashboard data
+            # 9. Generate dashboard data
             self.logger.info("📊 Generating dashboard data...")
             analysis_results['dashboard_data'] = await self.generate_dashboard_data(analysis_results)
             
-            # 9. Performance metrics
+            # 10. Performance metrics
             analysis_results['performance_metrics'] = {
                 'total_analysis_time': time.time() - start_time,
                 'files_analyzed': analysis_results['structure_analysis'].get('total_files', 0),
@@ -1761,4 +1765,84 @@ async def main_unified_serena():
     
     print("\n🎉 Unified Serena Analysis Complete!")
     print("This analysis demonstrates the full integration of ALL Serena capabilities.")
+
+
+    async def run_comprehensive_unified_analysis(self) -> Dict[str, Any]:
+        """Run the comprehensive unified analysis that merges ALL 3 analyzers."""
+        self.logger.info("🚀 Starting comprehensive unified analysis...")
+        
+        try:
+            from comprehensive_unified_analyzer import ComprehensiveUnifiedAnalyzer
+            
+            # Initialize comprehensive unified analyzer
+            unified_analyzer = ComprehensiveUnifiedAnalyzer(str(self.codebase_path))
+            
+            # Initialize codebase
+            if not await unified_analyzer.initialize_codebase():
+                return {"error": "Failed to initialize comprehensive unified analyzer"}
+            
+            # Run complete unified analysis
+            results = await unified_analyzer.run_complete_unified_analysis()
+            
+            # Print comprehensive report
+            unified_analyzer.print_complete_unified_report(results)
+            
+            # Cleanup
+            unified_analyzer.cleanup()
+            
+            return results
+            
+        except ImportError as e:
+            self.logger.error(f"Could not import comprehensive unified analyzer: {e}")
+            return {"error": f"Comprehensive unified analyzer not available: {e}"}
+        except Exception as e:
+            self.logger.error(f"Comprehensive unified analysis failed: {e}")
+            return {"error": f"Comprehensive unified analysis failed: {e}"}
+
+
+async def main_comprehensive_unified():
+    """Main function for running comprehensive unified analysis."""
+    print("🚀 COMPREHENSIVE UNIFIED ANALYSIS ENGINE")
+    print("=" * 80)
+    print("The Ultimate Analysis Engine - Merging ALL 3 Analyzers:")
+    print("1. ComprehensiveAnalysisEngine (full_analysis.py)")
+    print("2. DeepComprehensiveAnalyzer (deep_comprehensive_analysis.py)")
+    print("3. UnifiedSerenaAnalyzer (unified_serena_analyzer.py)")
+    print()
+    print("This provides complete LSP diagnostics, deep testing, and Serena integration.")
+    print()
+    
+    # Initialize analyzer
+    engine = ComprehensiveAnalysisEngine(".")
+    
+    # Initialize codebase
+    if not await engine.initialize_codebase():
+        print("❌ Failed to initialize codebase. Continuing with limited analysis...")
+    
+    # Run comprehensive unified analysis
+    try:
+        results = await engine.run_comprehensive_unified_analysis()
+        
+        if "error" not in results:
+            print("\n✅ Comprehensive unified analysis completed successfully!")
+            
+            # Show summary
+            perf_metrics = results.get('performance_metrics', {})
+            print(f"📊 Analysis Summary:")
+            print(f"   Total Analysis Time: {perf_metrics.get('total_analysis_time', 0)} seconds")
+            print(f"   LSP Diagnostics: {perf_metrics.get('lsp_diagnostics_count', 0)}")
+            print(f"   Symbols Analyzed: {perf_metrics.get('symbols_analyzed', 0)}")
+            print(f"   Files Analyzed: {perf_metrics.get('files_analyzed', 0)}")
+            print(f"   Errors Found: {perf_metrics.get('errors_found', 0)}")
+            print(f"   Warnings Found: {perf_metrics.get('warnings_found', 0)}")
+            
+        else:
+            print(f"\n⚠️  Comprehensive unified analysis had issues: {results['error']}")
+        
+    except Exception as e:
+        print(f"❌ Comprehensive unified analysis failed: {e}")
+        traceback.print_exc()
+    
+    print("\n🎉 Comprehensive Unified Analysis Complete!")
+    print("This analysis merged ALL 3 analyzers into one ultimate engine.")
 
