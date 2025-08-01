@@ -107,8 +107,8 @@ class ComprehensiveCodebaseAnalyzer:
     
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path).resolve()
-        self.codebase = None
-        self.error_analyzer = None
+        self.codebase: Optional[Codebase] = None
+        self.error_analyzer: Optional[ComprehensiveErrorAnalyzer] = None
         self.results = AnalysisResult()
         
     def initialize(self) -> bool:
@@ -118,7 +118,8 @@ class ComprehensiveCodebaseAnalyzer:
             
             # Create codebase instance
             self.codebase = Codebase(str(self.repo_path), language="python")
-            print(f"✅ Codebase loaded: {len(list(self.codebase.files))} files found")
+            assert self.codebase is not None  # Type guard for mypy
+            print(f"✅ Codebase loaded: {len(list(self.codebase.files()))} files found")
             
             # Add diagnostic capabilities for error detection
             add_diagnostic_capabilities(self.codebase, enable_lsp=True)
@@ -144,10 +145,10 @@ class ComprehensiveCodebaseAnalyzer:
             self.results.codebase_summary = get_codebase_summary(self.codebase)
             
             # Count basic metrics
-            self.results.total_files = len(list(self.codebase.files))
-            self.results.total_functions = len(list(self.codebase.functions))
-            self.results.total_classes = len(list(self.codebase.classes))
-            self.results.total_symbols = len(list(self.codebase.symbols))
+            self.results.total_files = len(list(self.codebase.files()))
+            self.results.total_functions = len(list(self.codebase.functions()))
+            self.results.total_classes = len(list(self.codebase.classes()))
+            self.results.total_symbols = len(list(self.codebase.symbols()))
             
             print(f"   📁 Files: {self.results.total_files}")
             print(f"   🔧 Functions: {self.results.total_functions}")
@@ -210,7 +211,7 @@ class ComprehensiveCodebaseAnalyzer:
         
         try:
             # Find unused functions using call graph analysis
-            for function in self.codebase.functions:
+            for function in self.codebase.functions():
                 try:
                     # Check if function has any call sites
                     call_sites = getattr(function, 'call_sites', [])
@@ -235,7 +236,7 @@ class ComprehensiveCodebaseAnalyzer:
             print(f"   💀 Dead Functions Found: {len(self.results.dead_functions)}")
             
             # Find unused imports
-            for file in self.codebase.files:
+            for file in self.codebase.files():
                 try:
                     if hasattr(file, 'imports'):
                         for import_stmt in file.imports:
@@ -264,11 +265,11 @@ class ComprehensiveCodebaseAnalyzer:
         try:
             # Track all function definitions
             defined_functions = set()
-            for function in self.codebase.functions:
+            for function in self.codebase.functions():
                 defined_functions.add(function.name)
             
             # Analyze function calls in each function
-            for function in self.codebase.functions:
+            for function in self.codebase.functions():
                 try:
                     if hasattr(function, 'function_calls'):
                         for call in function.function_calls:
@@ -302,7 +303,7 @@ class ComprehensiveCodebaseAnalyzer:
         
         try:
             # Check functions for missing docstrings
-            for function in self.codebase.functions:
+            for function in self.codebase.functions():
                 try:
                     docstring = getattr(function, 'docstring', None)
                     if not docstring or not docstring.strip():
@@ -322,7 +323,7 @@ class ComprehensiveCodebaseAnalyzer:
                     print(f"   ⚠️ Error checking docstring for {getattr(function, 'name', 'unknown')}: {e}")
             
             # Check classes for missing docstrings
-            for class_obj in self.codebase.classes:
+            for class_obj in self.codebase.classes():
                 try:
                     docstring = getattr(class_obj, 'docstring', None)
                     if not docstring or not docstring.strip():
@@ -349,7 +350,7 @@ class ComprehensiveCodebaseAnalyzer:
         
         try:
             # Check functions for missing return type annotations
-            for function in self.codebase.functions:
+            for function in self.codebase.functions():
                 try:
                     return_type = getattr(function, 'return_type', None)
                     if not return_type or str(return_type).strip() in ['', 'None', 'Any']:
@@ -395,7 +396,7 @@ class ComprehensiveCodebaseAnalyzer:
         
         try:
             # Check for long functions
-            for function in self.codebase.functions:
+            for function in self.codebase.functions():
                 try:
                     # Estimate function length from source
                     source = getattr(function, 'source', '')
@@ -415,7 +416,7 @@ class ComprehensiveCodebaseAnalyzer:
             print(f"   📏 Long Functions: {len(self.results.long_functions)}")
             
             # Look for common code smells in file content
-            for file in self.codebase.files:
+            for file in self.codebase.files():
                 try:
                     if hasattr(file, 'content') and file.filepath.endswith('.py'):
                         content = file.content
@@ -653,4 +654,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
