@@ -1,0 +1,522 @@
+[
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_manager.py",
+    "line": 16,
+    "character": 0,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_manager.py",
+    "line": 17,
+    "character": 0,
+    "message": "ImportError: No module named 'lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_manager.py",
+    "line": 23,
+    "character": 0,
+    "message": "ImportError: No module named 'unified_diagnostics'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_manager.py",
+    "line": 91,
+    "character": 16,
+    "message": "ImportError: cannot import name 'SerenaLSPBridge' from 'graph_sitter.extensions.lsp.serena_bridge'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_manager.py",
+    "line": 95,
+    "character": 16,
+    "message": "ImportError: cannot import name 'TransactionAwareLSPManager' from 'graph_sitter.extensions.lsp.transaction_manager'",
+    "severity": "error"
+  },
+  {
+    "source": "static_analysis",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_manager.py",
+    "line": 10,
+    "character": 0,
+    "message": "Unused import: weakref",
+    "severity": "warning"
+  },
+  {
+    "source": "static_analysis",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_types.py",
+    "line": 12,
+    "character": 0,
+    "message": "Unused import: json",
+    "severity": "warning"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_type_adapters.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: No module named 'lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_type_adapters.py",
+    "line": 24,
+    "character": 0,
+    "message": "ImportError: No module named 'extensions'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/lsp_type_adapters.py",
+    "line": 34,
+    "character": 0,
+    "message": "ImportError: No module named 'extensions'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/unified_diagnostics.py",
+    "line": 18,
+    "character": 0,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/unified_diagnostics.py",
+    "line": 19,
+    "character": 0,
+    "message": "ImportError: No module named 'lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/unified_diagnostics.py",
+    "line": 20,
+    "character": 0,
+    "message": "ImportError: No module named 'lsp_type_adapters'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/unified_diagnostics.py",
+    "line": 27,
+    "character": 0,
+    "message": "ImportError: No module named 'extensions'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/unified_diagnostics.py",
+    "line": 28,
+    "character": 0,
+    "message": "ImportError: No module named 'extensions'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/unified_diagnostics.py",
+    "line": 29,
+    "character": 0,
+    "message": "ImportError: No module named 'core'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/extensions/lsp/serena_bridge.py",
+    "line": 17,
+    "character": 0,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/extensions/lsp/serena_bridge.py",
+    "line": 18,
+    "character": 0,
+    "message": "ImportError: No module named 'protocol'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/extensions/lsp/serena_bridge.py",
+    "line": 19,
+    "character": 0,
+    "message": "ImportError: No module named 'language_servers'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/extensions/lsp/serena_bridge.py",
+    "line": 20,
+    "character": 0,
+    "message": "ImportError: No module named 'language_servers'",
+    "severity": "error"
+  },
+  {
+    "source": "static_analysis",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/extensions/lsp/serena_bridge.py",
+    "line": 11,
+    "character": 0,
+    "message": "Unused import: time",
+    "severity": "warning"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/extensions/lsp/transaction_manager.py",
+    "line": 14,
+    "character": 0,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/extensions/lsp/transaction_manager.py",
+    "line": 15,
+    "character": 0,
+    "message": "ImportError: No module named 'serena_bridge'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 11,
+    "character": 0,
+    "message": "ImportError: cannot import name 'LSPMethodsMixin' from 'graph_sitter.core.lsp_methods'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'ErrorInfo' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'ErrorCollection' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'ErrorSummary' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'ErrorContext' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'QuickFix' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'CompletionItem' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'HoverInfo' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'SignatureHelp' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'SymbolInfo' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'LSPCapabilities' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'LSPStatus' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'HealthCheck' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'ErrorSeverity' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'ErrorType' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'Position' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 12,
+    "character": 0,
+    "message": "ImportError: cannot import name 'Range' from 'graph_sitter.core.lsp_types'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 65,
+    "character": 4,
+    "message": "ImportError: cannot import name 'ensure_serena_initialized' from 'graph_sitter.extensions.serena.auto_init'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 59,
+    "character": 8,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 69,
+    "character": 8,
+    "message": "ImportError: cannot import name 'SerenaCore' from 'graph_sitter.extensions.serena'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 69,
+    "character": 8,
+    "message": "ImportError: cannot import name 'SerenaConfig' from 'graph_sitter.extensions.serena'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 69,
+    "character": 8,
+    "message": "ImportError: cannot import name 'SerenaCapability' from 'graph_sitter.extensions.serena'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 69,
+    "character": 8,
+    "message": "ImportError: cannot import name 'RefactoringType' from 'graph_sitter.extensions.serena'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 69,
+    "character": 8,
+    "message": "ImportError: cannot import name 'RefactoringResult' from 'graph_sitter.extensions.serena'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 69,
+    "character": 8,
+    "message": "ImportError: cannot import name 'CodeGenerationResult' from 'graph_sitter.extensions.serena'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 69,
+    "character": 8,
+    "message": "ImportError: cannot import name 'SemanticSearchResult' from 'graph_sitter.extensions.serena'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 90,
+    "character": 4,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/enhanced/codebase.py",
+    "line": 145,
+    "character": 8,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 1,
+    "character": 0,
+    "message": "ImportError: cannot import name 'Class' from 'graph_sitter.core.class_definition'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 3,
+    "character": 0,
+    "message": "ImportError: cannot import name 'ExternalModule' from 'graph_sitter.core.external_module'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 4,
+    "character": 0,
+    "message": "ImportError: cannot import name 'SourceFile' from 'graph_sitter.core.file'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 5,
+    "character": 0,
+    "message": "ImportError: cannot import name 'Function' from 'graph_sitter.core.function'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 6,
+    "character": 0,
+    "message": "ImportError: cannot import name 'Import' from 'graph_sitter.core.import_resolution'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 7,
+    "character": 0,
+    "message": "ImportError: cannot import name 'Symbol' from 'graph_sitter.core.symbol'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 8,
+    "character": 0,
+    "message": "ImportError: cannot import name 'EdgeType' from 'graph_sitter.enums'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/codebase/codebase_analysis.py",
+    "line": 8,
+    "character": 0,
+    "message": "ImportError: cannot import name 'SymbolType' from 'graph_sitter.enums'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/ai/codebase_ai.py",
+    "line": 1,
+    "character": 0,
+    "message": "ImportError: cannot import name 'File' from 'graph_sitter.core.file'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/ai/codebase_ai.py",
+    "line": 2,
+    "character": 0,
+    "message": "ImportError: cannot import name 'Editable' from 'graph_sitter.core.interfaces.editable'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/diagnostics.py",
+    "line": 11,
+    "character": 0,
+    "message": "ImportError: cannot import name 'get_logger' from 'graph_sitter.shared.logging.get_logger'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/diagnostics.py",
+    "line": 20,
+    "character": 4,
+    "message": "ImportError: cannot import name 'get_lsp_manager' from 'graph_sitter.extensions.lsp.transaction_manager'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/diagnostics.py",
+    "line": 20,
+    "character": 4,
+    "message": "ImportError: cannot import name 'TransactionAwareLSPManager' from 'graph_sitter.extensions.lsp.transaction_manager'",
+    "severity": "error"
+  },
+  {
+    "source": "import_check",
+    "file": "/tmp/Zeeeepa/graph-sitter/src/graph_sitter/core/diagnostics.py",
+    "line": 21,
+    "character": 4,
+    "message": "ImportError: cannot import name 'ErrorInfo' from 'graph_sitter.extensions.lsp.serena_bridge'",
+    "severity": "error"
+  }
+]
