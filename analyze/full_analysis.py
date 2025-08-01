@@ -111,7 +111,17 @@ class ComprehensiveAnalysisEngine:
     🚀 COMPREHENSIVE ANALYSIS ENGINE
     
     Consolidates all analysis capabilities from 25 original files into a single,
-    powerful analysis engine with dashboard integration.
+    powerful analysis engine with dashboard integration and enhanced Serena features.
+    
+    Enhanced Features:
+    - Comprehensive codebase analysis with error detection
+    - Semantic search and symbol intelligence
+    - Advanced refactoring capabilities
+    - Real-time analysis and diagnostics
+    - Code generation and completion
+    - Symbol relationship mapping
+    - Performance monitoring and optimization
+    - LSP integration showcase
     """
     
     def __init__(self, codebase_path: str = "."):
@@ -203,6 +213,437 @@ class ComprehensiveAnalysisEngine:
                 status['serena_error'] = str(e)
         
         return status
+    
+    async def analyze_file_comprehensive(self, file_path: str) -> AnalysisResult:
+        """Perform comprehensive analysis of a single file with enhanced Serena capabilities."""
+        self.logger.info(f"📄 Analyzing file comprehensively: {file_path}")
+        
+        errors = []
+        warnings = []
+        suggestions = []
+        symbols = []
+        dependencies = []
+        metrics = {}
+        
+        try:
+            # Basic file analysis using graph-sitter
+            if self.codebase:
+                # Get file content and basic metrics
+                full_path = self.codebase_path / file_path
+                if full_path.exists():
+                    content = full_path.read_text(encoding='utf-8', errors='ignore')
+                    metrics['lines_of_code'] = len(content.splitlines())
+                    metrics['file_size'] = len(content)
+                    
+                    # Try to get functions and classes from the file
+                    try:
+                        if hasattr(self.codebase, 'functions'):
+                            file_functions = [f for f in self.codebase.functions if getattr(f, 'file_path', '') == file_path]
+                            symbols.extend([{
+                                'name': getattr(f, 'name', 'unknown'),
+                                'type': 'function',
+                                'line': getattr(f, 'line_number', 0),
+                                'complexity': getattr(f, 'complexity', 1)
+                            } for f in file_functions])
+                            
+                        if hasattr(self.codebase, 'classes'):
+                            file_classes = [c for c in self.codebase.classes if getattr(c, 'file_path', '') == file_path]
+                            symbols.extend([{
+                                'name': getattr(c, 'name', 'unknown'),
+                                'type': 'class',
+                                'line': getattr(c, 'line_number', 0),
+                                'methods': len(getattr(c, 'methods', []))
+                            } for c in file_classes])
+                    except Exception as e:
+                        warnings.append({
+                            'type': 'symbol_extraction',
+                            'message': f"Could not extract symbols: {e}",
+                            'line': 0
+                        })
+                
+                # Enhanced analysis with Serena if available
+                if hasattr(self.codebase, 'get_file_diagnostics'):
+                    try:
+                        diagnostics = self.codebase.get_file_diagnostics(file_path)
+                        if diagnostics and diagnostics.get('success'):
+                            for diag in diagnostics.get('diagnostics', []):
+                                severity = diag.get('severity', 'info')
+                                item = {
+                                    'type': diag.get('code', 'unknown'),
+                                    'message': diag.get('message', ''),
+                                    'line': diag.get('range', {}).get('start', {}).get('line', 0),
+                                    'character': diag.get('range', {}).get('start', {}).get('character', 0),
+                                    'source': diag.get('source', 'lsp')
+                                }
+                                
+                                if severity == 'error':
+                                    errors.append(item)
+                                elif severity == 'warning':
+                                    warnings.append(item)
+                                else:
+                                    suggestions.append(item)
+                    except Exception as e:
+                        warnings.append({
+                            'type': 'diagnostics_error',
+                            'message': f"Failed to get diagnostics: {e}",
+                            'line': 0
+                        })
+                
+                # Get symbol information if available
+                if hasattr(self.codebase, 'get_symbol_context'):
+                    try:
+                        for symbol in symbols:
+                            context = self.codebase.get_symbol_context(
+                                symbol['name'], 
+                                include_dependencies=True
+                            )
+                            if context and context.get('success'):
+                                symbol['context'] = context.get('context', {})
+                                symbol['dependencies'] = context.get('dependencies', [])
+                    except Exception as e:
+                        warnings.append({
+                            'type': 'symbol_context_error',
+                            'message': f"Failed to get symbol context: {e}",
+                            'line': 0
+                        })
+                
+        except Exception as e:
+            errors.append({
+                'type': 'analysis_error',
+                'message': f"Failed to analyze file: {e}",
+                'line': 0,
+                'character': 0
+            })
+        
+        # Calculate complexity and maintainability scores
+        complexity_score = self._calculate_complexity_enhanced(symbols, metrics)
+        maintainability_index = self._calculate_maintainability_enhanced(metrics, errors, warnings)
+        
+        result = AnalysisResult(
+            file_path=file_path,
+            errors=errors,
+            warnings=warnings,
+            suggestions=suggestions,
+            metrics=metrics,
+            symbols=symbols,
+            dependencies=dependencies,
+            complexity_score=complexity_score,
+            maintainability_index=maintainability_index
+        )
+        
+        self.analysis_results[file_path] = result
+        self.errors_found.extend(errors)
+        
+        return result
+    
+    def _calculate_complexity_enhanced(self, symbols: List[Dict], metrics: Dict) -> float:
+        """Calculate enhanced complexity score for a file."""
+        base_complexity = 1.0
+        
+        # Add complexity based on symbols
+        for symbol in symbols:
+            if symbol['type'] == 'function':
+                base_complexity += symbol.get('complexity', 1)
+            elif symbol['type'] == 'class':
+                base_complexity += symbol.get('methods', 0) * 0.5
+        
+        # Adjust based on file size
+        lines = metrics.get('lines_of_code', 0)
+        if lines > 500:
+            base_complexity *= 1.5
+        elif lines > 1000:
+            base_complexity *= 2.0
+        
+        return min(base_complexity, 10.0)  # Cap at 10
+    
+    def _calculate_maintainability_enhanced(self, metrics: Dict, errors: List, warnings: List) -> float:
+        """Calculate enhanced maintainability index."""
+        base_score = 100.0
+        
+        # Reduce score based on errors and warnings
+        base_score -= len(errors) * 10
+        base_score -= len(warnings) * 5
+        
+        # Adjust based on file size
+        lines = metrics.get('lines_of_code', 0)
+        if lines > 500:
+            base_score -= 10
+        if lines > 1000:
+            base_score -= 20
+        
+        return max(base_score, 0.0)
+    
+    async def demonstrate_serena_features(self) -> Dict[str, Any]:
+        """Demonstrate all available Serena features and return results."""
+        if not self.codebase or not hasattr(self.codebase, 'get_serena_status'):
+            self.logger.warning("⚠️  Serena features not available")
+            return {'available': False, 'reason': 'Serena not available'}
+        
+        self.logger.info("🚀 Demonstrating Serena Features")
+        
+        demo_results = {
+            'available': True,
+            'code_intelligence': {},
+            'semantic_search': {},
+            'refactoring': {},
+            'code_generation': {},
+            'realtime_analysis': {},
+            'symbol_intelligence': {}
+        }
+        
+        # 1. Code Intelligence
+        demo_results['code_intelligence'] = await self._demo_code_intelligence()
+        
+        # 2. Semantic Search
+        demo_results['semantic_search'] = await self._demo_semantic_search()
+        
+        # 3. Refactoring Capabilities
+        demo_results['refactoring'] = await self._demo_refactoring()
+        
+        # 4. Code Generation
+        demo_results['code_generation'] = await self._demo_code_generation()
+        
+        # 5. Real-time Analysis
+        demo_results['realtime_analysis'] = await self._demo_realtime_analysis()
+        
+        # 6. Symbol Intelligence
+        demo_results['symbol_intelligence'] = await self._demo_symbol_intelligence()
+        
+        return demo_results
+    
+    async def _demo_code_intelligence(self) -> Dict[str, Any]:
+        """Demo code intelligence features."""
+        results = {'completions': [], 'hover_info': [], 'signature_help': []}
+        
+        try:
+            # Find a Python file to work with
+            sample_file = "src/graph_sitter/core/codebase.py"
+            if not (self.codebase_path / sample_file).exists():
+                sample_file = next(iter(self.analysis_results.keys()), None)
+            
+            if not sample_file:
+                return {'error': 'No suitable file found for demo'}
+            
+            self.logger.info(f"📄 Code intelligence demo with file: {sample_file}")
+            
+            # Get completions
+            if hasattr(self.codebase, 'get_completions'):
+                completions = self.codebase.get_completions(sample_file, 10, 0)
+                if completions and completions.get('success'):
+                    items = completions.get('completions', [])[:3]
+                    results['completions'] = [
+                        {'label': item.get('label', 'N/A'), 'kind': item.get('kind', 'N/A')}
+                        for item in items
+                    ]
+            
+            # Get hover information
+            if hasattr(self.codebase, 'get_hover_info'):
+                hover = self.codebase.get_hover_info(sample_file, 20, 10)
+                if hover and hover.get('success'):
+                    results['hover_info'] = hover.get('contents', 'N/A')[:200]
+            
+            # Get signature help
+            if hasattr(self.codebase, 'get_signature_help'):
+                signature = self.codebase.get_signature_help(sample_file, 30, 15)
+                if signature and signature.get('success'):
+                    results['signature_help'] = 'Available'
+                    
+        except Exception as e:
+            results['error'] = str(e)
+        
+        return results
+    
+    async def _demo_semantic_search(self) -> Dict[str, Any]:
+        """Demo semantic search features."""
+        results = {'searches': []}
+        
+        try:
+            if hasattr(self.codebase, 'semantic_search'):
+                # Search for common patterns
+                search_terms = ["codebase", "function", "class", "import"]
+                
+                for term in search_terms:
+                    search_results = self.codebase.semantic_search(term, max_results=3)
+                    if search_results and search_results.get('success'):
+                        items = search_results.get('results', [])
+                        results['searches'].append({
+                            'term': term,
+                            'count': len(items),
+                            'results': [
+                                {
+                                    'symbol_name': item.get('symbol_name', 'N/A'),
+                                    'file_path': item.get('file_path', 'N/A')
+                                }
+                                for item in items[:2]
+                            ]
+                        })
+            else:
+                results['error'] = 'Semantic search not available'
+                
+        except Exception as e:
+            results['error'] = str(e)
+        
+        return results
+    
+    async def _demo_refactoring(self) -> Dict[str, Any]:
+        """Demo refactoring capabilities."""
+        results = {'rename': {}, 'extract_method': {}, 'organize_imports': {}}
+        
+        try:
+            # Find a suitable file for refactoring demo
+            sample_file = next(iter(self.analysis_results.keys()), None)
+            if not sample_file:
+                return {'error': 'No suitable file found for refactoring demo'}
+            
+            self.logger.info(f"🔧 Refactoring demo with: {sample_file}")
+            
+            # Demo rename symbol (preview mode)
+            if hasattr(self.codebase, 'rename_symbol'):
+                rename_result = self.codebase.rename_symbol(
+                    sample_file, 10, 5, "new_name", preview=True
+                )
+                if rename_result and rename_result.get('success'):
+                    changes = rename_result.get('changes', [])
+                    results['rename'] = {'changes_count': len(changes), 'available': True}
+                else:
+                    results['rename'] = {'available': False}
+            
+            # Demo extract method (preview mode)
+            if hasattr(self.codebase, 'extract_method'):
+                extract_result = self.codebase.extract_method(
+                    sample_file, 15, 25, "extracted_method", preview=True
+                )
+                if extract_result and extract_result.get('success'):
+                    results['extract_method'] = {'available': True}
+                else:
+                    results['extract_method'] = {'available': False}
+            
+            # Demo organize imports
+            if hasattr(self.codebase, 'organize_imports'):
+                organize_result = self.codebase.organize_imports(sample_file)
+                if organize_result and organize_result.get('success'):
+                    results['organize_imports'] = {'available': True}
+                else:
+                    results['organize_imports'] = {'available': False}
+                    
+        except Exception as e:
+            results['error'] = str(e)
+        
+        return results
+    
+    async def _demo_code_generation(self) -> Dict[str, Any]:
+        """Demo code generation features."""
+        results = {'boilerplate': {}, 'tests': {}, 'documentation': {}}
+        
+        try:
+            if hasattr(self.codebase, 'generate_boilerplate'):
+                # Generate a simple class template
+                result = self.codebase.generate_boilerplate(
+                    "class", 
+                    {"class_name": "DemoClass", "methods": ["__init__", "process"]},
+                    "demo_generated.py"
+                )
+                if result and result.get('success'):
+                    results['boilerplate'] = {'available': True}
+                else:
+                    results['boilerplate'] = {'available': False}
+            
+            if hasattr(self.codebase, 'generate_tests'):
+                # Generate tests for a function
+                sample_file = next(iter(self.analysis_results.keys()), None)
+                if sample_file:
+                    result = self.codebase.generate_tests(
+                        f"{sample_file}:some_function",
+                        ["unit"]
+                    )
+                    if result and result.get('success'):
+                        results['tests'] = {'available': True}
+                    else:
+                        results['tests'] = {'available': False}
+            
+            if hasattr(self.codebase, 'generate_documentation'):
+                # Generate documentation
+                sample_file = next(iter(self.analysis_results.keys()), None)
+                if sample_file:
+                    result = self.codebase.generate_documentation(
+                        sample_file,
+                        "markdown"
+                    )
+                    if result and result.get('success'):
+                        results['documentation'] = {'available': True}
+                    else:
+                        results['documentation'] = {'available': False}
+                        
+        except Exception as e:
+            results['error'] = str(e)
+        
+        return results
+    
+    async def _demo_realtime_analysis(self) -> Dict[str, Any]:
+        """Demo real-time analysis features."""
+        results = {'realtime_enabled': False}
+        
+        try:
+            if hasattr(self.codebase, 'enable_realtime_analysis'):
+                result = self.codebase.enable_realtime_analysis(
+                    watch_patterns=["*.py"],
+                    auto_refresh=True
+                )
+                if result and result.get('success'):
+                    results['realtime_enabled'] = True
+                    
+                    # Disable it immediately for demo
+                    if hasattr(self.codebase, 'disable_realtime_analysis'):
+                        self.codebase.disable_realtime_analysis()
+                        results['realtime_disabled'] = True
+            else:
+                results['error'] = 'Real-time analysis not available'
+                
+        except Exception as e:
+            results['error'] = str(e)
+        
+        return results
+    
+    async def _demo_symbol_intelligence(self) -> Dict[str, Any]:
+        """Demo symbol intelligence features."""
+        results = {'symbols_analyzed': [], 'total_symbols': 0}
+        
+        try:
+            # Find symbols to work with
+            sample_symbols = []
+            for result in list(self.analysis_results.values())[:3]:
+                sample_symbols.extend(result.symbols[:2])
+            
+            if not sample_symbols:
+                return {'error': 'No symbols found for demo'}
+            
+            results['total_symbols'] = len(sample_symbols)
+            
+            for symbol in sample_symbols[:3]:
+                symbol_name = symbol.get('name', 'unknown')
+                symbol_result = {'name': symbol_name, 'context': {}, 'impact': {}}
+                
+                if hasattr(self.codebase, 'get_symbol_context'):
+                    context = self.codebase.get_symbol_context(
+                        symbol_name,
+                        include_dependencies=True
+                    )
+                    if context and context.get('success'):
+                        deps = context.get('dependencies', [])
+                        symbol_result['context'] = {'dependencies_count': len(deps)}
+                
+                if hasattr(self.codebase, 'analyze_symbol_impact'):
+                    impact = self.codebase.analyze_symbol_impact(symbol_name, "modify")
+                    if impact and impact.get('success'):
+                        affected = impact.get('affected_files', [])
+                        symbol_result['impact'] = {'affected_files_count': len(affected)}
+                
+                results['symbols_analyzed'].append(symbol_result)
+                        
+        except Exception as e:
+            results['error'] = str(e)
+        
+        return results
     
     async def collect_all_lsp_diagnostics(self) -> List[LSPDiagnostic]:
         """Collect ALL LSP diagnostics from all language servers."""
@@ -429,11 +870,15 @@ class ComprehensiveAnalysisEngine:
             self.logger.info("📈 Calculating code quality metrics...")
             analysis_results['code_quality_metrics'] = await self.calculate_quality_metrics()
             
-            # 5. Generate dashboard data
+            # 5. Demonstrate Serena features
+            self.logger.info("🚀 Demonstrating Serena features...")
+            analysis_results['serena_features'] = await self.demonstrate_serena_features()
+            
+            # 6. Generate dashboard data
             self.logger.info("📊 Generating dashboard data...")
             analysis_results['dashboard_data'] = await self.generate_dashboard_data(analysis_results)
             
-            # 6. Performance metrics
+            # 7. Performance metrics
             analysis_results['performance_metrics'] = {
                 'total_analysis_time': time.time() - start_time,
                 'files_analyzed': analysis_results['structure_analysis'].get('total_files', 0),
@@ -955,3 +1400,197 @@ if __name__ == "__main__":
         print(f"   Health Score: {summary.get('health_score', 0)}/100")
     
     asyncio.run(main())
+
+    def print_comprehensive_report(self, analysis_results: Dict[str, Any]):
+        """Print a comprehensive analysis report with enhanced Serena features."""
+        print("\n" + "=" * 80)
+        print("📊 COMPREHENSIVE CODEBASE ANALYSIS REPORT")
+        print("=" * 80)
+        
+        # Overall health summary
+        dashboard_data = analysis_results.get('dashboard_data', {})
+        summary = dashboard_data.get('summary', {})
+        
+        print(f"\n📈 OVERALL HEALTH METRICS:")
+        print(f"   Total Files Analyzed: {summary.get('total_files', 0)}")
+        print(f"   Total Functions: {summary.get('total_functions', 0)}")
+        print(f"   Total Classes: {summary.get('total_classes', 0)}")
+        print(f"   Total Errors Found: {summary.get('total_errors', 0)}")
+        print(f"   Total Warnings: {summary.get('total_warnings', 0)}")
+        print(f"   Dead Functions: {summary.get('dead_functions', 0)}")
+        print(f"   Dead Imports: {summary.get('dead_imports', 0)}")
+        print(f"   Health Score: {summary.get('health_score', 0)}/100")
+        
+        # Serena features report
+        serena_features = analysis_results.get('serena_features', {})
+        if serena_features.get('available'):
+            print(f"\n🚀 SERENA FEATURES ANALYSIS:")
+            
+            # Code Intelligence
+            code_intel = serena_features.get('code_intelligence', {})
+            if 'error' not in code_intel:
+                completions = len(code_intel.get('completions', []))
+                hover_info = 'Available' if code_intel.get('hover_info') else 'Not Available'
+                signature_help = code_intel.get('signature_help', 'Not Available')
+                print(f"   🧠 Code Intelligence:")
+                print(f"      Completions: {completions} items")
+                print(f"      Hover Info: {hover_info}")
+                print(f"      Signature Help: {signature_help}")
+            
+            # Semantic Search
+            semantic_search = serena_features.get('semantic_search', {})
+            if 'error' not in semantic_search:
+                searches = semantic_search.get('searches', [])
+                print(f"   🔍 Semantic Search:")
+                for search in searches[:3]:
+                    term = search.get('term', 'unknown')
+                    count = search.get('count', 0)
+                    print(f"      '{term}': {count} results")
+            
+            # Refactoring
+            refactoring = serena_features.get('refactoring', {})
+            if 'error' not in refactoring:
+                rename_available = refactoring.get('rename', {}).get('available', False)
+                extract_available = refactoring.get('extract_method', {}).get('available', False)
+                organize_available = refactoring.get('organize_imports', {}).get('available', False)
+                print(f"   🔧 Refactoring Capabilities:")
+                print(f"      Rename Symbol: {'✅' if rename_available else '❌'}")
+                print(f"      Extract Method: {'✅' if extract_available else '❌'}")
+                print(f"      Organize Imports: {'✅' if organize_available else '❌'}")
+            
+            # Code Generation
+            code_gen = serena_features.get('code_generation', {})
+            if 'error' not in code_gen:
+                boilerplate_available = code_gen.get('boilerplate', {}).get('available', False)
+                tests_available = code_gen.get('tests', {}).get('available', False)
+                docs_available = code_gen.get('documentation', {}).get('available', False)
+                print(f"   ⚡ Code Generation:")
+                print(f"      Boilerplate: {'✅' if boilerplate_available else '❌'}")
+                print(f"      Test Generation: {'✅' if tests_available else '❌'}")
+                print(f"      Documentation: {'✅' if docs_available else '❌'}")
+            
+            # Symbol Intelligence
+            symbol_intel = serena_features.get('symbol_intelligence', {})
+            if 'error' not in symbol_intel:
+                total_symbols = symbol_intel.get('total_symbols', 0)
+                analyzed_symbols = len(symbol_intel.get('symbols_analyzed', []))
+                print(f"   🎯 Symbol Intelligence:")
+                print(f"      Total Symbols: {total_symbols}")
+                print(f"      Analyzed Symbols: {analyzed_symbols}")
+                for symbol in symbol_intel.get('symbols_analyzed', [])[:3]:
+                    name = symbol.get('name', 'unknown')
+                    deps = symbol.get('context', {}).get('dependencies_count', 0)
+                    impact = symbol.get('impact', {}).get('affected_files_count', 0)
+                    print(f"         {name}: {deps} deps, {impact} files affected")
+        else:
+            print(f"\n⚠️  SERENA FEATURES: Not available - {serena_features.get('reason', 'Unknown')}")
+        
+        # Error summary
+        diagnostics = analysis_results.get('lsp_diagnostics', [])
+        if diagnostics:
+            print(f"\n❌ ERROR DETAILS ({len(diagnostics)} total):")
+            error_types = defaultdict(int)
+            for diag in diagnostics:
+                severity = diag.get('severity', 'unknown')
+                error_types[severity] += 1
+            
+            for error_type, count in sorted(error_types.items(), key=lambda x: x[1], reverse=True):
+                print(f"   {error_type}: {count} occurrences")
+            
+            # Show top errors
+            print(f"\n🔍 TOP ERROR EXAMPLES:")
+            for i, diag in enumerate(diagnostics[:5]):
+                file_path = diag.get('file_path', 'unknown')
+                line = diag.get('line', 0)
+                message = diag.get('message', 'No message')[:100]
+                print(f"   {i+1}. {file_path}:{line} - {message}")
+        
+        # Structure analysis
+        structure = analysis_results.get('structure_analysis', {})
+        if structure:
+            print(f"\n📊 CODEBASE STRUCTURE:")
+            print(f"   Languages: {', '.join(structure.get('languages', []))}")
+            print(f"   File Types: {structure.get('file_types', {})}")
+            
+            largest_files = structure.get('largest_files', [])[:5]
+            if largest_files:
+                print(f"\n📁 LARGEST FILES:")
+                for i, file_info in enumerate(largest_files):
+                    path = file_info.get('path', 'unknown')
+                    lines = file_info.get('lines', 0)
+                    size = file_info.get('size_bytes', 0)
+                    print(f"   {i+1}. {path}: {lines} lines, {size} bytes")
+        
+        # Performance metrics
+        perf_metrics = analysis_results.get('performance_metrics', {})
+        if perf_metrics:
+            print(f"\n⚡ PERFORMANCE METRICS:")
+            for metric, value in perf_metrics.items():
+                print(f"   {metric}: {value}")
+        
+        # Recommendations
+        print(f"\n💡 RECOMMENDATIONS:")
+        total_errors = summary.get('total_errors', 0)
+        total_warnings = summary.get('total_warnings', 0)
+        dead_functions = summary.get('dead_functions', 0)
+        health_score = summary.get('health_score', 100)
+        
+        if total_errors > 0:
+            print(f"   🔴 HIGH PRIORITY: Fix {total_errors} errors found in the codebase")
+        if total_warnings > 10:
+            print(f"   🟡 MEDIUM PRIORITY: Address {total_warnings} warnings")
+        if dead_functions > 5:
+            print(f"   🟠 CLEANUP: Remove {dead_functions} unused functions")
+        if health_score < 70:
+            print(f"   🔵 IMPROVE: Overall health score is low ({health_score}/100)")
+        
+        if serena_features.get('available'):
+            print(f"   ✨ ENHANCE: Leverage Serena features for advanced code intelligence")
+        else:
+            print(f"   🚀 UPGRADE: Enable Serena integration for enhanced analysis capabilities")
+        
+        print(f"\n✅ Enhanced comprehensive analysis complete!")
+        print("This analysis showcases the full power of graph-sitter with Serena integration.")
+
+
+# Enhanced main function with comprehensive reporting
+async def main_enhanced():
+    """Enhanced main function with comprehensive Serena analysis and reporting."""
+    print("🚀 ENHANCED COMPREHENSIVE ANALYSIS ENGINE")
+    print("=" * 60)
+    print("Analyzing codebase with comprehensive Serena integration")
+    print("This showcases all available analysis features and Serena capabilities.")
+    print()
+    
+    # Initialize analyzer
+    engine = ComprehensiveAnalysisEngine(".")
+    
+    # Record start time for performance metrics
+    start_time = time.time()
+    
+    # Initialize codebase
+    if not await engine.initialize_codebase():
+        print("❌ Failed to initialize codebase with full capabilities. Continuing with basic analysis...")
+    
+    # Perform comprehensive analysis
+    try:
+        results = await engine.run_full_analysis()
+        
+        # Print comprehensive report with Serena features
+        engine.print_comprehensive_report(results)
+        
+    except Exception as e:
+        print(f"❌ Analysis failed: {e}")
+        traceback.print_exc()
+    
+    # Cleanup
+    try:
+        if engine.codebase and hasattr(engine.codebase, 'shutdown_serena'):
+            engine.codebase.shutdown_serena()
+            print("\n🔄 Serena integration shutdown complete")
+    except Exception as e:
+        print(f"⚠️  Error during cleanup: {e}")
+    
+    print("\n🎉 Enhanced Comprehensive Analysis Complete!")
+    print("This analysis demonstrates the full power of graph-sitter with Serena integration.")
+
