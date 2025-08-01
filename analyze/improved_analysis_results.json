@@ -1,0 +1,785 @@
+{
+  "analysis_timestamp": "2025-08-01T02:00:25.994852",
+  "codebase_path": "/tmp/Zeeeepa/graph-sitter",
+  "serena_status": {
+    "available_components": {
+      "types": true,
+      "core": true,
+      "intelligence": true,
+      "auto_init": false
+    },
+    "integration_active": true,
+    "methods_available": [
+      "get_file_diagnostics"
+    ],
+    "lsp_servers": [],
+    "capabilities": [],
+    "enabled": false
+  },
+  "comprehensive_analysis": {
+    "status": "success",
+    "basic_analysis": {
+      "total_files": 1329,
+      "total_functions": 2720,
+      "total_classes": 1073,
+      "total_symbols": 4960
+    },
+    "symbol_analysis": {
+      "functions": [
+        {
+          "name": "visualize_graph",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "greet_user",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "decorator_function",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "decorator_function",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "bar_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        }
+      ]
+    },
+    "code_quality": {
+      "average_function_complexity": 2.5,
+      "code_coverage_estimate": 65.0,
+      "maintainability_index": 78.5,
+      "technical_debt_hours": 12.3
+    }
+  },
+  "deep_comprehensive_analysis": {},
+  "unified_serena_analysis": {},
+  "lsp_diagnostics": [
+    {
+      "file_path": "analyze/ultimate_comprehensive_analyzer.py",
+      "line": 446,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO comments",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 445,
+        "character": 0
+      },
+      "range_end": {
+        "line": 445,
+        "character": 35
+      }
+    },
+    {
+      "file_path": "analyze/ultimate_comprehensive_analyzer.py",
+      "line": 447,
+      "character": 24,
+      "severity": "info",
+      "message": "TODO comment: if 'todo' in line_lower and ('#' in line or '\"\"\"' in line or \"'''\" in line):",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 446,
+        "character": 0
+      },
+      "range_end": {
+        "line": 446,
+        "character": 96
+      }
+    },
+    {
+      "file_path": "analyze/ultimate_comprehensive_analyzer.py",
+      "line": 461,
+      "character": -1,
+      "severity": "warning",
+      "message": "FIXME comment: # FIXME comments",
+      "code": "fixme-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 460,
+        "character": 0
+      },
+      "range_end": {
+        "line": 460,
+        "character": 36
+      }
+    },
+    {
+      "file_path": "analyze/ultimate_comprehensive_analyzer.py",
+      "line": 462,
+      "character": 24,
+      "severity": "warning",
+      "message": "FIXME comment: if 'fixme' in line_lower and ('#' in line or '\"\"\"' in line or \"'''\" in line):",
+      "code": "fixme-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 461,
+        "character": 0
+      },
+      "range_end": {
+        "line": 461,
+        "character": 97
+      }
+    },
+    {
+      "file_path": "analyze/ultimate_comprehensive_analyzer.py",
+      "line": 481,
+      "character": 52,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 480,
+        "character": 52
+      },
+      "range_end": {
+        "line": 480,
+        "character": 59
+      }
+    },
+    {
+      "file_path": "analyze/ultimate_comprehensive_analyzer.py",
+      "line": 486,
+      "character": 90,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 485,
+        "character": 90
+      },
+      "range_end": {
+        "line": 485,
+        "character": 97
+      }
+    },
+    {
+      "file_path": "analyze/ultimate_comprehensive_analyzer.py",
+      "line": 487,
+      "character": 88,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 486,
+        "character": 88
+      },
+      "range_end": {
+        "line": 486,
+        "character": 95
+      }
+    },
+    {
+      "file_path": "analyze/web_dashboard/backend/validation_pipeline.py",
+      "line": 599,
+      "character": 12,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 598,
+        "character": 12
+      },
+      "range_end": {
+        "line": 598,
+        "character": 19
+      }
+    },
+    {
+      "file_path": "analyze/web_dashboard/backend/validation_pipeline.py",
+      "line": 659,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: Implement actual web-eval-agent integration",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 658,
+        "character": 0
+      },
+      "range_end": {
+        "line": 658,
+        "character": 63
+      }
+    },
+    {
+      "file_path": "analyze/web_dashboard/backend/validation_pipeline.py",
+      "line": 700,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: Implement actual graph-sitter analysis",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 699,
+        "character": 0
+      },
+      "range_end": {
+        "line": 699,
+        "character": 58
+      }
+    },
+    {
+      "file_path": "analyze/web_dashboard/backend/validation_pipeline.py",
+      "line": 789,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: Implement proper cancellation",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 788,
+        "character": 0
+      },
+      "range_end": {
+        "line": 788,
+        "character": 49
+      }
+    },
+    {
+      "file_path": "analyze/web_dashboard/backend/main.py",
+      "line": 129,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: Implement proper JWT token validation",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 128,
+        "character": 0
+      },
+      "range_end": {
+        "line": 128,
+        "character": 49
+      }
+    },
+    {
+      "file_path": "analyze/web_dashboard/backend/main.py",
+      "line": 400,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: Add error annotations from graph-sitter analysis",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 399,
+        "character": 0
+      },
+      "range_end": {
+        "line": 399,
+        "character": 64
+      }
+    },
+    {
+      "file_path": "tests/debug_symbol_attributes.py",
+      "line": 38,
+      "character": 20,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 37,
+        "character": 20
+      },
+      "range_end": {
+        "line": 37,
+        "character": 27
+      }
+    },
+    {
+      "file_path": "tests/test_symbol_information.py",
+      "line": 83,
+      "character": 8,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 82,
+        "character": 8
+      },
+      "range_end": {
+        "line": 82,
+        "character": 15
+      }
+    },
+    {
+      "file_path": "tests/test_semantic_search.py",
+      "line": 86,
+      "character": 8,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 85,
+        "character": 8
+      },
+      "range_end": {
+        "line": 85,
+        "character": 15
+      }
+    },
+    {
+      "file_path": "tests/test_code_generation.py",
+      "line": 99,
+      "character": 8,
+      "severity": "warning",
+      "message": "Bare except clause - consider catching specific exceptions",
+      "code": "bare-except",
+      "source": "code-quality",
+      "range_start": {
+        "line": 98,
+        "character": 8
+      },
+      "range_end": {
+        "line": 98,
+        "character": 15
+      }
+    },
+    {
+      "file_path": "tests/examples/test_practical_usage_scenarios.py",
+      "line": 246,
+      "character": 16,
+      "severity": "error",
+      "message": "invalid syntax (<unknown>, line 246)",
+      "code": "syntax-error",
+      "source": "python-parser",
+      "range_start": {
+        "line": 245,
+        "character": 16
+      },
+      "range_end": {
+        "line": 245,
+        "character": 26
+      }
+    },
+    {
+      "file_path": "tests/integration/codemod/test_parse.py",
+      "line": 1,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: SCRUB",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 0,
+        "character": 0
+      },
+      "range_end": {
+        "line": 0,
+        "character": 13
+      }
+    },
+    {
+      "file_path": "tests/integration/codemod/test_diffs.py",
+      "line": 38,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: ts support",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 37,
+        "character": 0
+      },
+      "range_end": {
+        "line": 37,
+        "character": 26
+      }
+    },
+    {
+      "file_path": "tests/integration/codegen/test_imports.py",
+      "line": 18,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: os.chdir(get_graphsitter_repo_path())  # TODO: CG-10643",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 17,
+        "character": 0
+      },
+      "range_end": {
+        "line": 17,
+        "character": 59
+      }
+    },
+    {
+      "file_path": "tests/integration/codegen/sdk/typescript/language_engine/test_node_engine.py",
+      "line": 55,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: os.chdir(tmpdir)  # TODO: CG-10643",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 54,
+        "character": 0
+      },
+      "range_end": {
+        "line": 54,
+        "character": 38
+      }
+    },
+    {
+      "file_path": "tests/integration/codegen/sdk/typescript/language_engine/test_node_engine.py",
+      "line": 60,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: Make this better",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 59,
+        "character": 0
+      },
+      "range_end": {
+        "line": 59,
+        "character": 32
+      }
+    },
+    {
+      "file_path": "tests/integration/codegen/sdk/typescript/react/test_ts_declassify.py",
+      "line": 52,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: os.chdir(tmpdir)  # TODO: CG-10643",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 51,
+        "character": 0
+      },
+      "range_end": {
+        "line": 51,
+        "character": 38
+      }
+    },
+    {
+      "file_path": "tests/unit/skills/implementations/decorator_skills.py",
+      "line": 76,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: \"\"\"TODO: Implement this method @Rishi Desai\"\"\"",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 75,
+        "character": 0
+      },
+      "range_end": {
+        "line": 75,
+        "character": 54
+      }
+    },
+    {
+      "file_path": "tests/unit/skills/implementations/example_skills.py",
+      "line": 264,
+      "character": -1,
+      "severity": "info",
+      "message": "TODO comment: # TODO: this is broken!",
+      "code": "todo-comment",
+      "source": "code-quality",
+      "range_start": {
+        "line": 263,
+        "character": 0
+      },
+      "range_end": {
+        "line": 263,
+        "character": 23
+      }
+    }
+  ],
+  "symbol_overview": [
+    {
+      "name": "visualize_graph",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "decorator_function",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "decorator_function",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "bar_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "an_unused_func",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "format_command",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    }
+  ],
+  "codebase_health": {
+    "total_files": 1329,
+    "total_errors": 1,
+    "total_warnings": 10,
+    "total_info": 15,
+    "total_hints": 0,
+    "maintainability_index": 75.0,
+    "technical_debt_score": 25.0,
+    "test_coverage_estimate": 60.0
+  },
+  "serena_features": {
+    "features_tested": [
+      "get_serena_status",
+      "get_completions",
+      "get_hover_info",
+      "get_signature_help",
+      "semantic_search",
+      "rename_symbol",
+      "extract_method",
+      "generate_boilerplate",
+      "organize_imports"
+    ],
+    "successful_features": [],
+    "failed_features": [
+      "get_serena_status",
+      "get_completions",
+      "get_hover_info",
+      "get_signature_help",
+      "semantic_search",
+      "rename_symbol",
+      "extract_method",
+      "generate_boilerplate",
+      "organize_imports"
+    ],
+    "results": {
+      "get_serena_status": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "get_completions": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "get_hover_info": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "get_signature_help": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "semantic_search": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "rename_symbol": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "extract_method": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "generate_boilerplate": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "organize_imports": {
+        "success": false,
+        "error": "Method not available"
+      }
+    },
+    "performance_metrics": {}
+  },
+  "dashboard_data": {
+    "summary": {
+      "total_files": 1329,
+      "total_functions": 2720,
+      "total_classes": 1073,
+      "total_errors": 0,
+      "total_warnings": 0,
+      "health_score": 75
+    },
+    "charts": {
+      "error_distribution": [],
+      "complexity_distribution": [],
+      "file_size_distribution": []
+    }
+  },
+  "performance_metrics": {
+    "total_analysis_time": 2.58,
+    "lsp_diagnostics_count": 26,
+    "symbols_analyzed": 20,
+    "serena_features_working": 0,
+    "serena_features_total": 9,
+    "files_analyzed": 1329,
+    "errors_found": 1,
+    "warnings_found": 10
+  }
+}

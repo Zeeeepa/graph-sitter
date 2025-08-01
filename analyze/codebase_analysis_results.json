@@ -1,0 +1,342 @@
+{
+  "analysis_timestamp": "2025-08-01T01:53:05.293962",
+  "codebase_path": "/tmp/Zeeeepa/graph-sitter",
+  "serena_status": {
+    "available_components": {
+      "types": true,
+      "core": true,
+      "intelligence": true,
+      "auto_init": false
+    },
+    "integration_active": true,
+    "methods_available": [
+      "get_file_diagnostics"
+    ],
+    "lsp_servers": [],
+    "capabilities": [],
+    "enabled": false
+  },
+  "comprehensive_analysis": {
+    "status": "success",
+    "basic_analysis": {
+      "total_files": 1329,
+      "total_functions": 2720,
+      "total_classes": 1073,
+      "total_symbols": 4960
+    },
+    "symbol_analysis": {
+      "functions": [
+        {
+          "name": "visualize_graph",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "greet_user",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "decorator_function",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "decorator_function",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "bar_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        },
+        {
+          "name": "foo_bar",
+          "file_path": "unknown",
+          "line_number": 0,
+          "complexity": 1
+        }
+      ]
+    },
+    "code_quality": {
+      "average_function_complexity": 2.5,
+      "code_coverage_estimate": 65.0,
+      "maintainability_index": 78.5,
+      "technical_debt_hours": 12.3
+    }
+  },
+  "deep_comprehensive_analysis": {},
+  "unified_serena_analysis": {},
+  "lsp_diagnostics": [],
+  "symbol_overview": [
+    {
+      "name": "visualize_graph",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "decorator_function",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "decorator_function",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "bar_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "foo_bar",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "an_unused_func",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "greet_user",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    },
+    {
+      "name": "format_command",
+      "symbol_type": "function",
+      "file_path": "unknown",
+      "line_number": 0,
+      "complexity_score": 1
+    }
+  ],
+  "codebase_health": {
+    "total_files": 1329,
+    "total_errors": 0,
+    "total_warnings": 0,
+    "total_info": 0,
+    "total_hints": 0,
+    "maintainability_index": 75.0,
+    "technical_debt_score": 25.0,
+    "test_coverage_estimate": 60.0
+  },
+  "serena_features": {
+    "features_tested": [
+      "get_serena_status",
+      "get_completions",
+      "get_hover_info",
+      "get_signature_help",
+      "semantic_search",
+      "rename_symbol",
+      "extract_method",
+      "generate_boilerplate",
+      "organize_imports"
+    ],
+    "successful_features": [],
+    "failed_features": [
+      "get_serena_status",
+      "get_completions",
+      "get_hover_info",
+      "get_signature_help",
+      "semantic_search",
+      "rename_symbol",
+      "extract_method",
+      "generate_boilerplate",
+      "organize_imports"
+    ],
+    "results": {
+      "get_serena_status": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "get_completions": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "get_hover_info": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "get_signature_help": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "semantic_search": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "rename_symbol": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "extract_method": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "generate_boilerplate": {
+        "success": false,
+        "error": "Method not available"
+      },
+      "organize_imports": {
+        "success": false,
+        "error": "Method not available"
+      }
+    },
+    "performance_metrics": {}
+  },
+  "dashboard_data": {
+    "summary": {
+      "total_files": 1329,
+      "total_functions": 2720,
+      "total_classes": 1073,
+      "total_errors": 0,
+      "total_warnings": 0,
+      "health_score": 75
+    },
+    "charts": {
+      "error_distribution": [],
+      "complexity_distribution": [],
+      "file_size_distribution": []
+    }
+  },
+  "performance_metrics": {
+    "total_analysis_time": 2.56,
+    "lsp_diagnostics_count": 0,
+    "symbols_analyzed": 20,
+    "serena_features_working": 0,
+    "serena_features_total": 9,
+    "files_analyzed": 1329,
+    "errors_found": 0,
+    "warnings_found": 0
+  }
+}

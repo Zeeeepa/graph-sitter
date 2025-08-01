@@ -397,66 +397,97 @@ class UltimateComprehensiveAnalyzer:
         return results
 
     async def _collect_all_lsp_diagnostics(self) -> List[Dict[str, Any]]:
-        """Collect ALL LSP diagnostics from all language servers."""
+        """Collect ALL diagnostics including syntax errors and code issues."""
         all_diagnostics = []
         
-        if not self.codebase:
-            return all_diagnostics
-        
-        # Check if LSP diagnostics method is available
-        if not hasattr(self.codebase, 'get_file_diagnostics'):
-            return all_diagnostics
-        
-        # Get all Python files in the codebase
+        # Manual syntax error detection since LSP diagnostics aren't available
         python_files = []
         for root, dirs, files in os.walk(self.codebase_path):
             # Skip common non-source directories
-            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'node_modules', 'venv', 'env']]
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'node_modules', 'venv', 'env', '.git']]
             
             for file in files:
                 if file.endswith('.py'):
                     rel_path = os.path.relpath(os.path.join(root, file), self.codebase_path)
                     python_files.append(rel_path)
         
-        # Collect diagnostics from all files
-        for i, file_path in enumerate(python_files[:50]):  # Limit for performance
+        # Check for syntax errors and code issues
+        for file_path in python_files[:100]:  # Limit for performance
             try:
-                # Get diagnostics for this file
-                result = self.codebase.get_file_diagnostics(file_path)
+                full_path = os.path.join(self.codebase_path, file_path)
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    lines = content.splitlines()
                 
-                if result and result.get('success'):
-                    file_diagnostics = result.get('diagnostics', [])
+                # Check for syntax errors
+                try:
+                    import ast
+                    ast.parse(content)
+                except SyntaxError as e:
+                    diagnostic = {
+                        "file_path": file_path,
+                        "line": e.lineno or 1,
+                        "character": e.offset or 0,
+                        "severity": "error",
+                        "message": str(e),
+                        "code": "syntax-error",
+                        "source": "python-parser",
+                        "range_start": {"line": (e.lineno or 1) - 1, "character": e.offset or 0},
+                        "range_end": {"line": (e.lineno or 1) - 1, "character": (e.offset or 0) + 10}
+                    }
+                    all_diagnostics.append(diagnostic)
+                except Exception:
+                    pass
+                
+                # Check for code quality issues
+                for line_num, line in enumerate(lines, 1):
+                    line_lower = line.lower().strip()
                     
-                    for diag in file_diagnostics:
-                        try:
-                            # Parse diagnostic information
-                            severity = diag.get('severity', 'info')
-                            if isinstance(severity, int):
-                                # Convert LSP severity numbers to strings
-                                severity_map = {1: 'error', 2: 'warning', 3: 'info', 4: 'hint'}
-                                severity = severity_map.get(severity, 'info')
-                            
-                            range_info = diag.get('range', {})
-                            start_pos = range_info.get('start', {})
-                            end_pos = range_info.get('end', {})
-                            
-                            diagnostic = {
-                                "file_path": file_path,
-                                "line": start_pos.get('line', 0) + 1,  # Convert to 1-based
-                                "character": start_pos.get('character', 0),
-                                "severity": severity,
-                                "message": diag.get('message', 'No message'),
-                                "code": diag.get('code'),
-                                "source": diag.get('source', 'lsp'),
-                                "range_start": start_pos,
-                                "range_end": end_pos
-                            }
-                            
-                            all_diagnostics.append(diagnostic)
-                            
-                        except Exception as e:
-                            continue
-                            
+                    # TODO comments
+                    if 'todo' in line_lower and ('#' in line or '"""' in line or "'''" in line):
+                        diagnostic = {
+                            "file_path": file_path,
+                            "line": line_num,
+                            "character": line.find('todo') if 'todo' in line.lower() else 0,
+                            "severity": "info",
+                            "message": f"TODO comment: {line.strip()}",
+                            "code": "todo-comment",
+                            "source": "code-quality",
+                            "range_start": {"line": line_num - 1, "character": 0},
+                            "range_end": {"line": line_num - 1, "character": len(line)}
+                        }
+                        all_diagnostics.append(diagnostic)
+                    
+                    # FIXME comments
+                    if 'fixme' in line_lower and ('#' in line or '"""' in line or "'''" in line):
+                        diagnostic = {
+                            "file_path": file_path,
+                            "line": line_num,
+                            "character": line.find('fixme') if 'fixme' in line.lower() else 0,
+                            "severity": "warning",
+                            "message": f"FIXME comment: {line.strip()}",
+                            "code": "fixme-comment",
+                            "source": "code-quality",
+                            "range_start": {"line": line_num - 1, "character": 0},
+                            "range_end": {"line": line_num - 1, "character": len(line)}
+                        }
+                        all_diagnostics.append(diagnostic)
+                    
+                    # Bare except clauses
+                    if 'except:' in line and 'except Exception' not in line:
+                        diagnostic = {
+                            "file_path": file_path,
+                            "line": line_num,
+                            "character": line.find('except:'),
+                            "severity": "warning",
+                            "message": "Bare except clause - consider catching specific exceptions",
+                            "code": "bare-except",
+                            "source": "code-quality",
+                            "range_start": {"line": line_num - 1, "character": line.find('except:')},
+                            "range_end": {"line": line_num - 1, "character": line.find('except:') + 7}
+                        }
+                        all_diagnostics.append(diagnostic)
+                        
             except Exception as e:
                 continue
         
