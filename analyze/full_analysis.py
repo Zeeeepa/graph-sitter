@@ -874,11 +874,15 @@ class ComprehensiveAnalysisEngine:
             self.logger.info("🚀 Demonstrating Serena features...")
             analysis_results['serena_features'] = await self.demonstrate_serena_features()
             
-            # 6. Generate dashboard data
+            # 6. Run deep comprehensive analysis
+            self.logger.info("🔬 Running deep comprehensive analysis...")
+            analysis_results["deep_comprehensive_analysis"] = await self.run_deep_comprehensive_analysis()
+            
+            # 7. Generate dashboard data
             self.logger.info("📊 Generating dashboard data...")
             analysis_results['dashboard_data'] = await self.generate_dashboard_data(analysis_results)
             
-            # 7. Performance metrics
+            # 8. Performance metrics
             analysis_results['performance_metrics'] = {
                 'total_analysis_time': time.time() - start_time,
                 'files_analyzed': analysis_results['structure_analysis'].get('total_files', 0),
@@ -1593,4 +1597,62 @@ async def main_enhanced():
     
     print("\n🎉 Enhanced Comprehensive Analysis Complete!")
     print("This analysis demonstrates the full power of graph-sitter with Serena integration.")
+
+
+    async def run_deep_comprehensive_analysis(self) -> Dict[str, Any]:
+        """Run deep comprehensive self-analysis using all existing features and new capabilities."""
+        self.logger.info("🔬 Starting deep comprehensive self-analysis...")
+        
+        try:
+            from deep_comprehensive_analysis import DeepComprehensiveAnalyzer
+            
+            # Initialize deep analyzer with current codebase
+            deep_analyzer = DeepComprehensiveAnalyzer(str(self.codebase_path), self.codebase)
+            
+            # Run deep comprehensive analysis
+            results = await deep_analyzer.run_deep_comprehensive_analysis()
+            
+            # Print the deep analysis report
+            deep_analyzer.print_deep_analysis_report(results)
+            
+            return results
+            
+        except ImportError as e:
+            self.logger.error(f"Could not import deep analysis module: {e}")
+            return {"error": f"Deep analysis module not available: {e}"}
+        except Exception as e:
+            self.logger.error(f"Deep analysis failed: {e}")
+            return {"error": f"Deep analysis failed: {e}"}
+
+
+async def main_deep_comprehensive():
+    """Main function for running deep comprehensive analysis."""
+    print("🔬 DEEP COMPREHENSIVE ANALYSIS ENGINE")
+    print("=" * 60)
+    print("Analyzing codebase with ALL existing and new capabilities")
+    print("This validates all integrations and provides comprehensive reporting.")
+    print()
+    
+    # Initialize analyzer
+    engine = ComprehensiveAnalysisEngine(".")
+    
+    # Initialize codebase
+    if not await engine.initialize_codebase():
+        print("❌ Failed to initialize codebase. Continuing with limited analysis...")
+    
+    # Run deep comprehensive analysis
+    try:
+        results = await engine.run_deep_comprehensive_analysis()
+        
+        if "error" not in results:
+            print("\n✅ Deep comprehensive analysis completed successfully!")
+        else:
+            print(f"\n⚠️  Deep analysis had issues: {results['error']}")
+        
+    except Exception as e:
+        print(f"❌ Deep comprehensive analysis failed: {e}")
+        traceback.print_exc()
+    
+    print("\n🎉 Deep Comprehensive Analysis Complete!")
+    print("This analysis demonstrates the full integration of all graph-sitter capabilities.")
 
