@@ -2,7 +2,7 @@
 """Test file with known errors."""
 
 # Syntax error: missing colon
-def bad_function()
+def bad_function():
     return "error"
 
 # Import error

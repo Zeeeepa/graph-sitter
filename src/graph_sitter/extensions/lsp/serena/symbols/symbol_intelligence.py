@@ -502,7 +502,8 @@ class SymbolIntelligence:
                     await self._index_file(file_path)
                     if symbol in self._symbol_index:
                         return self._symbol_index[symbol]
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Failed to search for symbol {symbol} in file {file_path}: {e}")
                 continue
         
         return None
@@ -718,4 +719,3 @@ class SymbolIntelligence:
         
         symbols_with_refs.sort(key=lambda x: x['references'], reverse=True)
         return symbols_with_refs[:limit]
-

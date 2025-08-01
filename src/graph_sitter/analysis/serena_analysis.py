@@ -333,8 +333,8 @@ class SerenaAnalyzer:
                         symbol_context = symbol_result.get('context', {})
                         context.related_symbols = symbol_context.get('symbols', [])
                         context.dependency_chain = symbol_context.get('dependencies', [])
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Failed to get symbol context for {error.file_path}: {e}")
             
             # Generate fix suggestions based on error type
             context.fix_suggestions = self._generate_fix_suggestions(error)
@@ -392,8 +392,8 @@ class SerenaAnalyzer:
                             context_result = self.codebase.get_symbol_context(func_name, include_dependencies=True)
                             if context_result and context_result.get('success'):
                                 symbol_context = context_result.get('context', {})
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            logger.debug(f"Failed to get symbol context for function {func_name}: {e}")
                     
                     # Calculate complexity score
                     complexity = len(func_name) / 10.0  # Simple proxy
@@ -438,8 +438,8 @@ class SerenaAnalyzer:
                             context_result = self.codebase.get_symbol_context(class_name, include_dependencies=True)
                             if context_result and context_result.get('success'):
                                 symbol_context = context_result.get('context', {})
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            logger.debug(f"Failed to get symbol context for class {class_name}: {e}")
                     
                     # Calculate complexity
                     complexity = len(class_name) / 10.0
@@ -556,7 +556,8 @@ class SerenaAnalyzer:
                             'lines': lines,
                             'size_bytes': full_path.stat().st_size
                         })
-                except Exception:
+                except Exception as e:
+                    logger.debug(f"Failed to process file {file.file_path}: {e}")
                     continue
         
         largest_files.sort(key=lambda x: x['lines'], reverse=True)
@@ -640,6 +641,5 @@ class SerenaAnalyzer:
         
         try:
             self.executor.shutdown(wait=True)
-        except Exception:
-            pass
-
+        except Exception as e:
+            logger.debug(f"Error shutting down executor: {e}")

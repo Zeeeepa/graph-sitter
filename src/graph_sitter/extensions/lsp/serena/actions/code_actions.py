@@ -513,7 +513,7 @@ class ImportActionProvider:
                 'changes': [{
                     'file': file_path,
                     'type': 'organize_imports',
-                    'organized_count': len([l for l in import_lines if l.strip()])
+                    'organized_count': len([line for line in import_lines if line.strip()])
                 }]
             }
             
@@ -719,4 +719,3 @@ class QuickFixActionProvider:
                 'applied': True
             }]
         }
-

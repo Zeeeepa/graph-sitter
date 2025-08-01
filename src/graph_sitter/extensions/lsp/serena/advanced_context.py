@@ -412,8 +412,8 @@ class AdvancedContextEngine:
                 import re
                 assignments = re.findall(r'(\w+)\s*=', func.source)
                 variables = list(set(assignments))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Failed to extract variables from function {func.name}: {e}")
         return variables[:10]
     
     def _analyze_control_flow(self, func: Function) -> Dict[str, int]:
@@ -425,8 +425,8 @@ class AdvancedContextEngine:
                 control_flow["if_statements"] = source.count('if ')
                 control_flow["loops"] = source.count('for ') + source.count('while ')
                 control_flow["try_blocks"] = source.count('try:')
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Failed to analyze control flow for function {func.name}: {e}")
         return control_flow
     
     def _analyze_class_methods(self, cls: Class) -> Dict[str, Any]:
@@ -470,7 +470,7 @@ class AdvancedContextEngine:
         """Assess file code quality."""
         lines = file_obj.source.splitlines()
         return {
-            "comment_ratio": len([l for l in lines if l.strip().startswith('#')]) / max(1, len(lines)),
+            "comment_ratio": len([line for line in lines if line.strip().startswith('#')]) / max(1, len(lines)),
             "function_density": len(file_obj.functions) / max(1, len(lines)),
             "class_density": len(file_obj.classes) / max(1, len(lines))
         }
@@ -568,8 +568,8 @@ class AdvancedContextEngine:
         try:
             for dep in func.dependencies[:5]:
                 chain.append(dep.name)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Failed to build dependency chain for function {func.name}: {e}")
         return chain
     
     def _assess_impact_severity(self, error: ContextualError) -> str:
@@ -656,4 +656,3 @@ class AdvancedContextEngine:
                 })
         
         return suggestions
-
