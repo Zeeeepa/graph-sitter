@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 # LSP integration imports (optional)
 try:
     from graph_sitter.extensions.lsp.transaction_manager import get_lsp_manager, TransactionAwareLSPManager
-    from graph_sitter.extensions.lsp.serena_bridge import ErrorInfo
+    from graph_sitter.extensions.lsp.protocol.lsp_types import ErrorInfo
     LSP_AVAILABLE = True
 except ImportError:
     logger.info("LSP integration not available. Install Serena dependencies for error detection.")

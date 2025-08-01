@@ -90,6 +90,7 @@ from graph_sitter.typescript.statements.import_statement import TSImportStatemen
 from graph_sitter.typescript.symbol import TSSymbol
 from graph_sitter.typescript.type_alias import TSTypeAlias
 from graph_sitter.visualizations.visualization_manager import VisualizationManager
+from graph_sitter.core.error_methods import SerenaErrorMethods
 
 logger = get_logger(__name__)
 MAX_LINES = 10000  # Maximum number of lines of text allowed to be logged
@@ -114,7 +115,7 @@ PyDirectory = Directory[PyFile, PySymbol, PyImportStatement, PyGlobalVar, PyClas
 
 
 @apidoc
-class Codebase(
+class Codebase(SerenaErrorMethods,
     Generic[
         TSourceFile,
         TDirectory,

@@ -1,0 +1,78 @@
+{
+  "success": false,
+  "tests_run": 7,
+  "tests_passed": 2,
+  "success_rate": 28.57142857142857,
+  "test_results": [
+    {
+      "name": "unified_interface_availability",
+      "success": false,
+      "duration": 0.00024080276489257812,
+      "error": "Path '/tmp/consolidation_test_tz6dq_67' is not in a git repository!",
+      "details": null
+    },
+    {
+      "name": "consolidated_error_info_class",
+      "success": true,
+      "duration": 6.628036499023438e-05,
+      "error": null,
+      "details": {
+        "properties_tested": [
+          "id",
+          "is_error",
+          "is_warning",
+          "column",
+          "severity_name"
+        ],
+        "conversions_tested": [
+          "to_lsp_diagnostic",
+          "from_lsp_diagnostic"
+        ],
+        "string_representation_works": true
+      }
+    },
+    {
+      "name": "import_consolidation",
+      "success": true,
+      "duration": 0.5188093185424805,
+      "error": null,
+      "details": {
+        "imports_tested": [
+          "ErrorInfo from lsp_types",
+          "TransactionAwareLSPManager",
+          "CodebaseDiagnostics",
+          "SerenaLSPBridge"
+        ],
+        "instance_creation_works": true
+      }
+    },
+    {
+      "name": "error_detection_functionality",
+      "success": false,
+      "duration": 9.5367431640625e-07,
+      "error": "Codebase not initialized",
+      "details": null
+    },
+    {
+      "name": "error_context_functionality",
+      "success": false,
+      "duration": 4.76837158203125e-07,
+      "error": "Codebase not initialized",
+      "details": null
+    },
+    {
+      "name": "error_resolution_interface",
+      "success": false,
+      "duration": 4.76837158203125e-07,
+      "error": "Codebase not initialized",
+      "details": null
+    },
+    {
+      "name": "performance_benchmarks",
+      "success": false,
+      "duration": 4.76837158203125e-07,
+      "error": "Codebase not initialized",
+      "details": null
+    }
+  ]
+}

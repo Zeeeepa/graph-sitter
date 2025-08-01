@@ -151,6 +151,94 @@ class SignatureHelp:
 
 
 @dataclass
+class ErrorInfo:
+    """
+    Consolidated error information for graph-sitter LSP integration.
+    
+    This is the single authoritative ErrorInfo class that replaces all duplicates
+    across the codebase. It provides a standardized interface for error handling
+    with LSP compatibility.
+    """
+    file_path: str
+    line: int  # 1-based line number
+    character: int  # 0-based character position
+    message: str
+    severity: DiagnosticSeverity
+    source: Optional[str] = None
+    code: Optional[Union[str, int]] = None
+    end_line: Optional[int] = None
+    end_character: Optional[int] = None
+    error_type: Optional[str] = None
+    
+    @property
+    def id(self) -> str:
+        """Unique identifier for this error."""
+        return f"{self.file_path}:{self.line}:{self.character}"
+    
+    @property
+    def is_error(self) -> bool:
+        """Check if this is an error (vs warning/info/hint)."""
+        return self.severity == DiagnosticSeverity.ERROR
+    
+    @property
+    def is_warning(self) -> bool:
+        """Check if this is a warning."""
+        return self.severity == DiagnosticSeverity.WARNING
+    
+    @property
+    def column(self) -> int:
+        """Alias for character for backward compatibility."""
+        return self.character
+    
+    @property
+    def severity_name(self) -> str:
+        """Human-readable severity name."""
+        return {
+            DiagnosticSeverity.ERROR: "error",
+            DiagnosticSeverity.WARNING: "warning", 
+            DiagnosticSeverity.INFORMATION: "info",
+            DiagnosticSeverity.HINT: "hint"
+        }.get(self.severity, "unknown")
+    
+    def to_lsp_diagnostic(self) -> Diagnostic:
+        """Convert to LSP Diagnostic format."""
+        start_pos = Position(line=max(0, self.line - 1), character=self.character)
+        end_pos = Position(
+            line=max(0, (self.end_line or self.line) - 1),
+            character=self.end_character or self.character
+        )
+        
+        return Diagnostic(
+            range=Range(start=start_pos, end=end_pos),
+            message=self.message,
+            severity=self.severity,
+            code=self.code,
+            source=self.source
+        )
+    
+    @classmethod
+    def from_lsp_diagnostic(cls, diagnostic: Diagnostic, file_path: str) -> 'ErrorInfo':
+        """Create ErrorInfo from LSP Diagnostic."""
+        return cls(
+            file_path=file_path,
+            line=diagnostic.range.start.line + 1,  # Convert to 1-based
+            character=diagnostic.range.start.character,
+            message=diagnostic.message,
+            severity=diagnostic.severity or DiagnosticSeverity.ERROR,
+            source=diagnostic.source,
+            code=diagnostic.code,
+            end_line=diagnostic.range.end.line + 1,
+            end_character=diagnostic.range.end.character
+        )
+    
+    def __str__(self) -> str:
+        return f"{self.file_path}:{self.line}:{self.character} [{self.severity_name}] {self.message}"
+    
+    def __repr__(self) -> str:
+        return f"ErrorInfo(file_path='{self.file_path}', line={self.line}, message='{self.message[:50]}...')"
+
+
+@dataclass
 class MarkupContent:
     """Represents markup content."""
     kind: str  # "plaintext" or "markdown"
@@ -193,4 +281,3 @@ def diagnostic_from_error(file_path: str, line: int, character: int,
         severity=severity,
         source=source
     )
-

@@ -15,53 +15,11 @@ from typing import List, Optional, Dict, Any, Union
 from enum import IntEnum
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from .protocol.lsp_types import DiagnosticSeverity, Diagnostic, Position, Range
+from .protocol.lsp_types import DiagnosticSeverity, Diagnostic, Position, Range, ErrorInfo
 from .language_servers.base import BaseLanguageServer
 from .language_servers.python_server import PythonLanguageServer
 
 logger = get_logger(__name__)
-
-
-# DiagnosticSeverity is now imported from protocol.lsp_types
-
-
-@dataclass
-class ErrorInfo:
-    """Standardized error information for graph-sitter."""
-    file_path: str
-    line: int
-    character: int
-    message: str
-    severity: DiagnosticSeverity
-    source: Optional[str] = None
-    code: Optional[Union[str, int]] = None
-    end_line: Optional[int] = None
-    end_character: Optional[int] = None
-    
-    @property
-    def is_error(self) -> bool:
-        """Check if this is an error (not warning or hint)."""
-        return self.severity == DiagnosticSeverity.ERROR
-    
-    @property
-    def is_warning(self) -> bool:
-        """Check if this is a warning."""
-        return self.severity == DiagnosticSeverity.WARNING
-    
-    @property
-    def is_hint(self) -> bool:
-        """Check if this is a hint."""
-        return self.severity == DiagnosticSeverity.HINT
-    
-    def __str__(self) -> str:
-        severity_str = {
-            DiagnosticSeverity.ERROR: "ERROR",
-            DiagnosticSeverity.WARNING: "WARNING", 
-            DiagnosticSeverity.INFORMATION: "INFO",
-            DiagnosticSeverity.HINT: "HINT"
-        }.get(self.severity, "UNKNOWN")
-        
-        return f"{severity_str} {self.file_path}:{self.line}:{self.character} - {self.message}"
 
 
 class SerenaLSPBridge:

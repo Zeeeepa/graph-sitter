@@ -1,0 +1,30 @@
+{
+  "syntax_errors.py": {
+    "expected_count": 5,
+    "error_types": [
+      "syntax_error",
+      "indentation_error",
+      "invalid_syntax"
+    ]
+  },
+  "import_errors.py": {
+    "expected_count": 6,
+    "error_types": [
+      "import_error",
+      "name_error",
+      "undefined_variable"
+    ]
+  },
+  "type_errors.py": {
+    "expected_count": 6,
+    "error_types": [
+      "type_error",
+      "zero_division_error",
+      "attribute_error"
+    ]
+  },
+  "valid_code.py": {
+    "expected_count": 0,
+    "error_types": []
+  }
+}

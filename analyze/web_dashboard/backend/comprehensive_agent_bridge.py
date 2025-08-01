@@ -34,7 +34,7 @@ from graph_sitter.codebase.codebase_analysis import (
 
 # Import deep analysis for comprehensive insights
 try:
-    from graph_sitter.analysis.deep_analysis import DeepCodebaseAnalyzer
+    from graph_sitter.analysis.analysis import DeepCodebaseAnalyzer
     DEEP_ANALYSIS_AVAILABLE = True
 except ImportError:
     DEEP_ANALYSIS_AVAILABLE = False
