@@ -1,0 +1,31 @@
+{
+  "test_summary": {
+    "enhanced_system_available": true,
+    "pylsp_available": true,
+    "total_tests": 1,
+    "errors_detected": 0,
+    "context_quality": 0.0
+  },
+  "integration_tests": [
+    {
+      "test_name": "enhanced_system_integration",
+      "results": {
+        "success": true,
+        "initialization_time": 0.0021948814392089844,
+        "total_errors": 0,
+        "errors_by_file": {},
+        "context_tests": [],
+        "average_context_quality": 0.0
+      }
+    }
+  ],
+  "performance_metrics": {
+    "initialization_under_5s": true,
+    "context_under_1s": false,
+    "meets_requirements": false
+  },
+  "recommendations": [
+    "Improve context extraction quality",
+    "Optimize performance to meet requirements"
+  ]
+}
