@@ -41,6 +41,9 @@ def add_serena_to_codebase(codebase_class: type) -> None:
     from .types import SerenaConfig, SerenaCapability
     from .lsp_integration import SerenaLSPIntegration
     
+    # Import unified error interface
+    from .unified_error_interface import add_unified_error_interface_to_codebase
+    
     async def get_serena_core(self) -> Optional[SerenaCore]:
         """Get or create Serena core instance for this codebase."""
         if not hasattr(self, '_serena_core'):
@@ -543,9 +546,11 @@ def add_serena_to_codebase(codebase_class: type) -> None:
         method = locals()[method_name]
         setattr(codebase_class, method_name, method)
     
-    logger.debug(f"Added {len(methods_to_add)} Serena methods to Codebase class")
+    # Add unified error interface methods
+    add_unified_error_interface_to_codebase(codebase_class)
+    
+    logger.debug(f"Added {len(methods_to_add)} Serena methods + unified error interface to Codebase class")
 
 
 # Auto-initialize when this module is imported
 _initialized = initialize_serena_integration()
-

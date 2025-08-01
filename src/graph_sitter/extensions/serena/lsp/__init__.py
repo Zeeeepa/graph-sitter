@@ -9,7 +9,8 @@ from .client import (
     SerenaLSPClient,
     LSPError,
     LSPConnectionError,
-    LSPTimeoutError
+    LSPTimeoutError,
+    ConnectionType
 )
 
 from .server_manager import (
@@ -31,7 +32,8 @@ from .diagnostics import (
     DiagnosticProcessor,
     DiagnosticFilter,
     DiagnosticAggregator,
-    RealTimeDiagnostics
+    RealTimeDiagnostics,
+    DiagnosticStats
 )
 
 from .protocol import (
@@ -48,6 +50,7 @@ __all__ = [
     'LSPError',
     'LSPConnectionError', 
     'LSPTimeoutError',
+    'ConnectionType',
     
     # Server management
     'SerenaServerManager',
@@ -67,6 +70,7 @@ __all__ = [
     'DiagnosticFilter',
     'DiagnosticAggregator',
     'RealTimeDiagnostics',
+    'DiagnosticStats',
     
     # Protocol handling
     'LSPMessage',
@@ -75,4 +79,3 @@ __all__ = [
     'LSPNotification',
     'ProtocolHandler'
 ]
-
