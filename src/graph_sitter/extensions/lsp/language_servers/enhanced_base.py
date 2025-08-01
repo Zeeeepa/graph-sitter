@@ -336,7 +336,7 @@ class EnhancedBaseLanguageServer(ABC):
                 source=diagnostic.get("source", self.language),
                 tags=diagnostic.get("tags"),
                 file_path=file_path,
-                id=f"{self.language}_{hash(f'{file_path}_{range_obj.start.line}_{diagnostic.get(\"message\", \"\")}')}",
+                id=f"{self.language}_{hash(str(file_path) + '_' + str(range_obj.start.line) + '_' + diagnostic.get('message', ''))}",
                 quick_fixes=[],  # Will be populated by code actions
                 suggestions=[],  # Will be populated by analysis
                 related_symbols=[]  # Will be populated by symbol analysis
