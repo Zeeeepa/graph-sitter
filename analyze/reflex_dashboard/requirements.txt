@@ -1,0 +1,12 @@
+# Reflex Dashboard Requirements
+
+# Core framework
+reflex>=0.4.0
+
+# Optional: If graph-sitter is available
+# graph-sitter (installed separately)
+
+# Development dependencies
+black
+isort
+mypy
