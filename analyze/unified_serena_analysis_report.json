@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-08-04 21:58:51",
+  "codebase_path": "/tmp/Zeeeepa/graph-sitter/analyze",
+  "serena_status": {
+    "available_components": {
+      "types": false,
+      "core": false,
+      "intelligence": false,
+      "auto_init": false
+    },
+    "integration_active": false,
+    "methods_available": [],
+    "lsp_servers": [],
+    "capabilities": [],
+    "enabled": false
+  },
+  "analysis_summary": {
+    "overall_health": "Good",
+    "serena_integration_health": "Available"
+  }
+}
