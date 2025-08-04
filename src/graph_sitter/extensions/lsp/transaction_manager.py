@@ -12,7 +12,7 @@ from typing import List, Optional, Dict, Any, Set
 from weakref import WeakKeyDictionary
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from .serena_bridge import SerenaLSPBridge, ErrorInfo, DiagnosticSeverity
+from .serena_bridge import SerenaLSPBridge, ErrorInfo, ErrorType, RuntimeContext, DiagnosticSeverity
 
 logger = get_logger(__name__)
 
@@ -289,4 +289,3 @@ def shutdown_all_lsp_managers() -> None:
         
         _lsp_managers.clear()
         logger.info("All LSP managers shutdown")
-
