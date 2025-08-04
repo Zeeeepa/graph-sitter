@@ -1,17 +1,18 @@
 """
-Enhanced Types for Serena LSP Integration
+Consolidated Types for Serena LSP Integration
 
-This module contains comprehensive types and enums used across all Serena modules
-including LSP integration, refactoring, symbol intelligence, and code actions.
+This module contains all type definitions used across Serena modules.
+Consolidated from types.py and serena_types.py to eliminate duplication.
 """
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict, Any, Optional, Union, Callable
+from typing import List, Dict, Any, Optional, Union, Callable, AsyncIterator
 from pathlib import Path
 import time
 
 
+# Core Enums
 class SerenaCapability(Enum):
     """Available Serena capabilities."""
     ERROR_ANALYSIS = "error_analysis"
@@ -52,6 +53,26 @@ class ConflictType(Enum):
     TYPE_MISMATCH = "type_mismatch"
     DEPENDENCY_CONFLICT = "dependency_conflict"
     SYNTAX_ERROR = "syntax_error"
+
+
+class ErrorSeverity(Enum):
+    """Severity levels for errors and diagnostics."""
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+    HINT = "hint"
+
+
+class ErrorCategory(Enum):
+    """Categories of code errors."""
+    SYNTAX = "syntax"
+    TYPE = "type"
+    IMPORT = "import"
+    UNDEFINED = "undefined"
+    UNUSED = "unused"
+    STYLE = "style"
+    PERFORMANCE = "performance"
+    SECURITY = "security"
 
 
 @dataclass
@@ -475,3 +496,77 @@ def merge_configs(base: SerenaConfig, override: SerenaConfig) -> SerenaConfig:
     
     return merged
 
+
+# Additional types from serena_types.py (consolidated)
+@dataclass
+class CodeGenerationResult:
+    """Result of a code generation operation."""
+    success: bool
+    generated_code: str
+    file_path: Optional[str] = None
+    message: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class SemanticSearchResult:
+    """Result of a semantic search operation."""
+    symbol_name: str
+    file_path: str
+    line_number: int
+    symbol_type: str
+    relevance_score: float
+    context_snippet: str
+    documentation: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class SymbolInfo:
+    """Information about a code symbol."""
+    name: str
+    kind: str  # function, class, variable, etc.
+    file_path: str
+    line: int
+    character: int
+    definition_range: Optional[Dict[str, int]] = None
+    documentation: Optional[str] = None
+    type_annotation: Optional[str] = None
+    scope: Optional[str] = None
+
+
+@dataclass
+class CompletionContext:
+    """Context information for code completions."""
+    file_path: str
+    line: int
+    character: int
+    trigger_character: Optional[str] = None
+    is_incomplete: bool = False
+
+
+@dataclass
+class CodeError:
+    """Represents a code error from LSP diagnostics."""
+    file_path: str
+    line: int
+    character: int
+    severity: ErrorSeverity
+    category: ErrorCategory
+    message: str
+    code: Optional[str] = None
+    source: str = "lsp"
+    range_start: Optional[Dict[str, int]] = None
+    range_end: Optional[Dict[str, int]] = None
+
+
+@dataclass
+class DiagnosticStats:
+    """Statistics about diagnostics."""
+    total_errors: int = 0
+    total_warnings: int = 0
+    total_info: int = 0
+    total_hints: int = 0
+    files_with_errors: int = 0
+    most_common_errors: List[str] = field(default_factory=list)
+    timestamp: float = field(default_factory=time.time)

@@ -7,6 +7,7 @@ for real-time code analysis, error detection, and comprehensive code intelligenc
 
 from .client import (
     SerenaLSPClient,
+    ConnectionType,
     LSPError,
     LSPConnectionError,
     LSPTimeoutError
@@ -31,6 +32,7 @@ from .diagnostics import (
     DiagnosticProcessor,
     DiagnosticFilter,
     DiagnosticAggregator,
+    DiagnosticStats,
     RealTimeDiagnostics
 )
 
@@ -45,6 +47,7 @@ from .protocol import (
 __all__ = [
     # Core LSP client
     'SerenaLSPClient',
+    'ConnectionType',
     'LSPError',
     'LSPConnectionError', 
     'LSPTimeoutError',
@@ -66,6 +69,7 @@ __all__ = [
     'DiagnosticProcessor',
     'DiagnosticFilter',
     'DiagnosticAggregator',
+    'DiagnosticStats',
     'RealTimeDiagnostics',
     
     # Protocol handling
@@ -75,4 +79,3 @@ __all__ = [
     'LSPNotification',
     'ProtocolHandler'
 ]
-
