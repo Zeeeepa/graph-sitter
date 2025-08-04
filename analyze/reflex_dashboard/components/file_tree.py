@@ -7,7 +7,7 @@ to display and navigate codebase structure.
 
 import reflex as rx
 from typing import List, Dict, Any
-from ..state.codebase_state import CodebaseState
+from state.codebase_state import CodebaseState
 
 
 def create_file_tree() -> rx.Component:

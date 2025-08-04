@@ -48,7 +48,7 @@ class CodebaseState(rx.State):
         
         try:
             # Get the codebase path from parent state
-            from .dashboard_state import DashboardState
+            from state.dashboard_state import DashboardState
             parent_state = self.get_state(DashboardState)
             
             if not parent_state.selected_codebase_path:

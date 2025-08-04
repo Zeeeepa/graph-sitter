@@ -5,7 +5,7 @@ This module contains the primary layout structure including header, sidebar, and
 """
 
 import reflex as rx
-from ..state.dashboard_state import DashboardState
+from state.dashboard_state import DashboardState
 
 
 def create_header() -> rx.Component:
@@ -348,7 +348,7 @@ def create_stat_card(title: str, value: int, icon: str, color: str) -> rx.Compon
 
 def create_files_tab() -> rx.Component:
     """Create the files tab content."""
-    from .file_tree import create_file_tree, create_file_details_panel, create_file_content_viewer
+    from components.file_tree import create_file_tree, create_file_details_panel, create_file_content_viewer
     
     return rx.vstack(
         rx.heading("File Explorer", size="xl"),

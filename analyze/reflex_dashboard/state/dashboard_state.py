@@ -178,7 +178,7 @@ class DashboardState(rx.State):
         
         try:
             # Import and initialize the analyzer
-            from ..analysis.unified_analyzer import UnifiedAnalyzer
+            from analysis.unified_analyzer import UnifiedAnalyzer
             
             analyzer = UnifiedAnalyzer(self.selected_codebase_path)
             
