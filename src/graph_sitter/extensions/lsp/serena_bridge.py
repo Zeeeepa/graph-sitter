@@ -1,9 +1,9 @@
 """
-Enhanced Serena LSP Bridge for Graph-Sitter
+Comprehensive Serena LSP Bridge for Graph-Sitter
 
-This module provides a comprehensive bridge between Serena's solidlsp implementation
+This module provides a complete bridge between Serena's solidlsp implementation
 and graph-sitter's codebase analysis system, with full runtime error detection,
-context analysis, and advanced LSP capabilities.
+context analysis, advanced LSP capabilities, and GitHub repository analysis.
 """
 
 import os
@@ -15,11 +15,13 @@ import ast
 import inspect
 import json
 import asyncio
-from dataclasses import dataclass, field
+import uuid
+import logging
+from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Union, Set, Callable
+from typing import List, Optional, Dict, Any, Union, Set, Callable, Deque, AsyncGenerator
 from enum import IntEnum, Enum
-from collections import defaultdict
+from collections import defaultdict, deque
 import weakref
 from types import FrameType, TracebackType
 
@@ -191,6 +193,620 @@ class RuntimeContext:
 
 # LSP message handling will use the existing solidlsp infrastructure
 # No need to redefine LSP message classes
+
+
+# ============================================================================
+# LSP PROTOCOL IMPLEMENTATION
+# ============================================================================
+
+class LSPMessageType(Enum):
+    """LSP message types."""
+    REQUEST = "request"
+    RESPONSE = "response"
+    NOTIFICATION = "notification"
+    ERROR = "error"
+
+
+class LSPErrorCode(Enum):
+    """LSP error codes."""
+    PARSE_ERROR = -32700
+    INVALID_REQUEST = -32600
+    METHOD_NOT_FOUND = -32601
+    INVALID_PARAMS = -32602
+    INTERNAL_ERROR = -32603
+    SERVER_ERROR_START = -32099
+    SERVER_ERROR_END = -32000
+    SERVER_NOT_INITIALIZED = -32002
+    UNKNOWN_ERROR_CODE = -32001
+    REQUEST_CANCELLED = -32800
+    CONTENT_MODIFIED = -32801
+
+
+@dataclass
+class LSPError:
+    """LSP error representation."""
+    code: int
+    message: str
+    data: Optional[Any] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        error_dict: Dict[str, Any] = {"code": self.code, "message": self.message}
+        if self.data is not None:
+            error_dict["data"] = self.data
+        return error_dict
+
+
+@dataclass
+class LSPMessage:
+    """Base LSP message."""
+    jsonrpc: str
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+    
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())
+
+
+@dataclass
+class LSPRequest(LSPMessage):
+    """LSP request message."""
+    id: Union[str, int]
+    method: str
+    params: Optional[Dict[str, Any]] = None
+    
+    @classmethod
+    def create(cls, method: str, params: Optional[Dict[str, Any]] = None) -> 'LSPRequest':
+        return cls(
+            jsonrpc="2.0",
+            id=str(uuid.uuid4()),
+            method=method,
+            params=params
+        )
+
+
+@dataclass
+class LSPResponse(LSPMessage):
+    """LSP response message."""
+    id: Union[str, int]
+    result: Optional[Any] = None
+    error: Optional[LSPError] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        response_dict: Dict[str, Any] = {"jsonrpc": self.jsonrpc, "id": self.id}
+        if self.error:
+            response_dict["error"] = self.error.to_dict()
+        else:
+            response_dict["result"] = self.result
+        return response_dict
+
+
+@dataclass
+class LSPNotification(LSPMessage):
+    """LSP notification message."""
+    method: str
+    params: Optional[Dict[str, Any]] = None
+
+
+class ProtocolHandler:
+    """
+    Handles LSP protocol message parsing, validation, and routing.
+    
+    Features:
+    - Message parsing and validation
+    - Request/response correlation
+    - Notification handling
+    - Error handling and reporting
+    - Protocol compliance checking
+    """
+    
+    def __init__(self):
+        self._pending_requests: Dict[Union[str, int], asyncio.Future] = {}
+        self._notification_handlers: Dict[str, List[Callable]] = {}
+        self._request_handlers: Dict[str, Callable] = {}
+        self._message_id_counter = 0
+    
+    def generate_message_id(self) -> str:
+        """Generate a unique message ID."""
+        self._message_id_counter += 1
+        return f"serena_{self._message_id_counter}"
+    
+    def parse_message(self, raw_message: str) -> Union[LSPRequest, LSPResponse, LSPNotification]:
+        """Parse a raw LSP message string into appropriate message object."""
+        try:
+            data = json.loads(raw_message)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in LSP message: {e}")
+        
+        # Validate jsonrpc version
+        if data.get("jsonrpc") != "2.0":
+            raise ValueError("Invalid or missing jsonrpc version")
+        
+        # Determine message type and parse accordingly
+        if "id" in data:
+            if "method" in data:
+                # Request
+                return LSPRequest(
+                    jsonrpc="2.0",
+                    id=data["id"],
+                    method=data["method"],
+                    params=data.get("params")
+                )
+            else:
+                # Response
+                error_data = data.get("error")
+                error = None
+                if error_data:
+                    error = LSPError(
+                        code=error_data["code"],
+                        message=error_data["message"],
+                        data=error_data.get("data")
+                    )
+                
+                return LSPResponse(
+                    jsonrpc="2.0",
+                    id=data["id"],
+                    result=data.get("result"),
+                    error=error
+                )
+        else:
+            # Notification
+            if "method" not in data:
+                raise ValueError("Notification missing method")
+            
+            return LSPNotification(
+                jsonrpc="2.0",
+                method=data["method"],
+                params=data.get("params")
+            )
+    
+    def create_request(self, method: str, params: Optional[Dict[str, Any]] = None) -> LSPRequest:
+        """Create a new LSP request with unique ID."""
+        return LSPRequest(
+            jsonrpc="2.0",
+            id=self.generate_message_id(),
+            method=method,
+            params=params
+        )
+    
+    def create_response(self, request_id: Union[str, int], 
+                       result: Optional[Any] = None,
+                       error: Optional[LSPError] = None) -> LSPResponse:
+        """Create an LSP response for a given request."""
+        return LSPResponse(
+            jsonrpc="2.0",
+            id=request_id,
+            result=result,
+            error=error
+        )
+    
+    def create_notification(self, method: str, 
+                          params: Optional[Dict[str, Any]] = None) -> LSPNotification:
+        """Create an LSP notification."""
+        return LSPNotification(
+            jsonrpc="2.0",
+            method=method,
+            params=params
+        )
+    
+    def create_error_response(self, request_id: Union[str, int], 
+                            code: LSPErrorCode, message: str,
+                            data: Optional[Any] = None) -> LSPResponse:
+        """Create an error response."""
+        error = LSPError(code=code.value, message=message, data=data)
+        return LSPResponse(jsonrpc="2.0", id=request_id, error=error)
+    
+    def register_request_handler(self, method: str, handler: Callable):
+        """Register a handler for incoming requests."""
+        self._request_handlers[method] = handler
+    
+    def register_notification_handler(self, method: str, handler: Callable):
+        """Register a handler for incoming notifications."""
+        if method not in self._notification_handlers:
+            self._notification_handlers[method] = []
+        self._notification_handlers[method].append(handler)
+    
+    async def handle_message(self, message: Union[LSPRequest, LSPResponse, LSPNotification]) -> Optional[LSPResponse]:
+        """Handle an incoming LSP message."""
+        try:
+            if isinstance(message, LSPRequest):
+                return await self._handle_request(message)
+            elif isinstance(message, LSPResponse):
+                await self._handle_response(message)
+            elif isinstance(message, LSPNotification):
+                await self._handle_notification(message)
+        except Exception as e:
+            logger.error(f"Error handling LSP message: {e}")
+            if isinstance(message, LSPRequest):
+                return self.create_error_response(
+                    message.id,
+                    LSPErrorCode.INTERNAL_ERROR,
+                    f"Internal error: {str(e)}"
+                )
+        
+        return None
+    
+    async def _handle_request(self, request: LSPRequest) -> LSPResponse:
+        """Handle incoming request."""
+        handler = self._request_handlers.get(request.method)
+        
+        if not handler:
+            return self.create_error_response(
+                request.id,
+                LSPErrorCode.METHOD_NOT_FOUND,
+                f"Method '{request.method}' not found"
+            )
+        
+        try:
+            result = await handler(request.params or {})
+            return self.create_response(request.id, result=result)
+        except Exception as e:
+            return self.create_error_response(
+                request.id,
+                LSPErrorCode.INTERNAL_ERROR,
+                f"Handler error: {str(e)}"
+            )
+    
+    async def _handle_response(self, response: LSPResponse):
+        """Handle incoming response."""
+        future = self._pending_requests.get(response.id)
+        if future and not future.done():
+            if response.error:
+                future.set_exception(
+                    Exception(f"LSP Error {response.error.code}: {response.error.message}")
+                )
+            else:
+                future.set_result(response.result)
+            
+            del self._pending_requests[response.id]
+    
+    async def _handle_notification(self, notification: LSPNotification):
+        """Handle incoming notification."""
+        handlers = self._notification_handlers.get(notification.method, [])
+        
+        for handler in handlers:
+            try:
+                await handler(notification.params or {})
+            except Exception as e:
+                logger.error(f"Error in notification handler for {notification.method}: {e}")
+    
+    def track_request(self, request: LSPRequest) -> asyncio.Future:
+        """Track a request for response correlation."""
+        future: asyncio.Future = asyncio.Future()
+        self._pending_requests[request.id] = future
+        return future
+    
+    def cancel_request(self, request_id: Union[str, int]):
+        """Cancel a pending request."""
+        future = self._pending_requests.get(request_id)
+        if future and not future.done():
+            future.cancel()
+            del self._pending_requests[request_id]
+    
+    def get_pending_requests(self) -> List[Union[str, int]]:
+        """Get list of pending request IDs."""
+        return list(self._pending_requests.keys())
+    
+    def cleanup_completed_requests(self):
+        """Clean up completed or cancelled requests."""
+        completed_ids = [
+            req_id for req_id, future in self._pending_requests.items()
+            if future.done()
+        ]
+        
+        for req_id in completed_ids:
+            del self._pending_requests[req_id]
+
+
+class SerenaProtocolExtensions:
+    """Serena-specific LSP protocol extensions."""
+    
+    # Serena-specific methods
+    SERENA_ANALYZE_FILE = "serena/analyzeFile"
+    SERENA_GET_ERRORS = "serena/getErrors"
+    SERENA_GET_COMPREHENSIVE_ERRORS = "serena/getComprehensiveErrors"
+    SERENA_ANALYZE_CODEBASE = "serena/analyzeCodebase"
+    SERENA_GET_CONTEXT = "serena/getContext"
+    SERENA_REFRESH_ANALYSIS = "serena/refreshAnalysis"
+    
+    # Serena-specific notifications
+    SERENA_ANALYSIS_COMPLETE = "serena/analysisComplete"
+    SERENA_ERROR_UPDATED = "serena/errorUpdated"
+    SERENA_PROGRESS = "serena/progress"
+    
+    @staticmethod
+    def create_analyze_file_request(file_path: str, content: Optional[str] = None) -> Dict[str, Any]:
+        """Create parameters for file analysis request."""
+        params: Dict[str, Any] = {"uri": f"file://{file_path}"}
+        if content is not None:
+            params["content"] = content
+        return params
+    
+    @staticmethod
+    def create_get_errors_request(file_path: Optional[str] = None, 
+                                severity_filter: Optional[List[str]] = None) -> Dict[str, Any]:
+        """Create parameters for error retrieval request."""
+        params: Dict[str, Any] = {}
+        if file_path:
+            params["uri"] = f"file://{file_path}"
+        if severity_filter:
+            params["severityFilter"] = severity_filter
+        return params
+    
+    @staticmethod
+    def create_comprehensive_errors_request(include_context: bool = True,
+                                          include_suggestions: bool = True,
+                                          max_errors: Optional[int] = None) -> Dict[str, Any]:
+        """Create parameters for comprehensive error analysis request."""
+        params: Dict[str, Any] = {
+            "includeContext": include_context,
+            "includeSuggestions": include_suggestions
+        }
+        if max_errors is not None:
+            params["maxErrors"] = max_errors
+        return params
+    
+    @staticmethod
+    def create_analyze_codebase_request(root_path: str, 
+                                      file_patterns: Optional[List[str]] = None,
+                                      exclude_patterns: Optional[List[str]] = None) -> Dict[str, Any]:
+        """Create parameters for codebase analysis request."""
+        params: Dict[str, Any] = {"rootUri": f"file://{root_path}"}
+        if file_patterns:
+            params["includePatterns"] = file_patterns
+        if exclude_patterns:
+            params["excludePatterns"] = exclude_patterns
+        return params
+
+
+# ============================================================================
+# ERROR ANALYSIS CLASSES
+# ============================================================================
+
+class ErrorSeverity(Enum):
+    """Error severity levels."""
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+    HINT = "hint"
+
+
+class ErrorCategory(Enum):
+    """Error categories for classification."""
+    SYNTAX = "syntax"
+    TYPE = "type"
+    LOGIC = "logic"
+    PERFORMANCE = "performance"
+    SECURITY = "security"
+    STYLE = "style"
+    COMPATIBILITY = "compatibility"
+    DEPENDENCY = "dependency"
+    UNKNOWN = "unknown"
+
+
+@dataclass
+class ErrorLocation:
+    """Represents the location of an error in code."""
+    file_path: str
+    line: int
+    column: int
+    end_line: Optional[int] = None
+    end_column: Optional[int] = None
+    
+    @property
+    def range_text(self) -> str:
+        """Get human-readable range text."""
+        if self.end_line and self.end_column:
+            return f"{self.line}:{self.column}-{self.end_line}:{self.end_column}"
+        return f"{self.line}:{self.column}"
+    
+    @property
+    def file_name(self) -> str:
+        """Get just the filename."""
+        return Path(self.file_path).name
+    
+    def to_lsp_position(self) -> Dict[str, Any]:
+        """Convert to LSP Position format."""
+        return {
+            "line": self.line - 1,  # LSP is 0-based
+            "character": self.column - 1
+        }
+    
+    def to_lsp_range(self) -> Dict[str, Any]:
+        """Convert to LSP Range format."""
+        start = self.to_lsp_position()
+        end = {
+            "line": (self.end_line or self.line) - 1,
+            "character": (self.end_column or self.column) - 1
+        }
+        return {"start": start, "end": end}
+
+
+@dataclass
+class CodeError:
+    """Represents a comprehensive code error with context."""
+    id: str
+    message: str
+    severity: ErrorSeverity
+    category: ErrorCategory
+    location: ErrorLocation
+    code: Optional[str] = None
+    source: str = "serena"
+    suggestions: List[str] = field(default_factory=list)
+    context: Dict[str, Any] = field(default_factory=dict)
+    related_errors: List[str] = field(default_factory=list)
+    timestamp: float = field(default_factory=time.time)
+    
+    @property
+    def is_critical(self) -> bool:
+        """Check if error is critical (error severity)."""
+        return self.severity == ErrorSeverity.ERROR
+    
+    @property
+    def display_text(self) -> str:
+        """Get formatted display text for the error."""
+        return f"[{self.severity.value.upper()}] {self.location.file_name}:{self.location.range_text} - {self.message}"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert error to dictionary representation."""
+        return {
+            'id': self.id,
+            'message': self.message,
+            'severity': self.severity.value,
+            'category': self.category.value,
+            'location': {
+                'file_path': self.location.file_path,
+                'line': self.location.line,
+                'column': self.location.column,
+                'end_line': self.location.end_line,
+                'end_column': self.location.end_column
+            },
+            'code': self.code,
+            'source': self.source,
+            'suggestions': self.suggestions,
+            'context': self.context,
+            'related_errors': self.related_errors,
+            'timestamp': self.timestamp
+        }
+    
+    @classmethod
+    def from_lsp_diagnostic(cls, diagnostic: Dict[str, Any], file_path: str) -> 'CodeError':
+        """Create CodeError from LSP diagnostic data."""
+        range_data = diagnostic.get('range', {})
+        start = range_data.get('start', {})
+        end = range_data.get('end', {})
+        
+        location = ErrorLocation(
+            file_path=file_path,
+            line=start.get('line', 0) + 1,  # LSP is 0-based, we use 1-based
+            column=start.get('character', 0) + 1,
+            end_line=end.get('line', 0) + 1 if end else None,
+            end_column=end.get('character', 0) + 1 if end else None
+        )
+        
+        # Map LSP severity to our severity
+        lsp_severity = diagnostic.get('severity', 1)
+        severity_map = {
+            1: ErrorSeverity.ERROR,
+            2: ErrorSeverity.WARNING,
+            3: ErrorSeverity.INFO,
+            4: ErrorSeverity.HINT
+        }
+        severity = severity_map.get(lsp_severity, ErrorSeverity.ERROR)
+        
+        # Determine category from diagnostic data
+        category = cls._determine_category(diagnostic)
+        
+        return cls(
+            id=diagnostic.get('id', f"{file_path}_{start.get('line', 0)}_{start.get('character', 0)}"),
+            message=diagnostic.get('message', 'Unknown error'),
+            severity=severity,
+            category=category,
+            location=location,
+            code=diagnostic.get('code'),
+            source=diagnostic.get('source', 'serena'),
+            context=diagnostic.get('data', {})
+        )
+    
+    @staticmethod
+    def _determine_category(diagnostic: Dict[str, Any]) -> ErrorCategory:
+        """Determine error category from diagnostic data."""
+        source = diagnostic.get('source', '').lower()
+        code = str(diagnostic.get('code', '')).lower()
+        message = diagnostic.get('message', '').lower()
+        
+        # Category determination logic
+        if 'syntax' in source or 'parse' in message:
+            return ErrorCategory.SYNTAX
+        elif 'type' in source or 'type' in message:
+            return ErrorCategory.TYPE
+        elif 'security' in source or 'security' in message:
+            return ErrorCategory.SECURITY
+        elif 'performance' in source or 'performance' in message:
+            return ErrorCategory.PERFORMANCE
+        elif 'style' in source or 'lint' in source:
+            return ErrorCategory.STYLE
+        elif 'import' in message or 'dependency' in message:
+            return ErrorCategory.DEPENDENCY
+        elif 'compatibility' in message:
+            return ErrorCategory.COMPATIBILITY
+        else:
+            return ErrorCategory.LOGIC
+
+
+@dataclass
+class ComprehensiveErrorList:
+    """Comprehensive list of code errors with metadata and analysis."""
+    errors: List[CodeError] = field(default_factory=list)
+    total_count: int = 0
+    critical_count: int = 0
+    warning_count: int = 0
+    info_count: int = 0
+    files_analyzed: Set[str] = field(default_factory=set)
+    analysis_timestamp: float = field(default_factory=time.time)
+    analysis_duration: float = 0.0
+    
+    def __post_init__(self):
+        """Calculate counts after initialization."""
+        self._update_counts()
+    
+    def _update_counts(self):
+        """Update error counts."""
+        self.total_count = len(self.errors)
+        self.critical_count = sum(1 for e in self.errors if e.severity == ErrorSeverity.ERROR)
+        self.warning_count = sum(1 for e in self.errors if e.severity == ErrorSeverity.WARNING)
+        self.info_count = sum(1 for e in self.errors if e.severity in [ErrorSeverity.INFO, ErrorSeverity.HINT])
+        self.files_analyzed = {e.location.file_path for e in self.errors}
+    
+    def add_error(self, error: CodeError):
+        """Add an error to the list."""
+        self.errors.append(error)
+        self._update_counts()
+    
+    def add_errors(self, errors: List[CodeError]):
+        """Add multiple errors to the list."""
+        self.errors.extend(errors)
+        self._update_counts()
+    
+    def get_errors_by_severity(self, severity: ErrorSeverity) -> List[CodeError]:
+        """Get errors filtered by severity."""
+        return [e for e in self.errors if e.severity == severity]
+    
+    def get_errors_by_category(self, category: ErrorCategory) -> List[CodeError]:
+        """Get errors filtered by category."""
+        return [e for e in self.errors if e.category == category]
+    
+    def get_errors_by_file(self, file_path: str) -> List[CodeError]:
+        """Get errors for a specific file."""
+        return [e for e in self.errors if e.location.file_path == file_path]
+    
+    def get_critical_errors(self) -> List[CodeError]:
+        """Get only critical errors."""
+        return self.get_errors_by_severity(ErrorSeverity.ERROR)
+    
+    def get_summary(self) -> Dict[str, Any]:
+        """Get summary statistics."""
+        category_counts = {}
+        for category in ErrorCategory:
+            category_counts[category.value] = len(self.get_errors_by_category(category))
+        
+        return {
+            'total_errors': self.total_count,
+            'critical_errors': self.critical_count,
+            'warnings': self.warning_count,
+            'info_hints': self.info_count,
+            'files_with_errors': len(self.files_analyzed),
+            'category_breakdown': category_counts,
+            'analysis_timestamp': self.analysis_timestamp,
+            'analysis_duration': self.analysis_duration
+        }
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary representation."""
+        return {
+            'errors': [error.to_dict() for error in self.errors],
+            'summary': self.get_summary()
+        }
 
 
 # ============================================================================
