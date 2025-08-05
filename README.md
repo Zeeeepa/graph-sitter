@@ -110,10 +110,10 @@ Once deployed, users will be able to:
 from graph_sitter.core.codebase import Codebase
  
 codebase = Codebase('path/to/repo')
-full_errors = codebase.FullErrors  # New comprehensive analysis!
+full_errors = codebase.FullErrors  # New analysis!
  
 if full_errors:
-    errors = full_errors.get_comprehensive_errors()
+    errors = full_errors.get_errors()
     print(f'Found {errors.total_count} errors across {len(errors.files_analyzed)} files')
     
     # Real-time monitoring
