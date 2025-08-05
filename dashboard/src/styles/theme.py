@@ -5,6 +5,7 @@ Defines the global theme, colors, and styling for the dashboard.
 """
 
 import reflex as rx
+from typing import Dict, Any
 
 # Color palette
 COLORS = {
@@ -112,7 +113,7 @@ SHADOWS = {
 }
 
 # Component styles
-COMPONENT_STYLES = {
+COMPONENT_STYLES: Dict[str, Dict[str, Any]] = {
     "card": {
         "background": "white",
         "border": f"1px solid {COLORS['gray']['200']}",
@@ -197,4 +198,3 @@ theme_styles = {
     "color": COLORS["gray"]["900"],
     "line_height": "1.5"
 }
-

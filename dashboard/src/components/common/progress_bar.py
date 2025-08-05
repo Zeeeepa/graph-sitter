@@ -12,7 +12,7 @@ def progress_bar(
     value: float,
     max_value: float = 100.0,
     show_percentage: bool = True,
-    color: str = None,
+    color: str = "primary",
     height: str = "8px"
 ) -> rx.Component:
     """
@@ -76,7 +76,7 @@ def circular_progress(
     max_value: float = 100.0,
     size: str = "60px",
     thickness: str = "4px",
-    color: str = None
+    color: str = "primary"
 ) -> rx.Component:
     """
     Circular progress indicator.
@@ -106,4 +106,3 @@ def circular_progress(
         color=color,
         track_color=COLORS["gray"]["200"]
     )
-

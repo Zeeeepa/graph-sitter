@@ -19,6 +19,14 @@ class RepositoryInputState(rx.State):
         """Update the repository URL input."""
         self.repo_url_input = value
     
+    def set_example_repo(self):
+        """Set example repository URL."""
+        self.repo_url_input = "https://github.com/Zeeeepa/graph-sitter"
+    
+    def set_local_project(self):
+        """Set local project path."""
+        self.repo_url_input = "./local-project"
+    
     async def submit_analysis(self):
         """Submit the analysis request."""
         if self.repo_url_input.strip():
@@ -93,7 +101,7 @@ def repository_input() -> rx.Component:
                     rx.hstack(
                         rx.button(
                             "https://github.com/Zeeeepa/graph-sitter",
-                            on_click=lambda: RepositoryInputState.update_repo_url("https://github.com/Zeeeepa/graph-sitter"),
+                            on_click=RepositoryInputState.set_example_repo,
                             variant="ghost",
                             size="sm",
                             color=COLORS["primary"]["600"],
@@ -101,7 +109,7 @@ def repository_input() -> rx.Component:
                         ),
                         rx.button(
                             "./local-project",
-                            on_click=lambda: RepositoryInputState.update_repo_url("./local-project"),
+                            on_click=RepositoryInputState.set_local_project,
                             variant="ghost",
                             size="sm",
                             color=COLORS["primary"]["600"],
@@ -244,4 +252,3 @@ def repository_input() -> rx.Component:
         align_items="center",
         justify_content="center"
     )
-

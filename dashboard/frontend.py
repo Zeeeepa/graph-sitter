@@ -265,7 +265,7 @@ def tree_node(node: Dict[str, Any], level: int = 0) -> rx.Component:
             spacing="2",
             align="center",
             cursor="pointer",
-            on_click=DashboardState.select_node(node),
+            on_click=lambda n=node: DashboardState.select_node(n),  # type: ignore
             _hover={"bg": "gray.100"}
         ),
         # Children (if expanded)

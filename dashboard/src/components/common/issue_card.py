@@ -148,7 +148,7 @@ def issue_summary_card(
     title: str,
     count: int,
     severity: str,
-    description: str = None
+    description: str = ""
 ) -> rx.Component:
     """Summary card for issue counts by severity or type."""
     severity_info = format_issue_severity(severity)
@@ -204,4 +204,3 @@ def issue_summary_card(
         text_align="center",
         min_width="150px"
     )
-
