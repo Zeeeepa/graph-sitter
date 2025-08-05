@@ -93,7 +93,7 @@ def repository_input() -> rx.Component:
                     rx.hstack(
                         rx.button(
                             "https://github.com/Zeeeepa/graph-sitter",
-                            on_click=lambda: RepositoryInputState.update_repo_url("https://github.com/Zeeeepa/graph-sitter"),
+                            on_click=lambda: RepositoryInputState.update_repo_url("https://github.com/Zeeeepa/graph-sitter"),  # type: ignore
                             variant="ghost",
                             size="sm",
                             color=COLORS["primary"]["600"],
@@ -101,7 +101,7 @@ def repository_input() -> rx.Component:
                         ),
                         rx.button(
                             "./local-project",
-                            on_click=lambda: RepositoryInputState.update_repo_url("./local-project"),
+                            on_click=lambda: RepositoryInputState.update_repo_url("./local-project"),  # type: ignore
                             variant="ghost",
                             size="sm",
                             color=COLORS["primary"]["600"],
@@ -244,4 +244,3 @@ def repository_input() -> rx.Component:
         align_items="center",
         justify_content="center"
     )
-
