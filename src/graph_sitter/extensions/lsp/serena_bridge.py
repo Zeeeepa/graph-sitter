@@ -21,6 +21,7 @@ from typing import List, Optional, Dict, Any, Union, Set, Callable
 from enum import IntEnum, Enum
 from collections import defaultdict
 import weakref
+from types import FrameType, TracebackType
 
 from graph_sitter.shared.logging.get_logger import get_logger
 
@@ -378,7 +379,7 @@ class RuntimeErrorCollector:
         self.runtime_errors: List[ErrorInfo] = []
         self.error_handlers: List[Callable[[ErrorInfo], None]] = []
         self._lock = threading.RLock()
-        self._original_excepthook: Optional[Callable[[type, BaseException, Any], Any]] = None
+        self._original_excepthook: Optional[Callable[[type, BaseException, Optional[TracebackType]], Any]] = None
         self._original_threading_excepthook: Optional[Callable[..., Any]] = None
         self._active = False
         
@@ -426,7 +427,7 @@ class RuntimeErrorCollector:
         except Exception as e:
             logger.error(f"Failed to stop runtime error collection: {e}")
     
-    def _handle_exception(self, exc_type: type, exc_value: BaseException, exc_traceback: Any) -> None:
+    def _handle_exception(self, exc_type: type, exc_value: BaseException, exc_traceback: Optional[TracebackType]) -> None:
         """Handle main thread exceptions."""
         try:
             self._collect_error(exc_type, exc_value, exc_traceback)
@@ -448,10 +449,12 @@ class RuntimeErrorCollector:
         if self._original_threading_excepthook:
             self._original_threading_excepthook(args)
     
-    def _collect_error(self, exc_type: type, exc_value: BaseException, exc_traceback: Any) -> None:
+    def _collect_error(self, exc_type: type, exc_value: BaseException, exc_traceback: Optional[TracebackType]) -> None:
         """Collect error information from exception."""
         try:
             # Extract traceback information
+            if exc_traceback is None:
+                return
             tb_list = traceback.extract_tb(exc_traceback)
             if not tb_list:
                 return
@@ -478,17 +481,18 @@ class RuntimeErrorCollector:
             # Collect variable information if enabled
             if self.collect_variables and exc_traceback:
                 try:
-                    frame = exc_traceback.tb_frame
+                    frame: Optional[FrameType] = exc_traceback.tb_frame
                     if frame:
                         runtime_context.local_variables = self._safe_extract_variables(frame.f_locals)
                         runtime_context.global_variables = self._safe_extract_variables(frame.f_globals)
                 except Exception as e:
                     logger.debug(f"Failed to collect variables: {e}")
             
-            # Create ErrorInfo
+            # Create ErrorInfo with proper type handling
+            line_number = target_frame.lineno if target_frame.lineno is not None else 1
             error_info = ErrorInfo(
                 file_path=str(Path(target_frame.filename).relative_to(self.repo_path)) if self._is_repo_file(target_frame.filename) else target_frame.filename,
-                line=target_frame.lineno,  # Keep 1-based line numbers
+                line=line_number,  # Ensure we have a valid int
                 character=0,  # We don't have character info from traceback
                 message=f"{exc_type.__name__}: {str(exc_value)}",
                 severity="error",
@@ -751,7 +755,7 @@ class SerenaLSPBridge:
     
     def _generate_fix_suggestions(self, error_info: ErrorInfo) -> List[str]:
         """Generate fix suggestions for an error."""
-        suggestions = []
+        suggestions: List[str] = []
         
         try:
             if not error_info.runtime_context:
