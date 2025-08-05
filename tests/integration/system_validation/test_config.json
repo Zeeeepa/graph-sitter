@@ -1,0 +1,145 @@
+{
+  "test_modules": [
+    "test_module_integration",
+    "test_database_integration",
+    "test_external_library_integration",
+    "test_dashboard_ui_integration",
+    "test_cicd_pipeline_integration",
+    "test_end_to_end_workflows",
+    "test_performance_validation",
+    "test_security_compliance"
+  ],
+  "parallel_execution": true,
+  "max_workers": 4,
+  "timeout_per_test": 300,
+  "retry_failed_tests": true,
+  "max_retries": 2,
+  "generate_artifacts": true,
+  "performance_monitoring": true,
+  "quality_gates": {
+    "min_success_rate": 0.95,
+    "max_avg_duration": 120,
+    "max_memory_usage_mb": 1024,
+    "max_error_rate": 0.05
+  },
+  "performance_thresholds": {
+    "response_time_ms": {
+      "fast": 100,
+      "acceptable": 500,
+      "slow": 2000
+    },
+    "throughput": {
+      "min_requests_per_second": 10,
+      "target_requests_per_second": 50
+    },
+    "resource_usage": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "database": {
+      "max_query_time_ms": 1000,
+      "max_connection_pool_size": 20
+    }
+  },
+  "security_requirements": {
+    "max_high_severity_vulnerabilities": 0,
+    "max_medium_severity_vulnerabilities": 5,
+    "required_encryption": true,
+    "audit_logging_required": true,
+    "access_control_required": true
+  },
+  "compliance_standards": [
+    "GDPR",
+    "SOC2",
+    "ISO27001"
+  ],
+  "test_data": {
+    "sample_projects": [
+      {
+        "name": "small_project",
+        "files": 10,
+        "lines_of_code": 1000,
+        "language": "python"
+      },
+      {
+        "name": "medium_project",
+        "files": 100,
+        "lines_of_code": 10000,
+        "language": "typescript"
+      },
+      {
+        "name": "large_project",
+        "files": 1000,
+        "lines_of_code": 100000,
+        "language": "python"
+      }
+    ],
+    "load_test_scenarios": [
+      {
+        "name": "light_load",
+        "concurrent_users": 5,
+        "requests_per_user": 10,
+        "duration_seconds": 60
+      },
+      {
+        "name": "medium_load",
+        "concurrent_users": 20,
+        "requests_per_user": 25,
+        "duration_seconds": 120
+      },
+      {
+        "name": "heavy_load",
+        "concurrent_users": 50,
+        "requests_per_user": 50,
+        "duration_seconds": 300
+      }
+    ]
+  },
+  "external_services": {
+    "github": {
+      "mock_responses": true,
+      "rate_limit_testing": true,
+      "timeout_seconds": 30
+    },
+    "linear": {
+      "mock_responses": true,
+      "rate_limit_testing": true,
+      "timeout_seconds": 30
+    },
+    "slack": {
+      "mock_responses": true,
+      "webhook_testing": true,
+      "timeout_seconds": 10
+    }
+  },
+  "database_config": {
+    "test_database_url": "sqlite:///test_integration.db",
+    "connection_pool_size": 10,
+    "query_timeout_seconds": 30,
+    "migration_testing": true,
+    "backup_testing": true
+  },
+  "monitoring": {
+    "metrics_collection": true,
+    "performance_profiling": true,
+    "memory_tracking": true,
+    "error_tracking": true,
+    "log_level": "INFO"
+  },
+  "artifacts": {
+    "generate_html_report": true,
+    "generate_json_report": true,
+    "generate_csv_report": true,
+    "generate_performance_charts": true,
+    "generate_security_report": true,
+    "retention_days": 30
+  },
+  "notifications": {
+    "slack_webhook": null,
+    "email_recipients": [],
+    "notify_on_failure": true,
+    "notify_on_success": false,
+    "notify_on_performance_regression": true
+  }
+}
+

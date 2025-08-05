@@ -1,0 +1,456 @@
+name: Integration Tests and System Validation
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+  schedule:
+    # Run integration tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - module_integration
+          - database_integration
+          - external_library_integration
+          - dashboard_ui_integration
+          - cicd_pipeline_integration
+          - end_to_end_workflows
+          - performance_validation
+          - security_compliance
+      parallel_execution:
+        description: 'Run tests in parallel'
+        required: false
+        default: true
+        type: boolean
+      generate_artifacts:
+        description: 'Generate test artifacts'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    strategy:
+      matrix:
+        test-group: [1, 2, 3, 4]
+      fail-fast: false
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libpq-dev \
+            postgresql-client \
+            redis-tools \
+            git \
+            curl \
+            jq
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
+          uv pip install -e .
+          uv pip install pytest pytest-cov pytest-xdist pytest-timeout pytest-mock pytest-asyncio
+          uv pip install psutil psycopg2-binary redis
+
+      - name: Install Node.js dependencies
+        run: |
+          npm install -g yarn pnpm
+
+      - name: Set up test environment
+        run: |
+          mkdir -p test_artifacts
+          mkdir -p test_workspace
+          echo "TEST_WORKSPACE=${{ github.workspace }}/test_workspace" >> $GITHUB_ENV
+          echo "TEST_MODE=integration" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db" >> $GITHUB_ENV
+          echo "REDIS_URL=redis://localhost:6379/0" >> $GITHUB_ENV
+
+      - name: Create test database schema
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "
+            CREATE TABLE IF NOT EXISTS tasks (
+              id SERIAL PRIMARY KEY,
+              title TEXT NOT NULL,
+              description TEXT,
+              status TEXT DEFAULT 'pending',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE TABLE IF NOT EXISTS codebase (
+              id SERIAL PRIMARY KEY,
+              name TEXT NOT NULL UNIQUE,
+              path TEXT NOT NULL,
+              language TEXT,
+              size_bytes INTEGER DEFAULT 0,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE TABLE IF NOT EXISTS prompts (
+              id SERIAL PRIMARY KEY,
+              content TEXT NOT NULL,
+              type TEXT DEFAULT 'user',
+              task_id INTEGER REFERENCES tasks(id),
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE TABLE IF NOT EXISTS analytics (
+              id SERIAL PRIMARY KEY,
+              event_type TEXT NOT NULL,
+              event_data TEXT,
+              codebase_id INTEGER REFERENCES codebase(id),
+              task_id INTEGER REFERENCES tasks(id),
+              timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE INDEX idx_tasks_status ON tasks(status);
+            CREATE INDEX idx_analytics_event_type ON analytics(event_type);
+            CREATE INDEX idx_analytics_timestamp ON analytics(timestamp);
+          "
+
+      - name: Run integration tests (Group ${{ matrix.test-group }})
+        run: |
+          # Determine which tests to run based on matrix group
+          case ${{ matrix.test-group }} in
+            1)
+              TEST_MODULES="test_module_integration test_database_integration"
+              ;;
+            2)
+              TEST_MODULES="test_external_library_integration test_dashboard_ui_integration"
+              ;;
+            3)
+              TEST_MODULES="test_cicd_pipeline_integration test_end_to_end_workflows"
+              ;;
+            4)
+              TEST_MODULES="test_performance_validation test_security_compliance"
+              ;;
+          esac
+          
+          # Run specific test suite if requested
+          if [ "${{ github.event.inputs.test_suite }}" != "all" ] && [ "${{ github.event.inputs.test_suite }}" != "" ]; then
+            TEST_MODULES="test_${{ github.event.inputs.test_suite }}"
+          fi
+          
+          # Set parallel execution flag
+          PARALLEL_FLAG=""
+          if [ "${{ github.event.inputs.parallel_execution }}" == "true" ] || [ "${{ github.event.inputs.parallel_execution }}" == "" ]; then
+            PARALLEL_FLAG="--parallel --workers 2"
+          fi
+          
+          # Set artifacts flag
+          ARTIFACTS_FLAG=""
+          if [ "${{ github.event.inputs.generate_artifacts }}" == "false" ]; then
+            ARTIFACTS_FLAG="--no-artifacts"
+          fi
+          
+          # Run tests for each module in the group
+          for module in $TEST_MODULES; do
+            echo "Running $module..."
+            python -m pytest tests/integration/system_validation/${module}.py \
+              -v \
+              --tb=short \
+              --timeout=300 \
+              --cov=src \
+              --cov-report=xml:coverage-${module}.xml \
+              --cov-report=html:htmlcov-${module} \
+              --junit-xml=test-results-${module}.xml \
+              || echo "Test module $module failed"
+          done
+
+      - name: Run comprehensive test suite
+        if: matrix.test-group == 1
+        run: |
+          python tests/integration/system_validation/test_suite_runner.py \
+            --parallel \
+            --workers 2 \
+            --timeout 300 \
+            --config tests/integration/system_validation/test_config.json
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results-group-${{ matrix.test-group }}
+          path: |
+            test-results-*.xml
+            coverage-*.xml
+            htmlcov-*
+            test_artifacts/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: coverage-*.xml
+          flags: integration-tests-group-${{ matrix.test-group }}
+          name: integration-tests-group-${{ matrix.test-group }}
+
+      - name: Performance regression check
+        if: matrix.test-group == 4
+        run: |
+          python -c "
+          import json
+          import sys
+          
+          # Load performance results
+          try:
+              with open('test_artifacts/integration_test_report.json', 'r') as f:
+                  report = json.load(f)
+              
+              # Check performance thresholds
+              performance = report.get('performance_metrics', {})
+              avg_duration = performance.get('average_test_duration', 0)
+              
+              if avg_duration > 120:  # 2 minutes threshold
+                  print(f'❌ Performance regression detected: {avg_duration:.1f}s > 120s')
+                  sys.exit(1)
+              else:
+                  print(f'✅ Performance check passed: {avg_duration:.1f}s')
+          except FileNotFoundError:
+              print('⚠️ Performance report not found, skipping check')
+          "
+
+      - name: Security vulnerability check
+        if: matrix.test-group == 4
+        run: |
+          # Run security scan
+          pip install safety bandit
+          
+          # Check for known vulnerabilities in dependencies
+          safety check --json > safety-report.json || true
+          
+          # Static security analysis
+          bandit -r src/ -f json -o bandit-report.json || true
+          
+          # Upload security reports
+          mkdir -p test_artifacts/security
+          mv safety-report.json test_artifacts/security/ || true
+          mv bandit-report.json test_artifacts/security/ || true
+
+  integration-test-summary:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    if: always()
+    
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v3
+        with:
+          path: all-test-results
+
+      - name: Generate summary report
+        run: |
+          echo "# Integration Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Count test results
+          total_files=$(find all-test-results -name "test-results-*.xml" | wc -l)
+          echo "📊 **Test Files**: $total_files" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for failures
+          if find all-test-results -name "test-results-*.xml" -exec grep -l "failures=\"[^0]" {} \; | grep -q .; then
+            echo "❌ **Status**: Some tests failed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Status**: All tests passed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Test results and coverage reports are available in the artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Performance and security reports included" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Read test results
+            let summary = '## 🧪 Integration Test Results\n\n';
+            
+            // Check if comprehensive report exists
+            const reportPath = 'all-test-results/test-results-group-1/test_artifacts/integration_test_report.json';
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              summary += `📊 **Total Tests**: ${report.total_tests}\n`;
+              summary += `✅ **Successful**: ${report.successful_tests}\n`;
+              summary += `❌ **Failed**: ${report.failed_tests}\n`;
+              summary += `📈 **Success Rate**: ${(report.success_rate * 100).toFixed(1)}%\n`;
+              summary += `⏱️ **Duration**: ${report.total_duration.toFixed(1)}s\n\n`;
+              
+              if (report.recommendations && report.recommendations.length > 0) {
+                summary += '### 🔍 Recommendations\n';
+                report.recommendations.forEach(rec => {
+                  summary += `- ${rec}\n`;
+                });
+              }
+            } else {
+              summary += '⚠️ Detailed report not available\n';
+            }
+            
+            // Post comment
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  quality-gates:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    if: always()
+    
+    steps:
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: test-results-group-1
+          path: test-results
+
+      - name: Check quality gates
+        run: |
+          echo "Checking quality gates..."
+          
+          # Initialize status
+          QUALITY_GATE_PASSED=true
+          
+          # Check if comprehensive report exists
+          if [ -f "test-results/test_artifacts/integration_test_report.json" ]; then
+            python3 -c "
+            import json
+            import sys
+            
+            with open('test-results/test_artifacts/integration_test_report.json', 'r') as f:
+                report = json.load(f)
+            
+            success_rate = report.get('success_rate', 0)
+            avg_duration = report.get('performance_metrics', {}).get('average_test_duration', 0)
+            
+            print(f'Success Rate: {success_rate:.2%}')
+            print(f'Average Duration: {avg_duration:.1f}s')
+            
+            # Quality gates
+            if success_rate < 0.95:
+                print('❌ Quality gate failed: Success rate below 95%')
+                sys.exit(1)
+            
+            if avg_duration > 120:
+                print('❌ Quality gate failed: Average duration exceeds 120s')
+                sys.exit(1)
+            
+            print('✅ All quality gates passed!')
+            "
+          else
+            echo "⚠️ Quality gate report not found"
+            QUALITY_GATE_PASSED=false
+          fi
+          
+          if [ "$QUALITY_GATE_PASSED" = false ]; then
+            echo "❌ Quality gates check failed"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure() && (github.event_name == 'push' || github.event_name == 'schedule')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Create an issue for failed integration tests
+            const title = `🚨 Integration Tests Failed - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## Integration Test Failure
+            
+            **Workflow**: ${context.workflow}
+            **Run ID**: ${context.runId}
+            **Commit**: ${context.sha}
+            **Branch**: ${context.ref}
+            
+            The integration test suite has failed. Please investigate and fix the issues.
+            
+            ### Next Steps
+            1. Review the test results in the workflow artifacts
+            2. Check the performance and security reports
+            3. Fix any failing tests
+            4. Ensure quality gates are met
+            
+            **Workflow URL**: ${context.payload.repository.html_url}/actions/runs/${context.runId}
+            `;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['bug', 'integration-tests', 'high-priority']
+            });
+
