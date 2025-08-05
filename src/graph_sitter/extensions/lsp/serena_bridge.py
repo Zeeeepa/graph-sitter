@@ -53,6 +53,120 @@ class ErrorInfo:
         """Check if this is a hint."""
         return self.severity == DiagnosticSeverity.HINT
     
+    def get_context(self, lines_before: int = 2, lines_after: int = 2) -> str:
+        """
+        Get context lines around the error location.
+        
+        Args:
+            lines_before: Number of lines to include before the error line
+            lines_after: Number of lines to include after the error line
+            
+        Returns:
+            Formatted string with context lines and error highlighting
+        """
+        try:
+            file_path = Path(self.file_path)
+            if not file_path.exists():
+                return f"File not found: {self.file_path}"
+            
+            # Read file content
+            with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                lines = f.readlines()
+            
+            # Calculate line range (convert to 0-based indexing)
+            error_line_idx = max(0, self.line - 1)
+            start_idx = max(0, error_line_idx - lines_before)
+            end_idx = min(len(lines), error_line_idx + lines_after + 1)
+            
+            # Build context with line numbers
+            context_lines = []
+            for i in range(start_idx, end_idx):
+                line_num = i + 1
+                line_content = lines[i].rstrip('\n\r')
+                
+                # Highlight the error line
+                if i == error_line_idx:
+                    # Add error indicator and highlight
+                    context_lines.append(f">>> {line_num:4d}: {line_content}")
+                    
+                    # Add character position indicator if available
+                    if self.character > 0:
+                        spaces = " " * (8 + self.character - 1)  # Account for line number prefix
+                        context_lines.append(f"{spaces}^")
+                else:
+                    context_lines.append(f"    {line_num:4d}: {line_content}")
+            
+            return "\n".join(context_lines)
+            
+        except Exception as e:
+            logger.error(f"Failed to get context for {self.file_path}:{self.line}: {e}")
+            return f"Error reading context: {e}"
+    
+    def get_detailed_context(self, lines_before: int = 5, lines_after: int = 5) -> Dict[str, Any]:
+        """
+        Get detailed context information including metadata.
+        
+        Args:
+            lines_before: Number of lines to include before the error line
+            lines_after: Number of lines to include after the error line
+            
+        Returns:
+            Dictionary with detailed context information
+        """
+        try:
+            file_path = Path(self.file_path)
+            if not file_path.exists():
+                return {
+                    "error": f"File not found: {self.file_path}",
+                    "context_lines": [],
+                    "error_line": self.line,
+                    "character": self.character
+                }
+            
+            # Read file content
+            with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                lines = f.readlines()
+            
+            # Calculate line range
+            error_line_idx = max(0, self.line - 1)
+            start_idx = max(0, error_line_idx - lines_before)
+            end_idx = min(len(lines), error_line_idx + lines_after + 1)
+            
+            # Build context data
+            context_lines = []
+            for i in range(start_idx, end_idx):
+                line_num = i + 1
+                line_content = lines[i].rstrip('\n\r')
+                
+                context_lines.append({
+                    "line_number": line_num,
+                    "content": line_content,
+                    "is_error_line": i == error_line_idx,
+                    "character_position": self.character if i == error_line_idx else None
+                })
+            
+            return {
+                "file_path": str(file_path),
+                "error_line": self.line,
+                "character": self.character,
+                "context_lines": context_lines,
+                "total_lines": len(lines),
+                "context_range": {
+                    "start": start_idx + 1,
+                    "end": end_idx
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to get detailed context for {self.file_path}:{self.line}: {e}")
+            return {
+                "error": str(e),
+                "file_path": self.file_path,
+                "error_line": self.line,
+                "character": self.character,
+                "context_lines": []
+            }
+    
     def __str__(self) -> str:
         severity_str = {
             DiagnosticSeverity.ERROR: "ERROR",
