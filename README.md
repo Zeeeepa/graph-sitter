@@ -56,7 +56,14 @@ from graph_sitter.agents.chat_agent import ChatAgent
 agent = ChatAgent(codebase)
 response = agent.run("What are the main components of this codebase?")
 ```
-
+```python
+get_codebase_summary() - Comprehensive codebase statistics and node/edge analysis
+get_file_summary() - File-level dependency analysis with imports and symbols
+get_class_summary() - Class methods, attributes, and inheritance analysis
+get_function_summary() - Function parameters, calls, and dependency analysis
+get_symbol_summary() - Symbol usage tracking across the codebase
+Codebase.from_repo() - GitHub URL loading for remote repository analysis
+```
 Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
 
 ## Installation and Usage
