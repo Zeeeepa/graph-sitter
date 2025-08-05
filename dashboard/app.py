@@ -237,7 +237,7 @@ class CodebaseAnalyzer:
         }
         
         # Group files by directory
-        dir_structure = defaultdict(list)
+        dir_structure: Dict[str, List[str]] = defaultdict(list)
         for file in files:
             try:
                 rel_path = file.relative_to(temp_dir)
