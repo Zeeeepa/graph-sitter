@@ -126,9 +126,21 @@ types = [
 ]
 lsp = ["pygls>=2.0.0a2", "lsprotocol==2024.0.0b1", "attrs>=25.1.0"]
 serena = [
-  # Serena MCP server can be installed via uvx or git
-  # No direct Python package dependency needed as it runs as external MCP server
+  # Core MCP communication
   "mcp>=1.0.0",  # MCP client library for communication
+  
+  # Serena LSP components (install via git or package manager)
+  # These are optional and will be imported with graceful fallback
+  # Install with: pip install git+https://github.com/serena-ai/solidlsp.git
+  # Or: uvx install serena-mcp-server
+  
+  # Alternative: Direct package dependencies if available
+  # "solidlsp>=0.1.0",  # Uncomment if solidlsp is available as package
+  # "serena-core>=0.1.0",  # Uncomment if serena-core is available as package
+  
+  # Additional LSP utilities that may be needed
+  "typing-extensions>=4.12.2",  # For enhanced type hints
+  "dataclasses-json>=0.6.4",  # For serialization support
 ]
 slack = ["slack_sdk>=3.0.0"]
 attribution = ["intervaltree>=3.0.0"]
