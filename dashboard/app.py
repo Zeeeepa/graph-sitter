@@ -223,12 +223,12 @@ class CodebaseAnalyzer:
         """Generate interactive tree structure"""
         
         # Group issues by file
-        issues_by_file = defaultdict(list)
+        issues_by_file: Dict[str, List[Issue]] = defaultdict(list)
         for issue in issues:
             issues_by_file[issue.file_path].append(issue)
         
         # Build tree structure
-        tree = {
+        tree: Dict[str, Any] = {
             "name": "Repository",
             "type": "directory",
             "children": [],
@@ -254,7 +254,7 @@ class CodebaseAnalyzer:
         for dir_name, file_paths in dir_structure.items():
             dir_issues = sum(len(issues_by_file.get(fp, [])) for fp in file_paths)
             
-            dir_node = {
+            dir_node: Dict[str, Any] = {
                 "name": dir_name,
                 "type": "directory", 
                 "children": [],
@@ -265,7 +265,7 @@ class CodebaseAnalyzer:
             # Add file nodes
             for file_path in file_paths[:5]:  # Limit to first 5 files per directory
                 file_issues = issues_by_file.get(file_path, [])
-                file_node = {
+                file_node: Dict[str, Any] = {
                     "name": Path(file_path).name,
                     "type": "file",
                     "path": file_path,
