@@ -183,6 +183,18 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
     def _get_lsp_status():
         return codebase._diagnostics.get_lsp_status()
     
+    # Add comprehensive error analysis capability
+    def _get_full_errors(self):
+        """Get comprehensive error analysis with context and suggestions."""
+        try:
+            from graph_sitter.extensions.lsp.serena_analysis import ComprehensiveErrorAnalyzer
+            if not hasattr(self, '_full_error_analyzer'):
+                self._full_error_analyzer = ComprehensiveErrorAnalyzer(self, enable_lsp=True)
+            return self._full_error_analyzer
+        except ImportError:
+            logger.warning("Serena analysis not available. Install Serena dependencies for full error analysis.")
+            return None
+    
     # Add properties and methods to codebase instance
     # Use type() to add properties to the instance's class
     codebase_class = type(codebase)
@@ -196,6 +208,8 @@ def add_diagnostic_capabilities(codebase: "Codebase", enable_lsp: bool = True) -
         codebase_class.hints = property(_get_hints)
     if not hasattr(codebase_class, 'diagnostics'):
         codebase_class.diagnostics = property(_get_diagnostics)
+    if not hasattr(codebase_class, 'FullErrors'):
+        codebase_class.FullErrors = property(_get_full_errors)
     
     # Add methods directly to the instance
     codebase.get_file_errors = _get_file_errors

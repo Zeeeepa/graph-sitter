@@ -1612,3 +1612,10 @@ TSCodebaseType = Codebase[
     TSCodeBlock,
 ]
 
+
+# Import diagnostics to enable automatic patching of Codebase instances
+try:
+    from graph_sitter.core import diagnostics  # noqa: F401
+except ImportError:
+    pass  # Diagnostics not available
+
