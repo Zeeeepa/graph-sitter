@@ -1,14 +1,6 @@
-# Backend API
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pydantic==2.5.0
-python-multipart==0.0.6
-
-# Frontend Framework
 reflex>=0.4.0
-
-# HTTP Client for API communication
+fastapi>=0.104.0
+uvicorn>=0.24.0
 httpx>=0.25.0
-
-# Development dependencies
-python-dotenv>=1.0.0
+pydantic>=2.5.0
+python-multipart>=0.0.6
