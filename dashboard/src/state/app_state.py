@@ -206,11 +206,11 @@ class AnalysisState(rx.State):
         """Set the active tab."""
         self.active_tab = tab
     
-    def filter_issues(self, severity: str = None, issue_type: str = None):
+    def filter_issues(self, severity: str = "", issue_type: str = ""):
         """Filter issues by severity and type."""
-        if severity is not None:
+        if severity:
             self.issue_filter_severity = severity
-        if issue_type is not None:
+        if issue_type:
             self.issue_filter_type = issue_type
         
         # Apply filters
@@ -256,4 +256,3 @@ class AnalysisState(rx.State):
 
 # Create global state instance
 AppState = AnalysisState
-
