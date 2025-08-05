@@ -2,58 +2,65 @@
 LSP Extensions for Graph-Sitter
 
 This package provides Language Server Protocol (LSP) integration and
-comprehensive error analysis capabilities for graph-sitter, including
-enhanced Serena integration and runtime error collection.
+comprehensive error analysis capabilities for graph-sitter using
+official Serena and SolidLSP components.
 """
 
-# Import enhanced Serena bridge (includes transaction manager)
+# Import Serena LSP bridge and analysis
 from .serena_bridge import (
-    SerenaErrorInfo,
     SerenaLSPBridge,
-    ErrorInfo,  # Keep backward compatibility
-    TransactionAwareLSPManager,
+    SerenaErrorInfo,
+    RuntimeContext,
+    RuntimeErrorCollector,
     create_serena_bridge,
     get_enhanced_diagnostics,
-    get_comprehensive_analysis,
-    start_runtime_error_collection,
-    stop_runtime_error_collection,
-    get_lsp_manager,
-    shutdown_all_lsp_managers,
 )
 
-# Import comprehensive analysis
 from .serena_analysis import (
+    GitHubRepositoryAnalyzer,
     RepositoryInfo,
-    AnalysisMetrics,
-    ComprehensiveAnalysisResult,
-    SerenaCodebaseAnalyzer,
-    analyze_codebase_comprehensive,
-    analyze_github_repository_comprehensive,
-    get_repository_quality_report,
+    AnalysisResult,
+    analyze_github_repository,
+    get_repository_error_summary,
+    analyze_multiple_repositories,
+)
+
+# Import comprehensive error analysis
+from .error_analysis import (
+    ErrorSeverity,
+    ErrorCategory,
+    ErrorLocation,
+    ErrorInfo,
+    ComprehensiveErrorList,
+    ComprehensiveErrorAnalyzer,
+    analyze_codebase_errors,
+    get_repo_error_analysis,
 )
 
 __all__ = [
-    # Enhanced Serena Bridge
-    "SerenaErrorInfo",
+    # Serena LSP Integration
     "SerenaLSPBridge",
-    "ErrorInfo",  # Backward compatibility
+    "SerenaErrorInfo",
+    "RuntimeContext",
+    "RuntimeErrorCollector",
     "create_serena_bridge",
     "get_enhanced_diagnostics",
-    "get_comprehensive_analysis",
-    "start_runtime_error_collection",
-    "stop_runtime_error_collection",
     
-    # Comprehensive Analysis
+    # GitHub Repository Analysis
+    "GitHubRepositoryAnalyzer",
     "RepositoryInfo",
-    "AnalysisMetrics",
-    "ComprehensiveAnalysisResult",
-    "SerenaCodebaseAnalyzer",
-    "analyze_codebase_comprehensive",
-    "analyze_github_repository_comprehensive",
-    "get_repository_quality_report",
+    "AnalysisResult",
+    "analyze_github_repository",
+    "get_repository_error_summary",
+    "analyze_multiple_repositories",
     
-    # Transaction Management
-    "TransactionAwareLSPManager",
-    "get_lsp_manager",
-    "shutdown_all_lsp_managers",
+    # Error Analysis
+    "ErrorSeverity",
+    "ErrorCategory", 
+    "ErrorLocation",
+    "ErrorInfo",
+    "ComprehensiveErrorList",
+    "ComprehensiveErrorAnalyzer",
+    "analyze_codebase_errors",
+    "get_repo_error_analysis",
 ]
