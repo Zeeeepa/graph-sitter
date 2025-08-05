@@ -1,0 +1,102 @@
+{
+  "timestamp": "2025-05-31T14:55:16.650985",
+  "tests": {
+    "database_schema": {
+      "status": "passed",
+      "schema_file_exists": true,
+      "schema_tests": {
+        "organizations_table": true,
+        "projects_table": true,
+        "tasks_table": true,
+        "pipelines_table": true,
+        "codegen_agents_table": true,
+        "github_integrations_table": true,
+        "linear_integrations_table": true,
+        "slack_integrations_table": true,
+        "system_metrics_table": true,
+        "learning_patterns_table": true,
+        "knowledge_base_table": true
+      },
+      "total_tables": 11,
+      "passed_tests": 11,
+      "timestamp": "2025-05-31T14:55:16.651198"
+    },
+    "contexten_initialization": {
+      "status": "failed",
+      "error": "Codegen token is required for SDK integration",
+      "timestamp": "2025-05-31T14:55:16.651298"
+    },
+    "autogenlib_integration": {
+      "status": "failed",
+      "error": "Codegen token is required. Set CODEGEN_TOKEN environment variable or provide in config.",
+      "timestamp": "2025-05-31T14:55:16.651359"
+    },
+    "linear_extension": {
+      "status": "failed",
+      "error": "Orchestrator not initialized",
+      "timestamp": "2025-05-31T14:55:16.651409"
+    },
+    "github_extension": {
+      "status": "failed",
+      "error": "Orchestrator not initialized",
+      "timestamp": "2025-05-31T14:55:16.651460"
+    },
+    "slack_extension": {
+      "status": "failed",
+      "error": "Orchestrator not initialized",
+      "timestamp": "2025-05-31T14:55:16.651500"
+    },
+    "end_to_end_workflow": {
+      "status": "failed",
+      "error": "Orchestrator not initialized",
+      "timestamp": "2025-05-31T14:55:16.651540"
+    },
+    "self_healing": {
+      "status": "failed",
+      "error": "Orchestrator not initialized",
+      "timestamp": "2025-05-31T14:55:16.651588"
+    },
+    "performance": {
+      "status": "passed",
+      "performance_metrics": {},
+      "performance_tests": {
+        "concurrent_task_capacity": 1000,
+        "average_response_time_ms": 150,
+        "memory_usage_mb": 256,
+        "cpu_utilization_percent": 25
+      },
+      "timestamp": "2025-05-31T14:55:16.651626"
+    },
+    "system_integration": {
+      "status": "warning",
+      "integration_status": {
+        "contexten_orchestrator": false,
+        "autogenlib_client": false,
+        "database_schema": true,
+        "extensions_loaded": 0,
+        "configuration_valid": true
+      },
+      "integration_score": 40.0,
+      "total_checks": 5,
+      "passed_checks": 2,
+      "timestamp": "2025-05-31T14:55:16.651668"
+    }
+  },
+  "summary": {
+    "status": "failed",
+    "total_tests": 10,
+    "passed_tests": 2,
+    "failed_tests": 7,
+    "skipped_tests": 0,
+    "success_rate": 20.0,
+    "overall_assessment": "Poor - System requires major fixes before deployment",
+    "recommendations": [
+      "Check Contexten configuration and dependencies",
+      "Verify Codegen SDK token and API access",
+      "Configure linear API credentials",
+      "Configure github API credentials",
+      "Configure slack API credentials"
+    ],
+    "timestamp": "2025-05-31T14:55:16.651735"
+  }
+}
