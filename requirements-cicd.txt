@@ -1,0 +1,118 @@
+# Graph-Sitter CI/CD System Requirements
+
+# Core dependencies
+asyncio-mqtt>=0.11.0
+aiohttp>=3.8.0
+aiofiles>=0.8.0
+asyncpg>=0.27.0
+psycopg2-binary>=2.9.0
+
+# Data processing and analysis
+pandas>=1.5.0
+numpy>=1.24.0
+scipy>=1.10.0
+scikit-learn>=1.2.0
+
+# Database and ORM
+sqlalchemy>=2.0.0
+alembic>=1.9.0
+
+# API and web framework
+fastapi>=0.95.0
+uvicorn>=0.20.0
+pydantic>=1.10.0
+
+# Monitoring and metrics
+prometheus-client>=0.16.0
+structlog>=22.3.0
+
+# Task queue and scheduling
+celery>=5.2.0
+redis>=4.5.0
+apscheduler>=3.10.0
+
+# HTTP client
+httpx>=0.24.0
+requests>=2.28.0
+
+# JSON and data serialization
+orjson>=3.8.0
+msgpack>=1.0.0
+
+# Configuration management
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# Testing
+pytest>=7.2.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+
+# Code quality
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Documentation
+sphinx>=6.0.0
+sphinx-rtd-theme>=1.2.0
+
+# Development tools
+pre-commit>=3.0.0
+bandit>=1.7.0
+safety>=2.3.0
+
+# Codegen SDK (if available as package)
+# codegen-sdk>=1.0.0
+
+# OpenEvolve integration (mock - replace with actual package when available)
+# openevolve-sdk>=1.0.0
+
+# Graph analysis (for code analysis features)
+networkx>=3.0
+pygraphviz>=1.10
+
+# Machine learning for pattern detection
+torch>=2.0.0
+transformers>=4.25.0
+sentence-transformers>=2.2.0
+
+# Time series analysis
+statsmodels>=0.13.0
+prophet>=1.1.0
+
+# Visualization (for analytics dashboards)
+plotly>=5.13.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Caching
+redis-py>=4.5.0
+diskcache>=5.4.0
+
+# Security
+cryptography>=39.0.0
+passlib>=1.7.0
+python-jose>=3.3.0
+
+# File processing
+openpyxl>=3.1.0
+python-multipart>=0.0.6
+
+# Utilities
+click>=8.1.0
+rich>=13.0.0
+tqdm>=4.64.0
+python-dateutil>=2.8.0
+pytz>=2022.7
+
+# Optional: GPU acceleration for ML workloads
+# torch-audio>=2.0.0
+# torch-vision>=0.15.0
+
+# Optional: Advanced analytics
+# dask>=2023.1.0
+# ray>=2.2.0
+
