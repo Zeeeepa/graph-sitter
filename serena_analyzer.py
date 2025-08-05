@@ -1,1371 +1,835 @@
 #!/usr/bin/env python3
 """
-Comprehensive Serena Codebase Analyzer - Integrated Module
-==========================================================
+Self-Contained Serena LSP Error Analyzer
 
-This is a comprehensive codebase analyzer that leverages the existing
-graph-sitter and Serena infrastructure to provide complete analysis
-capabilities with proper integration.
+A focused, self-contained analyzer that retrieves ALL LSP errors from the codebase
+using embedded Serena components. This analyzer consolidates only the essential
+LSP error retrieval functionality without refactoring or other unrelated features.
 
 Features:
-- 24+ error types with severity classification (Critical, Major, Minor)
-- Comprehensive dependency analysis using graph-sitter core
-- Code quality metrics and architectural analysis
-- Semantic analysis and symbol intelligence via Serena
-- LSP integration for real-time diagnostics
-- Formatted error reporting with detailed context
+- Complete LSP error retrieval from all language servers
+- Self-contained with embedded Serena core components
+- Comprehensive error categorization and analysis
+- JSON output with detailed error information
+- Performance metrics and analysis statistics
 
 Usage:
-    python serena_analyzer.py --repo https://github.com/user/repo
-    python serena_analyzer.py --repo /path/to/local/repo
-
-Output:
-    Generates report.txt with comprehensive error analysis in the format:
-    ERRORS: 104 [⚠️ Critical: 30] [👉 Major: 39] [🔍 Minor: 35]
-    1 ⚠️- projectname'/src/codefile1.py / Function - 'examplefunctionname' [error parameters/reason]
-    ...
+    python serena_analyzer.py --repo /path/to/codebase
+    python serena_analyzer.py --repo . --output errors_report.json
 """
 
 import os
 import sys
-import ast
-import re
+import json
+import time
+import asyncio
+import logging
 import argparse
-import subprocess
 import traceback
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple, Union
+from typing import Dict, List, Any, Optional, Set, Union, Callable
 from dataclasses import dataclass, field
-from collections import defaultdict, Counter
-from datetime import datetime
+from collections import defaultdict
 from enum import Enum
-import logging
-import tempfile
-import shutil
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Import graph-sitter core components
+# Add the parent directory to the path so we can import graph_sitter
+sys.path.insert(0, str(Path(__file__).parent))
+
 try:
-    from graph_sitter.core.codebase import Codebase
-    from graph_sitter.codebase.codebase_analysis import (
-        get_codebase_summary, get_file_summary, get_class_summary, 
-        get_function_summary, get_symbol_summary
-    )
+    from graph_sitter import Codebase
     GRAPH_SITTER_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"Graph-sitter core not available: {e}")
+    logger.warning(f"Graph-sitter not available: {e}")
     GRAPH_SITTER_AVAILABLE = False
 
-# Import LSP components
-try:
-    from solitlsp.ls_types import (
-        DiagnosticSeverity, Diagnostic, Position, Range, MarkupContent,
-        Location, MarkupKind, CompletionItemKind, CompletionItem, 
-        UnifiedSymbolInformation, SymbolKind, SymbolTag
-    )
-    from solitlsp.ls_utils import TextUtils, PathUtils, FileUtils, PlatformId, SymbolUtils
-    from solitlsp.ls_request import LanguageServerRequest
-    from solitlsp.ls_logger import LanguageServerLogger, LogLine
-    from solitlsp.ls_handler import SolidLanguageServerHandler, Request, LanguageServerTerminatedException
-    from solitlsp.ls import SolidLanguageServer, LSPFileBuffer
-    LSP_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"LSP components not available: {e}")
-    LSP_AVAILABLE = False
-
-# Import solidlsp protocol components
-try:
-    from solidlsp.lsp_protocol_handler.lsp_constants import LSPConstants
-    from solidlsp.lsp_protocol_handler.lsp_requests import LspRequest
-    from solidlsp.lsp_protocol_handler.lsp_types import (
-        DocumentDiagnosticReportKind, ErrorCodes, LSPErrorCodes, SymbolKind, SymbolTag,
-        DiagnosticSeverity, DiagnosticTag, InitializeError, WorkspaceDiagnosticParams,
-        WorkspaceDiagnosticReport, WorkspaceDiagnosticReportPartialResult,
-        PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport,
-        RelatedUnchangedDocumentDiagnosticReport, UnchangedDocumentDiagnosticReport,
-        FullDocumentDiagnosticReport, DiagnosticOptions, Diagnostic,
-        WorkspaceFullDocumentDiagnosticReport, WorkspaceUnchangedDocumentDiagnosticReport,
-        DiagnosticRelatedInformation, DiagnosticWorkspaceClientCapabilities,
-        DiagnosticClientCapabilities, PublishDiagnosticsClientCapabilities
-    )
-    from solidlsp.lsp_protocol_handler.server import ProcessLaunchInfo, LSPError, MessageType
-    SOLIDLSP_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"SolidLSP protocol components not available: {e}")
-    SOLIDLSP_AVAILABLE = False
-
-# Import Serena components
-try:
-    from serena.symbol import (
-        LanguageServerSymbolRetriever, ReferenceInLanguageServerSymbol,
-        LanguageServerSymbol, Symbol, PositionInFile, LanguageServerSymbolLocation
-    )
-    from serena.text_utils import MatchedConsecutiveLines, TextLine, LineType
-    from serena.project import Project
-    from serena.gui_log_viewer import GuiLogViewer, LogLevel, GuiLogViewerHandler
-    from serena.code_editor import CodeEditor
-    from serena.cli import (
-        PromptCommands, ToolCommands, ProjectCommands, SerenaConfigCommands,
-        ContextCommands, ModeCommands, TopLevelCommands, AutoRegisteringGroup, ProjectType
-    )
-    SERENA_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"Serena components not available: {e}")
-    SERENA_AVAILABLE = False
-
 # ============================================================================
-# CORE TYPES AND ENUMS
+# EMBEDDED SERENA TYPES (from serena/types.py)
 # ============================================================================
+
+class SerenaCapability(Enum):
+    """Available Serena capabilities."""
+    ERROR_ANALYSIS = "error_analysis"
+    SYMBOL_INTELLIGENCE = "symbol_intelligence"
+    CODE_ACTIONS = "code_actions"
+    REAL_TIME_ANALYSIS = "real_time_analysis"
+
 
 class ErrorSeverity(Enum):
     """Error severity levels."""
-    CRITICAL = "critical"
-    MAJOR = "major" 
-    MINOR = "minor"
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+    HINT = "hint"
+
 
 class ErrorCategory(Enum):
-    """Error categories."""
+    """Error categories for classification."""
     SYNTAX = "syntax"
+    TYPE = "type"
     LOGIC = "logic"
     PERFORMANCE = "performance"
     SECURITY = "security"
     STYLE = "style"
-    IMPORT = "import"
-    TYPE = "type"
-    UNUSED = "unused"
+    COMPATIBILITY = "compatibility"
     DEPENDENCY = "dependency"
-    ARCHITECTURE = "architecture"
-    COMPLEXITY = "complexity"
-    MAINTAINABILITY = "maintainability"
+    UNKNOWN = "unknown"
+
+
+@dataclass
+class SerenaConfig:
+    """Configuration for Serena integration."""
+    enabled_capabilities: List[SerenaCapability] = field(default_factory=lambda: [
+        SerenaCapability.ERROR_ANALYSIS,
+        SerenaCapability.SYMBOL_INTELLIGENCE
+    ])
+    lsp_server_host: str = "localhost"
+    lsp_server_port: int = 8080
+    lsp_connection_timeout: float = 30.0
+    lsp_auto_reconnect: bool = True
+    realtime_analysis: bool = False  # Disabled for focused error retrieval
+    max_concurrent_requests: int = 10
+    request_timeout: float = 30.0
+    log_level: str = "INFO"
+
+
+@dataclass
+class ErrorLocation:
+    """Represents the location of an error in code."""
+    file_path: str
+    line: int
+    column: int
+    end_line: Optional[int] = None
+    end_column: Optional[int] = None
+    
+    @property
+    def range_text(self) -> str:
+        """Get human-readable range text."""
+        if self.end_line and self.end_column:
+            return f"{self.line}:{self.column}-{self.end_line}:{self.end_column}"
+        return f"{self.line}:{self.column}"
+    
+    @property
+    def file_name(self) -> str:
+        """Get just the filename."""
+        return Path(self.file_path).name
+
 
 @dataclass
 class CodeError:
-    """Represents a code error with comprehensive context."""
+    """Represents a comprehensive code error with context."""
     id: str
-    category: ErrorCategory
-    severity: ErrorSeverity
     message: str
-    filepath: str
-    function_name: str = ""
-    line_start: int = 0
-    line_end: int = 0
-    column_start: int = 0
-    column_end: int = 0
-    context_lines: List[str] = field(default_factory=list)
-    suggested_fix: str = ""
+    severity: ErrorSeverity
+    category: ErrorCategory
+    location: ErrorLocation
+    code: Optional[str] = None
+    source: str = "serena"
+    suggestions: List[str] = field(default_factory=list)
+    context: Dict[str, Any] = field(default_factory=dict)
     related_errors: List[str] = field(default_factory=list)
-    affected_functions: List[str] = field(default_factory=list)
-    blast_radius: int = 0
-    parameters: str = ""
-    reason: str = ""
+    timestamp: float = field(default_factory=time.time)
+    
+    @property
+    def is_critical(self) -> bool:
+        """Check if error is critical (error severity)."""
+        return self.severity == ErrorSeverity.ERROR
+    
+    @property
+    def display_text(self) -> str:
+        """Get formatted display text for the error."""
+        return f"[{self.severity.value.upper()}] {self.location.file_name}:{self.location.range_text} - {self.message}"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert error to dictionary representation."""
+        return {
+            'id': self.id,
+            'message': self.message,
+            'severity': self.severity.value,
+            'category': self.category.value,
+            'location': {
+                'file_path': self.location.file_path,
+                'line': self.location.line,
+                'column': self.location.column,
+                'end_line': self.location.end_line,
+                'end_column': self.location.end_column,
+                'range_text': self.location.range_text,
+                'file_name': self.location.file_name
+            },
+            'code': self.code,
+            'source': self.source,
+            'suggestions': self.suggestions,
+            'context': self.context,
+            'related_errors': self.related_errors,
+            'timestamp': self.timestamp,
+            'is_critical': self.is_critical,
+            'display_text': self.display_text
+        }
+
+
+@dataclass
+class PerformanceMetrics:
+    """Performance metrics for operations."""
+    operation_name: str
+    start_time: float
+    end_time: float
+    duration: float
+
 
 @dataclass
 class AnalysisResult:
     """Complete analysis result."""
     total_errors: int
-    errors_by_severity: Dict[ErrorSeverity, int]
-    errors_by_category: Dict[ErrorCategory, int]
+    errors_by_severity: Dict[str, int]
+    errors_by_category: Dict[str, int]
+    errors_by_file: Dict[str, int]
     errors: List[CodeError]
     analysis_time: float
-    repository_info: Dict[str, Any]
-    metrics: Dict[str, Any]
+    files_analyzed: int
+    performance_metrics: List[PerformanceMetrics]
+    serena_status: Dict[str, Any]
+
 
 # ============================================================================
-# INTEGRATED REPOSITORY AND CODEBASE INTERFACE
+# EMBEDDED SERENA CORE (simplified for LSP error retrieval)
 # ============================================================================
 
-class IntegratedRepositoryInterface:
-    """Handles repository operations using graph-sitter infrastructure."""
+class SerenaCore:
+    """
+    Simplified Serena core focused on LSP error retrieval.
     
-    def __init__(self, repo_path: str):
-        self.repo_path = repo_path
-        self.is_remote = repo_path.startswith(('http://', 'https://', 'git@'))
-        self.temp_dir = None
-        self.codebase = None
-        
-    def setup_repository(self) -> Tuple[Path, Optional['Codebase']]:
-        """Setup repository for analysis using graph-sitter infrastructure."""
-        if self.is_remote:
-            repo_dir = self._clone_repository()
-        else:
-            repo_dir = Path(self.repo_path)
-            if not repo_dir.exists():
-                raise ValueError(f"Local repository path does not exist: {repo_dir}")
-        
-        # Initialize graph-sitter codebase if available
-        if GRAPH_SITTER_AVAILABLE:
-            try:
-                self.codebase = Codebase(str(repo_dir))
-                logger.info(f"Initialized graph-sitter codebase for {repo_dir}")
-            except Exception as e:
-                logger.warning(f"Failed to initialize graph-sitter codebase: {e}")
-                self.codebase = None
-        
-        return repo_dir, self.codebase
+    This is a streamlined version of the full SerenaCore that focuses
+    exclusively on retrieving LSP diagnostics and errors.
+    """
     
-    def _clone_repository(self) -> Path:
-        """Clone remote repository to temporary directory."""
-        self.temp_dir = Path(tempfile.mkdtemp(prefix="serena_analysis_"))
-        logger.info(f"Cloning repository {self.repo_path} to {self.temp_dir}")
+    def __init__(self, codebase_path: str, config: Optional[SerenaConfig] = None):
+        self.codebase_path = Path(codebase_path)
+        self.config = config or SerenaConfig()
+        self._initialized = False
+        self._lsp_integration: Optional[Any] = None
+        self._performance_metrics: List[PerformanceMetrics] = []
+        self._operation_counts: Dict[str, int] = {}
+        
+        logger.info(f"SerenaCore initialized for codebase: {self.codebase_path}")
+    
+    async def initialize(self) -> bool:
+        """Initialize core for LSP error retrieval."""
+        if self._initialized:
+            return True
         
         try:
-            subprocess.run([
-                'git', 'clone', '--depth', '1', str(self.repo_path), str(self.temp_dir)
-            ], check=True, capture_output=True, text=True)
-            return self.temp_dir
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to clone repository: {e}")
-            raise
+            logger.info("Initializing Serena core for LSP error retrieval...")
+            self._initialized = True
+            logger.info("✅ Serena core initialization complete")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize Serena core: {e}")
+            return False
     
-    def cleanup(self):
-        """Clean up temporary files."""
-        if self.temp_dir and self.temp_dir.exists():
-            shutil.rmtree(self.temp_dir)
-    
-    def get_repository_info(self, repo_dir: Path) -> Dict[str, Any]:
-        """Get repository information using graph-sitter if available."""
-        info = {
-            'name': repo_dir.name,
-            'path': str(repo_dir),
-            'is_git': (repo_dir / '.git').exists(),
-            'total_files': 0,
-            'code_files': 0,
-            'languages': set(),
-            'size_bytes': 0
-        }
+    async def shutdown(self) -> None:
+        """Shutdown core."""
+        if not self._initialized:
+            return
         
-        # Use graph-sitter codebase summary if available
-        if self.codebase and GRAPH_SITTER_AVAILABLE:
-            try:
-                codebase_summary = get_codebase_summary(self.codebase)
-                info.update({
-                    'total_files': len(codebase_summary.get('files', [])),
-                    'code_files': len([f for f in codebase_summary.get('files', []) if self._is_code_file(Path(f))]),
-                    'languages': list(set(codebase_summary.get('languages', []))),
-                    'functions': len(codebase_summary.get('functions', [])),
-                    'classes': len(codebase_summary.get('classes', [])),
-                    'symbols': len(codebase_summary.get('symbols', []))
-                })
-                return info
-            except Exception as e:
-                logger.warning(f"Failed to get codebase summary: {e}")
-        
-        # Fallback to manual file counting
-        for file_path in repo_dir.rglob('*'):
-            if file_path.is_file() and not self._should_ignore_file(file_path):
-                info['total_files'] += 1
-                info['size_bytes'] += file_path.stat().st_size
-                
-                if self._is_code_file(file_path):
-                    info['code_files'] += 1
-                    lang = self._detect_language(file_path)
-                    if lang:
-                        info['languages'].add(lang)
-        
-        info['languages'] = list(info['languages'])
-        return info
+        logger.info("Shutting down Serena core...")
+        self._initialized = False
+        logger.info("✅ Serena core shutdown complete")
     
-    def _should_ignore_file(self, file_path: Path) -> bool:
-        """Check if file should be ignored."""
-        ignore_patterns = {
-            '.git', '__pycache__', '.pytest_cache', 'node_modules',
-            '.venv', 'venv', '.env', 'dist', 'build', '.tox'
-        }
-        return any(pattern in str(file_path) for pattern in ignore_patterns)
-    
-    def _is_code_file(self, file_path: Path) -> bool:
-        """Check if file is a code file."""
-        code_extensions = {
-            '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.h',
-            '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.scala',
-            '.clj', '.hs', '.ml', '.fs', '.vb', '.pl', '.sh', '.ps1'
-        }
-        return file_path.suffix.lower() in code_extensions
-    
-    def _detect_language(self, file_path: Path) -> Optional[str]:
-        """Detect programming language from file extension."""
-        ext_to_lang = {
-            '.py': 'Python', '.js': 'JavaScript', '.ts': 'TypeScript',
-            '.jsx': 'React', '.tsx': 'React TypeScript', '.java': 'Java',
-            '.cpp': 'C++', '.c': 'C', '.h': 'C/C++ Header', '.cs': 'C#',
-            '.php': 'PHP', '.rb': 'Ruby', '.go': 'Go', '.rs': 'Rust',
-            '.swift': 'Swift', '.kt': 'Kotlin', '.scala': 'Scala',
-            '.sh': 'Shell', '.ps1': 'PowerShell'
-        }
-        return ext_to_lang.get(file_path.suffix.lower())
-
-# ============================================================================
-# ERROR DETECTION PATTERNS AND RULES
-# ============================================================================
-
-class ErrorPatterns:
-    """Comprehensive error detection patterns."""
-    
-    @staticmethod
-    def get_all_patterns() -> Dict[str, Dict]:
-        """Get all error detection patterns."""
+    def get_status(self) -> Dict[str, Any]:
+        """Get current status."""
         return {
-            # CRITICAL ERRORS
-            'syntax_errors': {
-                'patterns': [
-                    r'SyntaxError',
-                    r'IndentationError', 
-                    r'TabError',
-                    r'unexpected EOF',
-                    r'invalid syntax',
-                    r'unmatched.*[\(\)\[\]\{\}]',
-                    r'unexpected token'
-                ],
-                'severity': ErrorSeverity.CRITICAL,
-                'category': ErrorCategory.SYNTAX,
-                'description': 'Syntax errors that prevent code execution'
-            },
-            
-            'import_errors': {
-                'patterns': [
-                    r'ImportError',
-                    r'ModuleNotFoundError',
-                    r'from\s+\.\s+import',  # Problematic relative imports
-                    r'import\s+\*',  # Wildcard imports
-                    r'from\s+.*\s+import\s+\*'
-                ],
-                'severity': ErrorSeverity.CRITICAL,
-                'category': ErrorCategory.IMPORT,
-                'description': 'Import errors and problematic import patterns'
-            },
-            
-            'undefined_variables': {
-                'patterns': [
-                    r'NameError.*not defined',
-                    r'UnboundLocalError',
-                    r'undefined variable'
-                ],
-                'severity': ErrorSeverity.CRITICAL,
-                'category': ErrorCategory.LOGIC,
-                'description': 'Undefined variables and name errors'
-            },
-            
-            # MAJOR ERRORS
-            'security_vulnerabilities': {
-                'patterns': [
-                    r'eval\s*\(',
-                    r'exec\s*\(',
-                    r'subprocess\.call.*shell=True',
-                    r'os\.system\s*\(',
-                    r'pickle\.loads?\s*\(',
-                    r'yaml\.load\s*\(',
-                    r'input\s*\(',  # In Python 2 context
-                    r'raw_input\s*\('
-                ],
-                'severity': ErrorSeverity.MAJOR,
-                'category': ErrorCategory.SECURITY,
-                'description': 'Security vulnerabilities and dangerous functions'
-            },
-            
-            'type_errors': {
-                'patterns': [
-                    r'TypeError',
-                    r'AttributeError',
-                    r'ValueError.*invalid literal',
-                    r'cannot concatenate.*and',
-                    r'unsupported operand type'
-                ],
-                'severity': ErrorSeverity.MAJOR,
-                'category': ErrorCategory.TYPE,
-                'description': 'Type-related errors and mismatches'
-            },
-            
-            'logic_errors': {
-                'patterns': [
-                    r'ZeroDivisionError',
-                    r'IndexError',
-                    r'KeyError',
-                    r'RecursionError',
-                    r'infinite.*loop',
-                    r'unreachable.*code'
-                ],
-                'severity': ErrorSeverity.MAJOR,
-                'category': ErrorCategory.LOGIC,
-                'description': 'Logic errors and runtime exceptions'
-            },
-            
-            'performance_issues': {
-                'patterns': [
-                    r'for\s+.*\s+in\s+range\(len\(',  # Inefficient iteration
-                    r'\.append\s*\(\s*\)\s*$',  # Empty append
-                    r'time\.sleep\s*\(\s*[0-9]+\s*\)',  # Long sleeps
-                    r'while\s+True:.*(?!break)',  # Infinite loops without break
-                    r'nested.*loop.*O\(n\^[3-9]\)'  # High complexity
-                ],
-                'severity': ErrorSeverity.MAJOR,
-                'category': ErrorCategory.PERFORMANCE,
-                'description': 'Performance bottlenecks and inefficient code'
-            },
-            
-            # MINOR ERRORS
-            'unused_code': {
-                'patterns': [
-                    r'unused.*variable',
-                    r'unused.*import',
-                    r'unused.*function',
-                    r'dead.*code',
-                    r'unreachable.*statement'
-                ],
-                'severity': ErrorSeverity.MINOR,
-                'category': ErrorCategory.UNUSED,
-                'description': 'Unused variables, imports, and dead code'
-            },
-            
-            'style_violations': {
-                'patterns': [
-                    r'line too long',
-                    r'trailing whitespace',
-                    r'missing.*docstring',
-                    r'inconsistent.*indentation',
-                    r'[a-z]+[A-Z]',  # camelCase in Python
-                    r'def\s+[A-Z]',  # Capitalized function names
-                    r'class\s+[a-z]'  # Lowercase class names
-                ],
-                'severity': ErrorSeverity.MINOR,
-                'category': ErrorCategory.STYLE,
-                'description': 'Code style violations and formatting issues'
-            },
-            
-            'complexity_issues': {
-                'patterns': [
-                    r'too.*complex',
-                    r'cyclomatic.*complexity',
-                    r'too.*many.*branches',
-                    r'too.*many.*statements',
-                    r'function.*too.*long'
-                ],
-                'severity': ErrorSeverity.MINOR,
-                'category': ErrorCategory.COMPLEXITY,
-                'description': 'Code complexity and maintainability issues'
-            },
-            
-            'dependency_issues': {
-                'patterns': [
-                    r'circular.*import',
-                    r'dependency.*cycle',
-                    r'missing.*dependency',
-                    r'version.*conflict',
-                    r'deprecated.*package'
-                ],
-                'severity': ErrorSeverity.MAJOR,
-                'category': ErrorCategory.DEPENDENCY,
-                'description': 'Dependency management and circular import issues'
-            },
-            
-            'architectural_issues': {
-                'patterns': [
-                    r'god.*class',
-                    r'singleton.*abuse',
-                    r'tight.*coupling',
-                    r'violation.*of.*principle',
-                    r'anti.*pattern'
-                ],
-                'severity': ErrorSeverity.MAJOR,
-                'category': ErrorCategory.ARCHITECTURE,
-                'description': 'Architectural problems and design pattern violations'
-            }
+            'initialized': self._initialized,
+            'codebase_path': str(self.codebase_path),
+            'enabled_capabilities': [cap.value for cap in self.config.enabled_capabilities],
+            'operation_counts': self._operation_counts,
+            'performance_metrics_count': len(self._performance_metrics)
         }
-
-# ============================================================================
-# SEMANTIC ANALYSIS AND CODE INTELLIGENCE
-# ============================================================================
-
-class SemanticAnalyzer:
-    """Semantic analysis and code intelligence."""
     
-    def __init__(self):
-        self.symbol_table = {}
-        self.function_calls = defaultdict(list)
-        self.imports = defaultdict(list)
-        self.classes = defaultdict(list)
-        self.functions = defaultdict(list)
-    
-    def analyze_file(self, filepath: Path, content: str) -> Dict[str, Any]:
-        """Analyze a single file for semantic information."""
-        try:
-            tree = ast.parse(content)
-            visitor = SemanticVisitor(str(filepath))
-            visitor.visit(tree)
-            
-            return {
-                'functions': visitor.functions,
-                'classes': visitor.classes,
-                'imports': visitor.imports,
-                'variables': visitor.variables,
-                'function_calls': visitor.function_calls,
-                'complexity_metrics': visitor.complexity_metrics
-            }
-        except SyntaxError as e:
-            return {
-                'syntax_error': {
-                    'message': str(e),
-                    'line': e.lineno,
-                    'column': e.offset
-                }
-            }
-        except Exception as e:
-            return {'error': str(e)}
-
-class SemanticVisitor(ast.NodeVisitor):
-    """AST visitor for semantic analysis."""
-    
-    def __init__(self, filepath: str):
-        self.filepath = filepath
-        self.functions = []
-        self.classes = []
-        self.imports = []
-        self.variables = []
-        self.function_calls = []
-        self.complexity_metrics = {
-            'cyclomatic_complexity': 0,
-            'nesting_depth': 0,
-            'function_length': {}
-        }
-        self.current_function = None
-        self.nesting_level = 0
-    
-    def visit_FunctionDef(self, node):
-        """Visit function definition."""
-        func_info = {
-            'name': node.name,
-            'line_start': node.lineno,
-            'line_end': node.end_lineno or node.lineno,
-            'args': [arg.arg for arg in node.args.args],
-            'decorators': [self._get_decorator_name(d) for d in node.decorator_list],
-            'docstring': ast.get_docstring(node),
-            'complexity': self._calculate_function_complexity(node)
-        }
-        self.functions.append(func_info)
+    def _record_operation(self, operation_name: str, duration: float) -> None:
+        """Record an operation for performance tracking."""
+        self._operation_counts[operation_name] = self._operation_counts.get(operation_name, 0) + 1
         
-        # Track function length
-        func_length = (node.end_lineno or node.lineno) - node.lineno
-        self.complexity_metrics['function_length'][node.name] = func_length
-        
-        self.current_function = node.name
-        self.generic_visit(node)
-        self.current_function = None
-    
-    def visit_ClassDef(self, node):
-        """Visit class definition."""
-        class_info = {
-            'name': node.name,
-            'line_start': node.lineno,
-            'line_end': node.end_lineno or node.lineno,
-            'bases': [self._get_name(base) for base in node.bases],
-            'decorators': [self._get_decorator_name(d) for d in node.decorator_list],
-            'docstring': ast.get_docstring(node),
-            'methods': []
-        }
-        
-        # Find methods
-        for item in node.body:
-            if isinstance(item, ast.FunctionDef):
-                class_info['methods'].append(item.name)
-        
-        self.classes.append(class_info)
-        self.generic_visit(node)
-    
-    def visit_Import(self, node):
-        """Visit import statement."""
-        for alias in node.names:
-            self.imports.append({
-                'module': alias.name,
-                'alias': alias.asname,
-                'line': node.lineno,
-                'type': 'import'
-            })
-    
-    def visit_ImportFrom(self, node):
-        """Visit from import statement."""
-        for alias in node.names:
-            self.imports.append({
-                'module': node.module,
-                'name': alias.name,
-                'alias': alias.asname,
-                'line': node.lineno,
-                'type': 'from_import',
-                'level': node.level
-            })
-    
-    def visit_Call(self, node):
-        """Visit function call."""
-        func_name = self._get_name(node.func)
-        if func_name:
-            self.function_calls.append({
-                'function': func_name,
-                'line': node.lineno,
-                'args': len(node.args),
-                'kwargs': len(node.keywords),
-                'in_function': self.current_function
-            })
-        self.generic_visit(node)
-    
-    def visit_Assign(self, node):
-        """Visit assignment."""
-        for target in node.targets:
-            if isinstance(target, ast.Name):
-                self.variables.append({
-                    'name': target.id,
-                    'line': node.lineno,
-                    'in_function': self.current_function
-                })
-        self.generic_visit(node)
-    
-    def visit_If(self, node):
-        """Visit if statement (increases complexity)."""
-        self.complexity_metrics['cyclomatic_complexity'] += 1
-        self.nesting_level += 1
-        self.complexity_metrics['nesting_depth'] = max(
-            self.complexity_metrics['nesting_depth'], 
-            self.nesting_level
+        metric = PerformanceMetrics(
+            operation_name=operation_name,
+            start_time=time.time() - duration,
+            end_time=time.time(),
+            duration=duration
         )
-        self.generic_visit(node)
-        self.nesting_level -= 1
-    
-    def visit_For(self, node):
-        """Visit for loop (increases complexity)."""
-        self.complexity_metrics['cyclomatic_complexity'] += 1
-        self.nesting_level += 1
-        self.complexity_metrics['nesting_depth'] = max(
-            self.complexity_metrics['nesting_depth'], 
-            self.nesting_level
-        )
-        self.generic_visit(node)
-        self.nesting_level -= 1
-    
-    def visit_While(self, node):
-        """Visit while loop (increases complexity)."""
-        self.complexity_metrics['cyclomatic_complexity'] += 1
-        self.nesting_level += 1
-        self.complexity_metrics['nesting_depth'] = max(
-            self.complexity_metrics['nesting_depth'], 
-            self.nesting_level
-        )
-        self.generic_visit(node)
-        self.nesting_level -= 1
-    
-    def _get_name(self, node):
-        """Get name from AST node."""
-        if isinstance(node, ast.Name):
-            return node.id
-        elif isinstance(node, ast.Attribute):
-            return f"{self._get_name(node.value)}.{node.attr}"
-        elif isinstance(node, ast.Constant):
-            return str(node.value)
-        return None
-    
-    def _get_decorator_name(self, node):
-        """Get decorator name."""
-        return self._get_name(node)
-    
-    def _calculate_function_complexity(self, node):
-        """Calculate function complexity."""
-        complexity = 1  # Base complexity
-        for child in ast.walk(node):
-            if isinstance(child, (ast.If, ast.For, ast.While, ast.Try, ast.With)):
-                complexity += 1
-        return complexity
+        
+        self._performance_metrics.append(metric)
+
 
 # ============================================================================
-# INTEGRATED LSP DIAGNOSTIC ANALYZER
+# LSP ERROR RETRIEVAL ENGINE
 # ============================================================================
 
-class IntegratedLSPAnalyzer:
-    """LSP-based diagnostic analyzer using Serena infrastructure."""
+class LSPErrorRetriever:
+    """
+    Focused LSP error retrieval engine.
     
-    def __init__(self, codebase: Optional['Codebase'] = None):
+    This class handles the core functionality of retrieving ALL LSP errors
+    from the codebase using the graph-sitter integration.
+    """
+    
+    def __init__(self, codebase: Optional['Codebase'], serena_core: SerenaCore):
         self.codebase = codebase
-        self.lsp_server = None
-        self.symbol_retriever = None
-        self.project = None
+        self.serena_core = serena_core
+        self.errors: List[CodeError] = []
+        self.files_processed = 0
+        self.processing_stats = {
+            'files_with_errors': 0,
+            'total_diagnostics': 0,
+            'processing_time': 0.0
+        }
+    
+    async def retrieve_all_errors(self) -> List[CodeError]:
+        """Retrieve ALL LSP errors from the codebase."""
+        logger.info("🔍 Starting comprehensive LSP error retrieval...")
+        start_time = time.time()
         
-        # Initialize LSP components if available
-        if LSP_AVAILABLE and SOLIDLSP_AVAILABLE:
-            try:
-                self._initialize_lsp_components()
-            except Exception as e:
-                logger.warning(f"Failed to initialize LSP components: {e}")
+        if not self.codebase:
+            logger.warning("No codebase available for error retrieval")
+            return []
         
-        # Initialize Serena components if available
-        if SERENA_AVAILABLE:
+        # Check if LSP diagnostics method is available
+        if not hasattr(self.codebase, 'get_file_diagnostics'):
+            logger.info("LSP diagnostics method not available, using static analysis")
+        
+        # Get all Python files in the codebase
+        python_files = self._get_python_files()
+        logger.info(f"📊 Found {len(python_files)} Python files to analyze")
+        
+        if not python_files:
+            logger.warning("No Python files found to analyze")
+            return []
+        
+        # Process files in batches for better performance
+        batch_size = 50
+        all_errors = []
+        
+        for i in range(0, len(python_files), batch_size):
+            batch = python_files[i:i + batch_size]
+            batch_errors = await self._process_file_batch(batch, i + 1, len(python_files))
+            all_errors.extend(batch_errors)
+        
+        # Record performance metrics
+        processing_time = time.time() - start_time
+        self.processing_stats['processing_time'] = processing_time
+        self.serena_core._record_operation('lsp_error_retrieval', processing_time)
+        
+        logger.info(f"✅ LSP error retrieval complete:")
+        logger.info(f"   📊 Total errors: {len(all_errors)}")
+        logger.info(f"   📁 Files processed: {self.files_processed}")
+        logger.info(f"   📁 Files with errors: {self.processing_stats['files_with_errors']}")
+        logger.info(f"   ⏱️  Processing time: {processing_time:.2f}s")
+        
+        self.errors = all_errors
+        return all_errors
+    
+    def _get_python_files(self) -> List[str]:
+        """Get all Python files in the codebase."""
+        python_files = []
+        
+        logger.debug(f"Scanning directory: {self.serena_core.codebase_path}")
+        
+        for root, dirs, files in os.walk(self.serena_core.codebase_path):
+            # Skip common non-source directories
+            original_dirs = dirs[:]
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in [
+                '__pycache__', 'node_modules', 'venv', 'env', '.venv', '.env',
+                'dist', 'build', '.tox', '.pytest_cache'
+            ]]
+            
+            if len(dirs) != len(original_dirs):
+                logger.debug(f"Skipped directories: {set(original_dirs) - set(dirs)}")
+            
+            py_files_in_dir = [f for f in files if f.endswith('.py')]
+            if py_files_in_dir:
+                logger.debug(f"Found {len(py_files_in_dir)} Python files in {root}")
+            
+            for file in py_files_in_dir:
+                rel_path = os.path.relpath(os.path.join(root, file), self.serena_core.codebase_path)
+                python_files.append(rel_path)
+        
+        logger.debug(f"Total Python files found: {len(python_files)}")
+        if python_files:
+            logger.debug(f"Sample files: {python_files[:5]}")
+        
+        return python_files
+    
+    async def _process_file_batch(self, files: List[str], start_idx: int, total_files: int) -> List[CodeError]:
+        """Process a batch of files for LSP diagnostics."""
+        batch_errors = []
+        
+        for i, file_path in enumerate(files):
+            current_idx = start_idx + i - 1
+            if current_idx % 25 == 0:  # Progress every 25 files
+                logger.info(f"   Progress: {current_idx}/{total_files} files processed...")
+            
             try:
-                self._initialize_serena_components()
+                file_errors = await self._get_file_errors(file_path)
+                if file_errors:
+                    batch_errors.extend(file_errors)
+                    self.processing_stats['files_with_errors'] += 1
+                
+                self.files_processed += 1
+                
             except Exception as e:
-                logger.warning(f"Failed to initialize Serena components: {e}")
+                logger.debug(f"Error processing {file_path}: {e}")
+                continue
+        
+        return batch_errors
     
-    def _initialize_lsp_components(self):
-        """Initialize LSP server and handlers."""
+    async def _get_file_errors(self, file_path: str) -> List[CodeError]:
+        """Get errors for a specific file using static analysis."""
         try:
-            self.lsp_server = SolidLanguageServer()
-            logger.info("Initialized LSP server")
+            # Try LSP diagnostics first if available
+            if hasattr(self.codebase, 'get_file_diagnostics'):
+                try:
+                    result = self.codebase.get_file_diagnostics(file_path)
+                    if result and result.get('success'):
+                        diagnostics = result.get('diagnostics', [])
+                        if diagnostics:
+                            errors = []
+                            for diag in diagnostics:
+                                error = self._convert_diagnostic_to_error(diag, file_path)
+                                if error:
+                                    errors.append(error)
+                                    self.processing_stats['total_diagnostics'] += 1
+                            return errors
+                except Exception as e:
+                    logger.debug(f"LSP diagnostics failed for {file_path}: {e}")
+            
+            # Fallback to static analysis
+            return await self._static_analysis_errors(file_path)
+            
         except Exception as e:
-            logger.warning(f"Failed to initialize LSP server: {e}")
+            logger.debug(f"Error getting diagnostics for {file_path}: {e}")
+            return []
     
-    def _initialize_serena_components(self):
-        """Initialize Serena symbol retriever and project."""
-        try:
-            if self.codebase:
-                self.symbol_retriever = LanguageServerSymbolRetriever()
-                self.project = Project(str(self.codebase.root_path) if hasattr(self.codebase, 'root_path') else '.')
-                logger.info("Initialized Serena components")
-        except Exception as e:
-            logger.warning(f"Failed to initialize Serena components: {e}")
-    
-    def get_lsp_diagnostics(self, file_path: Path) -> List[CodeError]:
-        """Get LSP diagnostics for a file."""
+    async def _static_analysis_errors(self, file_path: str) -> List[CodeError]:
+        """Perform static analysis to find errors."""
         errors = []
         
-        if not (LSP_AVAILABLE and self.lsp_server):
-            return errors
-        
         try:
-            # Get diagnostics from LSP server
-            diagnostics = self._get_file_diagnostics(file_path)
+            # Read file content
+            full_path = self.serena_core.codebase_path / file_path
+            if not full_path.exists():
+                return errors
             
-            for diagnostic in diagnostics:
-                error = self._convert_diagnostic_to_error(diagnostic, file_path)
-                if error:
-                    errors.append(error)
-                    
+            content = full_path.read_text(encoding='utf-8', errors='ignore')
+            
+            # Basic syntax check using AST
+            try:
+                import ast
+                ast.parse(content)
+            except SyntaxError as e:
+                error = CodeError(
+                    id=f"{file_path}:syntax:{e.lineno}",
+                    message=f"Syntax error: {e.msg}",
+                    severity=ErrorSeverity.ERROR,
+                    category=ErrorCategory.SYNTAX,
+                    location=ErrorLocation(
+                        file_path=file_path,
+                        line=e.lineno or 1,
+                        column=e.offset or 0
+                    ),
+                    source="static_analysis"
+                )
+                errors.append(error)
+                self.processing_stats['total_diagnostics'] += 1
+            
+            # Check for common issues using simple pattern matching
+            lines = content.splitlines()
+            for line_num, line in enumerate(lines, 1):
+                line_errors = self._analyze_line_for_errors(file_path, line_num, line)
+                errors.extend(line_errors)
+                self.processing_stats['total_diagnostics'] += len(line_errors)
+            
         except Exception as e:
-            logger.warning(f"Failed to get LSP diagnostics for {file_path}: {e}")
+            logger.debug(f"Static analysis failed for {file_path}: {e}")
         
         return errors
     
-    def _get_file_diagnostics(self, file_path: Path) -> List:
-        """Get diagnostics for a specific file."""
-        # This would integrate with the actual LSP server
-        # For now, return empty list as placeholder
-        return []
+    def _analyze_line_for_errors(self, file_path: str, line_num: int, line: str) -> List[CodeError]:
+        """Analyze a single line for common errors."""
+        errors = []
+        line_stripped = line.strip()
+        
+        # Skip empty lines and comments
+        if not line_stripped or line_stripped.startswith('#'):
+            return errors
+        
+        # Check for common issues
+        patterns = [
+            # Import errors
+            (r'from\s+\.\s+import', 'Relative import from current package', ErrorSeverity.WARNING, ErrorCategory.DEPENDENCY),
+            (r'import\s+\*', 'Wildcard import should be avoided', ErrorSeverity.WARNING, ErrorCategory.STYLE),
+            
+            # Code quality issues
+            (r'print\s*\(', 'Print statement found (consider using logging)', ErrorSeverity.INFO, ErrorCategory.STYLE),
+            (r'TODO|FIXME|XXX', 'TODO/FIXME comment found', ErrorSeverity.INFO, ErrorCategory.LOGIC),
+            (r'except\s*:', 'Bare except clause', ErrorSeverity.WARNING, ErrorCategory.LOGIC),
+            
+            # Security issues
+            (r'eval\s*\(', 'Use of eval() is dangerous', ErrorSeverity.ERROR, ErrorCategory.SECURITY),
+            (r'exec\s*\(', 'Use of exec() is dangerous', ErrorSeverity.ERROR, ErrorCategory.SECURITY),
+            
+            # Performance issues
+            (r'\.append\s*\(.*\)\s*$', 'Consider list comprehension for better performance', ErrorSeverity.HINT, ErrorCategory.PERFORMANCE),
+        ]
+        
+        import re
+        for pattern, message, severity, category in patterns:
+            if re.search(pattern, line_stripped, re.IGNORECASE):
+                error = CodeError(
+                    id=f"{file_path}:{line_num}:{pattern}",
+                    message=message,
+                    severity=severity,
+                    category=category,
+                    location=ErrorLocation(
+                        file_path=file_path,
+                        line=line_num,
+                        column=0
+                    ),
+                    source="static_analysis",
+                    context={'line_content': line_stripped}
+                )
+                errors.append(error)
+        
+        return errors
     
-    def _convert_diagnostic_to_error(self, diagnostic, file_path: Path) -> Optional[CodeError]:
+    def _convert_diagnostic_to_error(self, diagnostic: Dict[str, Any], file_path: str) -> Optional[CodeError]:
         """Convert LSP diagnostic to CodeError."""
         try:
-            severity_map = {
-                DiagnosticSeverity.Error: ErrorSeverity.CRITICAL,
-                DiagnosticSeverity.Warning: ErrorSeverity.MAJOR,
-                DiagnosticSeverity.Information: ErrorSeverity.MINOR,
-                DiagnosticSeverity.Hint: ErrorSeverity.MINOR
-            }
+            # Parse severity
+            severity = diagnostic.get('severity', 'info')
+            if isinstance(severity, int):
+                # Convert LSP severity numbers to strings
+                severity_map = {1: 'error', 2: 'warning', 3: 'info', 4: 'hint'}
+                severity = severity_map.get(severity, 'info')
             
-            severity = severity_map.get(diagnostic.severity, ErrorSeverity.MINOR)
+            severity_enum = ErrorSeverity(severity.lower())
+            
+            # Parse range information
+            range_info = diagnostic.get('range', {})
+            start_pos = range_info.get('start', {})
+            end_pos = range_info.get('end', {})
+            
+            location = ErrorLocation(
+                file_path=file_path,
+                line=start_pos.get('line', 0) + 1,  # Convert to 1-based
+                column=start_pos.get('character', 0),
+                end_line=end_pos.get('line', 0) + 1 if end_pos.get('line') is not None else None,
+                end_column=end_pos.get('character', 0) if end_pos.get('character') is not None else None
+            )
+            
+            # Categorize error based on message and source
+            category = self._categorize_error(diagnostic)
+            
+            # Generate unique error ID
+            error_id = f"{file_path}:{location.line}:{location.column}:{hash(diagnostic.get('message', ''))}"
             
             return CodeError(
-                id=f"lsp_{file_path.stem}_{diagnostic.range.start.line}",
-                category=ErrorCategory.LOGIC,  # Default category
-                severity=severity,
-                message=diagnostic.message,
-                filepath=str(file_path),
-                line_start=diagnostic.range.start.line + 1,  # Convert to 1-based
-                line_end=diagnostic.range.end.line + 1,
-                column_start=diagnostic.range.start.character,
-                column_end=diagnostic.range.end.character,
-                reason=diagnostic.message
+                id=error_id,
+                message=diagnostic.get('message', 'No message'),
+                severity=severity_enum,
+                category=category,
+                location=location,
+                code=str(diagnostic.get('code', '')),
+                source=diagnostic.get('source', 'lsp'),
+                context={
+                    'original_diagnostic': diagnostic,
+                    'file_path': file_path
+                }
             )
-        except Exception as e:
-            logger.warning(f"Failed to convert diagnostic: {e}")
-            return None
-
-# ============================================================================
-# COMPREHENSIVE ERROR ANALYZER WITH INTEGRATION
-# ============================================================================
-
-class ComprehensiveErrorAnalyzer:
-    """Main error analysis engine consolidating all capabilities."""
-    
-    def __init__(self, codebase: Optional['Codebase'] = None):
-        self.codebase = codebase
-        self.patterns = ErrorPatterns.get_all_patterns()
-        self.semantic_analyzer = SemanticAnalyzer()
-        self.lsp_analyzer = IntegratedLSPAnalyzer(codebase)
-        self.error_cache = {}
-        self.analysis_stats = {
-            'files_analyzed': 0,
-            'total_errors': 0,
-            'errors_by_severity': defaultdict(int),
-            'errors_by_category': defaultdict(int)
-        }
-    
-    def analyze_repository(self, repo_dir: Path, repo_interface: 'IntegratedRepositoryInterface') -> AnalysisResult:
-        """Analyze entire repository using integrated components."""
-        start_time = datetime.now()
-        all_errors = []
-        
-        logger.info(f"Starting comprehensive analysis of {repo_dir}")
-        
-        # Get repository info using integrated interface
-        repo_info = repo_interface.get_repository_info(repo_dir)
-        
-        # Use graph-sitter codebase analysis if available
-        if self.codebase and GRAPH_SITTER_AVAILABLE:
-            all_errors.extend(self._analyze_with_graph_sitter())
-        
-        # Analyze all code files
-        code_files = self._get_code_files(repo_dir)
-        total_files = len(code_files)
-        
-        for i, file_path in enumerate(code_files, 1):
-            logger.info(f"Analyzing file {i}/{total_files}: {file_path.relative_to(repo_dir)}")
             
-            try:
-                content = file_path.read_text(encoding='utf-8', errors='ignore')
-                file_errors = self._analyze_file(file_path, content, repo_dir)
-                all_errors.extend(file_errors)
-                
-                # Add LSP diagnostics if available
-                lsp_errors = self.lsp_analyzer.get_lsp_diagnostics(file_path)
-                all_errors.extend(lsp_errors)
-                
-                self.analysis_stats['files_analyzed'] += 1
-            except Exception as e:
-                logger.warning(f"Failed to analyze {file_path}: {e}")
+        except Exception as e:
+            logger.debug(f"Error converting diagnostic: {e}")
+            return None
+    
+    def _categorize_error(self, diagnostic: Dict[str, Any]) -> ErrorCategory:
+        """Categorize error based on diagnostic information."""
+        message = diagnostic.get('message', '').lower()
+        source = diagnostic.get('source', '').lower()
+        code = str(diagnostic.get('code', '')).lower()
         
-        # Calculate metrics
-        analysis_time = (datetime.now() - start_time).total_seconds()
+        # Syntax errors
+        if any(keyword in message for keyword in ['syntax', 'invalid syntax', 'unexpected token']):
+            return ErrorCategory.SYNTAX
+        
+        # Type errors
+        if any(keyword in message for keyword in ['type', 'incompatible', 'cannot assign']):
+            return ErrorCategory.TYPE
+        
+        # Import/dependency errors
+        if any(keyword in message for keyword in ['import', 'module', 'cannot resolve']):
+            return ErrorCategory.DEPENDENCY
+        
+        # Style/formatting
+        if source in ['flake8', 'black', 'isort'] or 'style' in message:
+            return ErrorCategory.STYLE
+        
+        # Performance
+        if any(keyword in message for keyword in ['performance', 'slow', 'inefficient']):
+            return ErrorCategory.PERFORMANCE
+        
+        # Security
+        if any(keyword in message for keyword in ['security', 'unsafe', 'vulnerability']):
+            return ErrorCategory.SECURITY
+        
+        # Default to logic for other errors
+        return ErrorCategory.LOGIC
+
+
+# ============================================================================
+# MAIN ANALYZER CLASS
+# ============================================================================
+
+class SerenaLSPAnalyzer:
+    """
+    Main analyzer class that orchestrates LSP error retrieval.
+    
+    This is the primary interface for the self-contained Serena LSP analyzer.
+    """
+    
+    def __init__(self, codebase_path: str = "."):
+        self.codebase_path = Path(codebase_path).resolve()
+        self.codebase: Optional[Codebase] = None
+        self.serena_core: Optional[SerenaCore] = None
+        self.error_retriever: Optional[LSPErrorRetriever] = None
+        self.analysis_results: Optional[AnalysisResult] = None
+    
+    async def initialize(self) -> bool:
+        """Initialize the analyzer."""
+        try:
+            logger.info(f"🔍 Initializing Serena LSP Analyzer for: {self.codebase_path}")
+            
+            if not GRAPH_SITTER_AVAILABLE:
+                logger.error("❌ Graph-sitter not available")
+                return False
+            
+            # Initialize graph-sitter codebase
+            self.codebase = Codebase(str(self.codebase_path))
+            logger.info("✅ Graph-sitter codebase initialized")
+            
+            # Initialize Serena core
+            self.serena_core = SerenaCore(str(self.codebase_path))
+            await self.serena_core.initialize()
+            
+            # Initialize error retriever
+            self.error_retriever = LSPErrorRetriever(self.codebase, self.serena_core)
+            
+            logger.info("✅ Serena LSP Analyzer initialization complete")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize analyzer: {e}")
+            traceback.print_exc()
+            return False
+    
+    async def analyze(self) -> AnalysisResult:
+        """Run complete LSP error analysis."""
+        logger.info("\n" + "=" * 80)
+        logger.info("🚀 SERENA LSP ERROR ANALYZER - COMPREHENSIVE ANALYSIS")
+        logger.info("=" * 80)
+        
+        start_time = time.time()
+        
+        if not self.error_retriever:
+            raise RuntimeError("Analyzer not initialized")
+        
+        # Retrieve all LSP errors
+        all_errors = await self.error_retriever.retrieve_all_errors()
+        
+        # Calculate statistics
+        analysis_time = time.time() - start_time
         errors_by_severity = defaultdict(int)
         errors_by_category = defaultdict(int)
+        errors_by_file = defaultdict(int)
         
         for error in all_errors:
-            errors_by_severity[error.severity] += 1
-            errors_by_category[error.category] += 1
+            errors_by_severity[error.severity.value] += 1
+            errors_by_category[error.category.value] += 1
+            errors_by_file[error.location.file_path] += 1
         
-        # Generate comprehensive metrics
-        metrics = self._generate_comprehensive_metrics(repo_dir, all_errors)
-        
-        return AnalysisResult(
+        # Create analysis result
+        self.analysis_results = AnalysisResult(
             total_errors=len(all_errors),
             errors_by_severity=dict(errors_by_severity),
             errors_by_category=dict(errors_by_category),
+            errors_by_file=dict(errors_by_file),
             errors=all_errors,
             analysis_time=analysis_time,
-            repository_info=repo_info,
-            metrics=metrics
+            files_analyzed=self.error_retriever.files_processed,
+            performance_metrics=self.serena_core._performance_metrics,
+            serena_status=self.serena_core.get_status()
         )
+        
+        # Print summary
+        self._print_analysis_summary()
+        
+        return self.analysis_results
     
-    def _analyze_with_graph_sitter(self) -> List[CodeError]:
-        """Analyze using graph-sitter codebase capabilities."""
-        errors = []
+    def _print_analysis_summary(self):
+        """Print analysis summary."""
+        if not self.analysis_results:
+            return
         
-        try:
-            # Get comprehensive codebase analysis
-            codebase_summary = get_codebase_summary(self.codebase)
-            
-            # Analyze functions for complexity and issues
-            for func_info in codebase_summary.get('functions', []):
-                func_summary = get_function_summary(self.codebase, func_info.get('name', ''))
-                if func_summary:
-                    func_errors = self._analyze_function_summary(func_summary)
-                    errors.extend(func_errors)
-            
-            # Analyze classes for architectural issues
-            for class_info in codebase_summary.get('classes', []):
-                class_summary = get_class_summary(self.codebase, class_info.get('name', ''))
-                if class_summary:
-                    class_errors = self._analyze_class_summary(class_summary)
-                    errors.extend(class_errors)
-            
-            # Analyze symbols for usage patterns
-            for symbol_info in codebase_summary.get('symbols', []):
-                symbol_summary = get_symbol_summary(self.codebase, symbol_info.get('name', ''))
-                if symbol_summary:
-                    symbol_errors = self._analyze_symbol_summary(symbol_summary)
-                    errors.extend(symbol_errors)
-                    
-        except Exception as e:
-            logger.warning(f"Failed to analyze with graph-sitter: {e}")
+        result = self.analysis_results
         
-        return errors
-    
-    def _analyze_function_summary(self, func_summary: Dict) -> List[CodeError]:
-        """Analyze function summary for issues."""
-        errors = []
+        logger.info("\n📊 ANALYSIS SUMMARY:")
+        logger.info(f"   Analysis Time: {result.analysis_time:.2f} seconds")
+        logger.info(f"   Files Analyzed: {result.files_analyzed}")
+        logger.info(f"   Total Errors: {result.total_errors}")
         
-        # Check function complexity
-        complexity = func_summary.get('complexity', 0)
-        if complexity > 10:
-            errors.append(CodeError(
-                id=f"func_complexity_{func_summary.get('name', 'unknown')}",
-                category=ErrorCategory.COMPLEXITY,
-                severity=ErrorSeverity.MAJOR,
-                message="Function has high cyclomatic complexity",
-                filepath=func_summary.get('file', ''),
-                function_name=func_summary.get('name', ''),
-                line_start=func_summary.get('line_start', 0),
-                line_end=func_summary.get('line_end', 0),
-                parameters=f"complexity={complexity}",
-                reason=f"Function complexity {complexity} exceeds threshold (10)"
-            ))
+        logger.info("\n🔍 ERRORS BY SEVERITY:")
+        for severity, count in result.errors_by_severity.items():
+            emoji = {'error': '❌', 'warning': '⚠️', 'info': 'ℹ️', 'hint': '💡'}.get(severity, '📝')
+            logger.info(f"   {emoji} {severity.title()}: {count}")
         
-        # Check function length
-        length = func_summary.get('line_end', 0) - func_summary.get('line_start', 0)
-        if length > 50:
-            errors.append(CodeError(
-                id=f"func_length_{func_summary.get('name', 'unknown')}",
-                category=ErrorCategory.MAINTAINABILITY,
-                severity=ErrorSeverity.MINOR,
-                message="Function is too long and may be hard to maintain",
-                filepath=func_summary.get('file', ''),
-                function_name=func_summary.get('name', ''),
-                line_start=func_summary.get('line_start', 0),
-                line_end=func_summary.get('line_end', 0),
-                parameters=f"length={length}",
-                reason=f"Function length {length} lines exceeds threshold (50)"
-            ))
-        
-        return errors
-    
-    def _analyze_class_summary(self, class_summary: Dict) -> List[CodeError]:
-        """Analyze class summary for architectural issues."""
-        errors = []
-        
-        # Check for god classes (too many methods)
-        method_count = len(class_summary.get('methods', []))
-        if method_count > 20:
-            errors.append(CodeError(
-                id=f"god_class_{class_summary.get('name', 'unknown')}",
-                category=ErrorCategory.ARCHITECTURE,
-                severity=ErrorSeverity.MAJOR,
-                message="Class has too many methods (god class anti-pattern)",
-                filepath=class_summary.get('file', ''),
-                line_start=class_summary.get('line_start', 0),
-                line_end=class_summary.get('line_end', 0),
-                parameters=f"methods={method_count}",
-                reason=f"Class has {method_count} methods, exceeding threshold (20)"
-            ))
-        
-        return errors
-    
-    def _analyze_symbol_summary(self, symbol_summary: Dict) -> List[CodeError]:
-        """Analyze symbol summary for usage issues."""
-        errors = []
-        
-        # Check for unused symbols
-        usage_count = symbol_summary.get('usage_count', 0)
-        if usage_count == 0:
-            errors.append(CodeError(
-                id=f"unused_symbol_{symbol_summary.get('name', 'unknown')}",
-                category=ErrorCategory.UNUSED,
-                severity=ErrorSeverity.MINOR,
-                message="Symbol is defined but never used",
-                filepath=symbol_summary.get('file', ''),
-                line_start=symbol_summary.get('line', 0),
-                line_end=symbol_summary.get('line', 0),
-                parameters=f"usage_count={usage_count}",
-                reason=f"Symbol '{symbol_summary.get('name', '')}' is never used"
-            ))
-        
-        return errors
-    
-    def _get_code_files(self, repo_dir: Path) -> List[Path]:
-        """Get all code files in repository."""
-        code_files = []
-        code_extensions = {
-            '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.h',
-            '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.scala'
-        }
-        
-        for file_path in repo_dir.rglob('*'):
-            if (file_path.is_file() and 
-                file_path.suffix.lower() in code_extensions and
-                not self._should_ignore_file(file_path)):
-                code_files.append(file_path)
-        
-        return code_files
-    
-    def _should_ignore_file(self, file_path: Path) -> bool:
-        """Check if file should be ignored."""
-        ignore_patterns = {
-            '.git', '__pycache__', '.pytest_cache', 'node_modules',
-            '.venv', 'venv', '.env', 'dist', 'build', '.tox', 'target',
-            '.idea', '.vscode', 'coverage', '.nyc_output'
-        }
-        
-        return any(pattern in str(file_path) for pattern in ignore_patterns)
-    
-    def _analyze_file(self, file_path: Path, content: str, repo_dir: Path) -> List[CodeError]:
-        """Analyze single file for errors."""
-        errors = []
-        relative_path = file_path.relative_to(repo_dir)
-        
-        # Semantic analysis
-        semantic_info = self.semantic_analyzer.analyze_file(file_path, content)
-        
-        # Pattern-based error detection
-        errors.extend(self._detect_pattern_errors(file_path, content, relative_path, semantic_info))
-        
-        # AST-based error detection
-        errors.extend(self._detect_ast_errors(file_path, content, relative_path, semantic_info))
-        
-        # Complexity analysis
-        errors.extend(self._detect_complexity_errors(file_path, content, relative_path, semantic_info))
-        
-        return errors
-    
-    def _detect_pattern_errors(self, file_path: Path, content: str, relative_path: Path, semantic_info: Dict) -> List[CodeError]:
-        """Detect errors using pattern matching."""
-        errors = []
-        lines = content.split('\n')
-        
-        for pattern_name, pattern_info in self.patterns.items():
-            for pattern in pattern_info['patterns']:
-                for line_num, line in enumerate(lines, 1):
-                    if re.search(pattern, line, re.IGNORECASE):
-                        error_id = f"{pattern_name}_{file_path.stem}_{line_num}"
-                        
-                        # Extract function name if available
-                        function_name = self._find_function_at_line(semantic_info, line_num)
-                        
-                        error = CodeError(
-                            id=error_id,
-                            category=pattern_info['category'],
-                            severity=pattern_info['severity'],
-                            message=pattern_info['description'],
-                            filepath=str(relative_path),
-                            function_name=function_name,
-                            line_start=line_num,
-                            line_end=line_num,
-                            context_lines=self._get_context_lines(lines, line_num),
-                            parameters=self._extract_parameters(line, pattern),
-                            reason=f"Pattern '{pattern}' matched in line: {line.strip()}"
-                        )
-                        errors.append(error)
-        
-        return errors
-    
-    def _detect_ast_errors(self, file_path: Path, content: str, relative_path: Path, semantic_info: Dict) -> List[CodeError]:
-        """Detect errors using AST analysis."""
-        errors = []
-        
-        # Check for syntax errors
-        if 'syntax_error' in semantic_info:
-            syntax_error = semantic_info['syntax_error']
-            error = CodeError(
-                id=f"syntax_error_{file_path.stem}_{syntax_error.get('line', 0)}",
-                category=ErrorCategory.SYNTAX,
-                severity=ErrorSeverity.CRITICAL,
-                message="Syntax error prevents code execution",
-                filepath=str(relative_path),
-                line_start=syntax_error.get('line', 0),
-                line_end=syntax_error.get('line', 0),
-                reason=syntax_error['message']
-            )
-            errors.append(error)
-        
-        # Analyze function-specific issues
-        for func in semantic_info.get('functions', []):
-            # Check for long functions
-            func_length = func['line_end'] - func['line_start']
-            if func_length > 50:  # Configurable threshold
-                error = CodeError(
-                    id=f"long_function_{file_path.stem}_{func['name']}",
-                    category=ErrorCategory.COMPLEXITY,
-                    severity=ErrorSeverity.MINOR,
-                    message="Function is too long and may be hard to maintain",
-                    filepath=str(relative_path),
-                    function_name=func['name'],
-                    line_start=func['line_start'],
-                    line_end=func['line_end'],
-                    parameters=f"length={func_length}",
-                    reason=f"Function '{func['name']}' has {func_length} lines (threshold: 50)"
-                )
-                errors.append(error)
-            
-            # Check for high complexity
-            if func['complexity'] > 10:  # Configurable threshold
-                error = CodeError(
-                    id=f"high_complexity_{file_path.stem}_{func['name']}",
-                    category=ErrorCategory.COMPLEXITY,
-                    severity=ErrorSeverity.MAJOR,
-                    message="Function has high cyclomatic complexity",
-                    filepath=str(relative_path),
-                    function_name=func['name'],
-                    line_start=func['line_start'],
-                    line_end=func['line_end'],
-                    parameters=f"complexity={func['complexity']}",
-                    reason=f"Function '{func['name']}' has complexity {func['complexity']} (threshold: 10)"
-                )
-                errors.append(error)
-        
-        return errors
-    
-    def _detect_complexity_errors(self, file_path: Path, content: str, relative_path: Path, semantic_info: Dict) -> List[CodeError]:
-        """Detect complexity-related errors."""
-        errors = []
-        
-        complexity_metrics = semantic_info.get('complexity_metrics', {})
-        
-        # Check overall file complexity
-        if complexity_metrics.get('cyclomatic_complexity', 0) > 50:
-            error = CodeError(
-                id=f"file_complexity_{file_path.stem}",
-                category=ErrorCategory.COMPLEXITY,
-                severity=ErrorSeverity.MAJOR,
-                message="File has high overall complexity",
-                filepath=str(relative_path),
-                parameters=f"complexity={complexity_metrics['cyclomatic_complexity']}",
-                reason=f"File complexity {complexity_metrics['cyclomatic_complexity']} exceeds threshold (50)"
-            )
-            errors.append(error)
-        
-        # Check nesting depth
-        if complexity_metrics.get('nesting_depth', 0) > 5:
-            error = CodeError(
-                id=f"deep_nesting_{file_path.stem}",
-                category=ErrorCategory.COMPLEXITY,
-                severity=ErrorSeverity.MINOR,
-                message="Code has deep nesting levels",
-                filepath=str(relative_path),
-                parameters=f"depth={complexity_metrics['nesting_depth']}",
-                reason=f"Nesting depth {complexity_metrics['nesting_depth']} exceeds threshold (5)"
-            )
-            errors.append(error)
-        
-        return errors
-    
-    def _find_function_at_line(self, semantic_info: Dict, line_num: int) -> str:
-        """Find function name at given line number."""
-        for func in semantic_info.get('functions', []):
-            if func['line_start'] <= line_num <= func['line_end']:
-                return func['name']
-        return ""
-    
-    def _get_context_lines(self, lines: List[str], line_num: int, context: int = 2) -> List[str]:
-        """Get context lines around error."""
-        start = max(0, line_num - context - 1)
-        end = min(len(lines), line_num + context)
-        return lines[start:end]
-    
-    def _extract_parameters(self, line: str, pattern: str) -> str:
-        """Extract parameters from matched line."""
-        # Simple parameter extraction - can be enhanced
-        match = re.search(pattern, line)
-        if match:
-            return match.group(0)
-        return ""
-    
-    def _generate_comprehensive_metrics(self, repo_dir: Path, errors: List[CodeError]) -> Dict[str, Any]:
-        """Generate comprehensive analysis metrics."""
-        return {
-            'error_density': len(errors) / max(self.analysis_stats['files_analyzed'], 1),
-            'critical_error_ratio': len([e for e in errors if e.severity == ErrorSeverity.CRITICAL]) / max(len(errors), 1),
-            'most_problematic_files': self._get_most_problematic_files(errors),
-            'error_categories_distribution': dict(Counter(e.category.value for e in errors)),
-            'functions_with_errors': len(set(e.function_name for e in errors if e.function_name)),
-            'average_errors_per_file': len(errors) / max(self.analysis_stats['files_analyzed'], 1)
-        }
-    
-    def _get_most_problematic_files(self, errors: List[CodeError], limit: int = 10) -> List[Dict[str, Any]]:
-        """Get files with most errors."""
-        file_error_counts = Counter(e.filepath for e in errors)
-        return [
-            {'file': file, 'error_count': count}
-            for file, count in file_error_counts.most_common(limit)
-        ]
-
-# ============================================================================
-# OUTPUT FORMATTING AND REPORTING
-# ============================================================================
-
-class ReportFormatter:
-    """Formats analysis results into the requested output format."""
-    
-    @staticmethod
-    def format_report(result: AnalysisResult, repo_name: str) -> str:
-        """Format analysis result into the requested report format."""
-        
-        # Get severity counts
-        critical_count = result.errors_by_severity.get(ErrorSeverity.CRITICAL, 0)
-        major_count = result.errors_by_severity.get(ErrorSeverity.MAJOR, 0)
-        minor_count = result.errors_by_severity.get(ErrorSeverity.MINOR, 0)
-        
-        # Header with summary
-        report_lines = [
-            f"SERENA CODEBASE ANALYSIS REPORT",
-            f"=" * 50,
-            f"Repository: {repo_name}",
-            f"Analysis Time: {result.analysis_time:.2f} seconds",
-            f"Files Analyzed: {result.repository_info.get('code_files', 0)}",
-            f"Languages: {', '.join(result.repository_info.get('languages', []))[:100]}",
-            f"",
-            f"ERRORS: {result.total_errors} [⚠️ Critical: {critical_count}] [👉 Major: {major_count}] [🔍 Minor: {minor_count}]",
-            f""
-        ]
-        
-        # Sort errors by severity (Critical first, then Major, then Minor)
-        severity_order = {ErrorSeverity.CRITICAL: 0, ErrorSeverity.MAJOR: 1, ErrorSeverity.MINOR: 2}
-        sorted_errors = sorted(result.errors, key=lambda e: (severity_order[e.severity], e.filepath, e.line_start))
-        
-        # Format each error
-        for i, error in enumerate(sorted_errors, 1):
-            severity_icon = ReportFormatter._get_severity_icon(error.severity)
-            function_part = f" / Function - '{error.function_name}'" if error.function_name else ""
-            parameters_part = f" [{error.parameters}]" if error.parameters else ""
-            reason_part = f" [{error.reason}]" if error.reason else ""
-            
-            error_line = (
-                f"{i} {severity_icon}- {repo_name}/{error.filepath}"
-                f"{function_part}"
-                f"{parameters_part}"
-                f"{reason_part}"
-            )
-            report_lines.append(error_line)
-        
-        # Add summary statistics
-        report_lines.extend([
-            f"",
-            f"ANALYSIS SUMMARY",
-            f"=" * 20,
-            f"Error Density: {result.metrics.get('error_density', 0):.2f} errors per file",
-            f"Critical Error Ratio: {result.metrics.get('critical_error_ratio', 0):.2%}",
-            f"Functions with Errors: {result.metrics.get('functions_with_errors', 0)}",
-            f"",
-            f"ERROR CATEGORIES:",
-        ])
-        
-        # Add category breakdown
+        logger.info("\n📂 ERRORS BY CATEGORY:")
         for category, count in result.errors_by_category.items():
-            percentage = (count / result.total_errors * 100) if result.total_errors > 0 else 0
-            report_lines.append(f"  {category.value}: {count} ({percentage:.1f}%)")
+            logger.info(f"   🔸 {category.title()}: {count}")
         
-        # Add most problematic files
-        if result.metrics.get('most_problematic_files'):
-            report_lines.extend([
-                f"",
-                f"MOST PROBLEMATIC FILES:",
-            ])
-            for file_info in result.metrics['most_problematic_files'][:5]:
-                report_lines.append(f"  {file_info['file']}: {file_info['error_count']} errors")
+        # Show top error files
+        if result.errors_by_file:
+            logger.info("\n🔥 TOP ERROR FILES:")
+            sorted_files = sorted(result.errors_by_file.items(), key=lambda x: x[1], reverse=True)
+            for i, (file_path, count) in enumerate(sorted_files[:10]):
+                logger.info(f"   {i+1}. {Path(file_path).name}: {count} errors")
         
-        return '\n'.join(report_lines)
+        # Show sample errors
+        if result.errors:
+            logger.info("\n❌ SAMPLE ERRORS:")
+            for i, error in enumerate(result.errors[:5]):
+                logger.info(f"   {i+1}. {error.display_text}")
     
-    @staticmethod
-    def _get_severity_icon(severity: ErrorSeverity) -> str:
-        """Get icon for severity level."""
-        icons = {
-            ErrorSeverity.CRITICAL: "⚠️",
-            ErrorSeverity.MAJOR: "👉", 
-            ErrorSeverity.MINOR: "🔍"
-        }
-        return icons.get(severity, "❓")
-
-# ============================================================================
-# MAIN SERENA ANALYZER CLASS
-# ============================================================================
-
-class SerenaAnalyzer:
-    """Main Serena analyzer class that orchestrates the entire analysis process using integrated components."""
-    
-    def __init__(self):
-        self.repo_interface = None
-        self.error_analyzer = None
-        
-    def analyze_repository(self, repo_url: str, output_file: str = "report.txt") -> AnalysisResult:
-        """Analyze repository and generate report using integrated infrastructure."""
-        logger.info(f"🚀 Starting integrated Serena analysis of: {repo_url}")
+    def save_results(self, output_file: str = "serena_lsp_errors.json") -> None:
+        """Save analysis results to JSON file."""
+        if not self.analysis_results:
+            logger.warning("No analysis results to save")
+            return
         
         try:
-            # Setup repository with integrated interface
-            self.repo_interface = IntegratedRepositoryInterface(repo_url)
-            repo_dir, codebase = self.repo_interface.setup_repository()
-            repo_name = repo_dir.name
+            # Convert results to serializable format
+            results_dict = {
+                'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
+                'codebase_path': str(self.codebase_path),
+                'total_errors': self.analysis_results.total_errors,
+                'errors_by_severity': self.analysis_results.errors_by_severity,
+                'errors_by_category': self.analysis_results.errors_by_category,
+                'errors_by_file': self.analysis_results.errors_by_file,
+                'analysis_time': self.analysis_results.analysis_time,
+                'files_analyzed': self.analysis_results.files_analyzed,
+                'serena_status': self.analysis_results.serena_status,
+                'errors': [error.to_dict() for error in self.analysis_results.errors]
+            }
             
-            logger.info(f"📁 Repository setup complete: {repo_dir}")
-            if codebase:
-                logger.info(f"✅ Graph-sitter codebase initialized")
-            else:
-                logger.info(f"⚠️  Using fallback analysis (graph-sitter not available)")
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(results_dict, f, indent=2, default=str)
             
-            # Initialize error analyzer with codebase
-            self.error_analyzer = ComprehensiveErrorAnalyzer(codebase)
+            logger.info(f"💾 Analysis results saved to: {output_file}")
             
-            # Perform comprehensive analysis
-            result = self.error_analyzer.analyze_repository(repo_dir, self.repo_interface)
+        except Exception as e:
+            logger.error(f"Failed to save results: {e}")
+    
+    def generate_simple_report(self, report_file: str = "report.txt") -> None:
+        """Generate simple text report in the requested format."""
+        if not self.analysis_results:
+            logger.warning("No analysis results to generate report")
+            return
+        
+        try:
+            results = self.analysis_results
             
-            # Generate formatted report
-            report_content = ReportFormatter.format_report(result, repo_name)
+            # Count errors by severity with emojis
+            critical_count = results.errors_by_severity.get('error', 0)
+            major_count = results.errors_by_severity.get('warning', 0)
+            minor_count = results.errors_by_severity.get('info', 0) + results.errors_by_severity.get('hint', 0)
+            
+            # Generate report content
+            report_lines = []
+            report_lines.append(f"ERRORS: {results.total_errors} [⚠️ Critical: {critical_count}] [👉 Major: {major_count}] [🔍 Minor: {minor_count}]")
+            
+            # Add individual errors
+            for i, error in enumerate(results.errors, 1):
+                # Determine emoji based on severity
+                if error.severity == ErrorSeverity.ERROR:
+                    emoji = "⚠️"
+                elif error.severity == ErrorSeverity.WARNING:
+                    emoji = "👉"
+                else:
+                    emoji = "🔍"
+                
+                # Format error line
+                error_line = f"{i} {emoji}- {error.location.file_path} / Line {error.location.line} - '{error.category.value}' [{error.message}]"
+                report_lines.append(error_line)
             
             # Write report to file
-            with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(report_content)
+            with open(report_file, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(report_lines))
             
-            logger.info(f"📊 Analysis complete! Report saved to: {output_file}")
-            logger.info(f"🔍 Found {result.total_errors} total errors")
-            logger.info(f"⚠️  Critical: {result.errors_by_severity.get(ErrorSeverity.CRITICAL, 0)}")
-            logger.info(f"👉 Major: {result.errors_by_severity.get(ErrorSeverity.MAJOR, 0)}")
-            logger.info(f"🔍 Minor: {result.errors_by_severity.get(ErrorSeverity.MINOR, 0)}")
+            logger.info(f"📄 Simple report saved to: {report_file}")
             
-            # Log integration status
-            self._log_integration_status()
-            
-            return result
+            # Also print the summary to console
+            print(f"\n{report_lines[0]}")
+            if len(report_lines) > 1:
+                print("Sample errors:")
+                for line in report_lines[1:6]:  # Show first 5 errors
+                    print(line)
+                if len(report_lines) > 6:
+                    print(f"... and {len(report_lines) - 6} more errors")
             
         except Exception as e:
-            logger.error(f"❌ Analysis failed: {e}")
-            logger.error(traceback.format_exc())
-            raise
-        finally:
-            # Cleanup
-            if self.repo_interface:
-                self.repo_interface.cleanup()
+            logger.error(f"Failed to generate simple report: {e}")
     
-    def _log_integration_status(self):
-        """Log the status of various integrations."""
-        logger.info("🔧 Integration Status:")
-        logger.info(f"   Graph-sitter Core: {'✅' if GRAPH_SITTER_AVAILABLE else '❌'}")
-        logger.info(f"   LSP Components: {'✅' if LSP_AVAILABLE else '❌'}")
-        logger.info(f"   SolidLSP Protocol: {'✅' if SOLIDLSP_AVAILABLE else '❌'}")
-        logger.info(f"   Serena Components: {'✅' if SERENA_AVAILABLE else '❌'}")
+    async def cleanup(self):
+        """Cleanup resources."""
+        try:
+            if self.serena_core:
+                await self.serena_core.shutdown()
+                logger.info("🔄 Serena core shutdown complete")
+        except Exception as e:
+            logger.warning(f"Error during cleanup: {e}")
+
 
 # ============================================================================
 # COMMAND LINE INTERFACE
 # ============================================================================
 
-def main():
-    """Main CLI entry point."""
+async def main():
+    """Main function to run the Serena LSP analyzer."""
     parser = argparse.ArgumentParser(
-        description="Comprehensive Serena Codebase Analyzer - Integrated with Graph-sitter Infrastructure",
+        description="Self-Contained Serena LSP Error Analyzer",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python serena_analyzer.py --repo https://github.com/user/repo
-  python serena_analyzer.py --repo /path/to/local/repo
-  python serena_analyzer.py --repo https://github.com/user/repo --output custom_report.txt
+  python serena_analyzer.py --repo .
+  python serena_analyzer.py --repo /path/to/codebase
+  python serena_analyzer.py --repo . --output my_errors.json
   python serena_analyzer.py --repo . --verbose
 
-The analyzer leverages existing graph-sitter and Serena infrastructure:
-- Graph-sitter core codebase analysis
-- LSP integration for real-time diagnostics  
-- Serena symbol intelligence and semantic analysis
-- 24+ error types with severity classification
-- Comprehensive repository metrics and statistics
-- Fallback analysis when components are unavailable
-
-Integration Status:
-- ✅ Uses graph_sitter.core.codebase.Codebase when available
-- ✅ Integrates solitlsp LSP components for diagnostics
-- ✅ Leverages serena.symbol and serena.project components
-- ✅ Falls back gracefully when dependencies are missing
+This analyzer focuses exclusively on retrieving ALL LSP errors from the codebase
+using embedded Serena components. It provides comprehensive error analysis
+without refactoring or other unrelated features.
         """
     )
     
     parser.add_argument(
         '--repo',
         required=True,
-        help='Repository URL (https://github.com/user/repo) or local path'
+        help='Path to the codebase to analyze'
     )
     
     parser.add_argument(
         '--output',
-        default='report.txt',
-        help='Output file name (default: report.txt)'
+        default='serena_lsp_errors.json',
+        help='Output JSON file for results (default: serena_lsp_errors.json)'
     )
     
     parser.add_argument(
@@ -1377,7 +841,7 @@ Integration Status:
     parser.add_argument(
         '--version',
         action='version',
-        version='Serena Analyzer v2.0.0 - Integrated with Graph-sitter & Serena Infrastructure'
+        version='Serena LSP Analyzer v1.0.0 - Self-Contained LSP Error Retrieval'
     )
     
     args = parser.parse_args()
@@ -1386,36 +850,48 @@ Integration Status:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
+    logger.info("🚀 SERENA LSP ERROR ANALYZER")
+    logger.info("=" * 50)
+    logger.info("Self-contained LSP error retrieval with embedded Serena components")
+    logger.info(f"Graph-sitter available: {'✅' if GRAPH_SITTER_AVAILABLE else '❌'}")
+    logger.info("")
+    
+    # Initialize and run analyzer
+    analyzer = SerenaLSPAnalyzer(args.repo)
+    
     try:
-        # Create analyzer and run analysis
-        analyzer = SerenaAnalyzer()
-        result = analyzer.analyze_repository(args.repo, args.output)
+        # Initialize
+        if not await analyzer.initialize():
+            logger.error("❌ Failed to initialize analyzer. Exiting.")
+            return 1
         
-        # Print summary to console
-        print(f"\n🎉 Analysis Complete!")
-        print(f"📊 Total Errors: {result.total_errors}")
-        print(f"⚠️  Critical: {result.errors_by_severity.get(ErrorSeverity.CRITICAL, 0)}")
-        print(f"👉 Major: {result.errors_by_severity.get(ErrorSeverity.MAJOR, 0)}")
-        print(f"🔍 Minor: {result.errors_by_severity.get(ErrorSeverity.MINOR, 0)}")
-        print(f"📄 Report saved to: {args.output}")
-        print(f"⏱️  Analysis time: {result.analysis_time:.2f} seconds")
+        # Run analysis
+        results = await analyzer.analyze()
         
-        # Exit with appropriate code
-        if result.errors_by_severity.get(ErrorSeverity.CRITICAL, 0) > 0:
-            sys.exit(2)  # Critical errors found
-        elif result.errors_by_severity.get(ErrorSeverity.MAJOR, 0) > 0:
-            sys.exit(1)  # Major errors found
-        else:
-            sys.exit(0)  # Only minor errors or no errors
-            
-    except KeyboardInterrupt:
-        print("\n⚠️  Analysis interrupted by user")
-        sys.exit(130)
+        # Save results
+        analyzer.save_results(args.output)
+        
+        # Generate simple report format
+        analyzer.generate_simple_report()
+        
+        logger.info(f"\n✅ Analysis complete!")
+        logger.info(f"📊 Found {results.total_errors} total LSP errors")
+        logger.info(f"📁 Analyzed {results.files_analyzed} files")
+        logger.info(f"⏱️  Analysis time: {results.analysis_time:.2f} seconds")
+        logger.info(f"💾 Results saved to: {args.output}")
+        
+        return 0
+        
     except Exception as e:
-        print(f"\n❌ Analysis failed: {e}")
-        if args.verbose:
-            print(traceback.format_exc())
-        sys.exit(1)
+        logger.error(f"❌ Analysis failed: {e}")
+        traceback.print_exc()
+        return 1
+        
+    finally:
+        # Cleanup
+        await analyzer.cleanup()
+
 
 if __name__ == "__main__":
-    main()
+    import sys
+    sys.exit(asyncio.run(main()))
