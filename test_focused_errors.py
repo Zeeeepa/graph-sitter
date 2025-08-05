@@ -18,18 +18,14 @@ def main():
         # Test direct import
         from graph_sitter.extensions.lsp.error_analysis import (
             ComprehensiveErrorAnalyzer,
-            get_repo_error_analysis,
-            ErrorSeverity,
-            ErrorCategory
+            get_repo_error_analysis
         )
         print("✅ Direct imports successful")
         
         # Test via __init__
         from graph_sitter.extensions.lsp import (
             ComprehensiveErrorAnalyzer as CEA,
-            get_repo_error_analysis as GREA,
-            ErrorSeverity as ES,
-            ErrorCategory as EC
+            get_repo_error_analysis as GREA
         )
         print("✅ Package imports successful")
         
@@ -73,29 +69,35 @@ def complex_function():
         
         # Test comprehensive error analysis
         errors = full_errors.get_comprehensive_errors(max_errors=10)
-        print(f"✅ Comprehensive errors: {errors.total_count} total")
-        print(f"   - Critical/Errors: {errors.critical_count + errors.error_count}")
-        print(f"   - Warnings: {errors.warning_count}")
-        print(f"   - Files analyzed: {len(errors.files_analyzed)}")
+        print(f"✅ Comprehensive errors: {errors.get('total_count', 0)} total")
+        print(f"   - Critical/Errors: {errors.get('critical_count', 0) + errors.get('error_count', 0)}")
+        print(f"   - Warnings: {errors.get('warning_count', 0)}")
+        print(f"   - Files analyzed: {errors.get('files_analyzed', 0)}")
         
         # Show sample errors
-        if errors.errors:
+        all_errors = []
+        errors_by_severity = errors.get('errors_by_severity', {})
+        for severity_errors in errors_by_severity.values():
+            all_errors.extend(severity_errors)
+        
+        if all_errors:
             print("\n📋 Sample Errors:")
-            for i, error in enumerate(errors.errors[:3]):
-                print(f"   {i+1}. {error.display_text}")
-                print(f"      Category: {error.category.value}")
-                if error.suggestions:
-                    print(f"      Suggestion: {error.suggestions[0]}")
+            for i, error in enumerate(all_errors[:3]):
+                file_name = error['file_path'].split('/')[-1]
+                print(f"   {i+1}. [{error['severity'].upper()}] {file_name}:{error['line']}:{error['column']} - {error['message']}")
+                print(f"      Category: {error['category']}")
+                if error.get('suggestions'):
+                    print(f"      Suggestion: {error['suggestions'][0]}")
         
         # Test error summary
         summary = full_errors.get_error_summary()
         print(f"\n📊 Error Summary:")
-        print(f"   - Total errors: {summary['total_errors']}")
-        print(f"   - By category: {summary['errors_by_category']}")
+        print(f"   - Total errors: {summary.get('total_errors', 0)}")
+        print(f"   - By category: {summary.get('errors_by_category', {})}")
         
         # Test convenience function
         direct_analysis = get_repo_error_analysis(str(test_dir), max_errors=5)
-        print(f"✅ Direct analysis: {direct_analysis.total_count} errors")
+        print(f"✅ Direct analysis: {direct_analysis.get('total_count', 0)} errors")
         
         print("\n" + "=" * 50)
         print("🎉 Focused Error Analysis Test Complete!")
@@ -104,7 +106,7 @@ def complex_function():
         print("from graph_sitter.core.codebase import Codebase")
         print("codebase = Codebase('path/to/repo')")
         print("errors = codebase.FullErrors.get_comprehensive_errors()")
-        print("print(f'Found {errors.total_count} errors')")
+        print("print(f'Found {errors[\"total_count\"]} errors')")
         print("```")
         
         # Cleanup
