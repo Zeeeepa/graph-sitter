@@ -38,6 +38,18 @@ class DashboardState(rx.State):
     filter_severity: str = "all"
     expanded_nodes: List[str] = []
     
+    def set_repo_url(self, value: str):
+        """Set repository URL"""
+        self.repo_url = value
+    
+    def set_language(self, value: str):
+        """Set language"""
+        self.language = value
+    
+    def set_filter_severity(self, value: str):
+        """Set filter severity"""
+        self.filter_severity = value
+    
     async def start_analysis(self):
         """Start codebase analysis"""
         if not self.repo_url:

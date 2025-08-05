@@ -4,7 +4,7 @@ import reflex as rx
 
 # App configuration
 config = rx.Config(
-    app_name="demo",
+    app_name="frontend",
     api_url="http://localhost:8000",
     frontend_port=3000,
     backend_port=3001,

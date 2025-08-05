@@ -46,6 +46,14 @@ uvicorn.run(app, host='0.0.0.0', port=8000, log_level='info')
 def start_frontend():
     """Start the Reflex frontend"""
     print("🎨 Starting frontend dashboard...")
+    
+    # Initialize reflex if needed
+    try:
+        subprocess.run(["reflex", "init"], cwd=Path(__file__).parent, check=False, capture_output=True)
+    except:
+        pass
+    
+    # Start frontend
     frontend_process = subprocess.Popen([
         "reflex", "run", "--frontend-port", "3000", "--backend-port", "8001"
     ], cwd=Path(__file__).parent)
