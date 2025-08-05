@@ -13,12 +13,11 @@ import time
 import asyncio
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Union, Callable
+from typing import List, Optional, Dict, Any, Union, Callable, Set
 from enum import IntEnum
 from collections import defaultdict
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from graph_sitter.core.runtime_errors import RuntimeErrorCollector, RuntimeError, get_runtime_collector
 from .protocol.lsp_types import DiagnosticSeverity, Diagnostic, Position, Range
 from .language_servers.base import BaseLanguageServer
 from .language_servers.python_server import PythonLanguageServer
@@ -32,6 +31,113 @@ except ImportError:
     SERENA_AVAILABLE = False
 
 logger = get_logger(__name__)
+
+
+# ============================================================================
+# RUNTIME ERROR COLLECTION CLASSES (moved from core.runtime_errors)
+# ============================================================================
+
+@dataclass
+class RuntimeContext:
+    """Runtime context information for errors that occur during execution."""
+    exception_type: str
+    stack_trace: List[str] = field(default_factory=list)
+    local_variables: Dict[str, Any] = field(default_factory=dict)
+    global_variables: Dict[str, Any] = field(default_factory=dict)
+    execution_path: List[str] = field(default_factory=list)
+    timestamp: float = field(default_factory=time.time)
+    thread_id: Optional[int] = None
+    process_id: Optional[int] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary representation."""
+        return {
+            'exception_type': self.exception_type,
+            'stack_trace': self.stack_trace,
+            'local_variables': {k: str(v) for k, v in self.local_variables.items()},
+            'global_variables': {k: str(v) for k, v in self.global_variables.items()},
+            'execution_path': self.execution_path,
+            'timestamp': self.timestamp,
+            'thread_id': self.thread_id,
+            'process_id': self.process_id
+        }
+
+
+@dataclass
+class RuntimeError:
+    """Represents a runtime error with comprehensive context."""
+    file_path: str
+    line: int
+    character: int
+    message: str
+    context: RuntimeContext
+    error_id: str = field(default_factory=lambda: f"runtime_{int(time.time() * 1000000)}")
+    severity: str = "error"
+    category: str = "runtime"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary representation."""
+        return {
+            'error_id': self.error_id,
+            'file_path': self.file_path,
+            'line': self.line,
+            'character': self.character,
+            'message': self.message,
+            'context': self.context.to_dict(),
+            'severity': self.severity,
+            'category': self.category
+        }
+
+
+class RuntimeErrorCollector:
+    """Collects runtime errors during code execution."""
+    
+    def __init__(self, repo_path: str):
+        self.repo_path = Path(repo_path)
+        self.runtime_errors: List[RuntimeError] = []
+        self.error_handlers: List[Callable[[RuntimeError], None]] = []
+        self._lock = threading.RLock()
+        self._active = False
+        
+    def start_collection(self) -> None:
+        """Start collecting runtime errors."""
+        self._active = True
+        logger.info("Runtime error collection started")
+    
+    def stop_collection(self) -> None:
+        """Stop collecting runtime errors."""
+        self._active = False
+        logger.info("Runtime error collection stopped")
+    
+    def get_runtime_errors(self) -> List[RuntimeError]:
+        """Get all collected runtime errors."""
+        with self._lock:
+            return self.runtime_errors.copy()
+    
+    def add_error_handler(self, handler: Callable[[RuntimeError], None]) -> None:
+        """Add a handler to be called when new runtime errors are collected."""
+        self.error_handlers.append(handler)
+    
+    def get_error_summary(self) -> Dict[str, Any]:
+        """Get summary of collected runtime errors."""
+        with self._lock:
+            return {
+                'total_errors': len(self.runtime_errors),
+                'collection_active': self._active
+            }
+
+
+# Global registry for runtime error collectors
+_runtime_collectors: Dict[str, RuntimeErrorCollector] = {}
+_collector_lock = threading.RLock()
+
+
+def get_runtime_collector(repo_path: str) -> RuntimeErrorCollector:
+    """Get or create a runtime error collector for a repository."""
+    with _collector_lock:
+        if repo_path not in _runtime_collectors:
+            _runtime_collectors[repo_path] = RuntimeErrorCollector(repo_path)
+        return _runtime_collectors[repo_path]
 
 
 # DiagnosticSeverity is now imported from protocol.lsp_types
@@ -725,3 +831,287 @@ def stop_runtime_error_collection(repo_path: str) -> None:
     """Stop runtime error collection for a repository."""
     from graph_sitter.core.runtime_errors import stop_runtime_collection
     stop_runtime_collection(repo_path)
+
+
+# ============================================================================
+# TRANSACTION-AWARE LSP MANAGER
+# ============================================================================
+
+from weakref import WeakKeyDictionary
+
+# Global registry of LSP managers
+_lsp_managers: WeakKeyDictionary = WeakKeyDictionary()
+_manager_lock = threading.RLock()
+
+
+class TransactionAwareLSPManager:
+    """
+    LSP manager that integrates with graph-sitter's transaction system
+    to provide real-time diagnostic updates.
+    """
+
+    def __init__(self, repo_path: str, enable_lsp: bool = True):
+        self.repo_path = Path(repo_path)
+        self.enable_lsp = enable_lsp
+        self._bridge: Optional[SerenaLSPBridge] = None
+        self._diagnostics_cache: List[SerenaErrorInfo] = []
+        self._file_diagnostics_cache: Dict[str, List[SerenaErrorInfo]] = {}
+        self._last_refresh = 0.0
+        self._refresh_interval = 5.0  # Refresh every 5 seconds
+        self._lock = threading.RLock()
+        self._shutdown = False
+
+        if self.enable_lsp:
+            self._initialize_bridge()
+
+    def _initialize_bridge(self) -> None:
+        """Initialize the Serena LSP bridge."""
+        try:
+            self._bridge = SerenaLSPBridge(str(self.repo_path))
+            if self._bridge.is_initialized:
+                logger.info(f"LSP manager initialized for {self.repo_path}")
+                self._refresh_diagnostics_async()
+            else:
+                logger.warning(f"LSP bridge failed to initialize for {self.repo_path}")
+                self.enable_lsp = False
+        except Exception as e:
+            logger.error(f"Failed to initialize LSP bridge: {e}")
+            self.enable_lsp = False
+
+    def _refresh_diagnostics_async(self) -> None:
+        """Refresh diagnostics in background thread."""
+
+        def refresh_worker():
+            try:
+                if self._bridge and not self._shutdown:
+                    diagnostics = self._bridge.get_diagnostics()
+                    with self._lock:
+                        self._diagnostics_cache = diagnostics
+                        self._last_refresh = time.time()
+
+                        # Update file-specific cache
+                        self._file_diagnostics_cache.clear()
+                        for diag in diagnostics:
+                            if diag.file_path not in self._file_diagnostics_cache:
+                                self._file_diagnostics_cache[diag.file_path] = []
+                            self._file_diagnostics_cache[diag.file_path].append(diag)
+
+                    logger.debug(f"Refreshed {len(diagnostics)} diagnostics")
+            except Exception as e:
+                logger.error(f"Error refreshing diagnostics: {e}")
+
+        # Run in background thread
+        thread = threading.Thread(target=refresh_worker, daemon=True)
+        thread.start()
+
+    def _should_refresh(self) -> bool:
+        """Check if diagnostics should be refreshed."""
+        return (time.time() - self._last_refresh) > self._refresh_interval
+
+    @property
+    def errors(self) -> List[SerenaErrorInfo]:
+        """Get all errors in the codebase."""
+        if not self.enable_lsp:
+            return []
+
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+
+        with self._lock:
+            return [d for d in self._diagnostics_cache if d.is_error]
+
+    @property
+    def warnings(self) -> List[SerenaErrorInfo]:
+        """Get all warnings in the codebase."""
+        if not self.enable_lsp:
+            return []
+
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+
+        with self._lock:
+            return [d for d in self._diagnostics_cache if d.is_warning]
+
+    @property
+    def hints(self) -> List[SerenaErrorInfo]:
+        """Get all hints in the codebase."""
+        if not self.enable_lsp:
+            return []
+
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+
+        with self._lock:
+            return [d for d in self._diagnostics_cache if d.is_hint]
+
+    @property
+    def diagnostics(self) -> List[SerenaErrorInfo]:
+        """Get all diagnostics (errors, warnings, hints) in the codebase."""
+        if not self.enable_lsp:
+            return []
+
+        if self._should_refresh():
+            self._refresh_diagnostics_async()
+
+        with self._lock:
+            return self._diagnostics_cache.copy()
+
+    def get_file_errors(self, file_path: str) -> List[SerenaErrorInfo]:
+        """Get errors for a specific file."""
+        if not self.enable_lsp:
+            return []
+
+        file_diagnostics = self.get_file_diagnostics(file_path)
+        return [d for d in file_diagnostics if d.is_error]
+
+    def get_file_diagnostics(self, file_path: str) -> List[SerenaErrorInfo]:
+        """Get all diagnostics for a specific file."""
+        if not self.enable_lsp:
+            return []
+
+        # Normalize file path
+        try:
+            file_path = str(Path(file_path).relative_to(self.repo_path))
+        except ValueError:
+            # If not relative to repo, use as-is
+            pass
+
+        with self._lock:
+            if file_path in self._file_diagnostics_cache:
+                return self._file_diagnostics_cache[file_path].copy()
+
+        # If not in cache, try to get from bridge directly
+        if self._bridge:
+            try:
+                diagnostics = self._bridge.get_file_diagnostics(file_path)
+                with self._lock:
+                    self._file_diagnostics_cache[file_path] = diagnostics
+                return diagnostics
+            except Exception as e:
+                logger.error(f"Error getting file diagnostics: {e}")
+
+        return []
+
+    def apply_diffs(self, diffs: Any) -> None:
+        """
+        Handle file changes from graph-sitter's diff system.
+        This method is called when files are modified through graph-sitter.
+        """
+        if not self.enable_lsp or not self._bridge:
+            return
+
+        try:
+            # Extract changed files from diffs
+            changed_files: Set[str] = set()
+
+            # Handle different diff formats
+            if hasattr(diffs, "__iter__"):
+                for diff in diffs:
+                    if hasattr(diff, "file_path"):
+                        changed_files.add(diff.file_path)
+                    elif hasattr(diff, "path"):
+                        changed_files.add(diff.path)
+
+            if changed_files:
+                logger.debug(f"Files changed: {changed_files}")
+
+                # Clear cache for changed files
+                with self._lock:
+                    for file_path in changed_files:
+                        self._file_diagnostics_cache.pop(file_path, None)
+
+                # Trigger refresh
+                self._refresh_diagnostics_async()
+
+        except Exception as e:
+            logger.error(f"Error handling diff changes: {e}")
+
+    def refresh_diagnostics(self) -> None:
+        """Force refresh of diagnostic information."""
+        if not self.enable_lsp or not self._bridge:
+            return
+
+        try:
+            self._bridge.refresh_diagnostics()
+            with self._lock:
+                self._diagnostics_cache.clear()
+                self._file_diagnostics_cache.clear()
+                self._last_refresh = 0.0  # Force refresh
+
+            self._refresh_diagnostics_async()
+
+        except Exception as e:
+            logger.error(f"Error refreshing diagnostics: {e}")
+
+    def get_lsp_status(self) -> Dict[str, Any]:
+        """Get status information about the LSP integration."""
+        status = {
+            "enabled": self.enable_lsp,
+            "repo_path": str(self.repo_path),
+            "last_refresh": self._last_refresh,
+            "diagnostics_count": len(self._diagnostics_cache),
+            "errors_count": len([d for d in self._diagnostics_cache if d.is_error]),
+            "warnings_count": len([d for d in self._diagnostics_cache if d.is_warning]),
+            "hints_count": len([d for d in self._diagnostics_cache if d.is_hint]),
+        }
+
+        if self._bridge:
+            bridge_status = self._bridge.get_status()
+            status.update(bridge_status)
+
+        return status
+
+    def shutdown(self) -> None:
+        """Shutdown the LSP manager and clean up resources."""
+        self._shutdown = True
+
+        if self._bridge:
+            try:
+                self._bridge.shutdown()
+            except Exception as e:
+                logger.error(f"Error shutting down LSP bridge: {e}")
+
+        with self._lock:
+            self._diagnostics_cache.clear()
+            self._file_diagnostics_cache.clear()
+
+        logger.info(f"LSP manager shutdown for {self.repo_path}")
+
+
+def get_lsp_manager(
+    repo_path: str, enable_lsp: bool = True
+) -> TransactionAwareLSPManager:
+    """
+    Get or create an LSP manager for a repository.
+
+    This function maintains a registry of LSP managers to avoid creating
+    multiple managers for the same repository.
+    """
+    repo_path = str(Path(repo_path).resolve())
+
+    with _manager_lock:
+        # Check if we already have a manager for this repo
+        for existing_manager in _lsp_managers.values():
+            if str(existing_manager.repo_path) == repo_path:
+                return existing_manager
+
+        # Create new manager
+        manager = TransactionAwareLSPManager(repo_path, enable_lsp)
+
+        # Store in registry (using a dummy key since we can't use the manager as its own key)
+        _lsp_managers[object()] = manager
+
+        return manager
+
+
+def shutdown_all_lsp_managers() -> None:
+    """Shutdown all active LSP managers."""
+    with _manager_lock:
+        for manager in list(_lsp_managers.values()):
+            try:
+                manager.shutdown()
+            except Exception as e:
+                logger.error(f"Error shutting down LSP manager: {e}")
+
+        _lsp_managers.clear()
+        logger.info("All LSP managers shutdown")

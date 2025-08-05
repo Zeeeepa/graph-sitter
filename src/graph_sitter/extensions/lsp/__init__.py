@@ -6,16 +6,19 @@ comprehensive error analysis capabilities for graph-sitter, including
 enhanced Serena integration and runtime error collection.
 """
 
-# Import enhanced Serena bridge
+# Import enhanced Serena bridge (includes transaction manager)
 from .serena_bridge import (
     SerenaErrorInfo,
     SerenaLSPBridge,
     ErrorInfo,  # Keep backward compatibility
+    TransactionAwareLSPManager,
     create_serena_bridge,
     get_enhanced_diagnostics,
     get_comprehensive_analysis,
     start_runtime_error_collection,
     stop_runtime_error_collection,
+    get_lsp_manager,
+    shutdown_all_lsp_managers,
 )
 
 # Import comprehensive analysis
@@ -27,13 +30,6 @@ from .serena_analysis import (
     analyze_codebase_comprehensive,
     analyze_github_repository_comprehensive,
     get_repository_quality_report,
-)
-
-# Import transaction manager
-from .transaction_manager import (
-    TransactionAwareLSPManager,
-    get_lsp_manager,
-    shutdown_all_lsp_managers,
 )
 
 __all__ = [

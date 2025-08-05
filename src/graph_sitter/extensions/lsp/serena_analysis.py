@@ -16,8 +16,22 @@ from collections import defaultdict
 from urllib.parse import urlparse
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from graph_sitter.core.runtime_errors import RuntimeErrorCollector, RuntimeError
-from .serena_bridge import SerenaLSPBridge, SerenaErrorInfo, create_serena_bridge
+from .serena_bridge import (
+    SerenaLSPBridge, 
+    SerenaErrorInfo, 
+    ErrorInfo,  # Backward compatibility
+    RuntimeErrorCollector,
+    RuntimeError,
+    RuntimeContext,
+    TransactionAwareLSPManager,
+    create_serena_bridge,
+    get_enhanced_diagnostics,
+    get_comprehensive_analysis,
+    start_runtime_error_collection,
+    stop_runtime_error_collection,
+    get_lsp_manager,
+    shutdown_all_lsp_managers
+)
 
 logger = get_logger(__name__)
 
