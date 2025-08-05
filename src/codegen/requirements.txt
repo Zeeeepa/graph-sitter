@@ -1,0 +1,17 @@
+# Core dependencies for the Codegen SDK
+requests>=2.25.0
+urllib3>=1.26.0
+
+# Optional dependencies for enhanced functionality
+python-dotenv>=0.19.0  # For .env file support
+rich>=10.0.0          # For enhanced CLI output
+click>=8.0.0          # For CLI framework
+
+# Development dependencies (install with pip install -r requirements-dev.txt)
+# pytest>=6.0
+# pytest-cov>=2.0
+# black>=21.0
+# flake8>=3.8
+# mypy>=0.800
+# pre-commit>=2.0
+
