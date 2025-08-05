@@ -143,7 +143,7 @@ class RealCodebaseAnalyzer:
     def get_codebase_summary(self, codebase: Codebase) -> str:
         """Get comprehensive codebase summary using real graph-sitter"""
         try:
-            files = codebase.files()
+            files = codebase.files(extensions=None)
             functions = codebase.functions
             classes = codebase.classes
             imports = codebase.imports
@@ -422,7 +422,7 @@ async def perform_comprehensive_analysis(analysis_id: str, codebase: Codebase):
         
         # Get all codebase elements
         logger.info("Extracting codebase elements...")
-        files = codebase.files()
+        files = codebase.files(extensions=None)
         functions = codebase.functions
         classes = codebase.classes
         imports = codebase.imports
