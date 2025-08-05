@@ -1,0 +1,105 @@
+# Self-Healing Architecture Configuration
+# This file contains the default configuration for the self-healing system
+
+self_healing:
+  # Enable/disable the self-healing system
+  enabled: true
+  
+  # Database configuration
+  database_url: null  # Will use environment variable if not specified
+  
+  # Logging configuration
+  log_level: "INFO"
+  
+  # Metrics retention
+  metrics_retention_days: 30
+  
+  # Error Detection Configuration
+  error_detection:
+    # Monitoring interval in seconds
+    monitoring_interval: 30
+    
+    # Resource usage thresholds (percentages)
+    threshold_cpu: 80.0
+    threshold_memory: 85.0
+    threshold_error_rate: 5.0
+    
+    # Response time threshold in milliseconds
+    threshold_response_time: 2000.0
+    
+    # Feature toggles
+    pattern_recognition_enabled: true
+    anomaly_detection_enabled: true
+    
+    # Alert escalation timeout in seconds
+    alert_escalation_timeout: 300
+  
+  # Recovery System Configuration
+  recovery:
+    # Maximum retry attempts for recovery actions
+    max_retry_attempts: 3
+    
+    # Escalation timeout in seconds
+    escalation_timeout: 300
+    
+    # Feature toggles
+    rollback_enabled: true
+    auto_scaling_enabled: true
+    circuit_breaker_enabled: true
+    
+    # Recovery timeout in seconds
+    recovery_timeout: 600
+  
+  # Learning System Configuration
+  learning:
+    # Enable effectiveness tracking
+    effectiveness_tracking: true
+    
+    # Enable pattern recognition
+    pattern_recognition: true
+    
+    # Enable continuous improvement
+    continuous_improvement: true
+    
+    # Learning parameters
+    learning_rate: 0.1
+    min_samples_for_learning: 10
+    confidence_threshold: 0.8
+
+# Environment-specific overrides
+environments:
+  development:
+    self_healing:
+      error_detection:
+        monitoring_interval: 60  # Less frequent monitoring in dev
+        threshold_cpu: 90.0      # Higher thresholds in dev
+        threshold_memory: 90.0
+      recovery:
+        max_retry_attempts: 1    # Fewer retries in dev
+        rollback_enabled: false  # Disable rollback in dev
+  
+  staging:
+    self_healing:
+      error_detection:
+        monitoring_interval: 45
+        threshold_cpu: 85.0
+        threshold_memory: 87.0
+      recovery:
+        max_retry_attempts: 2
+        rollback_enabled: true
+  
+  production:
+    self_healing:
+      error_detection:
+        monitoring_interval: 30
+        threshold_cpu: 80.0
+        threshold_memory: 85.0
+        anomaly_detection_enabled: true
+      recovery:
+        max_retry_attempts: 3
+        rollback_enabled: true
+        auto_scaling_enabled: true
+      learning:
+        effectiveness_tracking: true
+        continuous_improvement: true
+
