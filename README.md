@@ -66,7 +66,6 @@ Codebase.from_repo() - GitHub URL loading for remote repository analysis
 ```
 
 
-```python
 🚀 Ready to Deploy Comprehensive Error Analysis System
 I have completed the implementation of the comprehensive error analysis system for graph-sitter. The system is fully functional, tested, and ready for deployment.
 
@@ -106,6 +105,7 @@ Testing Status
 💡
 User Impact
 Once deployed, users will be able to:
+```python
 
 from graph_sitter.core.codebase import Codebase
  
