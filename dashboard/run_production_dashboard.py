@@ -47,13 +47,7 @@ def start_frontend():
     """Start the Reflex frontend"""
     print("🎨 Starting frontend dashboard...")
     frontend_process = subprocess.Popen([
-        sys.executable, "-c",
-        """
-import sys
-sys.path.insert(0, '.')
-from frontend import app
-app.run(host='0.0.0.0', port=3000)
-        """
+        "reflex", "run", "--frontend-port", "3000", "--backend-port", "8001"
     ], cwd=Path(__file__).parent)
     
     return frontend_process
