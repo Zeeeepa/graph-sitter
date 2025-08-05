@@ -15,43 +15,85 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Union, Set, Callable
 from collections import defaultdict
+from enum import IntEnum
 import weakref
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from .lsp_types import DiagnosticSeverity, ErrorType, Position, Range, Diagnostic
+from graph_sitter.core.codebase import Codebase
+from graph_sitter.codebase.codebase_analysis import get_codebase_summary, get_file_summary, get_class_summary, get_function_summary, get_symbol_summary
 from .runtime_collector import RuntimeErrorCollector, RuntimeContext
 
 logger = get_logger(__name__)
 
+# Error type enumeration for runtime error classification
+class ErrorType(IntEnum):
+    """Types of errors that can be detected."""
+    STATIC_ANALYSIS = 1  # Syntax, import, type errors from static analysis
+    RUNTIME_ERROR = 2    # Errors that occur during execution
+    LINTING = 3         # Code style and quality issues
+    SECURITY = 4        # Security vulnerabilities
+    PERFORMANCE = 5     # Performance issues
+
 # Optional Serena imports with graceful fallback
 SERENA_AVAILABLE = False
 try:
-    # Try to import Serena components
-    from serena.config.serena_config import DEFAULT_TOOL_TIMEOUT, ProjectConfig
-    from serena.constants import SERENA_MANAGED_DIR_IN_HOME
-    from serena.text_utils import MatchedConsecutiveLines, search_files
-    from serena.util.file_system import GitignoreParser, match_path
-    from solidlsp import SolidLanguageServer
-    from solidlsp.ls_config import Language, LanguageServerConfig
-    from solidlsp.ls_logger import LanguageServerLogger
-    from solidlsp.settings import SolidLSPSettings
-    from solidlsp.ls import ReferenceInSymbol as LSPReferenceInSymbol
-    from solidlsp.ls_types import Position as SerenaPosition, SymbolKind, UnifiedSymbolInformation
-    from serena.symbol import JetBrainsSymbol, LanguageServerSymbol, LanguageServerSymbolRetriever, PositionInFile, Symbol
-    from solidlsp.ls import LSPFileBuffer
-    from solidlsp.ls_utils import TextUtils
+    # Core solidlsp imports
+    from solidlsp.ls_types import DiagnosticSeverity, Diagnostic, Position, Range, MarkupContent, Location, MarkupKind, CompletionItemKind, CompletionItem, UnifiedSymbolInformation, SymbolKind, SymbolTag
+    from solidlsp.ls_utils import TextUtils, PathUtils, FileUtils, PlatformId, SymbolUtils
+    from solidlsp.ls_request import LanguageServerRequest
+    from solidlsp.ls_logger import LanguageServerLogger, LogLine
+    from solidlsp.ls_handler import SolidLanguageServerHandler, Request, LanguageServerTerminatedException
+    from solidlsp.ls import SolidLanguageServer, LSPFileBuffer
+    from solidlsp.lsp_protocol_handler.lsp_constants import LSPConstants
+    from solidlsp.lsp_protocol_handler.lsp_requests import LspRequest
+    from solidlsp.lsp_protocol_handler.lsp_types import *
+    from solidlsp.lsp_protocol_handler.server import ProcessLaunchInfo, LSPError, MessageType
+    
+    # Serena imports
+    from serena.symbol import LanguageServerSymbolRetriever, ReferenceInLanguageServerSymbol, LanguageServerSymbol, Symbol, PositionInFile, LanguageServerSymbolLocation
+    from serena.text_utils import MatchedConsecutiveLines, TextLine, LineType
+    from serena.project import Project
+    from serena.gui_log_viewer import GuiLogViewer, LogLevel, GuiLogViewerHandler
+    from serena.code_editor import CodeEditor
+    from serena.cli import PromptCommands, ToolCommands, ProjectCommands, SerenaConfigCommands, ContextCommands, ModeCommands, TopLevelCommands, AutoRegisteringGroup, ProjectType
     
     SERENA_AVAILABLE = True
     logger.info("Serena components successfully imported")
     
 except ImportError as e:
     logger.info(f"Serena components not available, using basic LSP functionality: {e}")
-    # Define minimal fallback classes
+    # Define minimal fallback classes for essential types
+    from enum import IntEnum
+    
+    class DiagnosticSeverity(IntEnum):
+        ERROR = 1
+        WARNING = 2
+        INFORMATION = 3
+        HINT = 4
+    
+    @dataclass
+    class Position:
+        line: int
+        character: int
+    
+    @dataclass
+    class Range:
+        start: Position
+        end: Position
+    
+    @dataclass
+    class Diagnostic:
+        range: Range
+        message: str
+        severity: Optional[DiagnosticSeverity] = None
+        code: Optional[Union[str, int]] = None
+        source: Optional[str] = None
+    
     class SolidLanguageServer:
         def __init__(self, *args, **kwargs):
             pass
     
-    class ProjectConfig:
+    class Project:
         def __init__(self, *args, **kwargs):
             pass
 
@@ -186,7 +228,8 @@ class SerenaLSPBridge:
         # Core components
         self.runtime_collector: Optional[RuntimeErrorCollector] = None
         self.serena_server: Optional[SolidLanguageServer] = None
-        self.project_config: Optional[ProjectConfig] = None
+        self.project: Optional[Project] = None
+        self.codebase: Optional[Codebase] = None
         
         # Error storage and management
         self.static_errors: List[ErrorInfo] = []
@@ -250,8 +293,12 @@ class SerenaLSPBridge:
     def _initialize_serena_components(self) -> None:
         """Initialize Serena LSP components."""
         try:
-            # Create project configuration
-            self.project_config = ProjectConfig()
+            # Initialize graph-sitter codebase
+            self.codebase = Codebase(repo_path=str(self.repo_path))
+            
+            # Create Serena project
+            if SERENA_AVAILABLE:
+                self.project = Project(str(self.repo_path))
             
             # Initialize Serena language server
             # Note: This is a placeholder - actual initialization depends on Serena setup
@@ -262,7 +309,8 @@ class SerenaLSPBridge:
         except Exception as e:
             logger.error(f"Failed to initialize Serena components: {e}")
             self.serena_server = None
-            self.project_config = None
+            self.project = None
+            self.codebase = None
     
     def _handle_runtime_error(self, error_info: ErrorInfo) -> None:
         """Handle runtime errors from the collector."""
@@ -298,23 +346,45 @@ class SerenaLSPBridge:
     def _enhance_error_with_serena(self, error_info: ErrorInfo) -> None:
         """Enhance error information using Serena capabilities."""
         try:
-            if not self.serena_server:
-                return
+            # Use graph-sitter codebase analysis
+            if self.codebase:
+                try:
+                    # Get file summary for context
+                    file_summary = get_file_summary(self.codebase, error_info.file_path)
+                    if file_summary:
+                        error_info.context_lines = file_summary.get('content_preview', [])
+                        error_info.related_symbols = [s['name'] for s in file_summary.get('symbols', [])]
+                    
+                    # Get symbol information if available
+                    symbol_summary = get_symbol_summary(self.codebase, error_info.file_path, error_info.line)
+                    if symbol_summary:
+                        error_info.symbol_info = symbol_summary
+                        
+                except Exception as e:
+                    logger.debug(f"Graph-sitter analysis failed: {e}")
             
-            # This is a placeholder for Serena-specific enhancements
-            # Actual implementation would depend on Serena API
-            
-            # Example enhancements:
-            # - Symbol information lookup
-            # - Dependency analysis
-            # - Code context extraction
-            # - Advanced fix suggestions
+            # Use Serena-specific enhancements if available
+            if SERENA_AVAILABLE and self.project:
+                try:
+                    # Serena symbol retrieval
+                    symbol_retriever = LanguageServerSymbolRetriever(self.project)
+                    position = PositionInFile(error_info.file_path, error_info.line, error_info.character)
+                    
+                    # Get symbol at position
+                    symbols = symbol_retriever.get_symbols_at_position(position)
+                    if symbols:
+                        error_info.symbol_info = {
+                            'serena_symbols': [s.to_dict() for s in symbols if hasattr(s, 'to_dict')]
+                        }
+                        
+                except Exception as e:
+                    logger.debug(f"Serena symbol analysis failed: {e}")
             
             self._stats['serena_queries'] += 1
-            logger.debug(f"Enhanced error with Serena: {error_info.file_path}:{error_info.line}")
+            logger.debug(f"Enhanced error with analysis: {error_info.file_path}:{error_info.line}")
             
         except Exception as e:
-            logger.error(f"Failed to enhance error with Serena: {e}")
+            logger.error(f"Failed to enhance error with analysis: {e}")
     
     def _generate_contextual_fix_suggestions(self, error_info: ErrorInfo) -> List[str]:
         """Generate contextual fix suggestions based on error analysis."""
@@ -634,4 +704,3 @@ def create_error_info(file_path: str, line: int, character: int, message: str,
         error_type=error_type,
         **kwargs
     )
-

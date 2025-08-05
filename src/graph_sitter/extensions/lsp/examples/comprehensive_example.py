@@ -23,10 +23,20 @@ from typing import Dict, Any
 # Add the parent directory to the path so we can import our modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from serena_bridge import SerenaLSPBridge, ErrorInfo, create_serena_bridge, create_error_info
+from serena_bridge import SerenaLSPBridge, ErrorInfo, create_serena_bridge, create_error_info, ErrorType
 from serena_protocol import SerenaProtocolExtension, create_serena_protocol_extension
 from runtime_collector import RuntimeErrorCollector, create_runtime_collector
-from lsp_types import DiagnosticSeverity, ErrorType
+
+# Import DiagnosticSeverity with fallback
+try:
+    from solidlsp.ls_types import DiagnosticSeverity
+except ImportError:
+    from enum import IntEnum
+    class DiagnosticSeverity(IntEnum):
+        ERROR = 1
+        WARNING = 2
+        INFORMATION = 3
+        HINT = 4
 
 
 def demonstrate_basic_usage():
@@ -449,4 +459,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -20,12 +20,33 @@ from collections import defaultdict
 import weakref
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from .lsp_types import DiagnosticSeverity, ErrorType
+
+# Import types from serena_bridge to avoid circular imports
+try:
+    from solidlsp.ls_types import DiagnosticSeverity
+    SERENA_AVAILABLE = True
+except ImportError:
+    from enum import IntEnum
+    class DiagnosticSeverity(IntEnum):
+        ERROR = 1
+        WARNING = 2
+        INFORMATION = 3
+        HINT = 4
+    SERENA_AVAILABLE = False
+
+# Error type enumeration
+class ErrorType(IntEnum):
+    """Types of errors that can be detected."""
+    STATIC_ANALYSIS = 1  # Syntax, import, type errors from static analysis
+    RUNTIME_ERROR = 2    # Errors that occur during execution
+    LINTING = 3         # Code style and quality issues
+    SECURITY = 4        # Security vulnerabilities
+    PERFORMANCE = 5     # Performance issues
 
 logger = get_logger(__name__)
 
 
-# ErrorType is now imported from lsp_types
+# ErrorType is now defined above
 
 
 @dataclass

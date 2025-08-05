@@ -11,8 +11,18 @@ from typing import Dict, List, Optional, Any, Union
 from dataclasses import asdict
 
 from graph_sitter.shared.logging.get_logger import get_logger
-from .lsp_types import DiagnosticSeverity, ErrorType
-from .serena_bridge import ErrorInfo, SerenaLSPBridge
+from .serena_bridge import ErrorInfo, SerenaLSPBridge, ErrorType
+
+# Import DiagnosticSeverity with fallback
+try:
+    from solidlsp.ls_types import DiagnosticSeverity
+except ImportError:
+    from enum import IntEnum
+    class DiagnosticSeverity(IntEnum):
+        ERROR = 1
+        WARNING = 2
+        INFORMATION = 3
+        HINT = 4
 
 logger = get_logger(__name__)
 
@@ -404,4 +414,3 @@ def create_serena_protocol_extension(repo_path: str, enable_runtime_collection: 
 def create_protocol_handler(bridge: SerenaLSPBridge) -> SerenaProtocolHandler:
     """Create a protocol handler for an existing bridge."""
     return SerenaProtocolHandler(bridge)
-
