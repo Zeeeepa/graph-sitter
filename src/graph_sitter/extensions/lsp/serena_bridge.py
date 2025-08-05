@@ -29,10 +29,7 @@ from graph_sitter.shared.logging.get_logger import get_logger
 try:
     # Core Serena LSP types and utilities
     from solidlsp.ls_types import (
-        DiagnosticSeverity as SerenaDiagnosticSeverity, 
-        Diagnostic as SerenaDiagnostic, 
-        Position as SerenaPosition, 
-        Range as SerenaRange, 
+        DiagnosticSeverity, Diagnostic, Position, Range, 
         MarkupContent, Location, MarkupKind, 
         CompletionItemKind, CompletionItem, 
         UnifiedSymbolInformation, SymbolKind, SymbolTag
@@ -44,8 +41,33 @@ try:
     from solidlsp.ls import SolidLanguageServer, LSPFileBuffer
     from solidlsp.lsp_protocol_handler.lsp_constants import LSPConstants
     from solidlsp.lsp_protocol_handler.lsp_requests import LspRequest
-    from solidlsp.lsp_protocol_handler.lsp_types import *
-    from solidlsp.lsp_protocol_handler.server import ProcessLaunchInfo, LSPError, MessageType
+    from solidlsp.lsp_protocol_handler.lsp_types import (
+        # Import the actual LSP types instead of redefining them
+        MessageType, ErrorCodes, LSPErrorCodes,
+        TextDocumentIdentifier, TextDocumentPositionParams,
+        CompletionParams, CompletionList, CompletionRegistrationOptions,
+        HoverParams, Hover, HoverRegistrationOptions,
+        SignatureHelpParams, SignatureHelp, SignatureHelpRegistrationOptions,
+        DefinitionParams, DefinitionRegistrationOptions,
+        ReferenceParams, ReferenceRegistrationOptions,
+        DocumentHighlightParams, DocumentHighlight, DocumentHighlightRegistrationOptions,
+        DocumentSymbolParams, SymbolInformation, DocumentSymbol, DocumentSymbolRegistrationOptions,
+        CodeActionParams, Command, CodeAction, CodeActionRegistrationOptions,
+        WorkspaceSymbolParams, WorkspaceSymbol, WorkspaceSymbolRegistrationOptions,
+        CodeLensParams, CodeLens, CodeLensRegistrationOptions,
+        DocumentLinkParams, DocumentLink, DocumentLinkRegistrationOptions,
+        DocumentFormattingParams, DocumentFormattingRegistrationOptions,
+        DocumentRangeFormattingParams, DocumentRangeFormattingRegistrationOptions,
+        DocumentOnTypeFormattingParams, DocumentOnTypeFormattingRegistrationOptions,
+        RenameParams, RenameRegistrationOptions,
+        ExecuteCommandParams, ExecuteCommandRegistrationOptions,
+        ApplyWorkspaceEditParams, ApplyWorkspaceEditResult,
+        WorkDoneProgressBegin, WorkDoneProgressReport, WorkDoneProgressEnd,
+        SetTraceParams, LogTraceParams, CancelParams, ProgressParams,
+        LocationLink, TextEdit, WorkspaceEdit,
+        PublishDiagnosticsParams, DiagnosticRelatedInformation
+    )
+    from solidlsp.lsp_protocol_handler.server import ProcessLaunchInfo
     
     # Serena symbol and analysis capabilities
     from serena.symbol import (
@@ -66,10 +88,13 @@ try:
 except ImportError as e:
     SERENA_AVAILABLE = False
     # Fallback definitions to avoid import errors
-    SerenaDiagnosticSeverity = None
-    SerenaDiagnostic = None
-    SerenaPosition = None
-    SerenaRange = None
+    DiagnosticSeverity = None
+    Diagnostic = None
+    Position = None
+    Range = None
+    MessageType = None
+    ErrorCodes = None
+    LSPErrorCodes = None
 
 logger = get_logger(__name__)
 
@@ -87,14 +112,6 @@ class ErrorType(IntEnum):
     PERFORMANCE = 5     # Performance issues
 
 
-class ErrorSeverity(Enum):
-    """Error severity levels."""
-    ERROR = "error"
-    WARNING = "warning"
-    INFO = "info"
-    HINT = "hint"
-
-
 class ErrorCategory(Enum):
     """Error categories for classification."""
     SYNTAX = "syntax"
@@ -106,29 +123,6 @@ class ErrorCategory(Enum):
     COMPATIBILITY = "compatibility"
     DEPENDENCY = "dependency"
     UNKNOWN = "unknown"
-
-
-class SerenaMessageType(Enum):
-    """LSP message types (renamed to avoid conflicts)."""
-    REQUEST = "request"
-    RESPONSE = "response"
-    NOTIFICATION = "notification"
-    ERROR = "error"
-
-
-class LSPErrorCode(Enum):
-    """LSP error codes (renamed to avoid conflicts)."""
-    PARSE_ERROR = -32700
-    INVALID_REQUEST = -32600
-    METHOD_NOT_FOUND = -32601
-    INVALID_PARAMS = -32602
-    INTERNAL_ERROR = -32603
-    SERVER_ERROR_START = -32099
-    SERVER_ERROR_END = -32000
-    SERVER_NOT_INITIALIZED = -32002
-    UNKNOWN_ERROR_CODE = -32001
-    REQUEST_CANCELLED = -32800
-    CONTENT_MODIFIED = -32801
 
 
 class DiagnosticEvent(Enum):
@@ -160,6 +154,23 @@ class ErrorLocation:
     def file_name(self) -> str:
         """Get just the filename."""
         return Path(self.file_path).name
+    
+    def to_lsp_position(self) -> Optional[Any]:
+        """Convert to LSP Position if available."""
+        if SERENA_AVAILABLE and Position:
+            return Position(line=self.line - 1, character=self.column - 1)  # LSP is 0-based
+        return None
+    
+    def to_lsp_range(self) -> Optional[Any]:
+        """Convert to LSP Range if available."""
+        if SERENA_AVAILABLE and Range and Position:
+            start = Position(line=self.line - 1, character=self.column - 1)
+            end = Position(
+                line=(self.end_line or self.line) - 1, 
+                character=(self.end_column or self.column) - 1
+            )
+            return Range(start=start, end=end)
+        return None
 
 
 @dataclass
@@ -178,93 +189,8 @@ class RuntimeContext:
         return f"RuntimeContext({self.exception_type}, {len(self.stack_trace)} frames)"
 
 
-@dataclass
-class SerenaLSPError:
-    """LSP error representation (renamed to avoid conflicts)."""
-    code: int
-    message: str
-    data: Optional[Any] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        error_dict: Dict[str, Any] = {"code": self.code, "message": self.message}
-        if self.data is not None:
-            error_dict["data"] = self.data
-        return error_dict
-
-
-@dataclass
-class LSPMessage:
-    """Base LSP message."""
-    jsonrpc: str
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'jsonrpc': self.jsonrpc
-        }
-    
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict())
-
-
-@dataclass
-class LSPRequest(LSPMessage):
-    """LSP request message."""
-    id: Union[str, int]
-    method: str
-    params: Optional[Dict[str, Any]] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        result = super().to_dict()
-        result.update({
-            'id': self.id,
-            'method': self.method
-        })
-        if self.params is not None:
-            result['params'] = self.params
-        return result
-    
-    @classmethod
-    def create(cls, method: str, params: Optional[Dict[str, Any]] = None) -> 'LSPRequest':
-        import uuid
-        return cls(
-            jsonrpc="2.0",
-            id=str(uuid.uuid4()),
-            method=method,
-            params=params
-        )
-
-
-@dataclass
-class LSPResponse(LSPMessage):
-    """LSP response message."""
-    id: Union[str, int]
-    result: Optional[Any] = None
-    error: Optional[SerenaLSPError] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        response_dict = super().to_dict()
-        response_dict['id'] = self.id
-        if self.error:
-            response_dict["error"] = self.error.to_dict()
-        else:
-            response_dict["result"] = self.result
-        return response_dict
-
-
-@dataclass
-class LSPNotification(LSPMessage):
-    """LSP notification message."""
-    method: str
-    params: Optional[Dict[str, Any]] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        result = super().to_dict()
-        result.update({
-            'method': self.method
-        })
-        if self.params is not None:
-            result['params'] = self.params
-        return result
+# LSP message handling will use the existing solidlsp infrastructure
+# No need to redefine LSP message classes
 
 
 # ============================================================================
