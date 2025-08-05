@@ -38,6 +38,24 @@ for function in codebase.functions:
         # Auto-handles references and imports to maintain correctness
         function.move_to_file("deprecated.py")
 ```
+codebase summary and chat-agent use
+```python
+# Use existing analysis functions
+from graph_sitter import Codebase
+from graph_sitter.codebase.codebase_analysis import get_codebase_summary
+
+# Load from GitHub URL using existing method
+codebase = Codebase.from_repo("owner/repository")
+
+# Get comprehensive analysis using existing function
+summary = get_codebase_summary(codebase)
+print(summary)
+
+# Use existing agents for interactive exploration
+from graph_sitter.agents.chat_agent import ChatAgent
+agent = ChatAgent(codebase)
+response = agent.run("What are the main components of this codebase?")
+```
 
 Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
 
