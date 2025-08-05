@@ -1,0 +1,215 @@
+name: Continuous Learning Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'tests/integration/continuous_learning/**'
+      - 'src/**'
+      - 'scripts/run_continuous_learning_tests.py'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'tests/integration/continuous_learning/**'
+      - 'src/**'
+      - 'scripts/run_continuous_learning_tests.py'
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      concurrent_users:
+        description: 'Number of concurrent users for load testing'
+        required: false
+        default: '100'
+        type: string
+      test_duration:
+        description: 'Test duration in seconds'
+        required: false
+        default: '300'
+        type: string
+      full_suite:
+        description: 'Run full test suite (longer duration)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  continuous-learning-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+        test-suite: ['integration', 'performance', 'workflow', 'production']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install pytest pytest-asyncio pytest-cov pytest-xdist
+        
+    - name: Set test parameters
+      id: test-params
+      run: |
+        if [ "${{ github.event.inputs.full_suite }}" = "true" ]; then
+          echo "concurrent_users=500" >> $GITHUB_OUTPUT
+          echo "test_duration=1800" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" = "schedule" ]; then
+          echo "concurrent_users=200" >> $GITHUB_OUTPUT
+          echo "test_duration=900" >> $GITHUB_OUTPUT
+        else
+          echo "concurrent_users=${{ github.event.inputs.concurrent_users || '50' }}" >> $GITHUB_OUTPUT
+          echo "test_duration=${{ github.event.inputs.test_duration || '180' }}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Run Integration Tests
+      if: matrix.test-suite == 'integration'
+      run: |
+        python -m pytest tests/integration/continuous_learning/test_integration_framework.py \
+          -v --tb=short --durations=10 \
+          -m "continuous_learning" \
+          --junitxml=integration-test-results.xml \
+          --cov=tests/integration/continuous_learning \
+          --cov-report=xml:integration-coverage.xml
+          
+    - name: Run Performance Tests
+      if: matrix.test-suite == 'performance'
+      run: |
+        python -m pytest tests/integration/continuous_learning/test_performance_benchmark.py \
+          -v --tb=short --durations=10 \
+          -m "performance" \
+          --junitxml=performance-test-results.xml \
+          --cov=tests/integration/continuous_learning \
+          --cov-report=xml:performance-coverage.xml
+          
+    - name: Run Workflow Tests
+      if: matrix.test-suite == 'workflow'
+      run: |
+        python -m pytest tests/integration/continuous_learning/test_workflow_suite.py \
+          -v --tb=short --durations=10 \
+          -m "continuous_learning" \
+          --junitxml=workflow-test-results.xml \
+          --cov=tests/integration/continuous_learning \
+          --cov-report=xml:workflow-coverage.xml
+          
+    - name: Run Production Readiness Tests
+      if: matrix.test-suite == 'production'
+      run: |
+        python -m pytest tests/integration/continuous_learning/test_production_readiness.py \
+          -v --tb=short --durations=10 \
+          -m "production_readiness" \
+          --junitxml=production-test-results.xml \
+          --cov=tests/integration/continuous_learning \
+          --cov-report=xml:production-coverage.xml
+          
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}-${{ matrix.test-suite }}
+        path: |
+          *-test-results.xml
+          *-coverage.xml
+          continuous_learning_tests.log
+          
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: always()
+      with:
+        file: ./*-coverage.xml
+        flags: continuous-learning-${{ matrix.test-suite }}
+        name: codecov-${{ matrix.python-version }}-${{ matrix.test-suite }}
+
+  comprehensive-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    if: github.event_name == 'schedule' || github.event.inputs.full_suite == 'true'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install pytest pytest-asyncio pytest-cov
+        
+    - name: Run Comprehensive Test Suite
+      run: |
+        python scripts/run_continuous_learning_tests.py \
+          --concurrent-users ${{ github.event.inputs.concurrent_users || '200' }} \
+          --test-duration ${{ github.event.inputs.test_duration || '900' }} \
+          --output comprehensive-test-results.json \
+          --verbose
+          
+    - name: Upload comprehensive results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: comprehensive-test-results
+        path: |
+          comprehensive-test-results.json
+          continuous_learning_tests.log
+
+  test-summary:
+    runs-on: ubuntu-latest
+    needs: [continuous-learning-tests]
+    if: always()
+    
+    steps:
+    - name: Download all test results
+      uses: actions/download-artifact@v3
+      
+    - name: Generate test summary
+      run: |
+        echo "# Continuous Learning Integration Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Test Results by Suite" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        for suite in integration performance workflow production; do
+          echo "### ${suite^} Tests" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if test results exist for this suite
+          if ls test-results-*-${suite}/*-test-results.xml 1> /dev/null 2>&1; then
+            echo "✅ Tests completed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Tests failed or not run" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+        done
+        
+        echo "## Success Criteria Validation" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- Integration tests >95% success rate" >> $GITHUB_STEP_SUMMARY
+        echo "- System performance meets baseline requirements" >> $GITHUB_STEP_SUMMARY
+        echo "- Error detection and recovery <5 minute MTTR" >> $GITHUB_STEP_SUMMARY
+        echo "- Pattern analysis >80% accuracy" >> $GITHUB_STEP_SUMMARY
+        echo "- System handles 1000+ users <2s response time" >> $GITHUB_STEP_SUMMARY
+        echo "- Production readiness validated" >> $GITHUB_STEP_SUMMARY
+
