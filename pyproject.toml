@@ -129,6 +129,7 @@ serena = [
   # Serena MCP server can be installed via uvx or git
   # No direct Python package dependency needed as it runs as external MCP server
   "mcp>=1.0.0",  # MCP client library for communication
+  "serena>=0.1.0",  # Serena LSP integration
 ]
 slack = ["slack_sdk>=3.0.0"]
 attribution = ["intervaltree>=3.0.0"]
