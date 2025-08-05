@@ -28,11 +28,11 @@ class IssuesState(rx.State):
     
     def set_severity_filter(self, severity: str):
         """Set the severity filter."""
-        AppState.filter_issues(severity=severity)
+        self.get_state(AppState).filter_issues(severity=severity)
     
     def set_type_filter(self, issue_type: str):
         """Set the issue type filter."""
-        AppState.filter_issues(issue_type=issue_type)
+        self.get_state(AppState).filter_issues(issue_type=issue_type)
     
     def show_issue_details(self, issue: Dict[str, Any]):
         """Show detailed issue modal."""
@@ -99,9 +99,9 @@ def issues_display() -> rx.Component:
                     ),
                     
                     rx.hstack(
-                        _create_severity_summary("critical", IssuesState.issues_by_severity["critical"]),
-                        _create_severity_summary("major", IssuesState.issues_by_severity["major"]),
-                        _create_severity_summary("minor", IssuesState.issues_by_severity["minor"]),
+                        _create_severity_summary("critical", IssuesState.issues_by_severity["critical"]),  # type: ignore
+                        _create_severity_summary("major", IssuesState.issues_by_severity["major"]),  # type: ignore
+                        _create_severity_summary("minor", IssuesState.issues_by_severity["minor"]),  # type: ignore
                         spacing=SPACING["md"]
                     ),
                     
@@ -162,9 +162,9 @@ def issues_display() -> rx.Component:
                         rx.icon(tag="refresh", size="sm"),
                         "Reset Filters",
                         on_click=lambda: [
-                            IssuesState.update_search(""),
-                            IssuesState.set_severity_filter("all"),
-                            IssuesState.set_type_filter("all")
+                            IssuesState.update_search(""),  # type: ignore
+                            IssuesState.set_severity_filter("all"),  # type: ignore
+                            IssuesState.set_type_filter("all")  # type: ignore
                         ],
                         style=COMPONENT_STYLES["button_secondary"],
                         size="sm"
@@ -190,7 +190,7 @@ def issues_display() -> rx.Component:
                     *[
                         issue_card(
                             issue=issue,
-                            on_click=lambda i=issue: IssuesState.show_issue_details(i)
+                            on_click=lambda i=issue: IssuesState.show_issue_details(i)  # type: ignore
                         )
                         for issue in AppState.filtered_issues
                     ],
@@ -270,4 +270,3 @@ def _create_severity_summary(severity: str, count: int) -> rx.Component:
         border=f"1px solid {severity_info['border_color']}",
         border_radius="8px"
     )
-

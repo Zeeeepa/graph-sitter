@@ -143,10 +143,10 @@ class RealCodebaseAnalyzer:
     def get_codebase_summary(self, codebase: Codebase) -> str:
         """Get comprehensive codebase summary using real graph-sitter"""
         try:
-            files = list(codebase.files)
-            functions = list(codebase.functions)
-            classes = list(codebase.classes)
-            imports = list(codebase.imports)
+            files = list(codebase.files)  # type: ignore
+            functions = list(codebase.functions)  # type: ignore
+            classes = list(codebase.classes)  # type: ignore
+            imports = list(codebase.imports)  # type: ignore
             
             summary = f"""
 CODEBASE SUMMARY
@@ -160,7 +160,7 @@ LANGUAGE BREAKDOWN:
 """
             
             # Language breakdown
-            lang_counts = defaultdict(int)
+            lang_counts: Dict[str, int] = defaultdict(int)
             for file in files:
                 ext = Path(file.filepath).suffix.lower()
                 if ext in ['.py']:
@@ -422,11 +422,11 @@ async def perform_comprehensive_analysis(analysis_id: str, codebase: Codebase):
         
         # Get all codebase elements
         logger.info("Extracting codebase elements...")
-        files = list(codebase.files)
-        functions = list(codebase.functions)
-        classes = list(codebase.classes)
-        imports = list(codebase.imports)
-        symbols = list(codebase.symbols)
+        files = list(codebase.files)  # type: ignore
+        functions = list(codebase.functions)  # type: ignore
+        classes = list(codebase.classes)  # type: ignore
+        imports = list(codebase.imports)  # type: ignore
+        symbols = list(codebase.symbols)  # type: ignore
         
         analysis["progress"] = 30
         
@@ -666,7 +666,7 @@ async def build_tree_structure(files, functions, classes, issues) -> Dict[str, A
             issues_by_file[issue.file_path].append(issue)
         
         # Build file tree
-        file_tree = {}
+        file_tree: Dict[str, Any] = {}
         for file in files:
             path_parts = Path(file.filepath).parts
             current = file_tree
