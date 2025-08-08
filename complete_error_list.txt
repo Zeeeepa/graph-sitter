@@ -1,0 +1,2783 @@
+COMPLETE ERROR LIST: [556 errors]
+================================================================================
+
+   1. 🔴 [MISSING_FUNCTION] Function 'ParamSpec' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ParamSpec
+      💡 Fix: Define function 'ParamSpec'
+
+   2. 🔴 [MISSING_FUNCTION] Function 'skill' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: skill
+      💡 Fix: Define function 'skill'
+
+   3. 🔴 [MISSING_FUNCTION] Function 'skill_impl' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: skill_impl
+      💡 Fix: Define function 'skill_impl'
+
+   4. 🔴 [MISSING_FUNCTION] Function 'add_import' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_import
+      💡 Fix: Define function 'add_import'
+
+   5. 🔴 [MISSING_FUNCTION] Function 'SystemMessage' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SystemMessage
+      💡 Fix: Define function 'SystemMessage'
+
+   6. 🔴 [MISSING_FUNCTION] Function 'MemorySaver' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: MemorySaver
+      💡 Fix: Define function 'MemorySaver'
+
+   7. 🔴 [MISSING_FUNCTION] Function 'Group' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Group
+      💡 Fix: Define function 'Group'
+
+   8. 🔴 [MISSING_FUNCTION] Function 'cond' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: cond
+      💡 Fix: Define function 'cond'
+
+   9. 🔴 [MISSING_FUNCTION] Function 'Codebase' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Codebase
+      💡 Fix: Define function 'Codebase'
+
+  10. 🔴 [MISSING_FUNCTION] Function 'sort' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: sort
+      💡 Fix: Define function 'sort'
+
+  11. 🔴 [MISSING_FUNCTION] Function 'print_exc' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: print_exc
+      💡 Fix: Define function 'print_exc'
+
+  12. 🔴 [MISSING_FUNCTION] Function 'read' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: read
+      💡 Fix: Define function 'read'
+
+  13. 🔴 [MISSING_FUNCTION] Function 'parse' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parse
+      💡 Fix: Define function 'parse'
+
+  14. 🔴 [MISSING_FUNCTION] Function 'rstrip' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: rstrip
+      💡 Fix: Define function 'rstrip'
+
+  15. 🔴 [MISSING_FUNCTION] Function 'AsyncClient' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: AsyncClient
+      💡 Fix: Define function 'AsyncClient'
+
+  16. 🔴 [MISSING_FUNCTION] Function 'request' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: request
+      💡 Fix: Define function 'request'
+
+  17. 🔴 [MISSING_FUNCTION] Function 'APIError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: APIError
+      💡 Fix: Define function 'APIError'
+
+  18. 🔴 [MISSING_FUNCTION] Function 'NetworkError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: NetworkError
+      💡 Fix: Define function 'NetworkError'
+
+  19. 🔴 [MISSING_FUNCTION] Function 'ValidationError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ValidationError
+      💡 Fix: Define function 'ValidationError'
+
+  20. 🔴 [MISSING_FUNCTION] Function 'aclose' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: aclose
+      💡 Fix: Define function 'aclose'
+
+  21. 🔴 [MISSING_FUNCTION] Function 'close' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: close
+      💡 Fix: Define function 'close'
+
+  22. 🔴 [MISSING_FUNCTION] Function 'session' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: session
+      💡 Fix: Define function 'session'
+
+  23. 🔴 [MISSING_FUNCTION] Function 'basicConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: basicConfig
+      💡 Fix: Define function 'basicConfig'
+
+  24. 🔴 [MISSING_FUNCTION] Function 'DiGraph' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: DiGraph
+      💡 Fix: Define function 'DiGraph'
+
+  25. 🔴 [MISSING_FUNCTION] Function 'add_node' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_node
+      💡 Fix: Define function 'add_node'
+
+  26. 🔴 [MISSING_FUNCTION] Function 'add_edge' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_edge
+      💡 Fix: Define function 'add_edge'
+
+  27. 🔴 [MISSING_FUNCTION] Function 'tabulate' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: tabulate
+      💡 Fix: Define function 'tabulate'
+
+  28. 🔴 [MISSING_FUNCTION] Function 'dumps' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: dumps
+      💡 Fix: Define function 'dumps'
+
+  29. 🔴 [MISSING_FUNCTION] Function 'decode' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: decode
+      💡 Fix: Define function 'decode'
+
+  30. 🔴 [MISSING_FUNCTION] Function 'write_text' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: write_text
+      💡 Fix: Define function 'write_text'
+
+  31. 🔴 [MISSING_FUNCTION] Function 'getLogger' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: getLogger
+      💡 Fix: Define function 'getLogger'
+
+  32. 🔴 [MISSING_FUNCTION] Function 'Field' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Field
+      💡 Fix: Define function 'Field'
+
+  33. 🔴 [MISSING_FUNCTION] Function 'info' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: info
+      💡 Fix: Define function 'info'
+
+  34. 🔴 [MISSING_FUNCTION] Function 'error' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: error
+      💡 Fix: Define function 'error'
+
+  35. 🔴 [MISSING_FUNCTION] Function 'mkdtemp' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: mkdtemp
+      💡 Fix: Define function 'mkdtemp'
+
+  36. 🔴 [MISSING_FUNCTION] Function 'clone_repository' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: clone_repository
+      💡 Fix: Define function 'clone_repository'
+
+  37. 🔴 [MISSING_FUNCTION] Function 'sleep' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: sleep
+      💡 Fix: Define function 'sleep'
+
+  38. 🔴 [MISSING_FUNCTION] Function 'asdict' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: asdict
+      💡 Fix: Define function 'asdict'
+
+  39. 🔴 [MISSING_FUNCTION] Function 'FastAPI' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: FastAPI
+      💡 Fix: Define function 'FastAPI'
+
+  40. 🔴 [MISSING_FUNCTION] Function 'add_middleware' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_middleware
+      💡 Fix: Define function 'add_middleware'
+
+  41. 🔴 [MISSING_FUNCTION] Function 'post' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: post
+      💡 Fix: Define function 'post'
+
+  42. 🔴 [MISSING_FUNCTION] Function 'add_task' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_task
+      💡 Fix: Define function 'add_task'
+
+  43. 🔴 [MISSING_FUNCTION] Function 'AnalysisResponse' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: AnalysisResponse
+      💡 Fix: Define function 'AnalysisResponse'
+
+  44. 🔴 [MISSING_FUNCTION] Function 'alert_icon' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: alert_icon
+      💡 Fix: Define function 'alert_icon'
+
+  45. 🔴 [MISSING_FUNCTION] Function 'alert_title' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: alert_title
+      💡 Fix: Define function 'alert_title'
+
+  46. 🔴 [MISSING_FUNCTION] Function 'alert_description' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: alert_description
+      💡 Fix: Define function 'alert_description'
+
+  47. 🔴 [MISSING_FUNCTION] Function 'grid' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: grid
+      💡 Fix: Define function 'grid'
+
+  48. 🔴 [MISSING_FUNCTION] Function 'stat' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stat
+      💡 Fix: Define function 'stat'
+
+  49. 🔴 [MISSING_FUNCTION] Function 'stat_label' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stat_label
+      💡 Fix: Define function 'stat_label'
+
+  50. 🔴 [MISSING_FUNCTION] Function 'stat_number' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stat_number
+      💡 Fix: Define function 'stat_number'
+
+  51. 🔴 [MISSING_FUNCTION] Function 'stat_help_text' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stat_help_text
+      💡 Fix: Define function 'stat_help_text'
+
+  52. 🔴 [MISSING_FUNCTION] Function 'bind' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: bind
+      💡 Fix: Define function 'bind'
+
+  53. 🔴 [MISSING_FUNCTION] Function 'Thread' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Thread
+      💡 Fix: Define function 'Thread'
+
+  54. 🔴 [MISSING_FUNCTION] Function 'start' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: start
+      💡 Fix: Define function 'start'
+
+  55. 🔴 [MISSING_FUNCTION] Function 'warning' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: warning
+      💡 Fix: Define function 'warning'
+
+  56. 🔴 [MISSING_FUNCTION] Function 'total_seconds' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: total_seconds
+      💡 Fix: Define function 'total_seconds'
+
+  57. 🔴 [MISSING_FUNCTION] Function 'child_by_field_name' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: child_by_field_name
+      💡 Fix: Define function 'child_by_field_name'
+
+  58. 🔴 [MISSING_FUNCTION] Function 'Argument' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Argument
+      💡 Fix: Define function 'Argument'
+
+  59. 🔴 [MISSING_FUNCTION] Function 'MultiExpression' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: MultiExpression
+      💡 Fix: Define function 'MultiExpression'
+
+  60. 🔴 [MISSING_FUNCTION] Function 'insert_before' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: insert_before
+      💡 Fix: Define function 'insert_before'
+
+  61. 🔴 [MISSING_FUNCTION] Function 'find_parameter_by_name' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: find_parameter_by_name
+      💡 Fix: Define function 'find_parameter_by_name'
+
+  62. 🔴 [MISSING_FUNCTION] Function 'parse_expression' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parse_expression
+      💡 Fix: Define function 'parse_expression'
+
+  63. 🔴 [MISSING_FUNCTION] Function 'sort_editables' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: sort_editables
+      💡 Fix: Define function 'sort_editables'
+
+  64. 🔴 [MISSING_FUNCTION] Function 'insert_after' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: insert_after
+      💡 Fix: Define function 'insert_after'
+
+  65. 🔴 [MISSING_FUNCTION] Function 'edit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: edit
+      💡 Fix: Define function 'edit'
+
+  66. 🔴 [MISSING_FUNCTION] Function 'parent_of_type' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parent_of_type
+      💡 Fix: Define function 'parent_of_type'
+
+  67. 🔴 [MISSING_FUNCTION] Function 'reduce_condition' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: reduce_condition
+      💡 Fix: Define function 'reduce_condition'
+
+  68. 🔴 [MISSING_FUNCTION] Function 'RemoveTransaction' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RemoveTransaction
+      💡 Fix: Define function 'RemoveTransaction'
+
+  69. 🔴 [MISSING_FUNCTION] Function 'add_transaction' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_transaction
+      💡 Fix: Define function 'add_transaction'
+
+  70. 🔴 [MISSING_FUNCTION] Function 'insert_at' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: insert_at
+      💡 Fix: Define function 'insert_at'
+
+  71. 🔴 [MISSING_FUNCTION] Function 'count' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: count
+      💡 Fix: Define function 'count'
+
+  72. 🔴 [MISSING_FUNCTION] Function 'PyAttribute' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PyAttribute
+      💡 Fix: Define function 'PyAttribute'
+
+  73. 🔴 [MISSING_FUNCTION] Function 'find_all_descendants' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: find_all_descendants
+      💡 Fix: Define function 'find_all_descendants'
+
+  74. 🔴 [MISSING_FUNCTION] Function 'PyAssignment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PyAssignment
+      💡 Fix: Define function 'PyAssignment'
+
+  75. 🔴 [MISSING_FUNCTION] Function 'TSAssignment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSAssignment
+      💡 Fix: Define function 'TSAssignment'
+
+  76. 🔴 [MISSING_FUNCTION] Function 'popleft' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: popleft
+      💡 Fix: Define function 'popleft'
+
+  77. 🔴 [MISSING_FUNCTION] Function 'ConfigDict' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ConfigDict
+      💡 Fix: Define function 'ConfigDict'
+
+  78. 🔴 [MISSING_FUNCTION] Function 'fromkeys' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: fromkeys
+      💡 Fix: Define function 'fromkeys'
+
+  79. 🔴 [MISSING_FUNCTION] Function 'superclasses' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: superclasses
+      💡 Fix: Define function 'superclasses'
+
+  80. 🔴 [MISSING_FUNCTION] Function 'resolve_http' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: resolve_http
+      💡 Fix: Define function 'resolve_http'
+
+  81. 🔴 [MISSING_FUNCTION] Function 'rsplit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: rsplit
+      💡 Fix: Define function 'rsplit'
+
+  82. 🔴 [MISSING_FUNCTION] Function 'removesuffix' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: removesuffix
+      💡 Fix: Define function 'removesuffix'
+
+  83. 🔴 [MISSING_FUNCTION] Function 'rmtree' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: rmtree
+      💡 Fix: Define function 'rmtree'
+
+  84. 🔴 [MISSING_FUNCTION] Function 'ProgrammingLanguage' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ProgrammingLanguage
+      💡 Fix: Define function 'ProgrammingLanguage'
+
+  85. 🔴 [MISSING_FUNCTION] Function 'CodeIssue' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CodeIssue
+      💡 Fix: Define function 'CodeIssue'
+
+  86. 🔴 [MISSING_FUNCTION] Function 'convert_to_tree' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: convert_to_tree
+      💡 Fix: Define function 'convert_to_tree'
+
+  87. 🔴 [MISSING_FUNCTION] Function 'uuid4' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: uuid4
+      💡 Fix: Define function 'uuid4'
+
+  88. 🔴 [MISSING_FUNCTION] Function 'RepoConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RepoConfig
+      💡 Fix: Define function 'RepoConfig'
+
+  89. 🔴 [MISSING_FUNCTION] Function 'GitRepoClient' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: GitRepoClient
+      💡 Fix: Define function 'GitRepoClient'
+
+  90. 🔴 [MISSING_FUNCTION] Function 'Klass' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Klass
+      💡 Fix: Define function 'Klass'
+
+  91. 🔴 [MISSING_FUNCTION] Function 'remote' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: remote
+      💡 Fix: Define function 'remote'
+
+  92. 🔴 [MISSING_FUNCTION] Function 'exception' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: exception
+      💡 Fix: Define function 'exception'
+
+  93. 🔴 [MISSING_FUNCTION] Function 'parameter' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parameter
+      💡 Fix: Define function 'parameter'
+
+  94. 🔴 [MISSING_FUNCTION] Function 'method' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: method
+      💡 Fix: Define function 'method'
+
+  95. 🔴 [MISSING_FUNCTION] Function 'handle_slack_event' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: handle_slack_event
+      💡 Fix: Define function 'handle_slack_event'
+
+  96. 🔴 [MISSING_FUNCTION] Function 'handle_github_event' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: handle_github_event
+      💡 Fix: Define function 'handle_github_event'
+
+  97. 🔴 [MISSING_FUNCTION] Function 'handle_linear_event' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: handle_linear_event
+      💡 Fix: Define function 'handle_linear_event'
+
+  98. 🔴 [MISSING_FUNCTION] Function 'command_name' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: command_name
+      💡 Fix: Define function 'command_name'
+
+  99. 🔴 [MISSING_FUNCTION] Function 'SettingsConfigDict' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SettingsConfigDict
+      💡 Fix: Define function 'SettingsConfigDict'
+
+ 100. 🔴 [MISSING_FUNCTION] Function 'exists' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: exists
+      💡 Fix: Define function 'exists'
+
+ 101. 🔴 [MISSING_FUNCTION] Function 'load_dotenv' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: load_dotenv
+      💡 Fix: Define function 'load_dotenv'
+
+ 102. 🔴 [MISSING_FUNCTION] Function 'mkdir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: mkdir
+      💡 Fix: Define function 'mkdir'
+
+ 103. 🔴 [MISSING_FUNCTION] Function 'write' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: write
+      💡 Fix: Define function 'write'
+
+ 104. 🔴 [MISSING_FUNCTION] Function 'model_dump' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: model_dump
+      💡 Fix: Define function 'model_dump'
+
+ 105. 🔴 [MISSING_FUNCTION] Function 'RunBashCommandObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RunBashCommandObservation
+      💡 Fix: Define function 'RunBashCommandObservation'
+
+ 106. 🔴 [MISSING_FUNCTION] Function 'Popen' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Popen
+      💡 Fix: Define function 'Popen'
+
+ 107. 🔴 [MISSING_FUNCTION] Function 'ExpressionGroup' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ExpressionGroup
+      💡 Fix: Define function 'ExpressionGroup'
+
+ 108. 🔴 [MISSING_FUNCTION] Function 'unwrap' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: unwrap
+      💡 Fix: Define function 'unwrap'
+
+ 109. 🔴 [MISSING_FUNCTION] Function 'read_text' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: read_text
+      💡 Fix: Define function 'read_text'
+
+ 110. 🔴 [MISSING_FUNCTION] Function 'ResolutionStack' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ResolutionStack
+      💡 Fix: Define function 'ResolutionStack'
+
+ 111. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+ 112. 🔴 [MISSING_FUNCTION] Function 'reader' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: reader
+      💡 Fix: Define function 'reader'
+
+ 113. 🔴 [MISSING_FUNCTION] Function 'resolve_attribute' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: resolve_attribute
+      💡 Fix: Define function 'resolve_attribute'
+
+ 114. 🔴 [MISSING_FUNCTION] Function 'add_edges' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_edges
+      💡 Fix: Define function 'add_edges'
+
+ 115. 🔴 [MISSING_FUNCTION] Function 'create' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create
+      💡 Fix: Define function 'create'
+
+ 116. 🔴 [MISSING_FUNCTION] Function 'loads' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: loads
+      💡 Fix: Define function 'loads'
+
+ 117. 🔴 [MISSING_FUNCTION] Function 'Repo' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Repo
+      💡 Fix: Define function 'Repo'
+
+ 118. 🔴 [MISSING_FUNCTION] Function 'stream' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stream
+      💡 Fix: Define function 'stream'
+
+ 119. 🔴 [MISSING_FUNCTION] Function 'pretty_print' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: pretty_print
+      💡 Fix: Define function 'pretty_print'
+
+ 120. 🔴 [MISSING_FUNCTION] Function 'AIMessage' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: AIMessage
+      💡 Fix: Define function 'AIMessage'
+
+ 121. 🔴 [MISSING_FUNCTION] Function 'CheckoutPRObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CheckoutPRObservation
+      💡 Fix: Define function 'CheckoutPRObservation'
+
+ 122. 🔴 [MISSING_FUNCTION] Function 'checkout' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: checkout
+      💡 Fix: Define function 'checkout'
+
+ 123. 🔴 [MISSING_FUNCTION] Function 'compute_superclass_dependencies' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: compute_superclass_dependencies
+      💡 Fix: Define function 'compute_superclass_dependencies'
+
+ 124. 🔴 [MISSING_FUNCTION] Function 'add_attribute_from_source' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_attribute_from_source
+      💡 Fix: Define function 'add_attribute_from_source'
+
+ 125. 🔴 [MISSING_FUNCTION] Function 'VizNode' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: VizNode
+      💡 Fix: Define function 'VizNode'
+
+ 126. 🔴 [MISSING_FUNCTION] Function 'Parents' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Parents
+      💡 Fix: Define function 'Parents'
+
+ 127. 🔴 [MISSING_FUNCTION] Function 'SymbolGroup' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SymbolGroup
+      💡 Fix: Define function 'SymbolGroup'
+
+ 128. 🔴 [MISSING_FUNCTION] Function 'MultiLineCollection' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: MultiLineCollection
+      💡 Fix: Define function 'MultiLineCollection'
+
+ 129. 🔴 [MISSING_FUNCTION] Function 'child_by_field_types' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: child_by_field_types
+      💡 Fix: Define function 'child_by_field_types'
+
+ 130. 🔴 [MISSING_FUNCTION] Function 'convert_to_react_interface' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: convert_to_react_interface
+      💡 Fix: Define function 'convert_to_react_interface'
+
+ 131. 🔴 [MISSING_FUNCTION] Function 'basename' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: basename
+      💡 Fix: Define function 'basename'
+
+ 132. 🔴 [MISSING_FUNCTION] Function 'group' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: group
+      💡 Fix: Define function 'group'
+
+ 133. 🔴 [MISSING_FUNCTION] Function 'add_command' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_command
+      💡 Fix: Define function 'add_command'
+
+ 134. 🔴 [MISSING_FUNCTION] Function 'Repository' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Repository
+      💡 Fix: Define function 'Repository'
+
+ 135. 🔴 [MISSING_FUNCTION] Function 'dump' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: dump
+      💡 Fix: Define function 'dump'
+
+ 136. 🔴 [MISSING_FUNCTION] Function 'OpenAI' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: OpenAI
+      💡 Fix: Define function 'OpenAI'
+
+ 137. 🔴 [MISSING_FUNCTION] Function 'Session' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Session
+      💡 Fix: Define function 'Session'
+
+ 138. 🔴 [MISSING_FUNCTION] Function 'rprint' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: rprint
+      💡 Fix: Define function 'rprint'
+
+ 139. 🔴 [MISSING_FUNCTION] Function 'model_validate' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: model_validate
+      💡 Fix: Define function 'model_validate'
+
+ 140. 🔴 [MISSING_FUNCTION] Function 'ServerError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ServerError
+      💡 Fix: Define function 'ServerError'
+
+ 141. 🔴 [MISSING_FUNCTION] Function 'ServerInfo' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ServerInfo
+      💡 Fix: Define function 'ServerInfo'
+
+ 142. 🔴 [MISSING_FUNCTION] Function 'raise_for_status' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: raise_for_status
+      💡 Fix: Define function 'raise_for_status'
+
+ 143. 🔴 [MISSING_FUNCTION] Function 'listdir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: listdir
+      💡 Fix: Define function 'listdir'
+
+ 144. 🔴 [MISSING_FUNCTION] Function 'getcwd' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: getcwd
+      💡 Fix: Define function 'getcwd'
+
+ 145. 🔴 [MISSING_FUNCTION] Function 'realpath' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: realpath
+      💡 Fix: Define function 'realpath'
+
+ 146. 🔴 [MISSING_FUNCTION] Function 'dirname' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: dirname
+      💡 Fix: Define function 'dirname'
+
+ 147. 🔴 [MISSING_FUNCTION] Function 'chdir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: chdir
+      💡 Fix: Define function 'chdir'
+
+ 148. 🔴 [MISSING_FUNCTION] Function 'clone_from' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: clone_from
+      💡 Fix: Define function 'clone_from'
+
+ 149. 🔴 [MISSING_FUNCTION] Function 'CustomRemoteProgress' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CustomRemoteProgress
+      💡 Fix: Define function 'CustomRemoteProgress'
+
+ 150. 🔴 [MISSING_FUNCTION] Function 'HumanMessage' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: HumanMessage
+      💡 Fix: Define function 'HumanMessage'
+
+ 151. 🔴 [MISSING_FUNCTION] Function 'format_exc' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: format_exc
+      💡 Fix: Define function 'format_exc'
+
+ 152. 🔴 [MISSING_FUNCTION] Function 'usages' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: usages
+      💡 Fix: Define function 'usages'
+
+ 153. 🔴 [MISSING_FUNCTION] Function 'deprecated' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: deprecated
+      💡 Fix: Define function 'deprecated'
+
+ 154. 🔴 [MISSING_FUNCTION] Function 'remove_byte_range' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: remove_byte_range
+      💡 Fix: Define function 'remove_byte_range'
+
+ 155. 🔴 [MISSING_FUNCTION] Function 'indent' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: indent
+      💡 Fix: Define function 'indent'
+
+ 156. 🔴 [MISSING_FUNCTION] Function 'find_line_start_and_end_nodes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: find_line_start_and_end_nodes
+      💡 Fix: Define function 'find_line_start_and_end_nodes'
+
+ 157. 🔴 [MISSING_FUNCTION] Function 'Value' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Value
+      💡 Fix: Define function 'Value'
+
+ 158. 🔴 [MISSING_FUNCTION] Function 'model_dump_json' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: model_dump_json
+      💡 Fix: Define function 'model_dump_json'
+
+ 159. 🔴 [MISSING_FUNCTION] Function 'array' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: array
+      💡 Fix: Define function 'array'
+
+ 160. 🔴 [MISSING_FUNCTION] Function 'norm' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: norm
+      💡 Fix: Define function 'norm'
+
+ 161. 🔴 [MISSING_FUNCTION] Function 'auto' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: auto
+      💡 Fix: Define function 'auto'
+
+ 162. 🔴 [MISSING_FUNCTION] Function 'CodebaseConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CodebaseConfig
+      💡 Fix: Define function 'CodebaseConfig'
+
+ 163. 🔴 [MISSING_FUNCTION] Function 'CodebaseContext' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CodebaseContext
+      💡 Fix: Define function 'CodebaseContext'
+
+ 164. 🔴 [MISSING_FUNCTION] Function 'Console' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Console
+      💡 Fix: Define function 'Console'
+
+ 165. 🔴 [MISSING_FUNCTION] Function 'iter_files' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: iter_files
+      💡 Fix: Define function 'iter_files'
+
+ 166. 🔴 [MISSING_FUNCTION] Function 'files' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: files
+      💡 Fix: Define function 'files'
+
+ 167. 🔴 [MISSING_FUNCTION] Function 'uncache_all' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: uncache_all
+      💡 Fix: Define function 'uncache_all'
+
+ 168. 🔴 [MISSING_FUNCTION] Function 'file_exists' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: file_exists
+      💡 Fix: Define function 'file_exists'
+
+ 169. 🔴 [MISSING_FUNCTION] Function 'iterdir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: iterdir
+      💡 Fix: Define function 'iterdir'
+
+ 170. 🔴 [MISSING_FUNCTION] Function 'normpath' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: normpath
+      💡 Fix: Define function 'normpath'
+
+ 171. 🔴 [MISSING_FUNCTION] Function 'commit_transactions' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: commit_transactions
+      💡 Fix: Define function 'commit_transactions'
+
+ 172. 🔴 [MISSING_FUNCTION] Function 'stage_and_commit_all_changes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stage_and_commit_all_changes
+      💡 Fix: Define function 'stage_and_commit_all_changes'
+
+ 173. 🔴 [MISSING_FUNCTION] Function 'push_changes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: push_changes
+      💡 Fix: Define function 'push_changes'
+
+ 174. 🔴 [MISSING_FUNCTION] Function 'discard_changes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: discard_changes
+      💡 Fix: Define function 'discard_changes'
+
+ 175. 🔴 [MISSING_FUNCTION] Function 'reset' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: reset
+      💡 Fix: Define function 'reset'
+
+ 176. 🔴 [MISSING_FUNCTION] Function 'checkout_branch' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: checkout_branch
+      💡 Fix: Define function 'checkout_branch'
+
+ 177. 🔴 [MISSING_FUNCTION] Function 'checkout_commit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: checkout_commit
+      💡 Fix: Define function 'checkout_commit'
+
+ 178. 🔴 [MISSING_FUNCTION] Function 'sync_to_commit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: sync_to_commit
+      💡 Fix: Define function 'sync_to_commit'
+
+ 179. 🔴 [MISSING_FUNCTION] Function 'diff' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: diff
+      💡 Fix: Define function 'diff'
+
+ 180. 🔴 [MISSING_FUNCTION] Function 'apply_diffs' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: apply_diffs
+      💡 Fix: Define function 'apply_diffs'
+
+ 181. 🔴 [MISSING_FUNCTION] Function 'clean_remotes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: clean_remotes
+      💡 Fix: Define function 'clean_remotes'
+
+ 182. 🔴 [MISSING_FUNCTION] Function 'clean_branches' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: clean_branches
+      💡 Fix: Define function 'clean_branches'
+
+ 183. 🔴 [MISSING_FUNCTION] Function 'create_pull' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_pull
+      💡 Fix: Define function 'create_pull'
+
+ 184. 🔴 [MISSING_FUNCTION] Function 'flag_instance' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: flag_instance
+      💡 Fix: Define function 'flag_instance'
+
+ 185. 🔴 [MISSING_FUNCTION] Function 'should_fix' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: should_fix
+      💡 Fix: Define function 'should_fix'
+
+ 186. 🔴 [MISSING_FUNCTION] Function 'check_max_preview_time' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: check_max_preview_time
+      💡 Fix: Define function 'check_max_preview_time'
+
+ 187. 🔴 [MISSING_FUNCTION] Function 'export_text' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: export_text
+      💡 Fix: Define function 'export_text'
+
+ 188. 🔴 [MISSING_FUNCTION] Function 'SessionOptions' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SessionOptions
+      💡 Fix: Define function 'SessionOptions'
+
+ 189. 🔴 [MISSING_FUNCTION] Function 'wait_until_ready' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: wait_until_ready
+      💡 Fix: Define function 'wait_until_ready'
+
+ 190. 🔴 [MISSING_FUNCTION] Function 'model_copy' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: model_copy
+      💡 Fix: Define function 'model_copy'
+
+ 191. 🔴 [MISSING_FUNCTION] Function 'reset_stopwatch' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: reset_stopwatch
+      💡 Fix: Define function 'reset_stopwatch'
+
+ 192. 🔴 [MISSING_FUNCTION] Function 'makedirs' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: makedirs
+      💡 Fix: Define function 'makedirs'
+
+ 193. 🔴 [MISSING_FUNCTION] Function 'TemporaryDirectory' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TemporaryDirectory
+      💡 Fix: Define function 'TemporaryDirectory'
+
+ 194. 🔴 [MISSING_FUNCTION] Function 'splitext' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: splitext
+      💡 Fix: Define function 'splitext'
+
+ 195. 🔴 [MISSING_FUNCTION] Function 'FastMCP' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: FastMCP
+      💡 Fix: Define function 'FastMCP'
+
+ 196. 🔴 [MISSING_FUNCTION] Function 'tool' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: tool
+      💡 Fix: Define function 'tool'
+
+ 197. 🔴 [MISSING_FUNCTION] Function 'invoke' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: invoke
+      💡 Fix: Define function 'invoke'
+
+ 198. 🔴 [MISSING_FUNCTION] Function 'SecretsConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SecretsConfig
+      💡 Fix: Define function 'SecretsConfig'
+
+ 199. 🔴 [MISSING_FUNCTION] Function 'PyDiGraph' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PyDiGraph
+      💡 Fix: Define function 'PyDiGraph'
+
+ 200. 🔴 [MISSING_FUNCTION] Function 'FileIO' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: FileIO
+      💡 Fix: Define function 'FileIO'
+
+ 201. 🔴 [MISSING_FUNCTION] Function 'build_graph' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: build_graph
+      💡 Fix: Define function 'build_graph'
+
+ 202. 🔴 [MISSING_FUNCTION] Function 'write_file' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: write_file
+      💡 Fix: Define function 'write_file'
+
+ 203. 🔴 [MISSING_FUNCTION] Function 'save_files' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: save_files
+      💡 Fix: Define function 'save_files'
+
+ 204. 🔴 [MISSING_FUNCTION] Function 'check_changes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: check_changes
+      💡 Fix: Define function 'check_changes'
+
+ 205. 🔴 [MISSING_FUNCTION] Function 'nodes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: nodes
+      💡 Fix: Define function 'nodes'
+
+ 206. 🔴 [MISSING_FUNCTION] Function 'predecessors' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: predecessors
+      💡 Fix: Define function 'predecessors'
+
+ 207. 🔴 [MISSING_FUNCTION] Function 'remove_node' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: remove_node
+      💡 Fix: Define function 'remove_node'
+
+ 208. 🔴 [MISSING_FUNCTION] Function 'Directory' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Directory
+      💡 Fix: Define function 'Directory'
+
+ 209. 🔴 [MISSING_FUNCTION] Function 'ready' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ready
+      💡 Fix: Define function 'ready'
+
+ 210. 🔴 [MISSING_FUNCTION] Function 'remove_internal_edges' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: remove_internal_edges
+      💡 Fix: Define function 'remove_internal_edges'
+
+ 211. 🔴 [MISSING_FUNCTION] Function 'unparse' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: unparse
+      💡 Fix: Define function 'unparse'
+
+ 212. 🔴 [MISSING_FUNCTION] Function 'begin' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: begin
+      💡 Fix: Define function 'begin'
+
+ 213. 🔴 [MISSING_FUNCTION] Function 'sync_with_file_content' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: sync_with_file_content
+      💡 Fix: Define function 'sync_with_file_content'
+
+ 214. 🔴 [MISSING_FUNCTION] Function 'add_edges_from' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_edges_from
+      💡 Fix: Define function 'add_edges_from'
+
+ 215. 🔴 [MISSING_FUNCTION] Function 'weighted_edge_list' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: weighted_edge_list
+      💡 Fix: Define function 'weighted_edge_list'
+
+ 216. 🔴 [MISSING_FUNCTION] Function 'filter_nodes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: filter_nodes
+      💡 Fix: Define function 'filter_nodes'
+
+ 217. 🔴 [MISSING_FUNCTION] Function 'read_bytes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: read_bytes
+      💡 Fix: Define function 'read_bytes'
+
+ 218. 🔴 [MISSING_FUNCTION] Function 'find_node_by_weight' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: find_node_by_weight
+      💡 Fix: Define function 'find_node_by_weight'
+
+ 219. 🔴 [MISSING_FUNCTION] Function 'Edge' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Edge
+      💡 Fix: Define function 'Edge'
+
+ 220. 🔴 [MISSING_FUNCTION] Function 'successors' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: successors
+      💡 Fix: Define function 'successors'
+
+ 221. 🔴 [MISSING_FUNCTION] Function 'in_edges' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: in_edges
+      💡 Fix: Define function 'in_edges'
+
+ 222. 🔴 [MISSING_FUNCTION] Function 'out_edges' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: out_edges
+      💡 Fix: Define function 'out_edges'
+
+ 223. 🔴 [MISSING_FUNCTION] Function 'DiffLite' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: DiffLite
+      💡 Fix: Define function 'DiffLite'
+
+ 224. 🔴 [MISSING_FUNCTION] Function 'check_limits' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: check_limits
+      💡 Fix: Define function 'check_limits'
+
+ 225. 🔴 [MISSING_FUNCTION] Function 'create_from_files' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_from_files
+      💡 Fix: Define function 'create_from_files'
+
+ 226. 🔴 [MISSING_FUNCTION] Function 'ProjectConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ProjectConfig
+      💡 Fix: Define function 'ProjectConfig'
+
+ 227. 🔴 [MISSING_FUNCTION] Function 'move_to_file' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: move_to_file
+      💡 Fix: Define function 'move_to_file'
+
+ 228. 🔴 [MISSING_FUNCTION] Function 'handle' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: handle
+      💡 Fix: Define function 'handle'
+
+ 229. 🔴 [MISSING_FUNCTION] Function 'version' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: version
+      💡 Fix: Define function 'version'
+
+ 230. 🔴 [MISSING_FUNCTION] Function 'splitlines' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: splitlines
+      💡 Fix: Define function 'splitlines'
+
+ 231. 🔴 [MISSING_FUNCTION] Function 'findall' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: findall
+      💡 Fix: Define function 'findall'
+
+ 232. 🔴 [MISSING_FUNCTION] Function 'rmdir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: rmdir
+      💡 Fix: Define function 'rmdir'
+
+ 233. 🔴 [MISSING_FUNCTION] Function 'match' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: match
+      💡 Fix: Define function 'match'
+
+ 234. 🔴 [MISSING_FUNCTION] Function 'groups' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: groups
+      💡 Fix: Define function 'groups'
+
+ 235. 🔴 [MISSING_FUNCTION] Function 'ArgumentParser' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ArgumentParser
+      💡 Fix: Define function 'ArgumentParser'
+
+ 236. 🔴 [MISSING_FUNCTION] Function 'add_argument' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_argument
+      💡 Fix: Define function 'add_argument'
+
+ 237. 🔴 [MISSING_FUNCTION] Function 'parse_args' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parse_args
+      💡 Fix: Define function 'parse_args'
+
+ 238. 🔴 [MISSING_FUNCTION] Function 'ClickException' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ClickException
+      💡 Fix: Define function 'ClickException'
+
+ 239. 🔴 [MISSING_FUNCTION] Function 'files_generator' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: files_generator
+      💡 Fix: Define function 'files_generator'
+
+ 240. 🔴 [MISSING_FUNCTION] Function 'command' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: command
+      💡 Fix: Define function 'command'
+
+ 241. 🔴 [MISSING_FUNCTION] Function 'argument' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: argument
+      💡 Fix: Define function 'argument'
+
+ 242. 🔴 [MISSING_FUNCTION] Function 'colored' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: colored
+      💡 Fix: Define function 'colored'
+
+ 243. 🔴 [MISSING_FUNCTION] Function 'abspath' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: abspath
+      💡 Fix: Define function 'abspath'
+
+ 244. 🔴 [MISSING_FUNCTION] Function 'isdir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: isdir
+      💡 Fix: Define function 'isdir'
+
+ 245. 🔴 [MISSING_FUNCTION] Function 'system' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: system
+      💡 Fix: Define function 'system'
+
+ 246. 🔴 [MISSING_FUNCTION] Function 'escape' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: escape
+      💡 Fix: Define function 'escape'
+
+ 247. 🔴 [MISSING_FUNCTION] Function 'load' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: load
+      💡 Fix: Define function 'load'
+
+ 248. 🔴 [MISSING_FUNCTION] Function 'option' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: option
+      💡 Fix: Define function 'option'
+
+ 249. 🔴 [MISSING_FUNCTION] Function 'lstrip' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: lstrip
+      💡 Fix: Define function 'lstrip'
+
+ 250. 🔴 [MISSING_FUNCTION] Function 'edit_text' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: edit_text
+      💡 Fix: Define function 'edit_text'
+
+ 251. 🔴 [MISSING_FUNCTION] Function 'generate_comment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: generate_comment
+      💡 Fix: Define function 'generate_comment'
+
+ 252. 🔴 [MISSING_FUNCTION] Function 'parse_google_block' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parse_google_block
+      💡 Fix: Define function 'parse_google_block'
+
+ 253. 🔴 [MISSING_FUNCTION] Function 'merge_codebase_docstring' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: merge_codebase_docstring
+      💡 Fix: Define function 'merge_codebase_docstring'
+
+ 254. 🔴 [MISSING_FUNCTION] Function 'CommitObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CommitObservation
+      💡 Fix: Define function 'CommitObservation'
+
+ 255. 🔴 [MISSING_FUNCTION] Function 'RepoOperator' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RepoOperator
+      💡 Fix: Define function 'RepoOperator'
+
+ 256. 🔴 [MISSING_FUNCTION] Function 'expanduser' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: expanduser
+      💡 Fix: Define function 'expanduser'
+
+ 257. 🔴 [MISSING_FUNCTION] Function 'add_decorator' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_decorator
+      💡 Fix: Define function 'add_decorator'
+
+ 258. 🔴 [MISSING_FUNCTION] Function 'CreateFileObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CreateFileObservation
+      💡 Fix: Define function 'CreateFileObservation'
+
+ 259. 🔴 [MISSING_FUNCTION] Function 'ViewFileObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ViewFileObservation
+      💡 Fix: Define function 'ViewFileObservation'
+
+ 260. 🔴 [MISSING_FUNCTION] Function 'create_function_node' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_function_node
+      💡 Fix: Define function 'create_function_node'
+
+ 261. 🔴 [MISSING_FUNCTION] Function 'create_class_node' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_class_node
+      💡 Fix: Define function 'create_class_node'
+
+ 262. 🔴 [MISSING_FUNCTION] Function 'Relation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Relation
+      💡 Fix: Define function 'Relation'
+
+ 263. 🔴 [MISSING_FUNCTION] Function 'add_relation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_relation
+      💡 Fix: Define function 'add_relation'
+
+ 264. 🔴 [MISSING_FUNCTION] Function 'create_function_call_node' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_function_call_node
+      💡 Fix: Define function 'create_function_call_node'
+
+ 265. 🔴 [MISSING_FUNCTION] Function 'CreatePRObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CreatePRObservation
+      💡 Fix: Define function 'CreatePRObservation'
+
+ 266. 🔴 [MISSING_FUNCTION] Function 'git_commit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: git_commit
+      💡 Fix: Define function 'git_commit'
+
+ 267. 🔴 [MISSING_FUNCTION] Function 'PRCommentObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PRCommentObservation
+      💡 Fix: Define function 'PRCommentObservation'
+
+ 268. 🔴 [MISSING_FUNCTION] Function 'PRReviewCommentObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PRReviewCommentObservation
+      💡 Fix: Define function 'PRReviewCommentObservation'
+
+ 269. 🔴 [MISSING_FUNCTION] Function 'DocumentedObject' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: DocumentedObject
+      💡 Fix: Define function 'DocumentedObject'
+
+ 270. 🔴 [MISSING_FUNCTION] Function 'mset' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: mset
+      💡 Fix: Define function 'mset'
+
+ 271. 🔴 [MISSING_FUNCTION] Function 'field' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: field
+      💡 Fix: Define function 'field'
+
+ 272. 🔴 [MISSING_FUNCTION] Function 'DecoratedFunction' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: DecoratedFunction
+      💡 Fix: Define function 'DecoratedFunction'
+
+ 273. 🔴 [MISSING_FUNCTION] Function 'FunctionCall' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: FunctionCall
+      💡 Fix: Define function 'FunctionCall'
+
+ 274. 🔴 [MISSING_FUNCTION] Function 'Abort' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Abort
+      💡 Fix: Define function 'Abort'
+
+ 275. 🔴 [MISSING_FUNCTION] Function 'TokenManager' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TokenManager
+      💡 Fix: Define function 'TokenManager'
+
+ 276. 🔴 [MISSING_FUNCTION] Function 'authenticate_token' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: authenticate_token
+      💡 Fix: Define function 'authenticate_token'
+
+ 277. 🔴 [MISSING_FUNCTION] Function 'decorator' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: decorator
+      💡 Fix: Define function 'decorator'
+
+ 278. 🔴 [MISSING_FUNCTION] Function 'debug' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: debug
+      💡 Fix: Define function 'debug'
+
+ 279. 🔴 [MISSING_FUNCTION] Function 'write_state' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: write_state
+      💡 Fix: Define function 'write_state'
+
+ 280. 🔴 [MISSING_FUNCTION] Function 'wrapped' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: wrapped
+      💡 Fix: Define function 'wrapped'
+
+ 281. 🔴 [MISSING_FUNCTION] Function 'enter_state' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: enter_state
+      💡 Fix: Define function 'enter_state'
+
+ 282. 🔴 [MISSING_FUNCTION] Function 'DeleteFileObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: DeleteFileObservation
+      💡 Fix: Define function 'DeleteFileObservation'
+
+ 283. 🔴 [MISSING_FUNCTION] Function 'which' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: which
+      💡 Fix: Define function 'which'
+
+ 284. 🔴 [MISSING_FUNCTION] Function 'ThreadPoolExecutor' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ThreadPoolExecutor
+      💡 Fix: Define function 'ThreadPoolExecutor'
+
+ 285. 🔴 [MISSING_FUNCTION] Function 'submit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: submit
+      💡 Fix: Define function 'submit'
+
+ 286. 🔴 [MISSING_FUNCTION] Function 'check_output' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: check_output
+      💡 Fix: Define function 'check_output'
+
+ 287. 🔴 [MISSING_FUNCTION] Function 'install_dependencies' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: install_dependencies
+      💡 Fix: Define function 'install_dependencies'
+
+ 288. 🔴 [MISSING_FUNCTION] Function 'Collection' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Collection
+      💡 Fix: Define function 'Collection'
+
+ 289. 🔴 [MISSING_FUNCTION] Function 'subdirectories' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: subdirectories
+      💡 Fix: Define function 'subdirectories'
+
+ 290. 🔴 [MISSING_FUNCTION] Function 'relpath' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: relpath
+      💡 Fix: Define function 'relpath'
+
+ 291. 🔴 [MISSING_FUNCTION] Function 'update_filepath' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: update_filepath
+      💡 Fix: Define function 'update_filepath'
+
+ 292. 🔴 [MISSING_FUNCTION] Function 'RunFunctionRequest' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RunFunctionRequest
+      💡 Fix: Define function 'RunFunctionRequest'
+
+ 293. 🔴 [MISSING_FUNCTION] Function 'DockerClient' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: DockerClient
+      💡 Fix: Define function 'DockerClient'
+
+ 294. 🔴 [MISSING_FUNCTION] Function 'stop' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stop
+      💡 Fix: Define function 'stop'
+
+ 295. 🔴 [MISSING_FUNCTION] Function 'insort' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: insort
+      💡 Fix: Define function 'insort'
+
+ 296. 🔴 [MISSING_FUNCTION] Function 'signature' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: signature
+      💡 Fix: Define function 'signature'
+
+ 297. 🔴 [MISSING_FUNCTION] Function 'getmodule' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: getmodule
+      💡 Fix: Define function 'getmodule'
+
+ 298. 🔴 [MISSING_FUNCTION] Function 'ToolMessage' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ToolMessage
+      💡 Fix: Define function 'ToolMessage'
+
+ 299. 🔴 [MISSING_FUNCTION] Function 'EditFileObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: EditFileObservation
+      💡 Fix: Define function 'EditFileObservation'
+
+ 300. 🔴 [MISSING_FUNCTION] Function 'encode' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: encode
+      💡 Fix: Define function 'encode'
+
+ 301. 🔴 [MISSING_FUNCTION] Function 'finditer' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: finditer
+      💡 Fix: Define function 'finditer'
+
+ 302. 🔴 [MISSING_FUNCTION] Function 'EditTransaction' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: EditTransaction
+      💡 Fix: Define function 'EditTransaction'
+
+ 303. 🔴 [MISSING_FUNCTION] Function 'InsertTransaction' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: InsertTransaction
+      💡 Fix: Define function 'InsertTransaction'
+
+ 304. 🔴 [MISSING_FUNCTION] Function 'children_by_field_types' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: children_by_field_types
+      💡 Fix: Define function 'children_by_field_types'
+
+ 305. 🔴 [MISSING_FUNCTION] Function 'parse_type' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parse_type
+      💡 Fix: Define function 'parse_type'
+
+ 306. 🔴 [MISSING_FUNCTION] Function 'resolve_name' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: resolve_name
+      💡 Fix: Define function 'resolve_name'
+
+ 307. 🔴 [MISSING_FUNCTION] Function 'parent_of_types' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parent_of_types
+      💡 Fix: Define function 'parent_of_types'
+
+ 308. 🔴 [MISSING_FUNCTION] Function 'ancestors' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ancestors
+      💡 Fix: Define function 'ancestors'
+
+ 309. 🔴 [MISSING_FUNCTION] Function 'children_by_field_name' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: children_by_field_name
+      💡 Fix: Define function 'children_by_field_name'
+
+ 310. 🔴 [MISSING_FUNCTION] Function 'dataclass' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: dataclass
+      💡 Fix: Define function 'dataclass'
+
+ 311. 🔴 [MISSING_FUNCTION] Function 'SandboxExecutor' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SandboxExecutor
+      💡 Fix: Define function 'SandboxExecutor'
+
+ 312. 🔴 [MISSING_FUNCTION] Function 'execute' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: execute
+      💡 Fix: Define function 'execute'
+
+ 313. 🔴 [MISSING_FUNCTION] Function 'methods' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: methods
+      💡 Fix: Define function 'methods'
+
+ 314. 🔴 [MISSING_FUNCTION] Function 'AnalysisResult' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: AnalysisResult
+      💡 Fix: Define function 'AnalysisResult'
+
+ 315. 🔴 [MISSING_FUNCTION] Function 'calculate_cyclomatic_complexity' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: calculate_cyclomatic_complexity
+      💡 Fix: Define function 'calculate_cyclomatic_complexity'
+
+ 316. 🔴 [MISSING_FUNCTION] Function 'load_codebase' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: load_codebase
+      💡 Fix: Define function 'load_codebase'
+
+ 317. 🔴 [MISSING_FUNCTION] Function 'export_results' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: export_results
+      💡 Fix: Define function 'export_results'
+
+ 318. 🔴 [MISSING_FUNCTION] Function 'modal' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: modal
+      💡 Fix: Define function 'modal'
+
+ 319. 🔴 [MISSING_FUNCTION] Function 'modal_overlay' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: modal_overlay
+      💡 Fix: Define function 'modal_overlay'
+
+ 320. 🔴 [MISSING_FUNCTION] Function 'modal_content' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: modal_content
+      💡 Fix: Define function 'modal_content'
+
+ 321. 🔴 [MISSING_FUNCTION] Function 'modal_header' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: modal_header
+      💡 Fix: Define function 'modal_header'
+
+ 322. 🔴 [MISSING_FUNCTION] Function 'modal_body' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: modal_body
+      💡 Fix: Define function 'modal_body'
+
+ 323. 🔴 [MISSING_FUNCTION] Function 'modal_footer' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: modal_footer
+      💡 Fix: Define function 'modal_footer'
+
+ 324. 🔴 [MISSING_FUNCTION] Function 'Panel' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Panel
+      💡 Fix: Define function 'Panel'
+
+ 325. 🔴 [MISSING_FUNCTION] Function 'Range' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Range
+      💡 Fix: Define function 'Range'
+
+ 326. 🔴 [MISSING_FUNCTION] Function 'Position' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Position
+      💡 Fix: Define function 'Position'
+
+ 327. 🔴 [MISSING_FUNCTION] Function 'TSFunction' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSFunction
+      💡 Fix: Define function 'TSFunction'
+
+ 328. 🔴 [MISSING_FUNCTION] Function 'TSClass' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSClass
+      💡 Fix: Define function 'TSClass'
+
+ 329. 🔴 [MISSING_FUNCTION] Function 'add_usage' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_usage
+      💡 Fix: Define function 'add_usage'
+
+ 330. 🔴 [MISSING_FUNCTION] Function 'TSImportStatement' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSImportStatement
+      💡 Fix: Define function 'TSImportStatement'
+
+ 331. 🔴 [MISSING_FUNCTION] Function 'TSExport' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSExport
+      💡 Fix: Define function 'TSExport'
+
+ 332. 🔴 [MISSING_FUNCTION] Function 'bytes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: bytes
+      💡 Fix: Define function 'bytes'
+
+ 333. 🔴 [MISSING_FUNCTION] Function 'warn' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: warn
+      💡 Fix: Define function 'warn'
+
+ 334. 🔴 [MISSING_FUNCTION] Function 'add_file_rename_transaction' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_file_rename_transaction
+      💡 Fix: Define function 'add_file_rename_transaction'
+
+ 335. 🔴 [MISSING_FUNCTION] Function 'invalidate' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: invalidate
+      💡 Fix: Define function 'invalidate'
+
+ 336. 🔴 [MISSING_FUNCTION] Function 'symbol_usages' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: symbol_usages
+      💡 Fix: Define function 'symbol_usages'
+
+ 337. 🔴 [MISSING_FUNCTION] Function 'symbol_can_be_added' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: symbol_can_be_added
+      💡 Fix: Define function 'symbol_can_be_added'
+
+ 338. 🔴 [MISSING_FUNCTION] Function 'add_symbol_from_source' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_symbol_from_source
+      💡 Fix: Define function 'add_symbol_from_source'
+
+ 339. 🔴 [MISSING_FUNCTION] Function 'resolve_import' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: resolve_import
+      💡 Fix: Define function 'resolve_import'
+
+ 340. 🔴 [MISSING_FUNCTION] Function 'add_keyword' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_keyword
+      💡 Fix: Define function 'add_keyword'
+
+ 341. 🔴 [MISSING_FUNCTION] Function 'condition' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: condition
+      💡 Fix: Define function 'condition'
+
+ 342. 🔴 [MISSING_FUNCTION] Function 'delete' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: delete
+      💡 Fix: Define function 'delete'
+
+ 343. 🔴 [MISSING_FUNCTION] Function 'tqdm' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: tqdm
+      💡 Fix: Define function 'tqdm'
+
+ 344. 🔴 [MISSING_FUNCTION] Function 'tolist' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: tolist
+      💡 Fix: Define function 'tolist'
+
+ 345. 🔴 [MISSING_FUNCTION] Function 'BadWriteError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: BadWriteError
+      💡 Fix: Define function 'BadWriteError'
+
+ 346. 🔴 [MISSING_FUNCTION] Function 'write_bytes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: write_bytes
+      💡 Fix: Define function 'write_bytes'
+
+ 347. 🔴 [MISSING_FUNCTION] Function 'untrack_file' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: untrack_file
+      💡 Fix: Define function 'untrack_file'
+
+ 348. 🔴 [MISSING_FUNCTION] Function 'unlink' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: unlink
+      💡 Fix: Define function 'unlink'
+
+ 349. 🔴 [MISSING_FUNCTION] Function 'fdopen' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: fdopen
+      💡 Fix: Define function 'fdopen'
+
+ 350. 🔴 [MISSING_FUNCTION] Function 'fileno' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: fileno
+      💡 Fix: Define function 'fileno'
+
+ 351. 🔴 [MISSING_FUNCTION] Function 'analyze_remaining_issues' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: analyze_remaining_issues
+      💡 Fix: Define function 'analyze_remaining_issues'
+
+ 352. 🔴 [MISSING_FUNCTION] Function 'ImportAnalyzer' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ImportAnalyzer
+      💡 Fix: Define function 'ImportAnalyzer'
+
+ 353. 🔴 [MISSING_FUNCTION] Function 'find_import_issues' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: find_import_issues
+      💡 Fix: Define function 'find_import_issues'
+
+ 354. 🔴 [MISSING_FUNCTION] Function 'print_analysis' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: print_analysis
+      💡 Fix: Define function 'print_analysis'
+
+ 355. 🔴 [MISSING_FUNCTION] Function 'should_exclude_file' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: should_exclude_file
+      💡 Fix: Define function 'should_exclude_file'
+
+ 356. 🔴 [MISSING_FUNCTION] Function 'isdigit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: isdigit
+      💡 Fix: Define function 'isdigit'
+
+ 357. 🔴 [MISSING_FUNCTION] Function 'isupper' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: isupper
+      💡 Fix: Define function 'isupper'
+
+ 358. 🔴 [MISSING_FUNCTION] Function 'CodeError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CodeError
+      💡 Fix: Define function 'CodeError'
+
+ 359. 🔴 [MISSING_FUNCTION] Function 'analyze_missing_functions' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: analyze_missing_functions
+      💡 Fix: Define function 'analyze_missing_functions'
+
+ 360. 🔴 [MISSING_FUNCTION] Function 'generate_error_statistics' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: generate_error_statistics
+      💡 Fix: Define function 'generate_error_statistics'
+
+ 361. 🔴 [MISSING_FUNCTION] Function 'register_api' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: register_api
+      💡 Fix: Define function 'register_api'
+
+ 362. 🔴 [MISSING_FUNCTION] Function 'link' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: link
+      💡 Fix: Define function 'link'
+
+ 363. 🔴 [MISSING_FUNCTION] Function 'RestAPI' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RestAPI
+      💡 Fix: Define function 'RestAPI'
+
+ 364. 🔴 [MISSING_FUNCTION] Function 'lookup' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: lookup
+      💡 Fix: Define function 'lookup'
+
+ 365. 🔴 [MISSING_FUNCTION] Function 'CodemodConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: CodemodConfig
+      💡 Fix: Define function 'CodemodConfig'
+
+ 366. 🔴 [MISSING_FUNCTION] Function 'Codemod' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Codemod
+      💡 Fix: Define function 'Codemod'
+
+ 367. 🔴 [MISSING_FUNCTION] Function 'prepend_statements' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: prepend_statements
+      💡 Fix: Define function 'prepend_statements'
+
+ 368. 🔴 [MISSING_FUNCTION] Function 'removeprefix' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: removeprefix
+      💡 Fix: Define function 'removeprefix'
+
+ 369. 🔴 [MISSING_FUNCTION] Function 'TSParameter' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSParameter
+      💡 Fix: Define function 'TSParameter'
+
+ 370. 🔴 [MISSING_FUNCTION] Function 'rename_if_matching' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: rename_if_matching
+      💡 Fix: Define function 'rename_if_matching'
+
+ 371. 🔴 [MISSING_FUNCTION] Function 'getline' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: getline
+      💡 Fix: Define function 'getline'
+
+ 372. 🔴 [MISSING_FUNCTION] Function 'InvalidUserCodeException' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: InvalidUserCodeException
+      💡 Fix: Define function 'InvalidUserCodeException'
+
+ 373. 🔴 [MISSING_FUNCTION] Function 'exc_info' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: exc_info
+      💡 Fix: Define function 'exc_info'
+
+ 374. 🔴 [MISSING_FUNCTION] Function 'spec_from_file_location' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: spec_from_file_location
+      💡 Fix: Define function 'spec_from_file_location'
+
+ 375. 🔴 [MISSING_FUNCTION] Function 'module_from_spec' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: module_from_spec
+      💡 Fix: Define function 'module_from_spec'
+
+ 376. 🔴 [MISSING_FUNCTION] Function 'exec_module' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: exec_module
+      💡 Fix: Define function 'exec_module'
+
+ 377. 🔴 [MISSING_FUNCTION] Function 'literal_eval' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: literal_eval
+      💡 Fix: Define function 'literal_eval'
+
+ 378. 🔴 [MISSING_FUNCTION] Function 'generic_visit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: generic_visit
+      💡 Fix: Define function 'generic_visit'
+
+ 379. 🔴 [MISSING_FUNCTION] Function 'model_json_schema' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: model_json_schema
+      💡 Fix: Define function 'model_json_schema'
+
+ 380. 🔴 [MISSING_FUNCTION] Function 'visit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: visit
+      💡 Fix: Define function 'visit'
+
+ 381. 🔴 [MISSING_FUNCTION] Function 'MethodDoc' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: MethodDoc
+      💡 Fix: Define function 'MethodDoc'
+
+ 382. 🔴 [MISSING_FUNCTION] Function 'docstring' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: docstring
+      💡 Fix: Define function 'docstring'
+
+ 383. 🔴 [MISSING_FUNCTION] Function 'attributes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: attributes
+      💡 Fix: Define function 'attributes'
+
+ 384. 🔴 [MISSING_FUNCTION] Function 'NodeClasses' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: NodeClasses
+      💡 Fix: Define function 'NodeClasses'
+
+ 385. 🔴 [MISSING_FUNCTION] Function 'list_runs' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: list_runs
+      💡 Fix: Define function 'list_runs'
+
+ 386. 🔴 [MISSING_FUNCTION] Function 'StreamHandler' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: StreamHandler
+      💡 Fix: Define function 'StreamHandler'
+
+ 387. 🔴 [MISSING_FUNCTION] Function 'setFormatter' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: setFormatter
+      💡 Fix: Define function 'setFormatter'
+
+ 388. 🔴 [MISSING_FUNCTION] Function 'addFilter' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: addFilter
+      💡 Fix: Define function 'addFilter'
+
+ 389. 🔴 [MISSING_FUNCTION] Function 'addHandler' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: addHandler
+      💡 Fix: Define function 'addHandler'
+
+ 390. 🔴 [MISSING_FUNCTION] Function 'setLevel' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: setLevel
+      💡 Fix: Define function 'setLevel'
+
+ 391. 🔴 [MISSING_FUNCTION] Function 'PatchSet' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PatchSet
+      💡 Fix: Define function 'PatchSet'
+
+ 392. 🔴 [MISSING_FUNCTION] Function 'StringIO' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: StringIO
+      💡 Fix: Define function 'StringIO'
+
+ 393. 🔴 [MISSING_FUNCTION] Function 'build_history' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: build_history
+      💡 Fix: Define function 'build_history'
+
+ 394. 🔴 [MISSING_FUNCTION] Function 'stash' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stash
+      💡 Fix: Define function 'stash'
+
+ 395. 🔴 [MISSING_FUNCTION] Function 'create_review_comment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_review_comment
+      💡 Fix: Define function 'create_review_comment'
+
+ 396. 🔴 [MISSING_FUNCTION] Function 'create_issue_comment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_issue_comment
+      💡 Fix: Define function 'create_issue_comment'
+
+ 397. 🔴 [MISSING_FUNCTION] Function 'create_git_ref' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_git_ref
+      💡 Fix: Define function 'create_git_ref'
+
+ 398. 🔴 [MISSING_FUNCTION] Function 'compare' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: compare
+      💡 Fix: Define function 'compare'
+
+ 399. 🔴 [MISSING_FUNCTION] Function 'create_label' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_label
+      💡 Fix: Define function 'create_label'
+
+ 400. 🔴 [MISSING_FUNCTION] Function 'requestJson' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: requestJson
+      💡 Fix: Define function 'requestJson'
+
+ 401. 🔴 [MISSING_FUNCTION] Function 'search_issues' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: search_issues
+      💡 Fix: Define function 'search_issues'
+
+ 402. 🔴 [MISSING_FUNCTION] Function 'getenv' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: getenv
+      💡 Fix: Define function 'getenv'
+
+ 403. 🔴 [MISSING_FUNCTION] Function 'Github' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Github
+      💡 Fix: Define function 'Github'
+
+ 404. 🔴 [MISSING_FUNCTION] Function 'issubclass' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: issubclass
+      💡 Fix: Define function 'issubclass'
+
+ 405. 🔴 [MISSING_FUNCTION] Function 'handler' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: handler
+      💡 Fix: Define function 'handler'
+
+ 406. 🔴 [MISSING_FUNCTION] Function 'unified_diff' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: unified_diff
+      💡 Fix: Define function 'unified_diff'
+
+ 407. 🔴 [MISSING_FUNCTION] Function 'GlobalReplacementEditObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: GlobalReplacementEditObservation
+      💡 Fix: Define function 'GlobalReplacementEditObservation'
+
+ 408. 🔴 [MISSING_FUNCTION] Function 'bind_tools' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: bind_tools
+      💡 Fix: Define function 'bind_tools'
+
+ 409. 🔴 [MISSING_FUNCTION] Function 'format_header' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: format_header
+      💡 Fix: Define function 'format_header'
+
+ 410. 🔴 [MISSING_FUNCTION] Function 'catch_warnings' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: catch_warnings
+      💡 Fix: Define function 'catch_warnings'
+
+ 411. 🔴 [MISSING_FUNCTION] Function 'filterwarnings' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: filterwarnings
+      💡 Fix: Define function 'filterwarnings'
+
+ 412. 🔴 [MISSING_FUNCTION] Function 'add_conditional_edges' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_conditional_edges
+      💡 Fix: Define function 'add_conditional_edges'
+
+ 413. 🔴 [MISSING_FUNCTION] Function 'pprint' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: pprint
+      💡 Fix: Define function 'pprint'
+
+ 414. 🔴 [MISSING_FUNCTION] Function 'code_block_cls' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: code_block_cls
+      💡 Fix: Define function 'code_block_cls'
+
+ 415. 🔴 [MISSING_FUNCTION] Function 'clean_comment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: clean_comment
+      💡 Fix: Define function 'clean_comment'
+
+ 416. 🔴 [MISSING_FUNCTION] Function 'TSDecorator' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSDecorator
+      💡 Fix: Define function 'TSDecorator'
+
+ 417. 🔴 [MISSING_FUNCTION] Function 'PyIfBlockStatement' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PyIfBlockStatement
+      💡 Fix: Define function 'PyIfBlockStatement'
+
+ 418. 🔴 [MISSING_FUNCTION] Function 'TSCodeBlock' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSCodeBlock
+      💡 Fix: Define function 'TSCodeBlock'
+
+ 419. 🔴 [MISSING_FUNCTION] Function 'TSIfBlockStatement' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSIfBlockStatement
+      💡 Fix: Define function 'TSIfBlockStatement'
+
+ 420. 🔴 [MISSING_FUNCTION] Function 'ImportResolution' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ImportResolution
+      💡 Fix: Define function 'ImportResolution'
+
+ 421. 🔴 [MISSING_FUNCTION] Function 'Name' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Name
+      💡 Fix: Define function 'Name'
+
+ 422. 🔴 [MISSING_FUNCTION] Function 'find_first_descendant' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: find_first_descendant
+      💡 Fix: Define function 'find_first_descendant'
+
+ 423. 🔴 [MISSING_FUNCTION] Function 'traverse_classes' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: traverse_classes
+      💡 Fix: Define function 'traverse_classes'
+
+ 424. 🔴 [MISSING_FUNCTION] Function 'VenvManager' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: VenvManager
+      💡 Fix: Define function 'VenvManager'
+
+ 425. 🔴 [MISSING_FUNCTION] Function 'install_packages' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: install_packages
+      💡 Fix: Define function 'install_packages'
+
+ 426. 🔴 [MISSING_FUNCTION] Function 'TextEdit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TextEdit
+      💡 Fix: Define function 'TextEdit'
+
+ 427. 🔴 [MISSING_FUNCTION] Function 'badge' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: badge
+      💡 Fix: Define function 'badge'
+
+ 428. 🔴 [MISSING_FUNCTION] Function 'filter_issues' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: filter_issues
+      💡 Fix: Define function 'filter_issues'
+
+ 429. 🔴 [MISSING_FUNCTION] Function 'select' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: select
+      💡 Fix: Define function 'select'
+
+ 430. 🔴 [MISSING_FUNCTION] Function 'LinearIssue' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearIssue
+      💡 Fix: Define function 'LinearIssue'
+
+ 431. 🔴 [MISSING_FUNCTION] Function 'LinearComment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearComment
+      💡 Fix: Define function 'LinearComment'
+
+ 432. 🔴 [MISSING_FUNCTION] Function 'LinearUser' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearUser
+      💡 Fix: Define function 'LinearUser'
+
+ 433. 🔴 [MISSING_FUNCTION] Function 'LinearIssueObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearIssueObservation
+      💡 Fix: Define function 'LinearIssueObservation'
+
+ 434. 🔴 [MISSING_FUNCTION] Function 'LinearCommentsObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearCommentsObservation
+      💡 Fix: Define function 'LinearCommentsObservation'
+
+ 435. 🔴 [MISSING_FUNCTION] Function 'LinearCommentObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearCommentObservation
+      💡 Fix: Define function 'LinearCommentObservation'
+
+ 436. 🔴 [MISSING_FUNCTION] Function 'LinearWebhookObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearWebhookObservation
+      💡 Fix: Define function 'LinearWebhookObservation'
+
+ 437. 🔴 [MISSING_FUNCTION] Function 'LinearSearchObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearSearchObservation
+      💡 Fix: Define function 'LinearSearchObservation'
+
+ 438. 🔴 [MISSING_FUNCTION] Function 'LinearCreateIssueObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearCreateIssueObservation
+      💡 Fix: Define function 'LinearCreateIssueObservation'
+
+ 439. 🔴 [MISSING_FUNCTION] Function 'LinearTeamsObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LinearTeamsObservation
+      💡 Fix: Define function 'LinearTeamsObservation'
+
+ 440. 🔴 [MISSING_FUNCTION] Function 'mount' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: mount
+      💡 Fix: Define function 'mount'
+
+ 441. 🔴 [MISSING_FUNCTION] Function 'build_tree' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: build_tree
+      💡 Fix: Define function 'build_tree'
+
+ 442. 🔴 [MISSING_FUNCTION] Function 'render_as_string' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: render_as_string
+      💡 Fix: Define function 'render_as_string'
+
+ 443. 🔴 [MISSING_FUNCTION] Function 'ListDirectoryObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ListDirectoryObservation
+      💡 Fix: Define function 'ListDirectoryObservation'
+
+ 444. 🔴 [MISSING_FUNCTION] Function 'DirectoryInfo' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: DirectoryInfo
+      💡 Fix: Define function 'DirectoryInfo'
+
+ 445. 🔴 [MISSING_FUNCTION] Function 'SandboxRunner' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SandboxRunner
+      💡 Fix: Define function 'SandboxRunner'
+
+ 446. 🔴 [MISSING_FUNCTION] Function 'warmup' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: warmup
+      💡 Fix: Define function 'warmup'
+
+ 447. 🔴 [MISSING_FUNCTION] Function 'config_reader' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: config_reader
+      💡 Fix: Define function 'config_reader'
+
+ 448. 🔴 [MISSING_FUNCTION] Function 'bool' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: bool
+      💡 Fix: Define function 'bool'
+
+ 449. 🔴 [MISSING_FUNCTION] Function 'open_new' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: open_new
+      💡 Fix: Define function 'open_new'
+
+ 450. 🔴 [MISSING_FUNCTION] Function 'start_io' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: start_io
+      💡 Fix: Define function 'start_io'
+
+ 451. 🔴 [MISSING_FUNCTION] Function 'feature' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: feature
+      💡 Fix: Define function 'feature'
+
+ 452. 🔴 [MISSING_FUNCTION] Function 'update_file' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: update_file
+      💡 Fix: Define function 'update_file'
+
+ 453. 🔴 [MISSING_FUNCTION] Function 'TextDocumentContentResult' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TextDocumentContentResult
+      💡 Fix: Define function 'TextDocumentContentResult'
+
+ 454. 🔴 [MISSING_FUNCTION] Function 'begin_with_token' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: begin_with_token
+      💡 Fix: Define function 'begin_with_token'
+
+ 455. 🔴 [MISSING_FUNCTION] Function 'status' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: status
+      💡 Fix: Define function 'status'
+
+ 456. 🔴 [MISSING_FUNCTION] Function 'Markdown' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Markdown
+      💡 Fix: Define function 'Markdown'
+
+ 457. 🔴 [MISSING_FUNCTION] Function 'flatten_dict' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: flatten_dict
+      💡 Fix: Define function 'flatten_dict'
+
+ 458. 🔴 [MISSING_FUNCTION] Function 'Table' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Table
+      💡 Fix: Define function 'Table'
+
+ 459. 🔴 [MISSING_FUNCTION] Function 'add_column' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_column
+      💡 Fix: Define function 'add_column'
+
+ 460. 🔴 [MISSING_FUNCTION] Function 'add_section' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_section
+      💡 Fix: Define function 'add_section'
+
+ 461. 🔴 [MISSING_FUNCTION] Function 'add_row' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_row
+      💡 Fix: Define function 'add_row'
+
+ 462. 🔴 [MISSING_FUNCTION] Function 'UserConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: UserConfig
+      💡 Fix: Define function 'UserConfig'
+
+ 463. 🔴 [MISSING_FUNCTION] Function 'Status' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Status
+      💡 Fix: Define function 'Status'
+
+ 464. 🔴 [MISSING_FUNCTION] Function 'save' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: save
+      💡 Fix: Define function 'save'
+
+ 465. 🔴 [MISSING_FUNCTION] Function 'LocalGitRepo' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LocalGitRepo
+      💡 Fix: Define function 'LocalGitRepo'
+
+ 466. 🔴 [MISSING_FUNCTION] Function 'Version' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Version
+      💡 Fix: Define function 'Version'
+
+ 467. 🔴 [MISSING_FUNCTION] Function 'GitAttributionTracker' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: GitAttributionTracker
+      💡 Fix: Define function 'GitAttributionTracker'
+
+ 468. 🔴 [MISSING_FUNCTION] Function 'map_symbols_to_history' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: map_symbols_to_history
+      💡 Fix: Define function 'map_symbols_to_history'
+
+ 469. 🔴 [MISSING_FUNCTION] Function 'check_update' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: check_update
+      💡 Fix: Define function 'check_update'
+
+ 470. 🔴 [MISSING_FUNCTION] Function 'PendingFiles' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PendingFiles
+      💡 Fix: Define function 'PendingFiles'
+
+ 471. 🔴 [MISSING_FUNCTION] Function 'call_next' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: call_next
+      💡 Fix: Define function 'call_next'
+
+ 472. 🔴 [MISSING_FUNCTION] Function 'JSONResponse' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: JSONResponse
+      💡 Fix: Define function 'JSONResponse'
+
+ 473. 🔴 [MISSING_FUNCTION] Function 'dedent' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: dedent
+      💡 Fix: Define function 'dedent'
+
+ 474. 🔴 [MISSING_FUNCTION] Function 'MoveSymbolObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: MoveSymbolObservation
+      💡 Fix: Define function 'MoveSymbolObservation'
+
+ 475. 🔴 [MISSING_FUNCTION] Function 'TSFunctionType' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TSFunctionType
+      💡 Fix: Define function 'TSFunctionType'
+
+ 476. 🔴 [MISSING_FUNCTION] Function 'expr_type' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: expr_type
+      💡 Fix: Define function 'expr_type'
+
+ 477. 🔴 [MISSING_FUNCTION] Function 'log_unparsed' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: log_unparsed
+      💡 Fix: Define function 'log_unparsed'
+
+ 478. 🔴 [MISSING_FUNCTION] Function 'ExpressionStatement' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ExpressionStatement
+      💡 Fix: Define function 'ExpressionStatement'
+
+ 479. 🔴 [MISSING_FUNCTION] Function 'SymbolStatement' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SymbolStatement
+      💡 Fix: Define function 'SymbolStatement'
+
+ 480. 🔴 [MISSING_FUNCTION] Function 'parse_diff' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: parse_diff
+      💡 Fix: Define function 'parse_diff'
+
+ 481. 🔴 [MISSING_FUNCTION] Function 'closing' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: closing
+      💡 Fix: Define function 'closing'
+
+ 482. 🔴 [MISSING_FUNCTION] Function 'WorkDoneProgressBegin' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: WorkDoneProgressBegin
+      💡 Fix: Define function 'WorkDoneProgressBegin'
+
+ 483. 🔴 [MISSING_FUNCTION] Function 'WorkDoneProgressEnd' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: WorkDoneProgressEnd
+      💡 Fix: Define function 'WorkDoneProgressEnd'
+
+ 484. 🔴 [MISSING_FUNCTION] Function 'StubTask' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: StubTask
+      💡 Fix: Define function 'StubTask'
+
+ 485. 🔴 [MISSING_FUNCTION] Function 'LSPTask' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: LSPTask
+      💡 Fix: Define function 'LSPTask'
+
+ 486. 🔴 [MISSING_FUNCTION] Function 'format_param_assignment' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: format_param_assignment
+      💡 Fix: Define function 'format_param_assignment'
+
+ 487. 🔴 [MISSING_FUNCTION] Function 'Point' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Point
+      💡 Fix: Define function 'Point'
+
+ 488. 🔴 [MISSING_FUNCTION] Function 'offset_at_position' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: offset_at_position
+      💡 Fix: Define function 'offset_at_position'
+
+ 489. 🔴 [MISSING_FUNCTION] Function 'analyze_dead_code' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: analyze_dead_code
+      💡 Fix: Define function 'analyze_dead_code'
+
+ 490. 🔴 [MISSING_FUNCTION] Function 'analyze_parameter_issues' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: analyze_parameter_issues
+      💡 Fix: Define function 'analyze_parameter_issues'
+
+ 491. 🔴 [MISSING_FUNCTION] Function 'ReflectionSection' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ReflectionSection
+      💡 Fix: Define function 'ReflectionSection'
+
+ 492. 🔴 [MISSING_FUNCTION] Function 'StrOutputParser' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: StrOutputParser
+      💡 Fix: Define function 'StrOutputParser'
+
+ 493. 🔴 [MISSING_FUNCTION] Function 'ReflectionObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ReflectionObservation
+      💡 Fix: Define function 'ReflectionObservation'
+
+ 494. 🔴 [MISSING_FUNCTION] Function 'RelaceEditObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RelaceEditObservation
+      💡 Fix: Define function 'RelaceEditObservation'
+
+ 495. 🔴 [MISSING_FUNCTION] Function 'RenameFileObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RenameFileObservation
+      💡 Fix: Define function 'RenameFileObservation'
+
+ 496. 🔴 [MISSING_FUNCTION] Function 'ReplacementEditObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ReplacementEditObservation
+      💡 Fix: Define function 'ReplacementEditObservation'
+
+ 497. 🔴 [MISSING_FUNCTION] Function 'fetch_remote' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: fetch_remote
+      💡 Fix: Define function 'fetch_remote'
+
+ 498. 🔴 [MISSING_FUNCTION] Function 'RepositoryConfig' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RepositoryConfig
+      💡 Fix: Define function 'RepositoryConfig'
+
+ 499. 🔴 [MISSING_FUNCTION] Function 'setup_repo_dir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: setup_repo_dir
+      💡 Fix: Define function 'setup_repo_dir'
+
+ 500. 🔴 [MISSING_FUNCTION] Function 'config_writer' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: config_writer
+      💡 Fix: Define function 'config_writer'
+
+ 501. 🔴 [MISSING_FUNCTION] Function 'remove_option' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: remove_option
+      💡 Fix: Define function 'remove_option'
+
+ 502. 🔴 [MISSING_FUNCTION] Function 'GitCLI' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: GitCLI
+      💡 Fix: Define function 'GitCLI'
+
+ 503. 🔴 [MISSING_FUNCTION] Function 'repo_exists' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: repo_exists
+      💡 Fix: Define function 'repo_exists'
+
+ 504. 🔴 [MISSING_FUNCTION] Function 'perf_counter' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: perf_counter
+      💡 Fix: Define function 'perf_counter'
+
+ 505. 🔴 [MISSING_FUNCTION] Function 'delete_remote' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: delete_remote
+      💡 Fix: Define function 'delete_remote'
+
+ 506. 🔴 [MISSING_FUNCTION] Function 'fetch' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: fetch
+      💡 Fix: Define function 'fetch'
+
+ 507. 🔴 [MISSING_FUNCTION] Function 'create_remote' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: create_remote
+      💡 Fix: Define function 'create_remote'
+
+ 508. 🔴 [MISSING_FUNCTION] Function 'folder_exists' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: folder_exists
+      💡 Fix: Define function 'folder_exists'
+
+ 509. 🔴 [MISSING_FUNCTION] Function 'isfile' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: isfile
+      💡 Fix: Define function 'isfile'
+
+ 510. 🔴 [MISSING_FUNCTION] Function 'ls_files' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ls_files
+      💡 Fix: Define function 'ls_files'
+
+ 511. 🔴 [MISSING_FUNCTION] Function 'update_repo_url' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: update_repo_url
+      💡 Fix: Define function 'update_repo_url'
+
+ 512. 🔴 [MISSING_FUNCTION] Function 'tab_panel' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: tab_panel
+      💡 Fix: Define function 'tab_panel'
+
+ 513. 🔴 [MISSING_FUNCTION] Function 'under_token_limit' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: under_token_limit
+      💡 Fix: Define function 'under_token_limit'
+
+ 514. 🔴 [MISSING_FUNCTION] Function 'RevealSymbolObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: RevealSymbolObservation
+      💡 Fix: Define function 'RevealSymbolObservation'
+
+ 515. 🔴 [MISSING_FUNCTION] Function 'flush' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: flush
+      💡 Fix: Define function 'flush'
+
+ 516. 🔴 [MISSING_FUNCTION] Function 'add_line' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_line
+      💡 Fix: Define function 'add_line'
+
+ 517. 🔴 [MISSING_FUNCTION] Function 'SearchResultObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SearchResultObservation
+      💡 Fix: Define function 'SearchResultObservation'
+
+ 518. 🔴 [MISSING_FUNCTION] Function 'SearchObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SearchObservation
+      💡 Fix: Define function 'SearchObservation'
+
+ 519. 🔴 [MISSING_FUNCTION] Function 'SearchMatch' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SearchMatch
+      💡 Fix: Define function 'SearchMatch'
+
+ 520. 🔴 [MISSING_FUNCTION] Function 'SearchFileResult' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SearchFileResult
+      💡 Fix: Define function 'SearchFileResult'
+
+ 521. 🔴 [MISSING_FUNCTION] Function 'SearchFilesByNameResultObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SearchFilesByNameResultObservation
+      💡 Fix: Define function 'SearchFilesByNameResultObservation'
+
+ 522. 🔴 [MISSING_FUNCTION] Function 'SemanticEditObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SemanticEditObservation
+      💡 Fix: Define function 'SemanticEditObservation'
+
+ 523. 🔴 [MISSING_FUNCTION] Function 'SemanticSearchObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: SemanticSearchObservation
+      💡 Fix: Define function 'SemanticSearchObservation'
+
+ 524. 🔴 [MISSING_FUNCTION] Function 'resource' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: resource
+      💡 Fix: Define function 'resource'
+
+ 525. 🔴 [MISSING_FUNCTION] Function 'add_symbol' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: add_symbol
+      💡 Fix: Define function 'add_symbol'
+
+ 526. 🔴 [MISSING_FUNCTION] Function 'flag' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: flag
+      💡 Fix: Define function 'flag'
+
+ 527. 🔴 [MISSING_FUNCTION] Function 'AuthError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: AuthError
+      💡 Fix: Define function 'AuthError'
+
+ 528. 🔴 [MISSING_FUNCTION] Function 'render' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: render
+      💡 Fix: Define function 'render'
+
+ 529. 🔴 [MISSING_FUNCTION] Function 'topological_sort' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: topological_sort
+      💡 Fix: Define function 'topological_sort'
+
+ 530. 🔴 [MISSING_FUNCTION] Function 'strongly_connected_components' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: strongly_connected_components
+      💡 Fix: Define function 'strongly_connected_components'
+
+ 531. 🔴 [MISSING_FUNCTION] Function 'edges' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: edges
+      💡 Fix: Define function 'edges'
+
+ 532. 🔴 [MISSING_FUNCTION] Function 'break_down' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: break_down
+      💡 Fix: Define function 'break_down'
+
+ 533. 🔴 [MISSING_FUNCTION] Function 'TransactionError' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: TransactionError
+      💡 Fix: Define function 'TransactionError'
+
+ 534. 🔴 [MISSING_FUNCTION] Function 'exec_func' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: exec_func
+      💡 Fix: Define function 'exec_func'
+
+ 535. 🔴 [MISSING_FUNCTION] Function 'Language' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: Language
+      💡 Fix: Define function 'Language'
+
+ 536. 🔴 [MISSING_FUNCTION] Function 'language' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: language
+      💡 Fix: Define function 'language'
+
+ 537. 🔴 [MISSING_FUNCTION] Function 'traverse' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: traverse
+      💡 Fix: Define function 'traverse'
+
+ 538. 🔴 [MISSING_FUNCTION] Function 'frozenset' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: frozenset
+      💡 Fix: Define function 'frozenset'
+
+ 539. 🔴 [MISSING_FUNCTION] Function 'resolve_base_url' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: resolve_base_url
+      💡 Fix: Define function 'resolve_base_url'
+
+ 540. 🔴 [MISSING_FUNCTION] Function 'should_remove' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: should_remove
+      💡 Fix: Define function 'should_remove'
+
+ 541. 🔴 [MISSING_FUNCTION] Function 'update_type_annotation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: update_type_annotation
+      💡 Fix: Define function 'update_type_annotation'
+
+ 542. 🔴 [MISSING_FUNCTION] Function 'write_to_file' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: write_to_file
+      💡 Fix: Define function 'write_to_file'
+
+ 543. 🔴 [MISSING_FUNCTION] Function 'encoding_for_model' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: encoding_for_model
+      💡 Fix: Define function 'encoding_for_model'
+
+ 544. 🔴 [MISSING_FUNCTION] Function 'subclasses' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: subclasses
+      💡 Fix: Define function 'subclasses'
+
+ 545. 🔴 [MISSING_FUNCTION] Function 'process_parts' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: process_parts
+      💡 Fix: Define function 'process_parts'
+
+ 546. 🔴 [MISSING_FUNCTION] Function 'load_dataset' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: load_dataset
+      💡 Fix: Define function 'load_dataset'
+
+ 547. 🔴 [MISSING_FUNCTION] Function 'stylize_range' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: stylize_range
+      💡 Fix: Define function 'stylize_range'
+
+ 548. 🔴 [MISSING_FUNCTION] Function 'default' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: default
+      💡 Fix: Define function 'default'
+
+ 549. 🔴 [MISSING_FUNCTION] Function 'sort_dict' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: sort_dict
+      💡 Fix: Define function 'sort_dict'
+
+ 550. 🔴 [MISSING_FUNCTION] Function 'mean' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: mean
+      💡 Fix: Define function 'mean'
+
+ 551. 🔴 [MISSING_FUNCTION] Function 'gethostname' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: gethostname
+      💡 Fix: Define function 'gethostname'
+
+ 552. 🔴 [MISSING_FUNCTION] Function 'ViewPRObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: ViewPRObservation
+      💡 Fix: Define function 'ViewPRObservation'
+
+ 553. 🔴 [MISSING_FUNCTION] Function 'PRCheckObservation' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: PRCheckObservation
+      💡 Fix: Define function 'PRCheckObservation'
+
+ 554. 🔴 [MISSING_FUNCTION] Function 'emptydir' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: emptydir
+      💡 Fix: Define function 'emptydir'
+
+ 555. 🔴 [MISSING_FUNCTION] Function 'GraphJson' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: GraphJson
+      💡 Fix: Define function 'GraphJson'
+
+ 556. 🔴 [MISSING_FUNCTION] Function 'home' is called but not defined
+      📁 File: multiple_files
+      🔧 Function: home
+      💡 Fix: Define function 'home'
+
