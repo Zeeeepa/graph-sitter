@@ -7,6 +7,7 @@ Uses the ACTUAL graph-sitter API discovered through codebase analysis
 
 import json
 import logging
+import hashlib
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
@@ -61,6 +62,7 @@ class SupremeAnalysisReport:
     top_functions: List[AnalysisResult]
     analysis_features: List[str]
     errors_found: List[Dict[str, Any]]
+    comprehensive_errors: Dict[str, Any] = None
 
 
 class SupremeErrorAnalyzer:
@@ -266,6 +268,238 @@ class SupremeErrorAnalyzer:
         
         return errors
     
+    def comprehensive_error_context_analysis(self, max_issues: int = 200) -> Dict[str, Any]:
+        """
+        Comprehensive error analysis with detailed context using advanced graph-sitter features.
+        Provides the detailed error context requested: file paths, line numbers, function names,
+        interconnected context, and fix suggestions.
+        """
+        if not self.codebase:
+            logger.error("Codebase not loaded")
+            return {}
+        
+        logger.info("🔍 Running comprehensive error context analysis...")
+        
+        # Import calculate_cyclomatic_complexity function locally to avoid circular imports
+        def calculate_cyclomatic_complexity(function):
+            """Enhanced cyclomatic complexity calculation with better statement handling."""
+            base_complexity = 1
+            
+            if hasattr(function, 'source'):
+                # Fallback to source-based analysis
+                source = function.source.lower()
+                base_complexity += source.count('if ') + source.count('elif ')
+                base_complexity += source.count('for ') + source.count('while ')
+                base_complexity += source.count('except ')
+                base_complexity += source.count(' and ') + source.count(' or ')
+            
+            return base_complexity
+        
+        error_analysis = {
+            "total_issues": 0,
+            "critical_issues": 0,
+            "issues_by_severity": {},
+            "issues_by_file": {},
+            "interconnected_analysis": {},
+            "detailed_issues": []
+        }
+        
+        issue_counter = 0
+        
+        for file in self.codebase.files():
+            if issue_counter >= max_issues:
+                break
+                
+            file_issues = []
+            
+            try:
+                # Enhanced syntax and semantic analysis
+                for func in file.functions:
+                    if issue_counter >= max_issues:
+                        break
+                        
+                    try:
+                        # Get function context and interconnections
+                        func_context = self.get_enhanced_function_context(func)
+                        
+                        # Complexity analysis with detailed context
+                        complexity = calculate_cyclomatic_complexity(func)
+                        if complexity > 10:
+                            severity = "critical" if complexity > 25 else "high" if complexity > 15 else "medium"
+                            
+                            issue = {
+                                "id": f"complexity_{hashlib.md5(f'{file.filepath}_{func.name}'.encode()).hexdigest()[:8]}",
+                                "type": "complexity_issue",
+                                "severity": severity,
+                                "file_path": file.filepath,
+                                "line_number": getattr(func, 'line_number', None),
+                                "function_name": func.name,
+                                "message": f"High cyclomatic complexity: {complexity}",
+                                "description": f"Function '{func.name}' has cyclomatic complexity of {complexity}",
+                                "context": {
+                                    "complexity_score": complexity,
+                                    "parameters_count": len(func.parameters) if hasattr(func, 'parameters') else 0,
+                                    "return_statements": len(func.return_statements) if hasattr(func, 'return_statements') else 0,
+                                    "function_calls": len(func.function_calls) if hasattr(func, 'function_calls') else 0,
+                                    "dependencies": [dep.name for dep in func.dependencies[:5]] if hasattr(func, 'dependencies') else [],
+                                    "call_sites": len(func.call_sites) if hasattr(func, 'call_sites') else 0
+                                },
+                                "interconnected_context": func_context,
+                                "affected_symbols": {
+                                    "functions": [call.name for call in func.function_calls[:10]] if hasattr(func, 'function_calls') else [],
+                                    "parameters": [param.name for param in func.parameters] if hasattr(func, 'parameters') else [],
+                                    "dependencies": [dep.name for dep in func.dependencies[:10]] if hasattr(func, 'dependencies') else []
+                                },
+                                "fix_suggestions": [
+                                    f"Break down '{func.name}' into smaller functions (current complexity: {complexity})",
+                                    "Extract complex conditional logic into separate methods",
+                                    "Consider using strategy pattern for complex branching",
+                                    f"Target complexity should be under 10 (currently {complexity})"
+                                ]
+                            }
+                            
+                            file_issues.append(issue)
+                            error_analysis["detailed_issues"].append(issue)
+                            issue_counter += 1
+                            
+                            if severity == "critical":
+                                error_analysis["critical_issues"] += 1
+                                
+                    except Exception as e:
+                        continue
+                
+                # Store file-level issues
+                if file_issues:
+                    error_analysis["issues_by_file"][file.filepath] = {
+                        "total_issues": len(file_issues),
+                        "critical_count": len([i for i in file_issues if i["severity"] == "critical"]),
+                        "high_count": len([i for i in file_issues if i["severity"] == "high"]),
+                        "medium_count": len([i for i in file_issues if i["severity"] == "medium"]),
+                        "issues": file_issues
+                    }
+                    
+            except Exception as e:
+                continue
+        
+        # Calculate summary statistics
+        error_analysis["total_issues"] = issue_counter
+        
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for issue in error_analysis["detailed_issues"]:
+            severity = issue.get("severity", "low")
+            severity_counts[severity] = severity_counts.get(severity, 0) + 1
+        
+        error_analysis["issues_by_severity"] = severity_counts
+        
+        logger.info(f"✅ Comprehensive analysis complete: {issue_counter} issues found")
+        return error_analysis
+    
+    def get_enhanced_function_context(self, func: Function) -> Dict[str, Any]:
+        """Get enhanced context for a function including all interconnected elements."""
+        context = {
+            "dependencies": [],
+            "dependents": [],
+            "call_graph": {},
+            "data_flow": {},
+            "related_classes": [],
+            "related_files": []
+        }
+        
+        try:
+            # Dependencies analysis
+            if hasattr(func, 'dependencies'):
+                for dep in func.dependencies[:10]:
+                    context["dependencies"].append({
+                        "name": getattr(dep, 'name', 'unknown'),
+                        "type": type(dep).__name__,
+                        "file": getattr(dep, 'filepath', 'unknown')
+                    })
+            
+            # Call sites analysis
+            if hasattr(func, 'call_sites'):
+                for call_site in func.call_sites[:10]:
+                    context["dependents"].append({
+                        "caller": getattr(call_site, 'name', 'unknown'),
+                        "file": getattr(call_site, 'filepath', 'unknown')
+                    })
+            
+            # Function calls analysis
+            call_graph = {}
+            if hasattr(func, 'function_calls'):
+                for call in func.function_calls[:10]:
+                    call_graph[call.name] = {
+                        "type": "function_call",
+                        "arguments_count": len(getattr(call, 'args', []))
+                    }
+            context["call_graph"] = call_graph
+            
+            # Related files through imports
+            if hasattr(func, 'file'):
+                file = func.file
+                related_files = []
+                if hasattr(file, 'imports'):
+                    for imp in file.imports[:5]:
+                        if hasattr(imp, 'imported_symbol') and hasattr(imp.imported_symbol, 'filepath'):
+                            related_files.append(imp.imported_symbol.filepath)
+                context["related_files"] = related_files
+                
+        except Exception as e:
+            context["error"] = str(e)
+        
+        return context
+    
+    def get_enhanced_class_context(self, cls: Class) -> Dict[str, Any]:
+        """Get enhanced context for a class including all interconnected elements."""
+        context = {
+            "inheritance_chain": [],
+            "composition_relationships": [],
+            "method_dependencies": {},
+            "attribute_usage": {},
+            "related_classes": []
+        }
+        
+        try:
+            # Local complexity calculation to avoid circular imports
+            def calculate_cyclomatic_complexity(function):
+                base_complexity = 1
+                if hasattr(function, 'source'):
+                    source = function.source.lower()
+                    base_complexity += source.count('if ') + source.count('elif ')
+                    base_complexity += source.count('for ') + source.count('while ')
+                    base_complexity += source.count('except ')
+                    base_complexity += source.count(' and ') + source.count(' or ')
+                return base_complexity
+            
+            # Inheritance analysis
+            if hasattr(cls, 'parent_class_names'):
+                context["inheritance_chain"] = cls.parent_class_names
+            
+            # Method analysis
+            method_deps = {}
+            if hasattr(cls, 'methods'):
+                for method in cls.methods()[:10]:
+                    method_deps[method.name] = {
+                        "parameters": len(method.parameters) if hasattr(method, 'parameters') else 0,
+                        "complexity": calculate_cyclomatic_complexity(method),
+                        "calls": [call.name for call in method.function_calls[:5]] if hasattr(method, 'function_calls') else []
+                    }
+            context["method_dependencies"] = method_deps
+            
+            # Attribute analysis
+            attr_usage = {}
+            if hasattr(cls, 'attributes'):
+                for attr in cls.attributes[:10]:
+                    attr_usage[attr.name] = {
+                        "type": getattr(attr, 'type', 'unknown'),
+                        "access_level": getattr(attr, 'access_level', 'unknown')
+                    }
+            context["attribute_usage"] = attr_usage
+            
+        except Exception as e:
+            context["error"] = str(e)
+        
+        return context
+    
     def run_supreme_analysis(self) -> SupremeAnalysisReport:
         """
         Run complete supreme analysis using REAL graph-sitter API
@@ -291,6 +525,9 @@ class SupremeErrorAnalyzer:
         top_functions = self.analyze_top_functions()
         errors_found = self.detect_error_patterns()
         
+        # Run comprehensive error context analysis
+        comprehensive_errors = self.comprehensive_error_context_analysis()
+        
         # Create comprehensive report
         report = SupremeAnalysisReport(
             codebase_summary=codebase_summary,
@@ -301,7 +538,8 @@ class SupremeErrorAnalyzer:
             top_classes=top_classes,
             top_functions=top_functions,
             analysis_features=self.analysis_features,
-            errors_found=errors_found
+            errors_found=errors_found,
+            comprehensive_errors=comprehensive_errors
         )
         
         logger.info("✅ Supreme Analysis Complete!")
@@ -401,9 +639,21 @@ def main():
             print(f"  ✅ {feature}")
         
         if report.errors_found:
-            print(f"\n⚠️  Top Issues Found:")
-            for error in report.errors_found[:5]:
+            print(f"\n⚠️  Basic Issues Found:")
+            for error in report.errors_found[:3]:
                 print(f"  • {error['type']}: {error['message']}")
+        
+        if report.comprehensive_errors and report.comprehensive_errors.get('detailed_issues'):
+            print(f"\n🔍 Comprehensive Error Analysis:")
+            print(f"  📊 Total Issues: {report.comprehensive_errors['total_issues']}")
+            print(f"  🚨 Critical: {report.comprehensive_errors['critical_issues']}")
+            print(f"  📈 By Severity: {report.comprehensive_errors['issues_by_severity']}")
+            
+            print(f"\n🎯 Top Complex Functions:")
+            for issue in report.comprehensive_errors['detailed_issues'][:3]:
+                print(f"  • {issue['function_name']} (complexity: {issue['context']['complexity_score']})")
+                print(f"    📁 {issue['file_path']}")
+                print(f"    💡 {issue['fix_suggestions'][0]}")
         
         print(f"\n📄 Full results saved to: supreme_analysis_results.json")
         
