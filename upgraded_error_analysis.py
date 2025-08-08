@@ -154,12 +154,47 @@ class UpgradedSupremeErrorAnalyzer:
         if any(excluded in path_parts for excluded in self.exclude_folders):
             return True
             
-        # Additional pattern-based exclusions
-        if ('test' in file_lower and 
-            ('test_' in file_lower or '/test' in file_lower or 'tests/' in file_lower)):
+        # Enhanced test file detection
+        test_indicators = [
+            'test_' in file_lower,
+            '/test' in file_lower,
+            'tests/' in file_lower,
+            '/tests/' in file_lower,
+            'test_files/' in file_lower,
+            'conftest.py' in file_lower,
+            file_path.startswith('tests/'),
+            'src/codemods/eval/test_files/' in file_path,
+            # Additional comprehensive test patterns
+            any(part.startswith('test_') for part in path_parts),
+            any('test' in part for part in path_parts),
+            'test' in Path(file_path).stem,
+            file_path.endswith('_test.py'),
+            '/test/' in file_path,
+            'tests/unit/' in file_path,
+            'tests/integration/' in file_path,
+            'tests/shared/' in file_path
+        ]
+        if any(test_indicators):
             return True
             
-        if 'example' in file_lower and ('example' in path_parts or 'examples' in path_parts):
+        # Enhanced example file detection
+        example_indicators = [
+            'example' in file_lower and ('example' in path_parts or 'examples' in path_parts),
+            'examples/' in file_lower,
+            '/examples/' in file_lower,
+            file_path.startswith('examples/')
+        ]
+        if any(example_indicators):
+            return True
+            
+        # Documentation and config files
+        doc_indicators = [
+            'conftest.py' in file_lower,
+            '/docs/' in file_lower,
+            'docs/' in file_lower,
+            file_path.endswith('conftest.py')
+        ]
+        if any(doc_indicators):
             return True
             
         return False
@@ -227,6 +262,15 @@ class UpgradedSupremeErrorAnalyzer:
             # Common message/communication classes
             'SystemMessage', 'HumanMessage', 'AIMessage', 'BaseMessage', 'ChatMessage',
             
+            # Standard library imports
+            'Path', 'Counter', 'import_module', 'defaultdict', 'OrderedDict',
+            'namedtuple', 'deque', 'ChainMap',
+            
+            # Python built-in methods (string, path, etc.)
+            'lower', 'upper', 'title', 'capitalize', 'swapcase', 'casefold',
+            'walk', 'rglob', 'glob', 'relative_to', 'resolve', 'absolute',
+            'most_common', 'strftime', 'strptime', 'isoformat',
+            
             # Common library functions that might not be detected
             'join', 'split', 'strip', 'replace', 'find', 'startswith', 'endswith',
             'append', 'extend', 'insert', 'remove', 'pop', 'clear', 'copy',
@@ -249,7 +293,11 @@ class UpgradedSupremeErrorAnalyzer:
             
             # Common data processing
             'json', 'yaml', 'csv', 'pickle', 'base64', 'uuid',
-            'datetime', 'timedelta', 'timezone'
+            'datetime', 'timedelta', 'timezone',
+            
+            # UI framework components (Rich, Textual, etc.)
+            'box', 'vstack', 'hstack', 'heading', 'icon', 'spinner', 'button',
+            'panel', 'table', 'tree', 'progress', 'console', 'text', 'rule'
         }
         
         # Common false positive patterns
@@ -258,11 +306,15 @@ class UpgradedSupremeErrorAnalyzer:
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
             'id', 'ok', 'no', 'go', 'do', 'if', 'or', 'is', 'in', 'on', 'at',
+            'add', 'sub', 'end', 'now', 'tab', 'ask', 'cwd',  # Very short function names
             
             # Common variable names that might be mistaken for functions
             'data', 'item', 'value', 'key', 'name', 'path', 'file', 'line',
             'text', 'content', 'result', 'output', 'input', 'config', 'settings'
         }
+        
+        # Method call patterns that are likely false positives
+        method_patterns = ['get_', 'set_', 'is_', 'has_', 'to_', 'from_', 'with_', 'without_', 'as_']
         
         # Collect function calls with context (excluding specified folders)
         for file in self.codebase.files():
@@ -292,14 +344,18 @@ class UpgradedSupremeErrorAnalyzer:
         
         # Find missing functions with enhanced false positive filtering
         for func_name, call_sites in function_calls.items():
+            # Check if it's a method pattern (get_, set_, etc.)
+            is_method_pattern = any(func_name.startswith(pattern) for pattern in method_patterns)
+            
             if (func_name not in defined_functions and 
                 func_name not in builtin_functions and
                 func_name not in false_positive_patterns and
                 not func_name.startswith('_') and
-                len(func_name) > 2 and  # Increased from 1 to 2
+                len(func_name) > 3 and  # Increased to 4+ characters
                 not func_name.isdigit() and  # Skip numeric strings
                 not func_name.isupper() and  # Skip constants
                 not func_name.endswith('Tool') and  # Skip Tool classes (likely external)
+                not is_method_pattern and  # Skip method patterns
                 len(call_sites) >= 2):  # Only report if called multiple times
                 
                 error = CodeError(
