@@ -90,7 +90,7 @@ class SupremeErrorAnalyzer:
         """Load codebase using graph-sitter"""
         try:
             logger.info(f"Loading codebase from: {self.codebase_path}")
-            self.codebase = Codebase.from_repo(str(self.codebase_path))
+            self.codebase = Codebase(str(self.codebase_path))
             logger.info("✅ Codebase loaded successfully")
             return True
         except Exception as e:
