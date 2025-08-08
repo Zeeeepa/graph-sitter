@@ -105,18 +105,23 @@ class UpgradedSupremeErrorAnalyzer:
     Enhanced with comprehensive real error detection capabilities
     """
     
-    def __init__(self, codebase_path: str):
-        """Initialize with codebase path"""
+    def __init__(self, codebase_path: str, exclude_folders: Optional[List[str]] = None):
+        """Initialize with codebase path and optional folder exclusions"""
         self.codebase_path = Path(codebase_path)
         self.codebase: Optional[Codebase] = None
         self.errors: List[CodeError] = []
         self.function_call_graph = nx.DiGraph()
         self.import_graph = nx.DiGraph()
+        
+        # Default exclusions plus user-specified ones
+        default_exclusions = ['tests', 'examples', 'node_modules', '__pycache__', '.git', '.pytest_cache', 'venv', 'env']
+        self.exclude_folders = set(default_exclusions + (exclude_folders or []))
+        
         self.analysis_features = [
-            "Advanced missing function detection",
+            "Advanced missing function detection with false positive filtering",
             "Dead code analysis with usage tracking",
             "Parameter validation and optimization",
-            "Import cycle detection",
+            "Import cycle detection with exclusions",
             "Function call graph analysis",
             "Type annotation validation",
             "Documentation coverage analysis",
@@ -128,9 +133,10 @@ class UpgradedSupremeErrorAnalyzer:
         ]
         
     def load_codebase(self) -> bool:
-        """Load codebase using graph-sitter"""
+        """Load codebase using graph-sitter with folder exclusions"""
         try:
             logger.info(f"Loading codebase from: {self.codebase_path}")
+            logger.info(f"Excluding folders: {', '.join(sorted(self.exclude_folders))}")
             self.codebase = Codebase(str(self.codebase_path))
             logger.info("✅ Codebase loaded successfully")
             self._build_analysis_graphs()
@@ -138,6 +144,11 @@ class UpgradedSupremeErrorAnalyzer:
         except Exception as e:
             logger.error(f"❌ Failed to load codebase: {e}")
             return False
+    
+    def _should_exclude_file(self, file_path: str) -> bool:
+        """Check if file should be excluded based on folder exclusions"""
+        path_parts = Path(file_path).parts
+        return any(excluded in path_parts for excluded in self.exclude_folders)
     
     def _build_analysis_graphs(self):
         """Build function call and import graphs for analysis"""
@@ -170,7 +181,7 @@ class UpgradedSupremeErrorAnalyzer:
         logger.info(f"📊 Built graphs: {len(self.function_call_graph.nodes)} function nodes, {len(self.import_graph.nodes)} file nodes")
 
     def analyze_missing_functions(self) -> List[CodeError]:
-        """Enhanced missing function detection with context"""
+        """Enhanced missing function detection with context and false positive filtering"""
         errors = []
         if not self.codebase:
             return errors
@@ -180,17 +191,54 @@ class UpgradedSupremeErrorAnalyzer:
         # Get all function calls and definitions with file context
         function_calls = defaultdict(list)  # function_name -> [(caller, file, line)]
         defined_functions = set()
+        
+        # Enhanced builtin and common library functions to reduce false positives
         builtin_functions = {
+            # Python builtins
             'print', 'len', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple',
             'range', 'enumerate', 'zip', 'map', 'filter', 'sorted', 'reversed',
             'sum', 'min', 'max', 'abs', 'round', 'isinstance', 'hasattr', 'getattr',
             'setattr', 'delattr', 'type', 'id', 'hash', 'repr', 'format', 'open',
-            'input', 'eval', 'exec', 'compile', 'globals', 'locals', 'vars', 'dir'
+            'input', 'eval', 'exec', 'compile', 'globals', 'locals', 'vars', 'dir',
+            'next', 'iter', 'any', 'all', 'chr', 'ord', 'bin', 'hex', 'oct',
+            'callable', 'classmethod', 'staticmethod', 'property', 'super',
+            
+            # Common library functions that might not be detected
+            'join', 'split', 'strip', 'replace', 'find', 'startswith', 'endswith',
+            'append', 'extend', 'insert', 'remove', 'pop', 'clear', 'copy',
+            'update', 'get', 'keys', 'values', 'items',
+            
+            # Common method names that are often dynamically called
+            'close', 'read', 'write', 'flush', 'seek', 'tell',
+            'connect', 'disconnect', 'send', 'receive',
+            'start', 'stop', 'pause', 'resume', 'reset',
+            'load', 'save', 'dump', 'parse', 'format',
+            'validate', 'check', 'verify', 'confirm',
+            
+            # Common test/mock functions
+            'mock', 'patch', 'assert_called', 'assert_called_with',
+            'side_effect', 'return_value'
         }
         
-        # Collect function calls with context
+        # Common false positive patterns
+        false_positive_patterns = {
+            # Single letters or very short names (likely variables)
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            'id', 'ok', 'no', 'go', 'do', 'if', 'or', 'is', 'in', 'on', 'at',
+            
+            # Common variable names that might be mistaken for functions
+            'data', 'item', 'value', 'key', 'name', 'path', 'file', 'line',
+            'text', 'content', 'result', 'output', 'input', 'config', 'settings'
+        }
+        
+        # Collect function calls with context (excluding specified folders)
         for file in self.codebase.files():
             try:
+                # Skip excluded folders
+                if self._should_exclude_file(file.filepath):
+                    continue
+                    
                 for func in file.functions:
                     # Add to defined functions
                     if hasattr(func, 'name') and func.name:
@@ -210,12 +258,16 @@ class UpgradedSupremeErrorAnalyzer:
                 logger.warning(f"Error analyzing file {file.filepath}: {e}")
                 continue
         
-        # Find missing functions
+        # Find missing functions with enhanced false positive filtering
         for func_name, call_sites in function_calls.items():
             if (func_name not in defined_functions and 
                 func_name not in builtin_functions and
+                func_name not in false_positive_patterns and
                 not func_name.startswith('_') and
-                len(func_name) > 1):
+                len(func_name) > 1 and
+                not func_name.isdigit() and  # Skip numeric strings
+                not func_name.isupper() and  # Skip constants
+                len(call_sites) >= 2):  # Only report if called multiple times
                 
                 error = CodeError(
                     error_type="missing_function",
@@ -244,7 +296,7 @@ class UpgradedSupremeErrorAnalyzer:
         return errors
 
     def analyze_dead_code(self) -> List[CodeError]:
-        """Enhanced dead code analysis with usage patterns"""
+        """Enhanced dead code analysis with usage patterns and folder exclusions"""
         errors = []
         if not self.codebase:
             return errors
@@ -256,9 +308,13 @@ class UpgradedSupremeErrorAnalyzer:
         function_calls = set()
         method_calls = set()
         
-        # Collect all function definitions
+        # Collect all function definitions (excluding specified folders)
         for file in self.codebase.files():
             try:
+                # Skip excluded folders
+                if self._should_exclude_file(file.filepath):
+                    continue
+                    
                 for func in file.functions:
                     if hasattr(func, 'name') and func.name:
                         defined_functions[func.name] = {
@@ -284,13 +340,19 @@ class UpgradedSupremeErrorAnalyzer:
                 logger.warning(f"Error analyzing file {file.filepath}: {e}")
                 continue
         
-        # Find unused functions
+        # Find unused functions with enhanced filtering
         for func_name, func_info in defined_functions.items():
-            # Skip certain functions that might be used externally
+            # Skip certain functions that might be used externally or are special
             if (func_name.startswith('__') or  # Magic methods
                 func_name == 'main' or  # Main functions
                 func_name.startswith('test_') or  # Test functions
-                func_info['is_method']):  # Methods (harder to track usage)
+                func_info['is_method'] or  # Methods (harder to track usage)
+                func_name in ['setup', 'teardown', 'setUp', 'tearDown'] or  # Test setup
+                func_name.endswith('_handler') or  # Event handlers
+                func_name.startswith('handle_') or  # Event handlers
+                func_name.endswith('_callback') or  # Callbacks
+                func_name.startswith('on_') or  # Event handlers
+                func_info['source_lines'] < 3):  # Very small functions (likely properties/getters)
                 continue
                 
             if func_name not in function_calls:
@@ -484,7 +546,7 @@ class UpgradedSupremeErrorAnalyzer:
         return errors
 
     def analyze_documentation_coverage(self) -> List[CodeError]:
-        """Analyze missing or poor documentation"""
+        """Analyze missing or poor documentation with folder exclusions"""
         errors = []
         if not self.codebase:
             return errors
@@ -493,6 +555,10 @@ class UpgradedSupremeErrorAnalyzer:
         
         for file in self.codebase.files():
             try:
+                # Skip excluded folders
+                if self._should_exclude_file(file.filepath):
+                    continue
+                
                 # Check classes
                 for cls in file.classes:
                     if not hasattr(cls, 'docstring') or not cls.docstring:
@@ -514,10 +580,13 @@ class UpgradedSupremeErrorAnalyzer:
                         )
                         errors.append(error)
                 
-                # Check functions
+                # Check functions (with enhanced filtering)
                 for func in file.functions:
-                    if (not func.name or func.name.startswith('_') or 
-                        func.name.startswith('test_')):
+                    if (not func.name or 
+                        func.name.startswith('_') or 
+                        func.name.startswith('test_') or
+                        func.name in ['main', 'setup', 'teardown'] or
+                        len(func.name) <= 2):  # Skip very short function names
                         continue
                         
                     if not hasattr(func, 'docstring') or not func.docstring:
@@ -654,14 +723,21 @@ def main():
     import sys
     
     if len(sys.argv) < 2:
-        print("Usage: python upgraded_error_analysis.py <codebase_path>")
+        print("Usage: python upgraded_error_analysis.py <codebase_path> [--exclude folder1,folder2,...]")
+        print("Example: python upgraded_error_analysis.py . --exclude tests,examples,node_modules")
         sys.exit(1)
     
     codebase_path = sys.argv[1]
+    exclude_folders = None
+    
+    # Parse exclude folders argument
+    if len(sys.argv) > 2 and sys.argv[2] == '--exclude':
+        if len(sys.argv) > 3:
+            exclude_folders = [folder.strip() for folder in sys.argv[3].split(',')]
     
     try:
-        # Initialize upgraded analyzer
-        analyzer = UpgradedSupremeErrorAnalyzer(codebase_path)
+        # Initialize upgraded analyzer with exclusions
+        analyzer = UpgradedSupremeErrorAnalyzer(codebase_path, exclude_folders)
         
         # Run comprehensive analysis
         errors = analyzer.run_comprehensive_analysis()
@@ -677,6 +753,7 @@ def main():
         print("🚀 UPGRADED SUPREME ERROR ANALYSIS COMPLETE")
         print("="*70)
         print(f"📁 Analyzed: {codebase_path}")
+        print(f"🚫 Excluded: {', '.join(sorted(analyzer.exclude_folders))}")
         print(f"🚨 Total Errors: {stats['total_errors']}")
         print(f"⚠️ Critical: {stats['by_severity']['critical']}")
         print(f"🔶 High: {stats['by_severity']['high']}")
@@ -703,4 +780,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
