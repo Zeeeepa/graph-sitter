@@ -1,2 +1,0 @@
-export { VirtualizedList } from './VirtualizedList';
-
