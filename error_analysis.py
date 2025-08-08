@@ -11,7 +11,24 @@ import hashlib
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
-
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Dict, Any
+from codegen.sdk.core.statements.for_loop_statement import ForLoopStatement
+from codegen.sdk.core.statements.if_block_statement import IfBlockStatement
+from codegen.sdk.core.statements.try_catch_statement import TryCatchStatement
+from codegen.sdk.core.statements.while_statement import WhileStatement
+from codegen.sdk.core.expressions.binary_expression import BinaryExpression
+from codegen.sdk.core.expressions.unary_expression import UnaryExpression
+from codegen.sdk.core.expressions.comparison_expression import ComparisonExpression
+import math
+import re
+import requests
+from datetime import datetime, timedelta
+import subprocess
+import os
+import tempfile
+from fastapi.middleware.cors import CORSMiddleware
 # Import the REAL graph-sitter API
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.class_definition import Class
@@ -268,7 +285,164 @@ class SupremeErrorAnalyzer:
             logger.error(f"Error in pattern detection: {e}")
         
         return errors
+
+    def create_graph_from_codebase(repo_path):
+    """Create a directed graph representing import relationships in a codebase."""
+    codebase = Codebase.from_repo(repo_path)
+    G = nx.MultiDiGraph()
+
+    for imp in codebase.imports:
+        if imp.from_file and imp.to_file:
+            G.add_edge(
+                imp.to_file.filepath,
+                imp.from_file.filepath,
+                color="red" if getattr(imp, "is_dynamic", False) else "black",
+                label="dynamic" if getattr(imp, "is_dynamic", False) else "static",
+                is_dynamic=getattr(imp, "is_dynamic", False),
+            )
+    return G
+
+
+    def convert_all_calls_to_kwargs(codebase):
+        for file in codebase.files:
+            for function_call in file.function_calls:
+                function_call.convert_args_to_kwargs()
     
+        print("All function calls have been converted to kwargs")
+    
+    
+    def find_import_cycles(G):
+        """Identify strongly connected components (cycles) in the import graph."""
+        cycles = [scc for scc in nx.strongly_connected_components(G) if len(scc) > 1]
+        print(f"🔄 Found {len(cycles)} import cycles.")
+    
+        for i, cycle in enumerate(cycles, 1):
+            print(f"\nCycle #{i}: Size {len(cycle)} files")
+            print(f"Total number of imports in cycle: {G.subgraph(cycle).number_of_edges()}")
+    
+            print("\nFiles in this cycle:")
+            for file in cycle:
+                print(f"  - {file}")
+    
+        return cycles
+    
+    def cc_rank(complexity):
+        if complexity < 0:
+            raise ValueError("Complexity must be a non-negative value")
+    
+        ranks = [
+            (1, 5, "A"),
+            (6, 10, "B"),
+            (11, 20, "C"),
+            (21, 30, "D"),
+            (31, 40, "E"),
+            (41, float("inf"), "F"),
+        ]
+        for low, high, rank in ranks:
+            if low <= complexity <= high:
+                return rank
+        return "F"
+    
+    
+    def calculate_doi(cls):
+        """Calculate the depth of inheritance for a given class."""
+        return len(cls.superclasses)
+    
+    
+    def get_operators_and_operands(function):
+        operators = []
+        operands = []
+    
+        for statement in function.code_block.statements:
+            for call in statement.function_calls:
+                operators.append(call.name)
+                for arg in call.args:
+                    operands.append(arg.source)
+    
+            if hasattr(statement, "expressions"):
+                for expr in statement.expressions:
+                    if isinstance(expr, BinaryExpression):
+                        operators.extend([op.source for op in expr.operators])
+                        operands.extend([elem.source for elem in expr.elements])
+                    elif isinstance(expr, UnaryExpression):
+                        operators.append(expr.ts_node.type)
+                        operands.append(expr.argument.source)
+                    elif isinstance(expr, ComparisonExpression):
+                        operators.extend([op.source for op in expr.operators])
+                        operands.extend([elem.source for elem in expr.elements])
+    
+            if hasattr(statement, "expression"):
+                expr = statement.expression
+                if isinstance(expr, BinaryExpression):
+                    operators.extend([op.source for op in expr.operators])
+                    operands.extend([elem.source for elem in expr.elements])
+                elif isinstance(expr, UnaryExpression):
+                    operators.append(expr.ts_node.type)
+                    operands.append(expr.argument.source)
+                elif isinstance(expr, ComparisonExpression):
+                    operators.extend([op.source for op in expr.operators])
+                    operands.extend([elem.source for elem in expr.elements])
+    
+        return operators, operands
+    
+    
+    def calculate_halstead_volume(operators, operands):
+        n1 = len(set(operators))
+        n2 = len(set(operands))
+    
+        N1 = len(operators)
+        N2 = len(operands)
+    
+        N = N1 + N2
+        n = n1 + n2
+    
+        if n > 0:
+            volume = N * math.log2(n)
+            return volume, N1, N2, n1, n2
+        return 0, N1, N2, n1, n2
+        
+    def find_problematic_import_loops(G, cycles):
+        """Identify cycles with both static and dynamic imports between files."""
+        problematic_cycles = []
+    
+        for i, scc in enumerate(cycles):
+            if i == 2:
+                continue
+    
+            mixed_imports = {}
+            for from_file in scc:
+                for to_file in scc:
+                    if G.has_edge(from_file, to_file):
+                        edges = G.get_edge_data(from_file, to_file)
+                        dynamic_count = sum(1 for e in edges.values() if e["color"] == "red")
+                        static_count = sum(1 for e in edges.values() if e["color"] == "black")
+    
+                        if dynamic_count > 0 and static_count > 0:
+                            mixed_imports[(from_file, to_file)] = {
+                                "dynamic": dynamic_count,
+                                "static": static_count,
+                                "edges": edges,
+                            }
+    
+            if mixed_imports:
+                problematic_cycles.append({"files": scc, "mixed_imports": mixed_imports, "index": i})
+    
+        print(f"Found {len(problematic_cycles)} cycles with potentially problematic imports.")
+    
+        for i, cycle in enumerate(problematic_cycles):
+            print(f"\n⚠️ Problematic Cycle #{i + 1} (Index {cycle['index']}): Size {len(cycle['files'])} files")
+            print("\nFiles in cycle:")
+            for file in cycle["files"]:
+                print(f"  - {file}")
+            print("\nMixed imports:")
+            for (from_file, to_file), imports in cycle["mixed_imports"].items():
+                print(f"\n  From: {from_file}")
+                print(f"  To:   {to_file}")
+                print(f"  Static imports: {imports['static']}")
+                print(f"  Dynamic imports: {imports['dynamic']}")
+    
+        return problematic_cycles
+        
     def comprehensive_error_context_analysis(self, max_issues: int = 2000) -> Dict[str, Any]:
         """
         Comprehensive error analysis with detailed context using advanced graph-sitter features.
