@@ -401,7 +401,7 @@ class SupremeErrorAnalyzer:
     
     def get_enhanced_function_context(self, func: Function) -> Dict[str, Any]:
         """Get enhanced context for a function including all interconnected elements."""
-        context = {
+        context: Dict[str, Any] = {
             "dependencies": [],
             "dependents": [],
             "call_graph": {},
@@ -413,20 +413,24 @@ class SupremeErrorAnalyzer:
         try:
             # Dependencies analysis
             if hasattr(func, 'dependencies'):
-                for dep in func.dependencies[:10]:
-                    context["dependencies"].append({
-                        "name": getattr(dep, 'name', 'unknown'),
-                        "type": type(dep).__name__,
-                        "file": getattr(dep, 'filepath', 'unknown')
-                    })
+                dependencies_list = context["dependencies"]
+                if isinstance(dependencies_list, list):
+                    for dep in func.dependencies[:10]:
+                        dependencies_list.append({
+                            "name": getattr(dep, 'name', 'unknown'),
+                            "type": type(dep).__name__,
+                            "file": getattr(dep, 'filepath', 'unknown')
+                        })
             
             # Call sites analysis
             if hasattr(func, 'call_sites'):
-                for call_site in func.call_sites[:10]:
-                    context["dependents"].append({
-                        "caller": getattr(call_site, 'name', 'unknown'),
-                        "file": getattr(call_site, 'filepath', 'unknown')
-                    })
+                dependents_list = context["dependents"]
+                if isinstance(dependents_list, list):
+                    for call_site in func.call_sites[:10]:
+                        dependents_list.append({
+                            "caller": getattr(call_site, 'name', 'unknown'),
+                            "file": getattr(call_site, 'filepath', 'unknown')
+                        })
             
             # Function calls analysis
             call_graph = {}
@@ -455,7 +459,7 @@ class SupremeErrorAnalyzer:
     
     def get_enhanced_class_context(self, cls: Class) -> Dict[str, Any]:
         """Get enhanced context for a class including all interconnected elements."""
-        context = {
+        context: Dict[str, Any] = {
             "inheritance_chain": [],
             "composition_relationships": [],
             "method_dependencies": {},
@@ -513,6 +517,10 @@ class SupremeErrorAnalyzer:
         
         if not self.load_codebase():
             raise RuntimeError("Failed to load codebase")
+        
+        # Check if codebase is loaded properly
+        if not self.codebase:
+            raise RuntimeError("Codebase is None after loading")
         
         # Use existing codebase_analysis.py function
         codebase_summary = get_codebase_summary(self.codebase)
