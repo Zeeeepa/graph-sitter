@@ -62,7 +62,7 @@ class SupremeAnalysisReport:
     top_functions: List[AnalysisResult]
     analysis_features: List[str]
     errors_found: List[Dict[str, Any]]
-    comprehensive_errors: Dict[str, Any] = None
+    comprehensive_errors: Optional[Dict[str, Any]] = None
 
 
 class SupremeErrorAnalyzer:
@@ -116,8 +116,8 @@ class SupremeErrorAnalyzer:
             try:
                 # Use REAL properties available on Class objects
                 methods = cls.methods() if hasattr(cls, 'methods') else []
-                attributes = cls.attributes if hasattr(cls, 'attributes') else []
-                dependencies = cls.dependencies if hasattr(cls, 'dependencies') else []
+                attributes: List[Any] = cls.attributes if hasattr(cls, 'attributes') else []
+                dependencies: List[Any] = cls.dependencies if hasattr(cls, 'dependencies') else []
                 
                 result = AnalysisResult(
                     name=cls.name or "Unknown",
@@ -159,7 +159,7 @@ class SupremeErrorAnalyzer:
         for func in functions:
             try:
                 # Use REAL properties available on Function objects
-                dependencies = func.dependencies if hasattr(func, 'dependencies') else []
+                dependencies: List[Any] = func.dependencies if hasattr(func, 'dependencies') else []
                 
                 result = AnalysisResult(
                     name=func.name or "Unknown",
@@ -201,7 +201,7 @@ class SupremeErrorAnalyzer:
         
         for method in all_methods:
             try:
-                dependencies = method.dependencies if hasattr(method, 'dependencies') else []
+                dependencies: List[Any] = method.dependencies if hasattr(method, 'dependencies') else []
                 
                 result = AnalysisResult(
                     name=method.name or "Unknown",
@@ -240,7 +240,8 @@ class SupremeErrorAnalyzer:
             # Check for functions with no return statements
             for func in self.codebase.functions:
                 if hasattr(func, 'return_statements'):
-                    if len(func.return_statements) == 0 and not func.name.startswith('__'):
+                    func_name = func.name or ""
+                    if len(func.return_statements) == 0 and not func_name.startswith('__'):
                         errors.append({
                             "type": "missing_return",
                             "message": f"Function '{func.name}' has no return statements",
@@ -268,7 +269,7 @@ class SupremeErrorAnalyzer:
         
         return errors
     
-    def comprehensive_error_context_analysis(self, max_issues: int = 200) -> Dict[str, Any]:
+    def comprehensive_error_context_analysis(self, max_issues: int = 2000) -> Dict[str, Any]:
         """
         Comprehensive error analysis with detailed context using advanced graph-sitter features.
         Provides the detailed error context requested: file paths, line numbers, function names,
@@ -295,7 +296,7 @@ class SupremeErrorAnalyzer:
             
             return base_complexity
         
-        error_analysis = {
+        error_analysis: Dict[str, Any] = {
             "total_issues": 0,
             "critical_issues": 0,
             "issues_by_severity": {},
@@ -310,7 +311,7 @@ class SupremeErrorAnalyzer:
             if issue_counter >= max_issues:
                 break
                 
-            file_issues = []
+            file_issues: List[Dict[str, Any]] = []
             
             try:
                 # Enhanced syntax and semantic analysis
@@ -359,24 +360,27 @@ class SupremeErrorAnalyzer:
                             }
                             
                             file_issues.append(issue)
-                            error_analysis["detailed_issues"].append(issue)
+                            if isinstance(error_analysis["detailed_issues"], list):
+                                error_analysis["detailed_issues"].append(issue)
                             issue_counter += 1
                             
                             if severity == "critical":
-                                error_analysis["critical_issues"] += 1
+                                if isinstance(error_analysis["critical_issues"], int):
+                                    error_analysis["critical_issues"] += 1
                                 
                     except Exception as e:
                         continue
                 
                 # Store file-level issues
                 if file_issues:
-                    error_analysis["issues_by_file"][file.filepath] = {
-                        "total_issues": len(file_issues),
-                        "critical_count": len([i for i in file_issues if i["severity"] == "critical"]),
-                        "high_count": len([i for i in file_issues if i["severity"] == "high"]),
-                        "medium_count": len([i for i in file_issues if i["severity"] == "medium"]),
-                        "issues": file_issues
-                    }
+                    if isinstance(error_analysis["issues_by_file"], dict):
+                        error_analysis["issues_by_file"][file.filepath] = {
+                            "total_issues": len(file_issues),
+                            "critical_count": len([i for i in file_issues if i["severity"] == "critical"]),
+                            "high_count": len([i for i in file_issues if i["severity"] == "high"]),
+                            "medium_count": len([i for i in file_issues if i["severity"] == "medium"]),
+                            "issues": file_issues
+                        }
                     
             except Exception as e:
                 continue
@@ -385,9 +389,10 @@ class SupremeErrorAnalyzer:
         error_analysis["total_issues"] = issue_counter
         
         severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
-        for issue in error_analysis["detailed_issues"]:
-            severity = issue.get("severity", "low")
-            severity_counts[severity] = severity_counts.get(severity, 0) + 1
+        if isinstance(error_analysis["detailed_issues"], list):
+            for issue in error_analysis["detailed_issues"]:
+                severity = issue.get("severity", "low")
+                severity_counts[severity] = severity_counts.get(severity, 0) + 1
         
         error_analysis["issues_by_severity"] = severity_counts
         
