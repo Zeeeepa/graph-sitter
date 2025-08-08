@@ -70,6 +70,11 @@ dependencies = [
   "datasets",
   "colorlog>=6.9.0",
   "codegen-sdk-pink>=0.1.0",
+  "langchain>=0.3.0",
+  "langchain-core>=0.3.0",
+  "langgraph>=0.2.0",
+  "langchain-anthropic>=0.2.0",
+  "langchain-openai>=0.2.0",
 ]
 
 # renovate: datasource=python-version depName=python
@@ -120,6 +125,15 @@ types = [
   "types-toml>=0.10.8.20240310",
 ]
 lsp = ["pygls>=2.0.0a2", "lsprotocol==2024.0.0b1", "attrs>=25.1.0"]
+serena = [
+  # Serena MCP server can be installed via uvx or git
+  # No direct Python package dependency needed as it runs as external MCP server
+  "mcp>=1.0.0",  # MCP client library for communication
+  "serena>=0.1.0",  # Serena LSP integration
+]
+slack = ["slack_sdk>=3.0.0"]
+attribution = ["intervaltree>=3.0.0"]
+codemods = ["inflection>=0.5.1"]
 [tool.uv]
 cache-keys = [{ git = { commit = true, tags = true } }]
 dev-dependencies = [

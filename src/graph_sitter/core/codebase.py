@@ -24,7 +24,7 @@ from typing_extensions import TypeVar, deprecated
 
 from graph_sitter._proxy import proxy_property
 from graph_sitter.ai.client import get_openai_client
-from graph_sitter.codebase.codebase_ai import generate_system_prompt, generate_tools
+from graph_sitter.ai.codebase_ai import generate_system_prompt, generate_tools
 from graph_sitter.codebase.codebase_context import (
     GLOBAL_FILE_IGNORE_LIST,
     CodebaseContext,
@@ -215,7 +215,7 @@ class Codebase(
         if self.ctx.config.use_pink != PinkMode.OFF:
             import graph_sitter_sdk_pink
 
-            self._pink_codebase = codegen_sdk_pink.Codebase(self.repo_path)
+            self._pink_codebase = graph_sitter_sdk_pink.Codebase(self.repo_path)
 
     @noapidoc
     def __str__(self) -> str:
@@ -1611,3 +1611,4 @@ TSCodebaseType = Codebase[
     TSParameter,
     TSCodeBlock,
 ]
+

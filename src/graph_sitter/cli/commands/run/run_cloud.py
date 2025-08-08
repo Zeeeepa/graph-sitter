@@ -6,7 +6,7 @@ from pygit2._pygit2 import Repository
 from rich.panel import Panel
 
 from graph_sitter.cli.api.client import RestAPI
-from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.auth.token_manager import get_current_token
 from graph_sitter.cli.errors import ServerError
 from graph_sitter.cli.git.patch import apply_patch
@@ -15,7 +15,7 @@ from graph_sitter.cli.rich.spinners import create_spinner
 from graph_sitter.cli.utils.url import generate_webapp_url
 
 
-def run_cloud(session: CodegenSession, function, apply_local: bool = False, diff_preview: int | None = None):
+def run_cloud(session: CliSession, function, apply_local: bool = False, diff_preview: int | None = None):
     """Run a function on the cloud service.
 
     Args:

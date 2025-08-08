@@ -9,7 +9,7 @@ from graph_sitter.output.inspect import is_noapidoc, only_default_args
 from graph_sitter.output.placeholder import Placeholder
 from graph_sitter.output.utils import safe_getattr
 from graph_sitter.shared.decorators.docs import noapidoc
-from graph_sitter.types import JSON
+from graph_sitter.graph_sitter_types import JSON
 
 BLACKLIST = ["json", "G", "viz", "autocommit_cache", "ts_node", "symbol_usages", "usages"]
 
