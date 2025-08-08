@@ -257,9 +257,18 @@ class FixedSupremeErrorAnalyzer:
                 # Collect function calls
                 for call in file.function_calls:
                     if hasattr(call, 'name') and call.name:
+                        # Try multiple ways to get line number
+                        line_num = None
+                        if hasattr(call, 'line_number') and call.line_number:
+                            line_num = call.line_number
+                        elif hasattr(call, 'start_line') and call.start_line:
+                            line_num = call.start_line
+                        elif hasattr(call, 'line') and call.line:
+                            line_num = call.line
+                        
                         function_calls[call.name].append({
                             'file': file.filepath,
-                            'line': getattr(call, 'line_number', None)
+                            'line': line_num
                         })
                         
             except Exception as e:
@@ -284,27 +293,29 @@ class FixedSupremeErrorAnalyzer:
                 not is_method_pattern and
                 len(call_sites) >= 2):  # Called multiple times
                 
-                error = CodeError(
-                    error_type="missing_function",
-                    severity="critical",
-                    file_path="multiple_files" if len(call_sites) > 1 else call_sites[0]['file'],
-                    line_number=call_sites[0]['line'] if call_sites else None,
-                    function_name=func_name,
-                    class_name=None,
-                    message=f"Function '{func_name}' is called but not defined",
-                    description=f"Function '{func_name}' is referenced in {len(call_sites)} locations but no definition found",
-                    fix_suggestions=[
-                        f"Define function '{func_name}'",
-                        f"Import '{func_name}' from appropriate module",
-                        f"Check if '{func_name}' is a typo or renamed function"
-                    ],
-                    context={
-                        "function_name": func_name,
-                        "call_count": len(call_sites),
-                        "call_locations": call_sites[:5]  # Limit to first 5
-                    }
-                )
-                errors.append(error)
+                # Create separate error for each call site with exact location
+                for call_site in call_sites:
+                    error = CodeError(
+                        error_type="missing_function",
+                        severity="critical",
+                        file_path=call_site['file'],
+                        line_number=call_site['line'],
+                        function_name=func_name,
+                        class_name=None,
+                        message=f"Function '{func_name}' is called but not defined",
+                        description=f"Function '{func_name}' is called at {call_site['file']}:{call_site['line']} but no definition found",
+                        fix_suggestions=[
+                            f"Define function '{func_name}'",
+                            f"Import '{func_name}' from appropriate module",
+                            f"Check if '{func_name}' is a typo or renamed function"
+                        ],
+                        context={
+                            "function_name": func_name,
+                            "call_location": call_site,
+                            "total_call_count": len(call_sites)
+                        }
+                    )
+                    errors.append(error)
         
         logger.info(f"Found {len(errors)} missing function errors")
         return errors
@@ -340,7 +351,7 @@ class FixedSupremeErrorAnalyzer:
         
         # FIXED: Only count errors from non-excluded files
         for error in self.errors:
-            if error.file_path != "multiple_files" and not self.should_exclude_file(error.file_path):
+            if not self.should_exclude_file(error.file_path):
                 stats["by_file"][error.file_path] += 1
         
         # Find most problematic files (excluding test files)
@@ -371,6 +382,8 @@ class FixedSupremeErrorAnalyzer:
                     f.write(f"      📁 File: {error.file_path}\n")
                     if error.line_number:
                         f.write(f"      📍 Line: {error.line_number}\n")
+                    else:
+                        f.write(f"      📍 Line: Not available\n")
                     if error.function_name:
                         f.write(f"      🔧 Function: {error.function_name}\n")
                     if error.class_name:
