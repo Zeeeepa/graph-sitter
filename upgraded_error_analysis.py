@@ -114,7 +114,7 @@ class UpgradedSupremeErrorAnalyzer:
         self.import_graph = nx.DiGraph()
         
         # Default exclusions plus user-specified ones
-        default_exclusions = ['tests', 'examples', 'node_modules', '__pycache__', '.git', '.pytest_cache', 'venv', 'env']
+        default_exclusions = ['tests', 'examples', 'node_modules', '__pycache__', '.git', '.pytest_cache', 'venv', 'env', 'test_files', 'docs']
         self.exclude_folders = set(default_exclusions + (exclude_folders or []))
         
         self.analysis_features = [
@@ -148,7 +148,21 @@ class UpgradedSupremeErrorAnalyzer:
     def _should_exclude_file(self, file_path: str) -> bool:
         """Check if file should be excluded based on folder exclusions"""
         path_parts = Path(file_path).parts
-        return any(excluded in path_parts for excluded in self.exclude_folders)
+        file_lower = file_path.lower()
+        
+        # Check folder exclusions
+        if any(excluded in path_parts for excluded in self.exclude_folders):
+            return True
+            
+        # Additional pattern-based exclusions
+        if ('test' in file_lower and 
+            ('test_' in file_lower or '/test' in file_lower or 'tests/' in file_lower)):
+            return True
+            
+        if 'example' in file_lower and ('example' in path_parts or 'examples' in path_parts):
+            return True
+            
+        return False
     
     def _build_analysis_graphs(self):
         """Build function call and import graphs for analysis"""
@@ -203,6 +217,16 @@ class UpgradedSupremeErrorAnalyzer:
             'next', 'iter', 'any', 'all', 'chr', 'ord', 'bin', 'hex', 'oct',
             'callable', 'classmethod', 'staticmethod', 'property', 'super',
             
+            # functools module
+            'partial', 'reduce', 'wraps', 'lru_cache', 'cached_property', 'singledispatch',
+            
+            # typing module
+            'Optional', 'List', 'Dict', 'Union', 'Tuple', 'Any', 'Callable', 'Type',
+            'Generic', 'TypeVar', 'ClassVar', 'Final', 'Literal', 'Protocol',
+            
+            # Common message/communication classes
+            'SystemMessage', 'HumanMessage', 'AIMessage', 'BaseMessage', 'ChatMessage',
+            
             # Common library functions that might not be detected
             'join', 'split', 'strip', 'replace', 'find', 'startswith', 'endswith',
             'append', 'extend', 'insert', 'remove', 'pop', 'clear', 'copy',
@@ -217,7 +241,15 @@ class UpgradedSupremeErrorAnalyzer:
             
             # Common test/mock functions
             'mock', 'patch', 'assert_called', 'assert_called_with',
-            'side_effect', 'return_value'
+            'side_effect', 'return_value',
+            
+            # Common CLI/utility functions
+            'click', 'echo', 'prompt', 'confirm', 'abort', 'exit',
+            'warn', 'error', 'info', 'debug',
+            
+            # Common data processing
+            'json', 'yaml', 'csv', 'pickle', 'base64', 'uuid',
+            'datetime', 'timedelta', 'timezone'
         }
         
         # Common false positive patterns
@@ -264,9 +296,10 @@ class UpgradedSupremeErrorAnalyzer:
                 func_name not in builtin_functions and
                 func_name not in false_positive_patterns and
                 not func_name.startswith('_') and
-                len(func_name) > 1 and
+                len(func_name) > 2 and  # Increased from 1 to 2
                 not func_name.isdigit() and  # Skip numeric strings
                 not func_name.isupper() and  # Skip constants
+                not func_name.endswith('Tool') and  # Skip Tool classes (likely external)
                 len(call_sites) >= 2):  # Only report if called multiple times
                 
                 error = CodeError(
@@ -717,6 +750,37 @@ class UpgradedSupremeErrorAnalyzer:
             
         except Exception as e:
             logger.error(f"Failed to export results: {e}")
+    
+    def export_error_list(self, output_file: str = "error_list.txt"):
+        """Export numbered list of all errors"""
+        try:
+            with open(output_file, 'w') as f:
+                f.write(f"ERROR LIST: [{len(self.errors)} errors]\n")
+                f.write("=" * 80 + "\n\n")
+                
+                for i, error in enumerate(self.errors, 1):
+                    severity_emoji = {
+                        'critical': '🔴',
+                        'high': '🟠', 
+                        'medium': '🟡',
+                        'low': '🔵'
+                    }.get(error.severity, '⚪')
+                    
+                    f.write(f"{i:4d}. {severity_emoji} [{error.error_type.upper()}] {error.message}\n")
+                    f.write(f"      📁 File: {error.file_path}\n")
+                    if error.line_number:
+                        f.write(f"      📍 Line: {error.line_number}\n")
+                    if error.function_name:
+                        f.write(f"      🔧 Function: {error.function_name}\n")
+                    if error.class_name:
+                        f.write(f"      🏛️  Class: {error.class_name}\n")
+                    f.write(f"      💡 Fix: {error.fix_suggestions[0] if error.fix_suggestions else 'No suggestion'}\n")
+                    f.write("\n")
+            
+            logger.info(f"📋 Error list exported to: {output_file}")
+            
+        except Exception as e:
+            logger.error(f"Failed to export error list: {e}")
 
 def main():
     """Main entry point for upgraded analysis"""
@@ -747,6 +811,7 @@ def main():
         
         # Export results
         analyzer.export_detailed_results()
+        analyzer.export_error_list()
         
         # Print summary
         print("\n" + "="*70)
@@ -773,6 +838,7 @@ def main():
             print(f"  ✅ {feature}")
         
         print(f"\n📄 Full results saved to: upgraded_analysis_results.json")
+        print(f"📋 Complete error list saved to: error_list.txt")
         
     except Exception as e:
         logger.error(f"❌ Analysis failed: {e}")
