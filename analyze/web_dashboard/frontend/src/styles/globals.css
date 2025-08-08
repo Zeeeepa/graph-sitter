@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS variables for theming */
+:root {
+  --toast-bg: #ffffff;
+  --toast-color: #000000;
+}
+
+.dark {
+  --toast-bg: #1f2937;
+  --toast-color: #ffffff;
+}
+
+/* Monaco Editor custom styles */
+.monaco-editor {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace !important;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Error decoration styles for Monaco Editor */
+.editor-error-decoration {
+  border-bottom: 2px wavy red;
+}
+
+.editor-warning-decoration {
+  border-bottom: 2px wavy orange;
+}
+
+.editor-info-decoration {
+  border-bottom: 2px wavy blue;
+}
+
+.editor-error-glyph {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin: 2px;
+}

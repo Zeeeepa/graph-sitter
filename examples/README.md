@@ -51,6 +51,39 @@ To see a transformation, simply run the `run.py` script within the desired direc
 - [Tutorials](https://graph-sitter.com/tutorials/at-a-glance)
 - [API Reference](https://graph-sitter.com/api-reference)
 
+## Serena Integration Testing
+
+This directory also contains comprehensive testing scripts for the enhanced Serena integration:
+
+### `comprehensive_serena_demo.py`
+Comprehensive demonstration and testing script for all Serena capabilities including refactoring, symbol intelligence, code actions, and real-time analysis.
+
+```bash
+# Run basic demo
+python examples/comprehensive_serena_demo.py
+
+# Run full test suite
+python examples/comprehensive_serena_demo.py --test-all --verbose
+```
+
+### `test_web_eval_agent.py`
+Specialized test script for the web-eval-agent repository with auto-detection and targeted testing.
+
+```bash
+# From web-eval-agent repository root:
+python /path/to/graph-sitter/examples/test_web_eval_agent.py
+```
+
+### Features Tested
+- ✅ Enhanced LSP Integration with multi-server support
+- ✅ Advanced Refactoring Operations (rename, extract, inline, move)
+- ✅ Symbol Intelligence with relationship tracking
+- ✅ Code Actions with automated fixes
+- ✅ Real-time Analysis with file monitoring
+- ✅ Auto-initialization with Codebase class enhancement
+
+The testing scripts provide detailed results including success rates, capability status, performance metrics, and integration health.
+
 ## Contributing
 
 Have a useful example to share? We'd love to include it! Please see our [Contributing Guide](CONTRIBUTING.md) for instructions.

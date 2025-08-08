@@ -39,7 +39,7 @@ from graph_sitter.cli.api.schemas import (
     RunOnPRInput,
     RunOnPRResponse,
 )
-from graph_sitter.cli.auth.session import CodegenSession
+from graph_sitter.cli.auth.session import CliSession
 from graph_sitter.cli.codemod.convert import convert_to_ui
 from graph_sitter.cli.env.global_env import global_env
 from graph_sitter.cli.errors import InvalidTokenError, ServerError
@@ -132,7 +132,7 @@ class RestAPI:
             template_context: Context variables to pass to the codemod
 
         """
-        session = CodegenSession.from_active_session()
+        session = CliSession.from_active_session()
         base_input = {
             "codemod_name": function.name,
             "repo_full_name": session.config.repository.full_name,
@@ -158,7 +158,7 @@ class RestAPI:
 
     def get_docs(self) -> DocsResponse:
         """Search documentation."""
-        session = CodegenSession.from_active_session()
+        session = CliSession.from_active_session()
         return self._make_request(
             "GET",
             DOCS_ENDPOINT,
@@ -177,7 +177,7 @@ class RestAPI:
 
     def create(self, name: str, query: str) -> CreateResponse:
         """Get AI-generated starter code for a codemod."""
-        session = CodegenSession.from_active_session()
+        session = CliSession.from_active_session()
         language = ProgrammingLanguage(session.config.repository.language)
         return self._make_request(
             "GET",
@@ -205,7 +205,7 @@ class RestAPI:
         arguments_schema: dict | None = None,
     ) -> DeployResponse:
         """Deploy a codemod to the Modal backend."""
-        session = CodegenSession.from_active_session()
+        session = CliSession.from_active_session()
         return self._make_request(
             "POST",
             DEPLOY_ENDPOINT,
@@ -225,7 +225,7 @@ class RestAPI:
 
     def lookup(self, codemod_name: str) -> LookupOutput:
         """Look up a codemod by name."""
-        session = CodegenSession.from_active_session()
+        session = CliSession.from_active_session()
         return self._make_request(
             "GET",
             LOOKUP_ENDPOINT,
