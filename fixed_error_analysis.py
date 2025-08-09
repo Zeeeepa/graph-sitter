@@ -257,14 +257,18 @@ class FixedSupremeErrorAnalyzer:
                 # Collect function calls
                 for call in file.function_calls:
                     if hasattr(call, 'name') and call.name:
-                        # Try multiple ways to get line number
+                        # Extract line number from graph-sitter attributes
                         line_num = None
-                        if hasattr(call, 'line_number') and call.line_number:
-                            line_num = call.line_number
-                        elif hasattr(call, 'start_line') and call.start_line:
-                            line_num = call.start_line
-                        elif hasattr(call, 'line') and call.line:
-                            line_num = call.line
+                        
+                        # Try start_point.row (0-based, so add 1)
+                        if hasattr(call, 'start_point') and call.start_point:
+                            line_num = call.start_point.row + 1
+                        # Try line_range
+                        elif hasattr(call, 'line_range') and call.line_range:
+                            line_num = call.line_range.start + 1
+                        # Try __firstlineno__
+                        elif hasattr(call, '__firstlineno__') and call.__firstlineno__:
+                            line_num = call.__firstlineno__
                         
                         function_calls[call.name].append({
                             'file': file.filepath,
