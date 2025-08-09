@@ -260,6 +260,11 @@ class FixedSupremeErrorAnalyzer:
                     if hasattr(func, 'name') and func.name:
                         defined_functions.add(func.name)
                 
+                # FIXED: Collect imported functions (was missing!)
+                for imp in file.imports:
+                    if hasattr(imp, 'name') and imp.name:
+                        defined_functions.add(imp.name)
+                
                 # Collect function calls
                 for call in file.function_calls:
                     if hasattr(call, 'name') and call.name:
