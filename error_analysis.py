@@ -254,6 +254,14 @@ class FixedSupremeErrorAnalyzer:
                 
             processed_files += 1
             
+            # DEBUG: Print file being processed (disabled for main analysis)
+            # if 'sample_missing_function' in file.filepath:
+            #     print(f"🔍 DEBUG: Processing file: {file.filepath}")
+            #     print(f"  - Functions: {len(file.functions)}")
+            #     print(f"  - Function calls: {len(file.function_calls)}")
+            #     for call in file.function_calls:
+            #         print(f"    - {call.name}")
+            
             try:
                 # Collect defined functions
                 for func in file.functions:
@@ -268,6 +276,34 @@ class FixedSupremeErrorAnalyzer:
                 # Collect function calls
                 for call in file.function_calls:
                     if hasattr(call, 'name') and call.name:
+                        # DEBUG: Print all function calls being processed (disabled for main analysis)
+                        # if 'undefined' in call.name.lower():
+                        #     print(f"🔍 DEBUG: Processing function call: {call.name}")
+                        # FIXED: Skip attribute calls (like rx.cond, module.function)
+                        is_attribute_call = False
+                        
+                        # Check if this is an attribute call (has a base module/object different from function name)
+                        if hasattr(call, 'base') and call.base and call.base != call.name:
+                            is_attribute_call = True
+                        elif hasattr(call, 'attribute_chain') and call.attribute_chain and len(call.attribute_chain) > 1:
+                            is_attribute_call = True
+                        elif hasattr(call, 'parent') and call.parent and '.' in str(call.parent)[:50]:
+                            # Check if parent contains dot notation (like rx.cond)
+                            parent_str = str(call.parent)[:100]
+                            if f'.{call.name}(' in parent_str:
+                                is_attribute_call = True
+                        
+                        # Skip attribute calls - they're not missing functions
+                        if is_attribute_call:
+                            # DEBUG: Print skipped attribute calls (disabled for main analysis)
+                            # if 'undefined' in call.name.lower():
+                            #     print(f"🔍 DEBUG: SKIPPING {call.name} as attribute call")
+                            #     if hasattr(call, 'base'):
+                            #         print(f"  - base: {call.base}")
+                            #     if hasattr(call, 'attribute_chain'):
+                            #         print(f"  - attribute_chain length: {len(call.attribute_chain) if call.attribute_chain else 0}")
+                            continue
+                        
                         # Extract line number from graph-sitter attributes
                         line_num = None
                         
@@ -292,10 +328,31 @@ class FixedSupremeErrorAnalyzer:
         
         logger.info(f"📊 Processed {processed_files} files, excluded {excluded_files} files")
         
+        # DEBUG: Print function calls collected (disabled for main analysis)
+        # print(f"🔍 DEBUG: Total function calls collected: {len(function_calls)}")
+        # for func_name, call_sites in list(function_calls.items())[:5]:  # Show first 5
+        #     print(f"  - {func_name}: {len(call_sites)} calls")
+        # if 'undefined_function_name' in function_calls:
+        #     print(f"  - undefined_function_name: {len(function_calls['undefined_function_name'])} calls")
+        
         # Find missing functions with enhanced filtering
         for func_name, call_sites in function_calls.items():
             # Check if it's a method pattern
             is_method_pattern = any(func_name.startswith(pattern) for pattern in method_patterns)
+            
+            # DEBUG: Print function being checked (disabled for main analysis)
+            # if 'undefined' in func_name.lower():
+            #     print(f"🔍 DEBUG: Checking {func_name}")
+            #     print(f"  - defined_functions: {func_name in defined_functions}")
+            #     print(f"  - builtin_functions: {func_name in builtin_functions}")
+            #     print(f"  - false_positive_patterns: {func_name in false_positive_patterns}")
+            #     print(f"  - starts with _: {func_name.startswith('_')}")
+            #     print(f"  - length > 3: {len(func_name) > 3}")
+            #     print(f"  - not digit: {not func_name.isdigit()}")
+            #     print(f"  - not upper: {not func_name.isupper()}")
+            #     print(f"  - not endswith Tool: {not func_name.endswith('Tool')}")
+            #     print(f"  - not method pattern: {not is_method_pattern}")
+            #     print(f"  - call sites >= 2: {len(call_sites) >= 2}")
             
             if (func_name not in defined_functions and 
                 func_name not in builtin_functions and
