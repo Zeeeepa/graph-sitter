@@ -1,0 +1,1305 @@
+COMPLETE ERROR LIST: [217 errors]
+================================================================================
+
+   1. 🔴 [MISSING_FUNCTION] Function 'AnalysisResponse' is called but not defined
+      📁 File: dashboard/app.py
+      📍 Line: 317
+      🔧 Function: AnalysisResponse
+      💡 Fix: Define function 'AnalysisResponse'
+
+   2. 🔴 [MISSING_FUNCTION] Function 'AnalysisResponse' is called but not defined
+      📁 File: dashboard/backend/backend_core.py
+      📍 Line: 368
+      🔧 Function: AnalysisResponse
+      💡 Fix: Define function 'AnalysisResponse'
+
+   3. 🔴 [MISSING_FUNCTION] Function 'AnalysisResponse' is called but not defined
+      📁 File: dashboard/api/backend_server.py
+      📍 Line: 377
+      🔧 Function: AnalysisResponse
+      💡 Fix: Define function 'AnalysisResponse'
+
+   4. 🔴 [MISSING_FUNCTION] Function 'resolve_http' is called but not defined
+      📁 File: src/graph_sitter/core/plugins/axios.py
+      📍 Line: 30
+      🔧 Function: resolve_http
+      💡 Fix: Define function 'resolve_http'
+
+   5. 🔴 [MISSING_FUNCTION] Function 'resolve_http' is called but not defined
+      📁 File: src/graph_sitter/core/plugins/axios.py
+      📍 Line: 41
+      🔧 Function: resolve_http
+      💡 Fix: Define function 'resolve_http'
+
+   6. 🔴 [MISSING_FUNCTION] Function 'CodeIssue' is called but not defined
+      📁 File: dashboard/backend/backend_core.py
+      📍 Line: 488
+      🔧 Function: CodeIssue
+      💡 Fix: Define function 'CodeIssue'
+
+   7. 🔴 [MISSING_FUNCTION] Function 'CodeIssue' is called but not defined
+      📁 File: dashboard/backend/backend_core.py
+      📍 Line: 507
+      🔧 Function: CodeIssue
+      💡 Fix: Define function 'CodeIssue'
+
+   8. 🔴 [MISSING_FUNCTION] Function 'CodeIssue' is called but not defined
+      📁 File: dashboard/backend/backend_core.py
+      📍 Line: 526
+      🔧 Function: CodeIssue
+      💡 Fix: Define function 'CodeIssue'
+
+   9. 🔴 [MISSING_FUNCTION] Function 'CodeIssue' is called but not defined
+      📁 File: dashboard/backend/backend_core.py
+      📍 Line: 547
+      🔧 Function: CodeIssue
+      💡 Fix: Define function 'CodeIssue'
+
+  10. 🔴 [MISSING_FUNCTION] Function 'convert_to_tree' is called but not defined
+      📁 File: dashboard/backend/backend_core.py
+      📍 Line: 715
+      🔧 Function: convert_to_tree
+      💡 Fix: Define function 'convert_to_tree'
+
+  11. 🔴 [MISSING_FUNCTION] Function 'convert_to_tree' is called but not defined
+      📁 File: dashboard/backend/backend_core.py
+      📍 Line: 738
+      🔧 Function: convert_to_tree
+      💡 Fix: Define function 'convert_to_tree'
+
+  12. 🔴 [MISSING_FUNCTION] Function 'Klass' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/modal/base.py
+      📍 Line: 54
+      🔧 Function: Klass
+      💡 Fix: Define function 'Klass'
+
+  13. 🔴 [MISSING_FUNCTION] Function 'Klass' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/modal/base.py
+      📍 Line: 97
+      🔧 Function: Klass
+      💡 Fix: Define function 'Klass'
+
+  14. 🔴 [MISSING_FUNCTION] Function 'RunBashCommandObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/bash.py
+      📍 Line: 132
+      🔧 Function: RunBashCommandObservation
+      💡 Fix: Define function 'RunBashCommandObservation'
+
+  15. 🔴 [MISSING_FUNCTION] Function 'RunBashCommandObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/bash.py
+      📍 Line: 148
+      🔧 Function: RunBashCommandObservation
+      💡 Fix: Define function 'RunBashCommandObservation'
+
+  16. 🔴 [MISSING_FUNCTION] Function 'RunBashCommandObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/bash.py
+      📍 Line: 163
+      🔧 Function: RunBashCommandObservation
+      💡 Fix: Define function 'RunBashCommandObservation'
+
+  17. 🔴 [MISSING_FUNCTION] Function 'RunBashCommandObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/bash.py
+      📍 Line: 171
+      🔧 Function: RunBashCommandObservation
+      💡 Fix: Define function 'RunBashCommandObservation'
+
+  18. 🔴 [MISSING_FUNCTION] Function 'RunBashCommandObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/bash.py
+      📍 Line: 179
+      🔧 Function: RunBashCommandObservation
+      💡 Fix: Define function 'RunBashCommandObservation'
+
+  19. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/core/utils/cache_utils.py
+      📍 Line: 41
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  20. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/cli/sdk/decorator.py
+      📍 Line: 43
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  21. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/github.py
+      📍 Line: 65
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  22. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/github.py
+      📍 Line: 71
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  23. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/linear.py
+      📍 Line: 47
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  24. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/slack.py
+      📍 Line: 70
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  25. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/shared/performance/stopwatch_utils.py
+      📍 Line: 17
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  26. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/shared/performance/stopwatch_utils.py
+      📍 Line: 32
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  27. 🔴 [MISSING_FUNCTION] Function 'func' is called but not defined
+      📁 File: src/graph_sitter/shared/compilation/string_to_code.py
+      📍 Line: 66
+      🔧 Function: func
+      💡 Fix: Define function 'func'
+
+  28. 🔴 [MISSING_FUNCTION] Function 'CheckoutPRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/checkout_pr.py
+      📍 Line: 32
+      🔧 Function: CheckoutPRObservation
+      💡 Fix: Define function 'CheckoutPRObservation'
+
+  29. 🔴 [MISSING_FUNCTION] Function 'CheckoutPRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/checkout_pr.py
+      📍 Line: 38
+      🔧 Function: CheckoutPRObservation
+      💡 Fix: Define function 'CheckoutPRObservation'
+
+  30. 🔴 [MISSING_FUNCTION] Function 'CheckoutPRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/checkout_pr.py
+      📍 Line: 43
+      🔧 Function: CheckoutPRObservation
+      💡 Fix: Define function 'CheckoutPRObservation'
+
+  31. 🔴 [MISSING_FUNCTION] Function 'parse_google_block' is called but not defined
+      📁 File: src/graph_sitter/python/symbol_groups/comment_group.py
+      📍 Line: 165
+      🔧 Function: parse_google_block
+      💡 Fix: Define function 'parse_google_block'
+
+  32. 🔴 [MISSING_FUNCTION] Function 'parse_google_block' is called but not defined
+      📁 File: src/graph_sitter/python/symbol_groups/comment_group.py
+      📍 Line: 167
+      🔧 Function: parse_google_block
+      💡 Fix: Define function 'parse_google_block'
+
+  33. 🔴 [MISSING_FUNCTION] Function 'parse_google_block' is called but not defined
+      📁 File: src/graph_sitter/python/symbol_groups/comment_group.py
+      📍 Line: 169
+      🔧 Function: parse_google_block
+      💡 Fix: Define function 'parse_google_block'
+
+  34. 🔴 [MISSING_FUNCTION] Function 'merge_codebase_docstring' is called but not defined
+      📁 File: src/graph_sitter/python/symbol_groups/comment_group.py
+      📍 Line: 185
+      🔧 Function: merge_codebase_docstring
+      💡 Fix: Define function 'merge_codebase_docstring'
+
+  35. 🔴 [MISSING_FUNCTION] Function 'merge_codebase_docstring' is called but not defined
+      📁 File: src/graph_sitter/python/symbol_groups/comment_group.py
+      📍 Line: 217
+      🔧 Function: merge_codebase_docstring
+      💡 Fix: Define function 'merge_codebase_docstring'
+
+  36. 🔴 [MISSING_FUNCTION] Function 'CommitObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/commit.py
+      📍 Line: 33
+      🔧 Function: CommitObservation
+      💡 Fix: Define function 'CommitObservation'
+
+  37. 🔴 [MISSING_FUNCTION] Function 'CommitObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/commit.py
+      📍 Line: 38
+      🔧 Function: CommitObservation
+      💡 Fix: Define function 'CommitObservation'
+
+  38. 🔴 [MISSING_FUNCTION] Function 'CreateFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/create_file.py
+      📍 Line: 41
+      🔧 Function: CreateFileObservation
+      💡 Fix: Define function 'CreateFileObservation'
+
+  39. 🔴 [MISSING_FUNCTION] Function 'CreateFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/create_file.py
+      📍 Line: 48
+      🔧 Function: CreateFileObservation
+      💡 Fix: Define function 'CreateFileObservation'
+
+  40. 🔴 [MISSING_FUNCTION] Function 'CreateFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/create_file.py
+      📍 Line: 69
+      🔧 Function: CreateFileObservation
+      💡 Fix: Define function 'CreateFileObservation'
+
+  41. 🔴 [MISSING_FUNCTION] Function 'CreateFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/create_file.py
+      📍 Line: 76
+      🔧 Function: CreateFileObservation
+      💡 Fix: Define function 'CreateFileObservation'
+
+  42. 🔴 [MISSING_FUNCTION] Function 'create_function_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 66
+      🔧 Function: create_function_node
+      💡 Fix: Define function 'create_function_node'
+
+  43. 🔴 [MISSING_FUNCTION] Function 'create_function_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 72
+      🔧 Function: create_function_node
+      💡 Fix: Define function 'create_function_node'
+
+  44. 🔴 [MISSING_FUNCTION] Function 'create_function_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 86
+      🔧 Function: create_function_node
+      💡 Fix: Define function 'create_function_node'
+
+  45. 🔴 [MISSING_FUNCTION] Function 'create_function_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 126
+      🔧 Function: create_function_node
+      💡 Fix: Define function 'create_function_node'
+
+  46. 🔴 [MISSING_FUNCTION] Function 'create_class_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 75
+      🔧 Function: create_class_node
+      💡 Fix: Define function 'create_class_node'
+
+  47. 🔴 [MISSING_FUNCTION] Function 'create_class_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 81
+      🔧 Function: create_class_node
+      💡 Fix: Define function 'create_class_node'
+
+  48. 🔴 [MISSING_FUNCTION] Function 'create_class_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 115
+      🔧 Function: create_class_node
+      💡 Fix: Define function 'create_class_node'
+
+  49. 🔴 [MISSING_FUNCTION] Function 'create_function_call_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 95
+      🔧 Function: create_function_call_node
+      💡 Fix: Define function 'create_function_call_node'
+
+  50. 🔴 [MISSING_FUNCTION] Function 'create_function_call_node' is called but not defined
+      📁 File: src/graph_sitter/extensions/graph/create_graph.py
+      📍 Line: 128
+      🔧 Function: create_function_call_node
+      💡 Fix: Define function 'create_function_call_node'
+
+  51. 🔴 [MISSING_FUNCTION] Function 'CreatePRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr.py
+      📍 Line: 41
+      🔧 Function: CreatePRObservation
+      💡 Fix: Define function 'CreatePRObservation'
+
+  52. 🔴 [MISSING_FUNCTION] Function 'CreatePRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr.py
+      📍 Line: 62
+      🔧 Function: CreatePRObservation
+      💡 Fix: Define function 'CreatePRObservation'
+
+  53. 🔴 [MISSING_FUNCTION] Function 'CreatePRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr.py
+      📍 Line: 70
+      🔧 Function: CreatePRObservation
+      💡 Fix: Define function 'CreatePRObservation'
+
+  54. 🔴 [MISSING_FUNCTION] Function 'CreatePRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr.py
+      📍 Line: 78
+      🔧 Function: CreatePRObservation
+      💡 Fix: Define function 'CreatePRObservation'
+
+  55. 🔴 [MISSING_FUNCTION] Function 'PRCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr_comment.py
+      📍 Line: 35
+      🔧 Function: PRCommentObservation
+      💡 Fix: Define function 'PRCommentObservation'
+
+  56. 🔴 [MISSING_FUNCTION] Function 'PRCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr_comment.py
+      📍 Line: 41
+      🔧 Function: PRCommentObservation
+      💡 Fix: Define function 'PRCommentObservation'
+
+  57. 🔴 [MISSING_FUNCTION] Function 'PRReviewCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr_review_comment.py
+      📍 Line: 61
+      🔧 Function: PRReviewCommentObservation
+      💡 Fix: Define function 'PRReviewCommentObservation'
+
+  58. 🔴 [MISSING_FUNCTION] Function 'PRReviewCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/create_pr_review_comment.py
+      📍 Line: 70
+      🔧 Function: PRReviewCommentObservation
+      💡 Fix: Define function 'PRReviewCommentObservation'
+
+  59. 🔴 [MISSING_FUNCTION] Function 'wrapped' is called but not defined
+      📁 File: src/graph_sitter/core/autocommit/decorators.py
+      📍 Line: 53
+      🔧 Function: wrapped
+      💡 Fix: Define function 'wrapped'
+
+  60. 🔴 [MISSING_FUNCTION] Function 'wrapped' is called but not defined
+      📁 File: src/graph_sitter/core/autocommit/decorators.py
+      📍 Line: 73
+      🔧 Function: wrapped
+      💡 Fix: Define function 'wrapped'
+
+  61. 🔴 [MISSING_FUNCTION] Function 'wrapped' is called but not defined
+      📁 File: src/graph_sitter/core/autocommit/decorators.py
+      📍 Line: 92
+      🔧 Function: wrapped
+      💡 Fix: Define function 'wrapped'
+
+  62. 🔴 [MISSING_FUNCTION] Function 'wrapped' is called but not defined
+      📁 File: src/graph_sitter/core/autocommit/decorators.py
+      📍 Line: 112
+      🔧 Function: wrapped
+      💡 Fix: Define function 'wrapped'
+
+  63. 🔴 [MISSING_FUNCTION] Function 'DeleteFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/delete_file.py
+      📍 Line: 35
+      🔧 Function: DeleteFileObservation
+      💡 Fix: Define function 'DeleteFileObservation'
+
+  64. 🔴 [MISSING_FUNCTION] Function 'DeleteFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/delete_file.py
+      📍 Line: 42
+      🔧 Function: DeleteFileObservation
+      💡 Fix: Define function 'DeleteFileObservation'
+
+  65. 🔴 [MISSING_FUNCTION] Function 'DeleteFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/delete_file.py
+      📍 Line: 51
+      🔧 Function: DeleteFileObservation
+      💡 Fix: Define function 'DeleteFileObservation'
+
+  66. 🔴 [MISSING_FUNCTION] Function 'DeleteFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/delete_file.py
+      📍 Line: 56
+      🔧 Function: DeleteFileObservation
+      💡 Fix: Define function 'DeleteFileObservation'
+
+  67. 🔴 [MISSING_FUNCTION] Function 'EditFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/edit_file.py
+      📍 Line: 64
+      🔧 Function: EditFileObservation
+      💡 Fix: Define function 'EditFileObservation'
+
+  68. 🔴 [MISSING_FUNCTION] Function 'EditFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/edit_file.py
+      📍 Line: 78
+      🔧 Function: EditFileObservation
+      💡 Fix: Define function 'EditFileObservation'
+
+  69. 🔴 [MISSING_FUNCTION] Function 'condition' is called but not defined
+      📁 File: src/graph_sitter/typescript/file.py
+      📍 Line: 316
+      🔧 Function: condition
+      💡 Fix: Define function 'condition'
+
+  70. 🔴 [MISSING_FUNCTION] Function 'condition' is called but not defined
+      📁 File: src/graph_sitter/typescript/file.py
+      📍 Line: 342
+      🔧 Function: condition
+      💡 Fix: Define function 'condition'
+
+  71. 🔴 [MISSING_FUNCTION] Function 'ImportAnalyzer' is called but not defined
+      📁 File: fix_imports_codemod.py
+      📍 Line: 257
+      🔧 Function: ImportAnalyzer
+      💡 Fix: Define function 'ImportAnalyzer'
+
+  72. 🔴 [MISSING_FUNCTION] Function 'ImportAnalyzer' is called but not defined
+      📁 File: fix_imports_codemod.py
+      📍 Line: 271
+      🔧 Function: ImportAnalyzer
+      💡 Fix: Define function 'ImportAnalyzer'
+
+  73. 🔴 [MISSING_FUNCTION] Function 'handler' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/github.py
+      📍 Line: 120
+      🔧 Function: handler
+      💡 Fix: Define function 'handler'
+
+  74. 🔴 [MISSING_FUNCTION] Function 'handler' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/github.py
+      📍 Line: 134
+      🔧 Function: handler
+      💡 Fix: Define function 'handler'
+
+  75. 🔴 [MISSING_FUNCTION] Function 'handler' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/linear.py
+      📍 Line: 78
+      🔧 Function: handler
+      💡 Fix: Define function 'handler'
+
+  76. 🔴 [MISSING_FUNCTION] Function 'handler' is called but not defined
+      📁 File: src/graph_sitter/extensions/events/slack.py
+      📍 Line: 47
+      🔧 Function: handler
+      💡 Fix: Define function 'handler'
+
+  77. 🔴 [MISSING_FUNCTION] Function 'GlobalReplacementEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/global_replacement_edit.py
+      📍 Line: 99
+      🔧 Function: GlobalReplacementEditObservation
+      💡 Fix: Define function 'GlobalReplacementEditObservation'
+
+  78. 🔴 [MISSING_FUNCTION] Function 'GlobalReplacementEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/global_replacement_edit.py
+      📍 Line: 126
+      🔧 Function: GlobalReplacementEditObservation
+      💡 Fix: Define function 'GlobalReplacementEditObservation'
+
+  79. 🔴 [MISSING_FUNCTION] Function 'format_header' is called but not defined
+      📁 File: src/graph_sitter/extensions/langchain/graph.py
+      📍 Line: 167
+      🔧 Function: format_header
+      💡 Fix: Define function 'format_header'
+
+  80. 🔴 [MISSING_FUNCTION] Function 'format_header' is called but not defined
+      📁 File: src/graph_sitter/extensions/langchain/graph.py
+      📍 Line: 176
+      🔧 Function: format_header
+      💡 Fix: Define function 'format_header'
+
+  81. 🔴 [MISSING_FUNCTION] Function 'format_header' is called but not defined
+      📁 File: src/graph_sitter/extensions/langchain/graph.py
+      📍 Line: 180
+      🔧 Function: format_header
+      💡 Fix: Define function 'format_header'
+
+  82. 🔴 [MISSING_FUNCTION] Function 'format_header' is called but not defined
+      📁 File: src/graph_sitter/extensions/langchain/graph.py
+      📍 Line: 182
+      🔧 Function: format_header
+      💡 Fix: Define function 'format_header'
+
+  83. 🔴 [MISSING_FUNCTION] Function 'format_header' is called but not defined
+      📁 File: src/graph_sitter/extensions/langchain/graph.py
+      📍 Line: 184
+      🔧 Function: format_header
+      💡 Fix: Define function 'format_header'
+
+  84. 🔴 [MISSING_FUNCTION] Function 'format_header' is called but not defined
+      📁 File: src/graph_sitter/extensions/langchain/graph.py
+      📍 Line: 186
+      🔧 Function: format_header
+      💡 Fix: Define function 'format_header'
+
+  85. 🔴 [MISSING_FUNCTION] Function 'traverse_classes' is called but not defined
+      📁 File: src/graph_sitter/core/interfaces/inherits.py
+      📍 Line: 50
+      🔧 Function: traverse_classes
+      💡 Fix: Define function 'traverse_classes'
+
+  86. 🔴 [MISSING_FUNCTION] Function 'traverse_classes' is called but not defined
+      📁 File: src/graph_sitter/core/interfaces/inherits.py
+      📍 Line: 52
+      🔧 Function: traverse_classes
+      💡 Fix: Define function 'traverse_classes'
+
+  87. 🔴 [MISSING_FUNCTION] Function 'traverse_classes' is called but not defined
+      📁 File: src/graph_sitter/core/interfaces/inherits.py
+      📍 Line: 71
+      🔧 Function: traverse_classes
+      💡 Fix: Define function 'traverse_classes'
+
+  88. 🔴 [MISSING_FUNCTION] Function 'traverse_classes' is called but not defined
+      📁 File: src/graph_sitter/core/interfaces/inherits.py
+      📍 Line: 73
+      🔧 Function: traverse_classes
+      💡 Fix: Define function 'traverse_classes'
+
+  89. 🔴 [MISSING_FUNCTION] Function 'LinearIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 96
+      🔧 Function: LinearIssueObservation
+      💡 Fix: Define function 'LinearIssueObservation'
+
+  90. 🔴 [MISSING_FUNCTION] Function 'LinearIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 103
+      🔧 Function: LinearIssueObservation
+      💡 Fix: Define function 'LinearIssueObservation'
+
+  91. 🔴 [MISSING_FUNCTION] Function 'LinearIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 111
+      🔧 Function: LinearIssueObservation
+      💡 Fix: Define function 'LinearIssueObservation'
+
+  92. 🔴 [MISSING_FUNCTION] Function 'LinearIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 119
+      🔧 Function: LinearIssueObservation
+      💡 Fix: Define function 'LinearIssueObservation'
+
+  93. 🔴 [MISSING_FUNCTION] Function 'LinearIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 127
+      🔧 Function: LinearIssueObservation
+      💡 Fix: Define function 'LinearIssueObservation'
+
+  94. 🔴 [MISSING_FUNCTION] Function 'LinearCommentsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 139
+      🔧 Function: LinearCommentsObservation
+      💡 Fix: Define function 'LinearCommentsObservation'
+
+  95. 🔴 [MISSING_FUNCTION] Function 'LinearCommentsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 146
+      🔧 Function: LinearCommentsObservation
+      💡 Fix: Define function 'LinearCommentsObservation'
+
+  96. 🔴 [MISSING_FUNCTION] Function 'LinearCommentsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 154
+      🔧 Function: LinearCommentsObservation
+      💡 Fix: Define function 'LinearCommentsObservation'
+
+  97. 🔴 [MISSING_FUNCTION] Function 'LinearCommentsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 162
+      🔧 Function: LinearCommentsObservation
+      💡 Fix: Define function 'LinearCommentsObservation'
+
+  98. 🔴 [MISSING_FUNCTION] Function 'LinearCommentsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 170
+      🔧 Function: LinearCommentsObservation
+      💡 Fix: Define function 'LinearCommentsObservation'
+
+  99. 🔴 [MISSING_FUNCTION] Function 'LinearCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 182
+      🔧 Function: LinearCommentObservation
+      💡 Fix: Define function 'LinearCommentObservation'
+
+ 100. 🔴 [MISSING_FUNCTION] Function 'LinearCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 189
+      🔧 Function: LinearCommentObservation
+      💡 Fix: Define function 'LinearCommentObservation'
+
+ 101. 🔴 [MISSING_FUNCTION] Function 'LinearCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 197
+      🔧 Function: LinearCommentObservation
+      💡 Fix: Define function 'LinearCommentObservation'
+
+ 102. 🔴 [MISSING_FUNCTION] Function 'LinearCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 205
+      🔧 Function: LinearCommentObservation
+      💡 Fix: Define function 'LinearCommentObservation'
+
+ 103. 🔴 [MISSING_FUNCTION] Function 'LinearCommentObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 213
+      🔧 Function: LinearCommentObservation
+      💡 Fix: Define function 'LinearCommentObservation'
+
+ 104. 🔴 [MISSING_FUNCTION] Function 'LinearWebhookObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 232
+      🔧 Function: LinearWebhookObservation
+      💡 Fix: Define function 'LinearWebhookObservation'
+
+ 105. 🔴 [MISSING_FUNCTION] Function 'LinearWebhookObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 240
+      🔧 Function: LinearWebhookObservation
+      💡 Fix: Define function 'LinearWebhookObservation'
+
+ 106. 🔴 [MISSING_FUNCTION] Function 'LinearWebhookObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 249
+      🔧 Function: LinearWebhookObservation
+      💡 Fix: Define function 'LinearWebhookObservation'
+
+ 107. 🔴 [MISSING_FUNCTION] Function 'LinearWebhookObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 258
+      🔧 Function: LinearWebhookObservation
+      💡 Fix: Define function 'LinearWebhookObservation'
+
+ 108. 🔴 [MISSING_FUNCTION] Function 'LinearWebhookObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 267
+      🔧 Function: LinearWebhookObservation
+      💡 Fix: Define function 'LinearWebhookObservation'
+
+ 109. 🔴 [MISSING_FUNCTION] Function 'LinearSearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 280
+      🔧 Function: LinearSearchObservation
+      💡 Fix: Define function 'LinearSearchObservation'
+
+ 110. 🔴 [MISSING_FUNCTION] Function 'LinearSearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 287
+      🔧 Function: LinearSearchObservation
+      💡 Fix: Define function 'LinearSearchObservation'
+
+ 111. 🔴 [MISSING_FUNCTION] Function 'LinearSearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 295
+      🔧 Function: LinearSearchObservation
+      💡 Fix: Define function 'LinearSearchObservation'
+
+ 112. 🔴 [MISSING_FUNCTION] Function 'LinearSearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 303
+      🔧 Function: LinearSearchObservation
+      💡 Fix: Define function 'LinearSearchObservation'
+
+ 113. 🔴 [MISSING_FUNCTION] Function 'LinearSearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 311
+      🔧 Function: LinearSearchObservation
+      💡 Fix: Define function 'LinearSearchObservation'
+
+ 114. 🔴 [MISSING_FUNCTION] Function 'LinearCreateIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 323
+      🔧 Function: LinearCreateIssueObservation
+      💡 Fix: Define function 'LinearCreateIssueObservation'
+
+ 115. 🔴 [MISSING_FUNCTION] Function 'LinearCreateIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 331
+      🔧 Function: LinearCreateIssueObservation
+      💡 Fix: Define function 'LinearCreateIssueObservation'
+
+ 116. 🔴 [MISSING_FUNCTION] Function 'LinearCreateIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 340
+      🔧 Function: LinearCreateIssueObservation
+      💡 Fix: Define function 'LinearCreateIssueObservation'
+
+ 117. 🔴 [MISSING_FUNCTION] Function 'LinearCreateIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 349
+      🔧 Function: LinearCreateIssueObservation
+      💡 Fix: Define function 'LinearCreateIssueObservation'
+
+ 118. 🔴 [MISSING_FUNCTION] Function 'LinearCreateIssueObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 358
+      🔧 Function: LinearCreateIssueObservation
+      💡 Fix: Define function 'LinearCreateIssueObservation'
+
+ 119. 🔴 [MISSING_FUNCTION] Function 'LinearTeamsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 371
+      🔧 Function: LinearTeamsObservation
+      💡 Fix: Define function 'LinearTeamsObservation'
+
+ 120. 🔴 [MISSING_FUNCTION] Function 'LinearTeamsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 377
+      🔧 Function: LinearTeamsObservation
+      💡 Fix: Define function 'LinearTeamsObservation'
+
+ 121. 🔴 [MISSING_FUNCTION] Function 'LinearTeamsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 384
+      🔧 Function: LinearTeamsObservation
+      💡 Fix: Define function 'LinearTeamsObservation'
+
+ 122. 🔴 [MISSING_FUNCTION] Function 'LinearTeamsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 391
+      🔧 Function: LinearTeamsObservation
+      💡 Fix: Define function 'LinearTeamsObservation'
+
+ 123. 🔴 [MISSING_FUNCTION] Function 'LinearTeamsObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/linear/linear.py
+      📍 Line: 398
+      🔧 Function: LinearTeamsObservation
+      💡 Fix: Define function 'LinearTeamsObservation'
+
+ 124. 🔴 [MISSING_FUNCTION] Function 'build_tree' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/list_directory.py
+      📍 Line: 88
+      🔧 Function: build_tree
+      💡 Fix: Define function 'build_tree'
+
+ 125. 🔴 [MISSING_FUNCTION] Function 'build_tree' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/list_directory.py
+      📍 Line: 105
+      🔧 Function: build_tree
+      💡 Fix: Define function 'build_tree'
+
+ 126. 🔴 [MISSING_FUNCTION] Function 'ListDirectoryObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/list_directory.py
+      📍 Line: 176
+      🔧 Function: ListDirectoryObservation
+      💡 Fix: Define function 'ListDirectoryObservation'
+
+ 127. 🔴 [MISSING_FUNCTION] Function 'ListDirectoryObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/list_directory.py
+      📍 Line: 229
+      🔧 Function: ListDirectoryObservation
+      💡 Fix: Define function 'ListDirectoryObservation'
+
+ 128. 🔴 [MISSING_FUNCTION] Function 'DirectoryInfo' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/list_directory.py
+      📍 Line: 179
+      🔧 Function: DirectoryInfo
+      💡 Fix: Define function 'DirectoryInfo'
+
+ 129. 🔴 [MISSING_FUNCTION] Function 'DirectoryInfo' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/list_directory.py
+      📍 Line: 207
+      🔧 Function: DirectoryInfo
+      💡 Fix: Define function 'DirectoryInfo'
+
+ 130. 🔴 [MISSING_FUNCTION] Function 'DirectoryInfo' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/list_directory.py
+      📍 Line: 218
+      🔧 Function: DirectoryInfo
+      💡 Fix: Define function 'DirectoryInfo'
+
+ 131. 🔴 [MISSING_FUNCTION] Function 'flatten_dict' is called but not defined
+      📁 File: src/graph_sitter/cli/commands/config/main.py
+      📍 Line: 30
+      🔧 Function: flatten_dict
+      💡 Fix: Define function 'flatten_dict'
+
+ 132. 🔴 [MISSING_FUNCTION] Function 'flatten_dict' is called but not defined
+      📁 File: src/graph_sitter/cli/commands/config/main.py
+      📍 Line: 36
+      🔧 Function: flatten_dict
+      💡 Fix: Define function 'flatten_dict'
+
+ 133. 🔴 [MISSING_FUNCTION] Function 'PendingFiles' is called but not defined
+      📁 File: src/graph_sitter/core/autocommit/manager.py
+      📍 Line: 272
+      🔧 Function: PendingFiles
+      💡 Fix: Define function 'PendingFiles'
+
+ 134. 🔴 [MISSING_FUNCTION] Function 'PendingFiles' is called but not defined
+      📁 File: src/graph_sitter/core/autocommit/manager.py
+      📍 Line: 275
+      🔧 Function: PendingFiles
+      💡 Fix: Define function 'PendingFiles'
+
+ 135. 🔴 [MISSING_FUNCTION] Function 'PendingFiles' is called but not defined
+      📁 File: src/graph_sitter/core/autocommit/manager.py
+      📍 Line: 278
+      🔧 Function: PendingFiles
+      💡 Fix: Define function 'PendingFiles'
+
+ 136. 🔴 [MISSING_FUNCTION] Function 'call_next' is called but not defined
+      📁 File: src/graph_sitter/runner/sandbox/middlewares.py
+      📍 Line: 33
+      🔧 Function: call_next
+      💡 Fix: Define function 'call_next'
+
+ 137. 🔴 [MISSING_FUNCTION] Function 'call_next' is called but not defined
+      📁 File: src/graph_sitter/runner/sandbox/middlewares.py
+      📍 Line: 39
+      🔧 Function: call_next
+      💡 Fix: Define function 'call_next'
+
+ 138. 🔴 [MISSING_FUNCTION] Function 'MoveSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/move_symbol.py
+      📍 Line: 61
+      🔧 Function: MoveSymbolObservation
+      💡 Fix: Define function 'MoveSymbolObservation'
+
+ 139. 🔴 [MISSING_FUNCTION] Function 'MoveSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/move_symbol.py
+      📍 Line: 86
+      🔧 Function: MoveSymbolObservation
+      💡 Fix: Define function 'MoveSymbolObservation'
+
+ 140. 🔴 [MISSING_FUNCTION] Function 'MoveSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/move_symbol.py
+      📍 Line: 110
+      🔧 Function: MoveSymbolObservation
+      💡 Fix: Define function 'MoveSymbolObservation'
+
+ 141. 🔴 [MISSING_FUNCTION] Function 'MoveSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/move_symbol.py
+      📍 Line: 124
+      🔧 Function: MoveSymbolObservation
+      💡 Fix: Define function 'MoveSymbolObservation'
+
+ 142. 🔴 [MISSING_FUNCTION] Function 'MoveSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/move_symbol.py
+      📍 Line: 133
+      🔧 Function: MoveSymbolObservation
+      💡 Fix: Define function 'MoveSymbolObservation'
+
+ 143. 🔴 [MISSING_FUNCTION] Function 'expr_type' is called but not defined
+      📁 File: src/graph_sitter/core/parser.py
+      📍 Line: 76
+      🔧 Function: expr_type
+      💡 Fix: Define function 'expr_type'
+
+ 144. 🔴 [MISSING_FUNCTION] Function 'expr_type' is called but not defined
+      📁 File: src/graph_sitter/core/parser.py
+      📍 Line: 93
+      🔧 Function: expr_type
+      💡 Fix: Define function 'expr_type'
+
+ 145. 🔴 [MISSING_FUNCTION] Function 'LSPTask' is called but not defined
+      📁 File: src/graph_sitter/extensions/lsp/progress.py
+      📍 Line: 48
+      🔧 Function: LSPTask
+      💡 Fix: Define function 'LSPTask'
+
+ 146. 🔴 [MISSING_FUNCTION] Function 'LSPTask' is called but not defined
+      📁 File: src/graph_sitter/extensions/lsp/progress.py
+      📍 Line: 54
+      🔧 Function: LSPTask
+      💡 Fix: Define function 'LSPTask'
+
+ 147. 🔴 [MISSING_FUNCTION] Function 'ReflectionSection' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reflection.py
+      📍 Line: 111
+      🔧 Function: ReflectionSection
+      💡 Fix: Define function 'ReflectionSection'
+
+ 148. 🔴 [MISSING_FUNCTION] Function 'ReflectionSection' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reflection.py
+      📍 Line: 122
+      🔧 Function: ReflectionSection
+      💡 Fix: Define function 'ReflectionSection'
+
+ 149. 🔴 [MISSING_FUNCTION] Function 'ReflectionSection' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reflection.py
+      📍 Line: 205
+      🔧 Function: ReflectionSection
+      💡 Fix: Define function 'ReflectionSection'
+
+ 150. 🔴 [MISSING_FUNCTION] Function 'ReflectionObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reflection.py
+      📍 Line: 207
+      🔧 Function: ReflectionObservation
+      💡 Fix: Define function 'ReflectionObservation'
+
+ 151. 🔴 [MISSING_FUNCTION] Function 'ReflectionObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reflection.py
+      📍 Line: 217
+      🔧 Function: ReflectionObservation
+      💡 Fix: Define function 'ReflectionObservation'
+
+ 152. 🔴 [MISSING_FUNCTION] Function 'RelaceEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/relace_edit.py
+      📍 Line: 155
+      🔧 Function: RelaceEditObservation
+      💡 Fix: Define function 'RelaceEditObservation'
+
+ 153. 🔴 [MISSING_FUNCTION] Function 'RelaceEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/relace_edit.py
+      📍 Line: 170
+      🔧 Function: RelaceEditObservation
+      💡 Fix: Define function 'RelaceEditObservation'
+
+ 154. 🔴 [MISSING_FUNCTION] Function 'RelaceEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/relace_edit.py
+      📍 Line: 182
+      🔧 Function: RelaceEditObservation
+      💡 Fix: Define function 'RelaceEditObservation'
+
+ 155. 🔴 [MISSING_FUNCTION] Function 'RelaceEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/relace_edit.py
+      📍 Line: 195
+      🔧 Function: RelaceEditObservation
+      💡 Fix: Define function 'RelaceEditObservation'
+
+ 156. 🔴 [MISSING_FUNCTION] Function 'RenameFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/rename_file.py
+      📍 Line: 43
+      🔧 Function: RenameFileObservation
+      💡 Fix: Define function 'RenameFileObservation'
+
+ 157. 🔴 [MISSING_FUNCTION] Function 'RenameFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/rename_file.py
+      📍 Line: 58
+      🔧 Function: RenameFileObservation
+      💡 Fix: Define function 'RenameFileObservation'
+
+ 158. 🔴 [MISSING_FUNCTION] Function 'RenameFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/rename_file.py
+      📍 Line: 76
+      🔧 Function: RenameFileObservation
+      💡 Fix: Define function 'RenameFileObservation'
+
+ 159. 🔴 [MISSING_FUNCTION] Function 'RenameFileObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/rename_file.py
+      📍 Line: 83
+      🔧 Function: RenameFileObservation
+      💡 Fix: Define function 'RenameFileObservation'
+
+ 160. 🔴 [MISSING_FUNCTION] Function 'ReplacementEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/replacement_edit.py
+      📍 Line: 149
+      🔧 Function: ReplacementEditObservation
+      💡 Fix: Define function 'ReplacementEditObservation'
+
+ 161. 🔴 [MISSING_FUNCTION] Function 'ReplacementEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/replacement_edit.py
+      📍 Line: 165
+      🔧 Function: ReplacementEditObservation
+      💡 Fix: Define function 'ReplacementEditObservation'
+
+ 162. 🔴 [MISSING_FUNCTION] Function 'ReplacementEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/replacement_edit.py
+      📍 Line: 181
+      🔧 Function: ReplacementEditObservation
+      💡 Fix: Define function 'ReplacementEditObservation'
+
+ 163. 🔴 [MISSING_FUNCTION] Function 'under_token_limit' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reveal_symbol.py
+      📍 Line: 206
+      🔧 Function: under_token_limit
+      💡 Fix: Define function 'under_token_limit'
+
+ 164. 🔴 [MISSING_FUNCTION] Function 'under_token_limit' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reveal_symbol.py
+      📍 Line: 230
+      🔧 Function: under_token_limit
+      💡 Fix: Define function 'under_token_limit'
+
+ 165. 🔴 [MISSING_FUNCTION] Function 'RevealSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reveal_symbol.py
+      📍 Line: 284
+      🔧 Function: RevealSymbolObservation
+      💡 Fix: Define function 'RevealSymbolObservation'
+
+ 166. 🔴 [MISSING_FUNCTION] Function 'RevealSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reveal_symbol.py
+      📍 Line: 289
+      🔧 Function: RevealSymbolObservation
+      💡 Fix: Define function 'RevealSymbolObservation'
+
+ 167. 🔴 [MISSING_FUNCTION] Function 'RevealSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reveal_symbol.py
+      📍 Line: 297
+      🔧 Function: RevealSymbolObservation
+      💡 Fix: Define function 'RevealSymbolObservation'
+
+ 168. 🔴 [MISSING_FUNCTION] Function 'RevealSymbolObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/reveal_symbol.py
+      📍 Line: 308
+      🔧 Function: RevealSymbolObservation
+      💡 Fix: Define function 'RevealSymbolObservation'
+
+ 169. 🔴 [MISSING_FUNCTION] Function 'undefined_function_name' is called but not defined
+      📁 File: sample_dir/sample_missing_function.py
+      📍 Line: 2
+      🔧 Function: undefined_function_name
+      💡 Fix: Define function 'undefined_function_name'
+
+ 170. 🔴 [MISSING_FUNCTION] Function 'undefined_function_name' is called but not defined
+      📁 File: sample_dir/sample_missing_function.py
+      📍 Line: 3
+      🔧 Function: undefined_function_name
+      💡 Fix: Define function 'undefined_function_name'
+
+ 171. 🔴 [MISSING_FUNCTION] Function 'SearchResultObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/search.py
+      📍 Line: 65
+      🔧 Function: SearchResultObservation
+      💡 Fix: Define function 'SearchResultObservation'
+
+ 172. 🔴 [MISSING_FUNCTION] Function 'SearchResultObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/search.py
+      📍 Line: 72
+      🔧 Function: SearchResultObservation
+      💡 Fix: Define function 'SearchResultObservation'
+
+ 173. 🔴 [MISSING_FUNCTION] Function 'SearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 223
+      🔧 Function: SearchObservation
+      💡 Fix: Define function 'SearchObservation'
+
+ 174. 🔴 [MISSING_FUNCTION] Function 'SearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 299
+      🔧 Function: SearchObservation
+      💡 Fix: Define function 'SearchObservation'
+
+ 175. 🔴 [MISSING_FUNCTION] Function 'SearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 337
+      🔧 Function: SearchObservation
+      💡 Fix: Define function 'SearchObservation'
+
+ 176. 🔴 [MISSING_FUNCTION] Function 'SearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 400
+      🔧 Function: SearchObservation
+      💡 Fix: Define function 'SearchObservation'
+
+ 177. 🔴 [MISSING_FUNCTION] Function 'SearchMatch' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 265
+      🔧 Function: SearchMatch
+      💡 Fix: Define function 'SearchMatch'
+
+ 178. 🔴 [MISSING_FUNCTION] Function 'SearchMatch' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 371
+      🔧 Function: SearchMatch
+      💡 Fix: Define function 'SearchMatch'
+
+ 179. 🔴 [MISSING_FUNCTION] Function 'SearchFileResult' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 280
+      🔧 Function: SearchFileResult
+      💡 Fix: Define function 'SearchFileResult'
+
+ 180. 🔴 [MISSING_FUNCTION] Function 'SearchFileResult' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search.py
+      📍 Line: 381
+      🔧 Function: SearchFileResult
+      💡 Fix: Define function 'SearchFileResult'
+
+ 181. 🔴 [MISSING_FUNCTION] Function 'SearchFilesByNameResultObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search_files_by_name.py
+      📍 Line: 103
+      🔧 Function: SearchFilesByNameResultObservation
+      💡 Fix: Define function 'SearchFilesByNameResultObservation'
+
+ 182. 🔴 [MISSING_FUNCTION] Function 'SearchFilesByNameResultObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/search_files_by_name.py
+      📍 Line: 114
+      🔧 Function: SearchFilesByNameResultObservation
+      💡 Fix: Define function 'SearchFilesByNameResultObservation'
+
+ 183. 🔴 [MISSING_FUNCTION] Function 'SemanticEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/semantic_edit.py
+      📍 Line: 279
+      🔧 Function: SemanticEditObservation
+      💡 Fix: Define function 'SemanticEditObservation'
+
+ 184. 🔴 [MISSING_FUNCTION] Function 'SemanticEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/semantic_edit.py
+      📍 Line: 297
+      🔧 Function: SemanticEditObservation
+      💡 Fix: Define function 'SemanticEditObservation'
+
+ 185. 🔴 [MISSING_FUNCTION] Function 'SemanticEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/semantic_edit.py
+      📍 Line: 307
+      🔧 Function: SemanticEditObservation
+      💡 Fix: Define function 'SemanticEditObservation'
+
+ 186. 🔴 [MISSING_FUNCTION] Function 'SemanticEditObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/semantic_edit.py
+      📍 Line: 313
+      🔧 Function: SemanticEditObservation
+      💡 Fix: Define function 'SemanticEditObservation'
+
+ 187. 🔴 [MISSING_FUNCTION] Function 'SemanticSearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/semantic_search.py
+      📍 Line: 110
+      🔧 Function: SemanticSearchObservation
+      💡 Fix: Define function 'SemanticSearchObservation'
+
+ 188. 🔴 [MISSING_FUNCTION] Function 'SemanticSearchObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/semantic_search.py
+      📍 Line: 117
+      🔧 Function: SemanticSearchObservation
+      💡 Fix: Define function 'SemanticSearchObservation'
+
+ 189. 🔴 [MISSING_FUNCTION] Function 'break_down' is called but not defined
+      📁 File: src/graph_sitter/codebase/transaction_manager.py
+      📍 Line: 236
+      🔧 Function: break_down
+      💡 Fix: Define function 'break_down'
+
+ 190. 🔴 [MISSING_FUNCTION] Function 'break_down' is called but not defined
+      📁 File: src/graph_sitter/codebase/transaction_manager.py
+      📍 Line: 247
+      🔧 Function: break_down
+      💡 Fix: Define function 'break_down'
+
+ 191. 🔴 [MISSING_FUNCTION] Function 'TransactionError' is called but not defined
+      📁 File: src/graph_sitter/codebase/transaction_manager.py
+      📍 Line: 239
+      🔧 Function: TransactionError
+      💡 Fix: Define function 'TransactionError'
+
+ 192. 🔴 [MISSING_FUNCTION] Function 'TransactionError' is called but not defined
+      📁 File: src/graph_sitter/codebase/transaction_manager.py
+      📍 Line: 249
+      🔧 Function: TransactionError
+      💡 Fix: Define function 'TransactionError'
+
+ 193. 🔴 [MISSING_FUNCTION] Function 'TransactionError' is called but not defined
+      📁 File: src/graph_sitter/codebase/transaction_manager.py
+      📍 Line: 269
+      🔧 Function: TransactionError
+      💡 Fix: Define function 'TransactionError'
+
+ 194. 🔴 [MISSING_FUNCTION] Function 'traverse' is called but not defined
+      📁 File: src/graph_sitter/tree_sitter_parser.py
+      📍 Line: 90
+      🔧 Function: traverse
+      💡 Fix: Define function 'traverse'
+
+ 195. 🔴 [MISSING_FUNCTION] Function 'traverse' is called but not defined
+      📁 File: src/graph_sitter/tree_sitter_parser.py
+      📍 Line: 92
+      🔧 Function: traverse
+      💡 Fix: Define function 'traverse'
+
+ 196. 🔴 [MISSING_FUNCTION] Function 'traverse' is called but not defined
+      📁 File: src/graph_sitter/utils.py
+      📍 Line: 164
+      🔧 Function: traverse
+      💡 Fix: Define function 'traverse'
+
+ 197. 🔴 [MISSING_FUNCTION] Function 'traverse' is called but not defined
+      📁 File: src/graph_sitter/utils.py
+      📍 Line: 166
+      🔧 Function: traverse
+      💡 Fix: Define function 'traverse'
+
+ 198. 🔴 [MISSING_FUNCTION] Function 'cond' is called but not defined
+      📁 File: src/graph_sitter/gscli/backend/typestub_utils.py
+      📍 Line: 32
+      🔧 Function: cond
+      💡 Fix: Define function 'cond'
+
+ 199. 🔴 [MISSING_FUNCTION] Function 'cond' is called but not defined
+      📁 File: src/graph_sitter/gscli/backend/typestub_utils.py
+      📍 Line: 41
+      🔧 Function: cond
+      💡 Fix: Define function 'cond'
+
+ 200. 🔴 [MISSING_FUNCTION] Function 'cond' is called but not defined
+      📁 File: src/graph_sitter/gscli/backend/typestub_utils.py
+      📍 Line: 66
+      🔧 Function: cond
+      💡 Fix: Define function 'cond'
+
+ 201. 🔴 [MISSING_FUNCTION] Function 'cond' is called but not defined
+      📁 File: src/graph_sitter/gscli/backend/typestub_utils.py
+      📍 Line: 71
+      🔧 Function: cond
+      💡 Fix: Define function 'cond'
+
+ 202. 🔴 [MISSING_FUNCTION] Function 'update_type_annotation' is called but not defined
+      📁 File: src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py
+      📍 Line: 35
+      🔧 Function: update_type_annotation
+      💡 Fix: Define function 'update_type_annotation'
+
+ 203. 🔴 [MISSING_FUNCTION] Function 'update_type_annotation' is called but not defined
+      📁 File: src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py
+      📍 Line: 37
+      🔧 Function: update_type_annotation
+      💡 Fix: Define function 'update_type_annotation'
+
+ 204. 🔴 [MISSING_FUNCTION] Function 'update_type_annotation' is called but not defined
+      📁 File: src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py
+      📍 Line: 39
+      🔧 Function: update_type_annotation
+      💡 Fix: Define function 'update_type_annotation'
+
+ 205. 🔴 [MISSING_FUNCTION] Function 'update_type_annotation' is called but not defined
+      📁 File: src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py
+      📍 Line: 51
+      🔧 Function: update_type_annotation
+      💡 Fix: Define function 'update_type_annotation'
+
+ 206. 🔴 [MISSING_FUNCTION] Function 'process_parts' is called but not defined
+      📁 File: src/graph_sitter/code_generation/doc_utils/utils.py
+      📍 Line: 357
+      🔧 Function: process_parts
+      💡 Fix: Define function 'process_parts'
+
+ 207. 🔴 [MISSING_FUNCTION] Function 'process_parts' is called but not defined
+      📁 File: src/graph_sitter/code_generation/doc_utils/utils.py
+      📍 Line: 376
+      🔧 Function: process_parts
+      💡 Fix: Define function 'process_parts'
+
+ 208. 🔴 [MISSING_FUNCTION] Function 'process_parts' is called but not defined
+      📁 File: src/graph_sitter/code_generation/doc_utils/utils.py
+      📍 Line: 381
+      🔧 Function: process_parts
+      💡 Fix: Define function 'process_parts'
+
+ 209. 🔴 [MISSING_FUNCTION] Function 'sort_dict' is called but not defined
+      📁 File: src/graph_sitter/output/utils.py
+      📍 Line: 73
+      🔧 Function: sort_dict
+      💡 Fix: Define function 'sort_dict'
+
+ 210. 🔴 [MISSING_FUNCTION] Function 'sort_dict' is called but not defined
+      📁 File: src/graph_sitter/output/utils.py
+      📍 Line: 77
+      🔧 Function: sort_dict
+      💡 Fix: Define function 'sort_dict'
+
+ 211. 🔴 [MISSING_FUNCTION] Function 'sort_dict' is called but not defined
+      📁 File: src/graph_sitter/output/utils.py
+      📍 Line: 79
+      🔧 Function: sort_dict
+      💡 Fix: Define function 'sort_dict'
+
+ 212. 🔴 [MISSING_FUNCTION] Function 'sort_dict' is called but not defined
+      📁 File: src/graph_sitter/output/utils.py
+      📍 Line: 83
+      🔧 Function: sort_dict
+      💡 Fix: Define function 'sort_dict'
+
+ 213. 🔴 [MISSING_FUNCTION] Function 'ViewPRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/view_pr.py
+      📍 Line: 41
+      🔧 Function: ViewPRObservation
+      💡 Fix: Define function 'ViewPRObservation'
+
+ 214. 🔴 [MISSING_FUNCTION] Function 'ViewPRObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/view_pr.py
+      📍 Line: 50
+      🔧 Function: ViewPRObservation
+      💡 Fix: Define function 'ViewPRObservation'
+
+ 215. 🔴 [MISSING_FUNCTION] Function 'PRCheckObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/view_pr_checks.py
+      📍 Line: 36
+      🔧 Function: PRCheckObservation
+      💡 Fix: Define function 'PRCheckObservation'
+
+ 216. 🔴 [MISSING_FUNCTION] Function 'PRCheckObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/view_pr_checks.py
+      📍 Line: 43
+      🔧 Function: PRCheckObservation
+      💡 Fix: Define function 'PRCheckObservation'
+
+ 217. 🔴 [MISSING_FUNCTION] Function 'PRCheckObservation' is called but not defined
+      📁 File: src/graph_sitter/extensions/tools/github/view_pr_checks.py
+      📍 Line: 50
+      🔧 Function: PRCheckObservation
+      💡 Fix: Define function 'PRCheckObservation'
+
