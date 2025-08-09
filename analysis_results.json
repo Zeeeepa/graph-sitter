@@ -1,6 +1,6 @@
 {
   "analysis_metadata": {
-    "timestamp": "2025-08-09T19:51:17.127441",
+    "timestamp": "2025-08-09T21:42:44.723757",
     "codebase_path": ".",
     "analyzer_version": "3.0.0-fixed",
     "excluded_folders": [
@@ -25,12 +25,12 @@
     ]
   },
   "statistics": {
-    "total_errors": 236,
+    "total_errors": 217,
     "by_severity": {
-      "critical": 236
+      "critical": 217
     },
     "by_type": {
-      "missing_function": 236
+      "missing_function": 217
     },
     "by_file": {
       "dashboard/app.py": 1,
@@ -41,7 +41,7 @@
       "src/graph_sitter/extensions/tools/bash.py": 5,
       "src/graph_sitter/core/utils/cache_utils.py": 1,
       "src/graph_sitter/cli/sdk/decorator.py": 1,
-      "src/graph_sitter/extensions/events/github.py": 5,
+      "src/graph_sitter/extensions/events/github.py": 4,
       "src/graph_sitter/extensions/events/linear.py": 2,
       "src/graph_sitter/extensions/events/slack.py": 2,
       "src/graph_sitter/shared/performance/stopwatch_utils.py": 2,
@@ -57,26 +57,15 @@
       "src/graph_sitter/core/autocommit/decorators.py": 4,
       "src/graph_sitter/extensions/tools/delete_file.py": 4,
       "src/graph_sitter/extensions/tools/edit_file.py": 2,
-      "src/graph_sitter/core/file.py": 1,
-      "src/graph_sitter/codebase/transactions.py": 3,
-      "src/graph_sitter/tree_sitter_parser.py": 4,
       "src/graph_sitter/typescript/file.py": 2,
       "fix_imports_codemod.py": 2,
-      "src/graph_sitter/codebase/node_classes/node_classes.py": 1,
-      "src/graph_sitter/core/expressions/tuple_type.py": 1,
-      "src/graph_sitter/core/expressions/union_type.py": 1,
       "src/graph_sitter/extensions/tools/global_replacement_edit.py": 2,
       "src/graph_sitter/extensions/langchain/graph.py": 6,
       "src/graph_sitter/core/interfaces/inherits.py": 4,
       "src/graph_sitter/extensions/tools/linear/linear.py": 35,
       "src/graph_sitter/extensions/tools/list_directory.py": 7,
-      "src/graph_sitter/git/repo_operator/local_git_repo.py": 1,
-      "src/graph_sitter/cli/commands/reset/main.py": 1,
-      "src/graph_sitter/core/autocommit/manager.py": 4,
-      "dashboard/src/components/analysis/tree_visualization.py": 1,
-      "src/graph_sitter/utils.py": 3,
-      "dashboard/src/utils/validators.py": 1,
       "src/graph_sitter/cli/commands/config/main.py": 2,
+      "src/graph_sitter/core/autocommit/manager.py": 3,
       "src/graph_sitter/runner/sandbox/middlewares.py": 2,
       "src/graph_sitter/extensions/tools/move_symbol.py": 5,
       "src/graph_sitter/core/parser.py": 2,
@@ -93,7 +82,8 @@
       "src/graph_sitter/extensions/tools/semantic_edit.py": 4,
       "src/graph_sitter/extensions/tools/semantic_search.py": 2,
       "src/graph_sitter/codebase/transaction_manager.py": 5,
-      "src/graph_sitter/typescript/ts_config.py": 3,
+      "src/graph_sitter/tree_sitter_parser.py": 2,
+      "src/graph_sitter/utils.py": 2,
       "src/graph_sitter/gscli/backend/typestub_utils.py": 4,
       "src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py": 4,
       "src/graph_sitter/code_generation/doc_utils/utils.py": 3,
@@ -135,11 +125,11 @@
         5
       ],
       [
-        "src/graph_sitter/extensions/events/github.py",
+        "src/graph_sitter/python/symbol_groups/comment_group.py",
         5
       ],
       [
-        "src/graph_sitter/python/symbol_groups/comment_group.py",
+        "src/graph_sitter/extensions/tools/move_symbol.py",
         5
       ]
     ],
@@ -1714,144 +1704,6 @@
     {
       "error_type": "missing_function",
       "severity": "critical",
-      "file_path": "src/graph_sitter/core/file.py",
-      "line_number": 75,
-      "function_name": "bytes",
-      "class_name": null,
-      "message": "Function 'bytes' is called but not defined",
-      "description": "Function 'bytes' is called at src/graph_sitter/core/file.py:75 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bytes'",
-        "Import 'bytes' from appropriate module",
-        "Check if 'bytes' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bytes",
-        "call_location": {
-          "file": "src/graph_sitter/core/file.py",
-          "line": 75
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/codebase/transactions.py",
-      "line_number": 160,
-      "function_name": "bytes",
-      "class_name": null,
-      "message": "Function 'bytes' is called but not defined",
-      "description": "Function 'bytes' is called at src/graph_sitter/codebase/transactions.py:160 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bytes'",
-        "Import 'bytes' from appropriate module",
-        "Check if 'bytes' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bytes",
-        "call_location": {
-          "file": "src/graph_sitter/codebase/transactions.py",
-          "line": 160
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/codebase/transactions.py",
-      "line_number": 199,
-      "function_name": "bytes",
-      "class_name": null,
-      "message": "Function 'bytes' is called but not defined",
-      "description": "Function 'bytes' is called at src/graph_sitter/codebase/transactions.py:199 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bytes'",
-        "Import 'bytes' from appropriate module",
-        "Check if 'bytes' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bytes",
-        "call_location": {
-          "file": "src/graph_sitter/codebase/transactions.py",
-          "line": 199
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/codebase/transactions.py",
-      "line_number": 219,
-      "function_name": "bytes",
-      "class_name": null,
-      "message": "Function 'bytes' is called but not defined",
-      "description": "Function 'bytes' is called at src/graph_sitter/codebase/transactions.py:219 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bytes'",
-        "Import 'bytes' from appropriate module",
-        "Check if 'bytes' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bytes",
-        "call_location": {
-          "file": "src/graph_sitter/codebase/transactions.py",
-          "line": 219
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/tree_sitter_parser.py",
-      "line_number": 74,
-      "function_name": "bytes",
-      "class_name": null,
-      "message": "Function 'bytes' is called but not defined",
-      "description": "Function 'bytes' is called at src/graph_sitter/tree_sitter_parser.py:74 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bytes'",
-        "Import 'bytes' from appropriate module",
-        "Check if 'bytes' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bytes",
-        "call_location": {
-          "file": "src/graph_sitter/tree_sitter_parser.py",
-          "line": 74
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/tree_sitter_parser.py",
-      "line_number": 82,
-      "function_name": "bytes",
-      "class_name": null,
-      "message": "Function 'bytes' is called but not defined",
-      "description": "Function 'bytes' is called at src/graph_sitter/tree_sitter_parser.py:82 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bytes'",
-        "Import 'bytes' from appropriate module",
-        "Check if 'bytes' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bytes",
-        "call_location": {
-          "file": "src/graph_sitter/tree_sitter_parser.py",
-          "line": 82
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
       "file_path": "src/graph_sitter/typescript/file.py",
       "line_number": 316,
       "function_name": "condition",
@@ -1939,98 +1791,6 @@
           "line": 271
         },
         "total_call_count": 2
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/extensions/events/github.py",
-      "line_number": 62,
-      "function_name": "issubclass",
-      "class_name": null,
-      "message": "Function 'issubclass' is called but not defined",
-      "description": "Function 'issubclass' is called at src/graph_sitter/extensions/events/github.py:62 but no definition found",
-      "fix_suggestions": [
-        "Define function 'issubclass'",
-        "Import 'issubclass' from appropriate module",
-        "Check if 'issubclass' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "issubclass",
-        "call_location": {
-          "file": "src/graph_sitter/extensions/events/github.py",
-          "line": 62
-        },
-        "total_call_count": 4
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/codebase/node_classes/node_classes.py",
-      "line_number": 47,
-      "function_name": "issubclass",
-      "class_name": null,
-      "message": "Function 'issubclass' is called but not defined",
-      "description": "Function 'issubclass' is called at src/graph_sitter/codebase/node_classes/node_classes.py:47 but no definition found",
-      "fix_suggestions": [
-        "Define function 'issubclass'",
-        "Import 'issubclass' from appropriate module",
-        "Check if 'issubclass' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "issubclass",
-        "call_location": {
-          "file": "src/graph_sitter/codebase/node_classes/node_classes.py",
-          "line": 47
-        },
-        "total_call_count": 4
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/core/expressions/tuple_type.py",
-      "line_number": 38,
-      "function_name": "issubclass",
-      "class_name": null,
-      "message": "Function 'issubclass' is called but not defined",
-      "description": "Function 'issubclass' is called at src/graph_sitter/core/expressions/tuple_type.py:38 but no definition found",
-      "fix_suggestions": [
-        "Define function 'issubclass'",
-        "Import 'issubclass' from appropriate module",
-        "Check if 'issubclass' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "issubclass",
-        "call_location": {
-          "file": "src/graph_sitter/core/expressions/tuple_type.py",
-          "line": 38
-        },
-        "total_call_count": 4
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/core/expressions/union_type.py",
-      "line_number": 38,
-      "function_name": "issubclass",
-      "class_name": null,
-      "message": "Function 'issubclass' is called but not defined",
-      "description": "Function 'issubclass' is called at src/graph_sitter/core/expressions/union_type.py:38 but no definition found",
-      "fix_suggestions": [
-        "Define function 'issubclass'",
-        "Import 'issubclass' from appropriate module",
-        "Check if 'issubclass' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "issubclass",
-        "call_location": {
-          "file": "src/graph_sitter/core/expressions/union_type.py",
-          "line": 38
-        },
-        "total_call_count": 4
       }
     },
     {
@@ -3365,144 +3125,6 @@
           "line": 218
         },
         "total_call_count": 3
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/git/repo_operator/local_git_repo.py",
-      "line_number": 84,
-      "function_name": "bool",
-      "class_name": null,
-      "message": "Function 'bool' is called but not defined",
-      "description": "Function 'bool' is called at src/graph_sitter/git/repo_operator/local_git_repo.py:84 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bool'",
-        "Import 'bool' from appropriate module",
-        "Check if 'bool' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bool",
-        "call_location": {
-          "file": "src/graph_sitter/git/repo_operator/local_git_repo.py",
-          "line": 84
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/cli/commands/reset/main.py",
-      "line_number": 28,
-      "function_name": "bool",
-      "class_name": null,
-      "message": "Function 'bool' is called but not defined",
-      "description": "Function 'bool' is called at src/graph_sitter/cli/commands/reset/main.py:28 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bool'",
-        "Import 'bool' from appropriate module",
-        "Check if 'bool' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bool",
-        "call_location": {
-          "file": "src/graph_sitter/cli/commands/reset/main.py",
-          "line": 28
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/core/autocommit/manager.py",
-      "line_number": 59,
-      "function_name": "bool",
-      "class_name": null,
-      "message": "Function 'bool' is called but not defined",
-      "description": "Function 'bool' is called at src/graph_sitter/core/autocommit/manager.py:59 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bool'",
-        "Import 'bool' from appropriate module",
-        "Check if 'bool' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bool",
-        "call_location": {
-          "file": "src/graph_sitter/core/autocommit/manager.py",
-          "line": 59
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "dashboard/src/components/analysis/tree_visualization.py",
-      "line_number": 191,
-      "function_name": "bool",
-      "class_name": null,
-      "message": "Function 'bool' is called but not defined",
-      "description": "Function 'bool' is called at dashboard/src/components/analysis/tree_visualization.py:191 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bool'",
-        "Import 'bool' from appropriate module",
-        "Check if 'bool' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bool",
-        "call_location": {
-          "file": "dashboard/src/components/analysis/tree_visualization.py",
-          "line": 191
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/utils.py",
-      "line_number": 323,
-      "function_name": "bool",
-      "class_name": null,
-      "message": "Function 'bool' is called but not defined",
-      "description": "Function 'bool' is called at src/graph_sitter/utils.py:323 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bool'",
-        "Import 'bool' from appropriate module",
-        "Check if 'bool' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bool",
-        "call_location": {
-          "file": "src/graph_sitter/utils.py",
-          "line": 323
-        },
-        "total_call_count": 6
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "dashboard/src/utils/validators.py",
-      "line_number": 48,
-      "function_name": "bool",
-      "class_name": null,
-      "message": "Function 'bool' is called but not defined",
-      "description": "Function 'bool' is called at dashboard/src/utils/validators.py:48 but no definition found",
-      "fix_suggestions": [
-        "Define function 'bool'",
-        "Import 'bool' from appropriate module",
-        "Check if 'bool' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "bool",
-        "call_location": {
-          "file": "dashboard/src/utils/validators.py",
-          "line": 48
-        },
-        "total_call_count": 6
       }
     },
     {
@@ -5044,75 +4666,6 @@
           "line": 166
         },
         "total_call_count": 4
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/typescript/ts_config.py",
-      "line_number": 266,
-      "function_name": "frozenset",
-      "class_name": null,
-      "message": "Function 'frozenset' is called but not defined",
-      "description": "Function 'frozenset' is called at src/graph_sitter/typescript/ts_config.py:266 but no definition found",
-      "fix_suggestions": [
-        "Define function 'frozenset'",
-        "Import 'frozenset' from appropriate module",
-        "Check if 'frozenset' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "frozenset",
-        "call_location": {
-          "file": "src/graph_sitter/typescript/ts_config.py",
-          "line": 266
-        },
-        "total_call_count": 3
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/typescript/ts_config.py",
-      "line_number": 278,
-      "function_name": "frozenset",
-      "class_name": null,
-      "message": "Function 'frozenset' is called but not defined",
-      "description": "Function 'frozenset' is called at src/graph_sitter/typescript/ts_config.py:278 but no definition found",
-      "fix_suggestions": [
-        "Define function 'frozenset'",
-        "Import 'frozenset' from appropriate module",
-        "Check if 'frozenset' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "frozenset",
-        "call_location": {
-          "file": "src/graph_sitter/typescript/ts_config.py",
-          "line": 278
-        },
-        "total_call_count": 3
-      }
-    },
-    {
-      "error_type": "missing_function",
-      "severity": "critical",
-      "file_path": "src/graph_sitter/typescript/ts_config.py",
-      "line_number": 291,
-      "function_name": "frozenset",
-      "class_name": null,
-      "message": "Function 'frozenset' is called but not defined",
-      "description": "Function 'frozenset' is called at src/graph_sitter/typescript/ts_config.py:291 but no definition found",
-      "fix_suggestions": [
-        "Define function 'frozenset'",
-        "Import 'frozenset' from appropriate module",
-        "Check if 'frozenset' is a typo or renamed function"
-      ],
-      "context": {
-        "function_name": "frozenset",
-        "call_location": {
-          "file": "src/graph_sitter/typescript/ts_config.py",
-          "line": 291
-        },
-        "total_call_count": 3
       }
     },
     {

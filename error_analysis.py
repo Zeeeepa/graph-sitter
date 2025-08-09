@@ -176,14 +176,24 @@ class FixedSupremeErrorAnalyzer:
         
         # Enhanced builtin and library functions
         builtin_functions = {
-            # Python builtins
-            'print', 'len', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple',
+            # Python builtins - COMPLETE LIST
+            'print', 'len', 'str', 'int', 'float', 'bool', 'list', 'dict', 'set', 'tuple',
             'range', 'enumerate', 'zip', 'map', 'filter', 'sorted', 'reversed',
-            'sum', 'min', 'max', 'abs', 'round', 'isinstance', 'hasattr', 'getattr',
-            'setattr', 'delattr', 'type', 'id', 'hash', 'repr', 'format', 'open',
-            'input', 'eval', 'exec', 'compile', 'globals', 'locals', 'vars', 'dir',
-            'next', 'iter', 'any', 'all', 'chr', 'ord', 'bin', 'hex', 'oct',
-            'callable', 'classmethod', 'staticmethod', 'property', 'super',
+            'sum', 'min', 'max', 'abs', 'round', 'pow', 'divmod', 'isinstance', 'issubclass',
+            'hasattr', 'getattr', 'setattr', 'delattr', 'callable', 'iter', 'next',
+            'open', 'input', 'format', 'repr', 'ascii', 'ord', 'chr', 'bin', 'oct', 'hex',
+            'any', 'all', 'type', 'id', 'hash', 'help', 'dir', 'vars', 'locals', 'globals',
+            'exec', 'eval', 'compile', 'super', 'property', 'staticmethod', 'classmethod',
+            
+            # CRITICAL: Missing built-ins that were causing false positives
+            'bytes', 'bytearray', 'memoryview', 'complex', 'slice', 'object',
+            'frozenset', 'reversed', 'enumerate', 'zip', 'filter', 'map',
+            
+            # Exception types (often called as constructors)
+            'Exception', 'BaseException', 'ValueError', 'TypeError', 'KeyError',
+            'IndexError', 'AttributeError', 'NameError', 'ImportError', 'ModuleNotFoundError',
+            'RuntimeError', 'NotImplementedError', 'StopIteration', 'GeneratorExit',
+            'SystemExit', 'KeyboardInterrupt', 'OSError', 'IOError', 'FileNotFoundError',
             
             # functools, itertools, collections
             'partial', 'reduce', 'wraps', 'lru_cache', 'cached_property', 'singledispatch',
