@@ -1,0 +1,158 @@
+{
+  "codebase_summary": {
+    "total_files": 4,
+    "total_functions": 6,
+    "total_classes": 3,
+    "total_symbols": 9,
+    "total_imports": 0,
+    "total_external_modules": 0
+  },
+  "entry_points": {
+    "main_functions": [
+      "main"
+    ],
+    "cli_commands": [
+      "cli_command"
+    ],
+    "exported_symbols": [],
+    "top_level_classes": [
+      "AdminService",
+      "LegacyHandler"
+    ],
+    "web_routes": [
+      "get_users"
+    ],
+    "decorated_functions": [
+      "cli_command",
+      "get_users"
+    ]
+  },
+  "dead_code": {
+    "dead_functions": [
+      "deprecated_function",
+      "helper_function",
+      "unused_utility"
+    ],
+    "dead_classes": [
+      "UserService"
+    ],
+    "dead_variables": [],
+    "potentially_dead": [
+      "LegacyHandler"
+    ]
+  },
+  "unused_parameters": {
+    "helper_function": [
+      "unused_param"
+    ]
+  },
+  "import_analysis": {
+    "unused_imports": [
+      {
+        "file": "utils.py",
+        "import": "unused_module"
+      },
+      {
+        "file": "legacy.py",
+        "import": "deprecated_lib"
+      }
+    ],
+    "circular_imports": [
+      {
+        "files": [
+          "module_a.py",
+          "module_b.py"
+        ],
+        "cycle_length": 2
+      }
+    ],
+    "unresolved_imports": [
+      {
+        "file": "main.py",
+        "import": "missing_module"
+      }
+    ],
+    "import_statistics": {
+      "total_imports": 0,
+      "total_files": 4,
+      "unused_count": 2,
+      "circular_count": 1,
+      "unresolved_count": 1
+    }
+  },
+  "call_site_analysis": {
+    "argument_mismatches": [
+      {
+        "caller": "main",
+        "called_function": "helper_function",
+        "expected_args": 2,
+        "provided_args": 1
+      }
+    ],
+    "undefined_calls": [
+      {
+        "caller": "api_handler",
+        "call_name": "undefined_function"
+      }
+    ],
+    "call_statistics": {
+      "total_calls": 4,
+      "resolved_calls": 3,
+      "unresolved_calls": 1,
+      "resolution_rate": 0.75
+    }
+  },
+  "symbol_statistics": {
+    "main": {
+      "usage_count": 1,
+      "symbol_type": "Function",
+      "file": "mock_file.py"
+    },
+    "cli_command": {
+      "usage_count": 1,
+      "symbol_type": "Function",
+      "file": "mock_file.py"
+    },
+    "get_users": {
+      "usage_count": 1,
+      "symbol_type": "Function",
+      "file": "mock_file.py"
+    },
+    "helper_function": {
+      "usage_count": 1,
+      "symbol_type": "Function",
+      "file": "mock_file.py"
+    },
+    "deprecated_function": {
+      "usage_count": 0,
+      "symbol_type": "Function",
+      "file": "mock_file.py"
+    },
+    "unused_utility": {
+      "usage_count": 0,
+      "symbol_type": "Function",
+      "file": "mock_file.py"
+    },
+    "UserService": {
+      "usage_count": 1,
+      "symbol_type": "Class",
+      "file": "mock_file.py"
+    },
+    "AdminService": {
+      "usage_count": 1,
+      "symbol_type": "Class",
+      "file": "mock_file.py"
+    },
+    "LegacyHandler": {
+      "usage_count": 0,
+      "symbol_type": "Class",
+      "file": "mock_file.py"
+    }
+  },
+  "recommendations": [
+    "Consider removing 3 dead functions and 1 dead classes",
+    "Remove 2 unused imports to clean up dependencies",
+    "Resolve 1 circular import cycles to improve architecture",
+    "Review 1 functions with unused parameters"
+  ]
+}
