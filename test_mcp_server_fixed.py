@@ -1,62 +1,17 @@
-# MCP Orchestrator
-
-This repository contains a Python implementation of an MCP (Model Context Protocol) orchestrator. The orchestrator allows you to start MCP servers, create clients to interact with them, and call tools provided by the servers.
-
-## Overview
-
-The MCP Orchestrator consists of three main components:
-
-1. **MCPServer**: A class to manage an MCP server process.
-2. **MCPClient**: A class to interact with an MCP server.
-3. **MCPOrchestrator**: A class to orchestrate MCP servers and clients.
-
-## Usage
-
-### Basic Usage
-
-```python
-import asyncio
-from mcp_orchestrator import MCPOrchestrator
-
-async def main():
-    # Create an orchestrator
-    orchestrator = MCPOrchestrator()
-    
-    try:
-        # Start a server
-        await orchestrator.start_server("my-server", "python", ["my_mcp_server.py"])
-        
-        # Create a client
-        orchestrator.create_client("my-client", "my-server")
-        
-        # Initialize the client
-        result = await orchestrator.initialize_client("my-client")
-        print(f"Initialization result: {result}")
-        
-        # List the tools
-        tools = await orchestrator.list_tools("my-client")
-        print(f"Tools: {tools}")
-        
-        # Call a tool
-        result = await orchestrator.call_tool("my-client", "my-tool", {"arg1": "value1"})
-        print(f"Tool result: {result}")
-    
-    finally:
-        # Stop all servers
-        await orchestrator.stop_all_servers()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-### Creating a Custom MCP Server
-
-You can create a custom MCP server by implementing the JSON-RPC protocol. Here's a simple example:
-
-```python
+from mcp.server.fastmcp import FastMCP
 import json
 import sys
 
+# Create a FastMCP server
+mcp_server = FastMCP("test-mcp", instructions="Test MCP server")
+
+# Register a tool
+@mcp_server.tool()
+def hello_world():
+    """Say hello to the world."""
+    return "Hello, world!"
+
+# Handle JSON-RPC messages manually
 def handle_message(message):
     """Handle a JSON-RPC message."""
     try:
@@ -74,8 +29,8 @@ def handle_message(message):
                 "id": request.get("id"),
                 "result": {
                     "protocolVersion": "2025-06-18",
-                    "name": "my-mcp",
-                    "instructions": "My MCP server",
+                    "name": "test-mcp",
+                    "instructions": "Test MCP server",
                     "capabilities": {}
                 }
             }
@@ -87,9 +42,9 @@ def handle_message(message):
                 "result": {
                     "tools": [
                         {
-                            "name": "my-tool",
-                            "title": "My Tool",
-                            "description": "My tool description."
+                            "name": "hello_world",
+                            "title": "Hello World",
+                            "description": "Say hello to the world."
                         }
                     ]
                 }
@@ -97,12 +52,12 @@ def handle_message(message):
         elif method == "tools/call":
             # Call a tool
             tool_name = request.get("params", {}).get("name")
-            if tool_name == "my-tool":
+            if tool_name == "hello_world":
                 response = {
                     "jsonrpc": "2.0",
                     "id": request.get("id"),
                     "result": {
-                        "result": "My tool result!"
+                        "result": "Hello, world!"
                     }
                 }
             else:
@@ -150,7 +105,7 @@ def handle_message(message):
 
 # Start the server
 if __name__ == "__main__":
-    print("Starting MCP server...", file=sys.stderr)
+    print("Starting MCP server with manual JSON-RPC handling...", file=sys.stderr)
     
     # Read messages from stdin
     headers = {}
@@ -185,38 +140,4 @@ if __name__ == "__main__":
             print(f"Error: {e}", file=sys.stderr)
             import traceback
             traceback.print_exc(file=sys.stderr)
-```
-
-## API Reference
-
-### MCPServer
-
-- `__init__(command, args)`: Initialize the server.
-- `start()`: Start the server process.
-- `stop()`: Stop the server process.
-- `send_message(message)`: Send a message to the server.
-- `read_message()`: Read a message from the server.
-
-### MCPClient
-
-- `__init__(server)`: Initialize the client.
-- `next_request_id()`: Get the next request ID.
-- `initialize()`: Initialize the client.
-- `list_tools()`: List the available tools.
-- `call_tool(name, arguments=None)`: Call a tool.
-
-### MCPOrchestrator
-
-- `__init__()`: Initialize the orchestrator.
-- `start_server(name, command, args)`: Start a server.
-- `stop_server(name)`: Stop a server.
-- `stop_all_servers()`: Stop all servers.
-- `create_client(name, server_name)`: Create a client.
-- `initialize_client(name)`: Initialize a client.
-- `list_tools(name)`: List the tools for a client.
-- `call_tool(name, tool_name, arguments=None)`: Call a tool for a client.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
