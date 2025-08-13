@@ -1,74 +1,42 @@
-codegen-frontend/.cache/*
-codegen-frontend/build/*
-**/node_modules
-codegen-frontend/api/index.js
-codegen-frontend/api/index.js.map
-codegen-frontend/api/*.json
-codegen-frontend/app/styles/app.css
-**/.run/*
-test-repos
-**/__pycache__/
-.pytest_cache/
-.mypy_cache
-*/.diffs/**
-**.profiles/**
-*.pyc
-*.pyd
-.DS_Store
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 *.so
-*.sw[op]
-.idea/*
-codegen-frontend/scripts/.ipynb_checkpoints/*
-.python-version
-**/.vscode/settings.json
-**/.vscode/launch.json
-**/.ipynb_checkpoints/**
-supabase/config.toml
-**/.env.local
-**/alembic/versions/*
-**/scripts/scratch/*
-**/scripts/*.md
-**/scripts/Personal/*
-**/infrastructure/aws_infra/.terraform/*
-pyrightconfig.json
-Edwards Scratchpad.ipynb
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Allowing .env files to exist in repository, but not allowing updates
-.env
+# Virtual Environment
+venv/
+ENV/
+env/
 
-# Required folders
-extra-repos/
-pr-logs/#
-
-# Remove local files
-**/.coverage
-alembic_versions_backup
+# IDE
 .idea/
-**/*.egg-info/**
-**/*.c
-**/build/
-**/dist/
-**/*.so
-**/.diffs/**
-**/.coverage*
-**/coverage.xml
-.nvmrc
-**/.virtual_documents
-/.nvmrc
-**/build/test-results/test/TEST*.xml
-src/graph_sitter/__init__.py
-src/**/*.html
-.ccache/
-uv-*.tar.gz
-.venv
-graph-sitter-types/out/**
-graph-sitter-types/typings/**
-coverage.json
-tests/integration/verified_codemods/codemod_data/repo_commits.json
-.benchmarks/*
+.vscode/
+*.swp
+*.swo
 
-# SWE Bench results
-results.*.json
-codegen-examples/examples/swebench_agent_run/results/*
-codegen-examples/examples/swebench_agent_run/predictions/*
-codegen-examples/examples/swebench_agent_run/logs/*
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
