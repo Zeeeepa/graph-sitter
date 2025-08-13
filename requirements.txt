@@ -1,0 +1,4 @@
+fastmcp>=2.11.3
+requests>=2.25.0
+httpx>=0.23.0
+
