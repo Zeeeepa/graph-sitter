@@ -22,7 +22,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 
 # Graph-sitter imports
 from graph_sitter import Codebase
-from graph_sitter.configs import CodebaseConfig
+from graph_sitter.configs.models.codebase import CodebaseConfig
 from graph_sitter.codebase.codebase_analysis import (
     get_codebase_summary, 
     get_file_summary, 
