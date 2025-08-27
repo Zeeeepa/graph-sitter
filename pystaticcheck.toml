@@ -1,0 +1,232 @@
+# PyStaticCheck Configuration File
+# This file configures the comprehensive Python static code checker
+
+# General settings
+[general]
+# Exclude patterns (comma-separated glob patterns)
+exclude = [
+    "**/__pycache__/**",
+    "**/venv/**",
+    "**/.venv/**",
+    "**/node_modules/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/.git/**",
+    "**/.github/**",
+    "**/.pytest_cache/**",
+    "**/.mypy_cache/**",
+    "**/.ruff_cache/**",
+]
+
+# Tool-specific settings
+[tools]
+# Enable/disable specific tools
+ruff = true
+mypy = true
+pylint = true
+bandit = true
+pyright = true
+vulture = true
+dodgy = true
+pydocstyle = true
+pyroma = true
+codespell = true
+biome = false  # Disabled by default as it requires Node.js
+
+# Ruff configuration
+[tools.ruff]
+# Inherit from project's ruff.toml if it exists
+inherit_project_config = true
+# Additional rules to enable
+additional_rules = [
+    "F",   # Pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "C90", # mccabe
+    "N",   # pep8-naming
+    "D",   # pydocstyle
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "T10", # flake8-debugger
+    "EM",  # flake8-errmsg
+    "ISC", # flake8-implicit-str-concat
+    "G",   # flake8-logging-format
+    "PIE", # flake8-pie
+    "T20", # flake8-print
+    "PT",  # flake8-pytest-style
+    "Q",   # flake8-quotes
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "ARG", # flake8-unused-arguments
+    "ERA", # eradicate
+    "PL",  # Pylint
+    "TRY", # tryceratops
+    "RUF", # Ruff-specific rules
+]
+line_length = 100
+target_version = "py312"
+
+# MyPy configuration
+[tools.mypy]
+# Inherit from project's mypy.ini if it exists
+inherit_project_config = true
+# Additional settings
+python_version = "3.12"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+
+# Pylint configuration
+[tools.pylint]
+# Inherit from project's pylintrc if it exists
+inherit_project_config = true
+# Additional settings
+disable = [
+    "missing-docstring",
+    "invalid-name",
+    "too-many-arguments",
+    "too-many-instance-attributes",
+    "too-few-public-methods",
+    "too-many-locals",
+    "too-many-branches",
+    "too-many-statements",
+    "too-many-return-statements",
+    "too-many-public-methods",
+    "fixme",
+]
+enable = [
+    "unused-import",
+    "unused-variable",
+    "unused-argument",
+    "undefined-variable",
+    "undefined-loop-variable",
+    "used-before-assignment",
+    "redefined-builtin",
+    "redefined-outer-name",
+    "no-self-use",
+    "no-else-return",
+    "no-else-raise",
+    "no-else-break",
+    "no-else-continue",
+]
+max-line-length = 100
+max-args = 8
+max-attributes = 12
+max-locals = 20
+max-branches = 12
+max-statements = 50
+max-returns = 8
+max-public-methods = 20
+max-nested-blocks = 5
+max-complexity = 15
+
+# Bandit configuration
+[tools.bandit]
+# Inherit from project's .bandit if it exists
+inherit_project_config = true
+# Additional settings
+exclude_dirs = [
+    "tests",
+    "test",
+    "examples",
+    "docs",
+]
+skips = [
+    "B101", # assert statements
+    "B104", # hardcoded bind
+    "B110", # try-except-pass
+    "B311", # random
+]
+
+# Pyright configuration
+[tools.pyright]
+# Inherit from project's pyrightconfig.json if it exists
+inherit_project_config = true
+# Additional settings
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
+reportUnknownVariableType = false
+reportUnknownLambdaType = false
+reportUntypedFunctionDecorator = false
+
+# Vulture configuration
+[tools.vulture]
+# Inherit from project's .vulture if it exists
+inherit_project_config = true
+# Additional settings
+min_confidence = 80
+exclude = [
+    "tests/",
+    "test_*.py",
+    "conftest.py",
+]
+
+# Dodgy configuration
+[tools.dodgy]
+# Additional settings
+ignore_paths = [
+    ".venv",
+    "venv",
+    "env",
+    "node_modules",
+    "tests",
+]
+
+# Pydocstyle configuration
+[tools.pydocstyle]
+# Inherit from project's .pydocstyle if it exists
+inherit_project_config = true
+# Additional settings
+convention = "google"
+add_ignore = [
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D203", # 1 blank line required before class docstring
+    "D213", # Multi-line docstring summary should start at the second line
+]
+
+# Pyroma configuration
+[tools.pyroma]
+# Additional settings
+min_score = 9
+
+# Codespell configuration
+[tools.codespell]
+# Inherit from project's .codespellrc if it exists
+inherit_project_config = true
+# Additional settings
+ignore_words = [
+    "crate",
+    "datas",
+    "hist",
+    "iff",
+    "nd",
+    "nin",
+    "ot",
+    "te",
+    "upto",
+]
+skip = "*.json,*.lock,*.min.js,*.svg,*.css"
+
+# Biome configuration
+[tools.biome]
+# Inherit from project's biome.json if it exists
+inherit_project_config = true
+# Additional settings
+formatter_enabled = true
+linter_enabled = true
+organize_imports_enabled = true
