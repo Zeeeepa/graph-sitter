@@ -1,4 +1,6 @@
+import asyncio
 import logging
+from typing import Any, Dict, List
 
 from lsprotocol import types
 
@@ -6,6 +8,7 @@ import graph_sitter
 from graph_sitter.codebase.diff_lite import ChangeType, DiffLite
 from graph_sitter.core.file import SourceFile
 from graph_sitter.extensions.lsp.definition import go_to_definition
+from graph_sitter.extensions.lsp.diagnostics import DiagnosticsManager
 from graph_sitter.extensions.lsp.document_symbol import get_document_symbol
 from graph_sitter.extensions.lsp.protocol import GraphSitterLanguageServerProtocol
 from graph_sitter.extensions.lsp.range import get_range
@@ -16,6 +19,21 @@ from graph_sitter.shared.logging.get_logger import get_logger
 version = getattr(graph_sitter, "__version__", "v0.1")
 server = GraphSitterLanguageServer("codegen", version, protocol_cls=GraphSitterLanguageServerProtocol)
 logger = get_logger(__name__)
+
+
+@server.feature(types.INITIALIZED)
+async def initialized(server: GraphSitterLanguageServer, params: types.InitializedParams) -> None:
+    """Handle initialized notification."""
+    logger.info("Server initialized")
+    
+    # Initialize diagnostics manager
+    if server.codebase:
+        server.diagnostics_manager = DiagnosticsManager(str(server.codebase.root_path))
+        success = await server.diagnostics_manager.initialize()
+        if success:
+            logger.info("Diagnostics manager initialized successfully")
+        else:
+            logger.warning("Failed to initialize diagnostics manager")
 
 
 @server.feature(types.TEXT_DOCUMENT_DID_OPEN)
@@ -68,6 +86,41 @@ def did_close(server: GraphSitterLanguageServer, params: types.DidCloseTextDocum
     # We can perform any additional cleanup here if needed
     path = get_path(params.text_document.uri)
     server.io.close_file(path)
+
+
+@server.feature(types.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+def publish_diagnostics(server: GraphSitterLanguageServer, params: types.PublishDiagnosticsParams) -> None:
+    """Handle diagnostics notification."""
+    logger.info(f"Received diagnostics for {params.uri}")
+    
+    # Store diagnostics in the diagnostics manager if available
+    if server.diagnostics_manager:
+        server.diagnostics_manager.add_lsp_diagnostics(params.uri, params.diagnostics)
+
+
+@server.command("graph_sitter.getAllDiagnostics")
+async def get_all_diagnostics(server: GraphSitterLanguageServer, *args: Any) -> Dict[str, List[types.Diagnostic]]:
+    """Get all diagnostics from both normal LSP and SolidLSP."""
+    if server.diagnostics_manager:
+        return await server.diagnostics_manager.get_all_diagnostics()
+    return {}
+
+
+@server.command("graph_sitter.analyzeFile")
+async def analyze_file(server: GraphSitterLanguageServer, uri: str) -> List[types.Diagnostic]:
+    """Analyze a file for diagnostics using SolidLSP."""
+    if server.diagnostics_manager:
+        path = get_path(uri)
+        return await server.diagnostics_manager.analyze_file(str(path))
+    return []
+
+
+@server.command("graph_sitter.analyzeCodebase")
+async def analyze_codebase(server: GraphSitterLanguageServer, *args: Any) -> Dict[str, List[types.Diagnostic]]:
+    """Analyze the entire codebase for diagnostics using SolidLSP."""
+    if server.diagnostics_manager:
+        return await server.diagnostics_manager.analyze_codebase()
+    return {}
 
 
 @server.feature(

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from lsprotocol import types
 from lsprotocol.types import Position, Range
@@ -25,6 +25,7 @@ class GraphSitterLanguageServer(LanguageServer):
     io: LSPIO | None
     progress_manager: LSPProgress | None
     actions: dict[str, CodeAction]
+    diagnostics_manager: Optional["DiagnosticsManager"] = None
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

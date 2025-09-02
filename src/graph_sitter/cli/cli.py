@@ -6,7 +6,7 @@ from graph_sitter.cli.commands.config.main import config_command
 from graph_sitter.cli.commands.create.main import create_command
 from graph_sitter.cli.commands.init.main import init_command
 from graph_sitter.cli.commands.list.main import list_command
-from graph_sitter.cli.commands.lsp.lsp import lsp_command
+from graph_sitter.cli.commands.lsp.lsp import lsp
 from graph_sitter.cli.commands.notebook.main import notebook_command
 from graph_sitter.cli.commands.reset.main import reset_command
 from graph_sitter.cli.commands.run.main import run_command
@@ -35,7 +35,7 @@ main.add_command(notebook_command)
 main.add_command(reset_command)
 main.add_command(update_command)
 main.add_command(config_command)
-main.add_command(lsp_command)
+main.add_command(lsp)
 main.add_command(start_command)
 
 
