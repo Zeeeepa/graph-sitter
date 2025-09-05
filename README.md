@@ -25,7 +25,7 @@
 [Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Graph-sitter builds a complete graph connecting
 # functions, classes, imports and their relationships
