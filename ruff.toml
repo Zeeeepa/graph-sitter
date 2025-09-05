@@ -1,6 +1,6 @@
 line-length = 200
 exclude = [
-  "src/codegen/shared/compilation/function_imports.py",
+  "src/contexten/shared/compilation/function_imports.py",
   'docs/**',
   "src/graph_sitter/__init__.py",
 ]
