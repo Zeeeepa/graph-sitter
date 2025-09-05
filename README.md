@@ -1,117 +1,96 @@
-<br />
+# MCP Server Validation
 
-<p align="center">
-  <a href="https://graph-sitter.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+This repository contains tools for validating Model Context Protocol (MCP) servers.
 
-<h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
-</h2>
+## Overview
 
-<div align="center">
+The Model Context Protocol (MCP) is a protocol for communication between AI models and tools. This repository provides tools for validating that an MCP server is running correctly.
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-graph-sitter.com-purple?style=flat-square)](https://graph-sitter.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/graph-sitter/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+## Tools
 
-</div>
+### MCP Server Validator
 
-<br />
+The `mcp_server_validator.py` script validates that an MCP server is running correctly by:
+1. Starting a simple MCP server
+2. Testing the server with various requests
+3. Reporting the results
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+#### Usage
 
-```python
-from codegen import Codebase
-
-# Graph-sitter builds a complete graph connecting
-# functions, classes, imports and their relationships
-codebase = Codebase("./")
-
-# Work with code without dealing with syntax trees or parsing
-for function in codebase.functions:
-    # Comprehensive static analysis for references, dependencies, etc.
-    if not function.usages:
-        # Auto-handles references and imports to maintain correctness
-        function.move_to_file("deprecated.py")
+```bash
+./mcp_server_validator.py [--port PORT]
 ```
 
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+#### Options
 
-## Installation and Usage
+- `--port PORT`: Port to run the server on (default: 8001)
 
-We support
+#### Example
 
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
-
-```
-# Install inside existing project
-uv pip install graph-sitter
-
-# Install global CLI
-uv tool install graph-sitter --python 3.13
-
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
+```bash
+./mcp_server_validator.py
 ```
 
-## Usage
-
-See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
-
+Output:
 ```
-from graph_sitter import Codebase
+================================================================================
+MCP SERVER VALIDATION RESULTS
+================================================================================
+
+✅ MCP server started successfully
+
+Endpoint Tests:
+  - base: 404
+  - sse: 400
+  - json: 406
+
+Server Output:
+  stdout: 219 characters
+  stderr: 2817 characters
+
+Conclusion:
+  The MCP server is running correctly and implementing the MCP protocol.
+  To interact with it, you need to use the correct headers and request format.
+
+================================================================================
 ```
 
-## Troubleshooting
+### Test MCP Server
 
-Having issues? Here are some common problems and their solutions:
+The `test_mcp_server.py` script is a simple MCP server that can be used for testing. It provides:
+- A simple tool: `hello_world`
+- A simple resource: `system://greeting`
 
-- **I'm hitting an UV error related to `[[ packages ]]`**: This means you're likely using an outdated version of UV. Try updating to the latest version with: `uv self update`.
-- **I'm hitting an error about `No module named 'codegen.sdk.extensions.utils'`**: The compiled cython extensions are out of sync. Update them with `uv sync --reinstall-package codegen`.
-- **I'm hitting a `RecursionError: maximum recursion depth exceeded` error while parsing my codebase**: If you are using python 3.12, try upgrading to 3.13. If you are already on 3.13, try upping the recursion limit with `sys.setrecursionlimit(10000)`.
+#### Usage
 
-If you run into additional issues not listed here, please [join our slack community](https://community.codegen.com) and we'll help you out!
+```bash
+python test_mcp_server.py
+```
 
-## Resources
+### Test MCP Client
 
-- [Docs](https://graph-sitter.com)
-- [Getting Started](https://graph-sitter.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+The `test_mcp_client_lib.py` script is a simple MCP client that can be used to test the server. It uses the `httpx` library to send requests to the server.
 
-## Why Graph-sitter?
+#### Usage
 
-Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
+```bash
+python test_mcp_client_lib.py
+```
 
-We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+## Requirements
 
-- **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
+- Python 3.6+
+- FastMCP
+- Requests
+- HTTPX
 
-- **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
+## Installation
 
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+```bash
+pip install fastmcp requests httpx
+```
 
-## Contributing
+## License
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Enterprise
-
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
