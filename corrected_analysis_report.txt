@@ -1,0 +1,619 @@
+================================================================================
+🎯 CORRECTED COMPREHENSIVE ARCHITECTURAL ANALYSIS
+Graph-Sitter Codebase - Fixed Analysis
+================================================================================
+
+📊 CORRECTED SUMMARY
+------------------------------
+🚨 Total Missing Function Errors: 217
+📁 Files with Errors: 57
+🔧 Unique Missing Functions: 67
+
+🌳 PROJECT TREE WITH ACTUAL ISSUES
+----------------------------------------
+graph-sitter/
+├── 📁 dashboard/ [👉 Major: 9]
+│   ├── 🐍 app.py [🔍 Minor: 1]
+│   ├── 📁 backend/ [👉 Major: 7]
+│   │   └── 🐍 backend_core.py [⚠️ Critical: 7]
+│   └── 📁 api/ [🔍 Minor: 1]
+│       └── 🐍 backend_server.py [🔍 Minor: 1]
+├── 📁 src/ [⚠️ Critical: 204]
+│   ├── 📁 graph_sitter/ [⚠️ Critical: 200]
+│   │   ├── 📁 core/ [⚠️ Critical: 16]
+│   │   │   ├── 📁 plugins/ [🔍 Minor: 2]
+│   │   │   │   └── 🐍 axios.py [🔍 Minor: 2]
+│   │   │   ├── 📁 utils/ [🔍 Minor: 1]
+│   │   │   │   └── 🐍 cache_utils.py [🔍 Minor: 1]
+│   │   │   ├── 📁 autocommit/ [👉 Major: 7]
+│   │   │   │   ├── 🐍 decorators.py [👉 Major: 4]
+│   │   │   │   └── 🐍 manager.py [👉 Major: 3]
+│   │   │   ├── 📁 interfaces/ [🔍 Minor: 4]
+│   │   │   │   └── 🐍 inherits.py [👉 Major: 4]
+│   │   │   └── 🐍 parser.py [🔍 Minor: 2]
+│   │   ├── 📁 extensions/ [⚠️ Critical: 149]
+│   │   │   ├── 📁 events/ [⚠️ Critical: 10]
+│   │   │   │   ├── 📁 modal/ [🔍 Minor: 2]
+│   │   │   │   │   └── 🐍 base.py [🔍 Minor: 2]
+│   │   │   │   ├── 🐍 github.py [👉 Major: 4]
+│   │   │   │   ├── 🐍 linear.py [🔍 Minor: 2]
+│   │   │   │   └── 🐍 slack.py [🔍 Minor: 2]
+│   │   │   ├── 📁 tools/ [⚠️ Critical: 122]
+│   │   │   │   ├── 🐍 bash.py [⚠️ Critical: 5]
+│   │   │   │   ├── 📁 github/ [⚠️ Critical: 18]
+│   │   │   │   │   ├── 🐍 checkout_pr.py [👉 Major: 3]
+│   │   │   │   │   ├── 🐍 create_pr.py [👉 Major: 4]
+│   │   │   │   │   ├── 🐍 create_pr_comment.py [🔍 Minor: 2]
+│   │   │   │   │   ├── 🐍 create_pr_review_comment.py [🔍 Minor: 2]
+│   │   │   │   │   ├── 🐍 search.py [🔍 Minor: 2]
+│   │   │   │   │   ├── 🐍 view_pr.py [🔍 Minor: 2]
+│   │   │   │   │   └── 🐍 view_pr_checks.py [👉 Major: 3]
+│   │   │   │   ├── 🐍 commit.py [🔍 Minor: 2]
+│   │   │   │   ├── 🐍 create_file.py [👉 Major: 4]
+│   │   │   │   ├── 🐍 delete_file.py [👉 Major: 4]
+│   │   │   │   ├── 🐍 edit_file.py [🔍 Minor: 2]
+│   │   │   │   ├── 🐍 global_replacement_edit.py [🔍 Minor: 2]
+│   │   │   │   ├── 📁 linear/ [⚠️ Critical: 35]
+│   │   │   │   │   └── 🐍 linear.py [⚠️ Critical: 35]
+│   │   │   │   ├── 🐍 list_directory.py [⚠️ Critical: 7]
+│   │   │   │   ├── 🐍 move_symbol.py [⚠️ Critical: 5]
+│   │   │   │   ├── 🐍 reflection.py [⚠️ Critical: 5]
+│   │   │   │   ├── 🐍 relace_edit.py [👉 Major: 4]
+│   │   │   │   ├── 🐍 rename_file.py [👉 Major: 4]
+│   │   │   │   ├── 🐍 replacement_edit.py [👉 Major: 3]
+│   │   │   │   ├── 🐍 reveal_symbol.py [⚠️ Critical: 6]
+│   │   │   │   ├── 🐍 search.py [⚠️ Critical: 8]
+│   │   │   │   ├── 🐍 search_files_by_name.py [🔍 Minor: 2]
+│   │   │   │   ├── 🐍 semantic_edit.py [👉 Major: 4]
+│   │   │   │   └── 🐍 semantic_search.py [🔍 Minor: 2]
+│   │   │   ├── 📁 graph/ [👉 Major: 9]
+│   │   │   │   └── 🐍 create_graph.py [⚠️ Critical: 9]
+│   │   │   ├── 📁 langchain/ [👉 Major: 6]
+│   │   │   │   └── 🐍 graph.py [⚠️ Critical: 6]
+│   │   │   └── 📁 lsp/ [🔍 Minor: 2]
+│   │   │       └── 🐍 progress.py [🔍 Minor: 2]
+│   │   ├── 📁 cli/ [🔍 Minor: 3]
+│   │   │   ├── 📁 sdk/ [🔍 Minor: 1]
+│   │   │   │   └── 🐍 decorator.py [🔍 Minor: 1]
+│   │   │   └── 📁 commands/ [🔍 Minor: 2]
+│   │   │       └── 📁 config/ [🔍 Minor: 2]
+│   │   │           └── 🐍 main.py [🔍 Minor: 2]
+│   │   ├── 📁 shared/ [🔍 Minor: 3]
+│   │   │   ├── 📁 performance/ [🔍 Minor: 2]
+│   │   │   │   └── 🐍 stopwatch_utils.py [🔍 Minor: 2]
+│   │   │   └── 📁 compilation/ [🔍 Minor: 1]
+│   │   │       └── 🐍 string_to_code.py [🔍 Minor: 1]
+│   │   ├── 📁 python/ [👉 Major: 5]
+│   │   │   └── 📁 symbol_groups/ [👉 Major: 5]
+│   │   │       └── 🐍 comment_group.py [⚠️ Critical: 5]
+│   │   ├── 📁 typescript/ [🔍 Minor: 2]
+│   │   │   └── 🐍 file.py [🔍 Minor: 2]
+│   │   ├── 📁 runner/ [🔍 Minor: 2]
+│   │   │   └── 📁 sandbox/ [🔍 Minor: 2]
+│   │   │       └── 🐍 middlewares.py [🔍 Minor: 2]
+│   │   ├── 📁 codebase/ [👉 Major: 5]
+│   │   │   └── 🐍 transaction_manager.py [⚠️ Critical: 5]
+│   │   ├── 🐍 tree_sitter_parser.py [🔍 Minor: 2]
+│   │   ├── 🐍 utils.py [🔍 Minor: 2]
+│   │   ├── 📁 gscli/ [🔍 Minor: 4]
+│   │   │   └── 📁 backend/ [🔍 Minor: 4]
+│   │   │       └── 🐍 typestub_utils.py [👉 Major: 4]
+│   │   ├── 📁 code_generation/ [🔍 Minor: 3]
+│   │   │   └── 📁 doc_utils/ [🔍 Minor: 3]
+│   │   │       └── 🐍 utils.py [👉 Major: 3]
+│   │   └── 📁 output/ [🔍 Minor: 4]
+│   │       └── 🐍 utils.py [👉 Major: 4]
+│   └── 📁 codemods/ [🔍 Minor: 4]
+│       └── 📁 canonical/ [🔍 Minor: 4]
+│           └── 📁 update_optional_type_annotations/ [🔍 Minor: 4]
+│               └── 🐍 update_optional_type_annotations.py [👉 Major: 4]
+├── 🐍 fix_imports_codemod.py [🔍 Minor: 2]
+└── 📁 sample_dir/ [🔍 Minor: 2]
+    └── 🐍 sample_missing_function.py [🔍 Minor: 2]
+
+🎯 REAL ENTRY POINTS (Based on Usage, Not Complexity)
+-------------------------------------------------------
+ 1. 🟩 get_codebase_session (Function)
+     📁 get_session
+     👥 Used by 1720 components - Used by 1720 components
+ 2. 🟩 ProgrammingLanguage (Class)
+     📁 programming_language
+     👥 Used by 1543 components - Used by 1543 components
+ 3. 🟩 Codebase (Class)
+     📁 codebase
+     👥 Used by 599 components - Core framework class
+ 4. 🟩 noapidoc (Function)
+     📁 docs
+     👥 Used by 515 components - Used by 515 components
+ 5. 🟩 CodebaseContext (Class)
+     📁 codebase_context
+     👥 Used by 343 components - Core framework class
+ 6. 🟩 Editable (Class)
+     📁 editable
+     👥 Used by 266 components - Core framework class
+ 7. 🟩 skill_impl (Function)
+     📁 decorators
+     👥 Used by 261 components - Used by 261 components
+ 8. 🟩 SkillTestCase (Class)
+     📁 skill_test
+     👥 Used by 260 components - Used by 260 components
+ 9. 🟩 Expression (Class)
+     📁 expression
+     👥 Used by 240 components - Used by 240 components
+10. 🟩 Skill (Class)
+     📁 skill
+     👥 Used by 225 components - Used by 225 components
+11. 🟩 skill (Function)
+     📁 decorators
+     👥 Used by 218 components - Used by 218 components
+12. 🟩 get_codebase_graph_session (Function)
+     📁 get_session
+     👥 Used by 210 components - Used by 210 components
+13. 🟩 apidoc (Function)
+     📁 docs
+     👥 Used by 186 components - Used by 186 components
+14. 🟩 Symbol (Class)
+     📁 symbol
+     👥 Used by 184 components - Used by 184 components
+15. 🟩 FunctionCall (Class)
+     📁 function_call
+     👥 Used by 178 components - Used by 178 components
+
+🔴 COMPLETE MISSING FUNCTION ANALYSIS
+---------------------------------------------
+
+1. 🔴 MISSING FUNCTION: 'func' (9 occurrences)
+   📁 src/graph_sitter/core/utils/cache_utils.py:41
+   📁 src/graph_sitter/cli/sdk/decorator.py:43
+   📁 src/graph_sitter/extensions/events/github.py:65
+   📁 src/graph_sitter/extensions/events/github.py:71
+   📁 src/graph_sitter/extensions/events/linear.py:47
+   📁 src/graph_sitter/extensions/events/slack.py:70
+   📁 src/graph_sitter/shared/performance/stopwatch_utils.py:17
+   📁 src/graph_sitter/shared/performance/stopwatch_utils.py:32
+   📁 src/graph_sitter/shared/compilation/string_to_code.py:66
+   💡 Fix: Define function 'func' or import it from appropriate module
+
+2. 🔴 MISSING FUNCTION: 'format_header' (6 occurrences)
+   📁 src/graph_sitter/extensions/langchain/graph.py:167
+   📁 src/graph_sitter/extensions/langchain/graph.py:176
+   📁 src/graph_sitter/extensions/langchain/graph.py:180
+   📁 src/graph_sitter/extensions/langchain/graph.py:182
+   📁 src/graph_sitter/extensions/langchain/graph.py:184
+   📁 src/graph_sitter/extensions/langchain/graph.py:186
+   💡 Fix: Define function 'format_header' or import it from appropriate module
+
+3. 🔴 MISSING FUNCTION: 'RunBashCommandObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/bash.py:132
+   📁 src/graph_sitter/extensions/tools/bash.py:148
+   📁 src/graph_sitter/extensions/tools/bash.py:163
+   📁 src/graph_sitter/extensions/tools/bash.py:171
+   📁 src/graph_sitter/extensions/tools/bash.py:179
+   💡 Fix: Define function 'RunBashCommandObservation' or import it from appropriate module
+
+4. 🔴 MISSING FUNCTION: 'LinearIssueObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:96
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:103
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:111
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:119
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:127
+   💡 Fix: Define function 'LinearIssueObservation' or import it from appropriate module
+
+5. 🔴 MISSING FUNCTION: 'LinearCommentsObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:139
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:146
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:154
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:162
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:170
+   💡 Fix: Define function 'LinearCommentsObservation' or import it from appropriate module
+
+6. 🔴 MISSING FUNCTION: 'LinearCommentObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:182
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:189
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:197
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:205
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:213
+   💡 Fix: Define function 'LinearCommentObservation' or import it from appropriate module
+
+7. 🔴 MISSING FUNCTION: 'LinearWebhookObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:232
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:240
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:249
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:258
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:267
+   💡 Fix: Define function 'LinearWebhookObservation' or import it from appropriate module
+
+8. 🔴 MISSING FUNCTION: 'LinearSearchObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:280
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:287
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:295
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:303
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:311
+   💡 Fix: Define function 'LinearSearchObservation' or import it from appropriate module
+
+9. 🔴 MISSING FUNCTION: 'LinearCreateIssueObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:323
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:331
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:340
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:349
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:358
+   💡 Fix: Define function 'LinearCreateIssueObservation' or import it from appropriate module
+
+10. 🔴 MISSING FUNCTION: 'LinearTeamsObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:371
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:377
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:384
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:391
+   📁 src/graph_sitter/extensions/tools/linear/linear.py:398
+   💡 Fix: Define function 'LinearTeamsObservation' or import it from appropriate module
+
+11. 🔴 MISSING FUNCTION: 'MoveSymbolObservation' (5 occurrences)
+   📁 src/graph_sitter/extensions/tools/move_symbol.py:61
+   📁 src/graph_sitter/extensions/tools/move_symbol.py:86
+   📁 src/graph_sitter/extensions/tools/move_symbol.py:110
+   📁 src/graph_sitter/extensions/tools/move_symbol.py:124
+   📁 src/graph_sitter/extensions/tools/move_symbol.py:133
+   💡 Fix: Define function 'MoveSymbolObservation' or import it from appropriate module
+
+12. 🔴 MISSING FUNCTION: 'CodeIssue' (4 occurrences)
+   📁 dashboard/backend/backend_core.py:488
+   📁 dashboard/backend/backend_core.py:507
+   📁 dashboard/backend/backend_core.py:526
+   📁 dashboard/backend/backend_core.py:547
+   💡 Fix: Define function 'CodeIssue' or import it from appropriate module
+
+13. 🔴 MISSING FUNCTION: 'CreateFileObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/create_file.py:41
+   📁 src/graph_sitter/extensions/tools/create_file.py:48
+   📁 src/graph_sitter/extensions/tools/create_file.py:69
+   📁 src/graph_sitter/extensions/tools/create_file.py:76
+   💡 Fix: Define function 'CreateFileObservation' or import it from appropriate module
+
+14. 🔴 MISSING FUNCTION: 'create_function_node' (4 occurrences)
+   📁 src/graph_sitter/extensions/graph/create_graph.py:66
+   📁 src/graph_sitter/extensions/graph/create_graph.py:72
+   📁 src/graph_sitter/extensions/graph/create_graph.py:86
+   📁 src/graph_sitter/extensions/graph/create_graph.py:126
+   💡 Fix: Define function 'create_function_node' or import it from appropriate module
+
+15. 🔴 MISSING FUNCTION: 'CreatePRObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/github/create_pr.py:41
+   📁 src/graph_sitter/extensions/tools/github/create_pr.py:62
+   📁 src/graph_sitter/extensions/tools/github/create_pr.py:70
+   📁 src/graph_sitter/extensions/tools/github/create_pr.py:78
+   💡 Fix: Define function 'CreatePRObservation' or import it from appropriate module
+
+16. 🔴 MISSING FUNCTION: 'wrapped' (4 occurrences)
+   📁 src/graph_sitter/core/autocommit/decorators.py:53
+   📁 src/graph_sitter/core/autocommit/decorators.py:73
+   📁 src/graph_sitter/core/autocommit/decorators.py:92
+   📁 src/graph_sitter/core/autocommit/decorators.py:112
+   💡 Fix: Define function 'wrapped' or import it from appropriate module
+
+17. 🔴 MISSING FUNCTION: 'DeleteFileObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/delete_file.py:35
+   📁 src/graph_sitter/extensions/tools/delete_file.py:42
+   📁 src/graph_sitter/extensions/tools/delete_file.py:51
+   📁 src/graph_sitter/extensions/tools/delete_file.py:56
+   💡 Fix: Define function 'DeleteFileObservation' or import it from appropriate module
+
+18. 🔴 MISSING FUNCTION: 'handler' (4 occurrences)
+   📁 src/graph_sitter/extensions/events/github.py:120
+   📁 src/graph_sitter/extensions/events/github.py:134
+   📁 src/graph_sitter/extensions/events/linear.py:78
+   📁 src/graph_sitter/extensions/events/slack.py:47
+   💡 Fix: Define function 'handler' or import it from appropriate module
+
+19. 🔴 MISSING FUNCTION: 'traverse_classes' (4 occurrences)
+   📁 src/graph_sitter/core/interfaces/inherits.py:50
+   📁 src/graph_sitter/core/interfaces/inherits.py:52
+   📁 src/graph_sitter/core/interfaces/inherits.py:71
+   📁 src/graph_sitter/core/interfaces/inherits.py:73
+   💡 Fix: Define function 'traverse_classes' or import it from appropriate module
+
+20. 🔴 MISSING FUNCTION: 'RelaceEditObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/relace_edit.py:155
+   📁 src/graph_sitter/extensions/tools/relace_edit.py:170
+   📁 src/graph_sitter/extensions/tools/relace_edit.py:182
+   📁 src/graph_sitter/extensions/tools/relace_edit.py:195
+   💡 Fix: Define function 'RelaceEditObservation' or import it from appropriate module
+
+21. 🔴 MISSING FUNCTION: 'RenameFileObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/rename_file.py:43
+   📁 src/graph_sitter/extensions/tools/rename_file.py:58
+   📁 src/graph_sitter/extensions/tools/rename_file.py:76
+   📁 src/graph_sitter/extensions/tools/rename_file.py:83
+   💡 Fix: Define function 'RenameFileObservation' or import it from appropriate module
+
+22. 🔴 MISSING FUNCTION: 'RevealSymbolObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/reveal_symbol.py:284
+   📁 src/graph_sitter/extensions/tools/reveal_symbol.py:289
+   📁 src/graph_sitter/extensions/tools/reveal_symbol.py:297
+   📁 src/graph_sitter/extensions/tools/reveal_symbol.py:308
+   💡 Fix: Define function 'RevealSymbolObservation' or import it from appropriate module
+
+23. 🔴 MISSING FUNCTION: 'SearchObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/search.py:223
+   📁 src/graph_sitter/extensions/tools/search.py:299
+   📁 src/graph_sitter/extensions/tools/search.py:337
+   📁 src/graph_sitter/extensions/tools/search.py:400
+   💡 Fix: Define function 'SearchObservation' or import it from appropriate module
+
+24. 🔴 MISSING FUNCTION: 'SemanticEditObservation' (4 occurrences)
+   📁 src/graph_sitter/extensions/tools/semantic_edit.py:279
+   📁 src/graph_sitter/extensions/tools/semantic_edit.py:297
+   📁 src/graph_sitter/extensions/tools/semantic_edit.py:307
+   📁 src/graph_sitter/extensions/tools/semantic_edit.py:313
+   💡 Fix: Define function 'SemanticEditObservation' or import it from appropriate module
+
+25. 🔴 MISSING FUNCTION: 'traverse' (4 occurrences)
+   📁 src/graph_sitter/tree_sitter_parser.py:90
+   📁 src/graph_sitter/tree_sitter_parser.py:92
+   📁 src/graph_sitter/utils.py:164
+   📁 src/graph_sitter/utils.py:166
+   💡 Fix: Define function 'traverse' or import it from appropriate module
+
+26. 🔴 MISSING FUNCTION: 'cond' (4 occurrences)
+   📁 src/graph_sitter/gscli/backend/typestub_utils.py:32
+   📁 src/graph_sitter/gscli/backend/typestub_utils.py:41
+   📁 src/graph_sitter/gscli/backend/typestub_utils.py:66
+   📁 src/graph_sitter/gscli/backend/typestub_utils.py:71
+   💡 Fix: Define function 'cond' or import it from appropriate module
+
+27. 🔴 MISSING FUNCTION: 'update_type_annotation' (4 occurrences)
+   📁 src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py:35
+   📁 src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py:37
+   📁 src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py:39
+   📁 src/codemods/canonical/update_optional_type_annotations/update_optional_type_annotations.py:51
+   💡 Fix: Define function 'update_type_annotation' or import it from appropriate module
+
+28. 🔴 MISSING FUNCTION: 'sort_dict' (4 occurrences)
+   📁 src/graph_sitter/output/utils.py:73
+   📁 src/graph_sitter/output/utils.py:77
+   📁 src/graph_sitter/output/utils.py:79
+   📁 src/graph_sitter/output/utils.py:83
+   💡 Fix: Define function 'sort_dict' or import it from appropriate module
+
+29. 🔴 MISSING FUNCTION: 'AnalysisResponse' (3 occurrences)
+   📁 dashboard/app.py:317
+   📁 dashboard/backend/backend_core.py:368
+   📁 dashboard/api/backend_server.py:377
+   💡 Fix: Define function 'AnalysisResponse' or import it from appropriate module
+
+30. 🔴 MISSING FUNCTION: 'CheckoutPRObservation' (3 occurrences)
+   📁 src/graph_sitter/extensions/tools/github/checkout_pr.py:32
+   📁 src/graph_sitter/extensions/tools/github/checkout_pr.py:38
+   📁 src/graph_sitter/extensions/tools/github/checkout_pr.py:43
+   💡 Fix: Define function 'CheckoutPRObservation' or import it from appropriate module
+
+31. 🔴 MISSING FUNCTION: 'parse_google_block' (3 occurrences)
+   📁 src/graph_sitter/python/symbol_groups/comment_group.py:165
+   📁 src/graph_sitter/python/symbol_groups/comment_group.py:167
+   📁 src/graph_sitter/python/symbol_groups/comment_group.py:169
+   💡 Fix: Define function 'parse_google_block' or import it from appropriate module
+
+32. 🔴 MISSING FUNCTION: 'create_class_node' (3 occurrences)
+   📁 src/graph_sitter/extensions/graph/create_graph.py:75
+   📁 src/graph_sitter/extensions/graph/create_graph.py:81
+   📁 src/graph_sitter/extensions/graph/create_graph.py:115
+   💡 Fix: Define function 'create_class_node' or import it from appropriate module
+
+33. 🔴 MISSING FUNCTION: 'DirectoryInfo' (3 occurrences)
+   📁 src/graph_sitter/extensions/tools/list_directory.py:179
+   📁 src/graph_sitter/extensions/tools/list_directory.py:207
+   📁 src/graph_sitter/extensions/tools/list_directory.py:218
+   💡 Fix: Define function 'DirectoryInfo' or import it from appropriate module
+
+34. 🔴 MISSING FUNCTION: 'PendingFiles' (3 occurrences)
+   📁 src/graph_sitter/core/autocommit/manager.py:272
+   📁 src/graph_sitter/core/autocommit/manager.py:275
+   📁 src/graph_sitter/core/autocommit/manager.py:278
+   💡 Fix: Define function 'PendingFiles' or import it from appropriate module
+
+35. 🔴 MISSING FUNCTION: 'ReflectionSection' (3 occurrences)
+   📁 src/graph_sitter/extensions/tools/reflection.py:111
+   📁 src/graph_sitter/extensions/tools/reflection.py:122
+   📁 src/graph_sitter/extensions/tools/reflection.py:205
+   💡 Fix: Define function 'ReflectionSection' or import it from appropriate module
+
+36. 🔴 MISSING FUNCTION: 'ReplacementEditObservation' (3 occurrences)
+   📁 src/graph_sitter/extensions/tools/replacement_edit.py:149
+   📁 src/graph_sitter/extensions/tools/replacement_edit.py:165
+   📁 src/graph_sitter/extensions/tools/replacement_edit.py:181
+   💡 Fix: Define function 'ReplacementEditObservation' or import it from appropriate module
+
+37. 🔴 MISSING FUNCTION: 'TransactionError' (3 occurrences)
+   📁 src/graph_sitter/codebase/transaction_manager.py:239
+   📁 src/graph_sitter/codebase/transaction_manager.py:249
+   📁 src/graph_sitter/codebase/transaction_manager.py:269
+   💡 Fix: Define function 'TransactionError' or import it from appropriate module
+
+38. 🔴 MISSING FUNCTION: 'process_parts' (3 occurrences)
+   📁 src/graph_sitter/code_generation/doc_utils/utils.py:357
+   📁 src/graph_sitter/code_generation/doc_utils/utils.py:376
+   📁 src/graph_sitter/code_generation/doc_utils/utils.py:381
+   💡 Fix: Define function 'process_parts' or import it from appropriate module
+
+39. 🔴 MISSING FUNCTION: 'PRCheckObservation' (3 occurrences)
+   📁 src/graph_sitter/extensions/tools/github/view_pr_checks.py:36
+   📁 src/graph_sitter/extensions/tools/github/view_pr_checks.py:43
+   📁 src/graph_sitter/extensions/tools/github/view_pr_checks.py:50
+   💡 Fix: Define function 'PRCheckObservation' or import it from appropriate module
+
+40. 🔴 MISSING FUNCTION: 'resolve_http' (2 occurrences)
+   📁 src/graph_sitter/core/plugins/axios.py:30
+   📁 src/graph_sitter/core/plugins/axios.py:41
+   💡 Fix: Define function 'resolve_http' or import it from appropriate module
+
+41. 🔴 MISSING FUNCTION: 'convert_to_tree' (2 occurrences)
+   📁 dashboard/backend/backend_core.py:715
+   📁 dashboard/backend/backend_core.py:738
+   💡 Fix: Define function 'convert_to_tree' or import it from appropriate module
+
+42. 🔴 MISSING FUNCTION: 'Klass' (2 occurrences)
+   📁 src/graph_sitter/extensions/events/modal/base.py:54
+   📁 src/graph_sitter/extensions/events/modal/base.py:97
+   💡 Fix: Define function 'Klass' or import it from appropriate module
+
+43. 🔴 MISSING FUNCTION: 'merge_codebase_docstring' (2 occurrences)
+   📁 src/graph_sitter/python/symbol_groups/comment_group.py:185
+   📁 src/graph_sitter/python/symbol_groups/comment_group.py:217
+   💡 Fix: Define function 'merge_codebase_docstring' or import it from appropriate module
+
+44. 🔴 MISSING FUNCTION: 'CommitObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/commit.py:33
+   📁 src/graph_sitter/extensions/tools/commit.py:38
+   💡 Fix: Define function 'CommitObservation' or import it from appropriate module
+
+45. 🔴 MISSING FUNCTION: 'create_function_call_node' (2 occurrences)
+   📁 src/graph_sitter/extensions/graph/create_graph.py:95
+   📁 src/graph_sitter/extensions/graph/create_graph.py:128
+   💡 Fix: Define function 'create_function_call_node' or import it from appropriate module
+
+46. 🔴 MISSING FUNCTION: 'PRCommentObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/github/create_pr_comment.py:35
+   📁 src/graph_sitter/extensions/tools/github/create_pr_comment.py:41
+   💡 Fix: Define function 'PRCommentObservation' or import it from appropriate module
+
+47. 🔴 MISSING FUNCTION: 'PRReviewCommentObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/github/create_pr_review_comment.py:61
+   📁 src/graph_sitter/extensions/tools/github/create_pr_review_comment.py:70
+   💡 Fix: Define function 'PRReviewCommentObservation' or import it from appropriate module
+
+48. 🔴 MISSING FUNCTION: 'EditFileObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/edit_file.py:64
+   📁 src/graph_sitter/extensions/tools/edit_file.py:78
+   💡 Fix: Define function 'EditFileObservation' or import it from appropriate module
+
+49. 🔴 MISSING FUNCTION: 'condition' (2 occurrences)
+   📁 src/graph_sitter/typescript/file.py:316
+   📁 src/graph_sitter/typescript/file.py:342
+   💡 Fix: Define function 'condition' or import it from appropriate module
+
+50. 🔴 MISSING FUNCTION: 'ImportAnalyzer' (2 occurrences)
+   📁 fix_imports_codemod.py:257
+   📁 fix_imports_codemod.py:271
+   💡 Fix: Define function 'ImportAnalyzer' or import it from appropriate module
+
+51. 🔴 MISSING FUNCTION: 'GlobalReplacementEditObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/global_replacement_edit.py:99
+   📁 src/graph_sitter/extensions/tools/global_replacement_edit.py:126
+   💡 Fix: Define function 'GlobalReplacementEditObservation' or import it from appropriate module
+
+52. 🔴 MISSING FUNCTION: 'build_tree' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/list_directory.py:88
+   📁 src/graph_sitter/extensions/tools/list_directory.py:105
+   💡 Fix: Define function 'build_tree' or import it from appropriate module
+
+53. 🔴 MISSING FUNCTION: 'ListDirectoryObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/list_directory.py:176
+   📁 src/graph_sitter/extensions/tools/list_directory.py:229
+   💡 Fix: Define function 'ListDirectoryObservation' or import it from appropriate module
+
+54. 🔴 MISSING FUNCTION: 'flatten_dict' (2 occurrences)
+   📁 src/graph_sitter/cli/commands/config/main.py:30
+   📁 src/graph_sitter/cli/commands/config/main.py:36
+   💡 Fix: Define function 'flatten_dict' or import it from appropriate module
+
+55. 🔴 MISSING FUNCTION: 'call_next' (2 occurrences)
+   📁 src/graph_sitter/runner/sandbox/middlewares.py:33
+   📁 src/graph_sitter/runner/sandbox/middlewares.py:39
+   💡 Fix: Define function 'call_next' or import it from appropriate module
+
+56. 🔴 MISSING FUNCTION: 'expr_type' (2 occurrences)
+   📁 src/graph_sitter/core/parser.py:76
+   📁 src/graph_sitter/core/parser.py:93
+   💡 Fix: Define function 'expr_type' or import it from appropriate module
+
+57. 🔴 MISSING FUNCTION: 'LSPTask' (2 occurrences)
+   📁 src/graph_sitter/extensions/lsp/progress.py:48
+   📁 src/graph_sitter/extensions/lsp/progress.py:54
+   💡 Fix: Define function 'LSPTask' or import it from appropriate module
+
+58. 🔴 MISSING FUNCTION: 'ReflectionObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/reflection.py:207
+   📁 src/graph_sitter/extensions/tools/reflection.py:217
+   💡 Fix: Define function 'ReflectionObservation' or import it from appropriate module
+
+59. 🔴 MISSING FUNCTION: 'under_token_limit' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/reveal_symbol.py:206
+   📁 src/graph_sitter/extensions/tools/reveal_symbol.py:230
+   💡 Fix: Define function 'under_token_limit' or import it from appropriate module
+
+60. 🔴 MISSING FUNCTION: 'undefined_function_name' (2 occurrences)
+   📁 sample_dir/sample_missing_function.py:2
+   📁 sample_dir/sample_missing_function.py:3
+   💡 Fix: Define function 'undefined_function_name' or import it from appropriate module
+
+61. 🔴 MISSING FUNCTION: 'SearchResultObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/github/search.py:65
+   📁 src/graph_sitter/extensions/tools/github/search.py:72
+   💡 Fix: Define function 'SearchResultObservation' or import it from appropriate module
+
+62. 🔴 MISSING FUNCTION: 'SearchMatch' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/search.py:265
+   📁 src/graph_sitter/extensions/tools/search.py:371
+   💡 Fix: Define function 'SearchMatch' or import it from appropriate module
+
+63. 🔴 MISSING FUNCTION: 'SearchFileResult' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/search.py:280
+   📁 src/graph_sitter/extensions/tools/search.py:381
+   💡 Fix: Define function 'SearchFileResult' or import it from appropriate module
+
+64. 🔴 MISSING FUNCTION: 'SearchFilesByNameResultObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/search_files_by_name.py:103
+   📁 src/graph_sitter/extensions/tools/search_files_by_name.py:114
+   💡 Fix: Define function 'SearchFilesByNameResultObservation' or import it from appropriate module
+
+65. 🔴 MISSING FUNCTION: 'SemanticSearchObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/semantic_search.py:110
+   📁 src/graph_sitter/extensions/tools/semantic_search.py:117
+   💡 Fix: Define function 'SemanticSearchObservation' or import it from appropriate module
+
+66. 🔴 MISSING FUNCTION: 'break_down' (2 occurrences)
+   📁 src/graph_sitter/codebase/transaction_manager.py:236
+   📁 src/graph_sitter/codebase/transaction_manager.py:247
+   💡 Fix: Define function 'break_down' or import it from appropriate module
+
+67. 🔴 MISSING FUNCTION: 'ViewPRObservation' (2 occurrences)
+   📁 src/graph_sitter/extensions/tools/github/view_pr.py:41
+   📁 src/graph_sitter/extensions/tools/github/view_pr.py:50
+   💡 Fix: Define function 'ViewPRObservation' or import it from appropriate module
+
+📊 MOST PROBLEMATIC FILES
+------------------------------
+ 1. 📁 src/graph_sitter/extensions/tools/linear/linear.py: 35 errors
+ 2. 📁 src/graph_sitter/extensions/graph/create_graph.py: 9 errors
+ 3. 📁 src/graph_sitter/extensions/tools/search.py: 8 errors
+ 4. 📁 dashboard/backend/backend_core.py: 7 errors
+ 5. 📁 src/graph_sitter/extensions/tools/list_directory.py: 7 errors
+ 6. 📁 src/graph_sitter/extensions/langchain/graph.py: 6 errors
+ 7. 📁 src/graph_sitter/extensions/tools/reveal_symbol.py: 6 errors
+ 8. 📁 src/graph_sitter/extensions/tools/bash.py: 5 errors
+ 9. 📁 src/graph_sitter/python/symbol_groups/comment_group.py: 5 errors
+10. 📁 src/graph_sitter/extensions/tools/move_symbol.py: 5 errors
+
+🎯 PRIORITIZED ACTION PLAN
+------------------------------
+1. 🔥 IMMEDIATE - Fix most frequent missing functions:
+   • Define 'func' (9 occurrences)
+   • Define 'format_header' (6 occurrences)
+   • Define 'RunBashCommandObservation' (5 occurrences)
+   • Define 'LinearIssueObservation' (5 occurrences)
+   • Define 'LinearCommentsObservation' (5 occurrences)
+
+2. 📁 HIGH PRIORITY - Fix most problematic files:
+   • Fix src/graph_sitter/extensions/tools/linear/linear.py (35 errors)
+   • Fix src/graph_sitter/extensions/graph/create_graph.py (9 errors)
+   • Fix src/graph_sitter/extensions/tools/search.py (8 errors)
+   • Fix dashboard/backend/backend_core.py (7 errors)
+   • Fix src/graph_sitter/extensions/tools/list_directory.py (7 errors)
+
+3. 🔍 SYSTEMATIC - Review and fix remaining functions:
+   • Review import statements
+   • Check for typos in function names
+   • Verify module dependencies
+
+================================================================================
+✨ Corrected Analysis Complete! ✨
+================================================================================
