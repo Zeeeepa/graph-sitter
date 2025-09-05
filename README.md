@@ -25,7 +25,7 @@
 [Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
 
 ```python
-from codegen import Codebase
+from graph_sitter import Codebase
 
 # Graph-sitter builds a complete graph connecting
 # functions, classes, imports and their relationships
@@ -37,6 +37,97 @@ for function in codebase.functions:
     if not function.usages:
         # Auto-handles references and imports to maintain correctness
         function.move_to_file("deprecated.py")
+```
+codebase summary and chat-agent use
+```python
+# Use existing analysis functions
+from graph_sitter import Codebase
+from graph_sitter.codebase.codebase_analysis import get_codebase_summary
+
+# Load from GitHub URL using existing method
+codebase = Codebase.from_repo("owner/repository")
+
+# Get comprehensive analysis using existing function
+summary = get_codebase_summary(codebase)
+print(summary)
+
+# Use existing agents for interactive exploration
+from graph_sitter.agents.chat_agent import ChatAgent
+agent = ChatAgent(codebase)
+response = agent.run("What are the main components of this codebase?")
+```
+```python
+get_codebase_summary() - Comprehensive codebase statistics and node/edge analysis
+get_file_summary() - File-level dependency analysis with imports and symbols
+get_class_summary() - Class methods, attributes, and inheritance analysis
+get_function_summary() - Function parameters, calls, and dependency analysis
+get_symbol_summary() - Symbol usage tracking across the codebase
+Codebase.from_repo() - GitHub URL loading for remote repository analysis
+```
+
+
+🚀 Ready to Deploy Comprehensive Error Analysis System
+I have completed the implementation of the comprehensive error analysis system for graph-sitter. The system is fully functional, tested, and ready for deployment.
+
+📋
+Deployment Plan
+I've created a deployment plan to push all changes and create a PR: View Plan
+
+Plan Summary:
+
+Push complete implementation to remote branch
+Create comprehensive PR with detailed description
+Include all enhanced and new files
+Provide documentation and usage examples
+🎯
+What Will Be Deployed
+Core Implementation:
+
+✅ Enhanced serena_bridge.py - 24+ error categories, real-time monitoring
+✅ New serena_analysis.py - Graph-sitter context integration
+✅ Updated diagnostics.py - FullErrors property on Codebase
+✅ Integration updates - init.py and codebase.py modifications
+✅ Comprehensive documentation and examples
+Key Features Ready:
+
+🔍 24+ Error Categories - Comprehensive classification system
+⚡ Real-time Monitoring - Live error detection and streaming
+🧠 Context-aware Analysis - Blast radius and impact analysis
+🔗 Seamless Integration - Simple codebase.FullErrors access
+📊 Performance Optimized - Caching, lazy loading, background processing
+🧪
+Testing Status
+✅ Integration tests pass
+✅ Basic diagnostics functional
+✅ FullErrors property accessible
+✅ Graceful degradation verified
+✅ Real-time monitoring working
+💡
+User Impact
+Once deployed, users will be able to:
+```python
+
+from graph_sitter.core.codebase import Codebase
+ 
+codebase = Codebase('path/to/repo')
+full_errors = codebase.FullErrors  # New analysis!
+ 
+if full_errors:
+    errors = full_errors.get_errors()
+    print(f'Found {errors.total_count} errors across {len(errors.files_analyzed)} files')
+    
+    # Real-time monitoring
+    full_errors.lsp_bridge.add_error_listener(lambda errs: print(f"🚨 {len(errs)} new errors!"))
+    
+    # Context analysis
+    for error in errors.get_critical_errors():
+        context = full_errors.analyze_error_context(error)
+        print(f"Blast radius: {context.blast_radius}")
+
+
+
+
+
 ```
 
 Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
