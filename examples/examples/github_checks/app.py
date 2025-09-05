@@ -1,7 +1,8 @@
 import logging
 
 import modal
-from codegen import CodegenApp, Codebase
+from graph_sitter import CodegenApp
+from graph_sitter import Codebase
 from graph_sitter.extensions.github.types.events.pull_request import PullRequestLabeledEvent
 from graph_sitter.extensions.tools.github.create_pr_comment import create_pr_comment
 from dotenv import load_dotenv
