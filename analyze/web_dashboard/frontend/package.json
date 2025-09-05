@@ -1,0 +1,81 @@
+{
+  "name": "web-eval-agent-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive Web Dashboard for Web-Eval-Agent with Codebase Visualization",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0",
+    "@tanstack/react-query": "^4.24.0",
+    "zustand": "^4.3.2",
+    "axios": "^1.3.0",
+    "@monaco-editor/react": "^4.4.6",
+    "monaco-editor": "^0.36.1",
+    "@headlessui/react": "^1.7.7",
+    "@heroicons/react": "^2.0.16",
+    "clsx": "^1.2.1",
+    "tailwindcss": "^3.2.4",
+    "framer-motion": "^9.0.0",
+    "react-hot-toast": "^2.4.0",
+    "react-split": "^2.0.14",
+    "react-virtualized-auto-sizer": "^1.0.20",
+    "react-window": "^1.8.8",
+    "react-window-infinite-loader": "^1.0.8",
+    "fuse.js": "^6.6.2",
+    "highlight.js": "^11.7.0",
+    "prismjs": "^1.29.0",
+    "react-syntax-highlighter": "^15.5.0",
+    "d3": "^7.8.2",
+    "vis-network": "^9.1.6",
+    "vis-data": "^7.1.6",
+    "react-flow-renderer": "^10.3.17",
+    "dagre": "^0.8.5",
+    "lodash": "^4.17.21",
+    "date-fns": "^2.29.3",
+    "react-use": "^17.4.0",
+    "react-intersection-observer": "^9.4.1",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-resizable-panels": "^0.0.42",
+    "cmdk": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "@types/node": "^18.13.0",
+    "@types/lodash": "^4.14.191",
+    "@types/d3": "^7.4.0",
+    "@types/dagre": "^0.7.48",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.13",
+    "eslint": "^8.33.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss": "^8.4.21",
+    "typescript": "^4.9.4",
+    "vite": "^4.1.0",
+    "vite-plugin-monaco-editor": "^1.1.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
