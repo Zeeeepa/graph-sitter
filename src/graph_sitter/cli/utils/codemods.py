@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from graph_sitter.cli.api.webapp_routes import generate_webapp_url
 from graph_sitter.cli.utils.schema import CodemodConfig
 
 
@@ -11,6 +12,10 @@ class Codemod:
     name: str
     path: Path
     config: CodemodConfig | None = None
+
+    def get_url(self) -> str:
+        """Get the URL for this codemod."""
+        return generate_webapp_url(path=f"codemod/{self.config.codemod_id}")
 
     def relative_path(self) -> str:
         """Get the relative path to this codemod."""
