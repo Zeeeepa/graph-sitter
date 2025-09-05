@@ -1,5 +1,5 @@
-import codegen
-from codegen.sdk.core.codebase import PyCodebaseType
+import graph_sitter
+from graph_sitter.core.codebase import PyCodebaseType
 
 
 @codegen.function("update-loggers")
@@ -15,4 +15,4 @@ def run(codebase: PyCodebaseType) -> None:
         if (logger := file.get_global_var("logger")) and logger.value.source == "logging.getLogger(__name__)":
             print(f"Updating logger in {file.filepath}")
             logger.set_value("get_logger(__name__)")
-            file.add_import_from_import_string("\nfrom codegen.shared.logging.get_logger import get_logger")
+            file.add_import_from_import_string("\nfrom graph_sitter.shared.logging.get_logger import get_logger")
