@@ -1,117 +1,95 @@
-<br />
+# Graph-sitter MCP Server
 
-<p align="center">
-  <a href="https://graph-sitter.com">
-    <img src="https://i.imgur.com/6RF9W0z.jpeg" />
-  </a>
-</p>
+This repository contains a Model Context Protocol (MCP) server implementation for graph-sitter, allowing AI agents to interact with the graph-sitter codebase analysis tools.
 
-<h2 align="center">
-  Scriptable interface to a powerful, multi-lingual language server.
-</h2>
+## Overview
 
-<div align="center">
+The MCP (Model Context Protocol) is a standardized protocol for AI agents to interact with external tools and resources. This implementation provides a simple MCP server that exposes graph-sitter functionality to AI agents.
 
-[![PyPI](https://img.shields.io/badge/PyPi-codegen-gray?style=flat-square&color=blue)](https://pypi.org/project/codegen/)
-[![Documentation](https://img.shields.io/badge/Docs-graph-sitter.com-purple?style=flat-square)](https://graph-sitter.com)
-[![Slack Community](https://img.shields.io/badge/Slack-Join-4A154B?logo=slack&style=flat-square)](https://community.codegen.com)
-[![License](https://img.shields.io/badge/Code%20License-Apache%202.0-gray?&color=gray)](https://github.com/codegen-sh/graph-sitter/tree/develop?tab=Apache-2.0-1-ov-file)
-[![Follow on X](https://img.shields.io/twitter/follow/codegen?style=social)](https://x.com/codegen)
+## Files
 
-</div>
+- `final_mcp_server.py`: A complete MCP server implementation with support for tools and resources
+- `final_mcp_client.py`: A client implementation to interact with the MCP server
+- `debug_mcp_server.py`: A debug version of the MCP server with detailed logging
+- `debug_mcp_client.py`: A debug client for testing the MCP server
+- `test_mcp_server.py`: A minimal MCP server for testing
+- `simple_mcp_client.py`: A simple client implementation
+- `minimal_mcp_client.py`: A minimal client implementation
+- `mcp_direct_client.py`: A client using the MCP module directly
+- `complete_mcp_client.py`: A more complete client implementation
 
-<br />
+## Features
 
-[Graph-sitter](https://graph-sitter.com) is a python library for manipulating codebases.
+The MCP server provides the following features:
 
-```python
-from codegen import Codebase
+- Tool execution: Execute graph-sitter tools like code parsing and analysis
+- Resource access: Access resources like configuration and documentation
+- JSON-RPC protocol: Standard JSON-RPC 2.0 protocol for communication
 
-# Graph-sitter builds a complete graph connecting
-# functions, classes, imports and their relationships
-codebase = Codebase("./")
+## Available Tools
 
-# Work with code without dealing with syntax trees or parsing
-for function in codebase.functions:
-    # Comprehensive static analysis for references, dependencies, etc.
-    if not function.usages:
-        # Auto-handles references and imports to maintain correctness
-        function.move_to_file("deprecated.py")
-```
+- `hello_world`: A simple hello world tool for testing
+- `parse_code`: Parse code using graph-sitter
 
-Write code that transforms code. Graph-sitter combines the parsing power of [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) with the graph algorithms of [rustworkx](https://github.com/Qiskit/rustworkx) to enable scriptable, multi-language code manipulation at scale.
+## Available Resources
 
-## Installation and Usage
-
-We support
-
-- Running Graph-sitter in Python 3.12 - 3.13 (recommended: Python 3.13+)
-- macOS and Linux
-  - macOS is supported
-  - Linux is supported on x86_64 and aarch64 with glibc 2.34+
-  - Windows is supported via WSL. See [here](https://graph-sitter.com/building-with-graph-sitter/codegen-with-wsl) for more details.
-- Python, Typescript, Javascript and React codebases
-
-```
-# Install inside existing project
-uv pip install graph-sitter
-
-# Install global CLI
-uv tool install graph-sitter --python 3.13
-
-# Create a codemod for a given repo
-cd path/to/repo
-gs init
-gs create test-function
-
-# Run the codemod
-gs run test-function
-
-# Create an isolated venv with codegen => open jupyter
-gs notebook
-```
+- `system://manifest`: Get the service configuration
 
 ## Usage
 
-See [Getting Started](https://graph-sitter.com/introduction/getting-started) for a full tutorial.
+### Running the Server
 
+```bash
+python final_mcp_server.py
 ```
-from graph_sitter import Codebase
+
+### Running the Client
+
+```bash
+python final_mcp_client.py
 ```
 
-## Troubleshooting
+## Protocol
 
-Having issues? Here are some common problems and their solutions:
+The MCP server implements the JSON-RPC 2.0 protocol with the following methods:
 
-- **I'm hitting an UV error related to `[[ packages ]]`**: This means you're likely using an outdated version of UV. Try updating to the latest version with: `uv self update`.
-- **I'm hitting an error about `No module named 'codegen.sdk.extensions.utils'`**: The compiled cython extensions are out of sync. Update them with `uv sync --reinstall-package codegen`.
-- **I'm hitting a `RecursionError: maximum recursion depth exceeded` error while parsing my codebase**: If you are using python 3.12, try upgrading to 3.13. If you are already on 3.13, try upping the recursion limit with `sys.setrecursionlimit(10000)`.
+- `initialize`: Initialize the client-server connection
+- `initialized`: Notification that initialization is complete
+- `mcp/listTools`: List available tools
+- `mcp/callTool`: Call a tool with parameters
+- `mcp/listResources`: List available resources
+- `mcp/readResource`: Read a resource
 
-If you run into additional issues not listed here, please [join our slack community](https://community.codegen.com) and we'll help you out!
+## Example
 
-## Resources
+Here's an example of calling the `hello_world` tool:
 
-- [Docs](https://graph-sitter.com)
-- [Getting Started](https://graph-sitter.com/introduction/getting-started)
-- [Contributing](CONTRIBUTING.md)
-- [Contact Us](https://codegen.com/contact)
+```python
+# Initialize the client
+client = MCPClient(server_process)
+await client.initialize()
 
-## Why Graph-sitter?
+# Call the hello_world tool
+result = await client.call_tool("hello_world", {"name": "Graph-sitter"})
+print(f"Result: {result.get('result')}")  # Output: "Hello, Graph-sitter!"
+```
 
-Software development is fundamentally programmatic. Refactoring a codebase, enforcing patterns, or analyzing control flow - these are all operations that can (and should) be expressed as programs themselves.
+## Integration with AI Agents
 
-We built Graph-sitter backwards from real-world refactors performed on enterprise codebases. Instead of starting with theoretical abstractions, we focused on creating APIs that match how developers actually think about code changes:
+This MCP server can be integrated with AI agents like Claude Code, Cursor, or other MCP-compatible agents to provide graph-sitter functionality for code analysis and manipulation.
 
-- **Natural mental model**: Write transforms that read like your thought process - "move this function", "rename this variable", "add this parameter". No more wrestling with ASTs or manual import management.
+## Development
 
-- **Battle-tested on complex codebases**: Handle Python, TypeScript, and React codebases with millions of lines of code.
+To extend the MCP server with additional tools, add new functions with the `@server.tool` decorator:
 
-- **Built for advanced intelligences**: As AI developers become more sophisticated, they need expressive yet precise tools to manipulate code. Graph-sitter provides a programmatic interface that both humans and AI can use to express complex transformations through code itself.
+```python
+@server.tool(name="new_tool", description="Description of the new tool")
+def new_tool(param1: Annotated[str, "Parameter description"]) -> str:
+    # Tool implementation
+    return "Result"
+```
 
-## Contributing
+## License
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for instructions on how to set up the development environment and submit contributions.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Enterprise
-
-For more information on enterprise engagements, please [contact us](https://codegen.com/contact) or [request a demo](https://codegen.com/request-demo).
