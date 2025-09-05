@@ -1,0 +1,36 @@
+# FastAPI and web framework dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Database dependencies
+sqlalchemy>=2.0.0
+asyncpg>=0.29.0
+alembic>=1.12.0
+
+# GitHub integration
+PyGithub>=1.59.0
+
+# HTTP client
+aiohttp>=3.9.0
+
+# Docker integration
+docker>=6.1.0
+
+# Core Python packages (usually included but explicit for clarity)
+pydantic>=2.4.0
+python-dotenv>=1.0.0
+
+# Additional dependencies found in the codebase
+psycopg2-binary>=2.9.0
+
+# Additional utilities
+requests>=2.31.0
+websockets>=11.0.0
+
+# Graph-sitter integration (assuming it's available locally)
+# Note: This should be installed from the parent directory with: pip install -e ../..
+
+# Development dependencies (optional)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
