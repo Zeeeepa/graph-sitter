@@ -88,6 +88,8 @@ OPTIONS:
     -t, --titles T1,T2...   Comma-separated titles (default: predefined titles)
     --no-auth               Don't use Chrome authentication
     --vertical              Use vertical layout instead of grid
+    --horizontal            Use horizontal 1x5 layout (all panes in one row)
+    --single                Use single 1x1 layout (one pane only)
     --debug                 Enable debug mode
     --clean                 Clean previous installations
 
@@ -103,6 +105,12 @@ EXAMPLES:
 
     # Vertical layout without authentication
     $0 --vertical --no-auth
+    
+    # Horizontal 1x5 layout
+    $0 --horizontal
+    
+    # Single pane layout
+    $0 --single -u "https://codegen.com/" -t "Codegen"
 
 FEATURES:
     ✅ Fully resizable panes with drag handles
@@ -172,6 +180,14 @@ parse_args() {
                 LAYOUT="vertical"
                 shift
                 ;;
+            --horizontal)
+                LAYOUT="horizontal"
+                shift
+                ;;
+            --single)
+                LAYOUT="single"
+                shift
+                ;;
             --debug)
                 DEBUG=true
                 shift
@@ -194,9 +210,17 @@ parse_args() {
         exit 1
     fi
 
-    if [[ ${#URLS[@]} -lt 2 || ${#URLS[@]} -gt 9 ]]; then
-        log_error "Number of URLs must be between 2 and 9 (got ${#URLS[@]})"
-        exit 1
+    # Allow single URL for single layout
+    if [[ $LAYOUT == "single" ]]; then
+        if [[ ${#URLS[@]} -ne 1 ]]; then
+            log_error "Single layout requires exactly 1 URL (got ${#URLS[@]})"
+            exit 1
+        fi
+    else
+        if [[ ${#URLS[@]} -lt 2 || ${#URLS[@]} -gt 9 ]]; then
+            log_error "Number of URLs must be between 2 and 9 (got ${#URLS[@]})"
+            exit 1
+        fi
     fi
 }
 
@@ -272,6 +296,49 @@ generate_css() {
             background: #cbd5e0; 
         }
 EOF
+    elif [[ $LAYOUT == "horizontal" ]]; then
+        # Horizontal 1x5 layout
+        cat << EOF
+        .container { 
+            display: flex;
+            flex-direction: row;
+            height: 100vh; 
+        }
+        
+        .pane { 
+            flex: 1;
+            display: flex; 
+            flex-direction: column; 
+            background: white;
+            min-width: 200px;
+        }
+        
+        .resizer { 
+            width: 3px;
+            background: #e2e8f0; 
+            cursor: col-resize; 
+            transition: background 0.2s;
+        }
+        
+        .resizer:hover { 
+            background: #cbd5e0; 
+        }
+EOF
+    elif [[ $LAYOUT == "single" ]]; then
+        # Single 1x1 layout
+        cat << EOF
+        .container { 
+            display: flex;
+            height: 100vh; 
+        }
+        
+        .pane { 
+            flex: 1;
+            display: flex; 
+            flex-direction: column; 
+            background: white;
+        }
+EOF
     else
         # Grid layout (default)
         local cols=$(( (num_panes + 1) / 2 ))
@@ -342,6 +409,54 @@ generate_javascript() {
             document.removeEventListener('mouseup', stopResize);
             document.body.style.cursor = 'default';
         }
+EOF
+    elif [[ $LAYOUT == "horizontal" ]]; then
+        cat << 'EOF'
+        let isResizing = false;
+        let currentResizer = null;
+        
+        document.querySelectorAll('.resizer').forEach(resizer => {
+            resizer.addEventListener('mousedown', initResize);
+        });
+        
+        function initResize(e) {
+            isResizing = true;
+            currentResizer = e.target;
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        }
+        
+        function doResize(e) {
+            if (!isResizing) return;
+            
+            const container = document.querySelector('.container');
+            const rect = container.getBoundingClientRect();
+            const percentage = ((e.clientX - rect.left) / rect.width) * 100;
+            
+            // Update flex-basis of previous pane
+            const panes = Array.from(container.children).filter(child => child.classList.contains('pane'));
+            const resizerIndex = Array.from(container.children).indexOf(currentResizer);
+            const paneIndex = Math.floor(resizerIndex / 2);
+            
+            if (panes[paneIndex]) {
+                panes[paneIndex].style.flexBasis = Math.max(10, Math.min(80, percentage)) + '%';
+            }
+        }
+        
+        function stopResize() {
+            isResizing = false;
+            currentResizer = null;
+            document.removeEventListener('mousemove', doResize);
+            document.removeEventListener('mouseup', stopResize);
+            document.body.style.cursor = 'default';
+        }
+EOF
+    elif [[ $LAYOUT == "single" ]]; then
+        cat << 'EOF'
+        // Single layout doesn't need resizing
+        console.log('Single layout loaded');
 EOF
     else
         cat << 'EOF'
@@ -468,7 +583,7 @@ EOF
 EOF
 
         # Add resizer between panes (except after last pane)
-        if [[ $i -lt $((${#URLS[@]} - 1)) && $LAYOUT == "vertical" ]]; then
+        if [[ $i -lt $((${#URLS[@]} - 1)) && ($LAYOUT == "vertical" || $LAYOUT == "horizontal") ]]; then
             echo '        <div class="resizer"></div>' >> "$TEMP_HTML"
         fi
     done

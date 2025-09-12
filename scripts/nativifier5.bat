@@ -123,6 +123,14 @@ if /i "%~1"=="--vertical" (
     set "LAYOUT=vertical"
     shift & goto :parse_args
 )
+if /i "%~1"=="--horizontal" (
+    set "LAYOUT=horizontal"
+    shift & goto :parse_args
+)
+if /i "%~1"=="--single" (
+    set "LAYOUT=single"
+    shift & goto :parse_args
+)
 if /i "%~1"=="--debug" (
     set "DEBUG=true"
     shift & goto :parse_args
@@ -170,6 +178,8 @@ echo     -u, --urls URL1,URL2... Comma-separated URLs (default: codegen.com page
 echo     -t, --titles T1,T2...   Comma-separated titles (default: predefined titles)
 echo     --no-auth               Don't use Chrome authentication
 echo     --vertical              Use vertical layout instead of grid
+echo     --horizontal            Use horizontal 1x5 layout (all panes in one row)
+echo     --single                Use single 1x1 layout (one pane only)
 echo     --debug                 Enable debug mode
 echo     --clean                 Clean previous installations
 echo.
@@ -185,6 +195,12 @@ echo     %~nx0 -w 1920 -H 1080 -n "MyApp"
 echo.
 echo     # Vertical layout without authentication
 echo     %~nx0 --vertical --no-auth
+echo.
+echo     # Horizontal 1x5 layout
+echo     %~nx0 --horizontal
+echo.
+echo     # Single pane layout
+echo     %~nx0 --single -u "https://codegen.com/" -t "Codegen"
 echo.
 echo FEATURES:
 echo     ✅ Fully resizable panes with drag handles
@@ -257,6 +273,10 @@ echo %PURPLE%[STEP]%NC% Creating HTML layout...
 REM Generate CSS based on layout
 if /i "%LAYOUT%"=="vertical" (
     set "CSS_LAYOUT=.container { display: flex; flex-direction: column; height: 100vh; } .pane { flex: 1; display: flex; flex-direction: column; background: white; min-height: 100px; } .resizer { height: 3px; background: #e2e8f0; cursor: row-resize; transition: background 0.2s; } .resizer:hover { background: #cbd5e0; }"
+) else if /i "%LAYOUT%"=="horizontal" (
+    set "CSS_LAYOUT=.container { display: flex; flex-direction: row; height: 100vh; } .pane { flex: 1; display: flex; flex-direction: column; background: white; min-width: 200px; } .resizer { width: 3px; background: #e2e8f0; cursor: col-resize; transition: background 0.2s; } .resizer:hover { background: #cbd5e0; }"
+) else if /i "%LAYOUT%"=="single" (
+    set "CSS_LAYOUT=.container { display: flex; height: 100vh; } .pane { flex: 1; display: flex; flex-direction: column; background: white; }"
 ) else (
     set /a cols=(%URL_COUNT% + 1) / 2
     set /a rows=(%URL_COUNT% + !cols! - 1) / !cols!
@@ -360,9 +380,13 @@ for /L %%i in (1,1,%URL_COUNT%) do (
     echo         ^</div^>
     ) >> "%TEMP_HTML%"
     
-    REM Add resizer for vertical layout (except after last pane)
-    if /i "%LAYOUT%"=="vertical" if %%i LSS %URL_COUNT% (
-        echo         ^<div class="resizer"^>^</div^> >> "%TEMP_HTML%"
+    REM Add resizer for vertical/horizontal layout (except after last pane)
+    if %%i LSS %URL_COUNT% (
+        if /i "%LAYOUT%"=="vertical" (
+            echo         ^<div class="resizer"^>^</div^> >> "%TEMP_HTML%"
+        ) else if /i "%LAYOUT%"=="horizontal" (
+            echo         ^<div class="resizer"^>^</div^> >> "%TEMP_HTML%"
+        )
     )
 )
 
@@ -411,6 +435,48 @@ echo             document.removeEventListener^('mousemove', doResize^);
 echo             document.removeEventListener^('mouseup', stopResize^);
 echo             document.body.style.cursor = 'default';
 echo         }
+) else if /i "%LAYOUT%"=="horizontal" (
+echo         let isResizing = false;
+echo         let currentResizer = null;
+echo         
+echo         document.querySelectorAll^('.resizer'^).forEach^(resizer =^> {
+echo             resizer.addEventListener^('mousedown', initResize^);
+echo         }^);
+echo         
+echo         function initResize^(e^) {
+echo             isResizing = true;
+echo             currentResizer = e.target;
+echo             document.addEventListener^('mousemove', doResize^);
+echo             document.addEventListener^('mouseup', stopResize^);
+echo             document.body.style.cursor = 'col-resize';
+echo             e.preventDefault^(^);
+echo         }
+echo         
+echo         function doResize^(e^) {
+echo             if ^(!isResizing^) return;
+echo             
+echo             const container = document.querySelector^('.container'^);
+echo             const rect = container.getBoundingClientRect^(^);
+echo             const percentage = ^(^(e.clientX - rect.left^) / rect.width^) * 100;
+echo             
+echo             const panes = Array.from^(container.children^).filter^(child =^> child.classList.contains^('pane'^)^);
+echo             const resizerIndex = Array.from^(container.children^).indexOf^(currentResizer^);
+echo             const paneIndex = Math.floor^(resizerIndex / 2^);
+echo             
+echo             if ^(panes[paneIndex]^) {
+echo                 panes[paneIndex].style.flexBasis = Math.max^(10, Math.min^(80, percentage^)^) + '%%';
+echo             }
+echo         }
+echo         
+echo         function stopResize^(^) {
+echo             isResizing = false;
+echo             currentResizer = null;
+echo             document.removeEventListener^('mousemove', doResize^);
+echo             document.removeEventListener^('mouseup', stopResize^);
+echo             document.body.style.cursor = 'default';
+echo         }
+) else if /i "%LAYOUT%"=="single" (
+echo         console.log^('Single layout loaded'^);
 ) else (
 echo         console.log^('Grid layout loaded with', document.querySelectorAll^('.pane'^).length, 'panes'^);
 )
