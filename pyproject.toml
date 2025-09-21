@@ -161,10 +161,13 @@ dev-dependencies = [
   "pytest-lsp>=1.0.0b1",
   "cython>=3.0.11",
   "pytest-split>=0.10.0",
+  # Local development packages
+  "serena-agent",
 ]
 
 [tool.uv.workspace]
 exclude = ["examples"]
+members = [".", "src/graph_sitter/extensions/serena"]
 
 
 [tool.cython-lint]
