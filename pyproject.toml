@@ -110,6 +110,8 @@ keywords = [
 ]
 [project.scripts]
 gs = "graph_sitter.cli.cli:main"
+autogenlib = "graph_sitter.extensions.autogenlib.cli:main"
+solidlsp = "graph_sitter.extensions.lsp.solidlsp.cli:main"
 
 [project.optional-dependencies]
 pink = ["codegen-sdk-pink>=0.1.0"]
