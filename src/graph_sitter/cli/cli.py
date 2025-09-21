@@ -2,6 +2,7 @@ import rich_click as click
 from rich.traceback import install
 
 # Removed reference to non-existent agent module
+from graph_sitter.cli.commands.analyze.main import analyze_command
 from graph_sitter.cli.commands.config.main import config_command
 from graph_sitter.cli.commands.create.main import create_command
 from graph_sitter.cli.commands.init.main import init_command
@@ -26,6 +27,7 @@ def main():
 
 # Wrap commands with error handler
 # Removed reference to non-existent agent_command
+main.add_command(analyze_command)
 main.add_command(init_command)
 main.add_command(run_command)
 main.add_command(create_command)
