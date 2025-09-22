@@ -72,6 +72,11 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import requests
 from urllib.parse import urljoin
+import asyncio
+import aiohttp
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from queue import Queue, Empty
 
 
 # ============================================================================
@@ -210,34 +215,81 @@ class AuthManager:
         return self.auth_data
 
 
-class ZAIClient:
-    """Z.AI API Client - Simplified version for translation."""
+class AsyncZAIClient:
+    """Async Z.AI API Client - High-performance version for translation."""
     
     def __init__(self, token: str = None, base_url: str = "https://chat.z.ai", 
-                 timeout: int = 180, auto_auth: bool = True, verbose: bool = False):
-        self.base_url = base_url
-        self.timeout = timeout
+                 timeout: int = 300, auto_auth: bool = True, verbose: bool = False):
+        self.base_url = base_url.rstrip("/")
+        self.timeout = aiohttp.ClientTimeout(total=timeout)
         self.verbose = verbose
+        self.token = token
+        self._session = None
+        self._token_lock = asyncio.Lock()
         
-        self.http_client = HTTPClient(base_url, timeout, verbose=verbose)
-        self.auth_manager = AuthManager(self.http_client)
+        # Headers for requests
+        self.headers = {
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate",
+            "accept-language": "en-US,en;q=0.9",
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "pragma": "no-cache",
+            "referer": "https://chat.z.ai/",
+            "sec-ch-ua": '"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Windows"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+            "x-fe-version": "prod-fe-1.0.70"
+        }
         
-        if not token and auto_auth:
-            token = self.auth_manager.get_guest_token()
-        
-        if token:
-            self.auth_manager.set_token(token)
+        # Auto-auth will be handled in get_session()
+        self.auto_auth = auto_auth
     
-    @property
-    def token(self) -> Optional[str]:
-        """Get current authentication token."""
-        return self.auth_manager.token
+    async def get_session(self) -> aiohttp.ClientSession:
+        """Get or create async session with authentication."""
+        if self._session is None or self._session.closed:
+            connector = aiohttp.TCPConnector(limit=50, limit_per_host=20, ttl_dns_cache=300)
+            self._session = aiohttp.ClientSession(
+                connector=connector,
+                timeout=self.timeout,
+                headers=self.headers
+            )
+            
+            # Auto-authenticate if needed
+            if not self.token and self.auto_auth:
+                async with self._token_lock:
+                    if not self.token:  # Double-check after acquiring lock
+                        await self._get_guest_token()
+        
+        return self._session
     
-    def simple_chat(self, message: str, model: str = "glm-4.5v", 
-                   enable_thinking: bool = True, chat_title: str = "Simple Chat",
-                   temperature: float = None, top_p: float = None,
-                   max_tokens: int = None) -> ChatCompletionResponse:
-        """Simple one-shot chat completion."""
+    async def _get_guest_token(self):
+        """Get guest token asynchronously."""
+        try:
+            async with self._session.get(f"{self.base_url}/api/v1/auths/") as response:
+                if response.status == 200:
+                    auth_data = await response.json()
+                    self.token = auth_data.get("token")
+                    if self.token:
+                        self._session.headers["authorization"] = f"Bearer {self.token}"
+                        if self.verbose:
+                            print(f"[DEBUG] Got guest token: {self.token[:20]}...")
+                else:
+                    raise aiohttp.ClientError(f"Failed to get guest token: {response.status}")
+        except Exception as e:
+            raise ZAIError(f"Failed to get guest token: {e}")
+    
+    async def simple_chat_async(self, message: str, model: str = "glm-4.5v", 
+                               enable_thinking: bool = True, chat_title: str = "Translation Chat",
+                               temperature: float = 0.3, top_p: float = 0.7,
+                               max_tokens: int = 4000) -> ChatCompletionResponse:
+        """Async simple one-shot chat completion."""
+        session = await self.get_session()
+        
         chat_id = str(uuid.uuid4())
         message_id = str(uuid.uuid4())
         timestamp = int(time.time())
@@ -285,22 +337,26 @@ class ZAIClient:
             }
         }
         
-        self.http_client.update_headers({"x-fe-version": "prod-fe-1.0.70"})
-        
         try:
             # Create chat
-            response = self.http_client.make_request("POST", "/api/v1/chats/new", chat_payload)
-            chat_data = response.json()
-            actual_chat_id = chat_data.get("id")
+            async with session.post(f"{self.base_url}/api/v1/chats/new", json=chat_payload) as response:
+                if response.status != 200:
+                    raise ZAIError(f"Failed to create chat: {response.status}")
+                chat_data = await response.json()
+                actual_chat_id = chat_data.get("id")
+                
+                if not actual_chat_id:
+                    raise ZAIError("Failed to create chat - no chat ID returned")
             
-            if not actual_chat_id:
-                raise ZAIError("Failed to create chat - no chat ID returned")
-            
-            # Get completion via streaming (simplified - just collect all content)
+            # Get completion via streaming
             completion_payload = {
                 "model": model,
                 "messages": [{"role": "user", "content": message}],
-                "params": {},
+                "params": {
+                    "temperature": temperature,
+                    "top_p": top_p,
+                    "max_tokens": max_tokens
+                },
                 "features": {
                     "image_generation": False,
                     "web_search": False,
@@ -326,9 +382,9 @@ class ZAIClient:
                     "info": {
                         "id": model,
                         "params": {
-                            "temperature": temperature if temperature is not None else 0.8,
-                            "top_p": top_p if top_p is not None else 0.6,
-                            "max_tokens": max_tokens if max_tokens is not None else 80000
+                            "temperature": temperature,
+                            "top_p": top_p,
+                            "max_tokens": max_tokens
                         }
                     }
                 },
@@ -336,83 +392,70 @@ class ZAIClient:
                 "id": str(uuid.uuid4())
             }
             
-            # Add optional parameters to params dict
-            if temperature is not None:
-                completion_payload["params"]["temperature"] = temperature
-            if top_p is not None:
-                completion_payload["params"]["top_p"] = top_p  
-            if max_tokens is not None:
-                completion_payload["params"]["max_tokens"] = max_tokens
-            
             # Update referer header  
-            original_referer = self.http_client.session.headers.get("referer")
-            self.http_client.session.headers["referer"] = f"https://chat.z.ai/c/{actual_chat_id}"
+            original_referer = session.headers.get("referer")
+            session.headers["referer"] = f"https://chat.z.ai/c/{actual_chat_id}"
             
             try:
                 # Make streaming request and collect response
-                response = self.http_client.make_request(
-                    "POST", 
-                    "/api/chat/completions", 
-                    completion_payload,
-                    stream=True
-                )
-                
-                content = ""
-                thinking = ""
-                current_phase = None
-                
-                # Process streaming response  
-                line_count = 0
-                for line in response.iter_lines():
-                    line_count += 1
-                        
-                    if line:
-                        # Decode bytes to string if needed
-                        if isinstance(line, bytes):
-                            line = line.decode('utf-8')
-                        line = line.strip()
-                        if not line or line.startswith(":"):
-                            continue
-                            
-                        if line.startswith("data: "):
-                            data_str = line[6:]
-                            if data_str.strip():
-                                try:
-                                    data = json.loads(data_str)
-                                    
-                                    # Extract the actual data from the wrapper
-                                    if 'data' in data and isinstance(data['data'], dict):
-                                        actual_data = data['data']
-                                        
-                                        # Handle phase information
-                                        if 'phase' in actual_data:
-                                            current_phase = actual_data['phase']
-                                        
-                                        # Handle complete message content (first response with choices)
-                                        if 'choices' in actual_data and len(actual_data['choices']) > 0:
-                                            choice = actual_data['choices'][0]
-                                            if 'message' in choice:
-                                                message = choice['message']
-                                                if 'content' in message:
-                                                    msg_content = message['content']
-                                                    # Remove box markers if present
-                                                    msg_content = msg_content.replace('<|begin_of_box|>', '').replace('<|end_of_box|>', '')
-                                                    content = msg_content  # Replace, don't append
-                                                if 'reasoning_content' in message:
-                                                    reasoning = message['reasoning_content']
-                                                    thinking = reasoning  # Replace, don't append
-                                        
-                                        # Check for done signal
-                                        if actual_data.get('done', False):
-                                            break
-                                        
-                                except json.JSONDecodeError:
-                                    continue
+                async with session.post(f"{self.base_url}/api/chat/completions", json=completion_payload) as response:
+                    if response.status != 200:
+                        raise ZAIError(f"Chat completion failed: {response.status}")
                     
-                    # Add safety break for long streams
-                    if line_count > 1000:
-                        break
-            
+                    content = ""
+                    thinking = ""
+                    
+                    # Process streaming response  
+                    line_count = 0
+                    async for line in response.content:
+                        line_count += 1
+                        
+                        if line:
+                            # Decode bytes to string if needed
+                            if isinstance(line, bytes):
+                                line_str = line.decode('utf-8')
+                            else:
+                                line_str = str(line)
+                            
+                            line_str = line_str.strip()
+                            if not line_str or line_str.startswith(":"):
+                                continue
+                                
+                            if line_str.startswith("data: "):
+                                data_str = line_str[6:]
+                                if data_str.strip():
+                                    try:
+                                        data = json.loads(data_str)
+                                        
+                                        # Extract the actual data from the wrapper
+                                        if 'data' in data and isinstance(data['data'], dict):
+                                            actual_data = data['data']
+                                            
+                                            # Handle complete message content (first response with choices)
+                                            if 'choices' in actual_data and len(actual_data['choices']) > 0:
+                                                choice = actual_data['choices'][0]
+                                                if 'message' in choice:
+                                                    message_obj = choice['message']
+                                                    if 'content' in message_obj:
+                                                        msg_content = message_obj['content']
+                                                        # Remove box markers if present
+                                                        msg_content = msg_content.replace('<|begin_of_box|>', '').replace('<|end_of_box|>', '')
+                                                        content = msg_content  # Replace, don't append
+                                                    if 'reasoning_content' in message_obj:
+                                                        reasoning = message_obj['reasoning_content']
+                                                        thinking = reasoning  # Replace, don't append
+                                            
+                                            # Check for done signal
+                                            if actual_data.get('done', False):
+                                                break
+                                            
+                                    except json.JSONDecodeError:
+                                        continue
+                        
+                        # Add safety break for long streams
+                        if line_count > 1000:
+                            break
+                
                 return ChatCompletionResponse(
                     content=content.strip(),
                     thinking=thinking.strip(),
@@ -423,10 +466,45 @@ class ZAIClient:
             finally:
                 # Restore original referer
                 if original_referer:
-                    self.http_client.session.headers["referer"] = original_referer
+                    session.headers["referer"] = original_referer
             
         except Exception as e:
-            raise ZAIError(f"Simple chat failed: {e}")
+            raise ZAIError(f"Async chat failed: {e}")
+    
+    async def close(self):
+        """Close the async session."""
+        if self._session and not self._session.closed:
+            await self._session.close()
+
+
+class ZAIClient:
+    """Sync wrapper for AsyncZAIClient - backwards compatibility."""
+    
+    def __init__(self, token: str = None, base_url: str = "https://chat.z.ai", 
+                 timeout: int = 300, auto_auth: bool = True, verbose: bool = False):
+        self.async_client = AsyncZAIClient(token, base_url, timeout, auto_auth, verbose)
+    
+    @property
+    def token(self) -> Optional[str]:
+        """Get current authentication token."""
+        return self.async_client.token
+    
+    def simple_chat(self, message: str, model: str = "glm-4.5v", 
+                   enable_thinking: bool = True, chat_title: str = "Simple Chat",
+                   temperature: float = None, top_p: float = None,
+                   max_tokens: int = None) -> ChatCompletionResponse:
+        """Simple one-shot chat completion (sync wrapper)."""
+        loop = None
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        
+        return loop.run_until_complete(
+            self.async_client.simple_chat_async(message, model, enable_thinking, chat_title, 
+                                               temperature, top_p, max_tokens)
+        )
 
 
 # ============================================================================
@@ -446,6 +524,8 @@ class ChineseTranslator:
         self.client = None
         self.translation_cache = {}
         self.cache_file_path = None
+        self.cache_lock = threading.Lock()  # Thread-safe cache access
+        self.num_workers = 10  # Number of translation workers
         
     def init_client(self):
         """Initialize the embedded ZAI client"""
@@ -624,16 +704,153 @@ class ChineseTranslator:
         return {}
     
     def save_cache(self, cache_file: str, cache_data: Dict[str, str]):
-        """Save translation cache to JSON file"""
+        """Save translation cache to JSON file (thread-safe)"""
         try:
-            with open(cache_file, 'w', encoding='utf-8') as f:
-                json.dump(cache_data, f, indent=4, ensure_ascii=False)
+            with self.cache_lock:
+                with open(cache_file, 'w', encoding='utf-8') as f:
+                    json.dump(cache_data, f, indent=4, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving cache: {e}")
     
-    def translate_with_sdk(self, texts: List[str], is_identifier: bool = False) -> Dict[str, str]:
+    def create_character_based_batches(self, texts: List[str], max_chars_per_batch: int = 3000) -> List[List[str]]:
+        """Create batches based on total character count rather than item count."""
+        batches = []
+        current_batch = []
+        current_char_count = 0
+        
+        for text in texts:
+            text_len = len(text)
+            
+            # If a single text exceeds the limit, put it in its own batch
+            if text_len > max_chars_per_batch:
+                # Finish current batch if it has items
+                if current_batch:
+                    batches.append(current_batch)
+                    current_batch = []
+                    current_char_count = 0
+                
+                # Add the oversized item to its own batch
+                batches.append([text])
+                continue
+            
+            # Check if adding this text would exceed the limit
+            if current_char_count + text_len > max_chars_per_batch and current_batch:
+                # Start a new batch
+                batches.append(current_batch)
+                current_batch = [text]
+                current_char_count = text_len
+            else:
+                # Add to current batch
+                current_batch.append(text)
+                current_char_count += text_len
+        
+        # Add the final batch if it has items
+        if current_batch:
+            batches.append(current_batch)
+        
+        return batches
+
+    async def translate_batch_async(self, batch: List[str], is_identifier: bool, 
+                                   semaphore: asyncio.Semaphore, worker_id: int) -> Dict[str, str]:
+        """Async worker function to translate a single batch with 3000-character limit."""
+        async with semaphore:  # Limit concurrent requests
+            try:
+                # Create a separate async client for this worker
+                worker_client = AsyncZAIClient(auto_auth=True, verbose=False)
+                
+                # Calculate batch character count for reporting
+                batch_char_count = sum(len(text) for text in batch)
+                
+                if is_identifier:
+                    # For identifiers, use CamelCase naming convention
+                    prompt = f"""Translate the following Chinese programming identifiers to English using CamelCase naming convention.
+Return only the translations in the same order, one per line.
+Do not include explanations, numbers, or extra text.
+Make sure each translation is a valid programming identifier (no spaces, special characters except underscore).
+
+Chinese identifiers to translate:
+{chr(10).join(batch)}"""
+                else:
+                    # For string literals and comments, use simple format  
+                    prompt = f"""Translate the following Chinese text to English.
+Return ONLY the English translations, one per line, in the same order as the input.
+Do not include the original Chinese text, explanations, or extra formatting.
+Preserve the meaning and context of each text.
+
+Chinese texts to translate:
+{chr(10).join(batch)}"""
+                
+                print(f"🔄 Worker-{worker_id} processing batch: {len(batch)} items, {batch_char_count} chars")
+                
+                response = await worker_client.simple_chat_async(
+                    message=prompt,
+                    model="glm-4.5v",
+                    temperature=0.3,
+                    max_tokens=4000
+                )
+                
+                batch_translations = {}
+                
+                if response and hasattr(response, 'content') and response.content.strip():
+                    result = response.content.strip()
+                    
+                    if is_identifier:
+                        # Parse line-by-line results for identifiers
+                        translated_lines = [line.strip() for line in result.split('\n') if line.strip()]
+                        
+                        # Match original texts with translations
+                        for i, orig_text in enumerate(batch):
+                            if i < len(translated_lines):
+                                trans = translated_lines[i]
+                                # Clean up the translation
+                                clean_trans = re.sub(r'^["\']|["\']$', '', trans)
+                                clean_trans = re.sub(r'[^a-zA-Z0-9_]', '', clean_trans)
+                                if clean_trans and len(clean_trans) > 0:
+                                    batch_translations[orig_text] = clean_trans
+                                else:
+                                    batch_translations[orig_text] = f"translated_{i}"  # Fallback
+                            else:
+                                batch_translations[orig_text] = f"translated_{i}"  # Fallback
+                    else:
+                        # Parse line-by-line results for string literals (same as identifiers now)
+                        translated_lines = [line.strip() for line in result.split('\n') if line.strip()]
+                        
+                        # Match original texts with translations
+                        for i, orig_text in enumerate(batch):
+                            if i < len(translated_lines):
+                                trans = translated_lines[i]
+                                # Clean up the translation but keep it as natural text
+                                clean_trans = trans.strip()
+                                if clean_trans and len(clean_trans) > 0:
+                                    batch_translations[orig_text] = clean_trans
+                                else:
+                                    batch_translations[orig_text] = None
+                            else:
+                                batch_translations[orig_text] = None
+                else:
+                    # No response content - mark all as failed
+                    for orig_text in batch:
+                        batch_translations[orig_text] = None
+                
+                # Close the worker client
+                await worker_client.close()
+                
+                success_count = sum(1 for v in batch_translations.values() if v is not None)
+                print(f"✅ Worker-{worker_id} completed: {success_count}/{len(batch)} successful")
+                
+                return batch_translations
+                
+            except Exception as e:
+                print(f"❌ Worker-{worker_id} error: {e}")
+                # Return None for all items on error
+                error_result = {}
+                for text in batch:
+                    error_result[text] = None
+                return error_result
+
+    async def translate_with_async_sdk(self, texts: List[str], is_identifier: bool = False) -> Dict[str, str]:
         """
-        Translate texts using web-ui-python-sdk
+        Translate texts using async web-ui-python-sdk with character-based batching and 10 concurrent workers
         
         Args:
             texts: List of Chinese texts to translate
@@ -645,84 +862,97 @@ class ChineseTranslator:
         if not texts:
             return {}
         
-        if not self.client:
-            print("Error: SDK client not initialized")
+        # Create character-based batches (3000 characters each)
+        batches = self.create_character_based_batches(texts, max_chars_per_batch=3000)
+        
+        total_chars = sum(len(text) for text in texts)
+        batch_chars = [sum(len(text) for text in batch) for batch in batches]
+        
+        print(f"🚀 Starting high-performance async translation with 10 concurrent workers")
+        print(f"📦 Processing {len(batches)} character-based batches ({len(texts)} items, {total_chars} chars total)")
+        print(f"📊 Batch sizes: {[f'{len(b)}items/{c}chars' for b, c in zip(batches[:5], batch_chars[:5])]}...")
+        
+        # Semaphore to limit concurrent requests (10 workers)
+        semaphore = asyncio.Semaphore(10)
+        
+        # Create async tasks for all batches
+        tasks = []
+        for i, batch in enumerate(batches):
+            task = asyncio.create_task(
+                self.translate_batch_async(batch, is_identifier, semaphore, worker_id=i+1)
+            )
+            tasks.append(task)
+        
+        # Execute all tasks concurrently and collect results
+        print(f"⚡ Launching {len(tasks)} async translation tasks...")
+        
+        all_translations = {}
+        completed_batches = 0
+        
+        try:
+            # Wait for all tasks to complete
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Process results
+            for i, result in enumerate(results):
+                completed_batches += 1
+                progress = (completed_batches / len(batches)) * 100
+                
+                if isinstance(result, Exception):
+                    print(f"❌ Batch {i+1} failed with exception: {result}")
+                    # Add None translations for failed batch
+                    for text in batches[i]:
+                        all_translations[text] = None
+                elif isinstance(result, dict):
+                    all_translations.update(result)
+                    success_count = sum(1 for v in result.values() if v is not None)
+                    print(f"📈 Progress: {completed_batches}/{len(batches)} batches ({progress:.1f}%) - Batch {i+1}: {success_count}/{len(batches[i])} successful")
+                else:
+                    print(f"⚠️ Batch {i+1} returned unexpected result type: {type(result)}")
+                    for text in batches[i]:
+                        all_translations[text] = None
+        
+        except Exception as e:
+            print(f"❌ Critical error in async translation: {e}")
+            # Ensure all texts have some entry
+            for text in texts:
+                if text not in all_translations:
+                    all_translations[text] = None
+        
+        successful_translations = sum(1 for v in all_translations.values() if v is not None)
+        print(f"✅ Async translation completed! {successful_translations}/{len(texts)} successful ({successful_translations/len(texts)*100:.1f}%)")
+        
+        return all_translations
+
+    def translate_with_sdk(self, texts: List[str], is_identifier: bool = False) -> Dict[str, str]:
+        """
+        Sync wrapper for async translation method
+        
+        Args:
+            texts: List of Chinese texts to translate
+            is_identifier: True if translating code identifiers (use CamelCase)
+        
+        Returns:
+            Dictionary mapping original text to translated text
+        """
+        if not texts:
             return {}
         
-        translations = {}
-        
-        # Split into batches to avoid overwhelming the API
-        batch_size = random.randint(8, 16)  # Random batch size like original
-        
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
-            print(f"Translating batch {i//batch_size + 1}: {len(batch)} items")
-            
-            try:
-                if is_identifier:
-                    # For identifiers, use CamelCase naming convention
-                    prompt = f"""Translate the following Chinese programming identifiers to English using CamelCase naming convention.
-Return only the translations in the same order, one per line.
-Do not include explanations, numbers, or extra text.
-
-Chinese identifiers to translate:
-{json.dumps(batch, ensure_ascii=False)}"""
-                else:
-                    # For string literals and comments
-                    prompt = f"""Translate the following Chinese text to English.
-Return the translations in JSON format: {{"original_text": "translated_text"}}
-Keep the same number of items and maintain the structure.
-
-Chinese texts to translate:
-{json.dumps(batch, ensure_ascii=False)}"""
-                
-                response = self.client.simple_chat(
-                    message=prompt,
-                    model="glm-4.5v",  # Use the recommended model
-                    temperature=0.3    # Lower temperature for more consistent translation
-                )
-                
-                if response and hasattr(response, 'content'):
-                    result = response.content.strip()
-                    
-                    if is_identifier:
-                        # Parse line-by-line results for identifiers
-                        translated_lines = [line.strip() for line in result.split('\n') if line.strip()]
-                        for orig, trans in zip(batch, translated_lines):
-                            # Clean up the translation (remove quotes, extra characters)
-                            clean_trans = re.sub(r'^["\']|["\']$', '', trans)
-                            clean_trans = re.sub(r'[^a-zA-Z0-9_]', '', clean_trans)
-                            if clean_trans:
-                                translations[orig] = clean_trans
-                            else:
-                                translations[orig] = None
-                    else:
-                        # Parse JSON results for string literals
-                        try:
-                            json_result = json.loads(result)
-                            # Ensure we only add string values
-                            for key, value in json_result.items():
-                                if isinstance(value, str):
-                                    translations[key] = value
-                                elif isinstance(value, list) and len(value) == 1 and isinstance(value[0], str):
-                                    translations[key] = value[0]  # Take first item if it's a single-item list
-                                else:
-                                    translations[key] = None
-                        except json.JSONDecodeError:
-                            # Fallback: try to parse as simple mapping
-                            for orig in batch:
-                                translations[orig] = None
-                
-                # Small delay to avoid overwhelming the API
-                time.sleep(0.5)
-                
-            except Exception as e:
-                print(f"Error translating batch: {e}")
-                # Mark all items in batch as failed
-                for item in batch:
-                    translations[item] = None
-        
-        return translations
+        # Run the async method in an event loop
+        try:
+            # Try to get existing event loop
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is already running, we need to use run_in_executor
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(asyncio.run, self.translate_with_async_sdk(texts, is_identifier))
+                    return future.result()
+            else:
+                return loop.run_until_complete(self.translate_with_async_sdk(texts, is_identifier))
+        except RuntimeError:
+            # No event loop exists, create a new one
+            return asyncio.run(self.translate_with_async_sdk(texts, is_identifier))
     
     def get_missing_translations(self, all_texts: Set[str], cache: Dict[str, str]) -> List[str]:
         """Get list of texts that need translation"""
@@ -849,6 +1079,11 @@ Chinese texts to translate:
         # Create translated codebase
         print(f"\nApplying translations...")
         self.translate_codebase(source_dir, target_dir)
+        
+        # Ensure cache is saved one final time after all translations
+        if self.translation_cache:
+            self.save_cache(self.cache_file_path, self.translation_cache)
+            print(f"✓ Final cache saved to: {self.cache_file_path}")
         
         print(f"\n✓ Translation completed!")
         print(f"✓ Translated codebase: {target_dir}")
