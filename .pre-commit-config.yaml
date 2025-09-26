@@ -18,14 +18,14 @@ repos:
         types_or: [python, jupyter, pyi]
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: "v2.0.0-beta.1"
+    rev: "v2.0.6"
     hooks:
       - id: biome-check
         language: node
         additional_dependencies: ["@biomejs/biome@1.9.4"]
         exclude: (src/codemods/eval)|(tests/unit/skills/snapshots)|(tests/unit/sdk/output)|(tests/integration/verified_codemods)|(docs/samples)|(examples/examples/ai_impact_analysis)
   - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: v0.16.6
+    rev: v0.16.7
     hooks:
       - id: cython-lint
       - id: double-quote-cython-strings
@@ -47,7 +47,7 @@ repos:
       - id: check-merge-conflict
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.0
+    rev: 0.33.3
     hooks:
       - id: check-github-workflows
       - id: check-github-actions
@@ -68,7 +68,7 @@ repos:
         files: "docs/.*/.*.mdx"
 
   - repo: https://github.com/fpgmaas/deptry.git
-    rev: "0.23.0"
+    rev: "0.23.1"
     hooks:
       - id: deptry
         pass_filenames: false
@@ -81,7 +81,7 @@ repos:
       - id: renovate-config-validator
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: "0.7.4"
+    rev: "0.7.22"
     hooks:
       - id: uv-sync
         args: ["--frozen", "--all-packages", "--all-extras"]
