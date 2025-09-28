@@ -6,7 +6,7 @@ repos:
     hooks:
       - id: taplo-format
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.13
+    rev: v0.13.2
     hooks:
       # Run the linter.
       - id: ruff
@@ -18,7 +18,7 @@ repos:
         types_or: [python, jupyter, pyi]
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: "v2.0.6"
+    rev: "v2.2.4"
     hooks:
       - id: biome-check
         language: node
@@ -47,7 +47,7 @@ repos:
       - id: check-merge-conflict
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.3
+    rev: 0.34.0
     hooks:
       - id: check-github-workflows
       - id: check-github-actions
@@ -81,7 +81,7 @@ repos:
       - id: renovate-config-validator
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: "0.7.22"
+    rev: "0.8.22"
     hooks:
       - id: uv-sync
         args: ["--frozen", "--all-packages", "--all-extras"]
