@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive Python Code Analysis Backend with Graph-Sitter Integration
+"""Comprehensive Python Code Analysis Backend with Graph-Sitter Integration
 
 This module provides a complete code analysis system that combines:
 - Graph-sitter for structural codebase analysis
@@ -24,19 +23,20 @@ import subprocess
 import sys
 import time
 import traceback
-import yaml
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
+
+import yaml
 
 # Third-party imports
 try:
     import openai
     from rich.console import Console
-    from rich.table import Table
-    from rich.progress import Progress, SpinnerColumn, TextColumn
     from rich.panel import Panel
+    from rich.progress import Progress, SpinnerColumn, TextColumn
     from rich.syntax import Syntax
+    from rich.table import Table
     from rich.tree import Tree
 
     RICH_AVAILABLE = True
@@ -47,14 +47,14 @@ except ImportError:
 # Graph-sitter integration
 try:
     from graph_sitter import Codebase
-    from graph_sitter.configs.models.codebase import CodebaseConfig
     from graph_sitter.codebase.codebase_analysis import (
+        get_class_summary,
         get_codebase_summary,
         get_file_summary,
-        get_class_summary,
         get_function_summary,
         get_symbol_summary,
     )
+    from graph_sitter.configs.models.codebase import CodebaseConfig
 
     GRAPH_SITTER_AVAILABLE = True
 except ImportError:
@@ -76,8 +76,8 @@ except ImportError as e:
 # AutoGenLib integration
 try:
     from graph_sitter.extensions import autogenlib
-    from graph_sitter.extensions.autogenlib._exception_handler import generate_fix
     from graph_sitter.extensions.autogenlib._cache import cache_module
+    from graph_sitter.extensions.autogenlib._exception_handler import generate_fix
 
     AUTOGENLIB_AVAILABLE = True
 except ImportError as e:
@@ -97,11 +97,11 @@ class AnalysisError:
     message: str
     tool_source: str
     category: str = "general"
-    fix_suggestion: Optional[str] = None
+    fix_suggestion: str | None = None
     confidence: float = 1.0
-    context: Optional[str] = None
+    context: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "file_path": self.file_path,
@@ -125,8 +125,8 @@ class ToolConfig:
     name: str
     command: str
     enabled: bool = True
-    args: List[str] = field(default_factory=list)
-    config_file: Optional[str] = None
+    args: list[str] = field(default_factory=list)
+    config_file: str | None = None
     timeout: int = 300
     priority: int = 2  # 1=critical, 2=important, 3=optional
     requires_network: bool = False
@@ -138,9 +138,8 @@ class GraphSitterAnalysis:
     def __init__(self, target_path: str):
         """Initialize graph-sitter analysis."""
         if not GRAPH_SITTER_AVAILABLE:
-            raise ImportError(
-                "graph-sitter not available. Install with: pip install graph-sitter"
-            )
+            msg = "graph-sitter not available. Install with: pip install graph-sitter"
+            raise ImportError(msg)
 
         self.target_path = target_path
         self.codebase = None
@@ -204,7 +203,7 @@ class GraphSitterAnalysis:
             return []
         return getattr(self.codebase, "external_modules", [])
 
-    def get_codebase_summary(self) -> Dict[str, Any]:
+    def get_codebase_summary(self) -> dict[str, Any]:
         """Get comprehensive codebase summary."""
         if not self.codebase:
             return {}
@@ -221,7 +220,7 @@ class GraphSitterAnalysis:
                 "external_modules": len(self.external_modules),
             }
 
-    def get_function_analysis(self, function_name: str) -> Dict[str, Any]:
+    def get_function_analysis(self, function_name: str) -> dict[str, Any]:
         """Get detailed analysis for a specific function."""
         functions_attr = getattr(self.codebase, "functions", [])
         functions = list(functions_attr) if hasattr(functions_attr, "__iter__") else []
@@ -243,7 +242,7 @@ class GraphSitterAnalysis:
                     }
         return {}
 
-    def get_class_analysis(self, class_name: str) -> Dict[str, Any]:
+    def get_class_analysis(self, class_name: str) -> dict[str, Any]:
         """Get detailed analysis for a specific class."""
         classes_attr = getattr(self.codebase, "classes", [])
         classes = list(classes_attr) if hasattr(classes_attr, "__iter__") else []
@@ -258,12 +257,8 @@ class GraphSitterAnalysis:
                         "name": cls.name,
                         "methods": len(getattr(cls, "methods", [])),
                         "attributes": len(getattr(cls, "attributes", [])),
-                        "superclasses": [
-                            sc.name for sc in getattr(cls, "superclasses", [])
-                        ],
-                        "subclasses": [
-                            sc.name for sc in getattr(cls, "subclasses", [])
-                        ],
+                        "superclasses": [sc.name for sc in getattr(cls, "superclasses", [])],
+                        "subclasses": [sc.name for sc in getattr(cls, "subclasses", [])],
                         "is_abstract": getattr(cls, "is_abstract", False),
                     }
         return {}
@@ -275,7 +270,7 @@ class RuffIntegration:
     def __init__(self, target_path: str):
         self.target_path = target_path
 
-    def run_comprehensive_analysis(self) -> List[AnalysisError]:
+    def run_comprehensive_analysis(self) -> list[AnalysisError]:
         """Run comprehensive Ruff analysis with all rule categories."""
         errors = []
 
@@ -354,9 +349,7 @@ class RuffIntegration:
                     self.target_path,
                 ]
 
-                result = subprocess.run(
-                    cmd, capture_output=True, text=True, timeout=120
-                )
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
 
                 if result.stdout:
                     try:
@@ -368,14 +361,10 @@ class RuffIntegration:
                                     line=error.get("location", {}).get("row", 0),
                                     column=error.get("location", {}).get("column", 0),
                                     error_type=error.get("code", ""),
-                                    severity=self._map_ruff_severity(
-                                        error.get("code", "")
-                                    ),
+                                    severity=self._map_ruff_severity(error.get("code", "")),
                                     message=error.get("message", ""),
                                     tool_source="ruff",
-                                    category=self._categorize_ruff_error(
-                                        error.get("code", "")
-                                    ),
+                                    category=self._categorize_ruff_error(error.get("code", "")),
                                     confidence=0.9,
                                 )
                             )
@@ -433,7 +422,7 @@ class LSPDiagnosticsCollector:
         self.diagnostics = []
         self.logger = LanguageServerLogger() if SOLIDLSP_AVAILABLE else None
 
-    def collect_python_diagnostics(self) -> List[AnalysisError]:
+    def collect_python_diagnostics(self) -> list[AnalysisError]:
         """Collect diagnostics from Python language servers."""
         if not SOLIDLSP_AVAILABLE:
             logging.warning("SolidLSP not available, skipping LSP diagnostics")
@@ -443,9 +432,7 @@ class LSPDiagnosticsCollector:
 
         try:
             # Configure Pyright for comprehensive analysis
-            config = LanguageServerConfig(
-                code_language=Language.PYTHON, trace_lsp_communication=False
-            )
+            config = LanguageServerConfig(code_language=Language.PYTHON, trace_lsp_communication=False)
 
             settings = SolidLSPSettings()
 
@@ -457,9 +444,7 @@ class LSPDiagnosticsCollector:
 
                 # Find Python files to analyze
                 python_files = []
-                if os.path.isfile(self.target_path) and self.target_path.endswith(
-                    ".py"
-                ):
+                if os.path.isfile(self.target_path) and self.target_path.endswith(".py"):
                     python_files = [self.target_path]
                 elif os.path.isdir(self.target_path):
                     for root, dirs, files in os.walk(self.target_path):
@@ -483,7 +468,7 @@ class LSPDiagnosticsCollector:
                 # Open files and collect diagnostics
                 for file_path in python_files[:10]:  # Limit for performance
                     try:
-                        with open(file_path, "r", encoding="utf-8") as f:
+                        with open(file_path, encoding="utf-8") as f:
                             content = f.read()
 
                         # Open document in LSP
@@ -499,16 +484,10 @@ class LSPDiagnosticsCollector:
                             errors.append(
                                 AnalysisError(
                                     file_path=file_path,
-                                    line=diag.get("range", {})
-                                    .get("start", {})
-                                    .get("line", 0),
-                                    column=diag.get("range", {})
-                                    .get("start", {})
-                                    .get("character", 0),
+                                    line=diag.get("range", {}).get("start", {}).get("line", 0),
+                                    column=diag.get("range", {}).get("start", {}).get("character", 0),
                                     error_type=diag.get("code", "LSP_ERROR"),
-                                    severity=self._map_lsp_severity(
-                                        diag.get("severity", 1)
-                                    ),
+                                    severity=self._map_lsp_severity(diag.get("severity", 1)),
                                     message=diag.get("message", ""),
                                     tool_source="pyright",
                                     category="type_checking",
@@ -522,7 +501,7 @@ class LSPDiagnosticsCollector:
                         logging.warning(f"Failed to analyze {file_path} with LSP: {e}")
 
         except Exception as e:
-            logging.error(f"LSP diagnostics collection failed: {e}")
+            logging.exception(f"LSP diagnostics collection failed: {e}")
 
         return errors
 
@@ -574,28 +553,26 @@ class ErrorDatabase:
             """)
 
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_errors_session 
+                CREATE INDEX IF NOT EXISTS idx_errors_session
                 ON errors (session_id)
             """)
 
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_errors_category 
+                CREATE INDEX IF NOT EXISTS idx_errors_category
                 ON errors (category)
             """)
 
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_errors_severity 
+                CREATE INDEX IF NOT EXISTS idx_errors_severity
                 ON errors (severity)
             """)
 
-    def create_session(
-        self, target_path: str, tools_used: List[str], config: Dict[str, Any]
-    ) -> int:
+    def create_session(self, target_path: str, tools_used: list[str], config: dict[str, Any]) -> int:
         """Create a new analysis session."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute(
                 """
-                INSERT INTO analysis_sessions 
+                INSERT INTO analysis_sessions
                 (target_path, timestamp, tools_used, config_hash)
                 VALUES (?, ?, ?, ?)
             """,
@@ -608,14 +585,14 @@ class ErrorDatabase:
             )
             return cursor.lastrowid
 
-    def store_errors(self, errors: List[AnalysisError], session_id: int):
+    def store_errors(self, errors: list[AnalysisError], session_id: int):
         """Store errors in the database."""
         with sqlite3.connect(self.db_path) as conn:
             for error in errors:
                 conn.execute(
                     """
-                    INSERT INTO errors 
-                    (session_id, file_path, line, column, error_type, severity, 
+                    INSERT INTO errors
+                    (session_id, file_path, line, column, error_type, severity,
                      message, tool_source, category, fix_suggestion, confidence, context)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -640,14 +617,14 @@ class ErrorDatabase:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """
-                UPDATE analysis_sessions 
-                SET total_errors = ?, completed = TRUE 
+                UPDATE analysis_sessions
+                SET total_errors = ?, completed = TRUE
                 WHERE id = ?
             """,
                 (total_errors, session_id),
             )
 
-    def query_errors(self, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def query_errors(self, filters: dict[str, Any]) -> list[dict[str, Any]]:
         """Query errors with filters."""
         query = "SELECT * FROM errors WHERE 1=1"
         params = []
@@ -668,7 +645,8 @@ class AutoGenLibFixer:
 
     def __init__(self):
         if not AUTOGENLIB_AVAILABLE:
-            raise ImportError("AutoGenLib not available")
+            msg = "AutoGenLib not available"
+            raise ImportError(msg)
 
         # Initialize AutoGenLib for code fixing
         autogenlib.init(
@@ -677,9 +655,7 @@ class AutoGenLibFixer:
             enable_caching=True,
         )
 
-    def generate_fix_for_error(
-        self, error: AnalysisError, source_code: str
-    ) -> Optional[Dict[str, Any]]:
+    def generate_fix_for_error(self, error: AnalysisError, source_code: str) -> dict[str, Any] | None:
         """Generate a fix for a specific error using AutoGenLib's LLM integration."""
         try:
             # Create a mock exception for the error
@@ -707,7 +683,7 @@ File "{error.file_path}", line {error.line}, in <module>
             return fix_info
 
         except Exception as e:
-            logging.error(f"Failed to generate fix for error: {e}")
+            logging.exception(f"Failed to generate fix for error: {e}")
             return None
 
     def apply_fix_to_file(self, file_path: str, fixed_code: str) -> bool:
@@ -715,7 +691,7 @@ File "{error.file_path}", line {error.line}, in <module>
         try:
             # Create backup
             backup_path = f"{file_path}.backup_{int(time.time())}"
-            with open(file_path, "r") as original:
+            with open(file_path) as original:
                 with open(backup_path, "w") as backup:
                     backup.write(original.read())
 
@@ -727,7 +703,7 @@ File "{error.file_path}", line {error.line}, in <module>
             return True
 
         except Exception as e:
-            logging.error(f"Failed to apply fix to {file_path}: {e}")
+            logging.exception(f"Failed to apply fix to {file_path}: {e}")
             return False
 
 
@@ -760,9 +736,7 @@ class ComprehensiveAnalyzer:
             timeout=300,
             priority=1,
         ),
-        "pyright": ToolConfig(
-            "pyright", "pyright", args=["--outputjson"], timeout=600, priority=1
-        ),
+        "pyright": ToolConfig("pyright", "pyright", args=["--outputjson"], timeout=600, priority=1),
         "pylint": ToolConfig(
             "pylint",
             "pylint",
@@ -814,9 +788,7 @@ class ComprehensiveAnalyzer:
             timeout=120,
             priority=2,
         ),
-        "black": ToolConfig(
-            "black", "black", args=["--check", "--diff"], timeout=60, priority=2
-        ),
+        "black": ToolConfig("black", "black", args=["--check", "--diff"], timeout=60, priority=2),
         "isort": ToolConfig(
             "isort",
             "isort",
@@ -839,15 +811,13 @@ class ComprehensiveAnalyzer:
             timeout=120,
             priority=3,
         ),
-        "mccabe": ToolConfig(
-            "mccabe", "python -m mccabe", args=["--min", "5"], timeout=60, priority=3
-        ),
+        "mccabe": ToolConfig("mccabe", "python -m mccabe", args=["--min", "5"], timeout=60, priority=3),
     }
 
     def __init__(
         self,
         target_path: str,
-        config: Optional[Dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
         verbose: bool = False,
     ):
         self.target_path = target_path
@@ -907,7 +877,7 @@ class ComprehensiveAnalyzer:
         config_file = self.config.get("config_file")
         if config_file and os.path.exists(config_file):
             try:
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     if config_file.endswith(".yaml") or config_file.endswith(".yml"):
                         file_config = yaml.safe_load(f)
                     else:
@@ -918,19 +888,13 @@ class ComprehensiveAnalyzer:
                 for tool_name, tool_config in tools_config.items():
                     if tool_name in self.tools_config:
                         if "enabled" in tool_config:
-                            self.tools_config[tool_name].enabled = tool_config[
-                                "enabled"
-                            ]
+                            self.tools_config[tool_name].enabled = tool_config["enabled"]
                         if "args" in tool_config:
                             self.tools_config[tool_name].args = tool_config["args"]
                         if "timeout" in tool_config:
-                            self.tools_config[tool_name].timeout = tool_config[
-                                "timeout"
-                            ]
+                            self.tools_config[tool_name].timeout = tool_config["timeout"]
                         if "priority" in tool_config:
-                            self.tools_config[tool_name].priority = tool_config[
-                                "priority"
-                            ]
+                            self.tools_config[tool_name].priority = tool_config["priority"]
 
                 if self.verbose:
                     print(f"✓ Configuration loaded from {config_file}")
@@ -938,7 +902,7 @@ class ComprehensiveAnalyzer:
             except Exception as e:
                 logging.warning(f"Failed to load config from {config_file}: {e}")
 
-    def run_comprehensive_analysis(self) -> Dict[str, Any]:
+    def run_comprehensive_analysis(self) -> dict[str, Any]:
         """Run comprehensive analysis using all available tools and methods."""
         start_time = time.time()
         all_errors = []
@@ -949,9 +913,7 @@ class ComprehensiveAnalyzer:
                 TextColumn("[progress.description]{task.description}"),
                 console=self.console,
             ) as progress:
-                task = progress.add_task(
-                    "Running comprehensive analysis...", total=None
-                )
+                task = progress.add_task("Running comprehensive analysis...", total=None)
 
                 # Graph-sitter analysis
                 progress.update(task, description="Analyzing codebase structure...")
@@ -968,15 +930,11 @@ class ComprehensiveAnalyzer:
                 all_errors.extend(ruff_errors)
 
                 # Traditional tools
-                progress.update(
-                    task, description="Running traditional analysis tools..."
-                )
+                progress.update(task, description="Running traditional analysis tools...")
                 tool_errors = self._run_traditional_tools()
                 all_errors.extend(tool_errors)
 
-                progress.update(
-                    task, description="Categorizing and processing errors..."
-                )
+                progress.update(task, description="Categorizing and processing errors...")
         else:
             print("Running comprehensive analysis...")
             graph_sitter_results = self._run_graph_sitter_analysis()
@@ -1006,9 +964,7 @@ class ComprehensiveAnalyzer:
                 "target_path": self.target_path,
                 "analysis_time": round(end_time - start_time, 2),
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "tools_used": [
-                    name for name, config in self.tools_config.items() if config.enabled
-                ],
+                "tools_used": [name for name, config in self.tools_config.items() if config.enabled],
                 "graph_sitter_available": GRAPH_SITTER_AVAILABLE,
                 "lsp_available": SOLIDLSP_AVAILABLE,
                 "autogenlib_available": AUTOGENLIB_AVAILABLE,
@@ -1023,16 +979,14 @@ class ComprehensiveAnalyzer:
         }
 
         # Store in database
-        session_id = self.error_db.create_session(
-            self.target_path, results["metadata"]["tools_used"], self.config
-        )
+        session_id = self.error_db.create_session(self.target_path, results["metadata"]["tools_used"], self.config)
         self.error_db.store_errors(all_errors, session_id)
         self.error_db.update_session(session_id, len(all_errors))
 
         self.last_results = results
         return results
 
-    def _run_graph_sitter_analysis(self) -> Dict[str, Any]:
+    def _run_graph_sitter_analysis(self) -> dict[str, Any]:
         """Run graph-sitter analysis."""
         if not self.graph_sitter:
             return {}
@@ -1061,17 +1015,14 @@ class ComprehensiveAnalyzer:
                 "summary": summary,
                 "functions": functions_analysis,
                 "classes": classes_analysis,
-                "external_modules": [
-                    getattr(mod, "name", "")
-                    for mod in self.graph_sitter.external_modules[:50]
-                ],
+                "external_modules": [getattr(mod, "name", "") for mod in self.graph_sitter.external_modules[:50]],
             }
 
         except Exception as e:
-            logging.error(f"Graph-sitter analysis failed: {e}")
+            logging.exception(f"Graph-sitter analysis failed: {e}")
             return {}
 
-    def _collect_lsp_diagnostics(self) -> List[AnalysisError]:
+    def _collect_lsp_diagnostics(self) -> list[AnalysisError]:
         """Collect diagnostics from LSP servers."""
         if not self.lsp_collector:
             return []
@@ -1079,10 +1030,10 @@ class ComprehensiveAnalyzer:
         try:
             return self.lsp_collector.collect_python_diagnostics()
         except Exception as e:
-            logging.error(f"LSP diagnostics collection failed: {e}")
+            logging.exception(f"LSP diagnostics collection failed: {e}")
             return []
 
-    def _run_ruff_analysis(self) -> List[AnalysisError]:
+    def _run_ruff_analysis(self) -> list[AnalysisError]:
         """Run comprehensive Ruff analysis."""
         if not self.ruff_integration:
             return []
@@ -1090,10 +1041,10 @@ class ComprehensiveAnalyzer:
         try:
             return self.ruff_integration.run_comprehensive_analysis()
         except Exception as e:
-            logging.error(f"Ruff analysis failed: {e}")
+            logging.exception(f"Ruff analysis failed: {e}")
             return []
 
-    def _run_traditional_tools(self) -> List[AnalysisError]:
+    def _run_traditional_tools(self) -> list[AnalysisError]:
         """Run traditional analysis tools."""
         errors = []
 
@@ -1113,12 +1064,7 @@ class ComprehensiveAnalyzer:
             tools_group = priority_groups[priority]
 
             with ThreadPoolExecutor(max_workers=4) as executor:
-                future_to_tool = {
-                    executor.submit(
-                        self._run_single_tool, tool_name, tool_config
-                    ): tool_name
-                    for tool_name, tool_config in tools_group
-                }
+                future_to_tool = {executor.submit(self._run_single_tool, tool_name, tool_config): tool_name for tool_name, tool_config in tools_group}
 
                 for future in as_completed(future_to_tool):
                     tool_name = future_to_tool[future]
@@ -1126,19 +1072,17 @@ class ComprehensiveAnalyzer:
                         tool_errors = future.result()
                         errors.extend(tool_errors)
                     except Exception as e:
-                        logging.error(f"Tool {tool_name} failed: {e}")
+                        logging.exception(f"Tool {tool_name} failed: {e}")
 
         return errors
 
-    def _run_single_tool(
-        self, tool_name: str, tool_config: ToolConfig
-    ) -> List[AnalysisError]:
+    def _run_single_tool(self, tool_name: str, tool_config: ToolConfig) -> list[AnalysisError]:
         """Run a single analysis tool."""
         errors = []
 
         try:
             # Build command
-            cmd = [tool_config.command] + tool_config.args + [self.target_path]
+            cmd = [tool_config.command, *tool_config.args, self.target_path]
 
             # Run tool
             result = subprocess.run(
@@ -1167,11 +1111,11 @@ class ComprehensiveAnalyzer:
         except subprocess.TimeoutExpired:
             logging.warning(f"Tool {tool_name} timed out")
         except Exception as e:
-            logging.error(f"Tool {tool_name} failed: {e}")
+            logging.exception(f"Tool {tool_name} failed: {e}")
 
         return errors
 
-    def _parse_mypy_output(self, output: str) -> List[AnalysisError]:
+    def _parse_mypy_output(self, output: str) -> list[AnalysisError]:
         """Parse MyPy JSON output."""
         errors = []
         try:
@@ -1185,9 +1129,7 @@ class ComprehensiveAnalyzer:
                             line=error.get("line", 0),
                             column=error.get("column", 0),
                             error_type=error.get("code", "mypy-error"),
-                            severity="ERROR"
-                            if error.get("severity") == "error"
-                            else "WARNING",
+                            severity="ERROR" if error.get("severity") == "error" else "WARNING",
                             message=error.get("message", ""),
                             tool_source="mypy",
                             category="type_checking",
@@ -1218,7 +1160,7 @@ class ComprehensiveAnalyzer:
 
         return errors
 
-    def _parse_pylint_output(self, output: str) -> List[AnalysisError]:
+    def _parse_pylint_output(self, output: str) -> list[AnalysisError]:
         """Parse Pylint JSON output."""
         errors = []
         try:
@@ -1233,9 +1175,7 @@ class ComprehensiveAnalyzer:
                         severity=error.get("type", "INFO").upper(),
                         message=error.get("message", ""),
                         tool_source="pylint",
-                        category=self._categorize_pylint_error(
-                            error.get("message-id", "")
-                        ),
+                        category=self._categorize_pylint_error(error.get("message-id", "")),
                         confidence=0.8,
                     )
                 )
@@ -1244,7 +1184,7 @@ class ComprehensiveAnalyzer:
 
         return errors
 
-    def _parse_bandit_output(self, output: str) -> List[AnalysisError]:
+    def _parse_bandit_output(self, output: str) -> list[AnalysisError]:
         """Parse Bandit JSON output."""
         errors = []
         try:
@@ -1268,7 +1208,7 @@ class ComprehensiveAnalyzer:
 
         return errors
 
-    def _parse_safety_output(self, output: str) -> List[AnalysisError]:
+    def _parse_safety_output(self, output: str) -> list[AnalysisError]:
         """Parse Safety JSON output."""
         errors = []
         try:
@@ -1292,7 +1232,7 @@ class ComprehensiveAnalyzer:
 
         return errors
 
-    def _parse_semgrep_output(self, output: str) -> List[AnalysisError]:
+    def _parse_semgrep_output(self, output: str) -> list[AnalysisError]:
         """Parse Semgrep JSON output."""
         errors = []
         try:
@@ -1316,9 +1256,7 @@ class ComprehensiveAnalyzer:
 
         return errors
 
-    def _parse_generic_output(
-        self, tool_name: str, result: subprocess.CompletedProcess
-    ) -> List[AnalysisError]:
+    def _parse_generic_output(self, tool_name: str, result: subprocess.CompletedProcess) -> list[AnalysisError]:
         """Parse generic tool output."""
         errors = []
 
@@ -1328,19 +1266,13 @@ class ComprehensiveAnalyzer:
 
             # Try to extract file:line information
             for line in output.split("\n"):
-                if ":" in line and any(
-                    keyword in line.lower() for keyword in ["error", "warning", "issue"]
-                ):
+                if ":" in line and any(keyword in line.lower() for keyword in ["error", "warning", "issue"]):
                     parts = line.split(":")
                     if len(parts) >= 2:
                         errors.append(
                             AnalysisError(
-                                file_path=parts[0]
-                                if os.path.exists(parts[0])
-                                else self.target_path,
-                                line=int(parts[1])
-                                if len(parts) > 1 and parts[1].isdigit()
-                                else 0,
+                                file_path=parts[0] if os.path.exists(parts[0]) else self.target_path,
+                                line=int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0,
                                 column=0,
                                 error_type=f"{tool_name}-issue",
                                 severity="WARNING",
@@ -1353,9 +1285,7 @@ class ComprehensiveAnalyzer:
 
         return errors
 
-    def _categorize_errors(
-        self, errors: List[AnalysisError]
-    ) -> Dict[str, List[AnalysisError]]:
+    def _categorize_errors(self, errors: list[AnalysisError]) -> dict[str, list[AnalysisError]]:
         """Categorize errors into comprehensive categories."""
         categories = {
             "syntax_critical": [],
@@ -1411,9 +1341,7 @@ class ComprehensiveAnalyzer:
 
         return categories
 
-    def _detect_dead_code(
-        self, graph_sitter_results: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _detect_dead_code(self, graph_sitter_results: dict[str, Any]) -> list[dict[str, Any]]:
         """Detect dead code using graph-sitter analysis."""
         dead_code = []
 
@@ -1467,13 +1395,11 @@ class ComprehensiveAnalyzer:
                     )
 
         except Exception as e:
-            logging.error(f"Dead code detection failed: {e}")
+            logging.exception(f"Dead code detection failed: {e}")
 
         return dead_code
 
-    def _calculate_metrics(
-        self, errors: List[AnalysisError], graph_sitter_results: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _calculate_metrics(self, errors: list[AnalysisError], graph_sitter_results: dict[str, Any]) -> dict[str, Any]:
         """Calculate comprehensive code metrics."""
         metrics = {
             "total_errors": len(errors),
@@ -1485,27 +1411,20 @@ class ComprehensiveAnalyzer:
 
         # Error density calculation
         if graph_sitter_results.get("summary", {}).get("files", 0) > 0:
-            metrics["error_density"] = (
-                len(errors) / graph_sitter_results["summary"]["files"]
-            )
+            metrics["error_density"] = len(errors) / graph_sitter_results["summary"]["files"]
 
         # Complexity metrics
         complexity_errors = [e for e in errors if "complexity" in e.category]
         metrics["complexity_metrics"] = {
             "high_complexity_count": len(complexity_errors),
-            "average_complexity": sum(e.confidence for e in complexity_errors)
-            / len(complexity_errors)
-            if complexity_errors
-            else 0,
+            "average_complexity": sum(e.confidence for e in complexity_errors) / len(complexity_errors) if complexity_errors else 0,
         }
 
         # Dependency metrics
         dependency_errors = [e for e in errors if "dependency" in e.category]
         metrics["dependency_metrics"] = {
             "vulnerable_dependencies": len(dependency_errors),
-            "external_dependencies": len(
-                graph_sitter_results.get("external_modules", [])
-            ),
+            "external_dependencies": len(graph_sitter_results.get("external_modules", [])),
         }
 
         # Performance metrics
@@ -1519,27 +1438,17 @@ class ComprehensiveAnalyzer:
 
     def _generate_summary(
         self,
-        errors: List[AnalysisError],
-        categorized_errors: Dict[str, List[AnalysisError]],
-        metrics: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        errors: list[AnalysisError],
+        categorized_errors: dict[str, list[AnalysisError]],
+        metrics: dict[str, Any],
+    ) -> dict[str, Any]:
         """Generate comprehensive analysis summary."""
         return {
             "overview": {
                 "total_errors": len(errors),
-                "critical_errors": len(categorized_errors.get("syntax_critical", []))
-                + len(categorized_errors.get("type_critical", []))
-                + len(categorized_errors.get("security_critical", [])),
-                "major_issues": sum(
-                    len(categorized_errors.get(cat, []))
-                    for cat in categorized_errors
-                    if "major" in cat
-                ),
-                "minor_issues": sum(
-                    len(categorized_errors.get(cat, []))
-                    for cat in categorized_errors
-                    if "minor" in cat
-                ),
+                "critical_errors": len(categorized_errors.get("syntax_critical", [])) + len(categorized_errors.get("type_critical", [])) + len(categorized_errors.get("security_critical", [])),
+                "major_issues": sum(len(categorized_errors.get(cat, [])) for cat in categorized_errors if "major" in cat),
+                "minor_issues": sum(len(categorized_errors.get(cat, [])) for cat in categorized_errors if "minor" in cat),
             },
             "by_severity": {
                 "ERROR": len([e for e in errors if e.severity == "ERROR"]),
@@ -1547,16 +1456,11 @@ class ComprehensiveAnalyzer:
                 "SECURITY": len([e for e in errors if e.severity == "SECURITY"]),
                 "INFO": len([e for e in errors if e.severity == "INFO"]),
             },
-            "by_tool": {
-                tool: len([e for e in errors if e.tool_source == tool])
-                for tool in set(e.tool_source for e in errors)
-            },
+            "by_tool": {tool: len([e for e in errors if e.tool_source == tool]) for tool in set(e.tool_source for e in errors)},
             "quality_metrics": metrics,
         }
 
-    def _calculate_quality_score(
-        self, errors: List[AnalysisError], metrics: Dict[str, Any]
-    ) -> float:
+    def _calculate_quality_score(self, errors: list[AnalysisError], metrics: dict[str, Any]) -> float:
         """Calculate overall code quality score (0-100)."""
         if not errors:
             return 100.0
@@ -1576,15 +1480,11 @@ class ComprehensiveAnalyzer:
                 score -= 0.5
 
         # Deduct for complexity
-        complexity_count = metrics.get("complexity_metrics", {}).get(
-            "high_complexity_count", 0
-        )
+        complexity_count = metrics.get("complexity_metrics", {}).get("high_complexity_count", 0)
         score -= complexity_count * 3.0
 
         # Deduct for dependency issues
-        vuln_deps = metrics.get("dependency_metrics", {}).get(
-            "vulnerable_dependencies", 0
-        )
+        vuln_deps = metrics.get("dependency_metrics", {}).get("vulnerable_dependencies", 0)
         score -= vuln_deps * 10.0
 
         return max(0.0, min(100.0, score))
@@ -1602,7 +1502,7 @@ class ComprehensiveAnalyzer:
         else:
             return "general"
 
-    def fix_errors_with_autogenlib(self, max_fixes: int = 5) -> Dict[str, Any]:
+    def fix_errors_with_autogenlib(self, max_fixes: int = 5) -> dict[str, Any]:
         """Use AutoGenLib to generate fixes for errors."""
         if not self.autogenlib_fixer or not self.last_results:
             return {"error": "AutoGenLib not available or no analysis results"}
@@ -1615,9 +1515,7 @@ class ComprehensiveAnalyzer:
 
         # Get critical errors first
         for category in ["syntax_critical", "type_critical", "logic_critical"]:
-            errors_to_fix.extend(
-                categorized.get(category, [])[:2]
-            )  # Max 2 per category
+            errors_to_fix.extend(categorized.get(category, [])[:2])  # Max 2 per category
 
         # Limit total fixes
         errors_to_fix = errors_to_fix[:max_fixes]
@@ -1627,19 +1525,15 @@ class ComprehensiveAnalyzer:
 
             try:
                 # Read source file
-                with open(error.file_path, "r") as f:
+                with open(error.file_path) as f:
                     source_code = f.read()
 
                 # Generate fix
-                fix_info = self.autogenlib_fixer.generate_fix_for_error(
-                    error, source_code
-                )
+                fix_info = self.autogenlib_fixer.generate_fix_for_error(error, source_code)
 
                 if fix_info and fix_info.get("fixed_code"):
                     # Apply fix
-                    success = self.autogenlib_fixer.apply_fix_to_file(
-                        error.file_path, fix_info["fixed_code"]
-                    )
+                    success = self.autogenlib_fixer.apply_fix_to_file(error.file_path, fix_info["fixed_code"])
 
                     fixes_applied.append(
                         {
@@ -1651,7 +1545,7 @@ class ComprehensiveAnalyzer:
                     )
 
             except Exception as e:
-                logging.error(f"Failed to fix error in {error.file_path}: {e}")
+                logging.exception(f"Failed to fix error in {error.file_path}: {e}")
                 fixes_applied.append(
                     {
                         "error": error.to_dict(),
@@ -1679,16 +1573,13 @@ class InteractiveAnalyzer:
         if self.console:
             self.console.print(
                 Panel.fit(
-                    "🔍 Interactive Code Analysis Session\n"
-                    "Commands: summary, errors [category], function [name], class [name], fix, export [format], quit",
+                    "🔍 Interactive Code Analysis Session\nCommands: summary, errors [category], function [name], class [name], fix, export [format], quit",
                     title="Analysis Shell",
                 )
             )
         else:
             print("=== Interactive Code Analysis Session ===")
-            print(
-                "Commands: summary, errors [category], function [name], class [name], fix, export [format], quit"
-            )
+            print("Commands: summary, errors [category], function [name], class [name], fix, export [format], quit")
 
         while True:
             try:
@@ -1705,21 +1596,15 @@ class InteractiveAnalyzer:
                     func_name = command.split()[1] if len(command.split()) > 1 else None
                     self._show_function_analysis(func_name)
                 elif command.startswith("class"):
-                    class_name = (
-                        command.split()[1] if len(command.split()) > 1 else None
-                    )
+                    class_name = command.split()[1] if len(command.split()) > 1 else None
                     self._show_class_analysis(class_name)
                 elif command == "fix":
                     self._apply_fixes()
                 elif command.startswith("export"):
-                    format_type = (
-                        command.split()[1] if len(command.split()) > 1 else "json"
-                    )
+                    format_type = command.split()[1] if len(command.split()) > 1 else "json"
                     self._export_results(format_type)
                 else:
-                    print(
-                        "Unknown command. Available: summary, errors, function, class, fix, export, quit"
-                    )
+                    print("Unknown command. Available: summary, errors, function, class, fix, export, quit")
 
             except KeyboardInterrupt:
                 break
@@ -1752,7 +1637,7 @@ class InteractiveAnalyzer:
             for key, value in overview.items():
                 print(f"{key.replace('_', ' ').title()}: {value}")
 
-    def _show_errors(self, category: Optional[str] = None):
+    def _show_errors(self, category: str | None = None):
         """Show errors, optionally filtered by category."""
         if not self.analyzer.last_results:
             print("No analysis results available.")
@@ -1768,11 +1653,9 @@ class InteractiveAnalyzer:
             print(f"\n=== All Errors ({len(errors)}) ===")
 
         for i, error in enumerate(errors[:20]):  # Show first 20
-            print(
-                f"{i+1}. {error['file_path']}:{error['line']} - {error['message']} [{error['tool_source']}]"
-            )
+            print(f"{i + 1}. {error['file_path']}:{error['line']} - {error['message']} [{error['tool_source']}]")
 
-    def _show_function_analysis(self, func_name: Optional[str]):
+    def _show_function_analysis(self, func_name: str | None):
         """Show function analysis."""
         if not func_name:
             print("Please specify a function name: function <name>")
@@ -1790,7 +1673,7 @@ class InteractiveAnalyzer:
         else:
             print(f"Function '{func_name}' not found.")
 
-    def _show_class_analysis(self, class_name: Optional[str]):
+    def _show_class_analysis(self, class_name: str | None):
         """Show class analysis."""
         if not class_name:
             print("Please specify a class name: class <name>")
@@ -1840,9 +1723,7 @@ class InteractiveAnalyzer:
                 with open(filename, "w") as f:
                     json.dump(self.analyzer.last_results, f, indent=2)
             elif format_type == "html":
-                html_content = ReportGenerator(
-                    self.analyzer.last_results
-                ).generate_html_report()
+                html_content = ReportGenerator(self.analyzer.last_results).generate_html_report()
                 with open(filename, "w") as f:
                     f.write(html_content)
             else:
@@ -1858,7 +1739,7 @@ class InteractiveAnalyzer:
 class ReportGenerator:
     """Generate comprehensive analysis reports."""
 
-    def __init__(self, results: Dict[str, Any]):
+    def __init__(self, results: dict[str, Any]):
         self.results = results
 
     def generate_terminal_report(self) -> str:
@@ -1911,9 +1792,7 @@ class ReportGenerator:
             lines.append(f"💀 DEAD CODE ({len(dead_code)} items)")
             lines.append("-" * 50)
             for item in dead_code[:10]:  # Show first 10
-                lines.append(
-                    f"{item['type'].title()}: {item['name']} - {item['reason']}"
-                )
+                lines.append(f"{item['type'].title()}: {item['name']} - {item['reason']}")
             if len(dead_code) > 10:
                 lines.append(f"... and {len(dead_code) - 10} more items")
             lines.append("")
@@ -1925,13 +1804,9 @@ class ReportGenerator:
 
         for category, errors in categorized.items():
             if errors:
-                lines.append(
-                    f"\n{category.replace('_', ' ').title()} ({len(errors)} errors):"
-                )
+                lines.append(f"\n{category.replace('_', ' ').title()} ({len(errors)} errors):")
                 for error in errors[:5]:  # Show first 5 per category
-                    lines.append(
-                        f"  • {error['file_path']}:{error['line']} - {error['message']}"
-                    )
+                    lines.append(f"  • {error['file_path']}:{error['line']} - {error['message']}")
                 if len(errors) > 5:
                     lines.append(f"  ... and {len(errors) - 5} more")
 
@@ -1950,9 +1825,9 @@ class ReportGenerator:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comprehensive Code Analysis Report</title>
     <style>
-        body {{ 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; padding: 20px; background: #f5f5f5; 
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 20px; background: #f5f5f5;
         }}
         .container {{ max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
         h1 {{ color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }}
@@ -1981,35 +1856,35 @@ class ReportGenerator:
 <body>
     <div class="container">
         <h1>🔍 Comprehensive Code Analysis Report</h1>
-        
+
         <div class="metric-grid">
             <div class="metric-card">
-                <div class="metric-value">{self.results.get('quality_score', 0):.1f}</div>
+                <div class="metric-value">{self.results.get("quality_score", 0):.1f}</div>
                 <div class="metric-label">Quality Score</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">{len(self.results.get('errors', []))}</div>
+                <div class="metric-value">{len(self.results.get("errors", []))}</div>
                 <div class="metric-label">Total Issues</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">{len(self.results.get('dead_code', []))}</div>
+                <div class="metric-value">{len(self.results.get("dead_code", []))}</div>
                 <div class="metric-label">Dead Code Items</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">{len(self.results.get('metadata', {}).get('tools_used', []))}</div>
+                <div class="metric-value">{len(self.results.get("metadata", {}).get("tools_used", []))}</div>
                 <div class="metric-label">Tools Used</div>
             </div>
         </div>
-        
+
         <h2>📈 Error Categories</h2>
         {self._generate_error_categories_html()}
-        
+
         <h2>💀 Dead Code Analysis</h2>
         {self._generate_dead_code_html()}
-        
+
         <h2>🏗️ Codebase Structure</h2>
         {self._generate_structure_html()}
-        
+
         <h2>📊 Detailed Metrics</h2>
         {self._generate_metrics_html()}
     </div>
@@ -2028,24 +1903,20 @@ class ReportGenerator:
                 continue
 
             html_parts.append('<div class="error-category">')
-            html_parts.append(
-                f'<h3>{category.replace("_", " ").title()} ({len(errors)} errors)</h3>'
-            )
+            html_parts.append(f"<h3>{category.replace('_', ' ').title()} ({len(errors)} errors)</h3>")
 
             for error in errors[:10]:  # Show first 10 per category
                 html_parts.append(f"""
-                <div class="error-item severity-{error['severity']}">
-                    <strong>{error['file_path']}:{error['line']}</strong>
-                    <span class="tool-badge">{error['tool_source']}</span>
+                <div class="error-item severity-{error["severity"]}">
+                    <strong>{error["file_path"]}:{error["line"]}</strong>
+                    <span class="tool-badge">{error["tool_source"]}</span>
                     <br>
-                    {error['message']}
+                    {error["message"]}
                 </div>
                 """)
 
             if len(errors) > 10:
-                html_parts.append(
-                    f"<p><em>... and {len(errors) - 10} more errors</em></p>"
-                )
+                html_parts.append(f"<p><em>... and {len(errors) - 10} more errors</em></p>")
 
             html_parts.append("</div>")
 
@@ -2063,16 +1934,14 @@ class ReportGenerator:
         for item in dead_code[:20]:  # Show first 20
             html_parts.append(f"""
             <div class="error-item">
-                <strong>{item['type'].title()}: {item['name']}</strong><br>
-                <em>{item['file_path']}:{item['line']}</em><br>
-                {item['reason']}
+                <strong>{item["type"].title()}: {item["name"]}</strong><br>
+                <em>{item["file_path"]}:{item["line"]}</em><br>
+                {item["reason"]}
             </div>
             """)
 
         if len(dead_code) > 20:
-            html_parts.append(
-                f"<p><em>... and {len(dead_code) - 20} more items</em></p>"
-            )
+            html_parts.append(f"<p><em>... and {len(dead_code) - 20} more items</em></p>")
 
         html_parts.append("</div>")
         return "".join(html_parts)
@@ -2104,7 +1973,7 @@ class ReportGenerator:
 
         html_parts = []
         for category, data in metrics.items():
-            html_parts.append(f'<h3>{category.replace("_", " ").title()}</h3>')
+            html_parts.append(f"<h3>{category.replace('_', ' ').title()}</h3>")
             html_parts.append("<ul>")
 
             if isinstance(data, dict):
@@ -2120,23 +1989,13 @@ class ReportGenerator:
 
 def main():
     """Main entry point for the comprehensive analysis system."""
-    parser = argparse.ArgumentParser(
-        description="Comprehensive Python Code Analysis with Graph-Sitter, LSP, and AI-powered fixing"
-    )
-    parser.add_argument(
-        "--target", required=True, help="Target file or directory to analyze"
-    )
+    parser = argparse.ArgumentParser(description="Comprehensive Python Code Analysis with Graph-Sitter, LSP, and AI-powered fixing")
+    parser.add_argument("--target", required=True, help="Target file or directory to analyze")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
     parser.add_argument("--config", help="Configuration file path")
-    parser.add_argument(
-        "--comprehensive", action="store_true", help="Run comprehensive analysis"
-    )
-    parser.add_argument(
-        "--fix-errors", action="store_true", help="Apply AI-powered fixes"
-    )
-    parser.add_argument(
-        "--interactive", action="store_true", help="Start interactive session"
-    )
+    parser.add_argument("--comprehensive", action="store_true", help="Run comprehensive analysis")
+    parser.add_argument("--fix-errors", action="store_true", help="Apply AI-powered fixes")
+    parser.add_argument("--interactive", action="store_true", help="Start interactive session")
     parser.add_argument(
         "--format",
         choices=["terminal", "json", "html"],
@@ -2144,9 +2003,7 @@ def main():
         help="Output format",
     )
     parser.add_argument("--output", help="Output file path")
-    parser.add_argument(
-        "--max-fixes", type=int, default=5, help="Maximum number of fixes to apply"
-    )
+    parser.add_argument("--max-fixes", type=int, default=5, help="Maximum number of fixes to apply")
 
     args = parser.parse_args()
 
