@@ -63,24 +63,26 @@ except ImportError:
 
 # SolidLSP integration
 try:
-    from solidlsp import SolidLanguageServer
-    from solidlsp.ls_config import Language, LanguageServerConfig
-    from solidlsp.ls_logger import LanguageServerLogger
-    from solidlsp.settings import SolidLSPSettings
+    from graph_sitter.extensions.lsp.solidlsp.ls import SolidLanguageServer
+    from graph_sitter.extensions.lsp.solidlsp.ls_config import Language, LanguageServerConfig
+    from graph_sitter.extensions.lsp.solidlsp.ls_logger import LanguageServerLogger
+    from graph_sitter.extensions.lsp.solidlsp.settings import SolidLSPSettings
 
     SOLIDLSP_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logging.debug(f"SolidLSP not available: {e}")
     SOLIDLSP_AVAILABLE = False
 
 # AutoGenLib integration
 try:
-    import autogenlib
-    from autogenlib._exception_handler import generate_fix
-    from autogenlib._cache import cache_module
+    from graph_sitter.extensions import autogenlib
+    from graph_sitter.extensions.autogenlib._exception_handler import generate_fix
+    from graph_sitter.extensions.autogenlib._cache import cache_module
 
     AUTOGENLIB_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     AUTOGENLIB_AVAILABLE = False
+    logging.debug(f"AutoGenLib not available: {e}")
 
 
 @dataclass
@@ -448,7 +450,7 @@ class LSPDiagnosticsCollector:
             settings = SolidLSPSettings()
 
             # Initialize Pyright language server
-            from solidlsp.language_servers.pyright_server import PyrightServer
+            from graph_sitter.extensions.lsp.solidlsp.language_servers.pyright_server import PyrightServer
 
             with PyrightServer(config, self.logger, self.target_path, settings) as lsp:
                 lsp.start_server()

@@ -14,7 +14,7 @@ import openai
 from graph_sitter import Codebase
 
 # Import autogenlib's core generation and utility functions
-from autogenlib._generator import extract_python_code, validate_code
+from graph_sitter.extensions.autogenlib._generator import extract_python_code, validate_code
 
 # Import enhanced context functions and EnhancedDiagnostic
 from lsp_diagnostics import EnhancedDiagnostic

@@ -13,11 +13,11 @@ import time
 from typing import Dict, List, Optional, TypedDict, Any
 from pathlib import Path
 
-from solidlsp.ls import SolidLanguageServer
-from solidlsp.ls_config import Language, LanguageServerConfig
-from solidlsp.ls_logger import LanguageServerLogger
-from solidlsp.lsp_protocol_handler.lsp_types import Diagnostic, DocumentUri, Range
-from solidlsp.ls_utils import PathUtils
+from graph_sitter.extensions.lsp.solidlsp.ls import SolidLanguageServer
+from graph_sitter.extensions.lsp.solidlsp.ls_config import Language, LanguageServerConfig
+from graph_sitter.extensions.lsp.solidlsp.ls_logger import LanguageServerLogger
+from graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic, DocumentUri, Range
+from graph_sitter.extensions.lsp.solidlsp.ls_utils import PathUtils
 
 # Import GraphSitterAnalyzer for context enrichment
 from graph_sitter import Codebase

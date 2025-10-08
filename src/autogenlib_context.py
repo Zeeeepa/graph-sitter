@@ -9,16 +9,16 @@ import logging
 from typing import Dict, Optional, Any, List
 
 from graph_sitter import Codebase
-from solidlsp.lsp_protocol_handler.lsp_types import Diagnostic, Range
+from graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic, Range
 
 # Import LSPDiagnosticsManager's EnhancedDiagnostic
 from lsp_diagnostics import EnhancedDiagnostic
 
 # Import existing autogenlib components
-from autogenlib._caller import get_caller_info
-from autogenlib._generator import get_codebase_context as get_autogenlib_codebase_context
-from autogenlib._context import get_module_context, extract_defined_names
-from autogenlib._cache import get_all_modules, get_cached_code, get_cached_prompt
+from graph_sitter.extensions.autogenlib._caller import get_caller_info
+from graph_sitter.extensions.autogenlib._generator import get_codebase_context as get_autogenlib_codebase_context
+from graph_sitter.extensions.autogenlib._context import get_module_context, extract_defined_names
+from graph_sitter.extensions.autogenlib._cache import get_all_modules, get_cached_code, get_cached_prompt
 
 # Import GraphSitterAnalyzer for codebase overview
 from graph_sitter_analysis import GraphSitterAnalyzer
