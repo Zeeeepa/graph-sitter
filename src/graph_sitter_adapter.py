@@ -1,9 +1,17 @@
-"""GraphSitter adapter - consolidates all graph-sitter analysis."""
+"""GraphSitter adapter - consolidates all graph-sitter analysis.
+
+Integrated features from src/graph_sitter/extensions/tools/:
+- Directory analysis and listing
+- Symbol revelation and dependencies
+- Code reflection capabilities
+- Documentation generation helpers
+"""
 
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Set, Tuple
 from functools import lru_cache
 from pathlib import Path
+import os
 
 from graph_sitter.core.codebase import Codebase
 from graph_sitter.core.symbol import Symbol
@@ -435,3 +443,148 @@ class GraphSitterAdapter(GraphSitterAnalyzerProtocol):
             return "high"
         else:
             return "very_high"
+    
+    # ==================================================================
+    # INTEGRATED FEATURES FROM extensions/tools/
+    # ==================================================================
+    
+    def list_directory_structure(
+        self,
+        root_path: Optional[str] = None,
+        max_depth: int = 3,
+        include_hidden: bool = False
+    ) -> Dict[str, Any]:
+        """List directory structure with file statistics.
+        
+        Integrated from extensions/tools/list_directory.py
+        
+        Args:
+            root_path: Root directory to analyze (or None for codebase root)
+            max_depth: Maximum depth to traverse
+            include_hidden: Whether to include hidden files/directories
+            
+        Returns:
+            Dictionary with directory tree and statistics
+        """
+        if root_path is None:
+            root_path = self.codebase.root_dir
+        
+        root = Path(root_path)
+        
+        if not root.exists() or not root.is_dir():
+            return {"error": f"Invalid directory: {root_path}"}
+        
+        structure = {
+            "name": root.name,
+            "path": str(root),
+            "type": "directory",
+            "children": [],
+            "stats": {
+                "total_files": 0,
+                "total_dirs": 0,
+                "total_size_bytes": 0,
+                "file_types": {}
+            }
+        }
+        
+        def _traverse(path: Path, current_depth: int, parent_node: Dict):
+            if current_depth >= max_depth:
+                return
+            
+            try:
+                for item in sorted(path.iterdir()):
+                    # Skip hidden files if not included
+                    if not include_hidden and item.name.startswith('.'):
+                        continue
+                    
+                    if item.is_file():
+                        file_size = item.stat().st_size
+                        ext = item.suffix or "no_extension"
+                        
+                        # Update stats
+                        structure["stats"]["total_files"] += 1
+                        structure["stats"]["total_size_bytes"] += file_size
+                        structure["stats"]["file_types"][ext] = structure["stats"]["file_types"].get(ext, 0) + 1
+                        
+                        file_node = {
+                            "name": item.name,
+                            "path": str(item),
+                            "type": "file",
+                            "size_bytes": file_size,
+                            "extension": ext
+                        }
+                        parent_node["children"].append(file_node)
+                    
+                    elif item.is_dir():
+                        structure["stats"]["total_dirs"] += 1
+                        
+                        dir_node = {
+                            "name": item.name,
+                            "path": str(item),
+                            "type": "directory",
+                            "children": []
+                        }
+                        parent_node["children"].append(dir_node)
+                        _traverse(item, current_depth + 1, dir_node)
+                        
+            except PermissionError:
+                logger.warning(f"Permission denied: {path}")
+        
+        _traverse(root, 0, structure)
+        
+        # Convert size to human-readable
+        size_mb = structure["stats"]["total_size_bytes"] / (1024 * 1024)
+        structure["stats"]["total_size_mb"] = round(size_mb, 2)
+        
+        return structure
+    
+    def get_codebase_statistics(self) -> Dict[str, Any]:
+        """Get comprehensive codebase statistics.
+        
+        Combines multiple analysis methods for overview.
+        
+        Returns:
+            Dictionary with comprehensive stats
+        """
+        try:
+            stats = {
+                "overview": self.get_codebase_overview(),
+                "files": {
+                    "total": len(list(self.codebase.files)),
+                    "by_extension": {}
+                },
+                "symbols": {
+                    "total_functions": 0,
+                    "total_classes": 0,
+                    "total_symbols": 0
+                },
+                "health": {
+                    "dead_code_items": 0,
+                    "circular_dependencies": 0,
+                    "complex_functions": 0
+                }
+            }
+            
+            # Count by extension
+            for file in self.codebase.files:
+                ext = Path(file.filepath).suffix or "no_extension"
+                stats["files"]["by_extension"][ext] = stats["files"]["by_extension"].get(ext, 0) + 1
+                
+                # Count symbols
+                if hasattr(file, 'symbols'):
+                    stats["symbols"]["total_symbols"] += len(file.symbols)
+                    stats["symbols"]["total_functions"] += sum(1 for s in file.symbols if isinstance(s, Function))
+                    stats["symbols"]["total_classes"] += sum(1 for s in file.symbols if isinstance(s, Class))
+            
+            # Health metrics
+            dead_code = self.find_dead_code()
+            stats["health"]["dead_code_items"] = len(dead_code.get("unused_symbols", []))
+            
+            circular = self.detect_circular_dependencies()
+            stats["health"]["circular_dependencies"] = len(circular.get("cycles", []))
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Error getting codebase statistics: {e}")
+            return {"error": str(e)}
