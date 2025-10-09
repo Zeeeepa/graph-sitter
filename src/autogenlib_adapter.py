@@ -15,7 +15,16 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from graph_sitter import Codebase
+# Import Codebase - available from top-level package per __init__.py line 7
+try:
+    from graph_sitter import Codebase
+except ImportError:
+    # Fallback: try direct import from core
+    try:
+        from graph_sitter.core.codebase import Codebase
+    except ImportError:
+        # Final fallback for development/testing
+        Codebase = None
 from .analysis_utils import AnalysisError, setup_logger
 
 logger = setup_logger(__name__)

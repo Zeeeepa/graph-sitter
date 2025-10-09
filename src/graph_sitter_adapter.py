@@ -13,10 +13,19 @@ from functools import lru_cache
 from pathlib import Path
 import os
 
-from graph_sitter.core.codebase import Codebase
-from graph_sitter.core.symbol import Symbol
-from graph_sitter.core.function import Function
-from graph_sitter.core.class_definition import Class
+# Direct imports from graph_sitter core modules
+# Note: graph_sitter.core.__init__.py is empty, so we import directly
+try:
+    from graph_sitter.core.codebase import Codebase
+    from graph_sitter.core.symbol import Symbol
+    from graph_sitter.core.function import Function
+    from graph_sitter.core.class_definition import Class
+except ImportError:
+    # Fallback for development/testing
+    Codebase = None
+    Symbol = None
+    Function = None
+    Class = None
 
 from .protocols import GraphSitterAnalyzerProtocol
 from .analysis_utils import setup_logger, AnalysisError
