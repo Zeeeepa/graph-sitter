@@ -1,10 +1,18 @@
 """Unified AutoGenLib Adapter for AI-powered error resolution.
 
-Consolidates autogenlib_context.py and autogenlib_ai_resolve.py.
+Consolidates autogenlib_context.py, autogenlib_ai_resolve.py, and extensions.
+Integrated features from src/graph_sitter/extensions/autogenlib/:
+- Advanced exception handling
+- Intelligent caching
+- AI-powered code generation
 """
 
 import logging
 import os
+import json
+import hashlib
+import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from graph_sitter import Codebase
@@ -27,6 +35,8 @@ class AutoGenLibAdapter:
     Consolidates:
     - Context generation (from autogenlib_context.py)
     - AI resolution (from autogenlib_ai_resolve.py)
+    - Advanced caching (from extensions/autogenlib/_cache.py)
+    - Exception handling (from extensions/autogenlib/_exception_handler.py)
     """
     
     def __init__(
@@ -34,7 +44,8 @@ class AutoGenLibAdapter:
         codebase: Codebase,
         graph_sitter_adapter=None,
         lsp_manager=None,
-        ai_config: Optional[Dict[str, Any]] = None
+        ai_config: Optional[Dict[str, Any]] = None,
+        enable_caching: bool = True
     ):
         """Initialize AI resolution adapter.
         
@@ -43,6 +54,7 @@ class AutoGenLibAdapter:
             graph_sitter_adapter: GraphSitterAdapter for code analysis
             lsp_manager: LSPDiagnosticsManager for diagnostics
             ai_config: AI configuration (provider, model, etc.)
+            enable_caching: Whether to enable response caching
         """
         self.codebase = codebase
         self.gs_adapter = graph_sitter_adapter
@@ -50,11 +62,17 @@ class AutoGenLibAdapter:
         self.ai_config = ai_config or {}
         self._client = None
         self._context_cache: Dict[str, Any] = {}
+        self._enable_caching = enable_caching
+        self._cache_dir = None
+        
+        # Initialize cache directory
+        if self._enable_caching:
+            self._init_cache_directory()
         
         # Configure AI client
         self._setup_ai_client()
         
-        logger.info("Initialized AutoGenLibAdapter")
+        logger.info("Initialized AutoGenLibAdapter (caching: %s)", enable_caching)
     
     def _setup_ai_client(self):
         """Setup AI client based on configuration."""
@@ -343,6 +361,216 @@ Format your response as JSON:
             return "medium"
         else:
             return "high"
+    
+    # ==================================================================
+    # INTEGRATED FEATURES FROM extensions/autogenlib/
+    # ==================================================================
+    
+    def _init_cache_directory(self):
+        """Initialize cache directory for storing AI responses."""
+        cache_dir = Path.home() / ".autogenlib_cache"
+        cache_dir.mkdir(exist_ok=True)
+        self._cache_dir = cache_dir
+        logger.info(f"Cache directory initialized: {cache_dir}")
+    
+    def _get_cache_key(self, error: AnalysisError) -> str:
+        """Generate cache key for an error."""
+        key_data = f"{error.file_path}:{error.line}:{error.error_type}:{error.message}"
+        return hashlib.md5(key_data.encode()).hexdigest()
+    
+    def _get_cached_fix(self, error: AnalysisError) -> Optional[Dict[str, Any]]:
+        """Get cached fix for an error if available."""
+        if not self._enable_caching or not self._cache_dir:
+            return None
+        
+        cache_key = self._get_cache_key(error)
+        cache_file = self._cache_dir / f"{cache_key}.json"
+        
+        try:
+            if cache_file.exists():
+                with open(cache_file, 'r') as f:
+                    data = json.load(f)
+                    logger.info(f"Cache hit for error at {error.file_path}:{error.line}")
+                    return data
+        except (json.JSONDecodeError, IOError) as e:
+            logger.warning(f"Error reading cache: {e}")
+        
+        return None
+    
+    def _cache_fix(self, error: AnalysisError, fix_result: Dict[str, Any]):
+        """Cache a fix result."""
+        if not self._enable_caching or not self._cache_dir:
+            return
+        
+        cache_key = self._get_cache_key(error)
+        cache_file = self._cache_dir / f"{cache_key}.json"
+        
+        try:
+            with open(cache_file, 'w') as f:
+                json.dump(fix_result, f, indent=2)
+            logger.info(f"Cached fix for error at {error.file_path}:{error.line}")
+        except IOError as e:
+            logger.warning(f"Error writing cache: {e}")
+    
+    def generate_advanced_fix(
+        self,
+        error: AnalysisError,
+        source_code: str,
+        use_cache: bool = True
+    ) -> Dict[str, Any]:
+        """Generate advanced fix using OpenAI with detailed analysis.
+        
+        This method integrates the advanced error fixing from
+        extensions/autogenlib/_exception_handler.py
+        
+        Args:
+            error: AnalysisError to fix
+            source_code: Source code of the file
+            use_cache: Whether to use cached results
+            
+        Returns:
+            Dictionary with:
+                - explanation: What was wrong and how it was fixed
+                - changes: List of specific changes made
+                - fixed_code: Complete fixed source code
+                - confidence: Confidence level (0-1)
+        """
+        # Check cache first
+        if use_cache:
+            cached = self._get_cached_fix(error)
+            if cached:
+                return cached
+        
+        if not self._client or not HAS_OPENAI:
+            return {
+                "error": "OpenAI client not configured",
+                "explanation": None,
+                "changes": [],
+                "fixed_code": None,
+                "confidence": 0.0
+            }
+        
+        try:
+            # Create comprehensive system prompt
+            system_prompt = """
+You are an expert Python developer specialized in fixing static analysis errors.
+
+You excel at:
+1. Understanding static analysis tool outputs (ruff, mypy, pylint, bandit, etc.)
+2. Identifying the root cause of style, type, security, and logic issues
+3. Providing minimal, targeted fixes that resolve the specific issue
+4. Maintaining code consistency and following Python best practices
+5. Explaining the reasoning behind each fix
+
+Your fixes should:
+1. Address the specific error without introducing new issues
+2. Maintain the original code's functionality and intent
+3. Follow PEP 8 and modern Python conventions
+4. Include type hints where appropriate
+5. Add necessary imports or remove unused ones
+
+Always provide both the fixed code and a clear explanation.
+"""
+            
+            # Create detailed user prompt
+            user_prompt = f"""
+STATIC ANALYSIS ERROR FIXING TASK
+
+ERROR DETAILS:
+- File: {error.file_path}
+- Line: {error.line}
+- Column: {error.column}
+- Error Type: {error.error_type}
+- Severity: {error.severity}
+- Tool: {error.tool_source}
+- Message: {error.message}
+
+CURRENT SOURCE CODE:
+```python
+{source_code}
+```
+
+TASK:
+Fix the specific error identified above. Focus on the exact line and issue mentioned.
+
+RESPONSE FORMAT (JSON):
+{{
+    "explanation": "Clear explanation of what was wrong and how you fixed it",
+    "changes": [
+        {{
+            "line": {error.line},
+            "description": "What was changed on this line",
+            "original": "original code",
+            "new": "fixed code"
+        }}
+    ],
+    "fixed_code": "Complete fixed Python code for the entire file",
+    "confidence": 0.9
+}}
+"""
+            
+            # Call OpenAI API
+            response = openai.ChatCompletion.create(
+                model=self.ai_config.get('model', 'gpt-4'),
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=self.ai_config.get('temperature', 0.2),
+                max_tokens=self.ai_config.get('max_tokens', 3000)
+            )
+            
+            # Parse response
+            result = json.loads(response.choices[0].message.content)
+            
+            # Cache the result
+            if use_cache:
+                self._cache_fix(error, result)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error generating advanced fix: {e}")
+            return {
+                "error": str(e),
+                "explanation": None,
+                "changes": [],
+                "fixed_code": None,
+                "confidence": 0.0
+            }
+    
+    def clear_cache(self):
+        """Clear all cached fixes."""
+        if not self._cache_dir:
+            return
+        
+        try:
+            import shutil
+            shutil.rmtree(self._cache_dir)
+            self._init_cache_directory()
+            logger.info("Cache cleared successfully")
+        except Exception as e:
+            logger.error(f"Error clearing cache: {e}")
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get statistics about the cache."""
+        if not self._cache_dir:
+            return {"enabled": False}
+        
+        try:
+            cache_files = list(self._cache_dir.glob("*.json"))
+            total_size = sum(f.stat().st_size for f in cache_files)
+            
+            return {
+                "enabled": True,
+                "cache_dir": str(self._cache_dir),
+                "cached_fixes": len(cache_files),
+                "total_size_bytes": total_size,
+                "total_size_mb": round(total_size / (1024 * 1024), 2)
+            }
+        except Exception as e:
+            logger.error(f"Error getting cache stats: {e}")
+            return {"enabled": True, "error": str(e)}
     
     # Enhanced Context Generation (from autogenlib_context.py)
     
