@@ -27,8 +27,14 @@ except ImportError:
     Function = None
     Class = None
 
-from .protocols import GraphSitterAnalyzerProtocol
-from .analysis_utils import setup_logger, AnalysisError
+# Try relative imports first, fall back to absolute
+try:
+    from .protocols import GraphSitterAnalyzerProtocol
+    from .analysis_utils import setup_logger, AnalysisError
+except ImportError:
+    # Fallback for direct execution
+    from protocols import GraphSitterAnalyzerProtocol
+    from analysis_utils import setup_logger, AnalysisError
 
 logger = setup_logger(__name__)
 

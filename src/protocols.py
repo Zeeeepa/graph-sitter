@@ -6,7 +6,11 @@ enabling structural typing, better testing, and flexibility in implementation.
 
 from typing import Any, Protocol, runtime_checkable
 
-from .analysis_utils import AnalysisError
+# Try relative imports first, fall back to absolute
+try:
+    from .analysis_utils import AnalysisError
+except ImportError:
+    from analysis_utils import AnalysisError
 
 
 @runtime_checkable
@@ -210,4 +214,3 @@ ErrorContext = dict[str, Any]
 VisualizationResult = dict[str, Any]
 AnalysisResult = dict[str, Any]
 FixResult = dict[str, Any]
-

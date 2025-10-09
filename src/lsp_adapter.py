@@ -14,7 +14,11 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 from dataclasses import dataclass
 
-from .analysis_utils import AnalysisError, setup_logger
+# Try relative imports first, fall back to absolute
+try:
+    from .analysis_utils import AnalysisError, setup_logger
+except ImportError:
+    from analysis_utils import AnalysisError, setup_logger
 
 logger = setup_logger(__name__)
 
@@ -338,4 +342,3 @@ class LSPAdapter:
         """Clear the diagnostics cache."""
         self.diagnostics_cache.clear()
         logger.info("Diagnostics cache cleared")
-

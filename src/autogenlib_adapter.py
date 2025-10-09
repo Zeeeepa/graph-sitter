@@ -25,7 +25,11 @@ except ImportError:
     except ImportError:
         # Final fallback for development/testing
         Codebase = None
-from .analysis_utils import AnalysisError, setup_logger
+# Try relative imports first, fall back to absolute
+try:
+    from .analysis_utils import AnalysisError, setup_logger
+except ImportError:
+    from analysis_utils import AnalysisError, setup_logger
 
 logger = setup_logger(__name__)
 
