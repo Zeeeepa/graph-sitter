@@ -1,76 +1,48 @@
-import os
+"""Pytest configuration and fixtures for graph-sitter tests."""
 
 import pytest
+import sys
+from pathlib import Path
 
-from tests.shared.codemod.models import Size
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
+@pytest.fixture
+def sample_codebase():
+    """Fixture providing a sample codebase for testing."""
+    from graph_sitter import Codebase
+    # Use a small subset for testing
+    return Codebase("./src")
 
-def find_dirs_to_ignore(start_dir, prefix):
-    dirs_to_ignore = []
-    for root, dirs, files in os.walk(start_dir):
-        for dir in dirs:
-            full_path = os.path.relpath(os.path.join(root, dir), start_dir)
-            if any(dd.startswith("original_input") or dd.startswith("output") or dd.startswith("input") or dd.startswith("expected") for dd in dir.split("/")):
-                dirs_to_ignore.append(full_path)
-    return dirs_to_ignore
+@pytest.fixture
+def graph_sitter_adapter(sample_codebase):
+    """Fixture providing GraphSitterAdapter."""
+    from src.graph_sitter_adapter import GraphSitterAdapter
+    return GraphSitterAdapter(sample_codebase)
 
+@pytest.fixture
+def autogenlib_adapter(sample_codebase, graph_sitter_adapter):
+    """Fixture providing AutoGenLibAdapter."""
+    from src.autogenlib_adapter import AutoGenLibAdapter
+    return AutoGenLibAdapter(sample_codebase, graph_sitter_adapter)
 
-def pytest_addoption(parser) -> None:
-    parser.addoption(
-        "--size",
-        action="append",
-        type=Size,
-        default=["small"],
-        choices=map(str.lower, Size.__members__.keys()),
-        help="What size test cases to run",
+@pytest.fixture
+def analysis_orchestrator():
+    """Fixture providing AnalysisOrchestrator."""
+    from src.lib_analysis import AnalysisOrchestrator
+    return AnalysisOrchestrator()
+
+@pytest.fixture
+def sample_error():
+    """Fixture providing a sample AnalysisError."""
+    from src.analysis_utils import AnalysisError
+    return AnalysisError(
+        file_path="src/test_file.py",
+        line=10,
+        column=5,
+        error_type="syntax_error",
+        severity="error",
+        message="Test error message",
+        tool_source="ruff",
+        category="syntax"
     )
-    parser.addoption(
-        "--profile",
-        action="store",
-        type=bool,
-        default=False,
-        help="Whether to profile the test",
-    )
-    parser.addoption(
-        "--sync-graph",
-        action="store",
-        type=str,
-        dest="sync-graph",
-        default="false",
-        help="Whether to sync the graph between tests",
-    )
-    parser.addoption(
-        "--log-parse",
-        action="store",
-        type=str,
-        dest="log-parse",
-        default="false",
-        help="Whether to log parsing errors for parse tests",
-    )
-    parser.addoption(
-        "--extra-repos",
-        type=bool,
-        action="store",
-        default=False,
-        help="Whether to test on extra repos",
-    )
-    parser.addoption("--token", action="store", default=None, help="Read-only GHA token to access extra repos")
-
-    parser.addoption("--codemod-id", action="store", type=int, default=None, help="Runs db skills test for a specific codemod")
-
-    parser.addoption("--repo-id", action="store", type=int, default=None, help="Runs db skills test for a specific repo")
-
-    parser.addoption("--base-commit", action="store", type=str, default=None, help="Runs db skills test for a specific commit. Argument can be the shortest unique substring.")
-
-    parser.addoption("--cli-api-key", action="store", type=str, default=None, help="Token necessary to access skills.")
-
-
-@pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    outcome = yield
-    report = outcome.get_result()
-
-    if report.when == "call" and report.failed:
-        if "NodeJS or npm is not installed" in str(report.longrepr):
-            msg = "This test requires NodeJS and npm to be installed. Please install them before running the tests."
-            raise RuntimeError(msg)
