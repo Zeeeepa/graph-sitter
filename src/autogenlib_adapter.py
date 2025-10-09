@@ -343,3 +343,250 @@ Format your response as JSON:
             return "medium"
         else:
             return "high"
+    
+    # Enhanced Context Generation (from autogenlib_context.py)
+    
+    def generate_comprehensive_context(
+        self,
+        errors: List[AnalysisError],
+        include_patterns: bool = True
+    ) -> Dict[str, Any]:
+        """Generate comprehensive context for AI including patterns and history.
+        
+        Args:
+            errors: List of errors to generate context for
+            include_patterns: Whether to include error patterns
+            
+        Returns:
+            Comprehensive context dictionary
+        """
+        context = {
+            "codebase_overview": {},
+            "error_summary": {},
+            "patterns": [],
+            "related_files": [],
+            "suggested_approach": ""
+        }
+        
+        try:
+            # Codebase overview
+            if self.gs_adapter:
+                context["codebase_overview"] = self.gs_adapter.get_codebase_overview()
+            
+            # Error summary
+            context["error_summary"] = {
+                "total": len(errors),
+                "by_severity": self._group_by_severity(errors),
+                "by_category": self._group_by_category(errors),
+                "by_file": self._group_by_file(errors)
+            }
+            
+            # Find patterns if requested
+            if include_patterns:
+                context["patterns"] = self._find_error_patterns(errors)
+            
+            # Identify related files
+            context["related_files"] = self._get_relevant_files(errors)
+            
+            # Generate suggested approach
+            context["suggested_approach"] = self._generate_fix_approach(errors)
+            
+        except Exception as e:
+            logger.error(f"Error generating comprehensive context: {e}")
+            context["error"] = str(e)
+        
+        return context
+    
+    def resolve_with_retry(
+        self,
+        error: AnalysisError,
+        max_retries: int = 3,
+        backoff_factor: float = 2.0
+    ) -> Dict[str, Any]:
+        """Resolve error with retry logic and exponential backoff.
+        
+        Args:
+            error: AnalysisError to resolve
+            max_retries: Maximum number of retry attempts
+            backoff_factor: Multiplier for backoff delay
+            
+        Returns:
+            Resolution result with attempt history
+        """
+        import time
+        
+        attempts = []
+        delay = 1.0
+        
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Attempting resolution (attempt {attempt + 1}/{max_retries})")
+                result = self.resolve_error(error)
+                
+                attempts.append({
+                    "attempt": attempt + 1,
+                    "success": result.get("fix_code") is not None,
+                    "confidence": result.get("confidence", 0.0)
+                })
+                
+                # If successful, return result
+                if result.get("fix_code"):
+                    return {
+                        **result,
+                        "attempts": attempts,
+                        "final_attempt": attempt + 1
+                    }
+                
+                # If not final attempt, wait before retrying
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+                    delay *= backoff_factor
+                    
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} failed: {e}")
+                attempts.append({
+                    "attempt": attempt + 1,
+                    "success": False,
+                    "error": str(e)
+                })
+                
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+                    delay *= backoff_factor
+        
+        # All attempts failed
+        return {
+            "error": "All resolution attempts failed",
+            "fix_code": None,
+            "explanation": None,
+            "confidence": 0.0,
+            "attempts": attempts
+        }
+    
+    def batch_resolve(
+        self,
+        errors: List[AnalysisError],
+        batch_size: int = 5,
+        parallel: bool = False
+    ) -> List[Dict[str, Any]]:
+        """Resolve errors in batches for efficiency.
+        
+        Args:
+            errors: List of errors to resolve
+            batch_size: Number of errors per batch
+            parallel: Whether to process batches in parallel
+            
+        Returns:
+            List of resolution results
+        """
+        results = []
+        
+        # Sort errors by file and line for better batching
+        sorted_errors = sorted(errors, key=lambda e: (e.file_path, e.line))
+        
+        # Process in batches
+        for i in range(0, len(sorted_errors), batch_size):
+            batch = sorted_errors[i:i + batch_size]
+            logger.info(f"Processing batch {i//batch_size + 1} ({len(batch)} errors)")
+            
+            # Generate shared context for batch
+            batch_context = self._get_batch_context(batch)
+            
+            # Resolve each error in batch
+            for error in batch:
+                result = self.resolve_error(error, context=batch_context)
+                results.append(result)
+        
+        return results
+    
+    def _group_by_severity(self, errors: List[AnalysisError]) -> Dict[str, int]:
+        """Group errors by severity."""
+        from collections import Counter
+        return dict(Counter(e.severity for e in errors))
+    
+    def _group_by_category(self, errors: List[AnalysisError]) -> Dict[str, int]:
+        """Group errors by category."""
+        from collections import Counter
+        return dict(Counter(e.category for e in errors if e.category))
+    
+    def _group_by_file(self, errors: List[AnalysisError]) -> Dict[str, int]:
+        """Group errors by file."""
+        from collections import Counter
+        return dict(Counter(e.file_path for e in errors))
+    
+    def _find_error_patterns(self, errors: List[AnalysisError]) -> List[Dict[str, Any]]:
+        """Find common patterns in errors."""
+        patterns = []
+        
+        # Find common error types
+        by_type = self._group_by_category(errors)
+        for error_type, count in by_type.items():
+            if count >= 3:  # Pattern if appears 3+ times
+                patterns.append({
+                    "type": "repeated_error_type",
+                    "error_type": error_type,
+                    "count": count,
+                    "suggestion": f"Consider addressing root cause of {error_type} errors"
+                })
+        
+        # Find errors in same file
+        by_file = self._group_by_file(errors)
+        for file, count in by_file.items():
+            if count >= 5:  # Multiple errors in same file
+                patterns.append({
+                    "type": "file_hotspot",
+                    "file": file,
+                    "count": count,
+                    "suggestion": f"File {file} may need refactoring"
+                })
+        
+        return patterns
+    
+    def _get_relevant_files(self, errors: List[AnalysisError]) -> List[str]:
+        """Get list of files relevant to errors."""
+        files = set(e.file_path for e in errors)
+        
+        # Add related files based on imports if possible
+        if self.gs_adapter:
+            related = set()
+            for file in files:
+                deps = self.gs_adapter.analyze_dependencies(file)
+                related.update(imp.get("module") for imp in deps.get("imports", []))
+            
+            files.update(related)
+        
+        return sorted(list(files))
+    
+    def _generate_fix_approach(self, errors: List[AnalysisError]) -> str:
+        """Generate suggested approach for fixing errors."""
+        count = len(errors)
+        severities = self._group_by_severity(errors)
+        
+        critical_count = severities.get("error", 0)
+        warning_count = severities.get("warning", 0)
+        
+        if critical_count > 0:
+            return f"Start with {critical_count} critical errors, then address {warning_count} warnings"
+        elif warning_count > 0:
+            return f"Address {warning_count} warnings systematically"
+        else:
+            return "Review and address remaining issues"
+    
+    def _get_batch_context(self, batch: List[AnalysisError]) -> Dict[str, Any]:
+        """Get shared context for a batch of errors."""
+        # Get common files
+        files = list(set(e.file_path for e in batch))
+        
+        context = {
+            "batch_size": len(batch),
+            "common_files": files,
+            "severity_distribution": self._group_by_severity(batch)
+        }
+        
+        # Add file details for common files
+        if self.gs_adapter and len(files) <= 3:
+            context["file_details"] = {
+                f: self.gs_adapter.get_file_details(f) for f in files
+            }
+        
+        return context
