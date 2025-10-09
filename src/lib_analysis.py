@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Optional
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from analysis_utils import AnalysisError, ToolConfig, setup_logger
-from protocols import ToolIntegrationProtocol, AnalysisOrchestratorProtocol
+from .analysis_utils import AnalysisError, ToolConfig, setup_logger
+from .protocols import ToolIntegrationProtocol, AnalysisOrchestratorProtocol
 
 logger = setup_logger(__name__)
 

@@ -8,7 +8,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from graph_sitter import Codebase
-from analysis_utils import AnalysisError, setup_logger
+from .analysis_utils import AnalysisError, setup_logger
 
 logger = setup_logger(__name__)
 

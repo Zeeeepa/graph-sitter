@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import Optional
 
 from graph_sitter import Codebase
-from graph_sitter_adapter import GraphSitterAdapter
-from autogenlib_adapter import AutoGenLibAdapter  
-from lib_analysis import AnalysisOrchestrator
-from lsp_diagnostics import LSPDiagnosticsManager
-from analysis_utils import setup_logger
+from .graph_sitter_adapter import GraphSitterAdapter
+from .autogenlib_adapter import AutoGenLibAdapter  
+from .lib_analysis import AnalysisOrchestrator
+from .lsp_diagnostics import LSPDiagnosticsManager
+from .analysis_utils import setup_logger
 
 logger = setup_logger(__name__)
 

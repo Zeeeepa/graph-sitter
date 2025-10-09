@@ -6,7 +6,7 @@ enabling structural typing, better testing, and flexibility in implementation.
 
 from typing import Any, Protocol, runtime_checkable
 
-from analysis_utils import AnalysisError
+from .analysis_utils import AnalysisError
 
 
 @runtime_checkable
