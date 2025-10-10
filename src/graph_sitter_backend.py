@@ -57,7 +57,7 @@ try:
     from lsp_diagnostics import LSPDiagnosticsManager
 
     # Import autogenlib AI resolution
-    from autogenlib_ai_resolve import resolve_diagnostic_with_ai
+    from autogenlib_adapter import resolve_diagnostic_with_ai
     from solidlsp.lsp_protocol_handler.lsp_types import (
         Diagnostic,
         DocumentUri,
