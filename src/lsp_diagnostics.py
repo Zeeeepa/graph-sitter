@@ -259,7 +259,7 @@ class LSPDiagnosticsManager:
         network_errors = self.runtime_collector.collect_network_errors()
 
         # Import autogenlib_context here to avoid circular dependency at module level
-        from autogenlib_context import get_ai_fix_context
+        from autogenlib_adapter import get_ai_fix_context
 
         for uri, diagnostics_list in all_raw_diagnostics.items():
             file_path = PathUtils.uri_to_path(uri)
