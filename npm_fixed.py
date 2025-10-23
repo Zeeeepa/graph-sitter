@@ -36,7 +36,7 @@ from markdown.extensions.toc import TocExtension
 from markdown.extensions.extra import ExtraExtension
 import html
 import base64
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, Tag, Tag
 from bs4.element import NavigableString
 import queue
 import hashlib
@@ -1645,7 +1645,7 @@ class NPMClient:
                 return {}
 
             # Extract the package
-            file_tree = {}
+            file_tree: dict[str, dict] = {}
 
             if package_file.endswith('.tgz'):
                 # Handle tar.gz files
@@ -1957,7 +1957,7 @@ class NPMClient:
         min_bytes = int(size_min * 1024) if size_min else None
         max_bytes = int(size_max * 1024 * 1024) if size_max else None
 
-        all_packages = {}
+        all_packages: dict[str, dict] = {}
         page_size = 250
         from_value = 0
         total_retrieved = 0
