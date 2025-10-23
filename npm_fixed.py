@@ -1886,7 +1886,7 @@ class NPMClient:
                 readme_tag = cast(Tag, readme_div)
 
                 for element in readme_tag.find_all(['p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'code', 'table', 'tr', 'td', 'th']):
-                    if element.name == 'pre':
+                    if hasattr(element, "name") and element.name == 'pre':
                         readme_content += f"\n\n```\n{element.get_text()}\n```\n"
                     elif element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
                         readme_content += f"\n{element.get_text()}\n"
@@ -2333,7 +2333,7 @@ def find_npm_executable() -> Optional[str]:
         program_files = os.environ.get('ProgramFiles', 'C:\\Program Files')
         program_files_x86 = os.environ.get('ProgramFiles(x86)', 'C:\\Program Files (x86)')
         localappdata = os.environ.get('LOCALAPPDATA', os.path.expanduser('~\\AppData\\Local'))
-        appdata = os.environ.get('APPDATA', os.path.expanduser('~\AppData\Roaming'))
+        appdata = os.environ.get('APPDATA', os.path.expanduser(r'~\AppData\Roaming'))
 
         common_paths = [
             os.path.join(program_files, 'nodejs', 'npm.cmd'),
