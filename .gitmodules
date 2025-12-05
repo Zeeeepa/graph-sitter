@@ -1,0 +1,3 @@
+[submodule "src/graph_sitter/extensions/serena"]
+	path = src/graph_sitter/extensions/serena
+	url = https://github.com/oraios/serena.git
