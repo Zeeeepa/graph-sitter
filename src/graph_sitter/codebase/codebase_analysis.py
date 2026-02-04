@@ -29,13 +29,15 @@ def get_codebase_summary(codebase: Codebase) -> str:
 
 
 def get_file_summary(file: SourceFile) -> str:
+    # Check if interfaces attribute exists (TypeScript only)
+    interfaces_count = len(file.interfaces) if hasattr(file, 'interfaces') else 0
     return f"""==== [ `{file.name}` (SourceFile) Dependency Summary ] ====
 - {len(file.imports)} imports
 - {len(file.symbols)} symbol references
 \t- {len(file.classes)} classes
 \t- {len(file.functions)} functions
 \t- {len(file.global_vars)} global variables
-\t- {len(file.interfaces)} interfaces
+\t- {interfaces_count} interfaces
 
 ==== [ `{file.name}` Usage Summary ] ====
 - {len(file.imports)} importers
