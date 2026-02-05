@@ -42,7 +42,7 @@ from graph_sitter.core.file import SourceFile
 from graph_sitter.core.import_resolution import Import
 from graph_sitter.core.external_module import ExternalModule
 
-from graph_sitter.extensions.tools.codebase_analysis import (
+from codebase_analysis import (
     get_codebase_summary,
     get_file_summary,
     get_class_summary,
@@ -57,7 +57,7 @@ from graph_sitter.extensions.tools.view_file import (
     view_file
 )
 
-from graph_sitter.extensions.tools.reveal_symbol import (
+from graph_sitter_tools_adapter import (
     SymbolInfo,
     RevealSymbolObservation,
     get_symbol_info,
@@ -67,7 +67,7 @@ from graph_sitter.extensions.tools.reveal_symbol import (
     hop_through_imports
 )
 
-from graph_sitter.extensions.tools.list_directory import (
+from graph_sitter_tools_adapter import (
     DirectoryInfo,
     ListDirectoryObservation,
     list_directory
@@ -101,8 +101,8 @@ from graph_sitter.extensions.tools.tool_output_types import (
 )
 
 # Import documentation generation
-from graph_sitter.extensions.tools.generate_docs_json import generate_docs_json
-from graph_sitter.extensions.tools.mdx_docs_generation import (
+from graph_sitter_tools_adapter import generate_docs_json
+from graph_sitter_tools_adapter import (
     render_mdx_page_for_class,
     render_mdx_page_title,
     render_mdx_inheritence_section,
@@ -122,7 +122,7 @@ from graph_sitter.extensions.tools.mdx_docs_generation import (
 )
 
 # Import codebase utilities
-from graph_sitter.extensions.tools.current_code_codebase import (
+from graph_sitter_tools_adapter import (
     get_current_code_codebase,
     get_codegen_codebase_base_path,
     get_graphsitter_repo_path,
@@ -130,13 +130,13 @@ from graph_sitter.extensions.tools.current_code_codebase import (
     get_documented_objects
 )
 
-from graph_sitter.extensions.tools.codegen_sdk_codebase import (
+from graph_sitter_tools_adapter import (
     get_codegen_sdk_codebase,
     get_codegen_sdk_subdirectories
 )
 
 # Import document functions
-from graph_sitter.extensions.tools.document_functions import (
+from graph_sitter_tools_adapter import (
     run as document_functions_run,
     get_extended_context as doc_get_extended_context,
     hop_through_imports as doc_hop_through_imports
@@ -183,13 +183,13 @@ from graph_sitter.core.parameter import Parameter
 from graph_sitter.core.function_call import FunctionCall
 from graph_sitter.core.usage import Usage
 
-from lsp_diagnostics import LSPDiagnosticsManager
+from lsp_adapter import LSPDiagnosticsManager
 from autogenlib_adapter import resolve_diagnostic_with_ai
 from serena.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic, DocumentUri, Range
 from serena.solidlsp.ls_config import Language
 
-from graph_sitter.extensions.tools.generate_docs_json import generate_docs_json
-from graph_sitter.extensions.tools.mdx_docs_generation import render_mdx_page_for_class
+from graph_sitter_tools_adapter import generate_docs_json
+from graph_sitter_tools_adapter import render_mdx_page_for_class
 
 
 GRAPH_SITTER_AVAILABLE = True

@@ -51,10 +51,10 @@ try:
     from graph_sitter.core.usage import Usage
 
     # Import analysis functions from graph_sitter_analysis.py
-    from graph_sitter_analysis import GraphSitterAnalyzer
+    from codebase_analysis import GraphSitterAnalyzer
 
     # Import LSP diagnostics manager
-    from lsp_diagnostics import LSPDiagnosticsManager
+    from lsp_adapter import LSPDiagnosticsManager
 
     # Import autogenlib AI resolution
     from autogenlib_adapter import resolve_diagnostic_with_ai
