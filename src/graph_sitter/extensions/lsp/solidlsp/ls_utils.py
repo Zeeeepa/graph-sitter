@@ -24,6 +24,50 @@ class InvalidTextLocationError(Exception):
     pass
 
 
+class MatchedConsecutiveLines:
+    """
+    A simple container for consecutive lines from a file with context.
+    Replacement for serena.text_utils.MatchedConsecutiveLines
+    """
+
+    def __init__(self, lines: list[str], start_line: int, source_file_path: str = ""):
+        self.lines = lines
+        self.start_line = start_line
+        self.source_file_path = source_file_path
+
+    @classmethod
+    def from_file_contents(
+        cls,
+        file_contents: str,
+        line: int,
+        context_lines_before: int = 0,
+        context_lines_after: int = 0,
+        source_file_path: str = "",
+    ) -> "MatchedConsecutiveLines":
+        """
+        Create MatchedConsecutiveLines from file contents around a specific line.
+
+        :param file_contents: The full file contents
+        :param line: The target line (0-indexed)
+        :param context_lines_before: Number of lines before to include
+        :param context_lines_after: Number of lines after to include
+        :param source_file_path: Path to the source file
+        :return: MatchedConsecutiveLines instance
+        """
+        all_lines = file_contents.splitlines()
+        start_line = max(0, line - context_lines_before)
+        end_line = min(len(all_lines), line + context_lines_after + 1)
+        selected_lines = all_lines[start_line:end_line]
+
+        return cls(lines=selected_lines, start_line=start_line, source_file_path=source_file_path)
+
+    def __str__(self) -> str:
+        return "\n".join(self.lines)
+
+    def __repr__(self) -> str:
+        return f"MatchedConsecutiveLines(start_line={self.start_line}, lines={len(self.lines)})"
+
+
 class TextUtils:
     """
     Utilities for text operations.
@@ -163,6 +207,28 @@ class FileUtils:
     """
     Utility functions for file operations.
     """
+
+    @staticmethod
+    def match_path(path: str, spec: "pathspec.PathSpec", root_path: str = "") -> bool:
+        """
+        Check if a path matches a pathspec pattern.
+        Replacement for serena.util.file_system.match_path
+
+        :param path: The path to check
+        :param spec: The pathspec to match against
+        :param root_path: Optional root path for relative matching
+        :return: True if path matches the spec, False otherwise
+        """
+        import pathspec as ps
+
+        if not isinstance(spec, ps.PathSpec):
+            return False
+
+        # Normalize path for matching
+        if root_path and os.path.isabs(path):
+            path = os.path.relpath(path, root_path)
+
+        return spec.match_file(path)
 
     @staticmethod
     def read_file(logger: LanguageServerLogger, file_path: str) -> str:
