@@ -30,8 +30,8 @@ from graph_sitter.extensions.autogenlib._generator import (
     validate_code,
 )
 from graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic
-from graph_sitter_analysis import GraphSitterAnalyzer
-from lsp_diagnostics import EnhancedDiagnostic
+from codebase_analysis import GraphSitterAnalyzer
+from lsp_adapter import EnhancedDiagnostic
 
 logger = logging.getLogger(__name__)
 
@@ -1127,4 +1127,3 @@ def _styles_compatible(style1: dict[str, Any], style2: dict[str, Any]) -> bool:
 
 
 import time
-
