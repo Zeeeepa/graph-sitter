@@ -11,6 +11,9 @@ This module consolidates and orchestrates codebase analysis functionality from:
 It provides a unified public API for comprehensive codebase analysis.
 """
 
+# Standard library imports
+from typing import Dict, List, Any, Union
+
 # Core imports from consolidated modules
 # NOTE: Don't import autogenlib_adapter here - causes circular dependency
 # autogenlib_adapter imports from graph_sitter_analysis which may import from here
@@ -208,18 +211,21 @@ def find_dead_code(codebase: Codebase) -> Dict[str, List]:
 # COMPREHENSIVE ANALYSIS
 # ============================================================================
 
-def analyze_codebase(path: str, language: str = "python") -> Dict[str, Any]:
+def analyze_codebase(path: Union[str, Codebase], language: str = "python") -> Dict[str, Any]:
     """
     Perform comprehensive analysis of a codebase.
     
     Args:
-        path: Path to the codebase
+        path: Path to the codebase or Codebase object
         language: Programming language (default: "python")
         
     Returns:
         Dictionary containing complete analysis results
     """
-    codebase = Codebase(path, language=language)
+    if isinstance(path, Codebase):
+        codebase = path
+    else:
+        codebase = Codebase(path, language=language)
     
     results = {
         'summary': get_codebase_summary(codebase),
