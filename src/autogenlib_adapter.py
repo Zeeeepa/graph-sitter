@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
-"""AutoGenLib Adapter - Consolidated Module
+"""AutoGenLib Adapter - AutoGen Integration Module
+
+Part of the 4-file consolidated architecture:
+1. autogenlib_adapter.py (THIS FILE) - AutoGen integration
+2. lsp_adapter.py - LSP diagnostics  
+3. graph_sitter_tools_adapter.py - Tools consolidation
+4. codebase_analysis.py - Main analysis orchestrator
 
 Provides comprehensive AutoGenLib integration with:
 - Context enrichment for AI-driven code analysis
 - AI-powered error resolution  
 - Batch processing capabilities
 - Fix validation and strategy generation
+- Integration with LSP diagnostics and Graph-Sitter analysis
 
 This module consolidates functionality from:
 - autogenlib_context.py: Context gathering and enrichment
 - autogenlib_ai_resolve.py: AI-driven error resolution
+
+Author: Graph-Sitter Consolidation Project
 """
 
 import json
@@ -30,8 +39,9 @@ from graph_sitter.extensions.autogenlib._generator import (
     validate_code,
 )
 from graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic
-from graph_sitter_analysis import GraphSitterAnalyzer
-from lsp_diagnostics import EnhancedDiagnostic
+# Updated imports for new consolidated architecture
+from codebase_analysis import GraphSitterAnalyzer  # Consolidated from graph_sitter_analysis
+from lsp_adapter import EnhancedDiagnostic  # Consolidated from lsp_diagnostics
 
 logger = logging.getLogger(__name__)
 
@@ -1127,4 +1137,3 @@ def _styles_compatible(style1: dict[str, Any], style2: dict[str, Any]) -> bool:
 
 
 import time
-

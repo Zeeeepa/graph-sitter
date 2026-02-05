@@ -1,26 +1,18 @@
 #!/usr/bin/env python3
-# ================================================================================
-# DEPRECATION WARNING
-# ================================================================================
-# This module has been consolidated into codebase_analysis.py.
-# Please update your imports:
-#   Old: from graph_sitter_analysis import ...
-#   New: from codebase_analysis import ...
-#
-# This file will be removed in a future release.
-# ================================================================================
+"""Codebase Analysis - Consolidated Analysis Module
 
-import warnings
-warnings.warn(
-    "This module is deprecated. Use codebase_analysis.py instead.",
-    DeprecationWarning,
-    stacklevel=2
-)
+Part of the 4-file consolidated architecture:
+1. autogenlib_adapter.py - AutoGen integration
+2. lsp_adapter.py - LSP diagnostics  
+3. graph_sitter_tools_adapter.py - Tools consolidation
+4. codebase_analysis.py (THIS FILE) - Main analysis orchestrator
 
+Consolidates:
+- graph_sitter_analysis.py: GraphSitterAnalyzer class (76 methods)
+- graph_sitter_backend.py: Backend models (future)
+- analysis.py: Additional utilities (future)
 
-"""
-Comprehensive Graph-Sitter Analysis Module
-Integrates all graph-sitter folder functionalities for complete codebase analysis
+Author: Graph-Sitter Consolidation Project
 """
 
 import os

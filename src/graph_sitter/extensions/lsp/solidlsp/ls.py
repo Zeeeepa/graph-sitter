@@ -19,15 +19,13 @@ from typing import Self, Union, cast
 
 import pathspec
 
-from serena.text_utils import MatchedConsecutiveLines
-from serena.util.file_system import match_path
 from solidlsp import ls_types
 from solidlsp.ls_config import Language, LanguageServerConfig
 from solidlsp.ls_exceptions import SolidLSPException
 from solidlsp.ls_handler import SolidLanguageServerHandler
 from solidlsp.ls_logger import LanguageServerLogger
 from solidlsp.ls_types import UnifiedSymbolInformation
-from solidlsp.ls_utils import FileUtils, PathUtils, TextUtils
+from solidlsp.ls_utils import FileUtils, MatchedConsecutiveLines, PathUtils, TextUtils
 from solidlsp.lsp_protocol_handler import lsp_types
 from solidlsp.lsp_protocol_handler import lsp_types as LSPTypes
 from solidlsp.lsp_protocol_handler.lsp_constants import LSPConstants
@@ -418,7 +416,7 @@ class SolidLanguageServer(ABC):
             if self.is_ignored_dirname(part):
                 return True
 
-        return match_path(relative_path, self.get_ignore_spec(), root_path=self.repository_root_path)
+        return FileUtils.match_path(relative_path, self.get_ignore_spec(), root_path=self.repository_root_path)
 
     def _shutdown(self, timeout: float = 5.0):
         """

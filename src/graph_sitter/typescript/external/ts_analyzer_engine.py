@@ -9,7 +9,17 @@ from typing import TYPE_CHECKING
 
 from py_mini_racer import MiniRacer
 from py_mini_racer._objects import JSMappedObject
-from py_mini_racer._types import JSEvalException
+
+# Try to import the exception class, but fall back to generic Exception
+# Different versions of py-mini-racer have different exception names
+try:
+    from py_mini_racer._types import JSEvalException
+except ImportError:
+    try:
+        from py_mini_racer._types import JSOOMException as JSEvalException
+    except ImportError:
+        # If neither exists, use the base Exception class
+        JSEvalException = Exception
 
 from graph_sitter.core.external.language_engine import LanguageEngine
 from graph_sitter.shared.logging.get_logger import get_logger

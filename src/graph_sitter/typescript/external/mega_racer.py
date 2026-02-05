@@ -1,4 +1,9 @@
-from py_mini_racer import MiniRacer, init_mini_racer
+from py_mini_racer import MiniRacer
+try:
+    from py_mini_racer import init_mini_racer
+except ImportError:
+    # Newer versions of py-mini-racer removed init_mini_racer
+    init_mini_racer = None
 from py_mini_racer._context import Context
 from py_mini_racer._set_timeout import INSTALL_SET_TIMEOUT
 
@@ -25,6 +30,11 @@ class MegaRacer(MiniRacer):
 
     def __init__(self) -> None:
         # Set the max old space size to 64GB
-        dll = init_mini_racer(ignore_duplicate_init=True, flags=["--max-old-space-size=65536"])
-        self._ctx = Context(dll)
+        if init_mini_racer is not None:
+            dll = init_mini_racer(ignore_duplicate_init=True, flags=["--max-old-space-size=65536"])
+            self._ctx = Context(dll)
+        else:
+            # Fallback to parent class initialization for newer py-mini-racer versions
+            super().__init__()
+            return
         self.eval(INSTALL_SET_TIMEOUT)
