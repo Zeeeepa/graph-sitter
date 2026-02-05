@@ -1,4 +1,23 @@
 #!/usr/bin/env python3
+# ================================================================================
+# DEPRECATION WARNING
+# ================================================================================
+# This module has been consolidated into codebase_analysis.py.
+# Please update your imports:
+#   Old: from graph_sitter_backend import ...
+#   New: from codebase_analysis import ...
+#
+# This file will be removed in a future release.
+# ================================================================================
+
+import warnings
+warnings.warn(
+    "This module is deprecated. Use codebase_analysis.py instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+
 """
 Production Graph-Sitter Backend API
 Provides comprehensive codebase analysis, visualization, and transformation capabilities

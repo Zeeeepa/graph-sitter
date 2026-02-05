@@ -1,3 +1,12 @@
+# ================================================================================
+# DEPRECATED - DO NOT USE
+# ================================================================================
+# This file has syntax errors and is not functional.
+# It appears to be an incomplete/experimental version.
+#
+# This file will be removed in a future release.
+# ================================================================================
+
 #!/usr/bin/env python3
 """
 Comprehensive Python Code Analysis Backend with Graph-Sitter Integration

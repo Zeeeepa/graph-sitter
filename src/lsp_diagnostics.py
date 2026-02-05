@@ -1,4 +1,23 @@
 #!/usr/bin/env python3
+# ================================================================================
+# DEPRECATION WARNING
+# ================================================================================
+# This module has been consolidated into lsp_adapter.py.
+# Please update your imports:
+#   Old: from lsp_diagnostics import ...
+#   New: from lsp_adapter import ...
+#
+# This file will be removed in a future release.
+# ================================================================================
+
+import warnings
+warnings.warn(
+    "This module is deprecated. Use lsp_adapter.py instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+
 """Enhanced LSP Diagnostics Manager with Runtime Error Collection
 Integrates with Graph-Sitter and AutoGenLib for comprehensive error context
 """

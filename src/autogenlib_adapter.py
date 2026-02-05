@@ -40,7 +40,7 @@ from graph_sitter.extensions.autogenlib._generator import (
 )
 from graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic
 # Updated imports for new consolidated architecture
-from graph_sitter_analysis import GraphSitterAnalyzer  # TODO: Update to codebase_analysis after Phase 1
+from codebase_analysis import GraphSitterAnalyzer  # Consolidated from graph_sitter_analysis
 from lsp_adapter import EnhancedDiagnostic  # Consolidated from lsp_diagnostics
 
 logger = logging.getLogger(__name__)
