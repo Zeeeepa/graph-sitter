@@ -12,15 +12,16 @@ It provides a unified public API for comprehensive codebase analysis.
 """
 
 # Core imports from consolidated modules
-from autogenlib_adapter import *
+# NOTE: Don't import autogenlib_adapter here - causes circular dependency
+# autogenlib_adapter imports from graph_sitter_analysis which may import from here
 from lsp_adapter import *
 from graph_sitter_tools_adapter import *
 
 # Core graph-sitter SDK imports
 from graph_sitter import Codebase
-from graph_sitter.sdk.core.external_module import ExternalModule
-from graph_sitter.sdk.core.import_resolution import Import
-from graph_sitter.sdk.core.symbol import Symbol
+from graph_sitter.core.external_module import ExternalModule
+from graph_sitter.core.import_resolution import Import
+from graph_sitter.core.symbol import Symbol
 
 # Standard library
 import json
@@ -254,4 +255,3 @@ __all__ = [
 ]
 
 print("codebase_analysis loaded - main orchestrator with consolidated functionality")
-

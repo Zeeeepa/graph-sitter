@@ -42,7 +42,7 @@ from graph_sitter.core.file import SourceFile
 from graph_sitter.core.import_resolution import Import
 from graph_sitter.core.external_module import ExternalModule
 
-from graph_sitter.extensions.tools.codebase_analysis import (
+from codebase_analysis import (
     get_codebase_summary,
     get_file_summary,
     get_class_summary,

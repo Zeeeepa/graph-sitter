@@ -11,12 +11,23 @@ import time
 from typing import Any, TypedDict
 
 # Import GraphSitterAnalyzer for context enrichment
+# Import GraphSitterAnalyzer for context enrichment
 from graph_sitter import Codebase
-from graph_sitter.extensions.lsp.solidlsp.ls import SolidLanguageServer
-from graph_sitter.extensions.lsp.solidlsp.ls_config import Language, LanguageServerConfig
-from graph_sitter.extensions.lsp.solidlsp.ls_logger import LanguageServerLogger
-from graph_sitter.extensions.lsp.solidlsp.ls_utils import PathUtils
-from graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic, DocumentUri, Range
+
+# LSP imports - make optional for testing
+try:
+    from graph_sitter.extensions.lsp.solidlsp.ls import SolidLanguageServer
+    from graph_sitter.extensions.lsp.solidlsp.ls_config import Language, LanguageServerConfig
+    from graph_sitter.extensions.lsp.solidlsp.ls_logger import LanguageServerLogger
+    from graph_sitter.extensions.lsp.solidlsp.ls_utils import PathUtils
+    from graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types import Diagnostic, DocumentUri, Range
+except ImportError as e:
+    # Fallback stubs if LSP not available
+    import logging
+    logging.warning(f'LSP dependencies not available: {e}')
+    SolidLanguageServer = object
+    Language = LanguageServerConfig = LanguageServerLogger = PathUtils = object
+    Diagnostic = DocumentUri = Range = dict
 
 logger = logging.getLogger(__name__)
 
