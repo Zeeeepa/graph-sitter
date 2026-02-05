@@ -1,0 +1,3911 @@
+{
+  "analysis_files": {
+    "src/graph_sitter_analysis.py": {
+      "filepath": "src/graph_sitter_analysis.py",
+      "classes": [
+        {
+          "name": "GraphSitterAnalyzer",
+          "lineno": 156,
+          "methods": [
+            "__init__",
+            "get_codebase_overview",
+            "get_file_details",
+            "get_function_details",
+            "get_class_details",
+            "get_symbol_details",
+            "create_blast_radius_visualization",
+            "create_call_trace_visualization",
+            "create_dependency_trace_visualization",
+            "create_method_relationships_visualization",
+            "view_file_content",
+            "list_directory_contents",
+            "add_line_numbers_to_content",
+            "reveal_symbol_relationships",
+            "get_symbol_info_detailed",
+            "get_extended_symbol_context",
+            "generate_docstrings_for_undocumented",
+            "generate_structured_docs",
+            "generate_mdx_documentation",
+            "find_dead_code",
+            "validate_bash_command",
+            "run_bash_command",
+            "perform_reflection",
+            "parse_reflection_response",
+            "get_workspace_tools",
+            "get_current_code_codebase",
+            "get_codegen_sdk_codebase",
+            "import_all_sdk_modules",
+            "get_documented_objects",
+            "analyze_function_complexity",
+            "analyze_class_structure",
+            "analyze_import_relationships",
+            "_resolve_symbol_with_filepath",
+            "_identify_entrypoints",
+            "_get_dead_code_summary",
+            "_get_complexity_overview",
+            "_get_function_parameters_details",
+            "_get_function_return_type_details",
+            "_get_function_local_variables_details",
+            "_symbol_to_dict",
+            "_call_site_to_dict",
+            "_function_call_to_dict",
+            "_class_to_dict",
+            "_calculate_function_complexity",
+            "_calculate_cyclomatic_complexity",
+            "_calculate_halstead_metrics",
+            "_get_complexity_rank",
+            "_calculate_function_complexity_metrics",
+            "_calculate_function_quality_metrics",
+            "_calculate_class_complexity_metrics",
+            "_calculate_inheritance_metrics",
+            "_calculate_class_cohesion",
+            "_build_blast_radius_graph",
+            "_build_call_trace_graph",
+            "_build_dependency_trace_graph",
+            "_build_method_relationships_graph",
+            "_is_entrypoint_function",
+            "_is_entrypoint_class",
+            "_is_entrypoint_file",
+            "_is_test_function",
+            "_is_test_class",
+            "_is_special_function",
+            "_calculate_entrypoint_score",
+            "_calculate_class_entrypoint_score",
+            "_has_entrypoint_decorators",
+            "_has_framework_inheritance",
+            "_has_singleton_pattern",
+            "_has_test_decorators",
+            "_is_called_from_main_block",
+            "_is_property_method",
+            "_calculate_nesting_depth",
+            "_calculate_typed_parameters_ratio",
+            "_calculate_function_maintainability",
+            "_calculate_file_complexity",
+            "_calculate_maintainability_index",
+            "_calculate_file_doc_coverage",
+            "_detect_circular_imports",
+            "_get_function_summary",
+            "_get_class_summary",
+            "_get_import_summary",
+            "_get_symbol_summary",
+            "_get_method_summary",
+            "_get_attribute_summary",
+            "_get_symbol_context"
+          ],
+          "docstring": "Comprehensive analysis engine using all Graph-Sitter capabilities.\nProvides unified access to all gr"
+        }
+      ],
+      "functions": [
+        {
+          "name": "traverse_from_entry_point",
+          "lineno": 634,
+          "args": [
+            "symbol"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "add_file_imports",
+          "lineno": 1578,
+          "args": [
+            "current_file",
+            "visited"
+          ],
+          "docstring": null
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "os",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "logging",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "math",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "re",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Dict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "List",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Optional",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Any",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Tuple",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Union",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pathlib",
+          "name": "Path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "defaultdict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "Counter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.symbol",
+          "name": "Symbol",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.function",
+          "name": "Function",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.class_definition",
+          "name": "Class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.file",
+          "name": "SourceFile",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.import_resolution",
+          "name": "Import",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.external_module",
+          "name": "ExternalModule",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_codebase_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_file_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_class_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_function_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_symbol_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.view_file",
+          "name": "ViewFileObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.view_file",
+          "name": "add_line_numbers",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.view_file",
+          "name": "view_file",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "SymbolInfo",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "RevealSymbolObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "get_symbol_info",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "truncate_source",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "get_extended_context",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "reveal_symbol",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "hop_through_imports",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.list_directory",
+          "name": "DirectoryInfo",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.list_directory",
+          "name": "ListDirectoryObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.list_directory",
+          "name": "list_directory",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.bash",
+          "name": "RunBashCommandObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.bash",
+          "name": "validate_command",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.bash",
+          "name": "run_bash_command",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "ReflectionSection",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "ReflectionObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "parse_reflection_response",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "perform_reflection",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.observation",
+          "name": "Observation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tools",
+          "name": "get_workspace_tools",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "EditFileArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "ViewFileArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "ListDirectoryArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "SearchMatch",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "SearchArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "SemanticEditArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "RelaceEditArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.generate_docs_json",
+          "name": "generate_docs_json",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_page_for_class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_page_title",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_inheritence_section",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_attributes_section",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_methods_section",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_for_attribute",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_parameter_for_mdx",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_parameters_for_mdx",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_return_for_mdx",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_for_method",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "get_mdx_route_for_class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_type_string",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "resolve_type_string",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_builtin_type_string",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "span_type_string_by_pipe",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "parse_link",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_current_code_codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_codegen_codebase_base_path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_graphsitter_repo_path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "import_all_codegen_sdk_modules",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_documented_objects",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codegen_sdk_codebase",
+          "name": "get_codegen_sdk_codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codegen_sdk_codebase",
+          "name": "get_codegen_sdk_subdirectories",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.document_functions",
+          "name": "run",
+          "alias": "document_functions_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.document_functions",
+          "name": "get_extended_context",
+          "alias": "doc_get_extended_context"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.document_functions",
+          "name": "hop_through_imports",
+          "alias": "doc_hop_through_imports"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "generate_edge_meta",
+          "alias": "blast_generate_edge_meta"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "is_http_method",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "create_blast_radius_visualization",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "run",
+          "alias": "blast_radius_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.call_trace",
+          "name": "generate_edge_meta",
+          "alias": "call_generate_edge_meta"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.call_trace",
+          "name": "create_downstream_call_trace",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.call_trace",
+          "name": "run",
+          "alias": "call_trace_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.dependency_trace",
+          "name": "create_dependencies_visualization",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.dependency_trace",
+          "name": "run",
+          "alias": "dependency_trace_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "generate_edge_meta",
+          "alias": "method_generate_edge_meta"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "graph_class_methods",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "create_downstream_call_trace",
+          "alias": "method_create_downstream_call_trace"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "run",
+          "alias": "method_relationships_run"
+        },
+        {
+          "type": "import",
+          "module": "networkx",
+          "alias": "nx"
+        }
+      ],
+      "total_lines": 1676
+    },
+    "src/graph_sitter_backend.py": {
+      "filepath": "src/graph_sitter_backend.py",
+      "classes": [
+        {
+          "name": "AnalyzeRequest",
+          "lineno": 108,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "ErrorAnalysisResponse",
+          "lineno": 121,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "EntrypointAnalysisResponse",
+          "lineno": 132,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "TransformationRequest",
+          "lineno": 145,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "VisualizationRequest",
+          "lineno": 153,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "DeadCodeAnalysisResponse",
+          "lineno": 168,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "CodeQualityMetrics",
+          "lineno": 178,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "AnalysisEngine",
+          "lineno": 317,
+          "methods": [
+            "__init__",
+            "_analyze_errors_with_graph_sitter_enhanced",
+            "_analyze_error_patterns",
+            "_get_resolution_strategy",
+            "_generate_resolution_recommendations",
+            "_analyze_entrypoints_with_graph_sitter_enhanced",
+            "_get_function_parameters_details",
+            "_get_function_return_type_details",
+            "_get_function_local_variables_details",
+            "_is_test_function_enhanced",
+            "_is_entrypoint_class_enhanced",
+            "_is_api_entrypoint_class",
+            "_calculate_entrypoint_score",
+            "_estimate_test_coverage",
+            "_analyze_entrypoint_dependencies",
+            "_analyze_entrypoint_call_flows",
+            "_calculate_call_depth",
+            "_has_recursive_calls",
+            "_calculate_class_entrypoint_score",
+            "_classify_test_type",
+            "_build_tree_structure_from_graph_sitter",
+            "_build_directory_nodes_recursive",
+            "_build_dependency_graph_from_graph_sitter",
+            "_calculate_code_quality_metrics",
+            "_analyze_architectural_patterns",
+            "_analyze_security_patterns",
+            "_analyze_performance_patterns",
+            "_detect_file_errors_graph_sitter",
+            "_detect_function_errors_graph_sitter",
+            "_detect_class_errors_graph_sitter",
+            "_is_entrypoint_file",
+            "_is_entrypoint_function",
+            "_is_entrypoint_class",
+            "_is_test_function",
+            "_is_test_class",
+            "_is_special_function",
+            "_calculate_file_complexity",
+            "_calculate_function_complexity",
+            "_calculate_class_complexity",
+            "_calculate_maintainability_index"
+          ],
+          "docstring": "Comprehensive analysis engine for deep code analysis, integrating Graph-Sitter and LSP."
+        },
+        {
+          "name": "EnhancedVisualizationEngine",
+          "lineno": 2194,
+          "methods": [
+            "__init__",
+            "create_dynamic_dependency_graph",
+            "create_class_hierarchy_graph",
+            "create_module_dependency_graph",
+            "create_function_call_trace",
+            "create_data_flow_graph",
+            "create_blast_radius_graph",
+            "_get_target_symbol",
+            "_get_scope_symbols",
+            "_build_scoped_dependency_graph",
+            "_build_class_hierarchy_subgraph",
+            "_build_module_dependency_subgraph",
+            "_build_call_trace_subgraph",
+            "_build_data_flow_subgraph",
+            "_build_blast_radius_subgraph",
+            "_serialize_enhanced_graph",
+            "_serialize_graph",
+            "_calculate_function_complexity"
+          ],
+          "docstring": "Enhanced visualization engine with dynamic target selection and scope control"
+        },
+        {
+          "name": "TransformationEngine",
+          "lineno": 2714,
+          "methods": [
+            "__init__",
+            "move_symbol",
+            "remove_symbol",
+            "rename_symbol",
+            "resolve_imports",
+            "add_type_annotations",
+            "extract_function",
+            "get_transformation_log",
+            "clear_transformation_log"
+          ],
+          "docstring": "Advanced transformation engine for code modifications."
+        },
+        {
+          "name": "EnhancedTransformationEngine",
+          "lineno": 2997,
+          "methods": [
+            "__init__",
+            "_resolve_all_types",
+            "_resolve_all_imports",
+            "_resolve_all_function_calls",
+            "_resolve_method_implementations",
+            "_resolve_class_attributes",
+            "_resolve_variable_definitions",
+            "_resolve_parameter_types",
+            "_resolve_argument_types"
+          ],
+          "docstring": "Enhanced transformation engine with comprehensive resolution methods"
+        }
+      ],
+      "functions": [
+        {
+          "name": "clone_repository",
+          "lineno": 200,
+          "args": [
+            "repo_url",
+            "branch"
+          ],
+          "docstring": "Clone repository to temporary directory"
+        },
+        {
+          "name": "calculate_doi",
+          "lineno": 233,
+          "args": [
+            "cls"
+          ],
+          "docstring": "Calculate the depth of inheritance for a given class."
+        },
+        {
+          "name": "get_operators_and_operands",
+          "lineno": 238,
+          "args": [
+            "function"
+          ],
+          "docstring": "Extract operators and operands from function for Halstead metrics."
+        },
+        {
+          "name": "calculate_halstead_volume",
+          "lineno": 274,
+          "args": [
+            "operators",
+            "operands"
+          ],
+          "docstring": "Calculate Halstead volume metrics."
+        },
+        {
+          "name": "cc_rank",
+          "lineno": 293,
+          "args": [
+            "complexity"
+          ],
+          "docstring": "Calculate cyclomatic complexity rank."
+        },
+        {
+          "name": "find_import_cycles",
+          "lineno": 3794,
+          "args": [
+            "codebase"
+          ],
+          "docstring": "Find import cycles in the codebase"
+        },
+        {
+          "name": "find_problematic_import_loops",
+          "lineno": 3807,
+          "args": [
+            "codebase",
+            "cycles"
+          ],
+          "docstring": "Identify cycles with both static and dynamic imports between files"
+        },
+        {
+          "name": "convert_all_calls_to_kwargs",
+          "lineno": 3850,
+          "args": [
+            "codebase"
+          ],
+          "docstring": "Convert all function calls to use keyword arguments"
+        },
+        {
+          "name": "apply_fix_to_file",
+          "lineno": 3876,
+          "args": [
+            "filepath",
+            "original_content",
+            "fixed_code_snippet",
+            "diagnostic_range"
+          ],
+          "docstring": "Applies a fixed code snippet to the original file content.\nThis function attempts to replace the lin"
+        },
+        {
+          "name": "trace_calls",
+          "lineno": 2515,
+          "args": [
+            "func",
+            "target",
+            "depth"
+          ],
+          "docstring": null
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "os",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "tempfile",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "shutil",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "subprocess",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "traceback",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "uuid",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "math",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "ast",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "re",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Dict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "List",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Any",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Optional",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Union",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "defaultdict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "Counter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "datetime",
+          "name": "datetime",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "asyncio",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "logging",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "networkx",
+          "alias": "nx"
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi",
+          "name": "FastAPI",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi",
+          "name": "HTTPException",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi",
+          "name": "BackgroundTasks",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi.middleware.cors",
+          "name": "CORSMiddleware",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pydantic",
+          "name": "BaseModel",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pydantic",
+          "name": "Field",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "uvicorn",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.configs.models.codebase",
+          "name": "CodebaseConfig",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.external_module",
+          "name": "ExternalModule",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.symbol",
+          "name": "Symbol",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.file",
+          "name": "SourceFile",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.function",
+          "name": "Function",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.class_definition",
+          "name": "Class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "Statement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "IfStatement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "WhileStatement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "TryStatement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.import_statement",
+          "name": "Import",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.assignment",
+          "name": "Assignment",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.parameter",
+          "name": "Parameter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.function_call",
+          "name": "FunctionCall",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.usage",
+          "name": "Usage",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter_analysis",
+          "name": "GraphSitterAnalyzer",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "lsp_diagnostics",
+          "name": "LSPDiagnosticsManager",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "autogenlib_adapter",
+          "name": "resolve_diagnostic_with_ai",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "Diagnostic",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "DocumentUri",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "Range",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "solidlsp.ls_config",
+          "name": "Language",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.generate_docs_json",
+          "name": "generate_docs_json",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.mdx_docs_generation",
+          "name": "render_mdx_page_for_class",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "argparse",
+          "alias": null
+        }
+      ],
+      "total_lines": 3954
+    },
+    "src/lsp_diagnostics.py": {
+      "filepath": "src/lsp_diagnostics.py",
+      "classes": [
+        {
+          "name": "EnhancedDiagnostic",
+          "lineno": 24,
+          "methods": [],
+          "docstring": "A diagnostic with comprehensive context for AI resolution."
+        },
+        {
+          "name": "RuntimeErrorCollector",
+          "lineno": 40,
+          "methods": [
+            "__init__",
+            "collect_python_runtime_errors",
+            "collect_ui_interaction_errors",
+            "collect_network_errors",
+            "_collect_in_memory_errors",
+            "_collect_browser_console_errors"
+          ],
+          "docstring": "Collects runtime errors from various sources."
+        },
+        {
+          "name": "LSPDiagnosticsManager",
+          "lineno": 198,
+          "methods": [
+            "__init__",
+            "start_server",
+            "open_file",
+            "change_file",
+            "get_diagnostics",
+            "get_all_enhanced_diagnostics",
+            "_get_relevant_code_for_diagnostic",
+            "_get_error_history",
+            "_extract_component_errors",
+            "collect_runtime_diagnostics",
+            "get_error_statistics",
+            "add_runtime_error",
+            "add_ui_error",
+            "clear_diagnostics",
+            "shutdown_server",
+            "_categorize_diagnostics_by_severity",
+            "_calculate_resolution_success_rate",
+            "mark_error_resolved"
+          ],
+          "docstring": "Enhanced LSP server lifecycle and diagnostic retrieval with comprehensive context enrichment."
+        }
+      ],
+      "functions": [],
+      "imports": [
+        {
+          "type": "import",
+          "module": "asyncio",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "logging",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "os",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "re",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "time",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Any",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "TypedDict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.ls",
+          "name": "SolidLanguageServer",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.ls_config",
+          "name": "Language",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.ls_config",
+          "name": "LanguageServerConfig",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.ls_logger",
+          "name": "LanguageServerLogger",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.ls_utils",
+          "name": "PathUtils",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "Diagnostic",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "DocumentUri",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "Range",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "autogenlib_adapter",
+          "name": "get_ai_fix_context",
+          "alias": null
+        }
+      ],
+      "total_lines": 563
+    },
+    "src/autogenlib_adapter.py": {
+      "filepath": "src/autogenlib_adapter.py",
+      "classes": [],
+      "functions": [
+        {
+          "name": "get_llm_codebase_overview",
+          "lineno": 45,
+          "args": [
+            "codebase"
+          ],
+          "docstring": "Provides a high-level summary of the entire codebase for the LLM."
+        },
+        {
+          "name": "get_comprehensive_symbol_context",
+          "lineno": 52,
+          "args": [
+            "codebase",
+            "symbol_name",
+            "filepath"
+          ],
+          "docstring": "Get comprehensive context for a symbol using all available Graph-Sitter APIs."
+        },
+        {
+          "name": "get_file_context",
+          "lineno": 82,
+          "args": [
+            "codebase",
+            "filepath"
+          ],
+          "docstring": "Get comprehensive context for a file."
+        },
+        {
+          "name": "get_autogenlib_enhanced_context",
+          "lineno": 108,
+          "args": [
+            "enhanced_diagnostic"
+          ],
+          "docstring": "Get enhanced context using AutoGenLib's context retrieval capabilities."
+        },
+        {
+          "name": "get_ai_fix_context",
+          "lineno": 162,
+          "args": [
+            "enhanced_diagnostic",
+            "codebase"
+          ],
+          "docstring": "Aggregates all relevant context for the AI to resolve a diagnostic.\nThis is the central context aggr"
+        },
+        {
+          "name": "_extract_relevant_code_snippets",
+          "lineno": 252,
+          "args": [
+            "caller_code",
+            "enhanced_diagnostic"
+          ],
+          "docstring": "Extract relevant code snippets from caller code."
+        },
+        {
+          "name": "_analyze_module_dependencies",
+          "lineno": 280,
+          "args": [
+            "module_name",
+            "all_cached_modules"
+          ],
+          "docstring": "Analyze dependencies between cached modules."
+        },
+        {
+          "name": "_find_related_modules",
+          "lineno": 307,
+          "args": [
+            "module_name",
+            "all_cached_modules"
+          ],
+          "docstring": "Find modules related to the given module."
+        },
+        {
+          "name": "_count_import_statements",
+          "lineno": 322,
+          "args": [
+            "file_content"
+          ],
+          "docstring": "Count import statements in file content."
+        },
+        {
+          "name": "_count_function_definitions",
+          "lineno": 328,
+          "args": [
+            "file_content"
+          ],
+          "docstring": "Count function definitions in file content."
+        },
+        {
+          "name": "_count_class_definitions",
+          "lineno": 333,
+          "args": [
+            "file_content"
+          ],
+          "docstring": "Count class definitions in file content."
+        },
+        {
+          "name": "_determine_file_role",
+          "lineno": 338,
+          "args": [
+            "filepath"
+          ],
+          "docstring": "Determine the role of a file in the codebase architecture."
+        },
+        {
+          "name": "_find_related_symbols_in_file",
+          "lineno": 366,
+          "args": [
+            "codebase",
+            "filepath",
+            "error_line"
+          ],
+          "docstring": "Find symbols related to the error location."
+        },
+        {
+          "name": "_calculate_simple_complexity",
+          "lineno": 400,
+          "args": [
+            "func"
+          ],
+          "docstring": "Calculate simple complexity metric."
+        },
+        {
+          "name": "_categorize_error",
+          "lineno": 407,
+          "args": [
+            "diagnostic"
+          ],
+          "docstring": "Categorize error based on diagnostic information."
+        },
+        {
+          "name": "_get_common_fixes_for_error",
+          "lineno": 428,
+          "args": [
+            "diagnostic"
+          ],
+          "docstring": "Get common fixes for an error category."
+        },
+        {
+          "name": "_estimate_resolution_confidence",
+          "lineno": 444,
+          "args": [
+            "diagnostic",
+            "symbol_context"
+          ],
+          "docstring": "Estimate confidence in automated resolution."
+        },
+        {
+          "name": "_requires_manual_review",
+          "lineno": 465,
+          "args": [
+            "diagnostic"
+          ],
+          "docstring": "Check if error requires manual review."
+        },
+        {
+          "name": "_has_automated_fix",
+          "lineno": 478,
+          "args": [
+            "diagnostic"
+          ],
+          "docstring": "Check if error has available automated fix."
+        },
+        {
+          "name": "_get_visualization_context",
+          "lineno": 486,
+          "args": [
+            "analyzer",
+            "symbol"
+          ],
+          "docstring": "Get visualization context for a symbol."
+        },
+        {
+          "name": "get_error_pattern_context",
+          "lineno": 514,
+          "args": [
+            "codebase",
+            "error_category",
+            "max_examples"
+          ],
+          "docstring": "Get context about similar error patterns in the codebase."
+        },
+        {
+          "name": "_get_common_causes_for_error_category",
+          "lineno": 550,
+          "args": [
+            "category"
+          ],
+          "docstring": "Get common causes for an error category."
+        },
+        {
+          "name": "_get_resolution_strategies_for_error_category",
+          "lineno": 563,
+          "args": [
+            "category"
+          ],
+          "docstring": "Get resolution strategies for an error category."
+        },
+        {
+          "name": "_get_search_terms_for_error_category",
+          "lineno": 576,
+          "args": [
+            "category"
+          ],
+          "docstring": "Get search terms to find similar patterns for an error category."
+        },
+        {
+          "name": "resolve_diagnostic_with_ai",
+          "lineno": 596,
+          "args": [
+            "enhanced_diagnostic",
+            "codebase"
+          ],
+          "docstring": "Generates a fix for a given LSP diagnostic using an AI model, with comprehensive context."
+        },
+        {
+          "name": "resolve_runtime_error_with_ai",
+          "lineno": 772,
+          "args": [
+            "runtime_error",
+            "codebase"
+          ],
+          "docstring": "Resolve runtime errors using AI with full context."
+        },
+        {
+          "name": "resolve_ui_error_with_ai",
+          "lineno": 829,
+          "args": [
+            "ui_error",
+            "codebase"
+          ],
+          "docstring": "Resolve UI interaction errors using AI with full context."
+        },
+        {
+          "name": "resolve_multiple_errors_with_ai",
+          "lineno": 882,
+          "args": [
+            "enhanced_diagnostics",
+            "codebase",
+            "max_fixes"
+          ],
+          "docstring": "Resolve multiple errors in batch using AI with pattern recognition."
+        },
+        {
+          "name": "generate_comprehensive_fix_strategy",
+          "lineno": 996,
+          "args": [
+            "codebase",
+            "error_analysis"
+          ],
+          "docstring": "Generate a comprehensive fix strategy for all errors in the codebase."
+        },
+        {
+          "name": "validate_fix_with_context",
+          "lineno": 1063,
+          "args": [
+            "fixed_code",
+            "enhanced_diagnostic",
+            "codebase"
+          ],
+          "docstring": "Validate a fix using comprehensive context analysis."
+        },
+        {
+          "name": "_analyze_code_style",
+          "lineno": 1114,
+          "args": [
+            "code"
+          ],
+          "docstring": "Analyze code style patterns."
+        },
+        {
+          "name": "_styles_compatible",
+          "lineno": 1124,
+          "args": [
+            "style1",
+            "style2"
+          ],
+          "docstring": "Check if two code styles are compatible."
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "json",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "logging",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "os",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "time",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Any",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "openai",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._cache",
+          "name": "get_all_modules",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._cache",
+          "name": "get_cached_code",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._cache",
+          "name": "get_cached_prompt",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._caller",
+          "name": "get_caller_info",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._context",
+          "name": "extract_defined_names",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._context",
+          "name": "get_module_context",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._generator",
+          "name": "extract_python_code",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._generator",
+          "name": "get_codebase_context",
+          "alias": "get_autogenlib_codebase_context"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.autogenlib._generator",
+          "name": "validate_code",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.lsp.solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "Diagnostic",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter_analysis",
+          "name": "GraphSitterAnalyzer",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "lsp_diagnostics",
+          "name": "EnhancedDiagnostic",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "time",
+          "alias": null
+        }
+      ],
+      "total_lines": 1130
+    },
+    "src/analysis.py": {
+      "filepath": "src/analysis.py",
+      "classes": [
+        {
+          "name": "AnalyzeRequest",
+          "lineno": 226,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "ErrorAnalysisResponse",
+          "lineno": 239,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "EntrypointAnalysisResponse",
+          "lineno": 250,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "TransformationRequest",
+          "lineno": 263,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "VisualizationRequest",
+          "lineno": 271,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "DeadCodeAnalysisResponse",
+          "lineno": 286,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "CodeQualityMetrics",
+          "lineno": 296,
+          "methods": [],
+          "docstring": null
+        },
+        {
+          "name": "GraphSitterAnalyzer",
+          "lineno": 309,
+          "methods": [
+            "__init__",
+            "get_codebase_overview",
+            "get_file_details",
+            "get_function_details",
+            "get_class_details",
+            "get_symbol_details",
+            "create_blast_radius_visualization",
+            "create_call_trace_visualization",
+            "create_dependency_trace_visualization",
+            "create_method_relationships_visualization",
+            "view_file_content",
+            "list_directory_contents",
+            "add_line_numbers_to_content",
+            "reveal_symbol_relationships",
+            "get_symbol_info_detailed",
+            "get_extended_symbol_context",
+            "generate_docstrings_for_undocumented",
+            "generate_structured_docs",
+            "generate_mdx_documentation",
+            "find_dead_code",
+            "validate_bash_command",
+            "run_bash_command",
+            "perform_reflection",
+            "parse_reflection_response",
+            "get_workspace_tools",
+            "get_current_code_codebase",
+            "get_codegen_sdk_codebase",
+            "import_all_sdk_modules",
+            "get_documented_objects",
+            "analyze_function_complexity",
+            "analyze_class_structure",
+            "analyze_import_relationships",
+            "_resolve_symbol_with_filepath",
+            "_identify_entrypoints",
+            "_get_dead_code_summary",
+            "_get_complexity_overview",
+            "_get_function_parameters_details",
+            "_get_function_return_type_details",
+            "_get_function_local_variables_details",
+            "_symbol_to_dict",
+            "_call_site_to_dict",
+            "_function_call_to_dict",
+            "_class_to_dict",
+            "_calculate_function_complexity",
+            "_calculate_cyclomatic_complexity",
+            "_calculate_halstead_metrics",
+            "_get_complexity_rank",
+            "_calculate_function_complexity_metrics",
+            "_calculate_function_quality_metrics",
+            "_calculate_class_complexity_metrics",
+            "_calculate_inheritance_metrics",
+            "_calculate_class_cohesion",
+            "_build_blast_radius_graph",
+            "_build_call_trace_graph",
+            "_build_dependency_trace_graph",
+            "_build_method_relationships_graph",
+            "_is_entrypoint_function",
+            "_is_entrypoint_class",
+            "_is_entrypoint_file",
+            "_is_test_function",
+            "_is_test_class",
+            "_is_special_function",
+            "_calculate_entrypoint_score",
+            "_calculate_class_entrypoint_score",
+            "_has_entrypoint_decorators",
+            "_has_framework_inheritance",
+            "_has_singleton_pattern",
+            "_has_test_decorators",
+            "_is_called_from_main_block",
+            "_is_property_method",
+            "_calculate_nesting_depth",
+            "_calculate_typed_parameters_ratio",
+            "_calculate_function_maintainability",
+            "_calculate_file_complexity",
+            "_calculate_maintainability_index",
+            "_calculate_file_doc_coverage",
+            "_detect_circular_imports",
+            "_get_function_summary",
+            "_get_class_summary",
+            "_get_import_summary",
+            "_get_symbol_summary",
+            "_get_method_summary",
+            "_get_attribute_summary",
+            "_get_symbol_context"
+          ],
+          "docstring": "Comprehensive analysis engine using all Graph-Sitter capabilities.\nProvides unified access to all gr"
+        },
+        {
+          "name": "AnalysisEngine",
+          "lineno": 1952,
+          "methods": [
+            "__init__",
+            "_analyze_errors_with_graph_sitter_enhanced",
+            "_analyze_error_patterns",
+            "_get_resolution_strategy",
+            "_generate_resolution_recommendations",
+            "_analyze_entrypoints_with_graph_sitter_enhanced",
+            "_get_function_parameters_details",
+            "_get_function_return_type_details",
+            "_get_function_local_variables_details",
+            "_is_test_function_enhanced",
+            "_is_entrypoint_class_enhanced",
+            "_is_api_entrypoint_class",
+            "_calculate_entrypoint_score",
+            "_estimate_test_coverage",
+            "_analyze_entrypoint_dependencies",
+            "_analyze_entrypoint_call_flows",
+            "_calculate_call_depth",
+            "_has_recursive_calls",
+            "_calculate_class_entrypoint_score",
+            "_classify_test_type",
+            "_build_tree_structure_from_graph_sitter",
+            "_build_directory_nodes_recursive",
+            "_build_dependency_graph_from_graph_sitter",
+            "_calculate_code_quality_metrics",
+            "_analyze_architectural_patterns",
+            "_analyze_security_patterns",
+            "_analyze_performance_patterns",
+            "_detect_file_errors_graph_sitter",
+            "_detect_function_errors_graph_sitter",
+            "_detect_class_errors_graph_sitter",
+            "_is_entrypoint_file",
+            "_is_entrypoint_function",
+            "_is_entrypoint_class",
+            "_is_test_function",
+            "_is_test_class",
+            "_is_special_function",
+            "_calculate_file_complexity",
+            "_calculate_function_complexity",
+            "_calculate_class_complexity",
+            "_calculate_maintainability_index"
+          ],
+          "docstring": "Comprehensive analysis engine for deep code analysis, integrating Graph-Sitter and LSP."
+        },
+        {
+          "name": "EnhancedVisualizationEngine",
+          "lineno": 3829,
+          "methods": [
+            "__init__",
+            "create_dynamic_dependency_graph",
+            "create_class_hierarchy_graph",
+            "create_module_dependency_graph",
+            "create_function_call_trace",
+            "create_data_flow_graph",
+            "create_blast_radius_graph",
+            "_get_target_symbol",
+            "_get_scope_symbols",
+            "_build_scoped_dependency_graph",
+            "_build_class_hierarchy_subgraph",
+            "_build_module_dependency_subgraph",
+            "_build_call_trace_subgraph",
+            "_build_data_flow_subgraph",
+            "_build_blast_radius_subgraph",
+            "_serialize_enhanced_graph",
+            "_serialize_graph",
+            "_calculate_function_complexity"
+          ],
+          "docstring": "Enhanced visualization engine with dynamic target selection and scope control"
+        },
+        {
+          "name": "TransformationEngine",
+          "lineno": 4349,
+          "methods": [
+            "__init__",
+            "move_symbol",
+            "remove_symbol",
+            "rename_symbol",
+            "resolve_imports",
+            "add_type_annotations",
+            "extract_function",
+            "get_transformation_log",
+            "clear_transformation_log"
+          ],
+          "docstring": "Advanced transformation engine for code modifications."
+        },
+        {
+          "name": "EnhancedTransformationEngine",
+          "lineno": 4632,
+          "methods": [
+            "__init__",
+            "_resolve_all_types",
+            "_resolve_all_imports",
+            "_resolve_all_function_calls",
+            "_resolve_method_implementations",
+            "_resolve_class_attributes",
+            "_resolve_variable_definitions",
+            "_resolve_parameter_types",
+            "_resolve_argument_types"
+          ],
+          "docstring": "Enhanced transformation engine with comprehensive resolution methods"
+        }
+      ],
+      "functions": [
+        {
+          "name": "clone_repository",
+          "lineno": 1835,
+          "args": [
+            "repo_url",
+            "branch"
+          ],
+          "docstring": "Clone repository to temporary directory"
+        },
+        {
+          "name": "calculate_doi",
+          "lineno": 1868,
+          "args": [
+            "cls"
+          ],
+          "docstring": "Calculate the depth of inheritance for a given class."
+        },
+        {
+          "name": "get_operators_and_operands",
+          "lineno": 1873,
+          "args": [
+            "function"
+          ],
+          "docstring": "Extract operators and operands from function for Halstead metrics."
+        },
+        {
+          "name": "calculate_halstead_volume",
+          "lineno": 1909,
+          "args": [
+            "operators",
+            "operands"
+          ],
+          "docstring": "Calculate Halstead volume metrics."
+        },
+        {
+          "name": "cc_rank",
+          "lineno": 1928,
+          "args": [
+            "complexity"
+          ],
+          "docstring": "Calculate cyclomatic complexity rank."
+        },
+        {
+          "name": "find_import_cycles",
+          "lineno": 5429,
+          "args": [
+            "codebase"
+          ],
+          "docstring": "Find import cycles in the codebase"
+        },
+        {
+          "name": "find_problematic_import_loops",
+          "lineno": 5442,
+          "args": [
+            "codebase",
+            "cycles"
+          ],
+          "docstring": "Identify cycles with both static and dynamic imports between files"
+        },
+        {
+          "name": "convert_all_calls_to_kwargs",
+          "lineno": 5485,
+          "args": [
+            "codebase"
+          ],
+          "docstring": "Convert all function calls to use keyword arguments"
+        },
+        {
+          "name": "apply_fix_to_file",
+          "lineno": 5511,
+          "args": [
+            "filepath",
+            "original_content",
+            "fixed_code_snippet",
+            "diagnostic_range"
+          ],
+          "docstring": "Applies a fixed code snippet to the original file content.\nThis function attempts to replace the lin"
+        },
+        {
+          "name": "traverse_from_entry_point",
+          "lineno": 787,
+          "args": [
+            "symbol"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "add_file_imports",
+          "lineno": 1731,
+          "args": [
+            "current_file",
+            "visited"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "trace_calls",
+          "lineno": 4150,
+          "args": [
+            "func",
+            "target",
+            "depth"
+          ],
+          "docstring": null
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "os",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "tempfile",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "shutil",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "subprocess",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "traceback",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "uuid",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "math",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "ast",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "re",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Dict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "List",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Any",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Optional",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Union",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "defaultdict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "Counter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "datetime",
+          "name": "datetime",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "asyncio",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "logging",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "networkx",
+          "alias": "nx"
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi",
+          "name": "FastAPI",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi",
+          "name": "HTTPException",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi",
+          "name": "BackgroundTasks",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "fastapi.middleware.cors",
+          "name": "CORSMiddleware",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pydantic",
+          "name": "BaseModel",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pydantic",
+          "name": "Field",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "uvicorn",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "os",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "logging",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "math",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "re",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Dict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "List",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Optional",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Any",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Tuple",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Union",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pathlib",
+          "name": "Path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "defaultdict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "collections",
+          "name": "Counter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.symbol",
+          "name": "Symbol",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.function",
+          "name": "Function",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.class_definition",
+          "name": "Class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.file",
+          "name": "SourceFile",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.import_resolution",
+          "name": "Import",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.external_module",
+          "name": "ExternalModule",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_codebase_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_file_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_class_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_function_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codebase_analysis",
+          "name": "get_symbol_summary",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.view_file",
+          "name": "ViewFileObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.view_file",
+          "name": "add_line_numbers",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.view_file",
+          "name": "view_file",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "SymbolInfo",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "RevealSymbolObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "get_symbol_info",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "truncate_source",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "get_extended_context",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "reveal_symbol",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "hop_through_imports",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.list_directory",
+          "name": "DirectoryInfo",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.list_directory",
+          "name": "ListDirectoryObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.list_directory",
+          "name": "list_directory",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.bash",
+          "name": "RunBashCommandObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.bash",
+          "name": "validate_command",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.bash",
+          "name": "run_bash_command",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "ReflectionSection",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "ReflectionObservation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "parse_reflection_response",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reflection",
+          "name": "perform_reflection",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.observation",
+          "name": "Observation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tools",
+          "name": "get_workspace_tools",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "EditFileArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "ViewFileArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "ListDirectoryArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "SearchMatch",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "SearchArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "SemanticEditArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.tool_output_types",
+          "name": "RelaceEditArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.generate_docs_json",
+          "name": "generate_docs_json",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_page_for_class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_page_title",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_inheritence_section",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_attributes_section",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_methods_section",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_for_attribute",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_parameter_for_mdx",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_parameters_for_mdx",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_return_for_mdx",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_for_method",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "get_mdx_route_for_class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_type_string",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "resolve_type_string",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "format_builtin_type_string",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "span_type_string_by_pipe",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "parse_link",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_current_code_codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_codegen_codebase_base_path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_graphsitter_repo_path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "import_all_codegen_sdk_modules",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.current_code_codebase",
+          "name": "get_documented_objects",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codegen_sdk_codebase",
+          "name": "get_codegen_sdk_codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.codegen_sdk_codebase",
+          "name": "get_codegen_sdk_subdirectories",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.document_functions",
+          "name": "run",
+          "alias": "document_functions_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.document_functions",
+          "name": "get_extended_context",
+          "alias": "doc_get_extended_context"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.document_functions",
+          "name": "hop_through_imports",
+          "alias": "doc_hop_through_imports"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "generate_edge_meta",
+          "alias": "blast_generate_edge_meta"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "is_http_method",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "create_blast_radius_visualization",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.blast_radius",
+          "name": "run",
+          "alias": "blast_radius_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.call_trace",
+          "name": "generate_edge_meta",
+          "alias": "call_generate_edge_meta"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.call_trace",
+          "name": "create_downstream_call_trace",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.call_trace",
+          "name": "run",
+          "alias": "call_trace_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.dependency_trace",
+          "name": "create_dependencies_visualization",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.dependency_trace",
+          "name": "run",
+          "alias": "dependency_trace_run"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "generate_edge_meta",
+          "alias": "method_generate_edge_meta"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "graph_class_methods",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "create_downstream_call_trace",
+          "alias": "method_create_downstream_call_trace"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.method_relationships",
+          "name": "run",
+          "alias": "method_relationships_run"
+        },
+        {
+          "type": "import",
+          "module": "networkx",
+          "alias": "nx"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.configs.models.codebase",
+          "name": "CodebaseConfig",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.external_module",
+          "name": "ExternalModule",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.symbol",
+          "name": "Symbol",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.file",
+          "name": "SourceFile",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.function",
+          "name": "Function",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.class_definition",
+          "name": "Class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "Statement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "IfStatement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "WhileStatement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.statement",
+          "name": "TryStatement",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.import_statement",
+          "name": "Import",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.assignment",
+          "name": "Assignment",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.parameter",
+          "name": "Parameter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.function_call",
+          "name": "FunctionCall",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.usage",
+          "name": "Usage",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "lsp_diagnostics",
+          "name": "LSPDiagnosticsManager",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "autogenlib_adapter",
+          "name": "resolve_diagnostic_with_ai",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "serena.solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "Diagnostic",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "serena.solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "DocumentUri",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "serena.solidlsp.lsp_protocol_handler.lsp_types",
+          "name": "Range",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "serena.solidlsp.ls_config",
+          "name": "Language",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.generate_docs_json",
+          "name": "generate_docs_json",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.mdx_docs_generation",
+          "name": "render_mdx_page_for_class",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "argparse",
+          "alias": null
+        }
+      ],
+      "total_lines": 5589
+    }
+  },
+  "tool_files": {
+    "src/graph_sitter/extensions/tools/reveal_symbol_fn.py": {
+      "filepath": "src/graph_sitter/extensions/tools/reveal_symbol_fn.py",
+      "classes": [
+        {
+          "name": "RevealSymbolInput",
+          "lineno": 9,
+          "methods": [],
+          "docstring": "Input for revealing symbol relationships."
+        },
+        {
+          "name": "RevealSymbolTool",
+          "lineno": 26,
+          "methods": [
+            "__init__",
+            "_run"
+          ],
+          "docstring": "Tool for revealing symbol relationships."
+        }
+      ],
+      "functions": [],
+      "imports": [
+        {
+          "type": "from_import",
+          "module": "logging",
+          "name": "getLogger",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Annotated",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.extensions.tools.reveal_symbol",
+          "name": "reveal_symbol",
+          "alias": null
+        }
+      ],
+      "total_lines": 75
+    },
+    "src/graph_sitter/extensions/tools/reveal_symbol.py": {
+      "filepath": "src/graph_sitter/extensions/tools/reveal_symbol.py",
+      "classes": [
+        {
+          "name": "SymbolInfo",
+          "lineno": 17,
+          "methods": [],
+          "docstring": "Information about a symbol."
+        },
+        {
+          "name": "RevealSymbolObservation",
+          "lineno": 27,
+          "methods": [
+            "_get_details"
+          ],
+          "docstring": "Response from revealing symbol dependencies and usages."
+        }
+      ],
+      "functions": [
+        {
+          "name": "truncate_source",
+          "lineno": 57,
+          "args": [
+            "source",
+            "max_tokens"
+          ],
+          "docstring": "Truncate source code to fit within max_tokens while preserving meaning.\n\nAttempts to keep the most i"
+        },
+        {
+          "name": "get_symbol_info",
+          "lineno": 118,
+          "args": [
+            "symbol",
+            "max_tokens"
+          ],
+          "docstring": "Get relevant information about a symbol.\n\nArgs:\n    symbol: The symbol to get info for\n    max_token"
+        },
+        {
+          "name": "hop_through_imports",
+          "lineno": 140,
+          "args": [
+            "symbol",
+            "seen_imports"
+          ],
+          "docstring": "Follow import chain to find the root symbol, stopping at ExternalModule."
+        },
+        {
+          "name": "get_extended_context",
+          "lineno": 162,
+          "args": [
+            "symbol",
+            "degree",
+            "max_tokens",
+            "seen_symbols",
+            "current_degree",
+            "total_tokens",
+            "collect_dependencies",
+            "collect_usages"
+          ],
+          "docstring": "Recursively collect dependencies and usages up to specified degree.\n\nArgs:\n    symbol: The symbol to"
+        },
+        {
+          "name": "reveal_symbol",
+          "lineno": 255,
+          "args": [
+            "codebase",
+            "symbol_name",
+            "filepath",
+            "max_depth",
+            "max_tokens",
+            "collect_dependencies",
+            "collect_usages"
+          ],
+          "docstring": "Reveal the dependencies and usages of a symbol up to N degrees.\n\nArgs:\n    codebase: The codebase to"
+        },
+        {
+          "name": "under_token_limit",
+          "lineno": 200,
+          "args": [],
+          "docstring": null
+        }
+      ],
+      "imports": [
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Any",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "ClassVar",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "Optional",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "tiktoken",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pydantic",
+          "name": "Field",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.sdk.ai.utils",
+          "name": "count_tokens",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.sdk.core.codebase",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.sdk.core.external_module",
+          "name": "ExternalModule",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.sdk.core.import_resolution",
+          "name": "Import",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.sdk.core.symbol",
+          "name": "Symbol",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "observation",
+          "name": "Observation",
+          "alias": null
+        }
+      ],
+      "total_lines": 316
+    },
+    "src/graph_sitter/extensions/tools/mdx_docs_generation.py": {
+      "filepath": "src/graph_sitter/extensions/tools/mdx_docs_generation.py",
+      "classes": [],
+      "functions": [
+        {
+          "name": "render_mdx_page_for_class",
+          "lineno": 7,
+          "args": [
+            "cls_doc"
+          ],
+          "docstring": "Renders the MDX for a single class"
+        },
+        {
+          "name": "render_mdx_page_title",
+          "lineno": 16,
+          "args": [
+            "cls_doc",
+            "icon"
+          ],
+          "docstring": "Renders the MDX for the page title"
+        },
+        {
+          "name": "render_mdx_inheritence_section",
+          "lineno": 37,
+          "args": [
+            "cls_doc"
+          ],
+          "docstring": "Renders the MDX for the inheritence section"
+        },
+        {
+          "name": "render_mdx_attributes_section",
+          "lineno": 49,
+          "args": [
+            "cls_doc"
+          ],
+          "docstring": "Renders the MDX for the attributes section"
+        },
+        {
+          "name": "render_mdx_methods_section",
+          "lineno": 62,
+          "args": [
+            "cls_doc"
+          ],
+          "docstring": "Renders the MDX for the methods section"
+        },
+        {
+          "name": "render_mdx_for_attribute",
+          "lineno": 75,
+          "args": [
+            "attribute"
+          ],
+          "docstring": "Renders the MDX for a single attribute"
+        },
+        {
+          "name": "format_parameter_for_mdx",
+          "lineno": 95,
+          "args": [
+            "parameter"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "format_parameters_for_mdx",
+          "lineno": 107,
+          "args": [
+            "parameters"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "format_return_for_mdx",
+          "lineno": 111,
+          "args": [
+            "return_type",
+            "return_description"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "render_mdx_for_method",
+          "lineno": 120,
+          "args": [
+            "method"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "get_mdx_route_for_class",
+          "lineno": 143,
+          "args": [
+            "cls_doc"
+          ],
+          "docstring": "Get the expected MDX route for a class\nsplit by /core, /python, and /typescript"
+        },
+        {
+          "name": "format_type_string",
+          "lineno": 156,
+          "args": [
+            "type_string"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "resolve_type_string",
+          "lineno": 161,
+          "args": [
+            "type_string"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "format_builtin_type_string",
+          "lineno": 168,
+          "args": [
+            "type_string"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "span_type_string_by_pipe",
+          "lineno": 175,
+          "args": [
+            "type_string"
+          ],
+          "docstring": null
+        },
+        {
+          "name": "parse_link",
+          "lineno": 182,
+          "args": [
+            "type_string",
+            "href"
+          ],
+          "docstring": null
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "re",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.schemas",
+          "name": "ClassDoc",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.schemas",
+          "name": "MethodDoc",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.schemas",
+          "name": "ParameterDoc",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "sanitize_html_for_mdx",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "sanitize_mdx_mintlify_description",
+          "alias": null
+        }
+      ],
+      "total_lines": 204
+    },
+    "src/graph_sitter/extensions/tools/list_directory.py": {
+      "filepath": "src/graph_sitter/extensions/tools/list_directory.py",
+      "classes": [
+        {
+          "name": "DirectoryInfo",
+          "lineno": 14,
+          "methods": [
+            "_get_details",
+            "render_as_string",
+            "to_artifacts"
+          ],
+          "docstring": "Information about a directory."
+        },
+        {
+          "name": "ListDirectoryObservation",
+          "lineno": 130,
+          "methods": [
+            "render"
+          ],
+          "docstring": "Response from listing directory contents."
+        }
+      ],
+      "functions": [
+        {
+          "name": "list_directory",
+          "lineno": 164,
+          "args": [
+            "codebase",
+            "path",
+            "depth"
+          ],
+          "docstring": "List contents of a directory.\n\nArgs:\n    codebase: The codebase to operate on\n    path: Path to dire"
+        },
+        {
+          "name": "get_directory_info",
+          "lineno": 188,
+          "args": [
+            "dir_obj",
+            "current_depth",
+            "max_depth"
+          ],
+          "docstring": "Helper function to get directory info recursively."
+        },
+        {
+          "name": "add_tree_item",
+          "lineno": 60,
+          "args": [
+            "name",
+            "prefix",
+            "is_last"
+          ],
+          "docstring": "Helper to format a tree item with proper prefix."
+        },
+        {
+          "name": "build_tree",
+          "lineno": 66,
+          "args": [
+            "items",
+            "prefix"
+          ],
+          "docstring": "Recursively build tree with proper indentation."
+        }
+      ],
+      "imports": [
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "ClassVar",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "langchain_core.messages",
+          "name": "ToolMessage",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pydantic",
+          "name": "Field",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.extensions.tools.observation",
+          "name": "Observation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.extensions.tools.tool_output_types",
+          "name": "ListDirectoryArtifacts",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.sdk.core.codebase",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "codegen.sdk.core.directory",
+          "name": "Directory",
+          "alias": null
+        }
+      ],
+      "total_lines": 232
+    },
+    "src/graph_sitter/extensions/tools/generate_docs_json.py": {
+      "filepath": "src/graph_sitter/extensions/tools/generate_docs_json.py",
+      "classes": [],
+      "functions": [
+        {
+          "name": "generate_docs_json",
+          "lineno": 27,
+          "args": [
+            "codebase",
+            "head_commit",
+            "raise_on_missing_docstring"
+          ],
+          "docstring": "Update documentation table for classes, methods and attributes in the codebase.\n\nArgs:\n    codebase "
+        },
+        {
+          "name": "process_class_doc",
+          "lineno": 39,
+          "args": [
+            "cls"
+          ],
+          "docstring": "Update or create documentation for a class."
+        },
+        {
+          "name": "process_method",
+          "lineno": 56,
+          "args": [
+            "method",
+            "cls",
+            "cls_doc",
+            "seen_methods"
+          ],
+          "docstring": "Process a single method and update its documentation."
+        },
+        {
+          "name": "process_attribute",
+          "lineno": 117,
+          "args": [
+            "attr",
+            "cls",
+            "cls_doc",
+            "seen_methods"
+          ],
+          "docstring": "Process a single attribute and update its documentation."
+        }
+      ],
+      "imports": [
+        {
+          "type": "from_import",
+          "module": "tqdm",
+          "name": "tqdm",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.parse_docstring",
+          "name": "parse_docstring",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.schemas",
+          "name": "ClassDoc",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.schemas",
+          "name": "GSDocs",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.schemas",
+          "name": "MethodDoc",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "create_path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "extract_class_description",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "get_type",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "get_type_str",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "has_documentation",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "is_settter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.doc_utils.utils",
+          "name": "replace_multiple_types",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.class_definition",
+          "name": "Class",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.placeholder.placeholder_type",
+          "name": "TypePlaceholder",
+          "alias": null
+        }
+      ],
+      "total_lines": 183
+    },
+    "src/graph_sitter/extensions/tools/document_functions.py": {
+      "filepath": "src/graph_sitter/extensions/tools/document_functions.py",
+      "classes": [],
+      "functions": [
+        {
+          "name": "hop_through_imports",
+          "lineno": 8,
+          "args": [
+            "imp"
+          ],
+          "docstring": "Finds the root symbol for an import"
+        },
+        {
+          "name": "get_extended_context",
+          "lineno": 15,
+          "args": [
+            "symbol",
+            "degree"
+          ],
+          "docstring": "Recursively collect dependencies and usages up to the specified degree.\n\nArgs:\n    symbol: The symbo"
+        },
+        {
+          "name": "run",
+          "lineno": 58,
+          "args": [
+            "codebase"
+          ],
+          "docstring": null
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "graph_sitter",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.external_module",
+          "name": "ExternalModule",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.import_resolution",
+          "name": "Import",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.symbol",
+          "name": "Symbol",
+          "alias": null
+        }
+      ],
+      "total_lines": 119
+    },
+    "src/graph_sitter/extensions/tools/current_code_codebase.py": {
+      "filepath": "src/graph_sitter/extensions/tools/current_code_codebase.py",
+      "classes": [
+        {
+          "name": "DocumentedObjects",
+          "lineno": 73,
+          "methods": [],
+          "docstring": null
+        }
+      ],
+      "functions": [
+        {
+          "name": "get_graphsitter_repo_path",
+          "lineno": 20,
+          "args": [],
+          "docstring": "Points to base directory of the Graph-sitter repo (.git) that is currently running"
+        },
+        {
+          "name": "get_codegen_codebase_base_path",
+          "lineno": 30,
+          "args": [],
+          "docstring": null
+        },
+        {
+          "name": "get_current_code_codebase",
+          "lineno": 38,
+          "args": [
+            "config",
+            "secrets",
+            "subdirectories"
+          ],
+          "docstring": "Returns a Codebase for the code that is *currently running* (i.e. the Graph-sitter repo)"
+        },
+        {
+          "name": "import_all_codegen_sdk_modules",
+          "lineno": 54,
+          "args": [],
+          "docstring": null
+        },
+        {
+          "name": "get_documented_objects",
+          "lineno": 80,
+          "args": [],
+          "docstring": "Get all the objects decorated with apidoc, py_apidoc, ts_apidoc, and no_apidoc decorators,\nby import"
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "importlib",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "pathlib",
+          "name": "Path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "typing",
+          "name": "TypedDict",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.codebase.config",
+          "name": "ProjectConfig",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.configs.models.codebase",
+          "name": "CodebaseConfig",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.configs.models.secrets",
+          "name": "SecretsConfig",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "Codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "CodebaseType",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.git.repo_operator.repo_operator",
+          "name": "RepoOperator",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.git.schemas.repo_config",
+          "name": "RepoConfig",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.shared.decorators.docs",
+          "name": "DocumentedObject",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.shared.decorators.docs",
+          "name": "apidoc_objects",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.shared.decorators.docs",
+          "name": "no_apidoc_objects",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.shared.decorators.docs",
+          "name": "py_apidoc_objects",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.shared.decorators.docs",
+          "name": "ts_apidoc_objects",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.shared.enums.programming_language",
+          "name": "ProgrammingLanguage",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.shared.logging.get_logger",
+          "name": "get_logger",
+          "alias": null
+        },
+        {
+          "type": "import",
+          "module": "graph_sitter",
+          "alias": "sdk"
+        },
+        {
+          "type": "import",
+          "module": "graph_sitter",
+          "alias": "sdk"
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "CodebaseType",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "PyCodebaseType",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "TSCodebaseType",
+          "alias": null
+        }
+      ],
+      "total_lines": 94
+    },
+    "src/graph_sitter/extensions/tools/codegen_sdk_codebase.py": {
+      "filepath": "src/graph_sitter/extensions/tools/codegen_sdk_codebase.py",
+      "classes": [],
+      "functions": [
+        {
+          "name": "get_codegen_sdk_subdirectories",
+          "lineno": 7,
+          "args": [],
+          "docstring": null
+        },
+        {
+          "name": "get_codegen_sdk_codebase",
+          "lineno": 19,
+          "args": [],
+          "docstring": "Grabs a Codebase w/ GraphSitter content. Responsible for figuring out where it is, e.g. in Modal or "
+        }
+      ],
+      "imports": [
+        {
+          "type": "import",
+          "module": "os.path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.current_code_codebase",
+          "name": "get_codegen_codebase_base_path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.current_code_codebase",
+          "name": "get_current_code_codebase",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.code_generation.current_code_codebase",
+          "name": "get_graphsitter_repo_path",
+          "alias": null
+        },
+        {
+          "type": "from_import",
+          "module": "graph_sitter.core.codebase",
+          "name": "Codebase",
+          "alias": null
+        }
+      ],
+      "total_lines": 22
+    }
+  }
+}
